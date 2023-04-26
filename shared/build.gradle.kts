@@ -35,6 +35,7 @@ kotlin {
         implementation(compose.components.resources)
         implementation("io.ktor:ktor-client-core:2.2.4")
         implementation("io.ktor:ktor-client-logging:2.2.4")
+        implementation("io.github.aakira:napier:2.6.1")
       }
     }
     val androidMain by getting {
