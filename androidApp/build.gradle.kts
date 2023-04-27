@@ -17,7 +17,7 @@ kotlin {
 
 android {
   compileSdk = (findProperty("android.compileSdk") as String).toInt()
-  namespace = "com.myapplication"
+  namespace = "dev.sasikanth.rss.reader"
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
