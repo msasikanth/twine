@@ -38,6 +38,12 @@ kotlin {
         implementation("io.github.aakira:napier:2.6.1")
       }
     }
+    val commonTest by getting {
+      dependencies {
+        implementation(kotlin("test"))
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.0-RC")
+      }
+    }
     val androidMain by getting {
       dependencies {
         api("androidx.activity:activity-compose:1.6.1")
