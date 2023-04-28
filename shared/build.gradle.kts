@@ -3,6 +3,7 @@ plugins {
   kotlin("native.cocoapods")
   id("com.android.library")
   id("org.jetbrains.compose")
+  id("app.cash.sqldelight")
 }
 
 kotlin {
@@ -36,6 +37,7 @@ kotlin {
         implementation("io.ktor:ktor-client-core:2.2.4")
         implementation("io.ktor:ktor-client-logging:2.2.4")
         implementation("io.github.aakira:napier:2.6.1")
+        implementation("app.cash.sqldelight:coroutines-extensions:2.0.0-alpha05")
       }
     }
     val commonTest by getting {
@@ -50,6 +52,7 @@ kotlin {
         api("androidx.appcompat:appcompat:1.6.1")
         api("androidx.core:core-ktx:1.9.0")
         implementation("io.ktor:ktor-client-okhttp:2.2.4")
+        implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
       }
     }
     val iosX64Main by getting
@@ -62,6 +65,7 @@ kotlin {
       iosSimulatorArm64Main.dependsOn(this)
       dependencies {
         implementation("io.ktor:ktor-client-darwin:2.2.4")
+        implementation("app.cash.sqldelight:native-driver:2.0.0-alpha05")
       }
     }
   }
