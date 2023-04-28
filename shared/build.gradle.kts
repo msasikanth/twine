@@ -71,6 +71,14 @@ kotlin {
   }
 }
 
+sqldelight {
+  databases {
+    create("ReaderDatabase") {
+      packageName.set("dev.sasikanth.rss.reader.database")
+    }
+  }
+}
+
 android {
   compileSdk = (findProperty("android.compileSdk") as String).toInt()
   namespace = "dev.sasikanth.rss.reader.common"
