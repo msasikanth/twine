@@ -1,11 +1,12 @@
-package dev.sasikanth.rss.reader.parser
+package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.cleanText
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.cleanTextCompact
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.feedIcon
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.imageTags
+import dev.sasikanth.rss.reader.network.FeedParser
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanText
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

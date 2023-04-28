@@ -1,7 +1,6 @@
 package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
-import dev.sasikanth.rss.reader.parser.FeedParser
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText

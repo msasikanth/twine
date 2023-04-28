@@ -1,13 +1,13 @@
-package dev.sasikanth.rss.reader.parser
+package dev.sasikanth.rss.reader.network
 
 import android.net.Uri
 import android.util.Xml
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.cleanText
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.cleanTextCompact
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.feedIcon
-import dev.sasikanth.rss.reader.parser.FeedParser.Companion.imageTags
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanText
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

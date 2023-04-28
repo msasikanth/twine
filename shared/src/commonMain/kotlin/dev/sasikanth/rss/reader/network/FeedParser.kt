@@ -1,4 +1,4 @@
-package dev.sasikanth.rss.reader.parser
+package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
 
