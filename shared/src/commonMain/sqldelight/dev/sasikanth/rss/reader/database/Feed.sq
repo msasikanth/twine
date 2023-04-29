@@ -1,0 +1,16 @@
+CREATE TABLE feed(
+  name TEXT NOT NULL,
+  icon TEXT NOT NULL,
+  description TEXT NOT NULL,
+  link TEXT NOT NULL PRIMARY KEY
+);
+
+insert:
+INSERT OR ABORT INTO feed(name, icon, description, link)
+VALUES ?;
+
+remove:
+DELETE FROM feed WHERE link = :link;
+
+feeds:
+SELECT * FROM feed;
