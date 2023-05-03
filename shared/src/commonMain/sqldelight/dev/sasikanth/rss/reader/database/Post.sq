@@ -10,7 +10,7 @@ CREATE TABLE post(
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
 insert:
-INSERT OR ABORT INTO post(title, description, imageUrl, date, feedLink, link)
+INSERT OR REPLACE INTO post(title, description, imageUrl, date, feedLink, link)
 VALUES ?;
 
 removePostsOfFeed:

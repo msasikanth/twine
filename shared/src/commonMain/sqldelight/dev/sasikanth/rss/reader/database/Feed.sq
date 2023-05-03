@@ -6,7 +6,7 @@ CREATE TABLE feed(
 );
 
 insert:
-INSERT OR ABORT INTO feed(name, icon, description, link)
+INSERT OR REPLACE INTO feed(name, icon, description, link)
 VALUES ?;
 
 remove:
