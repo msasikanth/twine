@@ -9,8 +9,7 @@ plugins {
 kotlin {
   android()
 
-  iosX64()
-  iosArm64()
+  ios()
   iosSimulatorArm64()
 
   cocoapods {
@@ -56,13 +55,10 @@ kotlin {
         implementation("app.cash.sqldelight:android-driver:2.0.0-alpha05")
       }
     }
-    val iosX64Main by getting
-    val iosArm64Main by getting
+
     val iosSimulatorArm64Main by getting
-    val iosMain by creating {
+    val iosMain by getting {
       dependsOn(commonMain)
-      iosX64Main.dependsOn(this)
-      iosArm64Main.dependsOn(this)
       iosSimulatorArm64Main.dependsOn(this)
       dependencies {
         implementation("io.ktor:ktor-client-darwin:2.2.4")
