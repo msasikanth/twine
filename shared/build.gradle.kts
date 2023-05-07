@@ -34,7 +34,7 @@ kotlin {
         implementation(compose.material)
         @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
         implementation(compose.components.resources)
-        implementation("io.ktor:ktor-client-core:2.2.4")
+        implementation("io.ktor:ktor-client-core:2.3.0")
         implementation("io.ktor:ktor-client-logging:2.2.4")
         implementation("io.github.aakira:napier:2.6.1")
         implementation("app.cash.sqldelight:coroutines-extensions:2.0.0-alpha05")
