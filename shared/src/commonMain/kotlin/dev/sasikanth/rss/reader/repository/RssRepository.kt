@@ -9,20 +9,20 @@ import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class RssRepository(
   private val feedQueries: FeedQueries,
-  private val postQueries: PostQueries
+  private val postQueries: PostQueries,
+  private val ioDispatcher: CoroutineDispatcher
 ) {
 
-  private val feedFetcher = feedFetcher()
+  private val feedFetcher = feedFetcher(ioDispatcher)
 
   suspend fun addFeed(feedLink: String) {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
       val feedPayload = feedFetcher.fetch(feedLink)
       feedQueries.insert(feed = feedPayload.toFeed())
       feedPayload.posts.forEach {
@@ -30,9 +30,9 @@ class RssRepository(
       }
     }
   }
-  
+
   suspend fun updateFeeds() {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
       val feeds = feedQueries.feeds().executeAsList()
       feeds.forEach { feed ->
         addFeed(feed.link)
@@ -41,25 +41,25 @@ class RssRepository(
   }
 
   fun allPosts(): Flow<List<Post>> {
-    return postQueries.allPosts().asFlow().mapToList(Dispatchers.IO)
+    return postQueries.allPosts().asFlow().mapToList(ioDispatcher)
   }
 
   fun postsOfFeed(feedLink: String): Flow<List<Post>> {
-    return postQueries.postsOfFeed(feedLink).asFlow().mapToList(Dispatchers.IO)
+    return postQueries.postsOfFeed(feedLink).asFlow().mapToList(ioDispatcher)
   }
 
   suspend fun removePostsOfFeed(feedLink: String) {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
       postQueries.removePostsOfFeed(feedLink)
     }
   }
 
   fun allFeeds(): Flow<List<Feed>> {
-    return feedQueries.feeds().asFlow().mapToList(Dispatchers.IO)
+    return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
   }
 
   suspend fun removeFeed(feedLink: String) {
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
       feedQueries.remove(feedLink)
     }
   }

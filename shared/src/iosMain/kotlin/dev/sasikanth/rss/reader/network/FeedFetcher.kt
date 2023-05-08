@@ -2,8 +2,9 @@ package dev.sasikanth.rss.reader.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
+import kotlinx.coroutines.CoroutineDispatcher
 
-internal actual fun feedFetcher(): FeedFetcher {
+internal actual fun feedFetcher(ioDispatcher: CoroutineDispatcher): FeedFetcher {
   val httpClient = HttpClient(Darwin) {
     engine {
       configureRequest {
@@ -15,6 +16,6 @@ internal actual fun feedFetcher(): FeedFetcher {
 
   return FeedFetcher(
     httpClient = httpClient,
-    feedParser = IOSFeedParser()
+    feedParser = IOSFeedParser(ioDispatcher)
   )
 }

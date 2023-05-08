@@ -2,9 +2,10 @@ package dev.sasikanth.rss.reader.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import kotlinx.coroutines.CoroutineDispatcher
 import java.time.Duration
 
-internal actual fun feedFetcher(): FeedFetcher {
+internal actual fun feedFetcher(ioDispatcher: CoroutineDispatcher): FeedFetcher {
   val httpClient = HttpClient(OkHttp) {
     engine {
       config {
@@ -16,6 +17,6 @@ internal actual fun feedFetcher(): FeedFetcher {
 
   return FeedFetcher(
     httpClient = httpClient,
-    feedParser = AndroidFeedParser()
+    feedParser = AndroidFeedParser(ioDispatcher)
   )
 }

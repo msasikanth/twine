@@ -7,7 +7,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import io.ktor.http.Url
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSString
@@ -21,11 +21,13 @@ import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal class IOSFeedParser : FeedParser {
+internal class IOSFeedParser(
+  private val ioDispatcher: CoroutineDispatcher
+) : FeedParser {
 
   @Suppress("CAST_NEVER_SUCCEEDS")
   override suspend fun parse(xmlContent: String): FeedPayload {
-    return withContext(Dispatchers.Default) {
+    return withContext(ioDispatcher) {
       suspendCoroutine { continuation ->
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         NSXMLParser(data).apply {
