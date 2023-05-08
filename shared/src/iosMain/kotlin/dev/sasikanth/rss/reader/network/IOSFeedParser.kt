@@ -2,7 +2,6 @@ package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
-import dev.sasikanth.rss.reader.network.FeedParser
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanText
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
@@ -18,6 +17,7 @@ import platform.Foundation.NSXMLParserDelegateProtocol
 import platform.Foundation.dataUsingEncoding
 import platform.Foundation.timeIntervalSince1970
 import platform.darwin.NSObject
+import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -50,6 +50,13 @@ private class IOSXmlFeedParser(
     dateFormat = "E, d MMM yyyy HH:mm:ss Z"
   }
 
+  override fun parser(parser: NSXMLParser, foundCharacters: String) {
+    val currentElement = currentElement ?: return
+    val currentData = currentData ?: return
+
+    currentData[currentElement] = (currentData[currentElement] ?: "") + foundCharacters
+  }
+
   override fun parser(
     parser: NSXMLParser,
     didStartElement: String,
@@ -58,18 +65,16 @@ private class IOSXmlFeedParser(
     attributes: Map<Any?, *>
   ) {
     currentElement = didStartElement
+
+    if (imageTags.contains(currentElement) && !currentItemData.containsKey("imageUrl")) {
+      currentItemData["imageUrl"] = attributes["url"] as String
+    }
+
     currentData = when (currentElement) {
       "channel" -> currentChannelData
       "item" -> currentItemData
       else -> currentData
     }
-  }
-
-  override fun parser(parser: NSXMLParser, foundCharacters: String) {
-    val currentElement = currentElement ?: return
-    val currentData = currentData ?: return
-
-    currentData[currentElement] = (currentData[currentElement] ?: "") + foundCharacters
   }
 
   override fun parser(
@@ -97,13 +102,7 @@ private class IOSXmlFeedParser(
         null
     val link = rssMap["link"]
     val description = rssMap["description"]
-    val imageUrl: String? = rssMap.firstNotNullOfOrNull {
-      if (imageTags.contains(it.key)) {
-        it.value
-      } else {
-        null
-      }
-    }
+    val imageUrl: String? = rssMap["imageUrl"]
 
     return PostPayload(
       title = cleanText(rssMap["title"])!!,
