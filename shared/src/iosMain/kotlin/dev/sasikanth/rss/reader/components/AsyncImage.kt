@@ -104,11 +104,12 @@ private object ImageLoader {
 
   suspend fun getImage(url: String): ImageBitmap? {
     return withContext(Dispatchers.IO) {
-      val data = if (hasImageCache(url)) {
-        loadCachedImage(url)
+      val cachedImage = loadCachedImage(url)
+      val data = if (cachedImage != null) {
+        cachedImage
       } else {
-        downloadImage(url)
-      } ?: return@withContext null
+        downloadImage(url) ?: return@withContext null
+      }
 
       return@withContext Image.makeFromEncoded(data).toComposeImageBitmap()
     }
