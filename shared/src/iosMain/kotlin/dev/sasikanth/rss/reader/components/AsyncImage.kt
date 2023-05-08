@@ -1,7 +1,6 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -42,20 +41,18 @@ actual fun AsyncImage(
 ) {
   val imageState by rememberImageLoaderState(url)
 
-  Box(modifier) {
-    when (imageState) {
-      is ImageLoaderState.Loaded -> {
-        Image(
-          modifier = Modifier.matchParentSize(),
-          bitmap = (imageState as ImageLoaderState.Loaded).image,
-          contentDescription = contentDescription,
-          contentScale = contentScale
-        )
-      }
+  when (imageState) {
+    is ImageLoaderState.Loaded -> {
+      Image(
+        modifier = modifier,
+        bitmap = (imageState as ImageLoaderState.Loaded).image,
+        contentDescription = contentDescription,
+        contentScale = contentScale
+      )
+    }
 
-      else -> {
-        // TODO: Handle other cases instead of just showing blank space?
-      }
+    else -> {
+      // TODO: Handle other cases instead of just showing blank space?
     }
   }
 }
