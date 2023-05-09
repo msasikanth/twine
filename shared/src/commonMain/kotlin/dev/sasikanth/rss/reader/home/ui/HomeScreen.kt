@@ -22,8 +22,9 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.home.HomeComponent
+import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
-import io.github.aakira.napier.log
+import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.coroutines.channels.consumeEach
 
 private const val NUMBER_OF_FEATURED_POSTS = 6
@@ -47,7 +48,12 @@ fun HomeScreen(
 
   LaunchedEffect(Unit) {
     viewModel.effects.consumeEach { effect ->
-      log { effect.toString() }
+      when (effect) {
+        HomeEffect.NavigateToAddScreen -> TODO()
+        is HomeEffect.OpenPost -> {
+          openBrowser(effect.post.link)
+        }
+      }
     }
   }
 
