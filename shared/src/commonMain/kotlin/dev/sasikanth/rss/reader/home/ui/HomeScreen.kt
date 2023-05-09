@@ -19,7 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import com.moriatsushi.insetsx.systemBarsPadding
+import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.home.HomeComponent
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -93,7 +93,7 @@ internal fun FeaturedPostItems(
     FeaturedPostItemBackground(imageUrl = selectedFeaturedPost.imageUrl)
 
     HorizontalPager(
-      modifier = Modifier.systemBarsPadding(),
+      modifier = Modifier.statusBarsPadding(),
       state = pagerState,
       pageCount = featuredPosts.size,
       contentPadding = PaddingValues(
