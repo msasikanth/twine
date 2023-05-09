@@ -100,7 +100,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 12.sp,
-    lineHeight = 16.sp,
+    lineHeight = 20.sp,
     letterSpacing = 0.4.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
