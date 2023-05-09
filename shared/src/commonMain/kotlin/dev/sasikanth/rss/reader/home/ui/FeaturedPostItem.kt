@@ -50,11 +50,11 @@ internal fun FeaturedPostItem(
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
+      modifier = Modifier.padding(horizontal = 16.dp),
       text = item.title,
       style = MaterialTheme.typography.headlineSmall,
       color = MaterialTheme.colorScheme.onSurface,
-      modifier = Modifier.padding(horizontal = 16.dp),
-      maxLines = 3,
+      maxLines = 2,
       overflow = TextOverflow.Ellipsis
     )
 
@@ -62,12 +62,12 @@ internal fun FeaturedPostItem(
       Spacer(modifier = Modifier.height(8.dp))
 
       Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
         text = item.description,
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurface,
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.padding(horizontal = 16.dp)
       )
     }
 
@@ -84,7 +84,7 @@ internal fun FeaturedPostItemBackground(
     AsyncImage(
       url = imageUrl!!,
       modifier = Modifier
-        .aspectRatio(0.81f)
+        .aspectRatio(1.1f)
         .blur(100.dp, BlurredEdgeTreatment.Unbounded),
       contentDescription = null,
       contentScale = ContentScale.Crop
