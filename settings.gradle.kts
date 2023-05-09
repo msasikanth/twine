@@ -23,7 +23,8 @@ pluginManagement {
     id("com.android.library").version(agpVersion)
 
     id("org.jetbrains.compose").version(composeVersion)
-    id("app.cash.sqldelight") version "2.0.0-alpha05"
+    id("app.cash.sqldelight").version("2.0.0-alpha05")
+    id("dev.icerock.mobile.multiplatform-resources").version("0.22.0")
   }
 }
 
