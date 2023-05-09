@@ -66,7 +66,13 @@ internal class AndroidFeedParser(
     val domain = Uri.parse(link!!).host!!
     val iconUrl = feedIcon(domain)
 
-    return FeedPayload(title!!, link, description!!, iconUrl, posts)
+    return FeedPayload(
+      name = title!!,
+      icon = iconUrl,
+      description = description!!,
+      link = link,
+      posts = posts
+    )
   }
 
   private fun readPost(parser: XmlPullParser): PostPayload {
@@ -104,11 +110,11 @@ internal class AndroidFeedParser(
     } ?: System.currentTimeMillis()
 
     return PostPayload(
-      cleanText(title).orEmpty(),
-      cleanText(link).orEmpty(),
-      cleanTextCompact(description).orEmpty(),
-      image,
-      dateLong
+      title = cleanText(title).orEmpty(),
+      link = cleanText(link).orEmpty(),
+      description = cleanTextCompact(description).orEmpty(),
+      imageUrl = image,
+      date = dateLong
     )
   }
 
