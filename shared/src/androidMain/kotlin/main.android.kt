@@ -1,6 +1,5 @@
 import androidx.compose.runtime.Composable
-
-actual fun getPlatformName(): String = "Android"
+import dev.sasikanth.rss.reader.home.HomeComponent
 
 @Composable
-fun MainView() = App()
+fun MainView(component: HomeComponent) = App(component)
