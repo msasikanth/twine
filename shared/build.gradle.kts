@@ -1,9 +1,24 @@
+import dev.icerock.gradle.MRVisibility.Internal
+
 plugins {
   kotlin("multiplatform")
   kotlin("native.cocoapods")
   id("com.android.library")
   id("org.jetbrains.compose")
   id("app.cash.sqldelight")
+  id("dev.icerock.mobile.multiplatform-resources")
+}
+
+dependencies {
+  commonMainApi("dev.icerock.moko:resources:0.22.0")
+  commonMainApi("dev.icerock.moko:resources-compose:0.22.0") // for compose multiplatform
+}
+
+multiplatformResources {
+  multiplatformResourcesPackage = "dev.sasikanth.rss.reader"
+  multiplatformResourcesClassName = "CommonRes"
+  multiplatformResourcesVisibility = Internal
+  disableStaticFrameworkWarning = true
 }
 
 kotlin {
