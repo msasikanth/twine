@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.moriatsushi.insetsx.systemBarsPadding
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -21,7 +22,10 @@ fun App() {
   MaterialTheme {
     var greetingText by remember { mutableStateOf("Hello, World!") }
     var showImage by remember { mutableStateOf(false) }
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+      Modifier.systemBarsPadding().fillMaxWidth(),
+      horizontalAlignment = Alignment.CenterHorizontally
+    ) {
       Button(onClick = {
         greetingText = "Hello, ${getPlatformName()}"
         showImage = !showImage

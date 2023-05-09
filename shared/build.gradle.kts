@@ -39,6 +39,7 @@ kotlin {
         implementation("io.github.aakira:napier:2.6.1")
         implementation("app.cash.sqldelight:coroutines-extensions:2.0.0-alpha05")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
+        implementation("com.moriatsushi.insetsx:insetsx:0.1.0-alpha04")
       }
     }
     val commonTest by getting {
