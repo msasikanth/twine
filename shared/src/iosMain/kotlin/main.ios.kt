@@ -1,5 +1,4 @@
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.sasikanth.rss.reader.home.HomeComponent
 
-actual fun getPlatformName(): String = "iOS"
-
-fun MainViewController() = ComposeUIViewController { App() }
+fun MainViewController(component: HomeComponent) = ComposeUIViewController { App(component) }

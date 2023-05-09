@@ -21,6 +21,9 @@ kotlin {
     framework {
       baseName = "shared"
       isStatic = true
+
+      export("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-alpha-02")
+      export("com.arkivanov.essenty:lifecycle:1.1.0")
     }
     extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
   }
@@ -40,6 +43,9 @@ kotlin {
         implementation("app.cash.sqldelight:coroutines-extensions:2.0.0-alpha05")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
         implementation("com.moriatsushi.insetsx:insetsx:0.1.0-alpha04")
+        api("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-alpha-02")
+        implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-alpha-02")
+        api("com.arkivanov.essenty:lifecycle:1.1.0")
       }
     }
     val commonTest by getting {
