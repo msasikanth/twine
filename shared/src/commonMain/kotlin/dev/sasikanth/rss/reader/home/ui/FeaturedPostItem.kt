@@ -30,15 +30,18 @@ internal fun FeaturedPostItem(
   item: Post,
   onClick: () -> Unit
 ) {
-  Column {
+  Column(
+    modifier = Modifier
+      .clip(MaterialTheme.shapes.extraLarge)
+      .clickable(onClick = onClick)
+  ) {
     Box {
       AsyncImage(
         url = item.imageUrl!!,
         modifier = Modifier
           .clip(MaterialTheme.shapes.extraLarge)
           .aspectRatio(1.77f)
-          .background(MaterialTheme.colorScheme.surface)
-          .clickable(onClick = onClick),
+          .background(MaterialTheme.colorScheme.surface),
         contentDescription = null,
         contentScale = ContentScale.Crop
       )
