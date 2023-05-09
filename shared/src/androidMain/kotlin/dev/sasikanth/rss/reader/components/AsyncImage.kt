@@ -1,5 +1,6 @@
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -11,10 +12,12 @@ actual fun AsyncImage(
   contentScale: ContentScale,
   modifier: Modifier,
 ) {
-  coil.compose.AsyncImage(
-    modifier = modifier,
-    model = url,
-    contentDescription = contentDescription,
-    contentScale = ContentScale.Crop
-  )
+  Box(modifier) {
+    coil.compose.AsyncImage(
+      modifier = Modifier.matchParentSize(),
+      model = url,
+      contentDescription = contentDescription,
+      contentScale = ContentScale.Crop
+    )
+  }
 }
