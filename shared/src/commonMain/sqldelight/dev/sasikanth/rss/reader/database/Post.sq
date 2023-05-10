@@ -1,8 +1,10 @@
+import kotlinx.datetime.Instant;
+
 CREATE TABLE post(
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
-  date INTEGER NOT NULL,
+  date INTEGER AS Instant NOT NULL,
   feedLink TEXT NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
   FOREIGN KEY(feedLink) REFERENCES feed(link)
