@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.repository
 
 import app.cash.sqldelight.coroutines.asFlow
@@ -26,9 +41,7 @@ class RssRepository(
       val feedPayload = feedFetcher.fetch(feedLink)
       feedQueries.transaction {
         feedQueries.insert(feed = feedPayload.toFeed())
-        feedPayload.posts.forEach {
-          postQueries.insert(it.toPost(feedLink = feedPayload.link))
-        }
+        feedPayload.posts.forEach { postQueries.insert(it.toPost(feedLink = feedPayload.link)) }
       }
     }
   }
@@ -36,9 +49,7 @@ class RssRepository(
   suspend fun updateFeeds() {
     withContext(ioDispatcher) {
       val feeds = feedQueries.feeds().executeAsList()
-      feeds.forEach { feed ->
-        addFeed(feed.link)
-      }
+      feeds.forEach { feed -> addFeed(feed.link) }
     }
   }
 
@@ -55,8 +66,6 @@ class RssRepository(
   }
 
   suspend fun removeFeed(feedLink: String) {
-    withContext(ioDispatcher) {
-      feedQueries.remove(feedLink)
-    }
+    withContext(ioDispatcher) { feedQueries.remove(feedLink) }
   }
 }

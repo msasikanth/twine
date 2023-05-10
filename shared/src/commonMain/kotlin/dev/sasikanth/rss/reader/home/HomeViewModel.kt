@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.home
 
 import com.arkivanov.decompose.value.MutableValue
@@ -30,21 +45,15 @@ internal class HomeViewModel(
   private val _state = MutableValue(HomeState.DEFAULT)
   val state: Value<HomeState> = _state
 
-  private val _effects: Channel<HomeEffect> = Channel(
-    capacity = 5,
-    onBufferOverflow = BufferOverflow.DROP_OLDEST
-  )
+  private val _effects: Channel<HomeEffect> =
+    Channel(capacity = 5, onBufferOverflow = BufferOverflow.DROP_OLDEST)
   val effects: Channel<HomeEffect> = Channel()
 
   init {
-    lifecycle.doOnCreate {
-      dispatch(HomeEvent.LoadContent)
-    }
+    lifecycle.doOnCreate { dispatch(HomeEvent.LoadContent) }
 
     lifecycle.doOnResume {
-      viewModelScope.launch {
-        _effects.consumeAsFlow().collect(effects::send)
-      }
+      viewModelScope.launch { _effects.consumeAsFlow().collect(effects::send) }
     }
   }
 
@@ -60,52 +69,32 @@ internal class HomeViewModel(
   }
 
   private fun onPostClicked(post: PostWithMetadata) {
-    viewModelScope.launch {
-      _effects.send(HomeEffect.OpenPost(post))
-    }
+    viewModelScope.launch { _effects.send(HomeEffect.OpenPost(post)) }
   }
 
   private fun onAddClicked() {
-    viewModelScope.launch {
-      _effects.send(HomeEffect.NavigateToAddScreen)
-    }
+    viewModelScope.launch { _effects.send(HomeEffect.NavigateToAddScreen) }
   }
 
   private fun onHomeSelected() {
     val posts = rssRepository.allPosts()
-    _state.update {
-      it.copy(posts = posts, selectedFeed = null)
-    }
+    _state.update { it.copy(posts = posts, selectedFeed = null) }
   }
 
   private fun onFeedSelected(feed: Feed) {
     val posts = rssRepository.postsOfFeed(feed.link)
-    _state.update {
-      it.copy(
-        posts = posts,
-        selectedFeed = feed
-      )
-    }
+    _state.update { it.copy(posts = posts, selectedFeed = feed) }
   }
 
   private fun refreshContent() {
-    viewModelScope.launch {
-      updateLoadingState {
-        rssRepository.updateFeeds()
-      }
-    }
+    viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
   }
 
   private fun loadContent() {
     val feeds = rssRepository.allFeeds()
     val posts = rssRepository.allPosts()
 
-    _state.update {
-      it.copy(
-        feeds = feeds,
-        posts = posts
-      )
-    }
+    _state.update { it.copy(feeds = feeds, posts = posts) }
   }
 
   private suspend fun updateLoadingState(action: suspend () -> Unit) {

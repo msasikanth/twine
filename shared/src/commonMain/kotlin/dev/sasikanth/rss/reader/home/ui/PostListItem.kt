@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.clickable
@@ -23,20 +38,13 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.utils.relativeDurationString
 
 @Composable
-internal fun PostListItem(
-  item: PostWithMetadata,
-  onClick: () -> Unit
-) {
+internal fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
   Row(
-    modifier = Modifier
-      .clickable(onClick = onClick)
-      .padding(24.dp),
+    modifier = Modifier.clickable(onClick = onClick).padding(24.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Column(
-      modifier = Modifier.weight(1f)
-    ) {
+    Column(modifier = Modifier.weight(1f)) {
       Text(
         style = MaterialTheme.typography.titleSmall,
         text = item.title,
@@ -49,9 +57,8 @@ internal fun PostListItem(
     item.imageUrl?.let { url ->
       AsyncImage(
         url = url,
-        modifier = Modifier
-          .requiredSize(width = 128.dp, height = 72.dp)
-          .clip(RoundedCornerShape(12.dp)),
+        modifier =
+          Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
         contentDescription = null,
         contentScale = ContentScale.Crop
       )
@@ -64,9 +71,7 @@ private fun PostMetadata(post: PostWithMetadata) {
   val feedName = post.feedName ?: "Unknown"
   val postPublishedAt = post.date.relativeDurationString()
 
-  Row(
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
-  ) {
+  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
     Text(
       modifier = Modifier.requiredWidthIn(max = 72.dp),
       style = MaterialTheme.typography.bodySmall,

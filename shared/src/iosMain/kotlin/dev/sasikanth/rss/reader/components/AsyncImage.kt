@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.foundation.Image
@@ -52,7 +67,6 @@ actual fun AsyncImage(
           contentScale = contentScale
         )
       }
-
       else -> {
         // TODO: Handle other cases instead of just showing blank space?
       }
@@ -62,25 +76,30 @@ actual fun AsyncImage(
 
 @Composable
 private fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
-  val initialState = if (url.isNullOrBlank()) {
-    ImageLoaderState.Error
-  } else {
-    ImageLoaderState.Loading
-  }
+  val initialState =
+    if (url.isNullOrBlank()) {
+      ImageLoaderState.Error
+    } else {
+      ImageLoaderState.Loading
+    }
 
   return produceState(initialState, url) {
-    value = try {
-      ImageLoaderState.Loaded(ImageLoader.getImage(url!!)!!)
-    } catch (e: Exception) {
-      ImageLoaderState.Error
-    }
+    value =
+      try {
+        ImageLoaderState.Loaded(ImageLoader.getImage(url!!)!!)
+      } catch (e: Exception) {
+        ImageLoaderState.Error
+      }
   }
 }
 
 private sealed interface ImageLoaderState {
   object Idle : ImageLoaderState
+
   object Loading : ImageLoaderState
+
   data class Loaded(val image: ImageBitmap) : ImageLoaderState
+
   object Error : ImageLoaderState
 }
 
@@ -88,28 +107,31 @@ private object ImageLoader {
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
   private val diskCacheSize = (50 * 1024 * 1024).toULong() // 50 MB cache size
-  private val httpClient = HttpClient(Darwin) {
-    engine {
-      configureRequest {
-        setTimeoutInterval(60.0)
-        setAllowsCellularAccess(true)
+  private val httpClient =
+    HttpClient(Darwin) {
+      engine {
+        configureRequest {
+          setTimeoutInterval(60.0)
+          setAllowsCellularAccess(true)
+        }
       }
     }
-  }
-  private val urlCache = NSURLCache(
-    memoryCapacity = memoryCacheSize,
-    diskCapacity = diskCacheSize,
-    diskPath = "dev_sasikanth_rss_reader_images_cache"
-  )
+  private val urlCache =
+    NSURLCache(
+      memoryCapacity = memoryCacheSize,
+      diskCapacity = diskCacheSize,
+      diskPath = "dev_sasikanth_rss_reader_images_cache"
+    )
 
   suspend fun getImage(url: String): ImageBitmap? {
     return withContext(Dispatchers.IO) {
       val cachedImage = loadCachedImage(url)
-      val data = if (cachedImage != null) {
-        cachedImage
-      } else {
-        downloadImage(url) ?: return@withContext null
-      }
+      val data =
+        if (cachedImage != null) {
+          cachedImage
+        } else {
+          downloadImage(url) ?: return@withContext null
+        }
 
       return@withContext Image.makeFromEncoded(data).toComposeImageBitmap()
     }
@@ -138,15 +160,9 @@ private object ImageLoader {
     val response = httpClient.get(url)
 
     return response.readBytes().also { data ->
-      val cachedResponse = createCachedResponse(
-        httpResponse = response,
-        data = data,
-        requestUrl = url
-      )
-      urlCache.storeCachedResponse(
-        cachedResponse = cachedResponse,
-        forRequest = request
-      )
+      val cachedResponse =
+        createCachedResponse(httpResponse = response, data = data, requestUrl = url)
+      urlCache.storeCachedResponse(cachedResponse = cachedResponse, forRequest = request)
     }
   }
 
@@ -162,26 +178,21 @@ private object ImageLoader {
     requestUrl: String
   ): NSCachedURLResponse {
     val statusCode = httpResponse.status.value
-    val headers = httpResponse.headers
-      .toMap()
-      .mapValues { it.value.joinToString(", ") }
+    val headers = httpResponse.headers.toMap().mapValues { it.value.joinToString(", ") }
 
     val url = NSURL(string = requestUrl)
-    val response = NSHTTPURLResponse(
-      uRL = url,
-      statusCode = statusCode.toLong(),
-      HTTPVersion = httpResponse.version.toString(),
-      headerFields = headers as Map<Any?, *>
-    )
+    val response =
+      NSHTTPURLResponse(
+        uRL = url,
+        statusCode = statusCode.toLong(),
+        HTTPVersion = httpResponse.version.toString(),
+        headerFields = headers as Map<Any?, *>
+      )
     val nsData = data.toNSData()
 
-    return NSCachedURLResponse(
-      response = response,
-      data = nsData
-    )
+    return NSCachedURLResponse(response = response, data = nsData)
   }
 
-  private fun ByteArray.toNSData(): NSData = this.usePinned {
-    NSData.create(bytes = it.addressOf(0), length = this.size.convert())
-  }
+  private fun ByteArray.toNSData(): NSData =
+    this.usePinned { NSData.create(bytes = it.addressOf(0), length = this.size.convert()) }
 }

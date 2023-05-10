@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
@@ -33,30 +48,20 @@ import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 @Composable
-internal fun FeaturedPostItem(
-  item: PostWithMetadata,
-  onClick: () -> Unit
-) {
-  Column(
-    modifier = Modifier
-      .clip(MaterialTheme.shapes.extraLarge)
-      .clickable(onClick = onClick)
-  ) {
+internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
+  Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
     Box {
       AsyncImage(
         url = item.imageUrl!!,
-        modifier = Modifier
-          .clip(MaterialTheme.shapes.extraLarge)
-          .aspectRatio(1.77f)
-          .background(MaterialTheme.colorScheme.surface),
+        modifier =
+          Modifier.clip(MaterialTheme.shapes.extraLarge)
+            .aspectRatio(1.77f)
+            .background(MaterialTheme.colorScheme.surface),
         contentDescription = null,
         contentScale = ContentScale.Crop
       )
 
-      PostMetadata(
-        post = item,
-        modifier = Modifier.align(Alignment.BottomStart)
-      )
+      PostMetadata(post = item, modifier = Modifier.align(Alignment.BottomStart))
     }
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -88,63 +93,55 @@ internal fun FeaturedPostItem(
 }
 
 @Composable
-internal fun FeaturedPostItemBackground(
-  modifier: Modifier = Modifier,
-  imageUrl: String?
-) {
+internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl: String?) {
   BoxWithConstraints(modifier = modifier) {
     AsyncImage(
       url = imageUrl!!,
-      modifier = Modifier
-        .aspectRatio(1.1f)
-        .blur(100.dp, BlurredEdgeTreatment.Unbounded),
+      modifier = Modifier.aspectRatio(1.1f).blur(100.dp, BlurredEdgeTreatment.Unbounded),
       contentDescription = null,
       contentScale = ContentScale.Crop
     )
 
     Box(
-      modifier = Modifier
-        .matchParentSize()
-        .background(
-          brush = Brush.radialGradient(
-            colors = listOf(
-              Color.Black,
-              Color.Black.copy(alpha = 0.0f),
-              Color.Black.copy(alpha = 0.0f)
-            ),
-            center = Offset(
-              x = constraints.maxWidth.toFloat(),
-              y = 40f
-            )
+      modifier =
+        Modifier.matchParentSize()
+          .background(
+            brush =
+              Brush.radialGradient(
+                colors =
+                  listOf(
+                    Color.Black,
+                    Color.Black.copy(alpha = 0.0f),
+                    Color.Black.copy(alpha = 0.0f)
+                  ),
+                center = Offset(x = constraints.maxWidth.toFloat(), y = 40f)
+              )
           )
-        )
     )
 
     Box(
-      modifier = Modifier
-        .matchParentSize()
-        .background(
-          brush = Brush.verticalGradient(
-            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+      modifier =
+        Modifier.matchParentSize()
+          .background(
+            brush =
+              Brush.verticalGradient(
+                colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+              )
           )
-        )
     )
   }
 }
 
 @Composable
-private fun PostMetadata(
-  post: PostWithMetadata,
-  modifier: Modifier = Modifier
-) {
+private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) {
   val feedName = post.feedName ?: "Unknown"
 
   Row(
-    modifier = Modifier
-      .padding(start = 12.dp, bottom = 12.dp)
-      .background(color = Color.Black, shape = RoundedCornerShape(50))
-      .padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
-      .then(modifier),
+    modifier =
+      Modifier.padding(start = 12.dp, bottom = 12.dp)
+        .background(color = Color.Black, shape = RoundedCornerShape(50))
+        .padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+        .then(modifier),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
@@ -167,4 +164,3 @@ private fun PostMetadata(
     )
   }
 }
-

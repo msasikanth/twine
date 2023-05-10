@@ -1,3 +1,18 @@
+/*
+ * Copyright 2023 Sasikanth Miriyampalli
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.sasikanth.rss.reader.network
 
 import android.net.Uri
@@ -9,24 +24,21 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import org.xmlpull.v1.XmlPullParser
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import org.xmlpull.v1.XmlPullParser
 
-internal class AndroidFeedParser(
-  private val ioDispatcher: CoroutineDispatcher
-) : FeedParser {
+internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
 
   private val dateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
   override suspend fun parse(xmlContent: String): FeedPayload {
     return withContext(ioDispatcher) {
-      val parser = Xml.newPullParser().apply {
-        setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-      }
+      val parser =
+        Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
 
       return@withContext xmlContent.reader().use { reader ->
         parser.setInput(reader)
@@ -93,21 +105,21 @@ internal class AndroidFeedParser(
         name == "link" -> link = readTagText("link", parser)
         name == "description" -> description = readTagText("description", parser)
         name == "pubDate" -> date = readTagText("pubDate", parser)
-        imageTags.contains(name) && image.isNullOrBlank() -> image =
-          readPostImageUrl(parser)
-
+        imageTags.contains(name) && image.isNullOrBlank() -> image = readPostImageUrl(parser)
         else -> skip(parser)
       }
     }
 
-    val dateLong: Long = date?.let {
-      try {
-        ZonedDateTime.parse(date, dateFormat).toEpochSecond() * 1000
-      } catch (e: Throwable) {
-        Napier.e("Parse date error: ${e.message}")
-        null
+    val dateLong: Long =
+      date?.let {
+        try {
+          ZonedDateTime.parse(date, dateFormat).toEpochSecond() * 1000
+        } catch (e: Throwable) {
+          Napier.e("Parse date error: ${e.message}")
+          null
+        }
       }
-    } ?: System.currentTimeMillis()
+        ?: System.currentTimeMillis()
 
     return PostPayload(
       title = cleanText(title).orEmpty(),
