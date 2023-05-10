@@ -23,3 +23,20 @@ SELECT * FROM post;
 postsOfFeed:
 SELECT * FROM post
 WHERE feedLink = :feedLink;
+
+/**
+  TODO: Use multiplatform paging
+*/
+postWithMetadata:
+SELECT
+  post.title,
+  post.description,
+  post.imageUrl,
+  post.date,
+  post.link,
+  feed.name AS feedName,
+  feed.icon AS feedIcon
+FROM post
+LEFT JOIN feed ON post.feedLink == feed.link
+WHERE :feedLink IS NULL OR post.feedLink = :feedLink
+ORDER BY post.date DESC;
