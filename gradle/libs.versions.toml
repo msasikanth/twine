@@ -1,0 +1,64 @@
+[versions]
+kotlin = "1.8.20"
+android_gradle_plugin = "7.4.1"
+compose = "1.4.0"
+
+android_sdk_compile = "33"
+android_sdk_target = "33"
+android_sdk_min = "31"
+
+sqldelight = "2.0.0-alpha05"
+moko_resources = "0.22.0"
+ktor = "2.3.0"
+napier = "2.6.1"
+kotlinx_coroutines = "1.7.0"
+kotlinx_date_time = "0.4.0"
+insetsx = "0.1.0-alpha04"
+decompose = "2.0.0-compose-experimental-alpha-02"
+essenty = "1.1.0"
+androidx_activity = "1.7.1"
+androidx_appcompat = "1.6.1"
+androidx_core = "1.10.0"
+coil = "2.3.0"
+
+[libraries]
+compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
+compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
+ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
+kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
+kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
+sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
+sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
+sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+insetsx = { module = "com.moriatsushi.insetsx:insetsx", version.ref = "insetsx" }
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
+essenty_lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "androidx_activity" }
+androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
+androidx_core = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }
+coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+moko_resources = { module = "dev.icerock.moko:resources", version.ref = "moko_resources" }
+moko_resources_compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko_resources" }
+
+[plugins]
+android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
+android_library = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+kotlin_multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin_cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
+
+[bundles]
+compose = [ "compose-runtime", "compose-foundation", "compose_material3", "compose_resources" ]
+kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime" ]
+moko_resources = [ "moko_resources", "moko_resources_compose" ]
