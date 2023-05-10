@@ -99,7 +99,7 @@ private class IOSXmlFeedParser(
     val pubDate = rssMap["pubDate"]
     val date =
       if (pubDate != null)
-        dateFormatter.dateFromString(pubDate.trim())?.timeIntervalSince1970
+        dateFormatter.dateFromString(pubDate.trim())?.timeIntervalSince1970?.times(1000)
       else
         null
     val link = rssMap["link"]
