@@ -17,13 +17,6 @@ removePostsOfFeed:
 DELETE FROM post
 WHERE feedLink = :feedLink;
 
-allPosts:
-SELECT * FROM post;
-
-postsOfFeed:
-SELECT * FROM post
-WHERE feedLink = :feedLink;
-
 /**
   TODO: Use multiplatform paging
 */

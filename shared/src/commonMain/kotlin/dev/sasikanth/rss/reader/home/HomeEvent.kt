@@ -1,7 +1,7 @@
 package dev.sasikanth.rss.reader.home
 
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.database.Post
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 sealed interface HomeEvent {
 
@@ -15,5 +15,5 @@ sealed interface HomeEvent {
 
   object OnAddClicked : HomeEvent
 
-  data class OnPostClicked(val post: Post) : HomeEvent
+  data class OnPostClicked(val post: PostWithMetadata) : HomeEvent
 }

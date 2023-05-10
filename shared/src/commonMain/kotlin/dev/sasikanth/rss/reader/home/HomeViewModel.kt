@@ -8,11 +8,10 @@ import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.database.Post
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
@@ -60,7 +59,7 @@ internal class HomeViewModel(
     }
   }
 
-  private fun onPostClicked(post: Post) {
+  private fun onPostClicked(post: PostWithMetadata) {
     viewModelScope.launch {
       _effects.send(HomeEffect.OpenPost(post))
     }

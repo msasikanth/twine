@@ -4,8 +4,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
-import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.database.PostQueries
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
@@ -40,12 +40,12 @@ class RssRepository(
     }
   }
 
-  fun allPosts(): Flow<List<Post>> {
-    return postQueries.allPosts().asFlow().mapToList(ioDispatcher)
+  fun allPosts(): Flow<List<PostWithMetadata>> {
+    return postQueries.postWithMetadata(null).asFlow().mapToList(ioDispatcher)
   }
 
-  fun postsOfFeed(feedLink: String): Flow<List<Post>> {
-    return postQueries.postsOfFeed(feedLink).asFlow().mapToList(ioDispatcher)
+  fun postsOfFeed(feedLink: String): Flow<List<PostWithMetadata>> {
+    return postQueries.postWithMetadata(feedLink).asFlow().mapToList(ioDispatcher)
   }
 
   suspend fun removePostsOfFeed(feedLink: String) {

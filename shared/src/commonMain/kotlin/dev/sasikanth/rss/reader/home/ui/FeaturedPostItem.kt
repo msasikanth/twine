@@ -23,11 +23,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
-import dev.sasikanth.rss.reader.database.Post
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 @Composable
 internal fun FeaturedPostItem(
-  item: Post,
+  item: PostWithMetadata,
   onClick: () -> Unit
 ) {
   Column(

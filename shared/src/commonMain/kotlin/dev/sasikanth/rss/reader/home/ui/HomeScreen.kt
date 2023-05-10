@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.moriatsushi.insetsx.statusBarsPadding
-import dev.sasikanth.rss.reader.database.Post
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeComponent
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -89,8 +89,8 @@ fun HomeScreen(
 @Composable
 internal fun FeaturedPostItems(
   modifier: Modifier = Modifier,
-  featuredPosts: List<Post>,
-  onItemClick: (Post) -> Unit
+  featuredPosts: List<PostWithMetadata>,
+  onItemClick: (PostWithMetadata) -> Unit
 ) {
   Box(modifier = modifier) {
     val pagerState = rememberPagerState()
