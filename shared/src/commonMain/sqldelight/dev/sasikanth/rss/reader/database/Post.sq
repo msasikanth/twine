@@ -7,7 +7,7 @@ CREATE TABLE post(
   date INTEGER AS Instant NOT NULL,
   feedLink TEXT NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
-  FOREIGN KEY(feedLink) REFERENCES feed(link)
+  FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
 );
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
@@ -15,10 +15,6 @@ CREATE INDEX post_feed_link_index ON post(feedLink);
 insert:
 INSERT OR REPLACE INTO post(title, description, imageUrl, date, feedLink, link)
 VALUES ?;
-
-removePostsOfFeed:
-DELETE FROM post
-WHERE feedLink = :feedLink;
 
 /**
   TODO: Use multiplatform paging

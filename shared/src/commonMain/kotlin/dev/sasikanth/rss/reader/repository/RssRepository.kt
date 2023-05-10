@@ -50,12 +50,6 @@ class RssRepository(
     return postQueries.postWithMetadata(feedLink).asFlow().mapToList(ioDispatcher)
   }
 
-  suspend fun removePostsOfFeed(feedLink: String) {
-    withContext(ioDispatcher) {
-      postQueries.removePostsOfFeed(feedLink)
-    }
-  }
-
   fun allFeeds(): Flow<List<Feed>> {
     return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
   }
