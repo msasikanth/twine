@@ -1,5 +1,7 @@
 # Reader (WIP)
 
+![CI-MAIN](https://github.com/msasikanth/reader/actions/workflows/ci_checks.yml/badge.svg?branch=main)
+
 A Compose multiplatform (Android & iOS) RSS reader app
 
 ## License
