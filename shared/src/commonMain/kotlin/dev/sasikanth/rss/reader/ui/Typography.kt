@@ -1,70 +1,73 @@
 package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.material3.Typography
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
-import dev.icerock.moko.resources.compose.fontFamilyResource
-import dev.sasikanth.rss.reader.CommonRes
+
+expect fun createDefaultTextStyle(): TextStyle
 
 private val figmaLineHeightStyle = LineHeightStyle(
   alignment = LineHeightStyle.Alignment.Center,
   trim = LineHeightStyle.Trim.None
 )
 
+@Stable
+val defaultTextStyle = createDefaultTextStyle()
 fun typography(fontFamily: FontFamily) = Typography(
-  displayLarge = TextStyle.Default.copy(
+  displayLarge = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 57.sp,
     lineHeight = 64.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  displayMedium = TextStyle.Default.copy(
+  displayMedium = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 45.sp,
     lineHeight = 52.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  displaySmall = TextStyle.Default.copy(
+  displaySmall = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 36.sp,
     lineHeight = 44.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  headlineLarge = TextStyle.Default.copy(
+  headlineLarge = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 32.sp,
     lineHeight = 40.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  headlineMedium = TextStyle.Default.copy(
+  headlineMedium = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 28.sp,
     lineHeight = 36.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  headlineSmall = TextStyle.Default.copy(
+  headlineSmall = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 24.sp,
     lineHeight = 32.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  titleLarge = TextStyle.Default.copy(
+  titleLarge = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 22.sp,
     lineHeight = 28.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  titleMedium = TextStyle.Default.copy(
+  titleMedium = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 16.sp,
@@ -72,7 +75,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.15.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  titleSmall = TextStyle.Default.copy(
+  titleSmall = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 14.sp,
@@ -80,7 +83,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.1.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  bodyLarge = TextStyle.Default.copy(
+  bodyLarge = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 16.sp,
@@ -88,7 +91,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.15.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  bodyMedium = TextStyle.Default.copy(
+  bodyMedium = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 14.sp,
@@ -96,7 +99,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.25.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  bodySmall = TextStyle.Default.copy(
+  bodySmall = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Normal,
     fontSize = 12.sp,
@@ -104,7 +107,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.4.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  labelLarge = TextStyle.Default.copy(
+  labelLarge = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 14.sp,
@@ -112,7 +115,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.1.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  labelMedium = TextStyle.Default.copy(
+  labelMedium = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 12.sp,
@@ -120,7 +123,7 @@ fun typography(fontFamily: FontFamily) = Typography(
     letterSpacing = 0.5.sp,
     lineHeightStyle = figmaLineHeightStyle
   ),
-  labelSmall = TextStyle.Default.copy(
+  labelSmall = defaultTextStyle.copy(
     fontFamily = fontFamily,
     fontWeight = FontWeight.Medium,
     fontSize = 11.sp,
