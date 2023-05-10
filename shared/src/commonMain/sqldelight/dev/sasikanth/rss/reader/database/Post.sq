@@ -4,7 +4,8 @@ CREATE TABLE post(
   imageUrl TEXT,
   date INTEGER NOT NULL,
   feedLink TEXT NOT NULL,
-  link TEXT NOT NULL PRIMARY KEY
+  link TEXT NOT NULL PRIMARY KEY,
+  FOREIGN KEY(feedLink) REFERENCES feed(link)
 );
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
