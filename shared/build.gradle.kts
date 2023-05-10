@@ -61,6 +61,7 @@ kotlin {
         api("com.arkivanov.decompose:decompose:2.0.0-compose-experimental-alpha-02")
         implementation("com.arkivanov.decompose:extensions-compose-jetbrains:2.0.0-compose-experimental-alpha-02")
         api("com.arkivanov.essenty:lifecycle:1.1.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
       }
     }
     val commonTest by getting {
