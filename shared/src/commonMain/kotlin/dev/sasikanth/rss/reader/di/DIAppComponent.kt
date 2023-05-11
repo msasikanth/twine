@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.di
 
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import me.tatarka.inject.annotations.Inject
+import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
+import me.tatarka.inject.annotations.Scope
 
-interface DispatchersProvider {
-  val main: CoroutineDispatcher
-  val io: CoroutineDispatcher
-  val default: CoroutineDispatcher
+@Component
+@AppScope
+abstract class DIAppComponent {
+
+  @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }
 
-@Inject
-class DefaultDispatchersProvider : DispatchersProvider {
-  override val main = Dispatchers.Main
-  override val io = Dispatchers.IO
-  override val default = Dispatchers.Default
-}
+@Scope
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
+annotation class AppScope
