@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeComponent
@@ -46,10 +45,10 @@ private const val NUMBER_OF_FEATURED_POSTS = 6
 @Composable
 fun HomeScreen(component: HomeComponent) {
   val viewModel = component.viewModel
-  val state by viewModel.state.subscribeAsState()
-
+  val state by viewModel.state.collectAsState()
   val posts by state.posts.collectAsState(initial = emptyList())
 
+  // TODO: Move this transformation to data layer in background thread
   val postsWithImages = posts.filter { !it.imageUrl.isNullOrBlank() }
   val featuredPosts =
     if (postsWithImages.size > NUMBER_OF_FEATURED_POSTS) {

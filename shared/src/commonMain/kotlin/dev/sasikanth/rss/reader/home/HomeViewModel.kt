@@ -15,8 +15,6 @@
  */
 package dev.sasikanth.rss.reader.home
 
-import com.arkivanov.decompose.value.MutableValue
-import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.update
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
@@ -31,7 +29,12 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class HomeViewModel(
@@ -42,8 +45,13 @@ internal class HomeViewModel(
 
   private val viewModelScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
-  private val _state = MutableValue(HomeState.DEFAULT)
-  val state: Value<HomeState> = _state
+  private val _state = MutableStateFlow(HomeState.DEFAULT)
+  val state: StateFlow<HomeState> =
+    _state.stateIn(
+      scope = viewModelScope,
+      started = SharingStarted.WhileSubscribed(5000),
+      initialValue = HomeState.DEFAULT
+    )
 
   private val _effects: Channel<HomeEffect> =
     Channel(capacity = 5, onBufferOverflow = BufferOverflow.DROP_OLDEST)
