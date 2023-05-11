@@ -26,6 +26,7 @@ ktfmt = "0.44"
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -62,6 +63,6 @@ moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.re
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 [bundles]
-compose = [ "compose-runtime", "compose-foundation", "compose_material3", "compose_resources" ]
+compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime" ]
 moko_resources = [ "moko_resources", "moko_resources_compose" ]

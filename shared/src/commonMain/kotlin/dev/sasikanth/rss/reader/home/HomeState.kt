@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.home
 
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -46,3 +47,6 @@ sealed interface HomeLoadingState {
 
   data class Error(val errorMessage: String) : HomeLoadingState
 }
+
+val HomeLoadingState.isLoading: Boolean
+  get() = this == Loading

@@ -23,6 +23,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -37,11 +41,13 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeComponent
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
+import dev.sasikanth.rss.reader.home.isLoading
 import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.coroutines.channels.consumeEach
 
 private const val NUMBER_OF_FEATURED_POSTS = 6
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeScreen(component: HomeComponent) {
   val viewModel = component.viewModel
@@ -58,6 +64,13 @@ fun HomeScreen(component: HomeComponent) {
     }
   val postsList = posts.filter { !featuredPosts.contains(it) }
 
+  val isRefreshing = state.loadingState.isLoading
+  val swipeRefreshState =
+    rememberPullRefreshState(
+      isRefreshing,
+      onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
+    )
+
   LaunchedEffect(Unit) {
     viewModel.effects.consumeEach { effect ->
       when (effect) {
@@ -69,24 +82,32 @@ fun HomeScreen(component: HomeComponent) {
     }
   }
 
-  LazyColumn(contentPadding = PaddingValues(bottom = 136.dp)) {
-    if (featuredPosts.isNotEmpty()) {
-      item {
-        FeaturedPostItems(featuredPosts = featuredPosts) { post ->
-          viewModel.dispatch(HomeEvent.OnPostClicked(post))
+  Box(Modifier.pullRefresh(swipeRefreshState)) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 136.dp)) {
+      if (featuredPosts.isNotEmpty()) {
+        item {
+          FeaturedPostItems(featuredPosts = featuredPosts) { post ->
+            viewModel.dispatch(HomeEvent.OnPostClicked(post))
+          }
+        }
+      }
+
+      itemsIndexed(postsList) { i, post ->
+        PostListItem(post) { viewModel.dispatch(HomeEvent.OnPostClicked(post)) }
+        if (i != posts.size - 1) {
+          Divider(
+            modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+            color = MaterialTheme.colorScheme.outlineVariant
+          )
         }
       }
     }
 
-    itemsIndexed(postsList) { i, post ->
-      PostListItem(post) { viewModel.dispatch(HomeEvent.OnPostClicked(post)) }
-      if (i != posts.size - 1) {
-        Divider(
-          modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-          color = MaterialTheme.colorScheme.outlineVariant
-        )
-      }
-    }
+    PullRefreshIndicator(
+      refreshing = isRefreshing,
+      state = swipeRefreshState,
+      modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
+    )
   }
 }
 
