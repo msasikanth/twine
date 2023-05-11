@@ -132,9 +132,9 @@ private class IOSXmlFeedParser(private val onEnd: (FeedPayload) -> Unit) :
     val iconUrl = feedIcon(domain)
 
     return FeedPayload(
-      name = rssMap["title"]!!,
+      name = cleanText(rssMap["title"])!!,
       link = link,
-      description = rssMap["description"]!!,
+      description = cleanText(rssMap["description"])!!,
       icon = iconUrl,
       posts = posts
     )
