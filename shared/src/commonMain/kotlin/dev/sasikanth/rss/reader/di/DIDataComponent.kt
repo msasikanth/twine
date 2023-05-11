@@ -15,19 +15,19 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
-import me.tatarka.inject.annotations.Component
+import dev.sasikanth.rss.reader.database.DriverFactory
+import dev.sasikanth.rss.reader.database.ReaderDatabase
+import dev.sasikanth.rss.reader.database.createDatabase
 import me.tatarka.inject.annotations.Provides
-import me.tatarka.inject.annotations.Scope
 
-@Component
-@AppScope
-abstract class DIAppComponent : DIDataComponent {
+interface DIDataComponent {
 
-  @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
+  @Provides
+  fun providesDatabase(driverFactory: DriverFactory): ReaderDatabase {
+    return createDatabase(driverFactory)
+  }
+
+  @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries
+
+  @Provides fun providesPostQueries(database: ReaderDatabase) = database.postQueries
 }
-
-@Scope
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
-annotation class AppScope
