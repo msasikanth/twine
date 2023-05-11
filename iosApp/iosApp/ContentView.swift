@@ -10,19 +10,8 @@ struct ComposeView: UIViewControllerRepresentable {
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-		let dispatchersProvider = DefaultDispatchersProvider()
-		let database = DatabaseKt.createDatabase(driverFactory: DriverFactory())
-		let component = HomeComponent(
-			componentContext: DefaultComponentContext(lifecycle: lifecyle),
-			rssRepository: RssRepository(
-				feedQueries: database.feedQueries,
-				postQueries: database.postQueries,
-				ioDispatcher: dispatchersProvider.io
-			),
-			dispatchersProvider: dispatchersProvider
-		)
-		
-		let controller = Main_iosKt.MainViewController(component: component)
+		let appComponent = InjectDIAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
+		let controller = Main_iosKt.MainViewController(component: appComponent.homeComponent)
 		LifecycleRegistryExtKt.resume(lifecyle)
 		return controller
 	}
