@@ -26,6 +26,8 @@ import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RssRepository(
@@ -47,10 +49,12 @@ class RssRepository(
   }
 
   suspend fun updateFeeds() {
-    withContext(ioDispatcher) {
-      val feeds = feedQueries.feeds().executeAsList()
-      feeds.forEach { feed -> addFeed(feed.link) }
-    }
+    val results =
+      withContext(ioDispatcher) {
+        val feeds = feedQueries.feeds().executeAsList()
+        feeds.map { feed -> launch { addFeed(feed.link) } }
+      }
+    results.joinAll()
   }
 
   fun allPosts(): Flow<List<PostWithMetadata>> {
