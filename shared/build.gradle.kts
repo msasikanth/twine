@@ -40,7 +40,7 @@ kotlin {
 
   cocoapods {
     version = "1.0.0"
-    summary = "RSS Reader"
+    summary = "Multiplatform RSS app built with Kotlin and Compose"
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "14.1"
     podfile = project.file("../iosApp/Podfile")
