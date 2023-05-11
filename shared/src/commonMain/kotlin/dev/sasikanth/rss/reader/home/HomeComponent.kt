@@ -19,7 +19,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import me.tatarka.inject.annotations.Inject
 
+@Inject
 class HomeComponent(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
@@ -30,8 +32,8 @@ class HomeComponent(
     instanceKeeper.getOrCreate {
       HomeViewModel(
         lifecycle = lifecycle,
-        dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
+        dispatchersProvider = dispatchersProvider
       )
     }
 }
