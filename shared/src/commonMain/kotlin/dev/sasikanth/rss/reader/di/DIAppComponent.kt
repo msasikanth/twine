@@ -31,6 +31,8 @@ abstract class DIAppComponent(
   @get:Provides val driverFactory: DriverFactory
 ) : DIDataComponent {
 
+  abstract val homeComponent: HomeComponent
+
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }
 
