@@ -18,6 +18,7 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose)
+  alias(libs.plugins.ksp)
 }
 
 kotlin {

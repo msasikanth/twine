@@ -22,6 +22,8 @@ androidx_core = "1.10.0"
 coil = "2.3.0"
 spotless = "6.18.0"
 ktfmt = "0.44"
+kotlininject = "0.6.1"
+ksp = "1.8.20-1.0.11"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -50,6 +52,8 @@ androidx_core = { module = "androidx.core:core-ktx", version.ref = "androidx_cor
 coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 moko_resources = { module = "dev.icerock.moko:resources", version.ref = "moko_resources" }
 moko_resources_compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko_resources" }
+kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
+kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
@@ -61,6 +65,7 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
