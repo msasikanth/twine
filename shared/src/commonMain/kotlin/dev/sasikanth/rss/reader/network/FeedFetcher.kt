@@ -27,6 +27,6 @@ internal class FeedFetcher(private val httpClient: HttpClient, private val feedP
 
   suspend fun fetch(url: String): FeedPayload {
     val xml = httpClient.get(url).bodyAsText()
-    return feedParser.parse(xml)
+    return feedParser.parse(xml, url)
   }
 }

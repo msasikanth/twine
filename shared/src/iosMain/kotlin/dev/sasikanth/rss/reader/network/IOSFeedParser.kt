@@ -39,18 +39,22 @@ import platform.darwin.NSObject
 internal class IOSFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
 
   @Suppress("CAST_NEVER_SUCCEEDS")
-  override suspend fun parse(xmlContent: String): FeedPayload {
+  override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return withContext(ioDispatcher) {
       suspendCoroutine { continuation ->
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
-        NSXMLParser(data).apply { delegate = IOSXmlFeedParser { continuation.resume(it) } }.parse()
+        NSXMLParser(data)
+          .apply { delegate = IOSXmlFeedParser(feedUrl) { continuation.resume(it) } }
+          .parse()
       }
     }
   }
 }
 
-private class IOSXmlFeedParser(private val onEnd: (FeedPayload) -> Unit) :
-  NSObject(), NSXMLParserDelegateProtocol {
+private class IOSXmlFeedParser(
+  private val feedUrl: String,
+  private val onEnd: (FeedPayload) -> Unit
+) : NSObject(), NSXMLParserDelegateProtocol {
   private val posts = mutableListOf<PostPayload>()
 
   private var currentChannelData: MutableMap<String, String> = mutableMapOf()
@@ -137,7 +141,8 @@ private class IOSXmlFeedParser(private val onEnd: (FeedPayload) -> Unit) :
 
     return FeedPayload(
       name = cleanText(rssMap["title"])!!,
-      link = link,
+      homepageLink = link,
+      link = feedUrl,
       description = cleanText(rssMap["description"])!!,
       icon = iconUrl,
       posts = posts

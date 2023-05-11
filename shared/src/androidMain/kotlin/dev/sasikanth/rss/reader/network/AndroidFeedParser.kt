@@ -35,7 +35,7 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
 
   private val dateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
-  override suspend fun parse(xmlContent: String): FeedPayload {
+  override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return withContext(ioDispatcher) {
       val parser =
         Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
@@ -50,12 +50,12 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
         }
         parser.nextTag()
 
-        readFeed(parser)
+        readFeed(parser, feedUrl)
       }
     }
   }
 
-  private fun readFeed(parser: XmlPullParser): FeedPayload {
+  private fun readFeed(parser: XmlPullParser, feedUrl: String): FeedPayload {
     parser.require(XmlPullParser.START_TAG, null, "channel")
 
     val posts = mutableListOf<PostPayload>()
@@ -82,7 +82,8 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
       name = title!!,
       icon = iconUrl,
       description = description!!,
-      link = link,
+      homepageLink = link,
+      link = feedUrl,
       posts = posts
     )
   }

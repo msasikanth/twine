@@ -35,5 +35,5 @@ internal interface FeedParser {
     }
   }
 
-  suspend fun parse(xmlContent: String): FeedPayload
+  suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload
 }

@@ -19,6 +19,7 @@ data class FeedPayload(
   val name: String,
   val icon: String,
   val description: String,
+  val homepageLink: String,
   val link: String,
   val posts: List<PostPayload>,
 ) {
