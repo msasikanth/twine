@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Divider
@@ -71,7 +70,7 @@ fun HomeScreen(component: HomeComponent) {
     }
   }
 
-  LazyColumn(state = rememberLazyListState(), contentPadding = PaddingValues(bottom = 136.dp)) {
+  LazyColumn(contentPadding = PaddingValues(bottom = 136.dp)) {
     if (featuredPosts.isNotEmpty()) {
       item {
         FeaturedPostItems(featuredPosts = featuredPosts) { post ->
