@@ -76,7 +76,11 @@ private class IOSXmlFeedParser(private val onEnd: (FeedPayload) -> Unit) :
   ) {
     currentElement = didStartElement
 
-    if (imageTags.contains(currentElement) && !currentItemData.containsKey("imageUrl")) {
+    if (
+      imageTags.contains(currentElement) &&
+        !currentItemData.containsKey("imageUrl") &&
+        attributes.containsKey("url")
+    ) {
       currentItemData["imageUrl"] = attributes["url"] as String
     }
 
