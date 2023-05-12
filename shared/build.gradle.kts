@@ -59,11 +59,10 @@ kotlin {
     val commonMain by getting {
       dependencies {
         implementation(libs.bundles.compose)
+        implementation(libs.bundles.kotlinx)
         implementation(libs.ktor.core)
         implementation(libs.napier)
         implementation(libs.sqldelight.extensions.coroutines)
-        implementation(libs.kotlinx.coroutines)
-        implementation(libs.kotlinx.datetime)
         implementation(libs.insetsx)
         api(libs.decompose)
         implementation(libs.decompose.extensions.compose)

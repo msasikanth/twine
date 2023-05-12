@@ -43,6 +43,8 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.isLoading
 import dev.sasikanth.rss.reader.utils.openBrowser
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 private const val NUMBER_OF_FEATURED_POSTS = 6
 
@@ -57,10 +59,11 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
   val postsWithImages = posts.filter { !it.imageUrl.isNullOrBlank() }
   val featuredPosts =
     if (postsWithImages.size > NUMBER_OF_FEATURED_POSTS) {
-      postsWithImages.take(NUMBER_OF_FEATURED_POSTS)
-    } else {
-      postsWithImages
-    }
+        postsWithImages.take(NUMBER_OF_FEATURED_POSTS)
+      } else {
+        postsWithImages
+      }
+      .toImmutableList()
   val postsList = posts.filter { !featuredPosts.contains(it) }
 
   val isRefreshing = state.loadingState.isLoading
@@ -114,7 +117,7 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
 @Composable
 internal fun FeaturedPostItems(
   modifier: Modifier = Modifier,
-  featuredPosts: List<PostWithMetadata>,
+  featuredPosts: ImmutableList<PostWithMetadata>,
   onItemClick: (PostWithMetadata) -> Unit
 ) {
   Box(modifier = modifier) {

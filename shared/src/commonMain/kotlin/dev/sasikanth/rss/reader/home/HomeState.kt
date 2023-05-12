@@ -18,10 +18,12 @@ package dev.sasikanth.rss.reader.home
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 data class HomeState(
-  val feeds: List<Feed>,
-  val posts: List<PostWithMetadata>,
+  val feeds: ImmutableList<Feed>,
+  val posts: ImmutableList<PostWithMetadata>,
   val selectedFeed: Feed?,
   val loadingState: HomeLoadingState
 ) {
@@ -30,8 +32,8 @@ data class HomeState(
 
     val DEFAULT =
       HomeState(
-        feeds = emptyList(),
-        posts = emptyList(),
+        feeds = persistentListOf(),
+        posts = persistentListOf(),
         selectedFeed = null,
         loadingState = HomeLoadingState.Idle
       )
