@@ -26,10 +26,10 @@ import me.tatarka.inject.annotations.Scope
 
 @Component
 @AppScope
-abstract class DIAppComponent(
+abstract class AppComponent(
   @get:Provides val componentContext: ComponentContext,
   @get:Provides val driverFactory: DriverFactory
-) : DIDataComponent {
+) : DataComponent {
 
   abstract val homeViewModelFactory: HomeViewModelFactory
 

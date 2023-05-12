@@ -23,7 +23,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
-import dev.sasikanth.rss.reader.di.DIAppComponent
+import dev.sasikanth.rss.reader.di.AppComponent
 import dev.sasikanth.rss.reader.di.create
 
 class MainActivity : AppCompatActivity() {
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     window.navigationBarColor = Color.TRANSPARENT
 
     val appComponent =
-      DIAppComponent::class.create(
+      AppComponent::class.create(
         componentContext = defaultComponentContext(),
         driverFactory = DriverFactory(this)
       )

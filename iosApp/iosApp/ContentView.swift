@@ -10,7 +10,7 @@ struct ComposeView: UIViewControllerRepresentable {
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-		let appComponent = InjectDIAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
+		let appComponent = InjectAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
 		let controller = Main_iosKt.MainViewController(homeViewModelFactory: appComponent.homeViewModelFactory)
 		LifecycleRegistryExtKt.resume(lifecyle)
 		return controller

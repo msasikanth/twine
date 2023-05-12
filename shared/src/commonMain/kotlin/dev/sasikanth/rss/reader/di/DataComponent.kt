@@ -20,7 +20,7 @@ import dev.sasikanth.rss.reader.database.ReaderDatabase
 import dev.sasikanth.rss.reader.database.createDatabase
 import me.tatarka.inject.annotations.Provides
 
-interface DIDataComponent {
+interface DataComponent {
 
   @Provides
   fun providesDatabase(driverFactory: DriverFactory): ReaderDatabase {
