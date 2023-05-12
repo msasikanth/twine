@@ -43,7 +43,6 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.isLoading
 import dev.sasikanth.rss.reader.utils.openBrowser
-import kotlinx.coroutines.channels.consumeEach
 
 private const val NUMBER_OF_FEATURED_POSTS = 6
 
@@ -72,7 +71,7 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
     )
 
   LaunchedEffect(Unit) {
-    viewModel.effects.consumeEach { effect ->
+    viewModel.effects.collect { effect ->
       when (effect) {
         HomeEffect.NavigateToAddScreen -> TODO()
         is HomeEffect.OpenPost -> {

@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
@@ -26,12 +25,11 @@ import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,16 +50,11 @@ internal class HomeViewModel(
       initialValue = HomeState.DEFAULT
     )
 
-  private val _effects: Channel<HomeEffect> =
-    Channel(capacity = 5, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-  val effects: Channel<HomeEffect> = Channel()
+  private val _effects = MutableSharedFlow<HomeEffect>(extraBufferCapacity = 10)
+  val effects = _effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate { dispatch(HomeEvent.LoadContent) }
-
-    lifecycle.doOnResume {
-      viewModelScope.launch { _effects.consumeAsFlow().collect(effects::send) }
-    }
   }
 
   fun dispatch(event: HomeEvent) {
@@ -76,11 +69,11 @@ internal class HomeViewModel(
   }
 
   private fun onPostClicked(post: PostWithMetadata) {
-    viewModelScope.launch { _effects.send(HomeEffect.OpenPost(post)) }
+    viewModelScope.launch { _effects.emit(HomeEffect.OpenPost(post)) }
   }
 
   private fun onAddClicked() {
-    viewModelScope.launch { _effects.send(HomeEffect.NavigateToAddScreen) }
+    viewModelScope.launch { _effects.emit(HomeEffect.NavigateToAddScreen) }
   }
 
   private fun onHomeSelected() {
