@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -76,12 +77,12 @@ internal class HomeViewModel(
   private fun loadContent() {
     state
       .flatMapMerge { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
-      .onEach { posts -> _state.update { it.copy(posts = posts) } }
+      .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
 
     rssRepository
       .allFeeds()
-      .onEach { feeds -> _state.update { it.copy(feeds = feeds) } }
+      .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
       .launchIn(viewModelScope)
   }
 
