@@ -51,7 +51,7 @@ private const val NUMBER_OF_FEATURED_POSTS = 6
 fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
   val viewModel = homeViewModelFactory.viewModel
   val state by viewModel.state.collectAsState()
-  val posts by state.posts.collectAsState(initial = emptyList())
+  val posts = state.posts
 
   // TODO: Move this transformation to data layer in background thread
   val postsWithImages = posts.filter { !it.imageUrl.isNullOrBlank() }

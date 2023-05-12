@@ -62,12 +62,8 @@ class RssRepository(
     results.joinAll()
   }
 
-  fun allPosts(): Flow<List<PostWithMetadata>> {
-    return postQueries.postWithMetadata(null).asFlow().mapToList(ioDispatcher)
-  }
-
-  fun postsOfFeed(feedLink: String): Flow<List<PostWithMetadata>> {
-    return postQueries.postWithMetadata(feedLink).asFlow().mapToList(ioDispatcher)
+  fun posts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
+    return postQueries.postWithMetadata(selectedFeedLink).asFlow().mapToList(ioDispatcher)
   }
 
   fun allFeeds(): Flow<List<Feed>> {

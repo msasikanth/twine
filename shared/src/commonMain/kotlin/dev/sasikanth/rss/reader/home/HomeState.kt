@@ -18,12 +18,10 @@ package dev.sasikanth.rss.reader.home
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 data class HomeState(
-  val feeds: Flow<List<Feed>>,
-  val posts: Flow<List<PostWithMetadata>>,
+  val feeds: List<Feed>,
+  val posts: List<PostWithMetadata>,
   val selectedFeed: Feed?,
   val loadingState: HomeLoadingState
 ) {
@@ -32,8 +30,8 @@ data class HomeState(
 
     val DEFAULT =
       HomeState(
-        feeds = emptyFlow(),
-        posts = emptyFlow(),
+        feeds = emptyList(),
+        posts = emptyList(),
         selectedFeed = null,
         loadingState = HomeLoadingState.Idle
       )

@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,10 +31,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class HomeViewModel(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
@@ -68,6 +73,18 @@ internal class HomeViewModel(
     }
   }
 
+  private fun loadContent() {
+    state
+      .flatMapMerge { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
+      .onEach { posts -> _state.update { it.copy(posts = posts) } }
+      .launchIn(viewModelScope)
+
+    rssRepository
+      .allFeeds()
+      .onEach { feeds -> _state.update { it.copy(feeds = feeds) } }
+      .launchIn(viewModelScope)
+  }
+
   private fun onPostClicked(post: PostWithMetadata) {
     viewModelScope.launch { _effects.emit(HomeEffect.OpenPost(post)) }
   }
@@ -77,24 +94,15 @@ internal class HomeViewModel(
   }
 
   private fun onHomeSelected() {
-    val posts = rssRepository.allPosts()
-    _state.update { it.copy(posts = posts, selectedFeed = null) }
+    _state.update { it.copy(selectedFeed = null) }
   }
 
   private fun onFeedSelected(feed: Feed) {
-    val posts = rssRepository.postsOfFeed(feed.link)
-    _state.update { it.copy(posts = posts, selectedFeed = feed) }
+    _state.update { it.copy(selectedFeed = feed) }
   }
 
   private fun refreshContent() {
     viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
-  }
-
-  private fun loadContent() {
-    val feeds = rssRepository.allFeeds()
-    val posts = rssRepository.allPosts()
-
-    _state.update { it.copy(feeds = feeds, posts = posts) }
   }
 
   private suspend fun updateLoadingState(action: suspend () -> Unit) {
