@@ -13,6 +13,7 @@ ktor = "2.3.0"
 napier = "2.6.1"
 kotlinx_coroutines = "1.7.0"
 kotlinx_date_time = "0.4.0"
+kotlinx_immutable_collections = "0.3.5"
 insetsx = "0.1.0-alpha04"
 decompose = "2.0.0-compose-experimental-alpha-02"
 essenty = "1.1.0"
@@ -39,6 +40,7 @@ kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
+kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
@@ -69,5 +71,5 @@ ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
-kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime" ]
+kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
 moko_resources = [ "moko_resources", "moko_resources_compose" ]
