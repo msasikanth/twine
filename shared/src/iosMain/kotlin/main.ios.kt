@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import androidx.compose.ui.window.ComposeUIViewController
-import dev.sasikanth.rss.reader.home.HomeComponent
+import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
-fun MainViewController(component: HomeComponent) = ComposeUIViewController { App(component) }
+fun MainViewController(homeViewModelFactory: HomeViewModelFactory) = ComposeUIViewController {
+  App(homeViewModelFactory)
+}

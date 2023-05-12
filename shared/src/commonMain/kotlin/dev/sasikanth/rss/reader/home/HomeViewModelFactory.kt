@@ -22,7 +22,7 @@ import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class HomeComponent(
+class HomeViewModelFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
   dispatchersProvider: DispatchersProvider

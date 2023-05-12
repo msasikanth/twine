@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 import androidx.compose.runtime.Composable
-import dev.sasikanth.rss.reader.home.HomeComponent
+import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
-@Composable fun MainView(component: HomeComponent) = App(component)
+@Composable fun MainView(homeViewModelFactory: HomeViewModelFactory) = App(homeViewModelFactory)

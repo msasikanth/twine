@@ -39,6 +39,6 @@ class MainActivity : AppCompatActivity() {
         componentContext = defaultComponentContext(),
         driverFactory = DriverFactory(this)
       )
-    setContent { MainView(component = appComponent.homeComponent) }
+    setContent { MainView(homeViewModelFactory = appComponent.homeViewModelFactory) }
   }
 }
