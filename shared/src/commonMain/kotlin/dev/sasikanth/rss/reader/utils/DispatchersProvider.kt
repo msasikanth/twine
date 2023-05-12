@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.utils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import me.tatarka.inject.annotations.Inject
 
 interface DispatchersProvider {
   val main: CoroutineDispatcher
@@ -25,6 +26,7 @@ interface DispatchersProvider {
   val default: CoroutineDispatcher
 }
 
+@Inject
 class DefaultDispatchersProvider : DispatchersProvider {
   override val main = Dispatchers.Main
   override val io = Dispatchers.IO

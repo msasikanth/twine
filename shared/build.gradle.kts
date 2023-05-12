@@ -23,6 +23,7 @@ plugins {
   alias(libs.plugins.compose)
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.moko.resources)
+  alias(libs.plugins.ksp)
 }
 
 multiplatformResources {
@@ -68,6 +69,7 @@ kotlin {
         implementation(libs.decompose.extensions.compose)
         api(libs.essenty.lifecycle)
         api(libs.bundles.moko.resources)
+        implementation(libs.kotlininject.runtime)
       }
     }
     val commonTest by getting {
@@ -117,4 +119,20 @@ android {
     targetCompatibility = JavaVersion.VERSION_11
   }
   kotlin { jvmToolchain(11) }
+}
+
+dependencies {
+  // https://github.com/google/ksp/pull/1021
+  add("kspAndroid", libs.kotlininject.compiler)
+  add("kspIosX64", libs.kotlininject.compiler)
+  add("kspIosArm64", libs.kotlininject.compiler)
+  add("kspIosSimulatorArm64", libs.kotlininject.compiler)
+}
+
+afterEvaluate {
+  tasks.named("generateMRcommonMain").configure {
+    mustRunAfter(":shared:kspKotlinIosX64")
+    mustRunAfter(":shared:kspKotlinIosArm64")
+    mustRunAfter(":shared:kspKotlinIosSimulatorArm64")
+  }
 }

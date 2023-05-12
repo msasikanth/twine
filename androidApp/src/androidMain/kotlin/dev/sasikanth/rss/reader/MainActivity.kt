@@ -23,10 +23,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
-import dev.sasikanth.rss.reader.database.createDatabase
-import dev.sasikanth.rss.reader.home.HomeComponent
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
+import dev.sasikanth.rss.reader.di.AppComponent
+import dev.sasikanth.rss.reader.di.create
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,20 +34,11 @@ class MainActivity : AppCompatActivity() {
     window.statusBarColor = Color.TRANSPARENT
     window.navigationBarColor = Color.TRANSPARENT
 
-    val dispatchersProvider = DefaultDispatchersProvider()
-    val database = createDatabase(DriverFactory(this))
-    val component =
-      HomeComponent(
+    val appComponent =
+      AppComponent::class.create(
         componentContext = defaultComponentContext(),
-        rssRepository =
-          RssRepository(
-            feedQueries = database.feedQueries,
-            postQueries = database.postQueries,
-            ioDispatcher = dispatchersProvider.io
-          ),
-        dispatchersProvider = dispatchersProvider
+        driverFactory = DriverFactory(this)
       )
-
-    setContent { MainView(component = component) }
+    setContent { MainView(homeViewModelFactory = appComponent.homeViewModelFactory) }
   }
 }

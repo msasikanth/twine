@@ -21,21 +21,26 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.di.AppScope
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
-import kotlinx.coroutines.CoroutineDispatcher
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 
+@Inject
+@AppScope
 class RssRepository(
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
-  private val ioDispatcher: CoroutineDispatcher
+  dispatchersProvider: DispatchersProvider
 ) {
 
+  private val ioDispatcher = dispatchersProvider.io
   private val feedFetcher = feedFetcher(ioDispatcher)
 
   suspend fun addFeed(feedLink: String) {

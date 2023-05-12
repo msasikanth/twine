@@ -38,9 +38,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.database.PostWithMetadata
-import dev.sasikanth.rss.reader.home.HomeComponent
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
+import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.isLoading
 import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.coroutines.channels.consumeEach
@@ -49,8 +49,8 @@ private const val NUMBER_OF_FEATURED_POSTS = 6
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeScreen(component: HomeComponent) {
-  val viewModel = component.viewModel
+fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
+  val viewModel = homeViewModelFactory.viewModel
   val state by viewModel.state.collectAsState()
   val posts by state.posts.collectAsState(initial = emptyList())
 

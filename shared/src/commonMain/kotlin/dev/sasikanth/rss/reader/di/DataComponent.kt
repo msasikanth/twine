@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
-import dev.sasikanth.rss.reader.home.ui.HomeScreen
-import dev.sasikanth.rss.reader.ui.AppTheme
+package dev.sasikanth.rss.reader.di
 
-@Composable
-fun App(homeViewModelFactory: HomeViewModelFactory) {
-  AppTheme { Surface(modifier = Modifier.fillMaxSize()) { HomeScreen(homeViewModelFactory) } }
+import dev.sasikanth.rss.reader.database.DriverFactory
+import dev.sasikanth.rss.reader.database.ReaderDatabase
+import dev.sasikanth.rss.reader.database.createDatabase
+import me.tatarka.inject.annotations.Provides
+
+interface DataComponent {
+
+  @Provides
+  fun providesDatabase(driverFactory: DriverFactory): ReaderDatabase {
+    return createDatabase(driverFactory)
+  }
+
+  @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries
+
+  @Provides fun providesPostQueries(database: ReaderDatabase) = database.postQueries
 }
