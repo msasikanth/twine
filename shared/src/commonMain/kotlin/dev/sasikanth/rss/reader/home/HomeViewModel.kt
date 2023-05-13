@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ internal class HomeViewModel(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val observableSelectedFeed: ObservableSelectedFeed
 ) : InstanceKeeper.Instance {
 
   private val viewModelScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -75,8 +77,9 @@ internal class HomeViewModel(
   }
 
   private fun init() {
-    state
-      .flatMapLatest { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
+    observableSelectedFeed.selectedFeed
+      .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
+      .flatMapLatest { selectedFeed -> rssRepository.posts(selectedFeedLink = selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
   }
@@ -90,11 +93,11 @@ internal class HomeViewModel(
   }
 
   private fun onHomeSelected() {
-    _state.update { it.copy(selectedFeed = null) }
+    viewModelScope.launch { observableSelectedFeed.clearSelection() }
   }
 
   private fun onFeedSelected(feed: Feed) {
-    _state.update { it.copy(selectedFeed = feed) }
+    viewModelScope.launch { observableSelectedFeed.selectFeed(feed) }
   }
 
   private fun refreshContent() {

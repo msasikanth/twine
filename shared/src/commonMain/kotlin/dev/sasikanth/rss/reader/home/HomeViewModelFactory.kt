@@ -19,12 +19,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class HomeViewModelFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
+  observableSelectedFeed: ObservableSelectedFeed,
   dispatchersProvider: DispatchersProvider
 ) : ComponentContext by componentContext {
 
@@ -33,6 +35,7 @@ class HomeViewModelFactory(
       HomeViewModel(
         lifecycle = lifecycle,
         rssRepository = rssRepository,
+        observableSelectedFeed = observableSelectedFeed,
         dispatchersProvider = dispatchersProvider
       )
     }
