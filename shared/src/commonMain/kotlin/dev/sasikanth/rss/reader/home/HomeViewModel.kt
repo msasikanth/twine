@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -69,16 +68,12 @@ internal class HomeViewModel(
     when (event) {
       HomeEvent.Init -> init()
       HomeEvent.OnSwipeToRefresh -> refreshContent()
-      is HomeEvent.OnFeedSelected -> onFeedSelected(event.feed)
-      HomeEvent.OnHomeSelected -> onHomeSelected()
-      HomeEvent.OnAddClicked -> onAddClicked()
       is HomeEvent.OnPostClicked -> onPostClicked(event.post)
     }
   }
 
   private fun init() {
     observableSelectedFeed.selectedFeed
-      .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
       .flatMapLatest { selectedFeed -> rssRepository.posts(selectedFeedLink = selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
@@ -90,14 +85,6 @@ internal class HomeViewModel(
 
   private fun onAddClicked() {
     viewModelScope.launch { _effects.emit(HomeEffect.NavigateToAddScreen) }
-  }
-
-  private fun onHomeSelected() {
-    viewModelScope.launch { observableSelectedFeed.clearSelection() }
-  }
-
-  private fun onFeedSelected(feed: Feed) {
-    viewModelScope.launch { observableSelectedFeed.selectFeed(feed) }
   }
 
   private fun refreshContent() {
