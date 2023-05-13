@@ -13,36 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.home
+package dev.sasikanth.rss.reader.feeds
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import dev.sasikanth.rss.reader.feeds.FeedsViewModelFactory
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class HomeViewModelFactory(
-  componentContext: ComponentContext,
+class FeedsViewModelFactory(
   rssRepository: RssRepository,
   observableSelectedFeed: ObservableSelectedFeed,
-  feedsViewModelFactory: (ComponentContext) -> FeedsViewModelFactory,
-  dispatchersProvider: DispatchersProvider
+  dispatchersProvider: DispatchersProvider,
+  @Assisted componentContext: ComponentContext,
 ) : ComponentContext by componentContext {
 
   internal val viewModel =
     instanceKeeper.getOrCreate {
-      HomeViewModel(
+      FeedsViewModel(
         lifecycle = lifecycle,
         rssRepository = rssRepository,
         observableSelectedFeed = observableSelectedFeed,
         dispatchersProvider = dispatchersProvider
       )
     }
-
-  internal val feedsViewModel =
-    feedsViewModelFactory(childContext("feeds_viewmodel_factory")).viewModel
 }
