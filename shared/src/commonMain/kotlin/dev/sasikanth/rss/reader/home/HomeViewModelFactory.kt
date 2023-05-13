@@ -16,7 +16,9 @@
 package dev.sasikanth.rss.reader.home
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import dev.sasikanth.rss.reader.feeds.FeedsViewModelFactory
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -27,6 +29,7 @@ class HomeViewModelFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
   observableSelectedFeed: ObservableSelectedFeed,
+  feedsViewModelFactory: (ComponentContext) -> FeedsViewModelFactory,
   dispatchersProvider: DispatchersProvider
 ) : ComponentContext by componentContext {
 
@@ -39,4 +42,7 @@ class HomeViewModelFactory(
         dispatchersProvider = dispatchersProvider
       )
     }
+
+  internal val feedsViewModel =
+    feedsViewModelFactory(childContext("feeds_viewmodel_factory")).viewModel
 }
