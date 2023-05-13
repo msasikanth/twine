@@ -22,7 +22,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class HomeState(
-  val feeds: ImmutableList<Feed>,
   val posts: ImmutableList<PostWithMetadata>,
   val selectedFeed: Feed?,
   val loadingState: HomeLoadingState
@@ -32,7 +31,6 @@ data class HomeState(
 
     val DEFAULT =
       HomeState(
-        feeds = persistentListOf(),
         posts = persistentListOf(),
         selectedFeed = null,
         loadingState = HomeLoadingState.Idle

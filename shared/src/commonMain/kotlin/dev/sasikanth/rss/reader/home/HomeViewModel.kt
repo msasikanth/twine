@@ -79,11 +79,6 @@ internal class HomeViewModel(
       .flatMapLatest { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
-
-    rssRepository
-      .allFeeds()
-      .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
-      .launchIn(viewModelScope)
   }
 
   private fun onPostClicked(post: PostWithMetadata) {
