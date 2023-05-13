@@ -20,7 +20,7 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 sealed interface HomeEvent {
 
-  object LoadContent : HomeEvent
+  object Init : HomeEvent
 
   object OnSwipeToRefresh : HomeEvent
 

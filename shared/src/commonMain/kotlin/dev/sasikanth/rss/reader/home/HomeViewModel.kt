@@ -60,12 +60,12 @@ internal class HomeViewModel(
   val effects = _effects.asSharedFlow()
 
   init {
-    lifecycle.doOnCreate { dispatch(HomeEvent.LoadContent) }
+    lifecycle.doOnCreate { dispatch(HomeEvent.Init) }
   }
 
   fun dispatch(event: HomeEvent) {
     when (event) {
-      HomeEvent.LoadContent -> loadContent()
+      HomeEvent.Init -> init()
       HomeEvent.OnSwipeToRefresh -> refreshContent()
       is HomeEvent.OnFeedSelected -> onFeedSelected(event.feed)
       HomeEvent.OnHomeSelected -> onHomeSelected()
@@ -74,7 +74,7 @@ internal class HomeViewModel(
     }
   }
 
-  private fun loadContent() {
+  private fun init() {
     state
       .flatMapLatest { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
