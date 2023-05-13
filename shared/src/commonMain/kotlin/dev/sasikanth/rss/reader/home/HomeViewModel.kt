@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -76,7 +76,7 @@ internal class HomeViewModel(
 
   private fun loadContent() {
     state
-      .flatMapMerge { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
+      .flatMapLatest { state -> rssRepository.posts(selectedFeedLink = state.selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
 
