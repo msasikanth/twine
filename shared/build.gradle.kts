@@ -101,7 +101,12 @@ kotlin {
 }
 
 sqldelight {
-  databases { create("ReaderDatabase") { packageName.set("dev.sasikanth.rss.reader.database") } }
+  databases {
+    create("ReaderDatabase") {
+      packageName.set("dev.sasikanth.rss.reader.database")
+      dialect(libs.sqldelight.sqlite.dialect)
+    }
+  }
 }
 
 android {

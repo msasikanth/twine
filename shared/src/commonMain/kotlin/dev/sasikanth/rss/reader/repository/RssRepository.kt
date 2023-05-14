@@ -46,7 +46,7 @@ class RssRepository(
   suspend fun addFeed(feedLink: String) {
     withContext(ioDispatcher) {
       val feedPayload = feedFetcher.fetch(feedLink)
-      feedQueries.insert(feed = feedPayload.toFeed())
+      feedQueries.upsert(feed = feedPayload.toFeed())
       postQueries.transaction {
         feedPayload.posts.forEach { postQueries.insert(it.toPost(feedLink = feedPayload.link)) }
       }
