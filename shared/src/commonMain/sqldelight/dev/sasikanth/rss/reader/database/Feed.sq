@@ -19,4 +19,5 @@ remove:
 DELETE FROM feed WHERE link = :link;
 
 feeds:
-SELECT * FROM feed;
+SELECT * FROM feed
+ORDER BY createdAt DESC;
