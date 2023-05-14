@@ -1,15 +1,18 @@
+import kotlinx.datetime.Instant;
+
 CREATE TABLE feed(
   name TEXT NOT NULL,
   icon TEXT NOT NULL,
   description TEXT NOT NULL,
   homepageLink TEXT NOT NULL,
+  createdAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL PRIMARY KEY
 );
 
 CREATE INDEX feed_link_index ON feed(link);
 
 insert:
-INSERT OR REPLACE INTO feed(name, icon, description, homepageLink, link)
+INSERT OR REPLACE INTO feed(name, icon, description, homepageLink, createdAt, link)
 VALUES ?;
 
 remove:

@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.models.mappers
 
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.models.FeedPayload
+import kotlinx.datetime.Clock
 
 fun FeedPayload.toFeed() =
   Feed(
@@ -24,5 +25,6 @@ fun FeedPayload.toFeed() =
     icon = icon,
     description = description,
     homepageLink = homepageLink,
+    createdAt = Clock.System.now(),
     link = link
   )
