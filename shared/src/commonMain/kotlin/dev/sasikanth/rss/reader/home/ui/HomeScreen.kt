@@ -18,6 +18,8 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -36,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.moriatsushi.insetsx.statusBars
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeEffect
@@ -85,7 +88,14 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
   }
 
   Box(Modifier.pullRefresh(swipeRefreshState)) {
-    LazyColumn(contentPadding = PaddingValues(bottom = 136.dp)) {
+    val statusBarPadding =
+      if (featuredPosts.isEmpty()) {
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+      } else {
+        0.dp
+      }
+
+    LazyColumn(contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)) {
       if (featuredPosts.isNotEmpty()) {
         item {
           FeaturedPostItems(featuredPosts = featuredPosts) { post ->
