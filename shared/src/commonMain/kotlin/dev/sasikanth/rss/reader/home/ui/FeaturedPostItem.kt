@@ -158,7 +158,7 @@ private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) 
       modifier = Modifier.requiredWidthIn(max = 64.dp),
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
-      text = feedName,
+      text = feedName.uppercase(),
       color = MaterialTheme.colorScheme.onSurface,
       textAlign = TextAlign.Left
     )
