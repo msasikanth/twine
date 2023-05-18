@@ -37,3 +37,5 @@ open class AppColorScheme {
   open val surfaceContainerLowest: Color
     get() = darkYellow
 }
+
+internal val LocalAppColorScheme = staticCompositionLocalOf { AppColorScheme() }

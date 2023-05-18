@@ -18,15 +18,25 @@ package dev.sasikanth.rss.reader.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import dev.icerock.moko.resources.compose.fontFamilyResource
 import dev.sasikanth.rss.reader.CommonRes
 
 @Composable
-fun AppTheme(content: @Composable () -> Unit) {
+fun AppTheme(appColorScheme: AppColorScheme, content: @Composable () -> Unit) {
   val fontFamily = fontFamilyResource(CommonRes.fonts.golos.medium)
-  MaterialTheme(
-    colorScheme = darkColorScheme(),
-    typography = typography(fontFamily),
-    content = content
-  )
+  CompositionLocalProvider(LocalAppColorScheme provides appColorScheme) {
+    MaterialTheme(
+      colorScheme = darkColorScheme(),
+      typography = typography(fontFamily),
+      content = content
+    )
+  }
+}
+
+internal object AppTheme {
+
+  val colorScheme: AppColorScheme
+    @Composable @ReadOnlyComposable get() = LocalAppColorScheme.current
 }
