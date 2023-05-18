@@ -25,6 +25,11 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 fun App(appColorScheme: AppColorScheme, homeViewModelFactory: HomeViewModelFactory) {
   AppTheme(appColorScheme) {
-    Surface(modifier = Modifier.fillMaxSize()) { HomeScreen(homeViewModelFactory) }
+    Surface(
+      modifier = Modifier.fillMaxSize(),
+      color = AppTheme.colorScheme.surfaceContainerLowest
+    ) {
+      HomeScreen(homeViewModelFactory)
+    }
   }
 }
