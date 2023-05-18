@@ -15,5 +15,8 @@
  */
 import androidx.compose.runtime.Composable
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+import dev.sasikanth.rss.reader.ui.AppColorScheme
 
-@Composable fun MainView(homeViewModelFactory: HomeViewModelFactory) = App(homeViewModelFactory)
+@Composable
+fun MainView(appColorScheme: AppColorScheme, homeViewModelFactory: HomeViewModelFactory) =
+  App(appColorScheme = appColorScheme, homeViewModelFactory = homeViewModelFactory)
