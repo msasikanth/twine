@@ -30,4 +30,6 @@ sealed interface HomeEvent {
   data class OnPostClicked(val post: PostWithMetadata) : HomeEvent
 
   data class FeedsSheetStateChanged(val feedsSheetState: BottomSheetValue) : HomeEvent
+
+  object OnHomeSelected : HomeEvent
 }

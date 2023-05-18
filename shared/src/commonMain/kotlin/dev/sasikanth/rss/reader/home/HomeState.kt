@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.BottomSheetValue.Collapsed
 import androidx.compose.material.ExperimentalMaterialApi
+import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.collections.immutable.ImmutableList
@@ -28,7 +29,8 @@ import kotlinx.collections.immutable.persistentListOf
 data class HomeState(
   val posts: ImmutableList<PostWithMetadata>,
   val loadingState: HomeLoadingState,
-  val feedsSheetState: BottomSheetValue
+  val feedsSheetState: BottomSheetValue,
+  val selectedFeed: Feed?
 ) {
 
   companion object {
@@ -37,9 +39,13 @@ data class HomeState(
       HomeState(
         posts = persistentListOf(),
         loadingState = HomeLoadingState.Idle,
-        feedsSheetState = Collapsed
+        feedsSheetState = Collapsed,
+        selectedFeed = null
       )
   }
+
+  val isAllFeedsSelected: Boolean
+    get() = selectedFeed == null
 }
 
 sealed interface HomeLoadingState {

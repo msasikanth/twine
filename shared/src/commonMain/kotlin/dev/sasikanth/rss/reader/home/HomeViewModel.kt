@@ -74,6 +74,7 @@ internal class HomeViewModel(
       HomeEvent.OnSwipeToRefresh -> refreshContent()
       is HomeEvent.OnPostClicked -> onPostClicked(event.post)
       is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
+      HomeEvent.OnHomeSelected -> onHomeSelected()
     }
   }
 
@@ -83,9 +84,14 @@ internal class HomeViewModel(
 
   private fun init() {
     observableSelectedFeed.selectedFeed
+      .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
       .flatMapLatest { selectedFeed -> rssRepository.posts(selectedFeedLink = selectedFeed?.link) }
       .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
       .launchIn(viewModelScope)
+  }
+
+  private fun onHomeSelected() {
+    viewModelScope.launch { observableSelectedFeed.clearSelection() }
   }
 
   private fun onPostClicked(post: PostWithMetadata) {
