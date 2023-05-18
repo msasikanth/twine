@@ -30,6 +30,4 @@ sealed interface FeedsEvent {
   object OnGoBackClicked : FeedsEvent
 
   data class OnFeedSelected(val feed: Feed) : FeedsEvent
-
-  object OnHomeSelected : FeedsEvent
 }

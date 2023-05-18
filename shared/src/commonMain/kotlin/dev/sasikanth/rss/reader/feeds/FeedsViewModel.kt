@@ -69,12 +69,7 @@ class FeedsViewModel(
       is FeedsEvent.AddFeed -> addFeed(event.feedLink)
       FeedsEvent.OnGoBackClicked -> onGoBackClicked()
       is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
-      FeedsEvent.OnHomeSelected -> onHomeSelected()
     }
-  }
-
-  private fun onHomeSelected() {
-    viewModelScope.launch { observableSelectedFeed.clearSelection() }
   }
 
   private fun onFeedSelected(feed: Feed) {
