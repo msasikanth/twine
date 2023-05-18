@@ -22,6 +22,7 @@ private val darkYellowGreen = Color(0xFF1A1E00)
 private val darkYellowGreenLight = Color(0xFF2E3300)
 private val vibrantYellowGreen = Color(0xFFBFD100)
 private val darkYellow = Color(0xFF0E0E0A)
+private val darkGrayishYellow = Color(0xFF20201B)
 
 open class AppColorScheme {
 
@@ -33,6 +34,9 @@ open class AppColorScheme {
 
   open val tintedForeground: Color
     get() = vibrantYellowGreen
+
+  open val surfaceContainer: Color
+    get() = darkGrayishYellow
 
   open val surfaceContainerLowest: Color
     get() = darkYellow

@@ -30,7 +30,6 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +44,7 @@ import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.isLoading
+import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -109,7 +109,7 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
         if (i != posts.size - 1) {
           Divider(
             modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = AppTheme.colorScheme.surfaceContainer
           )
         }
       }

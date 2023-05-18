@@ -32,6 +32,9 @@ class AndroidColorScheme(private val context: Context) : AppColorScheme() {
   override val tintedForeground: Color
     get() = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary80)
 
+  override val surfaceContainer: Color
+    get() = ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral12)
+
   override val surfaceContainerLowest: Color
     get() = ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral4)
 }
