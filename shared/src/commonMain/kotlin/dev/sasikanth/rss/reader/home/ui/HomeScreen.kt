@@ -132,9 +132,10 @@ internal fun FeaturedPostItems(
 ) {
   Box(modifier = modifier) {
     val pagerState = rememberPagerState()
-    val selectedFeaturedPost = featuredPosts[pagerState.settledPage]
-
-    FeaturedPostItemBackground(imageUrl = selectedFeaturedPost.imageUrl)
+    val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
+    if (selectedFeaturedPost != null) {
+      FeaturedPostItemBackground(imageUrl = selectedFeaturedPost.imageUrl)
+    }
 
     HorizontalPager(
       modifier = Modifier.statusBarsPadding(),
