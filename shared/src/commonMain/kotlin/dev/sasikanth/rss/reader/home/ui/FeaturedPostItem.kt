@@ -27,7 +27,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
 internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
@@ -56,7 +57,7 @@ internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
         modifier =
           Modifier.clip(MaterialTheme.shapes.extraLarge)
             .aspectRatio(1.77f)
-            .background(MaterialTheme.colorScheme.surface),
+            .background(AppTheme.colorScheme.surfaceContainerLowest),
         contentDescription = null,
         contentScale = ContentScale.Crop
       )
@@ -135,12 +136,21 @@ internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl:
 @Composable
 private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) {
   val feedName = post.feedName ?: "Unknown"
+  val verticalPadding = 8.dp
+  val startPadding = 8.dp
+  val endPadding = 16.dp
+  val margin = 12.dp
 
   Row(
     modifier =
-      Modifier.padding(start = 12.dp, bottom = 12.dp)
+      Modifier.padding(margin)
         .background(color = Color.Black, shape = RoundedCornerShape(50))
-        .padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+        .padding(
+          start = startPadding,
+          top = verticalPadding,
+          end = endPadding,
+          bottom = verticalPadding
+        )
         .then(modifier),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically
@@ -150,17 +160,17 @@ private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) 
         url = url,
         contentDescription = null,
         contentScale = ContentScale.Crop,
-        modifier = Modifier.requiredSize(16.dp)
+        modifier = Modifier.requiredSize(16.dp).clip(CircleShape)
       )
     }
 
     Text(
-      modifier = Modifier.requiredWidthIn(max = 64.dp),
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.labelMedium,
       maxLines = 1,
-      text = feedName.uppercase(),
+      text = feedName.uppercase().take(12),
       color = MaterialTheme.colorScheme.onSurface,
-      textAlign = TextAlign.Left
+      textAlign = TextAlign.Left,
+      overflow = TextOverflow.Clip
     )
   }
 }
