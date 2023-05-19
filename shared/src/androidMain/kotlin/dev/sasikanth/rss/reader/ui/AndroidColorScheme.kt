@@ -21,23 +21,16 @@ import androidx.annotation.DoNotInline
 import androidx.compose.ui.graphics.Color
 import dev.sasikanth.rss.reader.common.R
 
-class AndroidColorScheme(private val context: Context) : AppColorScheme() {
-
-  override val tintedBackground: Color
-    get() = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary10)
-
-  override val tintedSurface: Color
-    get() = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary20)
-
-  override val tintedForeground: Color
-    get() = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary80)
-
-  override val surfaceContainer: Color
-    get() = ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral12)
-
-  override val surfaceContainerLowest: Color
-    get() = ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral4)
-}
+class AndroidColorScheme(context: Context) :
+  AppColorScheme(
+    tintedBackground = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary10),
+    tintedSurface = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary20),
+    tintedForeground = ColorResourceHelper.getColor(context, R.color.material_dynamic_primary80),
+    surfaceContainer =
+      ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral12),
+    surfaceContainerLowest =
+      ColorResourceHelper.getColor(context, R.color.m3_ref_palette_dyanmic_neutral4)
+  )
 
 private object ColorResourceHelper {
   @DoNotInline
