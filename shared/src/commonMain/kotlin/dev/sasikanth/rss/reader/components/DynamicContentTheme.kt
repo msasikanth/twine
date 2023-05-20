@@ -37,9 +37,7 @@ import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.score.Score
-import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.ui.AppTheme
-import io.github.aakira.napier.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

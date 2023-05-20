@@ -34,6 +34,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -53,7 +56,10 @@ private const val NUMBER_OF_FEATURED_POSTS = 6
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
+fun HomeScreen(
+  homeViewModelFactory: HomeViewModelFactory,
+  onFeaturedItemChange: (imageUrl: String?) -> Unit
+) {
   val viewModel = homeViewModelFactory.viewModel
   val state by viewModel.state.collectAsState()
   val posts = state.posts
@@ -98,9 +104,11 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
     LazyColumn(contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)) {
       if (featuredPosts.isNotEmpty()) {
         item {
-          FeaturedPostItems(featuredPosts = featuredPosts) { post ->
-            viewModel.dispatch(HomeEvent.OnPostClicked(post))
-          }
+          FeaturedPostItems(
+            featuredPosts = featuredPosts,
+            onItemClick = { post -> viewModel.dispatch(HomeEvent.OnPostClicked(post)) },
+            onFeaturedItemChange = onFeaturedItemChange
+          )
         }
       }
 
@@ -128,14 +136,20 @@ fun HomeScreen(homeViewModelFactory: HomeViewModelFactory) {
 internal fun FeaturedPostItems(
   modifier: Modifier = Modifier,
   featuredPosts: ImmutableList<PostWithMetadata>,
-  onItemClick: (PostWithMetadata) -> Unit
+  onItemClick: (PostWithMetadata) -> Unit,
+  onFeaturedItemChange: (imageUrl: String?) -> Unit
 ) {
   Box(modifier = modifier) {
     val pagerState = rememberPagerState()
-    val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
-    if (selectedFeaturedPost != null) {
-      FeaturedPostItemBackground(imageUrl = selectedFeaturedPost.imageUrl)
+    var selectedImage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(pagerState.settledPage) {
+      val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
+      selectedImage = selectedFeaturedPost?.imageUrl
+      onFeaturedItemChange(selectedImage)
     }
+
+    selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
 
     HorizontalPager(
       modifier = Modifier.statusBarsPadding(),
