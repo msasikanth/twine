@@ -143,7 +143,7 @@ internal fun FeaturedPostItems(
     val pagerState = rememberPagerState()
     var selectedImage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(pagerState.settledPage) {
+    LaunchedEffect(pagerState.settledPage, featuredPosts) {
       val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
       selectedImage = selectedFeaturedPost?.imageUrl
       onFeaturedItemChange(selectedImage)
