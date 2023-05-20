@@ -27,6 +27,7 @@ ktfmt = "0.44"
 kotlininject = "0.6.1"
 ksp = "1.8.20-1.0.11"
 material_components = "1.9.0"
+material_color_utilities = "1.0.0-alpha01"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -61,6 +62,7 @@ moko_resources_compose = { module = "dev.icerock.moko:resources-compose", versio
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_components = { module = "com.google.android.material:material", version.ref = "material_components" }
+material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
