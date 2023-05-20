@@ -15,8 +15,7 @@
  */
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
-import dev.sasikanth.rss.reader.ui.AppColorScheme
 
 fun MainViewController(homeViewModelFactory: HomeViewModelFactory) = ComposeUIViewController {
-  App(appColorScheme = AppColorScheme(), homeViewModelFactory = homeViewModelFactory)
+  App(homeViewModelFactory = homeViewModelFactory)
 }

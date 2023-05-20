@@ -19,12 +19,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
-import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun App(appColorScheme: AppColorScheme, homeViewModelFactory: HomeViewModelFactory) {
-  AppTheme(appColorScheme) {
+fun App(homeViewModelFactory: HomeViewModelFactory) {
+  AppTheme {
     Surface(
       modifier = Modifier.fillMaxSize(),
       color = AppTheme.colorScheme.surfaceContainerLowest
