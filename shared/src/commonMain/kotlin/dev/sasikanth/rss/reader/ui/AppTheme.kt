@@ -24,8 +24,10 @@ import dev.icerock.moko.resources.compose.fontFamilyResource
 import dev.sasikanth.rss.reader.CommonRes
 
 @Composable
-fun AppTheme(content: @Composable () -> Unit) {
-  val appColorScheme = AppColorScheme()
+fun AppTheme(
+  appColorScheme: AppColorScheme = AppTheme.colorScheme,
+  content: @Composable () -> Unit
+) {
   val fontFamily = fontFamilyResource(CommonRes.fonts.golos.medium)
   CompositionLocalProvider(LocalAppColorScheme provides appColorScheme) {
     MaterialTheme(
