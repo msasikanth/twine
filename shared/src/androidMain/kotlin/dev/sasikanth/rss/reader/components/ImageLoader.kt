@@ -21,6 +21,7 @@ import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Scale
 import dev.sasikanth.rss.reader.ReaderApplication
 
 actual suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap? {
@@ -28,6 +29,8 @@ actual suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap? {
   val request =
     ImageRequest.Builder(context)
       .data(url)
+      .size(128)
+      .scale(Scale.FILL)
       .allowHardware(false)
       .memoryCacheKey("$url.dynamic_colors")
       .build()
