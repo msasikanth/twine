@@ -103,7 +103,7 @@ private sealed interface ImageLoaderState {
   object Error : ImageLoaderState
 }
 
-private object ImageLoader {
+internal object ImageLoader {
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
   private val diskCacheSize = (50 * 1024 * 1024).toULong() // 50 MB cache size
