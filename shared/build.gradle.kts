@@ -87,7 +87,6 @@ kotlin {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.sqldelight.driver.android)
         implementation(libs.coil.compose)
-        implementation(libs.material.components)
       }
     }
 

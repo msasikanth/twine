@@ -26,7 +26,6 @@ spotless = "6.18.0"
 ktfmt = "0.44"
 kotlininject = "0.6.1"
 ksp = "1.8.20-1.0.11"
-material_components = "1.9.0"
 material_color_utilities = "1.0.0-alpha01"
 
 [libraries]
@@ -61,7 +60,6 @@ moko_resources = { module = "dev.icerock.moko:resources", version.ref = "moko_re
 moko_resources_compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko_resources" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
-material_components = { module = "com.google.android.material:material", version.ref = "material_components" }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 
 [plugins]
