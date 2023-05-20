@@ -69,6 +69,7 @@ kotlin {
         api(libs.essenty.lifecycle)
         api(libs.bundles.moko.resources)
         implementation(libs.kotlininject.runtime)
+        implementation(libs.androidx.collection)
       }
     }
     val commonTest by getting {
