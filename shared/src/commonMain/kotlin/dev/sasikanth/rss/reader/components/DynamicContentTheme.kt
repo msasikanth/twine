@@ -16,6 +16,9 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.collection.LruCache
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -34,7 +37,9 @@ import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.score.Score
+import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.ui.AppTheme
+import io.github.aakira.napier.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -49,13 +54,27 @@ internal fun DynamicContentTheme(
   dynamicColorState: DynamicColorState = rememberDynamicColorState(),
   content: @Composable () -> Unit
 ) {
+  val tintedBackground by
+    animateColorAsState(dynamicColorState.tintedBackground, spring(stiffness = Spring.StiffnessLow))
+  val tintedSurface by
+    animateColorAsState(dynamicColorState.tintedSurface, spring(stiffness = Spring.StiffnessLow))
+  val tintedForeground by
+    animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
+  val surfaceContainer by
+    animateColorAsState(dynamicColorState.surfaceContainer, spring(stiffness = Spring.StiffnessLow))
+  val surfaceContainerLowest by
+    animateColorAsState(
+      dynamicColorState.surfaceContainerLowest,
+      spring(stiffness = Spring.StiffnessLow)
+    )
+
   val colorScheme =
     AppTheme.colorScheme.copy(
-      tintedBackground = dynamicColorState.tintedBackground,
-      tintedSurface = dynamicColorState.tintedSurface,
-      tintedForeground = dynamicColorState.tintedForeground,
-      surfaceContainer = dynamicColorState.surfaceContainer,
-      surfaceContainerLowest = dynamicColorState.surfaceContainerLowest
+      tintedBackground = tintedBackground,
+      tintedSurface = tintedSurface,
+      tintedForeground = tintedForeground,
+      surfaceContainer = surfaceContainer,
+      surfaceContainerLowest = surfaceContainerLowest
     )
 
   AppTheme(appColorScheme = colorScheme, content = content)
@@ -155,19 +174,9 @@ class DynamicColorState(
   private suspend fun extractColorsFromImage(image: ImageBitmap): Map<String, Int> {
     val colorMap: MutableMap<String, Int> = mutableMapOf()
     withContext(Dispatchers.Default) {
-      val width: Int = image.width
-      val height: Int = image.height
-      val bitmapPixels = IntArray(width * height)
+      val bitmapPixels = IntArray(image.width * image.height)
+      image.readPixels(buffer = bitmapPixels)
 
-      image.readPixels(
-        buffer = bitmapPixels,
-        startX = 0,
-        startY = 0,
-        width = width,
-        height = height,
-        bufferOffset = 0,
-        stride = width
-      )
       val seedColor = Score.score(QuantizerCelebi.quantize(bitmapPixels, 128)).first()
       val scheme =
         SchemeContent(sourceColorHct = Hct.fromInt(seedColor), isDark = true, contrastLevel = 0.0)
