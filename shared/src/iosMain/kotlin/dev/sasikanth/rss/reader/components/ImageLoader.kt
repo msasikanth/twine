@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import androidx.compose.runtime.Composable
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+package dev.sasikanth.rss.reader.components
 
-@Composable
-fun MainView(homeViewModelFactory: HomeViewModelFactory) =
-  App(homeViewModelFactory = homeViewModelFactory)
+import androidx.compose.ui.graphics.ImageBitmap
+
+actual suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap? {
+  return ImageLoader.getImage(url)
+}

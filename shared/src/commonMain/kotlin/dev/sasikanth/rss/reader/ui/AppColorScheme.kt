@@ -15,7 +15,11 @@
  */
 package dev.sasikanth.rss.reader.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 
 private val darkYellowGreen = Color(0xFF1A1E00)
@@ -24,22 +28,43 @@ private val vibrantYellowGreen = Color(0xFFBFD100)
 private val darkYellow = Color(0xFF0E0E0A)
 private val darkGrayishYellow = Color(0xFF20201B)
 
-open class AppColorScheme {
+open class AppColorScheme(
+  tintedBackground: Color = darkYellowGreen,
+  tintedSurface: Color = darkYellowGreenLight,
+  tintedForeground: Color = vibrantYellowGreen,
+  surfaceContainer: Color = darkGrayishYellow,
+  surfaceContainerLowest: Color = darkYellow
+) {
 
-  open val tintedBackground: Color
-    get() = darkYellowGreen
+  var tintedBackground by mutableStateOf(tintedBackground, structuralEqualityPolicy())
+    internal set
 
-  open val tintedSurface: Color
-    get() = darkYellowGreenLight
+  var tintedSurface by mutableStateOf(tintedSurface, structuralEqualityPolicy())
+    internal set
 
-  open val tintedForeground: Color
-    get() = vibrantYellowGreen
+  var tintedForeground by mutableStateOf(tintedForeground, structuralEqualityPolicy())
+    internal set
 
-  open val surfaceContainer: Color
-    get() = darkGrayishYellow
+  var surfaceContainer by mutableStateOf(surfaceContainer, structuralEqualityPolicy())
+    internal set
 
-  open val surfaceContainerLowest: Color
-    get() = darkYellow
+  var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest, structuralEqualityPolicy())
+    internal set
+
+  fun copy(
+    tintedBackground: Color = this.tintedBackground,
+    tintedSurface: Color = this.surfaceContainer,
+    tintedForeground: Color = this.tintedForeground,
+    surfaceContainer: Color = this.surfaceContainer,
+    surfaceContainerLowest: Color = this.surfaceContainerLowest
+  ): AppColorScheme =
+    AppColorScheme(
+      tintedBackground = tintedBackground,
+      tintedSurface = tintedSurface,
+      tintedForeground = tintedForeground,
+      surfaceContainer = surfaceContainer,
+      surfaceContainerLowest = surfaceContainerLowest
+    )
 }
 
 internal val LocalAppColorScheme = staticCompositionLocalOf { AppColorScheme() }

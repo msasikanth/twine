@@ -25,7 +25,6 @@ import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.di.AppComponent
 import dev.sasikanth.rss.reader.di.create
-import dev.sasikanth.rss.reader.ui.AndroidColorScheme
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,11 +40,6 @@ class MainActivity : AppCompatActivity() {
         driverFactory = DriverFactory(this)
       )
 
-    setContent {
-      MainView(
-        appColorScheme = AndroidColorScheme(this),
-        homeViewModelFactory = appComponent.homeViewModelFactory
-      )
-    }
+    setContent { MainView(homeViewModelFactory = appComponent.homeViewModelFactory) }
   }
 }
