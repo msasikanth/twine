@@ -144,6 +144,14 @@ class DynamicColorState(
     surfaceContainerLowest = result?.surfaceContainerLowest ?: defaultSurfaceContainerLowest
   }
 
+  fun reset() {
+    tintedBackground = defaultTintedBackground
+    tintedSurface = defaultTintedSurface
+    tintedForeground = defaultTintedForeground
+    surfaceContainer = defaultSurfaceContainer
+    surfaceContainerLowest = surfaceContainerLowest
+  }
+
   private suspend fun fetchDynamicColors(url: String): DynamicColors? {
     val cached = cache?.get(url)
     if (cached != null) {
