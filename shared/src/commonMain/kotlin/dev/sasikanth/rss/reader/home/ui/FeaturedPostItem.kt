@@ -29,9 +29,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -47,49 +49,52 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
 
 @Composable
 internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
-  Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
-    Box {
-      AsyncImage(
-        url = item.imageUrl!!,
-        modifier =
-          Modifier.clip(MaterialTheme.shapes.extraLarge)
-            .aspectRatio(1.77f)
-            .background(AppTheme.colorScheme.surfaceContainerLowest),
-        contentDescription = null,
-        contentScale = ContentScale.Crop
-      )
+  CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
+    Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
+      Box {
+        AsyncImage(
+          url = item.imageUrl!!,
+          modifier =
+            Modifier.clip(MaterialTheme.shapes.extraLarge)
+              .aspectRatio(1.77f)
+              .background(AppTheme.colorScheme.surfaceContainerLowest),
+          contentDescription = null,
+          contentScale = ContentScale.Crop
+        )
 
-      PostMetadata(post = item, modifier = Modifier.align(Alignment.BottomStart))
-    }
+        PostMetadata(post = item, modifier = Modifier.align(Alignment.BottomStart))
+      }
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    Text(
-      modifier = Modifier.padding(horizontal = 16.dp),
-      text = item.title,
-      style = MaterialTheme.typography.headlineSmall,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis
-    )
-
-    if (item.description.isNotBlank()) {
-      Spacer(modifier = Modifier.height(8.dp))
+      Spacer(modifier = Modifier.height(16.dp))
 
       Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = item.description,
-        style = MaterialTheme.typography.bodySmall,
+        text = item.title,
+        style = MaterialTheme.typography.headlineSmall,
         color = AppTheme.colorScheme.textEmphasisHigh,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
       )
-    }
 
-    Spacer(modifier = Modifier.height(16.dp))
+      if (item.description.isNotBlank()) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+          modifier = Modifier.padding(horizontal = 16.dp),
+          text = item.description,
+          style = MaterialTheme.typography.bodySmall,
+          color = AppTheme.colorScheme.textEmphasisHigh,
+          maxLines = 3,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+    }
   }
 }
 
