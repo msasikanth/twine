@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.relativeDurationString
 
 @Composable
@@ -48,7 +49,7 @@ internal fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
       Text(
         style = MaterialTheme.typography.titleSmall,
         text = item.title,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 2
       )
       PostMetadata(post = item)
@@ -77,7 +78,7 @@ private fun PostMetadata(post: PostWithMetadata) {
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = feedName,
-      color = MaterialTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.textEmphasisHigh,
       overflow = TextOverflow.Ellipsis
     )
 
@@ -85,7 +86,7 @@ private fun PostMetadata(post: PostWithMetadata) {
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = "•",
-      color = MaterialTheme.colorScheme.onSurface
+      color = AppTheme.colorScheme.textEmphasisHigh
     )
 
     Text(
@@ -93,7 +94,7 @@ private fun PostMetadata(post: PostWithMetadata) {
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
-      color = MaterialTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.textEmphasisHigh,
       textAlign = TextAlign.Left
     )
   }

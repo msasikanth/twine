@@ -71,7 +71,7 @@ internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
       modifier = Modifier.padding(horizontal = 16.dp),
       text = item.title,
       style = MaterialTheme.typography.headlineSmall,
-      color = MaterialTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.textEmphasisHigh,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis
     )
@@ -83,7 +83,7 @@ internal fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
         modifier = Modifier.padding(horizontal = 16.dp),
         text = item.description,
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
       )
@@ -168,7 +168,7 @@ private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) 
       style = MaterialTheme.typography.labelMedium,
       maxLines = 1,
       text = feedName.uppercase().take(12),
-      color = MaterialTheme.colorScheme.onSurface,
+      color = AppTheme.colorScheme.textEmphasisHigh,
       textAlign = TextAlign.Left,
       overflow = TextOverflow.Clip
     )
