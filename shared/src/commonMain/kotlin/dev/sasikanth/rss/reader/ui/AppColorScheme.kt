@@ -33,7 +33,9 @@ open class AppColorScheme(
   tintedSurface: Color = darkYellowGreenLight,
   tintedForeground: Color = vibrantYellowGreen,
   surfaceContainer: Color = darkGrayishYellow,
-  surfaceContainerLowest: Color = darkYellow
+  surfaceContainerLowest: Color = darkYellow,
+  textEmphasisHigh: Color = Color.White.copy(alpha = 0.9f),
+  textEmphasisMed: Color = Color.White.copy(alpha = 0.7f)
 ) {
 
   var tintedBackground by mutableStateOf(tintedBackground, structuralEqualityPolicy())
@@ -51,19 +53,29 @@ open class AppColorScheme(
   var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest, structuralEqualityPolicy())
     internal set
 
+  var textEmphasisHigh by mutableStateOf(textEmphasisHigh, structuralEqualityPolicy())
+    internal set
+
+  var textEmphasisMed by mutableStateOf(textEmphasisMed, structuralEqualityPolicy())
+    internal set
+
   fun copy(
     tintedBackground: Color = this.tintedBackground,
     tintedSurface: Color = this.surfaceContainer,
     tintedForeground: Color = this.tintedForeground,
     surfaceContainer: Color = this.surfaceContainer,
-    surfaceContainerLowest: Color = this.surfaceContainerLowest
+    surfaceContainerLowest: Color = this.surfaceContainerLowest,
+    textEmphasisHigh: Color = this.textEmphasisHigh,
+    textEmphasisMed: Color = this.textEmphasisMed
   ): AppColorScheme =
     AppColorScheme(
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
       surfaceContainer = surfaceContainer,
-      surfaceContainerLowest = surfaceContainerLowest
+      surfaceContainerLowest = surfaceContainerLowest,
+      textEmphasisHigh = textEmphasisHigh,
+      textEmphasisMed = textEmphasisMed
     )
 }
 
