@@ -19,7 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
+import androidx.compose.ui.graphics.asComposeImageBitmap
 import io.github.aakira.napier.log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
@@ -34,7 +34,13 @@ import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import org.jetbrains.skia.Bitmap
+import org.jetbrains.skia.Canvas
+import org.jetbrains.skia.ColorAlphaType
 import org.jetbrains.skia.Image
+import org.jetbrains.skia.ImageInfo
+import org.jetbrains.skia.Rect
+import org.jetbrains.skia.SamplingMode
 import platform.Foundation.NSCachedURLResponse
 import platform.Foundation.NSData
 import platform.Foundation.NSHTTPURLResponse
@@ -55,7 +61,7 @@ internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
   return produceState(initialState, url) {
     value =
       try {
-        ImageLoaderState.Loaded(fetchImageBitmapFromUrl(url!!)!!)
+        ImageLoaderState.Loaded(ImageLoader.getImage(url!!)!!)
       } catch (e: Exception) {
         ImageLoaderState.Error
       }
@@ -92,7 +98,7 @@ internal object ImageLoader {
       diskPath = "dev_sasikanth_rss_reader_images_cache"
     )
 
-  suspend fun getImage(url: String): ImageBitmap? {
+  suspend fun getImage(url: String, size: Int? = null): ImageBitmap? {
     return withContext(Dispatchers.IO) {
       val cachedImage = loadCachedImage(url)
       val data =
@@ -102,7 +108,7 @@ internal object ImageLoader {
           downloadImage(url) ?: return@withContext null
         }
 
-      return@withContext Image.makeFromEncoded(data).toComposeImageBitmap()
+      return@withContext Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
     }
   }
 
@@ -166,6 +172,24 @@ internal object ImageLoader {
     this.usePinned { NSData.create(bytes = it.addressOf(0), length = this.size.convert()) }
 }
 
-actual suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap? {
-  return ImageLoader.getImage(url)
+private fun Image.toBitmap(size: Int? = null): Bitmap {
+  val width = size ?: this.width
+  val height = size ?: this.height
+  val bitmap = Bitmap()
+  bitmap.allocPixels(ImageInfo.makeN32(width, height, ColorAlphaType.PREMUL))
+  val canvas = Canvas(bitmap)
+  canvas.drawImageRect(
+    this,
+    Rect.makeWH(this.width.toFloat(), this.height.toFloat()),
+    Rect.makeXYWH(0f, 0f, width.toFloat(), height.toFloat()),
+    SamplingMode.DEFAULT,
+    null,
+    true
+  )
+  bitmap.setImmutable()
+  return bitmap
+}
+
+actual suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap? {
+  return ImageLoader.getImage(url, size)
 }

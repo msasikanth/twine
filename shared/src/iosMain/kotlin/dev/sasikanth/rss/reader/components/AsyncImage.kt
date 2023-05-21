@@ -18,35 +18,11 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.toComposeImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import io.github.aakira.napier.log
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.readBytes
-import io.ktor.util.toMap
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.convert
-import kotlinx.cinterop.readBytes
-import kotlinx.cinterop.usePinned
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Image
-import platform.Foundation.NSCachedURLResponse
-import platform.Foundation.NSData
-import platform.Foundation.NSHTTPURLResponse
-import platform.Foundation.NSURL
-import platform.Foundation.NSURLCache
-import platform.Foundation.NSURLRequest
-import platform.Foundation.create
 
 @Composable
 actual fun AsyncImage(

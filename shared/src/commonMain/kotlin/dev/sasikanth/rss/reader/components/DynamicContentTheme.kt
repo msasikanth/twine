@@ -157,7 +157,7 @@ class DynamicColorState(
       return cached
     }
 
-    val image = fetchImageBitmapFromUrl(url)
+    val image = fetchImageBitmapFromUrl(url, size = 128)
     return if (image != null) {
       extractColorsFromImage(image)
         .let { colorsMap ->
@@ -250,4 +250,4 @@ private data class DynamicColors(
   val surfaceContainerLowest: Color
 )
 
-expect suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap?
+expect suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap?

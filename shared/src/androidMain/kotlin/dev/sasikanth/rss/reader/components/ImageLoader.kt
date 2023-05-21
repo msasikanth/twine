@@ -24,12 +24,12 @@ import coil.request.SuccessResult
 import coil.size.Scale
 import dev.sasikanth.rss.reader.ReaderApplication
 
-actual suspend fun fetchImageBitmapFromUrl(url: String): ImageBitmap? {
+actual suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap? {
   val context = ReaderApplication.context
   val request =
     ImageRequest.Builder(context)
       .data(url)
-      .size(128)
+      .size(size)
       .scale(Scale.FILL)
       .allowHardware(false)
       .memoryCacheKey("$url.dynamic_colors")
