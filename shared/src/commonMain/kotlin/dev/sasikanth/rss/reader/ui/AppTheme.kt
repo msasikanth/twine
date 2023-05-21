@@ -32,15 +32,16 @@ fun AppTheme(
   content: @Composable () -> Unit
 ) {
   val fontFamily = fontFamilyResource(CommonRes.fonts.golos.medium)
-  CompositionLocalProvider(
-    LocalAppColorScheme provides appColorScheme,
-    LocalRippleTheme provides AppRippleTheme
+  MaterialTheme(
+    colorScheme = darkColorScheme(),
+    typography = typography(fontFamily),
   ) {
-    MaterialTheme(
-      colorScheme = darkColorScheme(),
-      typography = typography(fontFamily),
-      content = content
-    )
+    CompositionLocalProvider(
+      LocalAppColorScheme provides appColorScheme,
+      LocalRippleTheme provides AppRippleTheme
+    ) {
+      content()
+    }
   }
 }
 
