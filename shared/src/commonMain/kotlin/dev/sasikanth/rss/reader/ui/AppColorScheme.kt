@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.ui
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -28,6 +29,7 @@ private val vibrantYellowGreen = Color(0xFFBFD100)
 private val darkYellow = Color(0xFF0E0E0A)
 private val darkGrayishYellow = Color(0xFF20201B)
 
+@Stable
 class AppColorScheme(
   tintedBackground: Color = darkYellowGreen,
   tintedSurface: Color = darkYellowGreenLight,
