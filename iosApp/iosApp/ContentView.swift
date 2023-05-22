@@ -3,16 +3,15 @@ import SwiftUI
 import shared
 
 struct ComposeView: UIViewControllerRepresentable {
-	let lifecyle: LifecycleRegistry = LifecycleRegistryKt.LifecycleRegistry()
+	let lifecyle: Lifecycle
 	
-	init() {
-		LifecycleRegistryExtKt.create(lifecyle)
+	init(lifecyle: Lifecycle) {
+		self.lifecyle = lifecyle
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
 		let appComponent = InjectAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
 		let controller = Main_iosKt.MainViewController(homeViewModelFactory: appComponent.homeViewModelFactory)
-		LifecycleRegistryExtKt.resume(lifecyle)
 		return controller
 	}
 	
@@ -20,8 +19,15 @@ struct ComposeView: UIViewControllerRepresentable {
 }
 
 struct ContentView: View {
+	
+	let lifecycle: Lifecycle
+	
+	init(lifecycle: Lifecycle) {
+		self.lifecycle = lifecycle
+	}
+	
 	var body: some View {
-		ComposeView()
+		ComposeView(lifecyle: lifecycle)
 			.ignoresSafeArea(.keyboard) // Compose has own keyboard handler
 			.edgesIgnoringSafeArea(.all)
 	}
