@@ -23,6 +23,8 @@ sealed interface FeedsEvent {
 
   object OnAddFeedClicked : FeedsEvent
 
+  object OnCancelAddFeedClicked : FeedsEvent
+
   data class AddFeed(val feedLink: String) : FeedsEvent
 
   object OnGoBackClicked : FeedsEvent
