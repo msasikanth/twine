@@ -23,8 +23,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +71,49 @@ internal fun FeedsBottomSheet(
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
+      BottomSheetExpandedContent(
+        modifier =
+          Modifier.graphicsLayer {
+            val threshold = 0.3
+            val scaleFactor = 1 / (1 - threshold)
+            val targetAlpha =
+              if (bottomSheetSwipeTransition.currentState > threshold) {
+                  (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
+                } else {
+                  0f
+                }
+                .toFloat()
+            alpha = targetAlpha
+          },
+        feeds = state.feeds,
+        closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
+        onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+        onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) }
+      )
+    }
+  }
+}
+
+@Composable
+private fun BottomSheetExpandedContent(
+  feeds: ImmutableList<Feed>,
+  closeSheet: () -> Unit,
+  onDeleteFeed: (Feed) -> Unit,
+  onFeedSelected: (Feed) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Column(modifier = Modifier.fillMaxSize().then(modifier)) {
+    Toolbar(onCloseClicked = closeSheet)
+
+    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp)) {
+      itemsIndexed(feeds) { index, feed ->
+        FeedListItem(
+          feed = feed,
+          canShowDivider = index != feeds.lastIndex,
+          onDeleteFeed = onDeleteFeed,
+          onFeedSelected = onFeedSelected
+        )
+      }
     }
   }
 }
