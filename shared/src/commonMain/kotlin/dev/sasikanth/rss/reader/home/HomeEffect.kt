@@ -19,7 +19,5 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 sealed interface HomeEffect {
 
-  object NavigateToAddScreen : HomeEffect
-
   data class OpenPost(val post: PostWithMetadata) : HomeEffect
 }

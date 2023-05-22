@@ -85,7 +85,6 @@ fun HomeScreen(
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->
       when (effect) {
-        HomeEffect.NavigateToAddScreen -> TODO()
         is HomeEffect.OpenPost -> {
           openBrowser(effect.post.link)
         }

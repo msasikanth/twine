@@ -83,10 +83,6 @@ internal class HomeViewModel(
     viewModelScope.launch { _effects.emit(HomeEffect.OpenPost(post)) }
   }
 
-  private fun onAddClicked() {
-    viewModelScope.launch { _effects.emit(HomeEffect.NavigateToAddScreen) }
-  }
-
   private fun refreshContent() {
     viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
   }
