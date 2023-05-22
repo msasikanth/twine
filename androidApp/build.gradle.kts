@@ -46,4 +46,17 @@ android {
     targetCompatibility = JavaVersion.VERSION_11
   }
   kotlin { jvmToolchain(11) }
+  buildTypes {
+    release {
+      isMinifyEnabled = true
+      isShrinkResources = true
+
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    }
+  }
+  packaging {
+    resources {
+      excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+    }
+  }
 }
