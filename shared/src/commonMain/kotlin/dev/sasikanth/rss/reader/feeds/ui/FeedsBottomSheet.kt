@@ -21,22 +21,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -136,13 +133,7 @@ private fun BottomSheetCollapsedContent(
     items(feeds) { feed ->
       BottomSheetItem(
         text = feed.name.uppercase(),
-        icon = {
-          AsyncImage(
-            url = feed.icon,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp))
-          )
-        },
+        iconUrl = feed.icon,
         selected = selectedFeed == feed,
         onClick = { onFeedSelected(feed) }
       )

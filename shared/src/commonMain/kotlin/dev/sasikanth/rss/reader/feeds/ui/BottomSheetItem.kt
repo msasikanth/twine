@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -25,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -32,30 +34,50 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 
 @Composable
 internal fun BottomSheetItem(
   text: String,
-  icon: @Composable () -> Unit,
+  iconUrl: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
 ) {
+  val borderColor by
+    animateColorAsState(
+      if (selected) {
+        AppTheme.colorScheme.tintedForeground
+      } else {
+        Color.Transparent
+      }
+    )
+
   Column(
-    modifier = modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick),
+    modifier = modifier.clip(RoundedCornerShape(16.dp)),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected)
-      icon()
+    // Outer container to show selection indicator
+    Box(
+      modifier = modifier.clip(RoundedCornerShape(20.dp)).background(borderColor).padding(4.dp),
+      contentAlignment = Alignment.Center
+    ) {
+      AsyncImage(
+        url = iconUrl,
+        contentDescription = null,
+        modifier =
+          Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
+      )
     }
 
     Text(
