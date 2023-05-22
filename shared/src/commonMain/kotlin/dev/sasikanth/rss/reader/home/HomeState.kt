@@ -17,9 +17,9 @@
 
 package dev.sasikanth.rss.reader.home
 
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.BottomSheetValue.Collapsed
 import androidx.compose.material.ExperimentalMaterialApi
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
