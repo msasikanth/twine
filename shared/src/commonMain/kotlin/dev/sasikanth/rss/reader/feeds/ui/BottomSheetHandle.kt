@@ -59,6 +59,6 @@ internal fun BottomSheetHandle(bottomSheetSwipeTransition: Transition<Float>) {
       Modifier.background(AppTheme.colorScheme.tintedForeground, shape = RoundedCornerShape(50))
         .requiredSize(width = targetHandleSize, height = 4.dp)
     )
-    Spacer(Modifier.requiredHeight(8.dp))
+    Spacer(Modifier.requiredHeight(12.dp))
   }
 }
