@@ -53,13 +53,7 @@ android {
 
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
-    debug {
-      applicationIdSuffix = ".debug"
-    }
+    debug { applicationIdSuffix = ".debug" }
   }
-  packaging {
-    resources {
-      excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-    }
-  }
+  packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
 }
