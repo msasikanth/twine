@@ -26,7 +26,6 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -38,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -48,6 +48,7 @@ internal class HomeViewModel(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val postsListTransformationUseCase: PostsListTransformationUseCase,
   private val observableSelectedFeed: ObservableSelectedFeed
 ) : InstanceKeeper.Instance {
 
@@ -86,7 +87,10 @@ internal class HomeViewModel(
     observableSelectedFeed.selectedFeed
       .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
       .flatMapLatest { selectedFeed -> rssRepository.posts(selectedFeedLink = selectedFeed?.link) }
-      .onEach { posts -> _state.update { it.copy(posts = posts.toImmutableList()) } }
+      .map(postsListTransformationUseCase::transform)
+      .onEach { (featuredPosts, posts) ->
+        _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
+      }
       .launchIn(viewModelScope)
   }
 

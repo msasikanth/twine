@@ -28,6 +28,7 @@ import me.tatarka.inject.annotations.Inject
 class HomeViewModelFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
+  postsListTransformationUseCase: PostsListTransformationUseCase,
   observableSelectedFeed: ObservableSelectedFeed,
   feedsViewModelFactory: (ComponentContext) -> FeedsViewModelFactory,
   dispatchersProvider: DispatchersProvider
@@ -38,6 +39,7 @@ class HomeViewModelFactory(
       HomeViewModel(
         lifecycle = lifecycle,
         rssRepository = rssRepository,
+        postsListTransformationUseCase = postsListTransformationUseCase,
         observableSelectedFeed = observableSelectedFeed,
         dispatchersProvider = dispatchersProvider
       )

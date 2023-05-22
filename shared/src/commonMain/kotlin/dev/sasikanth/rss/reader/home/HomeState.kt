@@ -27,6 +27,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 data class HomeState(
+  val featuredPosts: ImmutableList<PostWithMetadata>,
   val posts: ImmutableList<PostWithMetadata>,
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
@@ -37,6 +38,7 @@ data class HomeState(
 
     val DEFAULT =
       HomeState(
+        featuredPosts = persistentListOf(),
         posts = persistentListOf(),
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,

@@ -54,10 +54,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
-private const val NUMBER_OF_FEATURED_POSTS = 6
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
@@ -71,12 +69,7 @@ fun HomeScreen(
 
   val viewModel = homeViewModelFactory.viewModel
   val state by viewModel.state.collectAsState()
-  val posts = state.posts
-
-  // TODO: Move this transformation to data layer in background thread
-  val featuredPosts =
-    posts.filter { !it.imageUrl.isNullOrBlank() }.take(NUMBER_OF_FEATURED_POSTS).toImmutableList()
-  val postsList = (posts - featuredPosts).toImmutableList()
+  val (featuredPosts, posts) = state
 
   val bottomSheetState =
     rememberBottomSheetState(
@@ -107,7 +100,7 @@ fun HomeScreen(
     content = {
       HomeScreenContent(
         featuredPosts = featuredPosts,
-        postsList = postsList,
+        posts = posts,
         isRefreshing = state.isRefreshing,
         onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
         onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
@@ -134,7 +127,7 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
   featuredPosts: ImmutableList<PostWithMetadata>,
-  postsList: ImmutableList<PostWithMetadata>,
+  posts: ImmutableList<PostWithMetadata>,
   isRefreshing: Boolean,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
@@ -145,7 +138,7 @@ private fun HomeScreenContent(
   Box(Modifier.pullRefresh(swipeRefreshState)) {
     PostsList(
       featuredPosts = featuredPosts,
-      posts = postsList,
+      posts = posts,
       onPostClicked = onPostClicked,
       onFeaturedItemChange = onFeaturedItemChange
     )
