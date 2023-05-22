@@ -77,7 +77,7 @@ class FeedsViewModel(
   }
 
   private fun onGoBackClicked() {
-    viewModelScope.launch { _effects.emit(FeedsEffect.MinimizeAddSheet) }
+    viewModelScope.launch { _effects.emit(FeedsEffect.MinimizeSheet) }
   }
 
   private fun addFeed(feedLink: String) {
