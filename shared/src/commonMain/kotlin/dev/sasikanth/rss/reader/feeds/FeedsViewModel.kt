@@ -68,8 +68,13 @@ class FeedsViewModel(
       FeedsEvent.OnCancelAddFeedClicked -> onCancelAddFeedClicked()
       is FeedsEvent.AddFeed -> addFeed(event.feedLink)
       FeedsEvent.OnGoBackClicked -> onGoBackClicked()
+      is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
       is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
     }
+  }
+
+  private fun onDeleteFeed(feed: Feed) {
+    viewModelScope.launch { rssRepository.removeFeed(feed.link) }
   }
 
   private fun onFeedSelected(feed: Feed) {

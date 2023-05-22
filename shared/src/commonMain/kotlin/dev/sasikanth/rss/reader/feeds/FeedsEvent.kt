@@ -29,5 +29,7 @@ sealed interface FeedsEvent {
 
   object OnGoBackClicked : FeedsEvent
 
+  data class OnDeleteFeed(val feed: Feed) : FeedsEvent
+
   data class OnFeedSelected(val feed: Feed) : FeedsEvent
 }
