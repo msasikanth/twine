@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,8 +22,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -34,9 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -73,7 +67,7 @@ fun HomeScreen(
         postsWithImages
       }
       .toImmutableList()
-  val postsList = posts.filter { !featuredPosts.contains(it) }
+  val postsList = posts.filter { !featuredPosts.contains(it) }.toImmutableList()
 
   val isRefreshing = state.loadingState.isLoading
   val swipeRefreshState =
@@ -93,73 +87,17 @@ fun HomeScreen(
   }
 
   Box(Modifier.pullRefresh(swipeRefreshState)) {
-    val statusBarPadding =
-      if (featuredPosts.isEmpty()) {
-        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-      } else {
-        0.dp
-      }
-
-    LazyColumn(contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)) {
-      if (featuredPosts.isNotEmpty()) {
-        item {
-          FeaturedPostItems(
-            featuredPosts = featuredPosts,
-            onItemClick = { post -> viewModel.dispatch(HomeEvent.OnPostClicked(post)) },
-            onFeaturedItemChange = onFeaturedItemChange
-          )
-        }
-      }
-
-      itemsIndexed(postsList) { i, post ->
-        PostListItem(post) { viewModel.dispatch(HomeEvent.OnPostClicked(post)) }
-        if (i != posts.size - 1) {
-          Divider(
-            modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-            color = AppTheme.colorScheme.surfaceContainer
-          )
-        }
-      }
-    }
+    PostsList(
+      featuredPosts = featuredPosts,
+      posts = postsList,
+      onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
+      onFeaturedItemChange = onFeaturedItemChange
+    )
 
     PullRefreshIndicator(
       refreshing = isRefreshing,
       state = swipeRefreshState,
       modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
     )
-  }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-internal fun FeaturedPostItems(
-  modifier: Modifier = Modifier,
-  featuredPosts: ImmutableList<PostWithMetadata>,
-  onItemClick: (PostWithMetadata) -> Unit,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit
-) {
-  Box(modifier = modifier) {
-    val pagerState = rememberPagerState()
-    var selectedImage by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(pagerState.settledPage, featuredPosts) {
-      val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
-      selectedImage = selectedFeaturedPost?.imageUrl
-      onFeaturedItemChange(selectedImage)
-    }
-
-    selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
-
-    HorizontalPager(
-      modifier = Modifier.statusBarsPadding(),
-      state = pagerState,
-      pageCount = featuredPosts.size,
-      contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
-      pageSpacing = 16.dp,
-      verticalAlignment = Alignment.Top
-    ) {
-      val featuredPost = featuredPosts[it]
-      FeaturedPostItem(item = featuredPost) { onItemClick(featuredPost) }
-    }
   }
 }
