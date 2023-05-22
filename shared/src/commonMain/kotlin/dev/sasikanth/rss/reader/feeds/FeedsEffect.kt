@@ -17,7 +17,5 @@ package dev.sasikanth.rss.reader.feeds
 
 sealed interface FeedsEffect {
 
-  object ShowFeedLinkEntryDialog : FeedsEffect
-
   object MinimizeAddSheet : FeedsEffect
 }
