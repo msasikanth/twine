@@ -46,6 +46,9 @@ data class HomeState(
 
   val isAllFeedsSelected: Boolean
     get() = selectedFeed == null
+
+  val isRefreshing: Boolean
+    get() = loadingState == Loading
 }
 
 sealed interface HomeLoadingState {
@@ -55,6 +58,3 @@ sealed interface HomeLoadingState {
 
   data class Error(val errorMessage: String) : HomeLoadingState
 }
-
-val HomeLoadingState.isLoading: Boolean
-  get() = this == Loading
