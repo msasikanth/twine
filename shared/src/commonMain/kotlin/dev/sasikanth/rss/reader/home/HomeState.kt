@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package dev.sasikanth.rss.reader.home
 
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.BottomSheetValue.Collapsed
+import androidx.compose.material.ExperimentalMaterialApi
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.collections.immutable.ImmutableList
@@ -22,12 +27,18 @@ import kotlinx.collections.immutable.persistentListOf
 
 data class HomeState(
   val posts: ImmutableList<PostWithMetadata>,
-  val loadingState: HomeLoadingState
+  val loadingState: HomeLoadingState,
+  val feedsSheetState: BottomSheetValue
 ) {
 
   companion object {
 
-    val DEFAULT = HomeState(posts = persistentListOf(), loadingState = HomeLoadingState.Idle)
+    val DEFAULT =
+      HomeState(
+        posts = persistentListOf(),
+        loadingState = HomeLoadingState.Idle,
+        feedsSheetState = Collapsed
+      )
   }
 }
 

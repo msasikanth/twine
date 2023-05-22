@@ -13,8 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package dev.sasikanth.rss.reader.home
 
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
@@ -69,7 +73,12 @@ internal class HomeViewModel(
       HomeEvent.Init -> init()
       HomeEvent.OnSwipeToRefresh -> refreshContent()
       is HomeEvent.OnPostClicked -> onPostClicked(event.post)
+      is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
     }
+  }
+
+  private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
+    _state.update { it.copy(feedsSheetState = feedsSheetState) }
   }
 
   private fun init() {

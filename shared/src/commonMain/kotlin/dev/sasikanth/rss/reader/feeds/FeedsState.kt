@@ -27,6 +27,7 @@ data class FeedsState(
 
   companion object {
 
-    val DEFAULT = FeedsState(feeds = persistentListOf(), selectedFeed = null, canShowFeedLinkEntry = false)
+    val DEFAULT =
+      FeedsState(feeds = persistentListOf(), selectedFeed = null, canShowFeedLinkEntry = false)
   }
 }
