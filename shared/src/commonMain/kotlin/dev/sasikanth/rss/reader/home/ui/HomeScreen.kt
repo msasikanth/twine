@@ -22,6 +22,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -35,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
@@ -42,6 +44,7 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -94,33 +97,69 @@ fun HomeScreen(
     }
   }
 
-  BottomSheetScaffold(
-    scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
-    content = {
-      HomeScreenContent(
-        featuredPosts = featuredPosts,
-        posts = posts,
-        isRefreshing = state.isRefreshing,
-        onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
-        onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
-        onFeaturedItemChange = onFeaturedItemChange
-      )
-    },
-    backgroundColor = Color.Transparent,
-    sheetContent = {
-      FeedsBottomSheet(
-        feedsViewModel = homeViewModelFactory.feedsViewModel,
-        bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-        closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
-      )
-    },
-    sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
-    sheetContentColor = AppTheme.colorScheme.tintedForeground,
-    sheetElevation = 0.dp,
-    sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding,
-    sheetShape =
-      RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize)
-  )
+  Box {
+    BottomSheetScaffold(
+      scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
+      content = {
+        HomeScreenContent(
+          featuredPosts = featuredPosts,
+          posts = posts,
+          isRefreshing = state.isRefreshing,
+          onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
+          onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
+          onFeaturedItemChange = onFeaturedItemChange
+        )
+      },
+      backgroundColor = Color.Transparent,
+      sheetContent = {
+        FeedsBottomSheet(
+          feedsViewModel = homeViewModelFactory.feedsViewModel,
+          bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
+        )
+      },
+      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
+      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetElevation = 0.dp,
+      sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding,
+      sheetShape =
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize)
+    )
+
+    /**
+     * Since we want the all button to not move when expanding and collapsing bottom bar and
+     * transform to add button. We are not placing it inside the bottom sheet content and instead
+     * place it above the home screen and bottom bar content essentially.
+     *
+     * We might have to replace this once bottom sheet exposes height or offset from bottom which
+     * would allow us to modify the offset of this item in the sheet itself instead of using
+     * workarounds.
+     *
+     * track: https://issuetracker.google.com/issues/209825720
+     */
+    val threshold = 5 // (1/0.2) 0.2 is our threshold in the 0..1 range
+    val primaryActionStartPadding =
+      (24.dp - (4 * (bottomSheetSwipeTransition.currentState * threshold).inverseProgress()).dp)
+        .coerceAtLeast(20.dp)
+        .coerceAtMost(24.dp)
+
+    val primaryActionBottomPadding =
+      (navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp)
+        .coerceAtLeast(navigationBarPadding)
+
+    BottomSheetPrimaryActionButton(
+      selected = state.isAllFeedsSelected,
+      modifier =
+        Modifier.align(Alignment.BottomStart)
+          .padding(start = primaryActionStartPadding, bottom = primaryActionBottomPadding),
+      bottomSheetSwipeProgress =
+        (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
+      bottomSheetCurrentState = bottomSheetState.currentValue,
+      bottomSheetTargetState = bottomSheetState.targetValue
+    ) {
+      viewModel.dispatch(HomeEvent.OnHomeSelected)
+    }
+  }
 }
 
 @Composable
