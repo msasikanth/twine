@@ -71,15 +71,9 @@ fun HomeScreen(
   val posts = state.posts
 
   // TODO: Move this transformation to data layer in background thread
-  val postsWithImages = posts.filter { !it.imageUrl.isNullOrBlank() }
   val featuredPosts =
-    if (postsWithImages.size > NUMBER_OF_FEATURED_POSTS) {
-        postsWithImages.take(NUMBER_OF_FEATURED_POSTS)
-      } else {
-        postsWithImages
-      }
-      .toImmutableList()
-  val postsList = posts.filter { !featuredPosts.contains(it) }.toImmutableList()
+    posts.filter { !it.imageUrl.isNullOrBlank() }.take(NUMBER_OF_FEATURED_POSTS).toImmutableList()
+  val postsList = (posts - featuredPosts).toImmutableList()
 
   val bottomSheetState =
     rememberBottomSheetState(
