@@ -1,8 +1,37 @@
-# Reader (WIP)
+# Reader
 
 ![CI-MAIN](https://github.com/msasikanth/reader/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 
-A Compose multiplatform (Android & iOS) RSS reader app
+![banner](./readme_images/banner.png)
+
+## Requirements
+
+- Android: 12+ (You can build app using lower min SDK, blur is the only thing that won't work)
+- iOS: 14.1+
+
+## Libraries
+
+- [Kotlin Mutliplatform](https://kotlinlang.org/lp/multiplatform/)
+- [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [Ktor Client](https://ktor.io/)
+- [SQLDelight](https://cashapp.github.io/sqldelight/2.0.0-alpha05/)
+- [Decompose](https://arkivanov.github.io/Decompose/)
+- [Kotlin-inject](https://github.com/evant/kotlin-inject)
+
+For full list of dependencies used, please take a look at the [catalog](/gradle/libs.versions.toml) file
+
+## TODO
+
+- [ ] Add Atom feeds support
+- [ ] Background sync
+- [ ] Bookmarks
+- [ ] Search
+- [ ] Rearrange feeds
+
+## Made by
+
+- [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development
+- [Eduardo Pratti](https://twitter.com/edpratti) / Design
 
 ## License
 
