@@ -144,8 +144,9 @@ fun HomeScreen(
         .coerceAtMost(24.dp)
 
     val primaryActionBottomPadding =
-      (navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp)
-        .coerceAtLeast(navigationBarPadding)
+      (navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp).coerceAtLeast(
+        navigationBarPadding
+      )
 
     BottomSheetPrimaryActionButton(
       selected = state.isAllFeedsSelected,
