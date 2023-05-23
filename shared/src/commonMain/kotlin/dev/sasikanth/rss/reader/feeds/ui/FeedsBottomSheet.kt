@@ -100,6 +100,7 @@ internal fun FeedsBottomSheet(
             alpha = targetAlpha
           },
         feeds = state.feeds,
+        selectedFeed = state.selectedFeed,
         showingFeedLinkEntry = showingFeedLinkEntry,
         closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
@@ -113,6 +114,7 @@ internal fun FeedsBottomSheet(
 @Composable
 private fun BottomSheetExpandedContent(
   feeds: ImmutableList<Feed>,
+  selectedFeed: Feed?,
   showingFeedLinkEntry: Boolean,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
@@ -133,6 +135,7 @@ private fun BottomSheetExpandedContent(
       itemsIndexed(feeds) { index, feed ->
         FeedListItem(
           feed = feed,
+          selected = selectedFeed == feed,
           canShowDivider = index != feeds.lastIndex,
           onDeleteFeed = onDeleteFeed,
           onFeedSelected = onFeedSelected

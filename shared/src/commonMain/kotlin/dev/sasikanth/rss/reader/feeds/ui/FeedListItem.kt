@@ -47,6 +47,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 internal fun FeedListItem(
   modifier: Modifier = Modifier,
   feed: Feed,
+  selected: Boolean,
   canShowDivider: Boolean,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
@@ -59,12 +60,16 @@ internal fun FeedListItem(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      AsyncImage(
-        url = feed.icon,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
-      )
+      Box {
+        SelectionIndicator(selected = selected, animationProgress = 1f)
+        AsyncImage(
+          url = feed.icon,
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp))
+            .align(Alignment.Center),
+        )
+      }
       Spacer(Modifier.requiredWidth(16.dp))
       Text(
         text = feed.name,
