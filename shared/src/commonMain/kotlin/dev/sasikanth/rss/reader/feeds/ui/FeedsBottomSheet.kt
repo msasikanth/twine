@@ -38,6 +38,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -63,7 +64,9 @@ internal fun FeedsBottomSheet(
     Box {
       BottomSheetCollapsedContent(
         modifier =
-          Modifier.graphicsLayer { alpha = 1f - (bottomSheetSwipeTransition.currentState * 5f) },
+          Modifier.graphicsLayer {
+            alpha = (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
+          },
         feeds = state.feeds,
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(feed)) }
