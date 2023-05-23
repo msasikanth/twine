@@ -22,4 +22,6 @@ sealed interface HomeEffect {
   data class OpenPost(val post: PostWithMetadata) : HomeEffect
 
   object MinimizeSheet : HomeEffect
+
+  class ShowError(val message: String?) : HomeEffect
 }

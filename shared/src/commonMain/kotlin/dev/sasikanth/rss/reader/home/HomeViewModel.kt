@@ -113,7 +113,13 @@ internal class HomeViewModel(
   }
 
   private fun addFeed(feedLink: String) {
-    viewModelScope.launch { rssRepository.addFeed(feedLink) }
+    viewModelScope.launch {
+      try {
+        rssRepository.addFeed(feedLink)
+      } catch (e: Exception) {
+        _effects.emit(HomeEffect.ShowError(e.message))
+      }
+    }
   }
 
   private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {

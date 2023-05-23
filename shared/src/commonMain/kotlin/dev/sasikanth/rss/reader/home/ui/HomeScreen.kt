@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SnackbarHost
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -80,6 +81,7 @@ fun HomeScreen(
         true
       }
     )
+  val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
   val bottomSheetSwipeTransition =
     updateTransition(
@@ -98,6 +100,12 @@ fun HomeScreen(
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
         }
+        is HomeEffect.ShowError -> {
+          if (!effect.message.isNullOrBlank()) {
+            bottomSheetScaffoldState.snackbarHostState
+              .showSnackbar(message = effect.message)
+          }
+        }
       }
     }
   }
@@ -110,7 +118,7 @@ fun HomeScreen(
 
   Box {
     BottomSheetScaffold(
-      scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
+      scaffoldState = bottomSheetScaffoldState,
       content = {
         HomeScreenContent(
           featuredPosts = featuredPosts,
@@ -135,7 +143,13 @@ fun HomeScreen(
       sheetElevation = 0.dp,
       sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding,
       sheetShape =
-        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize)
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      snackbarHost = {
+        SnackbarHost(
+          hostState = it,
+          modifier = Modifier.padding(bottom = navigationBarPadding + 112.dp)
+        )
+      }
     )
 
     /**
