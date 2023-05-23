@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -82,11 +81,12 @@ internal fun BottomSheetItem(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
-  val alpha = if (animationProgress.inverseProgress() > 1e-6f)  {
-    0f
-  } else {
-    1f
-  }
+  val alpha =
+    if (animationProgress.inverseProgress() > 1e-6f) {
+      0f
+    } else {
+      1f
+    }
 
   Box(Modifier.requiredSize(64.dp).graphicsLayer { this.alpha = alpha }) {
     AnimatedVisibility(
