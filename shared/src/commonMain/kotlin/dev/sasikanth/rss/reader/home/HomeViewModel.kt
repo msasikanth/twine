@@ -76,11 +76,11 @@ internal class HomeViewModel(
       is HomeEvent.OnPostClicked -> onPostClicked(event.post)
       is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
       HomeEvent.OnHomeSelected -> onHomeSelected()
+      HomeEvent.OnAddFeedClicked -> onAddFeedClicked()
+      HomeEvent.OnCancelAddFeedClicked -> onCancelAddFeedClicked()
+      is HomeEvent.AddFeed -> addFeed(event.feedLink)
+      HomeEvent.OnPrimaryActionClicked -> onPrimaryActionClicked()
     }
-  }
-
-  private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
-    _state.update { it.copy(feedsSheetState = feedsSheetState) }
   }
 
   private fun init() {
@@ -92,6 +92,30 @@ internal class HomeViewModel(
         _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
       }
       .launchIn(viewModelScope)
+  }
+
+  private fun onPrimaryActionClicked() {
+    if (_state.value.feedsSheetState == BottomSheetValue.Collapsed) {
+      dispatch(HomeEvent.OnHomeSelected)
+    } else {
+      dispatch(HomeEvent.OnAddFeedClicked)
+    }
+  }
+
+  private fun addFeed(feedLink: String) {
+    viewModelScope.launch { rssRepository.addFeed(feedLink) }
+  }
+
+  private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
+    _state.update { it.copy(feedsSheetState = feedsSheetState) }
+  }
+
+  private fun onCancelAddFeedClicked() {
+    _state.update { it.copy(canShowFeedLinkEntry = false) }
+  }
+
+  private fun onAddFeedClicked() {
+    _state.update { it.copy(canShowFeedLinkEntry = true) }
   }
 
   private fun onHomeSelected() {

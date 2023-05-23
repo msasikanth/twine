@@ -32,4 +32,12 @@ sealed interface HomeEvent {
   data class FeedsSheetStateChanged(val feedsSheetState: BottomSheetValue) : HomeEvent
 
   object OnHomeSelected : HomeEvent
+
+  object OnAddFeedClicked : HomeEvent
+
+  object OnPrimaryActionClicked : HomeEvent
+
+  object OnCancelAddFeedClicked : HomeEvent
+
+  data class AddFeed(val feedLink: String) : HomeEvent
 }

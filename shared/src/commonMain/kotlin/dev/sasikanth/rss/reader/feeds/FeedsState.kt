@@ -19,15 +19,10 @@ import dev.sasikanth.rss.reader.database.Feed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
-data class FeedsState(
-  val feeds: ImmutableList<Feed>,
-  val selectedFeed: Feed?,
-  val canShowFeedLinkEntry: Boolean
-) {
+data class FeedsState(val feeds: ImmutableList<Feed>, val selectedFeed: Feed?) {
 
   companion object {
 
-    val DEFAULT =
-      FeedsState(feeds = persistentListOf(), selectedFeed = null, canShowFeedLinkEntry = false)
+    val DEFAULT = FeedsState(feeds = persistentListOf(), selectedFeed = null)
   }
 }

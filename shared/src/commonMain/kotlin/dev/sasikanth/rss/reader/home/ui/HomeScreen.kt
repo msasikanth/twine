@@ -38,9 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import com.moriatsushi.insetsx.ime
 import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.database.PostWithMetadata
@@ -97,6 +99,12 @@ fun HomeScreen(
     }
   }
 
+  LaunchedEffect(bottomSheetState.targetValue) {
+    if (bottomSheetState.targetValue == BottomSheetValue.Collapsed) {
+      viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked)
+    }
+  }
+
   Box {
     BottomSheetScaffold(
       scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState),
@@ -115,6 +123,7 @@ fun HomeScreen(
         FeedsBottomSheet(
           feedsViewModel = homeViewModelFactory.feedsViewModel,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+          showingFeedLinkEntry = state.canShowFeedLinkEntry,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
         )
       },
@@ -148,17 +157,32 @@ fun HomeScreen(
         navigationBarPadding
       )
 
-    BottomSheetPrimaryActionButton(
-      selected = state.isAllFeedsSelected,
-      modifier =
-        Modifier.align(Alignment.BottomStart)
-          .padding(start = primaryActionStartPadding, bottom = primaryActionBottomPadding),
-      bottomSheetSwipeProgress =
-        (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
-      bottomSheetCurrentState = bottomSheetState.currentValue,
-      bottomSheetTargetState = bottomSheetState.targetValue
-    ) {
-      viewModel.dispatch(HomeEvent.OnHomeSelected)
+    Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
+      if (state.canShowFeedLinkEntry) {
+        FeedLinkInputField(
+          modifier =
+            Modifier.padding(
+              bottom =
+                navigationBarPadding +
+                  28.dp +
+                  WindowInsets.ime.asPaddingValues().calculateBottomPadding(),
+              end = 24.dp
+            ),
+          onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
+          onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
+        )
+      } else {
+        BottomSheetPrimaryActionButton(
+          modifier = Modifier.padding(bottom = primaryActionBottomPadding),
+          selected = state.isAllFeedsSelected,
+          bottomSheetSwipeProgress =
+            (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
+          bottomSheetCurrentState = bottomSheetState.currentValue,
+          bottomSheetTargetState = bottomSheetState.targetValue
+        ) {
+          viewModel.dispatch(HomeEvent.OnPrimaryActionClicked)
+        }
+      }
     }
   }
 }

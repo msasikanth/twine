@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.moriatsushi.insetsx.ime
 import com.moriatsushi.insetsx.navigationBars
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
@@ -57,6 +58,7 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun FeedsBottomSheet(
   feedsViewModel: FeedsViewModel,
   bottomSheetSwipeTransition: Transition<Float>,
+  showingFeedLinkEntry: Boolean,
   closeSheet: () -> Unit
 ) {
   val state by feedsViewModel.state.collectAsState()
@@ -98,6 +100,7 @@ internal fun FeedsBottomSheet(
             alpha = targetAlpha
           },
         feeds = state.feeds,
+        showingFeedLinkEntry = showingFeedLinkEntry,
         closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) }
@@ -110,15 +113,20 @@ internal fun FeedsBottomSheet(
 @Composable
 private fun BottomSheetExpandedContent(
   feeds: ImmutableList<Feed>,
+  showingFeedLinkEntry: Boolean,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val navigationBarsPadding =
-    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+  val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-  Column(modifier = Modifier.fillMaxSize().then(modifier)) {
+  Column(
+    modifier =
+      Modifier.fillMaxSize()
+        .padding(bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding())
+        .then(modifier)
+  ) {
     Toolbar(onCloseClicked = closeSheet)
 
     LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
@@ -138,16 +146,19 @@ private fun BottomSheetExpandedContent(
         .requiredHeight(104.dp + navigationBarsPadding)
     ) {
       Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
-      TextButton(
-        modifier =
-          Modifier.align(Alignment.CenterEnd).padding(bottom = navigationBarsPadding, end = 24.dp),
-        onClick = closeSheet
-      ) {
-        Text(
-          text = "Go back",
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground
-        )
+      if (!showingFeedLinkEntry) {
+        TextButton(
+          modifier =
+            Modifier.align(Alignment.CenterEnd)
+              .padding(bottom = navigationBarsPadding, end = 24.dp),
+          onClick = closeSheet
+        ) {
+          Text(
+            text = "Go back",
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.tintedForeground
+          )
+        }
       }
     }
   }

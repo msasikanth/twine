@@ -31,7 +31,8 @@ data class HomeState(
   val posts: ImmutableList<PostWithMetadata>,
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
-  val selectedFeed: Feed?
+  val selectedFeed: Feed?,
+  val canShowFeedLinkEntry: Boolean
 ) {
 
   companion object {
@@ -42,7 +43,8 @@ data class HomeState(
         posts = persistentListOf(),
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
-        selectedFeed = null
+        selectedFeed = null,
+        canShowFeedLinkEntry = false
       )
   }
 

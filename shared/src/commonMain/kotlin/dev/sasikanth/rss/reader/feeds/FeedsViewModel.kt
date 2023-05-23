@@ -64,9 +64,6 @@ class FeedsViewModel(
   fun dispatch(event: FeedsEvent) {
     when (event) {
       FeedsEvent.Init -> init()
-      FeedsEvent.OnAddFeedClicked -> onAddFeedClicked()
-      FeedsEvent.OnCancelAddFeedClicked -> onCancelAddFeedClicked()
-      is FeedsEvent.AddFeed -> addFeed(event.feedLink)
       FeedsEvent.OnGoBackClicked -> onGoBackClicked()
       is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
       is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
@@ -83,18 +80,6 @@ class FeedsViewModel(
 
   private fun onGoBackClicked() {
     viewModelScope.launch { _effects.emit(FeedsEffect.MinimizeSheet) }
-  }
-
-  private fun addFeed(feedLink: String) {
-    viewModelScope.launch { rssRepository.addFeed(feedLink) }
-  }
-
-  private fun onCancelAddFeedClicked() {
-    _state.update { it.copy(canShowFeedLinkEntry = false) }
-  }
-
-  private fun onAddFeedClicked() {
-    _state.update { it.copy(canShowFeedLinkEntry = false) }
   }
 
   private fun init() {
