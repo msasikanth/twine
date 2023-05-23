@@ -81,7 +81,8 @@ fun HomeScreen(
         true
       }
     )
-  val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
+  val bottomSheetScaffoldState =
+    rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
   val bottomSheetSwipeTransition =
     updateTransition(
@@ -102,8 +103,7 @@ fun HomeScreen(
         }
         is HomeEffect.ShowError -> {
           if (!effect.message.isNullOrBlank()) {
-            bottomSheetScaffoldState.snackbarHostState
-              .showSnackbar(message = effect.message)
+            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = effect.message)
           }
         }
       }
