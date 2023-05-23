@@ -95,7 +95,6 @@ fun HomeScreen(
         is HomeEffect.OpenPost -> {
           openBrowser(effect.post.link)
         }
-
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
         }

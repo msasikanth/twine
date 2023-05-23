@@ -39,14 +39,13 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.ImageResource
-import dev.icerock.moko.resources.compose.painterResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -68,8 +67,8 @@ internal fun BottomSheetPrimaryActionButton(
     val (icon, label) =
       when {
         bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
-          Pair(CommonRes.images.ic_all, null)
-        else -> Pair(CommonRes.images.ic_add, "Add feed")
+          Pair("MR/images/ic_all.xml", null)
+        else -> Pair("MR/images/ic_add.xml", "Add feed")
       }
 
     FloatingActionButton(
@@ -93,10 +92,11 @@ internal fun BottomSheetPrimaryActionButton(
   }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 private fun FloatingActionButton(
   modifier: Modifier = Modifier,
-  icon: ImageResource,
+  icon: String,
   animationProgress: Float,
   label: String? = null,
   selected: Boolean = false,

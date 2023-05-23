@@ -37,12 +37,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 internal fun FeedListItem(
   modifier: Modifier = Modifier,
@@ -82,7 +83,7 @@ internal fun FeedListItem(
       Spacer(Modifier.requiredWidth(16.dp))
       IconButton(onClick = { onDeleteFeed(feed) }) {
         Icon(
-          painter = painterResource(CommonRes.images.ic_delete),
+          painter = painterResource("MR/images/ic_delete.xml"),
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )
