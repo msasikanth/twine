@@ -18,6 +18,8 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
+import com.arkivanov.essenty.backhandler.BackCallback
+import com.arkivanov.essenty.backhandler.BackHandler
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
@@ -47,6 +49,7 @@ import kotlinx.coroutines.launch
 internal class HomeViewModel(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
+  private val backHandler: BackHandler,
   private val rssRepository: RssRepository,
   private val postsListTransformationUseCase: PostsListTransformationUseCase,
   private val observableSelectedFeed: ObservableSelectedFeed
@@ -65,8 +68,15 @@ internal class HomeViewModel(
   private val _effects = MutableSharedFlow<HomeEffect>(extraBufferCapacity = 10)
   val effects = _effects.asSharedFlow()
 
+  private val backCallback = BackCallback {
+    viewModelScope.launch { _effects.emit(HomeEffect.MinimizeSheet) }
+  }
+
   init {
-    lifecycle.doOnCreate { dispatch(HomeEvent.Init) }
+    lifecycle.doOnCreate {
+      dispatch(HomeEvent.Init)
+      backHandler.register(backCallback)
+    }
   }
 
   fun dispatch(event: HomeEvent) {
@@ -107,6 +117,7 @@ internal class HomeViewModel(
   }
 
   private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
+    backCallback.isEnabled = feedsSheetState == BottomSheetValue.Expanded
     _state.update { it.copy(feedsSheetState = feedsSheetState) }
   }
 
@@ -138,5 +149,6 @@ internal class HomeViewModel(
 
   override fun onDestroy() {
     viewModelScope.cancel()
+    backHandler.unregister(backCallback)
   }
 }

@@ -20,4 +20,6 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 sealed interface HomeEffect {
 
   data class OpenPost(val post: PostWithMetadata) : HomeEffect
+
+  object MinimizeSheet : HomeEffect
 }

@@ -66,8 +66,8 @@ internal fun FeedListItem(
           url = feed.icon,
           contentDescription = null,
           contentScale = ContentScale.Crop,
-          modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp))
-            .align(Alignment.Center),
+          modifier =
+            Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).align(Alignment.Center),
         )
       }
       Spacer(Modifier.requiredWidth(16.dp))

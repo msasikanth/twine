@@ -38,6 +38,7 @@ class HomeViewModelFactory(
     instanceKeeper.getOrCreate {
       HomeViewModel(
         lifecycle = lifecycle,
+        backHandler = backHandler,
         rssRepository = rssRepository,
         postsListTransformationUseCase = postsListTransformationUseCase,
         observableSelectedFeed = observableSelectedFeed,
