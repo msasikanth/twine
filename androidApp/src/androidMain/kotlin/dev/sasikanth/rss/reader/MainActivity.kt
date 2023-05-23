@@ -20,6 +20,7 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
@@ -31,7 +32,7 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
-    window.statusBarColor = Color.TRANSPARENT
+    window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar_color)
     window.navigationBarColor = Color.TRANSPARENT
 
     val appComponent =
