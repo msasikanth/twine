@@ -36,11 +36,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
+import dev.sasikanth.rss.reader.utils.inverseProgress
 
 @Composable
 internal fun BottomSheetItem(
@@ -55,7 +58,7 @@ internal fun BottomSheetItem(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected)
+      SelectionIndicator(selected = selected, animationProgress = 1f)
       AsyncImage(
         url = iconUrl,
         contentDescription = null,
@@ -78,17 +81,21 @@ internal fun BottomSheetItem(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-internal fun SelectionIndicator(selected: Boolean, modifier: Modifier = Modifier) {
-  Box(Modifier.requiredSize(64.dp).then(modifier)) {
+internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
+  val alpha = if (animationProgress.inverseProgress() > 1e-6f)  {
+    0f
+  } else {
+    1f
+  }
+
+  Box(Modifier.requiredSize(64.dp).graphicsLayer { this.alpha = alpha }) {
     AnimatedVisibility(
       modifier = Modifier.matchParentSize(),
       visible = selected,
       enter = scaleIn() + fadeIn(),
       exit = fadeOut() + scaleOut()
     ) {
-      Box(
-        Modifier.clip(RoundedCornerShape(20.dp)).background(AppTheme.colorScheme.tintedForeground)
-      )
+      Box(Modifier.background(AppTheme.colorScheme.tintedForeground, RoundedCornerShape(20.dp)))
     }
   }
 }
