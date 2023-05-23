@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -26,7 +25,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -38,8 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
@@ -54,24 +50,12 @@ internal fun BottomSheetItem(
   modifier: Modifier = Modifier,
   selected: Boolean = false,
 ) {
-  val borderColor by
-    animateColorAsState(
-      if (selected) {
-        AppTheme.colorScheme.tintedForeground
-      } else {
-        Color.Transparent
-      }
-    )
-
   Column(
     modifier = modifier.clip(RoundedCornerShape(16.dp)),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    // Outer container to show selection indicator
-    Box(
-      modifier = modifier.clip(RoundedCornerShape(20.dp)).background(borderColor).padding(4.dp),
-      contentAlignment = Alignment.Center
-    ) {
+    Box(contentAlignment = Alignment.Center) {
+      SelectionIndicator(selected = selected)
       AsyncImage(
         url = iconUrl,
         contentDescription = null,
@@ -87,9 +71,7 @@ internal fun BottomSheetItem(
       color = AppTheme.colorScheme.textEmphasisHigh,
       maxLines = 1,
       modifier =
-        Modifier.requiredSizeIn(maxWidth = 56.dp)
-          .wrapContentHeight(Alignment.CenterVertically)
-          .graphicsLayer { translationY = -4.dp.toPx() }
+        Modifier.requiredSizeIn(maxWidth = 56.dp).wrapContentHeight(Alignment.CenterVertically)
     )
   }
 }
