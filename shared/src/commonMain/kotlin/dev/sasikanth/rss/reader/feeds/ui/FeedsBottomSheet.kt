@@ -127,9 +127,7 @@ private fun BottomSheetCollapsedContent(
 ) {
   LazyRow(
     modifier =
-      modifier.padding(start = 100.dp).fillMaxWidth().graphicsLayer {
-        translationY = -(4).dp.toPx()
-      },
+      modifier.padding(start = 100.dp).fillMaxWidth(),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     contentPadding = PaddingValues(end = 24.dp)
   ) {
