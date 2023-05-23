@@ -39,6 +39,8 @@ import androidx.compose.material.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.Saver
@@ -227,6 +229,22 @@ constructor(
   /*@FloatRange(from = 0f, to = 1f)*/
   val progress: Float
     get() = anchoredDraggableState.progress
+
+  val offsetProgress: Float by derivedStateOf {
+    val maxOffset = anchoredDraggableState.maxOffset
+    val minOffset = anchoredDraggableState.minOffset
+    val currentOffset = anchoredDraggableState.offset
+
+    val delta = maxOffset - minOffset
+    if (!currentOffset.isNaN()) {
+      ((maxOffset - anchoredDraggableState.requireOffset()) / delta).coerceIn(
+        minimumValue = 0f,
+        maximumValue = 1f
+      )
+    } else {
+      0f
+    }
+  }
 
   /**
    * Expand the bottom sheet with an animation and suspend until the animation finishes or is
