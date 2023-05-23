@@ -30,7 +30,6 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -40,9 +39,6 @@ import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Expanded
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.database.PostWithMetadata
@@ -79,9 +75,12 @@ fun HomeScreen(
         true
       }
     )
-  val bottomSheetSwipeProgress by derivedStateOf { calculateBottomSheetProgress(bottomSheetState) }
+
   val bottomSheetSwipeTransition =
-    updateTransition(targetState = bottomSheetSwipeProgress, label = "Bottom Sheet Swipe Progress")
+    updateTransition(
+      targetState = bottomSheetState.offsetProgress,
+      label = "Bottom Sheet Swipe Progress"
+    )
   val bottomSheetCornerSize by
     bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverseProgress() }
 
@@ -148,17 +147,5 @@ private fun HomeScreenContent(
       state = swipeRefreshState,
       modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
     )
-  }
-}
-
-private fun calculateBottomSheetProgress(bottomSheetState: BottomSheetState): Float {
-  return when {
-    bottomSheetState.currentValue == Collapsed && bottomSheetState.targetValue == Expanded ->
-      bottomSheetState.progress
-    bottomSheetState.currentValue == Collapsed && bottomSheetState.targetValue == Collapsed -> 0f
-    bottomSheetState.currentValue == Expanded && bottomSheetState.targetValue == Collapsed ->
-      1f - bottomSheetState.progress
-    bottomSheetState.currentValue == Expanded && bottomSheetState.targetValue == Expanded -> 1f
-    else -> 0f
   }
 }
