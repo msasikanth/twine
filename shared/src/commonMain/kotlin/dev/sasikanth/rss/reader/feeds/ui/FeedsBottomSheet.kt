@@ -16,28 +16,40 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.animation.core.Transition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
+import com.moriatsushi.insetsx.navigationBars
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 
@@ -94,6 +106,7 @@ internal fun FeedsBottomSheet(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetExpandedContent(
   feeds: ImmutableList<Feed>,
@@ -102,16 +115,38 @@ private fun BottomSheetExpandedContent(
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
+  val navigationBarsPadding =
+    WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
   Column(modifier = Modifier.fillMaxSize().then(modifier)) {
     Toolbar(onCloseClicked = closeSheet)
 
-    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp)) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
       itemsIndexed(feeds) { index, feed ->
         FeedListItem(
           feed = feed,
           canShowDivider = index != feeds.lastIndex,
           onDeleteFeed = onDeleteFeed,
           onFeedSelected = onFeedSelected
+        )
+      }
+    }
+
+    Box(
+      Modifier.fillMaxWidth()
+        .background(AppTheme.colorScheme.tintedBackground)
+        .requiredHeight(104.dp + navigationBarsPadding)
+    ) {
+      Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+      TextButton(
+        modifier =
+          Modifier.align(Alignment.CenterEnd).padding(bottom = navigationBarsPadding, end = 24.dp),
+        onClick = closeSheet
+      ) {
+        Text(
+          text = "Go back",
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.tintedForeground
         )
       }
     }
