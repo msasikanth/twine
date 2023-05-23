@@ -19,16 +19,27 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.ime
@@ -116,7 +128,7 @@ fun HomeScreen(
     }
   }
 
-  Box {
+  Box(Modifier.fillMaxSize()) {
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
       content = {
@@ -126,7 +138,8 @@ fun HomeScreen(
           isRefreshing = state.isRefreshing,
           onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
-          onFeaturedItemChange = onFeaturedItemChange
+          onFeaturedItemChange = onFeaturedItemChange,
+          onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } }
         )
       },
       backgroundColor = Color.Transparent,
@@ -211,22 +224,67 @@ private fun HomeScreenContent(
   isRefreshing: Boolean,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit
+  onFeaturedItemChange: (imageUrl: String?) -> Unit,
+  onNoFeedsSwipeUp: () -> Unit
 ) {
-  val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
+  val hasContent = featuredPosts.isNotEmpty() || posts.isNotEmpty()
+  if (hasContent) {
+    val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
 
-  Box(Modifier.pullRefresh(swipeRefreshState)) {
-    PostsList(
-      featuredPosts = featuredPosts,
-      posts = posts,
-      onPostClicked = onPostClicked,
-      onFeaturedItemChange = onFeaturedItemChange
+    Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
+      PostsList(
+        featuredPosts = featuredPosts,
+        posts = posts,
+        onPostClicked = onPostClicked,
+        onFeaturedItemChange = onFeaturedItemChange
+      )
+
+      PullRefreshIndicator(
+        refreshing = isRefreshing,
+        state = swipeRefreshState,
+        modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
+      )
+    }
+  } else {
+    NoFeeds(onNoFeedsSwipeUp)
+  }
+}
+
+@Composable
+private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
+  Column(
+    modifier =
+      Modifier.fillMaxSize().padding(bottom = 136.dp).pointerInput(Unit) {
+        detectDragGestures { change, dragAmount ->
+          change.consume()
+          if (dragAmount.y < 0) {
+            onNoFeedsSwipeUp()
+          }
+        }
+      },
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+  ) {
+    Text(
+      text = "No feeds present!",
+      style = MaterialTheme.typography.headlineMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
     )
 
-    PullRefreshIndicator(
-      refreshing = isRefreshing,
-      state = swipeRefreshState,
-      modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
+    Spacer(Modifier.requiredHeight(8.dp))
+
+    Text(
+      text = "Swipe up to get started",
+      style = MaterialTheme.typography.labelLarge,
+      color = AppTheme.colorScheme.textEmphasisMed
+    )
+
+    Spacer(Modifier.requiredHeight(12.dp))
+
+    Icon(
+      imageVector = Icons.Filled.KeyboardArrowUp,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.tintedForeground
     )
   }
 }
