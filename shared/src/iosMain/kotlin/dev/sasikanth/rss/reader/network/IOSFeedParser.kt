@@ -80,12 +80,15 @@ private class IOSXmlFeedParser(
   ) {
     currentElement = didStartElement
 
-    if (
+    when {
       imageTags.contains(currentElement) &&
         !currentItemData.containsKey("imageUrl") &&
-        attributes.containsKey("url")
-    ) {
-      currentItemData["imageUrl"] = attributes["url"] as String
+        attributes.containsKey("url") -> {
+        currentItemData["imageUrl"] = attributes["url"] as String
+      }
+      currentElement == "enclosure" && currentItemData["link"].isNullOrBlank() -> {
+        currentItemData["link"] = attributes["url"] as String
+      }
     }
 
     currentData =

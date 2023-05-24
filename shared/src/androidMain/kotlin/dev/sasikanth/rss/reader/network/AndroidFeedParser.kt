@@ -104,9 +104,10 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
       when {
         name == "title" -> title = readTagText("title", parser)
         name == "link" -> link = readTagText("link", parser)
+        name == "enclosure" && link.isNullOrBlank() -> link = readAttrText("url", parser)
         name == "description" -> description = readTagText("description", parser)
         name == "pubDate" -> date = readTagText("pubDate", parser)
-        imageTags.contains(name) && image.isNullOrBlank() -> image = readPostImageUrl(parser)
+        imageTags.contains(name) && image.isNullOrBlank() -> image = readAttrText("url", parser)
         else -> skip(parser)
       }
     }
@@ -131,8 +132,8 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
     )
   }
 
-  private fun readPostImageUrl(parser: XmlPullParser): String? {
-    val url = parser.getAttributeValue(null, "url")
+  private fun readAttrText(attrName: String, parser: XmlPullParser): String? {
+    val url = parser.getAttributeValue(null, attrName)
     skip(parser)
     return url
   }
