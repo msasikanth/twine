@@ -4,7 +4,11 @@
 
 ![banner](./readme_images/banner.png)
 
-## Requirements
+## Download
+
+<a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
+
+### Requirements
 
 - Android: 12+ (You can build app using lower min SDK, blur is the only thing that won't work)
 - iOS: 14.1+
