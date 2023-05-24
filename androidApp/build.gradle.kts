@@ -38,18 +38,37 @@ android {
     applicationId = "dev.sasikanth.rss.reader"
     minSdk = libs.versions.android.sdk.min.get().toInt()
     targetSdk = libs.versions.android.sdk.target.get().toInt()
-    versionCode = 1
-    versionName = "1.0.0"
+
+    if (project.properties["VERSION_CODE"] != null) {
+      versionCode = (project.properties["VERSION_CODE"] as String).toInt()
+    } else {
+      versionCode = 1
+    }
+
+    if (project.properties["VERSION_NAME"] != null) {
+      versionName = project.properties["VERSION_NAME"] as String
+    } else {
+      versionName = "1.0.0"
+    }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
   }
   kotlin { jvmToolchain(11) }
+  signingConfigs {
+    create("release") {
+      storeFile = file("$rootDir/release/reader.jks")
+      storePassword = "${project.properties["READER_KEYSTORE_PASSWORD"]}"
+      keyAlias = "reader_alias"
+      keyPassword = "${project.properties["READER_KEY_PASSWORD"]}"
+    }
+  }
   buildTypes {
     release {
       isMinifyEnabled = true
       isShrinkResources = true
+      signingConfigs.getByName("release")
 
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }

@@ -1,0 +1,60 @@
+name: Android Prod Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'User-facing release version name'
+        required: true
+        default: "1.0.0"
+      versionCode:
+        description: 'versionCode or build number'
+        required: true
+        default: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      TERM: dumb
+      ORG_GRADLE_PROJECT_READER_KEYSTORE_PASSWORD: ${{ secrets.READER_KEYSTORE_PASSWORD }}
+      ORG_GRADLE_PROJECT_READER_KEY_PASSWORD: ${{ secrets.READER_KEY_PASSWORD }}
+    steps:
+      - name: Setup versionName regardless of how this action is triggered
+        id: version_name
+        run: |
+          WORKFLOW_INPUT=${{ github.event.inputs.versionName }}
+          VERSION_NAME=${WORKFLOW_INPUT:-"1.0.0"}
+          echo "ORG_GRADLE_PROJECT_VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
+      - name: Setup versionCode regardless of how this action is triggered
+        id: version_code
+        run: |
+          WORKFLOW_INPUT=${{ github.event.inputs.versionCode }}
+          VERSION_CODE=${WORKFLOW_INPUT:-"1"}
+          echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: zulu
+          cache: 'gradle'
+
+      - name: Decrypt secrets
+        run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
+
+      - name: Build release artifacts
+        run: ./gradlew --no-daemon androidApp:assembleRelease androidApp:bundleRelease
+
+      - name: Upload Release Bundle
+        uses: actions/upload-artifact@v3
+        with:
+          name: release.aab
+          path: androidApp/build/outputs/bundle/release/androidApp-release.aab
+
+      - name: Clean secrets
+        run: |
+          rm -f release/app-release.jks
