@@ -114,10 +114,13 @@ internal class HomeViewModel(
 
   private fun addFeed(feedLink: String) {
     viewModelScope.launch {
+      _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
       try {
         rssRepository.addFeed(feedLink)
       } catch (e: Exception) {
         _effects.emit(HomeEffect.ShowError(e.message))
+      } finally {
+        _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
       }
     }
   }

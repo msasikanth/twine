@@ -18,9 +18,11 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +53,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun FeedLinkInputField(
   modifier: Modifier = Modifier,
+  isFetchingFeed: Boolean,
   onAddFeed: (String) -> Unit,
   onCancelFeedEntryClicked: () -> Unit
 ) {
@@ -78,11 +81,14 @@ internal fun FeedLinkInputField(
     maxLines = 1,
     textStyle = MaterialTheme.typography.labelLarge,
     shape = RoundedCornerShape(16.dp),
+    enabled = !isFetchingFeed,
     colors =
       TextFieldDefaults.textFieldColors(
         containerColor = AppTheme.colorScheme.tintedSurface,
         focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        errorIndicatorColor = Color.Transparent,
       ),
     leadingIcon = {
       Icon(
@@ -92,12 +98,20 @@ internal fun FeedLinkInputField(
       )
     },
     trailingIcon = {
-      TextButton(modifier = Modifier.padding(end = 8.dp), onClick = onCancelFeedEntryClicked) {
-        Text(
-          text = stringResource(CommonRes.strings.button_cancel),
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground
+      if (isFetchingFeed) {
+        CircularProgressIndicator(
+          modifier = Modifier.padding(end = 8.dp).requiredSize(24.dp),
+          color = AppTheme.colorScheme.tintedForeground,
+          strokeWidth = 4.dp
         )
+      } else {
+        TextButton(modifier = Modifier.padding(end = 8.dp), onClick = onCancelFeedEntryClicked) {
+          Text(
+            text = stringResource(CommonRes.strings.button_cancel),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.tintedForeground
+          )
+        }
       }
     },
     placeholder = {

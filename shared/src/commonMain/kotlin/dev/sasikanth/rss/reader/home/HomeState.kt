@@ -32,7 +32,8 @@ data class HomeState(
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
   val selectedFeed: Feed?,
-  val canShowFeedLinkEntry: Boolean
+  val canShowFeedLinkEntry: Boolean,
+  val feedFetchingState: FeedFetchingState
 ) {
 
   companion object {
@@ -44,7 +45,8 @@ data class HomeState(
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
         selectedFeed = null,
-        canShowFeedLinkEntry = false
+        canShowFeedLinkEntry = false,
+        feedFetchingState = FeedFetchingState.Idle
       )
   }
 
@@ -53,6 +55,9 @@ data class HomeState(
 
   val isRefreshing: Boolean
     get() = loadingState == Loading
+
+  val isFetchingFeed: Boolean
+    get() = feedFetchingState == FeedFetchingState.Loading
 }
 
 sealed interface HomeLoadingState {
@@ -61,4 +66,9 @@ sealed interface HomeLoadingState {
   object Loading : HomeLoadingState
 
   data class Error(val errorMessage: String) : HomeLoadingState
+}
+
+enum class FeedFetchingState {
+  Idle,
+  Loading
 }

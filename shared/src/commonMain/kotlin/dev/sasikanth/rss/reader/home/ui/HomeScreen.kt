@@ -206,6 +206,7 @@ fun HomeScreen(
                   .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
               )
               .padding(bottom = 24.dp, end = 24.dp),
+          isFetchingFeed = state.isFetchingFeed,
           onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
           onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
         )
