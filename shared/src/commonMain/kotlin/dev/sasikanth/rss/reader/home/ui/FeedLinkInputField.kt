@@ -42,13 +42,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.ui.AppTheme
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalResourceApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FeedLinkInputField(
   modifier: Modifier = Modifier,
@@ -87,7 +86,7 @@ internal fun FeedLinkInputField(
       ),
     leadingIcon = {
       Icon(
-        painter = painterResource("MR/images/ic_link.xml"),
+        painter = painterResource(CommonRes.images.ic_link),
         contentDescription = null,
         tint = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
       )
