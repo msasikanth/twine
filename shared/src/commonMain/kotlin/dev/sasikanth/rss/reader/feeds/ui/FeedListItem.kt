@@ -55,7 +55,7 @@ internal fun FeedListItem(
 ) {
   Box(
     modifier =
-      modifier.clickable { onFeedSelected(feed) }.fillMaxWidth().padding(start = 24.dp, end = 12.dp)
+      modifier.clickable { onFeedSelected(feed) }.fillMaxWidth().padding(start = 20.dp, end = 12.dp)
   ) {
     Row(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
