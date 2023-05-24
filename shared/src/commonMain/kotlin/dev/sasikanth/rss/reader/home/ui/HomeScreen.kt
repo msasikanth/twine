@@ -194,7 +194,7 @@ fun HomeScreen(
         .coerceAtMost(24.dp)
 
     val primaryActionBottomPadding =
-      (4 * bottomSheetSwipeTransition.currentState).dp.coerceIn(0.dp, 4.dp)
+      navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp.coerceIn(0.dp, 4.dp)
 
     Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
       if (state.canShowFeedLinkEntry) {
@@ -205,15 +205,13 @@ fun HomeScreen(
                   .only(WindowInsetsSides.Bottom)
                   .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
               )
-              .padding(bottom = 28.dp, end = 24.dp),
+              .padding(bottom = 24.dp, end = 24.dp),
           onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
           onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
         )
       } else {
         BottomSheetPrimaryActionButton(
-          modifier =
-            Modifier.windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-              .padding(bottom = primaryActionBottomPadding),
+          modifier = Modifier.padding(bottom = primaryActionBottomPadding),
           selected = state.isAllFeedsSelected,
           bottomSheetSwipeProgress =
             (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
