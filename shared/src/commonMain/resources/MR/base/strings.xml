@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="post_source_unknown">Unknown</string>
+    <string name="button_all">ALL</string>
+    <string name="button_add_feed">Add feed</string>
+    <string name="button_go_back">Go back</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="feed_entry_hint">Enter feed link</string>
+</resources>

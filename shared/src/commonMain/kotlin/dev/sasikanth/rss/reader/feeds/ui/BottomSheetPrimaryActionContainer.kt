@@ -39,6 +39,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.stringResource
+import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -68,7 +70,7 @@ internal fun BottomSheetPrimaryActionButton(
       when {
         bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
           Pair("MR/images/ic_all.xml", null)
-        else -> Pair("MR/images/ic_add.xml", "Add feed")
+        else -> Pair("MR/images/ic_add.xml", stringResource(CommonRes.strings.button_add_feed))
       }
 
     FloatingActionButton(
@@ -80,7 +82,7 @@ internal fun BottomSheetPrimaryActionButton(
     )
 
     Text(
-      text = "ALL",
+      text = stringResource(CommonRes.strings.button_all),
       style = MaterialTheme.typography.bottomSheetItemLabel,
       textAlign = TextAlign.Center,
       color = AppTheme.colorScheme.textEmphasisHigh,

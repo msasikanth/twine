@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.imePadding
 import com.moriatsushi.insetsx.navigationBars
+import dev.icerock.moko.resources.compose.stringResource
+import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -159,7 +161,7 @@ private fun FeedsSheetBottomBar(showingFeedLinkEntry: Boolean, closeSheet: () ->
           onClick = closeSheet
         ) {
           Text(
-            text = "Go back",
+            text = stringResource(CommonRes.strings.button_go_back),
             style = MaterialTheme.typography.labelLarge,
             color = AppTheme.colorScheme.tintedForeground
           )

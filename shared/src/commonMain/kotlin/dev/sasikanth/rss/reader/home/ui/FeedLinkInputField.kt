@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.stringResource
+import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -93,7 +95,7 @@ internal fun FeedLinkInputField(
     trailingIcon = {
       TextButton(modifier = Modifier.padding(end = 8.dp), onClick = onCancelFeedEntryClicked) {
         Text(
-          text = "Cancel",
+          text = stringResource(CommonRes.strings.button_cancel),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.tintedForeground
         )
@@ -101,7 +103,7 @@ internal fun FeedLinkInputField(
     },
     placeholder = {
       Text(
-        text = "Enter feed link",
+        text = stringResource(CommonRes.strings.feed_entry_hint),
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
       )
