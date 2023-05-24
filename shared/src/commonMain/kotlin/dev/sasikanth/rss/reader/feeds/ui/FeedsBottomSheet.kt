@@ -138,13 +138,21 @@ private fun BottomSheetExpandedContent(
       }
     }
 
-    Box(
-      Modifier.fillMaxWidth()
-        .background(AppTheme.colorScheme.tintedBackground)
-        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-        .requiredHeight(104.dp)
-    ) {
-      Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+    FeedsSheetBottomBar(showingFeedLinkEntry = showingFeedLinkEntry, closeSheet = closeSheet)
+  }
+}
+
+@Composable
+private fun FeedsSheetBottomBar(showingFeedLinkEntry: Boolean, closeSheet: () -> Unit) {
+  Box(
+    Modifier.background(AppTheme.colorScheme.tintedBackground)
+      .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+  ) {
+    Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+    Box(Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
+      // Placeholder view with similar height of primary action button and input field
+      // from the home screen
+      Box(Modifier.requiredHeight(56.dp))
       if (!showingFeedLinkEntry) {
         TextButton(
           modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
