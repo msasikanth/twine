@@ -22,11 +22,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -44,7 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.ime
+import com.moriatsushi.insetsx.imePadding
 import com.moriatsushi.insetsx.navigationBars
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
@@ -121,14 +123,7 @@ private fun BottomSheetExpandedContent(
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-
-  Column(
-    modifier =
-      Modifier.fillMaxSize()
-        .padding(bottom = WindowInsets.ime.asPaddingValues().calculateBottomPadding())
-        .then(modifier)
-  ) {
+  Column(modifier = Modifier.fillMaxSize().imePadding().then(modifier)) {
     Toolbar(onCloseClicked = closeSheet)
 
     LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
@@ -146,14 +141,13 @@ private fun BottomSheetExpandedContent(
     Box(
       Modifier.fillMaxWidth()
         .background(AppTheme.colorScheme.tintedBackground)
-        .requiredHeight(104.dp + navigationBarsPadding)
+        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+        .requiredHeight(104.dp)
     ) {
       Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
       if (!showingFeedLinkEntry) {
         TextButton(
-          modifier =
-            Modifier.align(Alignment.CenterEnd)
-              .padding(bottom = navigationBarsPadding, end = 24.dp),
+          modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
           onClick = closeSheet
         ) {
           Text(
