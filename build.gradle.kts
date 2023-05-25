@@ -36,12 +36,14 @@ allprojects {
       target("**/*.kt")
       targetExclude("$buildDir/**/*.kt")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"))
+        .onlyIfContentMatches("missingString")
     }
     kotlinGradle {
       ktfmt(libs.versions.ktfmt.get()).googleStyle()
       target("**/*.kts")
       targetExclude("$buildDir/**/*.kts")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "(^(?![\\/ ]\\*).*$)")
+        .onlyIfContentMatches("missingString")
     }
     format("xml") {
       target("**/*.xml")
