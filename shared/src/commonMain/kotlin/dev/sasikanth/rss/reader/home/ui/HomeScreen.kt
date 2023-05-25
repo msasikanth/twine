@@ -54,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceAtLeast
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.ime
 import com.moriatsushi.insetsx.navigationBars
@@ -194,7 +193,7 @@ fun HomeScreen(
         .coerceAtMost(24.dp)
 
     val primaryActionBottomPadding =
-      navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp.coerceIn(0.dp, 4.dp)
+      navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp
 
     Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
       if (state.canShowFeedLinkEntry) {
@@ -212,7 +211,7 @@ fun HomeScreen(
         )
       } else {
         BottomSheetPrimaryActionButton(
-          modifier = Modifier.padding(bottom = primaryActionBottomPadding),
+          modifier = Modifier.padding(bottom = primaryActionBottomPadding.coerceAtLeast(0.dp)),
           selected = state.isAllFeedsSelected,
           bottomSheetSwipeProgress =
             (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
