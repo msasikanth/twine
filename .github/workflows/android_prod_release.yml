@@ -49,6 +49,12 @@ jobs:
       - name: Build release artifacts
         run: ./gradlew --no-daemon androidApp:assembleRelease androidApp:bundleRelease
 
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: release.apk
+          path: androidApp/build/outputs/bundle/release/androidApp-release.apk
+
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v3
         with:
