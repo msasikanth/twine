@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.android.build.api.dsl.ManagedVirtualDevice
 import dev.icerock.gradle.MRVisibility.Internal
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -79,6 +80,7 @@ kotlin {
         implementation(libs.kotlinx.coroutines.test)
       }
     }
+
     val androidMain by getting {
       dependencies {
         api(libs.androidx.activity.compose)
@@ -87,6 +89,13 @@ kotlin {
         implementation(libs.ktor.client.okhttp)
         implementation(libs.sqldelight.driver.android)
         implementation(libs.coil.compose)
+      }
+    }
+    val androidInstrumentedTest by getting {
+      dependsOn(commonTest)
+      dependencies {
+        implementation(libs.androidx.test.runner)
+        implementation(libs.androidx.test.rules)
       }
     }
 
@@ -98,6 +107,15 @@ kotlin {
         implementation(libs.ktor.client.darwin)
         implementation(libs.sqldelight.driver.native)
       }
+    }
+    val iosX64Test by getting
+    val iosArm64Test by getting
+    val iosSimulatorArm64Test by getting
+    val iosTest by getting {
+      dependsOn(commonTest)
+      iosX64Test.dependsOn(this)
+      iosArm64Test.dependsOn(this)
+      iosSimulatorArm64Test.dependsOn(this)
     }
   }
 }
@@ -119,12 +137,26 @@ android {
   sourceSets["main"].res.srcDirs("src/androidMain/res")
   sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
-  defaultConfig { minSdk = libs.versions.android.sdk.min.get().toInt() }
+  defaultConfig {
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
   }
   kotlin { jvmToolchain(11) }
+  testOptions {
+    managedDevices {
+      devices {
+        maybeCreate<ManagedVirtualDevice>("pixel2Api31").apply {
+          device = "Pixel 2"
+          apiLevel = 31
+          systemImageSource = "aosp"
+        }
+      }
+    }
+  }
 }
 
 dependencies {
