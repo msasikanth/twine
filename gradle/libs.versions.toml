@@ -25,7 +25,7 @@ coil = "2.3.0"
 spotless = "6.18.0"
 ktfmt = "0.44"
 kotlininject = "0.6.1"
-ksp = "1.8.20-1.0.11"
+ksp = "1.8.21-1.0.11"
 material_color_utilities = "1.0.0-alpha01"
 
 [libraries]
