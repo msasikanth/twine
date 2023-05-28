@@ -22,9 +22,13 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +36,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +49,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -58,26 +62,27 @@ internal fun FeedLinkInputField(
   onCancelFeedEntryClicked: () -> Unit
 ) {
   var input by remember { mutableStateOf("") }
+  val isInputBlank by derivedStateOf { input.isBlank() }
+
   val focusRequester = remember { FocusRequester() }
   val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+  fun onAddFeed() {
+    if (!isInputBlank) {
+      onAddFeed.invoke(input)
+      input = ""
+      focusManager.clearFocus()
+    }
+  }
 
   TextField(
     modifier = modifier.requiredHeight(56.dp).fillMaxWidth().focusRequester(focusRequester),
     value = input,
     onValueChange = { input = it },
     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Uri),
-    keyboardActions =
-      KeyboardActions(
-        onDone = {
-          if (input.isNotBlank()) {
-            onAddFeed(input)
-            input = ""
-            focusManager.clearFocus()
-          }
-        }
-      ),
+    keyboardActions = KeyboardActions(onDone = { onAddFeed() }),
     maxLines = 1,
     textStyle = MaterialTheme.typography.labelLarge,
     shape = RoundedCornerShape(16.dp),
@@ -91,11 +96,13 @@ internal fun FeedLinkInputField(
         errorIndicatorColor = Color.Transparent,
       ),
     leadingIcon = {
-      Icon(
-        painter = painterResource(CommonRes.images.ic_link),
-        contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
-      )
+      IconButton(onClick = onCancelFeedEntryClicked) {
+        Icon(
+          imageVector = Icons.Filled.ArrowBack,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      }
     },
     trailingIcon = {
       if (isFetchingFeed) {
@@ -105,11 +112,19 @@ internal fun FeedLinkInputField(
           strokeWidth = 4.dp
         )
       } else {
-        TextButton(modifier = Modifier.padding(end = 8.dp), onClick = onCancelFeedEntryClicked) {
+        TextButton(
+          modifier = Modifier.padding(end = 8.dp),
+          enabled = !isInputBlank,
+          onClick = { onAddFeed() },
+          colors =
+            ButtonDefaults.textButtonColors(
+              contentColor = AppTheme.colorScheme.tintedForeground,
+              disabledContentColor = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
+            )
+        ) {
           Text(
-            text = stringResource(CommonRes.strings.button_cancel),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground
+            text = stringResource(CommonRes.strings.button_add),
+            style = MaterialTheme.typography.labelLarge
           )
         }
       }

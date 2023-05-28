@@ -5,5 +5,6 @@
     <string name="button_add_feed">Add feed</string>
     <string name="button_go_back">Go back</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_add">Add</string>
     <string name="feed_entry_hint">Enter feed link</string>
 </resources>
