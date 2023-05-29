@@ -62,6 +62,7 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
+import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
@@ -143,6 +144,7 @@ fun HomeScreen(
         HomeScreenContent(
           featuredPosts = featuredPosts,
           posts = posts,
+          selectedFeed = state.selectedFeed,
           isRefreshing = state.isRefreshing,
           onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
@@ -229,6 +231,7 @@ fun HomeScreen(
 private fun HomeScreenContent(
   featuredPosts: ImmutableList<PostWithMetadata>,
   posts: ImmutableList<PostWithMetadata>,
+  selectedFeed: Feed?,
   isRefreshing: Boolean,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
@@ -243,6 +246,7 @@ private fun HomeScreenContent(
       PostsList(
         featuredPosts = featuredPosts,
         posts = posts,
+        selectedFeed = selectedFeed,
         onPostClicked = onPostClicked,
         onFeaturedItemChange = onFeaturedItemChange
       )

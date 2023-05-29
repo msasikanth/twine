@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -65,13 +65,13 @@ import kotlinx.collections.immutable.ImmutableList
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeaturedPostItems(
-  modifier: Modifier = Modifier,
+  pagerState: PagerState,
   featuredPosts: ImmutableList<PostWithMetadata>,
+  modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit
 ) {
   Box(modifier = modifier) {
-    val pagerState = rememberPagerState()
     var selectedImage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(pagerState.settledPage, featuredPosts) {

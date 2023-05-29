@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Divider
@@ -34,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,16 +47,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.statusBars
 import dev.sasikanth.rss.reader.components.AsyncImage
+import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
 import dev.sasikanth.rss.reader.utils.relativeDurationString
 import kotlinx.collections.immutable.ImmutableList
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PostsList(
   featuredPosts: ImmutableList<PostWithMetadata>,
   posts: ImmutableList<PostWithMetadata>,
+  selectedFeed: Feed?,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onPostClicked: (post: PostWithMetadata) -> Unit
 ) {
@@ -63,10 +70,22 @@ internal fun PostsList(
       0.dp
     }
 
-  LazyColumn(contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)) {
+  val listState = rememberLazyListState()
+  val featuredPostsPagerState = rememberPagerState()
+
+  LaunchedEffect(selectedFeed) {
+    listState.scrollToItem(0)
+    featuredPostsPagerState.scrollToPage(0)
+  }
+
+  LazyColumn(
+    state = listState,
+    contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)
+  ) {
     if (featuredPosts.isNotEmpty()) {
       item {
         FeaturedPostItems(
+          pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
           onItemClick = onPostClicked,
           onFeaturedItemChange = onFeaturedItemChange
