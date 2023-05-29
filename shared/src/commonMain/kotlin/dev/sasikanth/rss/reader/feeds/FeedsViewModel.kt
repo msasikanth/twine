@@ -71,7 +71,12 @@ class FeedsViewModel(
   }
 
   private fun onDeleteFeed(feed: Feed) {
-    viewModelScope.launch { rssRepository.removeFeed(feed.link) }
+    viewModelScope.launch {
+      rssRepository.removeFeed(feed.link)
+      if (_state.value.selectedFeed == feed) {
+        observableSelectedFeed.clearSelection()
+      }
+    }
   }
 
   private fun onFeedSelected(feed: Feed) {
