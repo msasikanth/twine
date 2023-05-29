@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release.apk
-          path: androidApp/build/outputs/bundle/release/androidApp-release.apk
+          path: androidApp/build/outputs/apk/release/androidApp-release.apk
 
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v3
