@@ -80,36 +80,43 @@ internal fun FeedsBottomSheet(
     BottomSheetHandle(bottomSheetSwipeTransition)
 
     Box {
-      BottomSheetCollapsedContent(
-        modifier =
-          Modifier.graphicsLayer {
-            alpha = (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
-          },
-        feeds = state.feeds,
-        selectedFeed = selectedFeed,
-        onFeedSelected = { feed -> feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(feed)) }
-      )
-      BottomSheetExpandedContent(
-        modifier =
-          Modifier.graphicsLayer {
-            val threshold = 0.3
-            val scaleFactor = 1 / (1 - threshold)
-            val targetAlpha =
-              if (bottomSheetSwipeTransition.currentState > threshold) {
-                  (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
-                } else {
-                  0f
-                }
-                .toFloat()
-            alpha = targetAlpha
-          },
-        feeds = state.feeds,
-        selectedFeed = state.selectedFeed,
-        showingFeedLinkEntry = showingFeedLinkEntry,
-        closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
-        onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
-        onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) }
-      )
+      // Transforming the bottom sheet progress from 0-1 to 1-0,
+      // since we want to control the alpha of the content as
+      // users swipes the sheet up and down
+      val bottomSheetExpandingProgress =
+        (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
+      val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
+
+      if (hasBottomSheetExpandedThreshold) {
+        BottomSheetCollapsedContent(
+          modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
+          feeds = state.feeds,
+          selectedFeed = selectedFeed,
+          onFeedSelected = { feed -> feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(feed)) }
+        )
+      } else {
+        BottomSheetExpandedContent(
+          modifier =
+            Modifier.graphicsLayer {
+              val threshold = 0.3
+              val scaleFactor = 1 / (1 - threshold)
+              val targetAlpha =
+                if (bottomSheetSwipeTransition.currentState > threshold) {
+                    (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
+                  } else {
+                    0f
+                  }
+                  .toFloat()
+              alpha = targetAlpha
+            },
+          feeds = state.feeds,
+          selectedFeed = state.selectedFeed,
+          showingFeedLinkEntry = showingFeedLinkEntry,
+          closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
+          onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+          onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) }
+        )
+      }
     }
   }
 }
