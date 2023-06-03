@@ -62,7 +62,10 @@ private class IOSXmlFeedParser(
   private var currentData: MutableMap<String, String>? = null
   private var currentElement: String? = null
 
-  private val dateFormatter = NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss Z" }
+  private val offsetTimezoneDateFormatter =
+    NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss Z" }
+  private val abbrevTimezoneDateFormatter =
+    NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss z" }
 
   override fun parser(parser: NSXMLParser, foundCharacters: String) {
     val currentElement = currentElement ?: return
@@ -117,10 +120,6 @@ private class IOSXmlFeedParser(
 
   private fun PostPayload.Companion.withMap(rssMap: Map<String, String>): PostPayload {
     val pubDate = rssMap["pubDate"]
-    val date =
-      if (pubDate != null)
-        dateFormatter.dateFromString(pubDate.trim())?.timeIntervalSince1970?.times(1000)
-      else null
     val link = rssMap["link"]
     val description = rssMap["description"]
     val imageUrl: String? = rssMap["imageUrl"]
@@ -130,7 +129,7 @@ private class IOSXmlFeedParser(
       link = cleanText(link)!!,
       description = cleanTextCompact(description).orEmpty(),
       imageUrl = imageUrl,
-      date = date?.toLong() ?: 0
+      date = pubDate.dateStringToEpochSeconds()
     )
   }
 
@@ -150,5 +149,23 @@ private class IOSXmlFeedParser(
       icon = iconUrl,
       posts = posts
     )
+  }
+
+  private fun String?.dateStringToEpochSeconds(): Long {
+    if (this.isNullOrBlank()) return 0L
+
+    val date =
+      try {
+        offsetTimezoneDateFormatter.dateFromString(this.trim())
+      } catch (e: Exception) {
+        try {
+          abbrevTimezoneDateFormatter.dateFromString(this.trim())
+        } catch (e: Exception) {
+          Napier.e("Parse date error: ${e.message}")
+          null
+        }
+      }
+
+    return date?.timeIntervalSince1970?.times(1000)?.toLong() ?: 0L
   }
 }
