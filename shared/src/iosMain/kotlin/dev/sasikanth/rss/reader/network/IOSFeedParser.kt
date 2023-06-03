@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanText
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.cleanTextCompact
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlin.collections.set
 import kotlin.coroutines.resume
@@ -138,8 +139,12 @@ private class IOSXmlFeedParser(
     posts: List<PostPayload>
   ): FeedPayload {
     val link = rssMap["link"]!!
-    val domain = Url(link).host
-    val iconUrl = feedIcon(domain)
+    val domain = Url(link)
+    val iconUrl =
+      feedIcon(
+        if (domain.host != "localhost") domain.host
+        else domain.pathSegments.first().split(" ").first().trim()
+      )
 
     return FeedPayload(
       name = cleanText(rssMap["title"])!!,
