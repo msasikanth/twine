@@ -75,8 +75,8 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
       }
     }
 
-    val domain = Uri.parse(link!!).host!!
-    val iconUrl = feedIcon(domain)
+    val domain = Uri.parse(link!!)
+    val iconUrl = feedIcon(domain.host ?: domain.path!!)
 
     return FeedPayload(
       name = title!!,
