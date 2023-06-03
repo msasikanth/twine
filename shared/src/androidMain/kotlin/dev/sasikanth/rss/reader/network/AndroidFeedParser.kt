@@ -25,7 +25,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.feedIcon
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import io.github.aakira.napier.Napier
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -33,7 +33,16 @@ import org.xmlpull.v1.XmlPullParser
 
 internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
 
-  private val dateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
+  private val dateFormat =
+    DateTimeFormatterBuilder()
+      .appendPattern("EEE, dd MMM yyyy HH:mm:ss ")
+      .optionalStart()
+      .appendPattern("z")
+      .optionalEnd()
+      .optionalStart()
+      .appendPattern("Z")
+      .optionalEnd()
+      .toFormatter(Locale.US)
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return withContext(ioDispatcher) {
