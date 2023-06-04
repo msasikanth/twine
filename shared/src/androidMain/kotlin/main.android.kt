@@ -17,5 +17,5 @@ import androidx.compose.runtime.Composable
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
 @Composable
-fun MainView(homeViewModelFactory: HomeViewModelFactory) =
-  App(homeViewModelFactory = homeViewModelFactory)
+fun MainView(homeViewModelFactory: HomeViewModelFactory, openLink: (String) -> Unit) =
+  App(homeViewModelFactory = homeViewModelFactory, openLink = openLink)

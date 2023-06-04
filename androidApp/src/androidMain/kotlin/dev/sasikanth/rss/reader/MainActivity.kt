@@ -16,7 +16,9 @@
 package dev.sasikanth.rss.reader
 
 import MainView
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -41,6 +43,14 @@ class MainActivity : AppCompatActivity() {
         driverFactory = DriverFactory(this)
       )
 
-    setContent { MainView(homeViewModelFactory = appComponent.homeViewModelFactory) }
+    setContent {
+      MainView(homeViewModelFactory = appComponent.homeViewModelFactory, openLink = ::openLink)
+    }
+  }
+
+  private fun openLink(url: String) {
+    val intent =
+      Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+    startActivity(intent)
   }
 }

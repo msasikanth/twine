@@ -29,7 +29,7 @@ import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun App(homeViewModelFactory: HomeViewModelFactory) {
+fun App(homeViewModelFactory: HomeViewModelFactory, openLink: (String) -> Unit) {
   val dynamicColorState = rememberDynamicColorState()
   var imageUrl by remember { mutableStateOf<String?>(null) }
 
@@ -48,7 +48,8 @@ fun App(homeViewModelFactory: HomeViewModelFactory) {
     ) {
       HomeScreen(
         homeViewModelFactory = homeViewModelFactory,
-        onFeaturedItemChange = { imageUrl = it }
+        onFeaturedItemChange = { imageUrl = it },
+        openLink = openLink
       )
     }
   }

@@ -16,6 +16,7 @@
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
-fun MainViewController(homeViewModelFactory: HomeViewModelFactory) = ComposeUIViewController {
-  App(homeViewModelFactory = homeViewModelFactory)
-}
+fun MainViewController(homeViewModelFactory: HomeViewModelFactory, openLink: (String) -> Unit) =
+  ComposeUIViewController {
+    App(homeViewModelFactory = homeViewModelFactory, openLink = openLink)
+  }

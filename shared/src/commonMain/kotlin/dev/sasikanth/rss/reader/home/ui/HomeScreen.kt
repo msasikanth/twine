@@ -71,7 +71,6 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
-import dev.sasikanth.rss.reader.utils.openBrowser
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
@@ -81,7 +80,8 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 @Composable
 fun HomeScreen(
   homeViewModelFactory: HomeViewModelFactory,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit
+  onFeaturedItemChange: (imageUrl: String?) -> Unit,
+  openLink: (String) -> Unit
 ) {
   val coroutineScope = rememberCoroutineScope()
   val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()

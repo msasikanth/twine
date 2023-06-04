@@ -11,11 +11,17 @@ struct ComposeView: UIViewControllerRepresentable {
 	
 	func makeUIViewController(context: Context) -> UIViewController {
 		let appComponent = InjectAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
-		let controller = Main_iosKt.MainViewController(homeViewModelFactory: appComponent.homeViewModelFactory)
+        let controller = Main_iosKt.MainViewController(homeViewModelFactory: appComponent.homeViewModelFactory, openLink: { url in
+            openLink(url: url)
+        })
 		return controller
 	}
 	
 	func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
+    
+    private func openLink(url: String) {
+        UIApplication.shared.open(URL(string: url)!, options: [:], completionHandler: nil)
+    }
 }
 
 struct ContentView: View {
