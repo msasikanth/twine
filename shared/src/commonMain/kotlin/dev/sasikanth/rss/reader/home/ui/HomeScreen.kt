@@ -113,7 +113,7 @@ fun HomeScreen(
     viewModel.effects.collect { effect ->
       when (effect) {
         is HomeEffect.OpenPost -> {
-          openBrowser(effect.post.link)
+          openLink(effect.post.link)
         }
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
