@@ -83,7 +83,7 @@ internal fun FeedLinkInputField(
     onValueChange = { input = it },
     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Uri),
     keyboardActions = KeyboardActions(onDone = { onAddFeed() }),
-    maxLines = 1,
+    singleLine = true,
     textStyle = MaterialTheme.typography.labelLarge,
     shape = RoundedCornerShape(16.dp),
     enabled = !isFetchingFeed,
