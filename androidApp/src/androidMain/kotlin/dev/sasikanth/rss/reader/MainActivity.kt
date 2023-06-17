@@ -16,18 +16,20 @@
 package dev.sasikanth.rss.reader
 
 import MainView
-import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.di.AppComponent
 import dev.sasikanth.rss.reader.di.create
+
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,8 +51,7 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun openLink(url: String) {
-    val intent =
-      Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-    startActivity(intent)
+    val intent = CustomTabsIntent.Builder().build()
+    intent.launchUrl(this, url.toUri())
   }
 }
