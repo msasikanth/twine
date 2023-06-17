@@ -85,6 +85,7 @@ kotlin {
       dependencies {
         api(libs.androidx.activity.compose)
         api(libs.androidx.appcompat)
+        api(libs.androidx.browser)
         api(libs.androidx.core)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.sqldelight.driver.android)
