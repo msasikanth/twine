@@ -20,6 +20,8 @@ import dev.sasikanth.rss.reader.models.FeedPayload
 internal interface FeedParser {
 
   companion object {
+    const val RSS_TAG = "rss"
+
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
 
