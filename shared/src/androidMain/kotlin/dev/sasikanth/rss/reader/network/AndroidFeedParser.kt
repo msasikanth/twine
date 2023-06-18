@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.network
 
 import android.util.Xml
 import dev.sasikanth.rss.reader.models.FeedPayload
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -35,6 +36,7 @@ internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) 
 
         when (parser.name) {
           RSS_TAG -> AndroidRssParser(parser, feedUrl).parse()
+          ATOM_TAG -> AndroidAtomParser(parser, feedUrl).parse()
           else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
         }
       }

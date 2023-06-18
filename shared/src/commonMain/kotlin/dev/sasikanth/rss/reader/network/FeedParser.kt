@@ -21,6 +21,7 @@ internal interface FeedParser {
 
   companion object {
     const val RSS_TAG = "rss"
+    const val ATOM_TAG = "feed"
 
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
