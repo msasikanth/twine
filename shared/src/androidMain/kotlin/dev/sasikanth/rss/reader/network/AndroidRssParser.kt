@@ -12,9 +12,8 @@ import java.util.Locale
 internal class AndroidRssParser(
   private val parser: XmlPullParser,
   private val feedUrl: String
-) {
+) : Parser() {
 
-  private val namespace: String? = null
   private val rssDateFormat =
     DateTimeFormatterBuilder()
       .appendPattern("EEE, dd MMM yyyy HH:mm:ss ")
@@ -26,7 +25,7 @@ internal class AndroidRssParser(
       .optionalEnd()
       .toFormatter(Locale.US)
 
-  internal fun parse(): FeedPayload {
+  override fun parse(): FeedPayload {
     parser.nextTag()
     parser.require(XmlPullParser.START_TAG, namespace, "channel")
 
@@ -104,38 +103,5 @@ internal class AndroidRssParser(
       imageUrl = image,
       date = dateLong
     )
-  }
-
-  fun readAttrText(attrName: String, parser: XmlPullParser): String? {
-    val url = parser.getAttributeValue(namespace, attrName)
-    skip(parser)
-    return url
-  }
-
-  fun readTagText(tagName: String, parser: XmlPullParser): String {
-    parser.require(XmlPullParser.START_TAG, namespace, tagName)
-    val title = readText(parser)
-    parser.require(XmlPullParser.END_TAG, namespace, tagName)
-    return title
-  }
-
-  private fun readText(parser: XmlPullParser): String {
-    var result = ""
-    if (parser.next() == XmlPullParser.TEXT) {
-      result = parser.text
-      parser.nextTag()
-    }
-    return result
-  }
-
-  fun skip(parser: XmlPullParser) {
-    parser.require(XmlPullParser.START_TAG, namespace, null)
-    var depth = 1
-    while (depth != 0) {
-      when (parser.next()) {
-        XmlPullParser.END_TAG -> depth--
-        XmlPullParser.START_TAG -> depth++
-      }
-    }
   }
 }
