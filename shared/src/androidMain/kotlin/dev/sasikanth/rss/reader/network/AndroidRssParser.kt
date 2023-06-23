@@ -4,15 +4,13 @@ import android.net.Uri
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
-import org.xmlpull.v1.XmlPullParser
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.util.Locale
+import org.xmlpull.v1.XmlPullParser
 
-internal class AndroidRssParser(
-  private val parser: XmlPullParser,
-  private val feedUrl: String
-) : Parser() {
+internal class AndroidRssParser(private val parser: XmlPullParser, private val feedUrl: String) :
+  Parser() {
 
   private val rssDateFormat =
     DateTimeFormatterBuilder()
@@ -80,7 +78,6 @@ internal class AndroidRssParser(
         name == "pubDate" -> date = readTagText("pubDate", parser)
         FeedParser.imageTags.contains(name) && image.isNullOrBlank() ->
           image = readAttrText("url", parser)
-
         else -> skip(parser)
       }
     }

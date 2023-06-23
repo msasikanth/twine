@@ -5,15 +5,13 @@ import android.util.Xml
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 
-internal class AndroidAtomParser(
-  private val parser: XmlPullParser,
-  private val feedUrl: String
-) : Parser() {
+internal class AndroidAtomParser(private val parser: XmlPullParser, private val feedUrl: String) :
+  Parser() {
 
   private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
@@ -38,7 +36,6 @@ internal class AndroidAtomParser(
           if (link.isNullOrBlank()) {
             link = readAtomLink(parser)
           }
-
         "subtitle" -> description = readTagText("subtitle", parser)
         "entry" -> posts.add(readAtomEntry(parser))
         else -> skip(parser)
@@ -81,7 +78,6 @@ internal class AndroidAtomParser(
             image = atomContent.imageUrl
           }
         }
-
         "published" -> date = readTagText(tagName, parser)
         else -> skip(parser)
       }
@@ -131,14 +127,12 @@ internal class AndroidAtomParser(
               imageUrl = contentParser.getAttributeValue(namespace, "src")
             }
           }
-
           XmlPullParser.TEXT -> {
             val text = contentParser.text.trim()
             if (text.isNotBlank() && currentTag == "p") {
               contentBuilder.append(contentParser.text.trim())
             }
           }
-
           XmlPullParser.END_TAG -> {
             if (contentParser.name == tagName) {
               parsedContent = true
