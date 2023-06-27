@@ -7,7 +7,7 @@ android_sdk_compile = "33"
 android_sdk_target = "33"
 android_sdk_min = "31"
 
-sqldelight = "2.0.0-rc01"
+sqldelight = "2.0.0-rc02"
 moko_resources = "0.23.0"
 ktor = "2.3.1"
 napier = "2.6.1"
