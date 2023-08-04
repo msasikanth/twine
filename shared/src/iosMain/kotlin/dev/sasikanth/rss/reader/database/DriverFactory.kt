@@ -26,10 +26,12 @@ actual class DriverFactory {
     return NativeSqliteDriver(
       DatabaseConfiguration(
         name = DB_NAME,
-        version = ReaderDatabase.Schema.version,
+        version = ReaderDatabase.Schema.version.toInt(),
         create = { connection -> wrapConnection(connection) { ReaderDatabase.Schema.create(it) } },
         upgrade = { connection, oldVersion, newVersion ->
-          wrapConnection(connection) { ReaderDatabase.Schema.migrate(it, oldVersion, newVersion) }
+          wrapConnection(connection) {
+            ReaderDatabase.Schema.migrate(it, oldVersion.toLong(), newVersion.toLong())
+          }
         },
         extendedConfig = DatabaseConfiguration.Extended(foreignKeyConstraints = true)
       )
