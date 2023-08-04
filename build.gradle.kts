@@ -33,7 +33,7 @@ allprojects {
   configure<SpotlessExtension> {
     kotlin {
       ktfmt(libs.versions.ktfmt.get()).googleStyle()
-      target("**/*.kt")
+      target("src/**/*.kt")
       targetExclude("$buildDir/**/*.kt")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"))
         .onlyIfContentMatches("missingString")
@@ -46,7 +46,7 @@ allprojects {
         .onlyIfContentMatches("missingString")
     }
     format("xml") {
-      target("**/*.xml")
+      target("src/**/*.xml")
       targetExclude("**/build/", ".idea/")
       trimTrailingWhitespace()
       endWithNewline()
