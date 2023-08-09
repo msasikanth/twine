@@ -145,7 +145,7 @@ private class IOSXmlFeedParser(
     rssMap: Map<String, String>,
     posts: List<PostPayload>
   ): FeedPayload {
-    val link = rssMap["link"]!!
+    val link = rssMap["link"]!!.trim()
     val domain = Url(link)
     val iconUrl =
       feedIcon(
