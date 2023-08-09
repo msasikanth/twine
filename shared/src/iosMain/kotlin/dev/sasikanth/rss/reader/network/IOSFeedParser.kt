@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+
 package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
@@ -85,12 +87,10 @@ private class IOSXmlFeedParser(
     currentElement = didStartElement
 
     when {
-      imageTags.contains(currentElement) &&
-        !currentItemData.containsKey("imageUrl") &&
-        attributes.containsKey("url") -> {
+      hasRssImageUrl(attributes) -> {
         currentItemData["imageUrl"] = attributes["url"] as String
       }
-      currentElement == "enclosure" && currentItemData["link"].isNullOrBlank() -> {
+      hasPodcastRssUrl() -> {
         currentItemData["link"] = attributes["url"] as String
       }
     }
@@ -110,16 +110,24 @@ private class IOSXmlFeedParser(
     qualifiedName: String?
   ) {
     if (didEndElement == "item") {
-      posts.add(PostPayload.withMap(currentItemData))
+      posts.add(PostPayload.mapRssPost(currentItemData))
       currentItemData.clear()
     }
   }
 
   override fun parserDidEndDocument(parser: NSXMLParser) {
-    onEnd(FeedPayload.withMap(currentChannelData, posts))
+    onEnd(FeedPayload.mapRssFeed(currentChannelData, posts))
   }
 
-  private fun PostPayload.Companion.withMap(rssMap: Map<String, String>): PostPayload {
+  private fun hasPodcastRssUrl() =
+    currentElement == "enclosure" && currentItemData["link"].isNullOrBlank()
+
+  private fun hasRssImageUrl(attributes: Map<Any?, *>) =
+    imageTags.contains(currentElement) &&
+      !currentItemData.containsKey("imageUrl") &&
+      attributes.containsKey("url")
+
+  private fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): PostPayload {
     val pubDate = rssMap["pubDate"]
     val link = rssMap["link"]
     val description = rssMap["description"]
@@ -134,11 +142,11 @@ private class IOSXmlFeedParser(
     )
   }
 
-  private fun FeedPayload.Companion.withMap(
+  private fun FeedPayload.Companion.mapRssFeed(
     rssMap: Map<String, String>,
     posts: List<PostPayload>
   ): FeedPayload {
-    val link = rssMap["link"]!!
+    val link = rssMap["link"]!!.trim()
     val domain = Url(link)
     val iconUrl =
       feedIcon(
