@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+
 package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.FeedPayload
