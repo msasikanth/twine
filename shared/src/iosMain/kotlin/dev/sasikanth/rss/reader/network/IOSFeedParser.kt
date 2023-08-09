@@ -119,12 +119,13 @@ private class IOSXmlFeedParser(
     onEnd(FeedPayload.mapRssFeed(currentChannelData, posts))
   }
 
-  private fun hasPodcastRssUrl() = currentElement == "enclosure" && currentItemData["link"].isNullOrBlank()
+  private fun hasPodcastRssUrl() =
+    currentElement == "enclosure" && currentItemData["link"].isNullOrBlank()
 
   private fun hasRssImageUrl(attributes: Map<Any?, *>) =
     imageTags.contains(currentElement) &&
-            !currentItemData.containsKey("imageUrl") &&
-            attributes.containsKey("url")
+      !currentItemData.containsKey("imageUrl") &&
+      attributes.containsKey("url")
 
   private fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): PostPayload {
     val pubDate = rssMap["pubDate"]
