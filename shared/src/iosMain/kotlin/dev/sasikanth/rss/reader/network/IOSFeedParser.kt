@@ -87,7 +87,7 @@ private class IOSXmlFeedParser(
     currentElement = didStartElement
 
     when {
-      hasRssImageUrl(attributes) -> {
+      !currentItemData.containsKey("imageUrl") && hasRssImageUrl(attributes) -> {
         currentItemData["imageUrl"] = attributes["url"] as String
       }
       hasPodcastRssUrl() -> {
@@ -123,8 +123,8 @@ private class IOSXmlFeedParser(
     currentElement == "enclosure" && currentItemData["link"].isNullOrBlank()
 
   private fun hasRssImageUrl(attributes: Map<Any?, *>) =
-    imageTags.contains(currentElement) &&
-      !currentItemData.containsKey("imageUrl") &&
+    (imageTags.contains(currentElement) ||
+      (currentElement == "enclosure" && attributes["type"] == "image/jpeg")) &&
       attributes.containsKey("url")
 
   private fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): PostPayload {

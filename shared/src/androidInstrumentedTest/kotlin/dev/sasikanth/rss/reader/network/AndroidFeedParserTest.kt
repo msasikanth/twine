@@ -46,6 +46,13 @@ class AndroidFeedParserTest {
               imageUrl = null,
               date = 1684924200000
             ),
+            PostPayload(
+              title = "Post with enclosure image",
+              link = "https://example.com/fourth-post",
+              description = "Fourth post description.",
+              imageUrl = "https://example.com/enclosure-image",
+              date = 1684924200000
+            ),
           )
       )
 
@@ -127,6 +134,13 @@ class AndroidFeedParserTest {
             <description>Third post description.</description>
             <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
             <enclosure url="https://example.com/third-post" />
+          </item>
+          <item>
+            <title>Post with enclosure image</title>
+            <description>Fourth post description.</description>
+            <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
+            <enclosure url="https://example.com/fourth-post" />
+            <enclosure type="image/jpeg" url="https://example.com/enclosure-image" />
           </item>
         </channel>
       </rss>

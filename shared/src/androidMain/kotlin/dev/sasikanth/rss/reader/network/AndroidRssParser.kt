@@ -76,8 +76,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         name == "enclosure" && link.isNullOrBlank() -> link = readAttrText("url", parser)
         name == "description" -> description = readTagText("description", parser)
         name == "pubDate" -> date = readTagText("pubDate", parser)
-        FeedParser.imageTags.contains(name) && image.isNullOrBlank() ->
-          image = readAttrText("url", parser)
+        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> image = readAttrText("url", parser)
         else -> skip(parser)
       }
     }
@@ -101,4 +100,9 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       date = dateLong
     )
   }
+
+  private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
+    (FeedParser.imageTags.contains(name) ||
+      (name == "enclosure" && parser.getAttributeValue(namespace, "type") == "image/jpeg")) &&
+      !parser.getAttributeValue(namespace, "url").isNullOrBlank()
 }
