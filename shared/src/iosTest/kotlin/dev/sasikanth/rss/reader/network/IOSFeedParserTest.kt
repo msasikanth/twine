@@ -3,6 +3,7 @@ package dev.sasikanth.rss.reader.network
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -63,6 +64,54 @@ class IOSFeedParserTest {
     assertEquals(expectedFeedPayload, payload)
   }
 
+  @Test
+  fun parsingAtomFeedShouldWorkCorrectly() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Feed title",
+        icon = "https://icon.horse/icon/example.com",
+        description = "Feed description",
+        link = feedUrl,
+        homepageLink = "https://example.com",
+        posts =
+          listOf(
+            PostPayload(
+              title = "Post with image",
+              link = "https://example.com/first-post",
+              description = "Post summary with an image.",
+              imageUrl = "https://example.com/image.jpg",
+              date = 1685008800000
+            ),
+            PostPayload(
+              title = "Second post",
+              link = "https://example.com/second-post",
+              description = "Post summary of the second post.",
+              imageUrl = null,
+              date = 1684917000000
+            ),
+            PostPayload(
+              title = "Post without image",
+              link = "https://example.com/third-post",
+              description = "Post summary of the third post.",
+              imageUrl = null,
+              date = 1684936800000
+            ),
+          )
+      )
+
+    // when
+    val payload = feedParser.parse(atomXmlContent, feedUrl)
+
+    // then
+    assertEquals(expectedFeedPayload.name, payload.name)
+    assertEquals(expectedFeedPayload.description, payload.description)
+    assertEquals(expectedFeedPayload.link, payload.link)
+    assertEquals(expectedFeedPayload.homepageLink, payload.homepageLink)
+    assertEquals(expectedFeedPayload.icon, payload.icon)
+    assertContentEquals(expectedFeedPayload.posts, payload.posts)
+  }
+
   companion object {
 
     private const val feedUrl = "https://example.com"
@@ -101,6 +150,48 @@ class IOSFeedParserTest {
           </item>
         </channel>
       </rss>
+      """
+    private const val atomXmlContent =
+      """
+        <feed xmlns="http://www.w3.org/2005/Atom">
+        <title>Feed title</title>
+        <subtitle>Feed description</subtitle>
+        <link href="https://example.com" rel="alternate" />
+        <entry>
+          <title>Post with image</title>
+          <link rel="alternate" href="https://example.com/first-post" />
+          <published>2023-05-25T10:00:00Z</published>
+          <content type="html">
+          
+          &lt;img alt="First Image"
+            src="https://example.com/image.jpg"
+            /&gt;
+          
+          &lt;p&gt;Post summary with an image.&lt;/p&gt;
+          
+          </content>
+        </entry>
+        <entry>
+          <title>Second post</title>
+          <link rel="alternate" href="https://example.com/second-post" />
+          <published>2023-05-24T08:30:00Z</published>
+          <content type="html">
+
+          &lt;p&gt;Post summary of the second post.&lt;/p&gt;
+          
+          </content>
+        </entry>
+        <entry>
+          <title>Post without image</title>
+          <link rel="alternate" href="https://example.com/third-post" />
+          <published>2023-05-24T14:00:00Z</published>
+          <content type="html">
+
+          &lt;p&gt;Post summary of the third post.&lt;/p&gt;
+          
+          </content>
+        </entry>
+        </feed>
       """
   }
 }
