@@ -26,7 +26,7 @@ import me.tatarka.inject.annotations.Scope
 
 @Component
 @AppScope
-abstract class AppComponent(
+abstract class HomeComponent(
   @get:Provides val componentContext: ComponentContext,
   @get:Provides val driverFactory: DriverFactory
 ) : DataComponent {

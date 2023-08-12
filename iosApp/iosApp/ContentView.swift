@@ -3,15 +3,14 @@ import SwiftUI
 import shared
 
 struct ComposeView: UIViewControllerRepresentable {
-	let lifecyle: Lifecycle
+    let homeComponent: InjectHomeComponent
 	
-	init(lifecyle: Lifecycle) {
-		self.lifecyle = lifecyle
+    init(homeComponent: InjectHomeComponent) {
+        self.homeComponent = homeComponent
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-		let appComponent = InjectAppComponent(componentContext: DefaultComponentContext(lifecycle: lifecyle), driverFactory: DriverFactory())
-        let controller = Main_iosKt.MainViewController(homeViewModelFactory: appComponent.homeViewModelFactory, openLink: { url in
+        let controller = Main_iosKt.MainViewController(homeViewModelFactory: homeComponent.homeViewModelFactory, openLink: { url in
             openLink(url: url)
         })
 		return controller
@@ -26,14 +25,14 @@ struct ComposeView: UIViewControllerRepresentable {
 
 struct ContentView: View {
 	
-	let lifecycle: Lifecycle
+    let homeComponent: InjectHomeComponent
 	
-	init(lifecycle: Lifecycle) {
-		self.lifecycle = lifecycle
+    init(homeComponent: InjectHomeComponent) {
+        self.homeComponent = homeComponent
 	}
-	
+
 	var body: some View {
-		ComposeView(lifecyle: lifecycle)
+        ComposeView(homeComponent: homeComponent)
 			.ignoresSafeArea(.keyboard) // Compose has own keyboard handler
 			.edgesIgnoringSafeArea(.all)
 	}

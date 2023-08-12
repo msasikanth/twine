@@ -17,8 +17,13 @@ struct iOSApp: App {
 	}
 	
 	var body: some Scene {
+        let homeComponent = InjectHomeComponent(
+            componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle),
+            driverFactory: DriverFactory()
+        )
+
 		WindowGroup {
-			ContentView(lifecycle: rootHolder.lifecycle)
+            ContentView(homeComponent: homeComponent)
 				.onChange(of: scenePhase) { newPhase in
 					switch newPhase {
 						case .background: LifecycleRegistryExtKt.stop(rootHolder.lifecycle)

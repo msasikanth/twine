@@ -26,7 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
-import dev.sasikanth.rss.reader.di.AppComponent
+import dev.sasikanth.rss.reader.di.HomeComponent
 import dev.sasikanth.rss.reader.di.create
 
 class MainActivity : AppCompatActivity() {
@@ -37,14 +37,14 @@ class MainActivity : AppCompatActivity() {
     window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar_color)
     window.navigationBarColor = Color.TRANSPARENT
 
-    val appComponent =
-      AppComponent::class.create(
+    val homeComponent =
+      HomeComponent::class.create(
         componentContext = defaultComponentContext(),
         driverFactory = DriverFactory(this)
       )
 
     setContent {
-      MainView(homeViewModelFactory = appComponent.homeViewModelFactory, openLink = ::openLink)
+      MainView(homeViewModelFactory = homeComponent.homeViewModelFactory, openLink = ::openLink)
     }
   }
 
