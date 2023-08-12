@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.di
 
 import com.arkivanov.decompose.ComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -25,7 +25,7 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
 @Component
-@AppScope
+@ActivityScope
 abstract class HomeComponent(
   @get:Provides val componentContext: ComponentContext,
   @get:Provides val driverFactory: DriverFactory
