@@ -23,6 +23,7 @@ import me.tatarka.inject.annotations.Provides
 interface DataComponent {
 
   @Provides
+  @AppScope
   fun providesDatabase(driverFactory: DriverFactory): ReaderDatabase {
     return createDatabase(driverFactory)
   }
