@@ -26,3 +26,12 @@ jobs:
 
       - name: Check Spotless
         run: ./gradlew spotlessCheck
+
+      - name: Common Tests
+        run: ./gradlew cleanAllTests allTests
+
+      - name: Android Integration Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          script: ./gradlew :shared:connectedAndroidTest
