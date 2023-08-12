@@ -17,9 +17,13 @@ struct iOSApp: App {
 	}
 	
 	var body: some Scene {
+        let appComponent = InjectAppComponent(
+            driverFactory: DriverFactory()
+        )
+        
         let homeComponent = InjectHomeComponent(
             componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle),
-            driverFactory: DriverFactory()
+            appComponent: appComponent
         )
 
 		WindowGroup {
