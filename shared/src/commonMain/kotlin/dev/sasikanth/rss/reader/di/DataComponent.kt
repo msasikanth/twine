@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.database.ReaderDatabase
 import dev.sasikanth.rss.reader.database.createDatabase
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
 interface DataComponent {

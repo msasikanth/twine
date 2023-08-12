@@ -17,12 +17,12 @@ package dev.sasikanth.rss.reader.di
 
 import com.arkivanov.decompose.ComponentContext
 import dev.sasikanth.rss.reader.database.DriverFactory
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
-import me.tatarka.inject.annotations.Scope
 
 @Component
 @AppScope
@@ -35,7 +35,3 @@ abstract class HomeComponent(
 
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }
-
-@Scope
-@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER)
-annotation class AppScope

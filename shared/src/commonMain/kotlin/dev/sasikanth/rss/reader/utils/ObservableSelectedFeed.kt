@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.utils
 
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.di.AppScope
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.sync.Mutex

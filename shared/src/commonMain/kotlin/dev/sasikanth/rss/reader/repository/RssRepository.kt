@@ -21,7 +21,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostWithMetadata
-import dev.sasikanth.rss.reader.di.AppScope
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
