@@ -99,7 +99,6 @@ internal class IOSFeedParser(private val ioDispatcher: CoroutineDispatcher) : Fe
         }
         .parse()
 
-    println(parserResult)
     if (parserResult) {
       return expandedPostPayload
     }
