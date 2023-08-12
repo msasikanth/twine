@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader
 
 import MainView
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
@@ -25,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.defaultComponentContext
-import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.di.AppComponent
 import dev.sasikanth.rss.reader.di.HomeComponent
 import dev.sasikanth.rss.reader.di.create
@@ -38,12 +38,10 @@ class MainActivity : AppCompatActivity() {
     window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar_color)
     window.navigationBarColor = Color.TRANSPARENT
 
-    val appComponent = AppComponent::class.create(driverFactory = DriverFactory(this))
-
     val homeComponent =
       HomeComponent::class.create(
         componentContext = defaultComponentContext(),
-        appComponent = appComponent
+        appComponent = AppComponent.from(this)
       )
 
     setContent {
@@ -57,3 +55,6 @@ class MainActivity : AppCompatActivity() {
     startActivity(intent)
   }
 }
+
+fun AppComponent.Companion.from(activity: Activity) =
+  (activity.applicationContext as ReaderApplication).appComponent

@@ -18,6 +18,9 @@ package dev.sasikanth.rss.reader
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import dev.sasikanth.rss.reader.database.DriverFactory
+import dev.sasikanth.rss.reader.di.AppComponent
+import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.utils.initialiseLogging
 
 class ReaderApplication : Application() {
@@ -25,6 +28,11 @@ class ReaderApplication : Application() {
   companion object {
     @SuppressLint("StaticFieldLeak") internal lateinit var context: Context
   }
+
+  val appComponent by
+    lazy(LazyThreadSafetyMode.NONE) {
+      AppComponent::class.create(driverFactory = DriverFactory(this))
+    }
 
   override fun onCreate() {
     super.onCreate()

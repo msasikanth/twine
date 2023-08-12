@@ -26,5 +26,7 @@ import me.tatarka.inject.annotations.Provides
 @AppScope
 abstract class AppComponent(@get:Provides val driverFactory: DriverFactory) : DataComponent {
 
+  companion object
+
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }
