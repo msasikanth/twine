@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.network
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -119,12 +118,7 @@ class IOSFeedParserTest {
     val payload = feedParser.parse(atomXmlContent, feedUrl)
 
     // then
-    assertEquals(expectedFeedPayload.name, payload.name)
-    assertEquals(expectedFeedPayload.description, payload.description)
-    assertEquals(expectedFeedPayload.link, payload.link)
-    assertEquals(expectedFeedPayload.homepageLink, payload.homepageLink)
-    assertEquals(expectedFeedPayload.icon, payload.icon)
-    assertContentEquals(expectedFeedPayload.posts, payload.posts)
+    assertEquals(expectedFeedPayload, payload)
   }
 
   companion object {
