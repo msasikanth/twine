@@ -27,7 +27,12 @@ class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) :
   private var currentElement: String? = null
 
   override fun parser(parser: NSXMLParser, foundCharacters: String) {
-    if (currentElement == "p") {
+    if (
+      currentElement == "p" ||
+        currentElement == "a" ||
+        currentElement == "span" ||
+        currentElement == "em"
+    ) {
       currentData["content"] = (currentData["content"] ?: "") + foundCharacters.trim()
     }
   }

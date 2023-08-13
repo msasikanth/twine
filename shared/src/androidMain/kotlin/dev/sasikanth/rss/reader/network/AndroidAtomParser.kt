@@ -144,8 +144,14 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
           }
           XmlPullParser.TEXT -> {
             val text = contentParser.text.trim()
-            if (text.isNotBlank() && currentTag == "p") {
-              contentBuilder.append(contentParser.text.trim())
+            when {
+              text.isNotBlank() &&
+                (currentTag == "p" ||
+                  currentTag == "a" ||
+                  currentTag == "span" ||
+                  currentTag == "em") -> {
+                contentBuilder.append("$text ")
+              }
             }
           }
           XmlPullParser.END_TAG -> {
