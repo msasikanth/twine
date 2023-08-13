@@ -286,7 +286,7 @@ private class IOSXmlFeedParser(
       name = cleanText(atomMap["title"])!!,
       homepageLink = link,
       link = feedUrl,
-      description = cleanText(atomMap["subtitle"])!!,
+      description = cleanText(atomMap["subtitle"]).orEmpty(),
       icon = iconUrl,
       posts = posts
     )
