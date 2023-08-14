@@ -83,7 +83,14 @@ private class IOSXmlFeedParser(
     val currentElement = currentElement ?: return
     val currentData = currentData ?: return
 
-    currentData[currentElement] = (currentData[currentElement] ?: "") + foundCharacters
+    when {
+      !currentData.containsKey("imageUrl") && currentElement == "featuredImage" -> {
+        currentData["imageUrl"] = foundCharacters
+      }
+      else -> {
+        currentData[currentElement] = (currentData[currentElement] ?: "") + foundCharacters
+      }
+    }
   }
 
   override fun parser(
