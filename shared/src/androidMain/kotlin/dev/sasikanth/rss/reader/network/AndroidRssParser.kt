@@ -90,7 +90,8 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         name == "title" -> title = readTagText("title", parser)
         name == "link" -> link = readTagText("link", parser)
         name == "enclosure" && link.isNullOrBlank() -> link = readAttrText("url", parser)
-        name == "description" -> description = readTagText("description", parser)
+        name == "description" || name == "content:encoded" ->
+          description = readTagText(name, parser)
         name == "pubDate" -> date = readTagText("pubDate", parser)
         image.isNullOrBlank() && hasRssImageUrl(name, parser) -> image = readAttrText("url", parser)
         image.isNullOrBlank() && name == "featuredImage" -> image = readTagText(name, parser)

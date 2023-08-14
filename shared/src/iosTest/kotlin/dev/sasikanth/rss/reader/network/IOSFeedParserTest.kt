@@ -68,6 +68,13 @@ class IOSFeedParserTest {
               imageUrl = "https://example.com/enclosure-image",
               date = 1684924200000
             ),
+            PostPayload(
+              title = "Post with description and encoded content",
+              link = "https://example.com/fifth-post",
+              description = "Fourth post description in HTML syntax.",
+              imageUrl = "https://example.com/encoded-image",
+              date = 1684924200000
+            ),
           )
       )
 
@@ -156,6 +163,16 @@ class IOSFeedParserTest {
             <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
             <enclosure url="https://example.com/fourth-post" />
             <enclosure type="image/jpeg" url="https://example.com/enclosure-image" />
+          </item>
+          <item>
+            <title>Post with description and encoded content</title>
+            <description>Fourth post description.</description>
+            <link>https://example.com/fifth-post</link>
+            <content:encoded>
+              &lt;p&gt;Fourth post description in HTML syntax.&lt;/p&gt;
+              &lt;img src="https://example.com/encoded-image" alt="encoded image" /&gt;
+            </content:encoded>
+            <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
           </item>
         </channel>
       </rss>

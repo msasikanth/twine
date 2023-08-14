@@ -32,18 +32,25 @@ internal fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): Post
   val pubDate = rssMap["pubDate"]
   val link = rssMap["link"]
   var description = rssMap["description"]
+  val encodedContent = rssMap["content:encoded"]
   var imageUrl: String? = rssMap["imageUrl"]
 
+  val descriptionToParse =
+    if (encodedContent.isNullOrBlank()) {
+      description
+    } else {
+      encodedContent
+    }
   val contentParser =
     KsoupHtmlParser(
       handler =
         HtmlContentParser {
           if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
-          description = it.content.ifBlank { description?.trim() }
+          description = it.content.ifBlank { descriptionToParse?.trim() }
         },
     )
 
-  contentParser.parseComplete(description.orEmpty())
+  contentParser.parseComplete(descriptionToParse.orEmpty())
 
   return PostPayload(
     title = FeedParser.cleanText(rssMap["title"])!!,
