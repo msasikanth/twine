@@ -62,7 +62,7 @@ internal fun FeedListItem(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box {
+      Box(contentAlignment = Alignment.Center) {
         SelectionIndicator(selected = selected, animationProgress = 1f)
         Box(
           modifier =
