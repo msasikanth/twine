@@ -206,12 +206,14 @@ private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) 
     verticalAlignment = Alignment.CenterVertically
   ) {
     post.feedIcon?.let { url ->
-      AsyncImage(
-        url = url,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.requiredSize(16.dp).clip(CircleShape)
-      )
+      Box(modifier = Modifier.clip(CircleShape).background(Color.White)) {
+        AsyncImage(
+          url = url,
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.requiredSize(16.dp)
+        )
+      }
     }
 
     Text(
