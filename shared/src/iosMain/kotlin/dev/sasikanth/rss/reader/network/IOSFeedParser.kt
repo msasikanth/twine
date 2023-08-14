@@ -111,7 +111,8 @@ private class IOSXmlFeedParser(
       hasPodcastRssUrl() -> {
         currentItemData["link"] = attributes["url"] as String
       }
-      currentElement == "link" && (attributes["rel"] == "alternate" || attributes["rel"] == null) -> {
+      currentElement == "link" &&
+        (attributes["rel"] == "alternate" || attributes["rel"] == null) -> {
         if (currentChannelData["link"].isNullOrBlank()) {
           currentChannelData["link"] = attributes["href"] as String
         }
