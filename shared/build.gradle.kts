@@ -90,6 +90,7 @@ kotlin {
         implementation(libs.kotlininject.runtime)
         implementation(libs.androidx.collection)
         implementation(libs.material.color.utilities)
+        implementation(libs.ksoup)
       }
     }
     val commonTest by getting {
