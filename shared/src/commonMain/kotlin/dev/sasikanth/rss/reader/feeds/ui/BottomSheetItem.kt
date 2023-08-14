@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -58,12 +59,19 @@ internal fun BottomSheetItem(
   ) {
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
-      AsyncImage(
-        url = iconUrl,
-        contentDescription = null,
-        modifier =
-          Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
-      )
+      Box(
+        modifier = Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
+        contentAlignment = Alignment.Center
+      ) {
+        AsyncImage(
+          url = iconUrl,
+          contentDescription = null,
+          modifier =
+            Modifier.requiredSize(48.dp)
+              .clip(RoundedCornerShape(16.dp))
+              .clickable(onClick = onClick)
+        )
+      }
     }
 
     Text(
