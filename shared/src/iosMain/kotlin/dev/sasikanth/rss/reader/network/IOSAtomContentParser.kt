@@ -15,46 +15,39 @@
  */
 package dev.sasikanth.rss.reader.network
 
-import platform.Foundation.NSXMLParser
-import platform.Foundation.NSXMLParserDelegateProtocol
-import platform.darwin.NSObject
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
-@Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) :
-  NSObject(), NSXMLParserDelegateProtocol {
+class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) : KsoupHtmlHandler {
 
-  private var currentData: MutableMap<String, String> = mutableMapOf()
-  private var currentElement: String? = null
+  private val currentData: MutableMap<String, String> = mutableMapOf()
+  private var currentTag: String? = null
 
-  override fun parser(parser: NSXMLParser, foundCharacters: String) {
-    if (
-      currentElement == "p" ||
-        currentElement == "a" ||
-        currentElement == "span" ||
-        currentElement == "em"
-    ) {
-      currentData["content"] = (currentData["content"] ?: "") + foundCharacters.trim()
+  override fun onText(text: String) {
+    when (currentTag) {
+      "p",
+      "a",
+      "span",
+      "em" -> {
+        currentData["content"] = (currentData["content"] ?: "") + text
+      }
     }
   }
 
-  override fun parser(
-    parser: NSXMLParser,
-    didStartElement: String,
-    namespaceURI: String?,
-    qualifiedName: String?,
-    attributes: Map<Any?, *>
-  ) {
-    currentElement = didStartElement
+  override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
+    currentTag = name
     when {
-      currentElement == "img" && attributes.containsKey("src") -> {
+      currentTag == "img" && attributes.containsKey("src") -> {
         currentData["imageUrl"] = attributes["src"].toString()
       }
     }
   }
 
-  override fun parserDidEndDocument(parser: NSXMLParser) {
+  override fun onEnd() {
     onEnd(
-      AtomContent(imageUrl = currentData["imageUrl"], content = currentData["content"].orEmpty())
+      AtomContent(
+        imageUrl = currentData["imageUrl"],
+        content = currentData["content"].orEmpty().trim()
+      )
     )
     currentData.clear()
   }

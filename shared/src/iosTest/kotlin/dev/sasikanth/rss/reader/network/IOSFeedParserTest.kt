@@ -107,7 +107,7 @@ class IOSFeedParserTest {
             PostPayload(
               title = "Post without image",
               link = "https://example.com/third-post",
-              description = "Post summary of the third post.",
+              description = "Post summary of the third post. click here.",
               imageUrl = null,
               date = 1684936800000
             ),
@@ -196,7 +196,7 @@ class IOSFeedParserTest {
           <published>2023-05-24T14:00:00Z</published>
           <content type="html">
 
-          &lt;p&gt;Post summary of the third post.&lt;/p&gt;
+          &lt;p&gt;Post summary of the third post. &lt;a href="https://example.com/hyperlink" &gt;click here&lt;/a&gt;.&lt;/p&gt;
           
           </content>
         </entry>
