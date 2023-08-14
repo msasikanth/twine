@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.network
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
-class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) : KsoupHtmlHandler {
+class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
 
   private val currentData: MutableMap<String, String> = mutableMapOf()
   private var currentTag: String? = null
@@ -44,7 +44,7 @@ class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) : KsoupHtml
 
   override fun onEnd() {
     onEnd(
-      AtomContent(
+      HtmlContent(
         imageUrl = currentData["imageUrl"],
         content = currentData["content"].orEmpty().trim()
       )
@@ -53,4 +53,4 @@ class IOSAtomContentParser(private val onEnd: (AtomContent) -> Unit) : KsoupHtml
   }
 }
 
-data class AtomContent(val imageUrl: String?, val content: String)
+data class HtmlContent(val imageUrl: String?, val content: String)

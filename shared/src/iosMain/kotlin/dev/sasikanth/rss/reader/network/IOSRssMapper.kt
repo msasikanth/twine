@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
@@ -30,8 +31,19 @@ private val abbrevTimezoneDateFormatter =
 internal fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): PostPayload {
   val pubDate = rssMap["pubDate"]
   val link = rssMap["link"]
-  val description = rssMap["description"]
-  val imageUrl: String? = rssMap["imageUrl"]
+  var description = rssMap["description"]
+  var imageUrl: String? = rssMap["imageUrl"]
+
+  val contentParser =
+    KsoupHtmlParser(
+      handler =
+        HtmlContentParser {
+          if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
+          description = it.content.ifBlank { description?.trim() }
+        },
+    )
+
+  contentParser.parseComplete(description.orEmpty())
 
   return PostPayload(
     title = FeedParser.cleanText(rssMap["title"])!!,

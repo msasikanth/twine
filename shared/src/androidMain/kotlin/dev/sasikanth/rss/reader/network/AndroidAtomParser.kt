@@ -16,14 +16,13 @@
 package dev.sasikanth.rss.reader.network
 
 import android.net.Uri
-import android.util.Xml
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
 
 internal class AndroidAtomParser(private val parser: XmlPullParser, private val feedUrl: String) :
   Parser() {
@@ -85,13 +84,16 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
         "title" -> title = readTagText(tagName, parser)
         "link" -> link = readAtomLink(parser)
         "content" -> {
-          val atomContent = readAtomContent(tagName, parser)
-          if (content.isNullOrBlank()) {
-            content = atomContent.content
-          }
-          if (image.isNullOrBlank()) {
-            image = atomContent.imageUrl
-          }
+          val rawContent = readTagText(tagName, parser)
+          val contentParser =
+            KsoupHtmlParser(
+              handler =
+                HtmlContentParser {
+                  if (image.isNullOrBlank()) image = it.imageUrl
+                  content = it.content.ifBlank { rawContent.trim() }
+                },
+            )
+          contentParser.parseComplete(rawContent)
         }
         "published" -> date = readTagText(tagName, parser)
         else -> skip(parser)
@@ -118,57 +120,6 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
     )
   }
 
-  private fun readAtomContent(tagName: String, parser: XmlPullParser): AtomContent {
-    parser.require(XmlPullParser.START_TAG, namespace, tagName)
-
-    val rawContent = readTagText(tagName, parser)
-    val contentBuilder = StringBuilder()
-    var imageUrl: String? = null
-
-    try {
-      val contentParser =
-        Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
-      contentParser.setInput(rawContent.reader())
-
-      var parsedContent = false
-      var currentEventType = contentParser.eventType
-      var currentTag: String? = null
-
-      while (!parsedContent && currentEventType != XmlPullParser.END_DOCUMENT) {
-        when (currentEventType) {
-          XmlPullParser.START_TAG -> {
-            currentTag = contentParser.name
-            if (currentTag == "img") {
-              imageUrl = contentParser.getAttributeValue(namespace, "src")
-            }
-          }
-          XmlPullParser.TEXT -> {
-            val text = contentParser.text.trim()
-            when {
-              text.isNotBlank() &&
-                (currentTag == "p" ||
-                  currentTag == "a" ||
-                  currentTag == "span" ||
-                  currentTag == "em") -> {
-                contentBuilder.append("$text ")
-              }
-            }
-          }
-          XmlPullParser.END_TAG -> {
-            if (contentParser.name == tagName) {
-              parsedContent = true
-            }
-          }
-        }
-        currentEventType = contentParser.next()
-      }
-    } catch (e: XmlPullParserException) {
-      contentBuilder.append(rawContent)
-    }
-
-    return AtomContent(imageUrl = imageUrl, content = contentBuilder.toString())
-  }
-
   private fun readAtomLink(parser: XmlPullParser): String? {
     var link: String? = null
     parser.require(XmlPullParser.START_TAG, namespace, "link")
@@ -181,5 +132,3 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
     return link
   }
 }
-
-private data class AtomContent(val imageUrl: String?, val content: String)

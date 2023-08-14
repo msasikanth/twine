@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.network
 
 import android.net.Uri
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
@@ -107,6 +108,17 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         }
       }
         ?: System.currentTimeMillis()
+
+    val contentParser =
+      KsoupHtmlParser(
+        handler =
+          HtmlContentParser {
+            if (image.isNullOrBlank()) image = it.imageUrl
+            description = it.content.ifBlank { description?.trim() }
+          },
+      )
+
+    contentParser.parseComplete(description.orEmpty())
 
     return PostPayload(
       title = FeedParser.cleanText(title).orEmpty(),
