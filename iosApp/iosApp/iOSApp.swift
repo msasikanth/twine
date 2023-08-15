@@ -17,11 +17,9 @@ struct iOSApp: App {
 	}
 	
 	var body: some Scene {
-        let applicationComponent = InjectApplicationComponent()
-        
         let homeViewControllerComponent = InjectHomeViewControllerComponent(
             componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle),
-            applicationComponent: applicationComponent
+            applicationComponent: appDelegate.applicationComponent
         )
 
 		WindowGroup {

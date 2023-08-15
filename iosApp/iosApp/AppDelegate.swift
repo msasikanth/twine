@@ -7,7 +7,10 @@
 //
 
 import UIKit
+import shared
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 	let rootHolder: RootHolder = RootHolder()
+    
+    lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent()
 }
