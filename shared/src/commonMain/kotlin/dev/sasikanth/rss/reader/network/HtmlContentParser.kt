@@ -28,7 +28,7 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
       "a",
       "span",
       "em" -> {
-        currentData["content"] = (currentData["content"] ?: "") + text
+        currentData["content"] = (currentData["content"] ?: "") + "${text.trim()} "
       }
     }
   }
