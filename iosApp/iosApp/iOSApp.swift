@@ -17,21 +17,22 @@ struct iOSApp: App {
 	}
 	
 	var body: some Scene {
-        let applicationComponent = InjectApplicationComponent()
-        
         let homeViewControllerComponent = InjectHomeViewControllerComponent(
             componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle),
-            applicationComponent: applicationComponent
+            applicationComponent: appDelegate.applicationComponent
         )
 
 		WindowGroup {
             ContentView(homeViewControllerComponent: homeViewControllerComponent)
 				.onChange(of: scenePhase) { newPhase in
 					switch newPhase {
-						case .background: LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
-						case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
-						case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
-						@unknown default: break
+                    case .background:
+                        LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
+                        appDelegate.scheduledRefreshFeeds()
+                
+                    case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
+                    case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
+                    @unknown default: break
 					}
 				}
 		}
