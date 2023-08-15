@@ -18,8 +18,7 @@ package dev.sasikanth.rss.reader
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import dev.sasikanth.rss.reader.database.DriverFactory
-import dev.sasikanth.rss.reader.di.AppComponent
+import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.utils.initialiseLogging
 
@@ -30,9 +29,7 @@ class ReaderApplication : Application() {
   }
 
   val appComponent by
-    lazy(LazyThreadSafetyMode.NONE) {
-      AppComponent::class.create(driverFactory = DriverFactory(this))
-    }
+    lazy(LazyThreadSafetyMode.NONE) { ApplicationComponent::class.create(context = this) }
 
   override fun onCreate() {
     super.onCreate()

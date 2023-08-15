@@ -21,14 +21,19 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
-import dev.sasikanth.rss.reader.di.AppComponent
-import dev.sasikanth.rss.reader.di.HomeComponent
+import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
 
 class MainActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,14 +43,10 @@ class MainActivity : AppCompatActivity() {
     window.statusBarColor = ContextCompat.getColor(this, R.color.status_bar_color)
     window.navigationBarColor = Color.TRANSPARENT
 
-    val homeComponent =
-      HomeComponent::class.create(
-        componentContext = defaultComponentContext(),
-        appComponent = AppComponent.from(this)
-      )
+    val activityComponent = ActivityComponent::class.create(activity = this)
 
     setContent {
-      MainView(homeViewModelFactory = homeComponent.homeViewModelFactory, openLink = ::openLink)
+      MainView(homeViewModelFactory = activityComponent.homeViewModelFactory, openLink = ::openLink)
     }
   }
 
@@ -56,5 +57,16 @@ class MainActivity : AppCompatActivity() {
   }
 }
 
-fun AppComponent.Companion.from(activity: Activity) =
+fun ApplicationComponent.Companion.from(activity: Activity) =
   (activity.applicationContext as ReaderApplication).appComponent
+
+@Component
+@ActivityScope
+abstract class ActivityComponent(
+  @get:Provides val activity: ComponentActivity,
+  @get:Provides val componentContext: ComponentContext = activity.defaultComponentContext(),
+  @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity)
+) {
+
+  abstract val homeViewModelFactory: HomeViewModelFactory
+}

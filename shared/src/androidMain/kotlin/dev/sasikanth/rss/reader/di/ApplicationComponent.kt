@@ -15,18 +15,15 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.database.DriverFactory
+import android.content.Context
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
-@Component
 @AppScope
-abstract class AppComponent(@get:Provides val driverFactory: DriverFactory) : DataComponent {
+@Component
+abstract class ApplicationComponent(@get:Provides val context: Context) :
+  SharedApplicationComponent {
 
   companion object
-
-  @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }

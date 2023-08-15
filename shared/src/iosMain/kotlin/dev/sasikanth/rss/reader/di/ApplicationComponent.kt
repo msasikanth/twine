@@ -15,18 +15,7 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import com.arkivanov.decompose.ComponentContext
-import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
 
-@Component
-@ActivityScope
-abstract class HomeComponent(
-  @get:Provides val componentContext: ComponentContext,
-  @Component val appComponent: AppComponent
-) {
-
-  abstract val homeViewModelFactory: HomeViewModelFactory
-}
+@AppScope @Component interface ApplicationComponent : SharedApplicationComponent

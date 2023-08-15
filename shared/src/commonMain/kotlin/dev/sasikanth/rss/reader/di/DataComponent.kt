@@ -15,20 +15,26 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.database.DriverFactory
+import app.cash.sqldelight.db.SqlDriver
+import dev.sasikanth.rss.reader.database.DateAdapter
+import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.database.ReaderDatabase
-import dev.sasikanth.rss.reader.database.createDatabase
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
 expect interface SqlDriverPlatformComponent
 
-interface DataComponent {
+interface DataComponent : SqlDriverPlatformComponent {
 
   @Provides
   @AppScope
-  fun providesDatabase(driverFactory: DriverFactory): ReaderDatabase {
-    return createDatabase(driverFactory)
+  fun providesDatabase(driver: SqlDriver): ReaderDatabase {
+    return ReaderDatabase(
+      driver = driver,
+      postAdapter = Post.Adapter(dateAdapter = DateAdapter),
+      feedAdapter = Feed.Adapter(createdAtAdapter = DateAdapter)
+    )
   }
 
   @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries

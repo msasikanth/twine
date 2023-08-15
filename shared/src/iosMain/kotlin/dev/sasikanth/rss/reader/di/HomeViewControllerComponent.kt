@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.database
+package dev.sasikanth.rss.reader.di
 
-fun createDatabase(driverFactory: DriverFactory): ReaderDatabase {
-  val driver = driverFactory.createDriver()
-  return ReaderDatabase(
-    driver = driver,
-    postAdapter = Post.Adapter(dateAdapter = DateAdapter),
-    feedAdapter = Feed.Adapter(createdAtAdapter = DateAdapter)
-  )
+import com.arkivanov.decompose.ComponentContext
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
+
+@Component
+@ActivityScope
+abstract class HomeViewControllerComponent(
+  @get:Provides val componentContext: ComponentContext,
+  @Component val applicationComponent: ApplicationComponent
+) {
+
+  abstract val homeViewModelFactory: HomeViewModelFactory
 }
