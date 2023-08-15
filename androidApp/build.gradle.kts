@@ -76,4 +76,5 @@ dependencies {
   implementation(project(":shared"))
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
+  implementation(libs.androidx.work)
 }
