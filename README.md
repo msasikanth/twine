@@ -27,7 +27,7 @@ For full list of dependencies used, please take a look at the [catalog](/gradle/
 ## TODO
 
 - [x] Add Atom feeds support
-- [ ] Background sync
+- [x] Background sync
 - [ ] Bookmarks
 - [ ] Search
 - [ ] Rearrange feeds
