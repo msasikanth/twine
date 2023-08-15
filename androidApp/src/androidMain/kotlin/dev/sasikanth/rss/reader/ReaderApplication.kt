@@ -33,9 +33,12 @@ class ReaderApplication : Application(), Configuration.Provider {
   val appComponent by
     lazy(LazyThreadSafetyMode.NONE) { ApplicationComponent::class.create(context = this) }
 
+  private val workManager by lazy(LazyThreadSafetyMode.NONE) { WorkManager.getInstance(this) }
+
   override fun onCreate() {
     super.onCreate()
     initialiseLogging()
+    enqueuePeriodicFeedsRefresh()
   }
 
   override fun getWorkManagerConfiguration(): Configuration {
@@ -61,5 +64,11 @@ class ReaderApplication : Application(), Configuration.Provider {
       .build()
   }
 
+  private fun enqueuePeriodicFeedsRefresh() {
+    workManager.enqueueUniquePeriodicWork(
+      FeedsRefreshWorker.UNIQUE_WORK_NAME,
+      ExistingPeriodicWorkPolicy.KEEP,
+      FeedsRefreshWorker.periodicRequest()
+    )
   }
 }

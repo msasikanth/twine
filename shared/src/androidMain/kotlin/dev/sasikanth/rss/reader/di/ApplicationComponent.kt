@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.di
 
 import android.content.Context
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -24,6 +25,8 @@ import me.tatarka.inject.annotations.Provides
 @Component
 abstract class ApplicationComponent(@get:Provides val context: Context) :
   SharedApplicationComponent() {
+
+  abstract val rssRepository: RssRepository
 
   companion object
 }
