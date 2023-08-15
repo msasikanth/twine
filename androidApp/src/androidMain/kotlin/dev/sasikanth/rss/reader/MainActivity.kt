@@ -29,7 +29,6 @@ import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.di.ApplicationComponent
-import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import me.tatarka.inject.annotations.Component
