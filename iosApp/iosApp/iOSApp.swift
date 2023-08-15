@@ -26,10 +26,13 @@ struct iOSApp: App {
             ContentView(homeViewControllerComponent: homeViewControllerComponent)
 				.onChange(of: scenePhase) { newPhase in
 					switch newPhase {
-						case .background: LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
-						case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
-						case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
-						@unknown default: break
+                    case .background:
+                        LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
+                        appDelegate.scheduledRefreshFeeds()
+                
+                    case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
+                    case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
+                    @unknown default: break
 					}
 				}
 		}
