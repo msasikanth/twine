@@ -21,12 +21,7 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-kotlin {
-  android()
-  sourceSets {
-    val androidMain by getting { dependencies { implementation(project(":shared")) } }
-  }
-}
+kotlin { android() }
 
 android {
   compileSdk = libs.versions.android.sdk.compile.get().toInt()
@@ -75,4 +70,10 @@ android {
     debug { applicationIdSuffix = ".debug" }
   }
   packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
+}
+
+dependencies {
+  implementation(project(":shared"))
+  implementation(libs.kotlininject.runtime)
+  ksp(libs.kotlininject.compiler)
 }
