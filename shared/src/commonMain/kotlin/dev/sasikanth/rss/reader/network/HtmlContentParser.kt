@@ -28,7 +28,7 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
       "a",
       "span",
       "em" -> {
-        currentData["content"] = (currentData["content"] ?: "") + text
+        currentData["content"] = (currentData["content"] ?: "") + text.cleanWhitespaces()
       }
     }
   }
@@ -50,6 +50,19 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
       )
     )
     currentData.clear()
+  }
+
+  private fun String.cleanWhitespaces(): String {
+    var formattedText = this.trim()
+    if (formattedText.isNotBlank()) {
+      if (this[0].isWhitespace()) {
+        formattedText = " $formattedText"
+      }
+      if (this.last().isWhitespace()) {
+        formattedText += " "
+      }
+    }
+    return formattedText
   }
 }
 
