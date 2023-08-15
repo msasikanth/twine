@@ -16,11 +16,19 @@
 package dev.sasikanth.rss.reader
 
 import android.app.Application
+import android.content.Context
+import android.util.Log
+import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ListenableWorker
+import androidx.work.WorkManager
+import androidx.work.WorkerFactory
+import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 import dev.sasikanth.rss.reader.utils.initialiseLogging
 
-class ReaderApplication : Application() {
+class ReaderApplication : Application(), Configuration.Provider {
 
   val appComponent by
     lazy(LazyThreadSafetyMode.NONE) { ApplicationComponent::class.create(context = this) }
@@ -28,5 +36,30 @@ class ReaderApplication : Application() {
   override fun onCreate() {
     super.onCreate()
     initialiseLogging()
+  }
+
+  override fun getWorkManagerConfiguration(): Configuration {
+    val loggingLevel =
+      if (BuildConfig.DEBUG) {
+        Log.DEBUG
+      } else {
+        Log.ERROR
+      }
+    return Configuration.Builder()
+      .setMinimumLoggingLevel(loggingLevel)
+      .setWorkerFactory(
+        object : WorkerFactory() {
+          override fun createWorker(
+            appContext: Context,
+            workerClassName: String,
+            workerParameters: WorkerParameters
+          ): ListenableWorker {
+            return FeedsRefreshWorker(appContext, workerParameters, appComponent.rssRepository)
+          }
+        }
+      )
+      .build()
+  }
+
   }
 }
