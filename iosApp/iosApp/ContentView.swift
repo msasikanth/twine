@@ -10,9 +10,12 @@ struct ComposeView: UIViewControllerRepresentable {
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-        let controller = Main_iosKt.MainViewController(homeViewModelFactory: homeViewControllerComponent.homeViewModelFactory, openLink: { url in
-            openLink(url: url)
-        })
+        let controller = Main_iosKt.MainViewController(
+            homeViewModelFactory: homeViewControllerComponent.homeViewModelFactory,
+            imageLoader: homeViewControllerComponent.applicationComponent.imageLoader,
+            openLink: { url in
+                openLink(url: url)
+            })
 		return controller
 	}
 	

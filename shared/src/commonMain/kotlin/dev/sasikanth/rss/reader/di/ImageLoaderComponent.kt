@@ -15,15 +15,4 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import android.content.Context
-import dev.sasikanth.rss.reader.di.scopes.AppScope
-import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
-
-@AppScope
-@Component
-abstract class ApplicationComponent(@get:Provides val context: Context) :
-  SharedApplicationComponent() {
-
-  companion object
-}
+expect interface ImageLoaderComponent

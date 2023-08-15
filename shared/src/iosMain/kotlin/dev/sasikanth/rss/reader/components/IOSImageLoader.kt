@@ -20,6 +20,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.github.aakira.napier.log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
@@ -34,6 +35,7 @@ import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.ColorAlphaType
@@ -57,11 +59,12 @@ internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
     } else {
       ImageLoaderState.Loading
     }
+  val imageLoader = LocalImageLoader.current
 
   return produceState(initialState, url) {
     value =
       try {
-        ImageLoaderState.Loaded(ImageLoader.getImage(url!!)!!)
+        ImageLoaderState.Loaded(imageLoader?.getImage(url!!, size = null)!!)
       } catch (e: Exception) {
         ImageLoaderState.Error
       }
@@ -78,7 +81,9 @@ internal sealed interface ImageLoaderState {
   object Error : ImageLoaderState
 }
 
-internal object ImageLoader {
+@Inject
+@AppScope
+class IOSImageLoader : ImageLoader {
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
   private val diskCacheSize = (50 * 1024 * 1024).toULong() // 50 MB cache size
@@ -98,7 +103,7 @@ internal object ImageLoader {
       diskPath = "dev_sasikanth_rss_reader_images_cache"
     )
 
-  suspend fun getImage(url: String, size: Int? = null): ImageBitmap? {
+  override suspend fun getImage(url: String, size: Int?): ImageBitmap? {
     return withContext(Dispatchers.IO) {
       val cachedImage = loadCachedImage(url)
       val data =
@@ -188,8 +193,4 @@ private fun Image.toBitmap(size: Int? = null): Bitmap {
   )
   bitmap.setImmutable()
   return bitmap
-}
-
-actual suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap? {
-  return ImageLoader.getImage(url, size)
 }

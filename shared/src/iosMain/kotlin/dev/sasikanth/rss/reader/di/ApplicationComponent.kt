@@ -18,4 +18,4 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Component
 
-@AppScope @Component interface ApplicationComponent : SharedApplicationComponent
+@AppScope @Component abstract class ApplicationComponent : SharedApplicationComponent()

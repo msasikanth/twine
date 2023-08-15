@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 import androidx.compose.runtime.Composable
+import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
 @Composable
-fun MainView(homeViewModelFactory: HomeViewModelFactory, openLink: (String) -> Unit) =
-  App(homeViewModelFactory = homeViewModelFactory, openLink = openLink)
+fun MainView(
+  homeViewModelFactory: HomeViewModelFactory,
+  imageLoader: ImageLoader,
+  openLink: (String) -> Unit
+) = App(homeViewModelFactory = homeViewModelFactory, imageLoader = imageLoader, openLink = openLink)

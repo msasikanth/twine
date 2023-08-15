@@ -46,7 +46,11 @@ class MainActivity : AppCompatActivity() {
     val activityComponent = ActivityComponent::class.create(activity = this)
 
     setContent {
-      MainView(homeViewModelFactory = activityComponent.homeViewModelFactory, openLink = ::openLink)
+      MainView(
+        homeViewModelFactory = activityComponent.homeViewModelFactory,
+        imageLoader = activityComponent.applicationComponent.imageLoader,
+        openLink = ::openLink
+      )
     }
   }
 

@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 
-fun MainViewController(homeViewModelFactory: HomeViewModelFactory, openLink: (String) -> Unit) =
-  ComposeUIViewController {
-    App(homeViewModelFactory = homeViewModelFactory, openLink = openLink)
-  }
+fun MainViewController(
+  homeViewModelFactory: HomeViewModelFactory,
+  imageLoader: ImageLoader,
+  openLink: (String) -> Unit
+) = ComposeUIViewController {
+  App(homeViewModelFactory = homeViewModelFactory, imageLoader = imageLoader, openLink = openLink)
+}

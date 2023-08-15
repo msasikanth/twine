@@ -15,12 +15,15 @@
  */
 package dev.sasikanth.rss.reader.di
 
+import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import me.tatarka.inject.annotations.Provides
 
-interface SharedApplicationComponent : DataComponent {
+abstract class SharedApplicationComponent : DataComponent, ImageLoaderComponent {
+
+  abstract val imageLoader: ImageLoader
 
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }

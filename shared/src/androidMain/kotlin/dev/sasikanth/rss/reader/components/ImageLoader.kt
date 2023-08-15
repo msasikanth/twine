@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.components
 
+import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.drawable.toBitmap
@@ -22,21 +23,28 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Scale
-import dev.sasikanth.rss.reader.ReaderApplication
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import me.tatarka.inject.annotations.Inject
 
-actual suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap? {
-  val context = ReaderApplication.context
-  val request =
-    ImageRequest.Builder(context)
-      .data(url)
-      .size(size)
-      .scale(Scale.FILL)
-      .allowHardware(false)
-      .memoryCacheKey("$url.dynamic_colors")
-      .build()
+@Inject
+@AppScope
+class AndroidImageLoader(private val context: Context) : ImageLoader {
 
-  return when (val result = context.imageLoader.execute(request)) {
-    is SuccessResult -> result.drawable.toBitmap().asImageBitmap()
-    else -> null
+  override suspend fun getImage(url: String, size: Int?): ImageBitmap? {
+    val requestBuilder =
+      ImageRequest.Builder(context)
+        .data(url)
+        .scale(Scale.FILL)
+        .allowHardware(false)
+        .memoryCacheKey("$url.dynamic_colors")
+
+    if (size != null) {
+      requestBuilder.size(size)
+    }
+
+    return when (val result = context.imageLoader.execute(requestBuilder.build())) {
+      is SuccessResult -> result.drawable.toBitmap().asImageBitmap()
+      else -> null
+    }
   }
 }

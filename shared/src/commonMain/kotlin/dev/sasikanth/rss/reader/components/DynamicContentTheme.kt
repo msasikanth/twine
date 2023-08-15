@@ -86,15 +86,19 @@ internal fun rememberDynamicColorState(
   defaultSurfaceContainer: Color = AppTheme.colorScheme.surfaceContainer,
   defaultSurfaceContainerLowest: Color = AppTheme.colorScheme.surfaceContainerLowest,
   cacheSize: Int = 12
-): DynamicColorState = remember {
-  DynamicColorState(
-    defaultTintedBackground,
-    defaultTintedSurface,
-    defaultTintedForeground,
-    defaultSurfaceContainer,
-    defaultSurfaceContainerLowest,
-    cacheSize
-  )
+): DynamicColorState {
+  val imageLoader = LocalImageLoader.current
+  return remember {
+    DynamicColorState(
+      defaultTintedBackground,
+      defaultTintedSurface,
+      defaultTintedForeground,
+      defaultSurfaceContainer,
+      defaultSurfaceContainerLowest,
+      imageLoader,
+      cacheSize
+    )
+  }
 }
 
 /**
@@ -110,6 +114,7 @@ class DynamicColorState(
   private val defaultTintedForeground: Color,
   private val defaultSurfaceContainer: Color,
   private val defaultSurfaceContainerLowest: Color,
+  private val imageLoader: ImageLoader?,
   cacheSize: Int
 ) {
   var tintedBackground by mutableStateOf(defaultTintedBackground)
@@ -157,7 +162,7 @@ class DynamicColorState(
       return cached
     }
 
-    val image = fetchImageBitmapFromUrl(url, size = 128)
+    val image = imageLoader?.getImage(url, size = 128)
     return if (image != null) {
       extractColorsFromImage(image)
         .let { colorsMap ->
@@ -249,5 +254,3 @@ private data class DynamicColors(
   val surfaceContainer: Color,
   val surfaceContainerLowest: Color
 )
-
-expect suspend fun fetchImageBitmapFromUrl(url: String, size: Int): ImageBitmap?
