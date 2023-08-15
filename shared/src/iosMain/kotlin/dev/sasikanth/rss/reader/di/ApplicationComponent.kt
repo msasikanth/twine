@@ -16,6 +16,12 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
 
-@AppScope @Component abstract class ApplicationComponent : SharedApplicationComponent()
+@AppScope
+@Component
+abstract class ApplicationComponent : SharedApplicationComponent() {
+
+  abstract val rssRepository: RssRepository
+}
