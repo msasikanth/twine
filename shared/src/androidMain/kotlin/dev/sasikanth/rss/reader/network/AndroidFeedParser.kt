@@ -19,27 +19,33 @@ import android.util.Xml
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 
 internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
-    return withContext(ioDispatcher) {
-      val parser =
-        Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
+    return try {
+      withContext(ioDispatcher) {
+        val parser =
+          Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
 
-      return@withContext xmlContent.reader().use { reader ->
-        parser.setInput(reader)
-        parser.nextTag()
+        return@withContext xmlContent.reader().use { reader ->
+          parser.setInput(reader)
+          parser.nextTag()
 
-        when (parser.name) {
-          RSS_TAG -> AndroidRssParser(parser, feedUrl).parse()
-          ATOM_TAG -> AndroidAtomParser(parser, feedUrl).parse()
-          else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
+          when (parser.name) {
+            RSS_TAG -> AndroidRssParser(parser, feedUrl).parse()
+            ATOM_TAG -> AndroidAtomParser(parser, feedUrl).parse()
+            else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
+          }
         }
       }
+    } catch (e: XmlPullParserException) {
+      throw XmlParsingError(e.stackTraceToString())
     }
   }
 }

@@ -23,8 +23,10 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import dev.sasikanth.rss.reader.network.FeedType.*
+import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlin.collections.set
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -55,11 +57,14 @@ internal class IOSFeedParser(private val ioDispatcher: CoroutineDispatcher) : Fe
             this@IOSFeedParser.feedPayload = feedPayload
           }
 
-        val parserResult = NSXMLParser(data).apply { delegate = xmlFeedParser }.parse()
+        val parser = NSXMLParser(data).apply { delegate = xmlFeedParser }
+        val parserResult = parser.parse()
 
         val feedPayload = feedPayload
         if (parserResult && feedPayload != null) {
           continuation.resume(feedPayload)
+        } else if (!parserResult && parser.parserError() != null) {
+          continuation.resumeWithException(XmlParsingError(parser.parserError()?.description))
         }
       }
     }
