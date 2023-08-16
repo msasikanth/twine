@@ -77,4 +77,5 @@ dependencies {
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
   implementation(libs.androidx.work)
+  implementation(libs.sentry)
 }
