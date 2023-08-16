@@ -31,6 +31,9 @@ kotlininject = "0.6.1"
 ksp = "1.8.22-1.0.11"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.4"
+sentry = "0.2.1"
+sentry_android = "3.12.0"
+buildKonfig = "0.13.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -69,6 +72,7 @@ kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.mohamedrejeb.ksoup:ksoup-html", version.ref = "ksoup" }
+sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
@@ -81,6 +85,8 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
+buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
+sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
 
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]

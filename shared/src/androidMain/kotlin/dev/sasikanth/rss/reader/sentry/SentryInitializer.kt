@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.sentry
 
-import dev.sasikanth.rss.reader.components.ImageLoader
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import android.content.Context
+import dev.sasikanth.reader.BuildKonfig
 import dev.sasikanth.rss.reader.initializers.Initializer
-import dev.sasikanth.rss.reader.sentry.SentryComponent
-import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
-import me.tatarka.inject.annotations.Provides
+import io.sentry.kotlin.multiplatform.Sentry
+import me.tatarka.inject.annotations.Inject
 
-abstract class SharedApplicationComponent : DataComponent, ImageLoaderComponent, SentryComponent {
+@Inject
+class SentryInitializer(private val context: Context) : Initializer {
 
-  abstract val imageLoader: ImageLoader
-
-  abstract val initializers: Set<Initializer>
-
-  @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
+  override fun initialize() {
+    Sentry.init(context) { options -> options.dsn = BuildKonfig.SENTRY_DSN }
+  }
 }

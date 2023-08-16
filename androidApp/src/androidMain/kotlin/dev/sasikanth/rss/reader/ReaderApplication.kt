@@ -39,6 +39,8 @@ class ReaderApplication : Application(), Configuration.Provider {
     super.onCreate()
     initialiseLogging()
     enqueuePeriodicFeedsRefresh()
+
+    appComponent.initializers.forEach { it.initialize() }
   }
 
   override fun getWorkManagerConfiguration(): Configuration {

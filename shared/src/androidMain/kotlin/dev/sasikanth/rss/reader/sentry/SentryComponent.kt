@@ -13,21 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.sentry
 
-import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
-import dev.sasikanth.rss.reader.sentry.SentryComponent
-import dev.sasikanth.rss.reader.utils.DefaultDispatchersProvider
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import me.tatarka.inject.annotations.IntoSet
 import me.tatarka.inject.annotations.Provides
 
-abstract class SharedApplicationComponent : DataComponent, ImageLoaderComponent, SentryComponent {
+actual interface SentryComponent {
 
-  abstract val imageLoader: ImageLoader
-
-  abstract val initializers: Set<Initializer>
-
-  @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
+  @IntoSet
+  @Provides
+  @AppScope
+  fun providesSentryInitializer(bind: SentryInitializer): Initializer = bind
 }

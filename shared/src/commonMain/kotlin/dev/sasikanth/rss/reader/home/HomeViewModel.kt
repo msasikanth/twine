@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
+import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -118,6 +119,7 @@ internal class HomeViewModel(
       try {
         rssRepository.addFeed(feedLink)
       } catch (e: Exception) {
+        Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
         _effects.emit(HomeEffect.ShowError(e.message))
       } finally {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }

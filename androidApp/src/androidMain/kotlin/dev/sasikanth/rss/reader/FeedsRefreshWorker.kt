@@ -21,6 +21,7 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.repository.RssRepository
+import io.sentry.kotlin.multiplatform.Sentry
 import java.lang.Exception
 import java.time.Duration
 
@@ -45,6 +46,7 @@ class FeedsRefreshWorker(
       rssRepository.updateFeeds()
       Result.success()
     } catch (e: Exception) {
+      Sentry.captureException(e)
       Result.failure()
     }
   }

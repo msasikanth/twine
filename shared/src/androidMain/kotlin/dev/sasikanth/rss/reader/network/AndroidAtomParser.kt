@@ -20,6 +20,7 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
+import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import org.xmlpull.v1.XmlPullParser
@@ -105,6 +106,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
         try {
           ZonedDateTime.parse(date, atomDateFormat).toEpochSecond() * 1000
         } catch (e: Throwable) {
+          Sentry.captureException(e)
           Napier.e("Parse date error: ${e.message}")
           null
         }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import dev.icerock.gradle.MRVisibility.Internal
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -25,6 +26,14 @@ plugins {
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.moko.resources)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+  packageName = "dev.sasikanth.reader"
+  defaultConfigs {
+    buildConfigField(STRING, "SENTRY_DSN", project.properties["sentry.dsn"] as? String)
+  }
 }
 
 multiplatformResources {
@@ -64,6 +73,8 @@ kotlin {
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "14.1"
     podfile = project.file("../iosApp/Podfile")
+    pod("Sentry", "~> 8.4.0")
+
     framework {
       baseName = "shared"
       isStatic = true
@@ -91,6 +102,7 @@ kotlin {
         implementation(libs.androidx.collection)
         implementation(libs.material.color.utilities)
         implementation(libs.ksoup)
+        implementation(libs.sentry)
       }
     }
     val commonTest by getting {
