@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import dev.icerock.gradle.MRVisibility.Internal
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -30,6 +31,9 @@ plugins {
 
 buildkonfig {
   packageName = "dev.sasikanth.reader"
+  defaultConfigs {
+    buildConfigField(STRING, "SENTRY_DSN", project.properties["sentry.dsn"] as? String)
+  }
 }
 
 multiplatformResources {
