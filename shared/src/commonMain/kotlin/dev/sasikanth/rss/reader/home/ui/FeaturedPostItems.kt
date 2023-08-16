@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -34,8 +34,10 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -51,12 +53,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.sasikanth.rss.reader.components.AsyncImage
+import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
@@ -95,10 +100,24 @@ internal fun FeaturedPostItems(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
   CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
-    Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
+    val hapticFeedback = LocalHapticFeedback.current
+    var dropdownMenuExpanded by remember { mutableStateOf(false) }
+
+    Column(
+      modifier =
+        Modifier.clip(MaterialTheme.shapes.extraLarge)
+          .combinedClickable(
+            onClick = onClick,
+            onLongClick = {
+              hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+              dropdownMenuExpanded = true
+            }
+          )
+    ) {
       Box {
         AsyncImage(
           url = item.imageUrl!!,
@@ -115,14 +134,25 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
 
       Spacer(modifier = Modifier.height(16.dp))
 
-      Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = item.title,
-        style = MaterialTheme.typography.headlineSmall,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis
-      )
+      Box {
+        Text(
+          modifier = Modifier.padding(horizontal = 16.dp),
+          text = item.title,
+          style = MaterialTheme.typography.headlineSmall,
+          color = AppTheme.colorScheme.textEmphasisHigh,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
+        )
+
+        MaterialTheme(colorScheme = lightColorScheme()) {
+          DropdownMenu(
+            expanded = dropdownMenuExpanded,
+            onDismissRequest = { dropdownMenuExpanded = false }
+          ) {
+            DropdownMenuShareItem(contentToShare = item.link)
+          }
+        }
+      }
 
       if (item.description.isNotBlank()) {
         Spacer(modifier = Modifier.height(8.dp))
