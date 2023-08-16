@@ -127,9 +127,7 @@ internal class HomeViewModel(
             _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
           }
           is XmlParsingError -> {
-            Sentry.captureMessage("Failed to parse the XML fetched from: $feedLink") { scope ->
-              scope.setContext("feed_url", feedLink)
-            }
+            Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
             _effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
           }
           is ConnectTimeoutException -> {
