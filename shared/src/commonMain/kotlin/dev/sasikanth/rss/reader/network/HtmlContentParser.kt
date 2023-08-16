@@ -36,7 +36,9 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
   override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
     currentTag = name
     when {
-      currentTag == "img" && attributes.containsKey("src") -> {
+      currentTag == "img" &&
+        attributes.containsKey("src") &&
+        !currentData.containsKey("imageUrl") -> {
         currentData["imageUrl"] = attributes["src"].toString()
       }
     }
