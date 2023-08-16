@@ -19,6 +19,9 @@ jobs:
       TERM: dumb
       ORG_GRADLE_PROJECT_READER_KEYSTORE_PASSWORD: ${{ secrets.READER_KEYSTORE_PASSWORD }}
       ORG_GRADLE_PROJECT_READER_KEY_PASSWORD: ${{ secrets.READER_KEY_PASSWORD }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
     steps:
       - name: Setup versionName regardless of how this action is triggered
         id: version_name
