@@ -123,12 +123,14 @@ internal class HomeViewModel(
       } catch (e: Exception) {
         when (e) {
           is UnsupportedOperationException -> {
-            Sentry.captureException(e)
-            _effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
+            Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
+            _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
           }
           is XmlParsingError -> {
-            Sentry.captureMessage("Failed to parse the XML fetched from: $feedLink")
-            _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
+            Sentry.captureMessage("Failed to parse the XML fetched from: $feedLink") { scope ->
+              scope.setContext("feed_url", feedLink)
+            }
+            _effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
           }
           is ConnectTimeoutException -> {
             _effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
