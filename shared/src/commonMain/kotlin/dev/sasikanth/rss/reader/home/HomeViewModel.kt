@@ -119,7 +119,7 @@ internal class HomeViewModel(
       try {
         rssRepository.addFeed(feedLink)
       } catch (e: Exception) {
-        Sentry.captureException(e)
+        Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
         _effects.emit(HomeEffect.ShowError(e.message))
       } finally {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
