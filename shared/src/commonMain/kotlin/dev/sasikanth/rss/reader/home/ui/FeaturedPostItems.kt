@@ -140,6 +140,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
           text = item.title,
           style = MaterialTheme.typography.headlineSmall,
           color = AppTheme.colorScheme.textEmphasisHigh,
+          minLines = 2,
           maxLines = 2,
           overflow = TextOverflow.Ellipsis
         )
@@ -162,6 +163,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
           text = item.description,
           style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.textEmphasisHigh,
+          minLines = 3,
           maxLines = 3,
           overflow = TextOverflow.Ellipsis,
         )
