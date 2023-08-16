@@ -50,6 +50,8 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
         "link" ->
           if (link.isNullOrBlank()) {
             link = readAtomLink(parser)
+          } else {
+            skip(parser)
           }
         "subtitle" -> description = readTagText("subtitle", parser)
         "entry" -> posts.add(readAtomEntry(parser))
