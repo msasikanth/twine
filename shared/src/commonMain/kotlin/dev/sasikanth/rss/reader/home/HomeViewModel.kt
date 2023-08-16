@@ -166,7 +166,11 @@ internal class HomeViewModel(
   }
 
   private fun refreshContent() {
-    viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
+    try {
+      viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+    }
   }
 
   private suspend fun updateLoadingState(action: suspend () -> Unit) {
