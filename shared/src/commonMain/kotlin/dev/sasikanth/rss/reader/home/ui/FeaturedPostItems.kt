@@ -85,7 +85,6 @@ internal fun FeaturedPostItems(
     HorizontalPager(
       modifier = Modifier.statusBarsPadding(),
       state = pagerState,
-      pageCount = featuredPosts.size,
       contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
       pageSpacing = 16.dp,
       verticalAlignment = Alignment.Top

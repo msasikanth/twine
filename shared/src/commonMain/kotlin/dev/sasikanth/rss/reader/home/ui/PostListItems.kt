@@ -71,7 +71,7 @@ internal fun PostsList(
     }
 
   val listState = rememberLazyListState()
-  val featuredPostsPagerState = rememberPagerState()
+  val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
   LaunchedEffect(selectedFeed) {
     listState.scrollToItem(0)
