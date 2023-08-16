@@ -19,6 +19,8 @@ import dev.sasikanth.rss.reader.models.FeedPayload
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
 import kotlinx.coroutines.CoroutineDispatcher
 
 internal expect fun feedFetcher(ioDispatcher: CoroutineDispatcher): FeedFetcher
@@ -26,7 +28,8 @@ internal expect fun feedFetcher(ioDispatcher: CoroutineDispatcher): FeedFetcher
 internal class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
   suspend fun fetch(url: String): FeedPayload {
-    val xml = httpClient.get(url).bodyAsText()
+    val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
+    val xml = httpClient.get(transformedUrl).bodyAsText()
     return feedParser.parse(xml, url)
   }
 }
