@@ -19,7 +19,10 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.sentry.android)
 }
+
+sentry { tracingInstrumentation { enabled = false } }
 
 kotlin { android() }
 
