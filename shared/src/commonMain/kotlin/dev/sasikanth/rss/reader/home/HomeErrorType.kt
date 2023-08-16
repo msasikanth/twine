@@ -5,5 +5,7 @@ sealed interface HomeErrorType {
 
   object FailedToParseXML : HomeErrorType
 
+  object Timeout : HomeErrorType
+
   data class Unknown(val e: Exception) : HomeErrorType
 }

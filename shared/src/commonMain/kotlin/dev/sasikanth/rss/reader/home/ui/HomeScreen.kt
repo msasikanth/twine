@@ -125,6 +125,8 @@ fun HomeScreen(
             when (val errorType = effect.homeErrorType) {
               HomeErrorType.UnknownFeedType,
               HomeErrorType.FailedToParseXML -> "Provided link doesn't contain valid RSS/Atom feed"
+              HomeErrorType.Timeout ->
+                "Request timeout. Check your network connection and try again later"
               is HomeErrorType.Unknown -> errorType.e.message
             }
 

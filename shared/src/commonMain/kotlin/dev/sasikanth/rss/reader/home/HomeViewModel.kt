@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.utils.XmlParsingError
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -128,6 +129,10 @@ internal class HomeViewModel(
           is XmlParsingError -> {
             Sentry.captureMessage("Failed to parse the XML fetched from: $feedLink")
             _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
+          }
+          is ConnectTimeoutException -> {
+            Sentry.captureException(e)
+            _effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
           }
           else -> {
             Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
