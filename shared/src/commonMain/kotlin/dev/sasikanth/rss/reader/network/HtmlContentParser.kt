@@ -39,7 +39,10 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
       currentTag == "img" &&
         attributes.containsKey("src") &&
         !currentData.containsKey("imageUrl") -> {
-        currentData["imageUrl"] = attributes["src"].toString()
+        val imageUrl = attributes["src"].toString()
+        if (!imageUrl.endsWith(".gif")) {
+          currentData["imageUrl"] = imageUrl
+        }
       }
     }
   }
