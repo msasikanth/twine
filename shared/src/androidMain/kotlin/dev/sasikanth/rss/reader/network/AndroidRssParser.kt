@@ -31,7 +31,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
 
   private val rssDateFormat =
     DateTimeFormatterBuilder()
-      .appendPattern("EEE, dd MMM yyyy HH:mm:ss ")
+      .appendPattern("E, d MMM yyyy HH:mm:ss ")
       .optionalStart()
       .appendPattern("z")
       .optionalEnd()
