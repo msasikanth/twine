@@ -131,7 +131,6 @@ internal class HomeViewModel(
             _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
           }
           is ConnectTimeoutException -> {
-            Sentry.captureException(e)
             _effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
           }
           else -> {
