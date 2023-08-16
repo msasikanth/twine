@@ -20,6 +20,7 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
+import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.util.Locale
@@ -104,6 +105,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         try {
           ZonedDateTime.parse(date, this.rssDateFormat).toEpochSecond() * 1000
         } catch (e: Throwable) {
+          Sentry.captureException(e)
           Napier.e("Parse date error: ${e.message}")
           null
         }

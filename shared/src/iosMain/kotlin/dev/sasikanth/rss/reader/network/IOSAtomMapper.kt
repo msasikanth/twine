@@ -20,6 +20,7 @@ import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
+import io.sentry.kotlin.multiplatform.Sentry
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.timeIntervalSince1970
 
@@ -82,6 +83,7 @@ private fun String?.atomDateStringToEpochSeconds(): Long {
     try {
       atomDateFormatter.dateFromString(this.trim())
     } catch (e: Exception) {
+      Sentry.captureException(e)
       Napier.e("Parse date error: ${e.message}")
       null
     }
