@@ -50,7 +50,7 @@ jobs:
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
       - name: Build release artifacts
-        run: ./gradlew --no-daemon androidApp:bundleRelease
+        run: ./gradlew --no-daemon androidApp:bundleRelease -Psentry.dsn=${{ secrets.SENTRY_DSN }}
 
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v3
