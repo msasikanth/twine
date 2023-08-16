@@ -32,6 +32,7 @@ ksp = "1.8.22-1.0.11"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.4"
 sentry = "0.2.1"
+buildKonfig = "0.13.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -83,6 +84,7 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
+buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]

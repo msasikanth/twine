@@ -25,6 +25,11 @@ plugins {
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.moko.resources)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.buildKonfig)
+}
+
+buildkonfig {
+  packageName = "dev.sasikanth.reader"
 }
 
 multiplatformResources {
