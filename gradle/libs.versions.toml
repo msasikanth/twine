@@ -31,6 +31,7 @@ kotlininject = "0.6.1"
 ksp = "1.8.22-1.0.11"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.4"
+sentry = "0.2.1"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -69,6 +70,7 @@ kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.mohamedrejeb.ksoup:ksoup-html", version.ref = "ksoup" }
+sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

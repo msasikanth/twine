@@ -64,6 +64,8 @@ kotlin {
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "14.1"
     podfile = project.file("../iosApp/Podfile")
+    pod("Sentry", "~> 8.4.0")
+
     framework {
       baseName = "shared"
       isStatic = true
@@ -91,6 +93,7 @@ kotlin {
         implementation(libs.androidx.collection)
         implementation(libs.material.color.utilities)
         implementation(libs.ksoup)
+        implementation(libs.sentry)
       }
     }
     val commonTest by getting {
