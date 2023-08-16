@@ -67,6 +67,7 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
+import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -119,8 +120,16 @@ fun HomeScreen(
           bottomSheetState.collapse()
         }
         is HomeEffect.ShowError -> {
-          if (!effect.message.isNullOrBlank()) {
-            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = effect.message)
+          // TODO: Figure out how to move these strings to common string resource
+          val message =
+            when (val errorType = effect.homeErrorType) {
+              HomeErrorType.UnknownFeedType,
+              HomeErrorType.FailedToParseXML -> "Provided link doesn't contain valid RSS/Atom feed"
+              is HomeErrorType.Unknown -> errorType.e.message
+            }
+
+          if (message != null) {
+            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = message)
           }
         }
       }

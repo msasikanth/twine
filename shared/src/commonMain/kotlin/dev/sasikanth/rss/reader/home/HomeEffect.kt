@@ -23,5 +23,5 @@ sealed interface HomeEffect {
 
   object MinimizeSheet : HomeEffect
 
-  class ShowError(val message: String?) : HomeEffect
+  class ShowError(val homeErrorType: HomeErrorType) : HomeEffect
 }
