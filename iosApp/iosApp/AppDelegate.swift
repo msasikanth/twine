@@ -16,6 +16,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent()
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+
+        applicationComponent.initializers
+            .compactMap { $0 as! any Initializer }
+            .forEach { initializer in
+                initializer.initialize()
+            }
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: DispatchQueue.main) { (task) in
             self.refreshFeeds(task: task as! BGAppRefreshTask)

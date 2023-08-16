@@ -27,5 +27,7 @@ abstract class SharedApplicationComponent : DataComponent, ImageLoaderComponent,
 
   abstract val imageLoader: ImageLoader
 
+  abstract val initializers: Set<Initializer>
+
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }
