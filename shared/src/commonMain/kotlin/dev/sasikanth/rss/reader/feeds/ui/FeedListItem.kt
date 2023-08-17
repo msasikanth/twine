@@ -117,7 +117,10 @@ internal fun FeedListItem(
             expanded = dropdownMenuExpanded,
             onDismissRequest = { dropdownMenuExpanded = false }
           ) {
-            DropdownMenuShareItem(contentToShare = feed.link)
+            DropdownMenuShareItem(
+              contentToShare = feed.link,
+              onShareMenuOpened = { dropdownMenuExpanded = false }
+            )
           }
         }
       }

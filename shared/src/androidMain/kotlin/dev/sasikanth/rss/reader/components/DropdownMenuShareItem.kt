@@ -28,7 +28,11 @@ import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 
 @Composable
-actual fun DropdownMenuShareItem(contentToShare: String, modifier: Modifier) {
+actual fun DropdownMenuShareItem(
+  contentToShare: String,
+  modifier: Modifier,
+  onShareMenuOpened: () -> Unit
+) {
   val context = LocalContext.current
   val sendIntent =
     Intent().apply {
@@ -42,6 +46,9 @@ actual fun DropdownMenuShareItem(contentToShare: String, modifier: Modifier) {
     modifier = modifier,
     text = { Text(text = stringResource(CommonRes.strings.share)) },
     leadingIcon = { Icon(Icons.TwoTone.Share, null) },
-    onClick = { context.startActivity(shareIntent) }
+    onClick = {
+      context.startActivity(shareIntent)
+      onShareMenuOpened()
+    }
   )
 }

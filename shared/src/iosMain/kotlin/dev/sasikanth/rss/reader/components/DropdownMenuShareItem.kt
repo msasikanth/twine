@@ -28,7 +28,11 @@ import dev.sasikanth.rss.reader.CommonRes
 import platform.UIKit.UIActivityViewController
 
 @Composable
-actual fun DropdownMenuShareItem(contentToShare: String, modifier: Modifier) {
+actual fun DropdownMenuShareItem(
+  contentToShare: String,
+  modifier: Modifier,
+  onShareMenuOpened: () -> Unit
+) {
   val viewController = LocalUIViewController.current
 
   DropdownMenuItem(
@@ -39,6 +43,7 @@ actual fun DropdownMenuShareItem(contentToShare: String, modifier: Modifier) {
       val items = listOf(contentToShare)
       val activityController = UIActivityViewController(items, null)
       viewController.presentViewController(activityController, true, null)
+      onShareMenuOpened()
     }
   )
 }

@@ -150,7 +150,10 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
             expanded = dropdownMenuExpanded,
             onDismissRequest = { dropdownMenuExpanded = false }
           ) {
-            DropdownMenuShareItem(contentToShare = item.link)
+            DropdownMenuShareItem(
+              contentToShare = item.link,
+              onShareMenuOpened = { dropdownMenuExpanded = false }
+            )
           }
         }
       }

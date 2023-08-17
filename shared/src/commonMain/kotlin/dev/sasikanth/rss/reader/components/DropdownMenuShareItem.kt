@@ -18,4 +18,9 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-@Composable expect fun DropdownMenuShareItem(contentToShare: String, modifier: Modifier = Modifier)
+@Composable
+expect fun DropdownMenuShareItem(
+  contentToShare: String,
+  modifier: Modifier = Modifier,
+  onShareMenuOpened: () -> Unit
+)
