@@ -24,3 +24,6 @@ DELETE FROM feed WHERE link = :link;
 feeds:
 SELECT * FROM feed
 ORDER BY createdAt DESC;
+
+updateFeedName:
+UPDATE feed SET name = :newFeedName WHERE link = :link;

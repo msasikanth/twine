@@ -73,4 +73,8 @@ class RssRepository(
   suspend fun removeFeed(feedLink: String) {
     withContext(ioDispatcher) { feedQueries.remove(feedLink) }
   }
+
+  suspend fun updateFeedName(newFeedName: String, feedLink: String) {
+    withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
+  }
 }
