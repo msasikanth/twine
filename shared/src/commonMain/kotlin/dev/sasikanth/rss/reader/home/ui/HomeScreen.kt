@@ -17,11 +17,15 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarHost
@@ -42,22 +47,28 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.ime
 import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
+import dev.icerock.moko.resources.compose.stringResource
+import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
@@ -157,11 +168,13 @@ fun HomeScreen(
           posts = posts,
           selectedFeed = state.selectedFeed,
           isRefreshing = state.isRefreshing,
+          navigationBarPadding = navigationBarPadding,
           onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
-          onFeaturedItemChange = onFeaturedItemChange,
-          onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } }
-        )
+          onFeaturedItemChange = onFeaturedItemChange
+        ) {
+          coroutineScope.launch { bottomSheetState.expand() }
+        }
       },
       backgroundColor = Color.Transparent,
       sheetContent = {
@@ -244,22 +257,27 @@ private fun HomeScreenContent(
   posts: ImmutableList<PostWithMetadata>,
   selectedFeed: Feed?,
   isRefreshing: Boolean,
+  navigationBarPadding: Dp,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
-  onNoFeedsSwipeUp: () -> Unit
+  onNoFeedsSwipeUp: () -> Unit,
 ) {
   val hasContent = featuredPosts.isNotEmpty() || posts.isNotEmpty()
   if (hasContent) {
     val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
 
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
+      val listState = rememberLazyListState()
+      val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
       PostsList(
         featuredPosts = featuredPosts,
         posts = posts,
         selectedFeed = selectedFeed,
         onPostClicked = onPostClicked,
-        onFeaturedItemChange = onFeaturedItemChange
+        onFeaturedItemChange = onFeaturedItemChange,
+        listState = listState
       )
 
       PullRefreshIndicator(
@@ -267,9 +285,47 @@ private fun HomeScreenContent(
         state = swipeRefreshState,
         modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
       )
+
+      ScrollToTopButton(visible = showScrollToTop, navigationBarPadding = navigationBarPadding) {
+        listState.animateScrollToItem(0)
+      }
     }
   } else {
     NoFeeds(onNoFeedsSwipeUp)
+  }
+}
+
+@Composable
+private fun BoxScope.ScrollToTopButton(
+  visible: Boolean,
+  navigationBarPadding: Dp,
+  onClick: suspend () -> Unit
+) {
+  val coroutineScope = rememberCoroutineScope()
+  AnimatedVisibility(
+    visible = visible,
+    enter = slideInVertically { it / 2 },
+    exit = slideOutVertically { it / 2 },
+    modifier = Modifier.Companion.align(Alignment.BottomEnd)
+  ) {
+    ExtendedFloatingActionButton(
+      modifier =
+        Modifier.padding(
+          end = 24.dp,
+          bottom = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding + 24.dp
+        ),
+      shape = RoundedCornerShape(50),
+      containerColor = AppTheme.colorScheme.tintedBackground,
+      contentColor = AppTheme.colorScheme.tintedForeground,
+      text = {
+        Text(
+          stringResource(CommonRes.strings.scroll_to_top),
+          color = AppTheme.colorScheme.tintedForeground
+        )
+      },
+      icon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
+      onClick = { coroutineScope.launch { onClick() } }
+    )
   }
 }
 

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -71,6 +72,7 @@ internal fun PostsList(
   posts: ImmutableList<PostWithMetadata>,
   selectedFeed: Feed?,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
+  listState: LazyListState = rememberLazyListState(),
   onPostClicked: (post: PostWithMetadata) -> Unit
 ) {
   val statusBarPadding =
@@ -80,7 +82,6 @@ internal fun PostsList(
       0.dp
     }
 
-  val listState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
   LaunchedEffect(selectedFeed) {

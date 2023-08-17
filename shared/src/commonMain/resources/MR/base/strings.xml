@@ -8,4 +8,5 @@
     <string name="button_add">Add</string>
     <string name="feed_entry_hint">Enter feed link</string>
     <string name="share">Share</string>
+    <string name="scroll_to_top">Scroll to top</string>
 </resources>
