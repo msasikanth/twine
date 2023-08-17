@@ -9,4 +9,6 @@
     <string name="feed_entry_hint">Enter feed link</string>
     <string name="share">Share</string>
     <string name="scroll_to_top">Scroll to top</string>
+    <string name="no_feeds">No feeds present!</string>
+    <string name="swipe_up_get_started">Swipe up to get started</string>
 </resources>

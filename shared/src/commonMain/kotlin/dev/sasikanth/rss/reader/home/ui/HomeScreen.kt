@@ -345,7 +345,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     verticalArrangement = Arrangement.Center
   ) {
     Text(
-      text = "No feeds present!",
+      text = stringResource(CommonRes.strings.no_feeds),
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
@@ -353,7 +353,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(8.dp))
 
     Text(
-      text = "Swipe up to get started",
+      text = stringResource(CommonRes.strings.swipe_up_get_started),
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed
     )
