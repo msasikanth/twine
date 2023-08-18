@@ -113,7 +113,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
     val hapticFeedback = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
-    var dropdownMenuExpanded by remember { mutableStateOf(false) }
+    var dropdownMenuExpanded by remember(item) { mutableStateOf(false) }
     var dropdownOffset by remember(item) { mutableStateOf(Offset.Zero) }
 
     Box {
@@ -121,7 +121,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
         modifier =
           Modifier.clip(MaterialTheme.shapes.extraLarge)
             .indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
+            .pointerInput(item) {
               detectTapGestures(
                 onTap = {
                   pressInteraction(

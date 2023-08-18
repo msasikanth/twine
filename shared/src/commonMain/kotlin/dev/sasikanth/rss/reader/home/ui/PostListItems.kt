@@ -99,7 +99,7 @@ internal fun PostsList(
 
   LazyColumn(
     state = listState,
-    contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)
+    contentPadding = PaddingValues(top = statusBarPadding, bottom = 240.dp)
   ) {
     if (featuredPosts.isNotEmpty()) {
       item {
@@ -129,7 +129,7 @@ private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
-  var dropdownMenuExpanded by remember { mutableStateOf(false) }
+  var dropdownMenuExpanded by remember(item) { mutableStateOf(false) }
   var dropdownOffset by remember(item) { mutableStateOf(Offset.Zero) }
 
   CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
@@ -137,7 +137,7 @@ private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
       Row(
         modifier =
           Modifier.indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
+            .pointerInput(item) {
               detectTapGestures(
                 onTap = {
                   pressInteraction(

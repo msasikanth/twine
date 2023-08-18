@@ -72,7 +72,7 @@ internal fun FeedListItem(
   onFeedSelected: (Feed) -> Unit
 ) {
   val hapticFeedback = LocalHapticFeedback.current
-  var dropdownMenuExpanded by remember { mutableStateOf(false) }
+  var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
   var dropdownOffset by remember(feed) { mutableStateOf(Offset.Zero) }
@@ -81,7 +81,7 @@ internal fun FeedListItem(
     modifier =
       modifier
         .indication(interactionSource, LocalIndication.current)
-        .pointerInput(Unit) {
+        .pointerInput(feed) {
           detectTapGestures(
             onTap = {
               pressInteraction(
