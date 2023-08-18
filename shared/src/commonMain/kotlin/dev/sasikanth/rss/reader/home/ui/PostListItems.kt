@@ -129,7 +129,7 @@ private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
-  var dropdownMenuExpanded by remember { mutableStateOf(false) }
+  var dropdownMenuExpanded by remember(item) { mutableStateOf(false) }
   var dropdownOffset by remember(item) { mutableStateOf(Offset.Zero) }
 
   CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
