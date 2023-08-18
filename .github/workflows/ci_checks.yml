@@ -56,4 +56,9 @@ jobs:
           cache: 'gradle'
 
       - name: Android Integration Tests
-        run: ./gradlew :shared:pixel2Api31DebugAndroidTest
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: x86_64
+          disable-animations: true
+          script: ./gradlew :shared:connectedAndroidTest
