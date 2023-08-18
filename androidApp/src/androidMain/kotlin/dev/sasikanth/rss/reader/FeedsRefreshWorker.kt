@@ -16,7 +16,9 @@
 package dev.sasikanth.rss.reader
 
 import android.content.Context
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
@@ -36,7 +38,14 @@ class FeedsRefreshWorker(
     const val UNIQUE_WORK_NAME = "REFRESH_FEEDS"
 
     fun periodicRequest(): PeriodicWorkRequest {
+      val constraints =
+        Constraints.Builder()
+          .setRequiredNetworkType(NetworkType.CONNECTED)
+          .setRequiresBatteryNotLow(true)
+          .build()
+
       return PeriodicWorkRequestBuilder<FeedsRefreshWorker>(repeatInterval = Duration.ofHours(1))
+        .setConstraints(constraints)
         .build()
     }
   }
