@@ -42,7 +42,7 @@ allprojects {
     }
     kotlinGradle {
       ktfmt(libs.versions.ktfmt.get()).googleStyle()
-      target("**/*.kts")
+      target("*.kts")
       targetExclude("$buildDir/**/*.kts")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "(^(?![\\/ ]\\*).*$)")
         .onlyIfContentMatches("missingString")
