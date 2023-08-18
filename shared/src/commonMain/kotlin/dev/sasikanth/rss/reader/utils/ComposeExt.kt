@@ -15,13 +15,36 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 @ReadOnlyComposable
 inline fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
 inline fun Float.inverseProgress() = 1f - this
+
+@Composable
+@ReadOnlyComposable
+inline fun Float.toDp() = with(LocalDensity.current) { this@toDp.toDp() }
+
+inline fun pressInteraction(
+  coroutineScope: CoroutineScope,
+  interactionSource: MutableInteractionSource,
+  offset: Offset = Offset.Zero,
+  crossinline block: () -> Unit
+) {
+  val pressInteraction = PressInteraction.Press(offset)
+  coroutineScope.launch { interactionSource.emit(pressInteraction) }
+
+  block()
+
+  coroutineScope.launch { interactionSource.emit(PressInteraction.Release(pressInteraction)) }
+}

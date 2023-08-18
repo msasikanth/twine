@@ -15,9 +15,11 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,20 +35,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
 import dev.sasikanth.rss.reader.CommonRes
@@ -54,8 +59,9 @@ import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.pressInteraction
+import dev.sasikanth.rss.reader.utils.toDp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeedListItem(
   modifier: Modifier = Modifier,
@@ -67,17 +73,38 @@ internal fun FeedListItem(
 ) {
   val hapticFeedback = LocalHapticFeedback.current
   var dropdownMenuExpanded by remember { mutableStateOf(false) }
+  val coroutineScope = rememberCoroutineScope()
+  val interactionSource = remember { MutableInteractionSource() }
+  var dropdownOffset by remember(feed) { mutableStateOf(Offset.Zero) }
 
   Box(
     modifier =
       modifier
-        .combinedClickable(
-          onClick = { onFeedSelected(feed) },
-          onLongClick = {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            dropdownMenuExpanded = true
-          }
-        )
+        .indication(interactionSource, LocalIndication.current)
+        .pointerInput(Unit) {
+          detectTapGestures(
+            onTap = {
+              pressInteraction(
+                coroutineScope = coroutineScope,
+                interactionSource = interactionSource,
+                offset = it,
+              ) {
+                onFeedSelected(feed)
+              }
+            },
+            onLongPress = {
+              pressInteraction(
+                coroutineScope = coroutineScope,
+                interactionSource = interactionSource,
+                offset = it,
+              ) {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                dropdownOffset = it
+                dropdownMenuExpanded = true
+              }
+            }
+          )
+        }
         .fillMaxWidth()
         .padding(start = 20.dp, end = 12.dp)
   ) {
@@ -103,27 +130,14 @@ internal fun FeedListItem(
       }
       Spacer(Modifier.requiredWidth(16.dp))
 
-      Box(modifier = Modifier.weight(1f)) {
-        Text(
-          text = feed.name,
-          maxLines = 1,
-          color = AppTheme.colorScheme.textEmphasisHigh,
-          style = MaterialTheme.typography.titleMedium,
-          overflow = TextOverflow.Ellipsis
-        )
-
-        MaterialTheme(colorScheme = lightColorScheme()) {
-          DropdownMenu(
-            expanded = dropdownMenuExpanded,
-            onDismissRequest = { dropdownMenuExpanded = false }
-          ) {
-            DropdownMenuShareItem(
-              contentToShare = feed.link,
-              onShareMenuOpened = { dropdownMenuExpanded = false }
-            )
-          }
-        }
-      }
+      Text(
+        modifier = Modifier.weight(1f),
+        text = feed.name,
+        maxLines = 1,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        style = MaterialTheme.typography.titleMedium,
+        overflow = TextOverflow.Ellipsis
+      )
 
       Spacer(Modifier.requiredWidth(16.dp))
       IconButton(onClick = { onDeleteFeed(feed) }) {
@@ -140,6 +154,19 @@ internal fun FeedListItem(
         modifier = Modifier.requiredHeight(1.dp).align(Alignment.BottomStart).padding(end = 12.dp),
         color = AppTheme.colorScheme.tintedSurface
       )
+    }
+
+    Box {
+      DropdownMenu(
+        expanded = dropdownMenuExpanded,
+        onDismissRequest = { dropdownMenuExpanded = false },
+        offset = DpOffset(dropdownOffset.x.toDp(), dropdownOffset.y.toDp())
+      ) {
+        DropdownMenuShareItem(
+          contentToShare = feed.link,
+          onShareMenuOpened = { dropdownMenuExpanded = false }
+        )
+      }
     }
   }
 }
