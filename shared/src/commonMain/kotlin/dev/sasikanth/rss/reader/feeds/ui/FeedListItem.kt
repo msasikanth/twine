@@ -81,7 +81,7 @@ internal fun FeedListItem(
     modifier =
       modifier
         .indication(interactionSource, LocalIndication.current)
-        .pointerInput(Unit) {
+        .pointerInput(feed) {
           detectTapGestures(
             onTap = {
               pressInteraction(
