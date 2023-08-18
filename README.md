@@ -31,6 +31,7 @@ For full list of dependencies used, please take a look at the [catalog](/gradle/
 - [ ] Bookmarks
 - [ ] Search
 - [ ] Rearrange feeds
+- [ ] Rename feed
 
 ## Made by
 
