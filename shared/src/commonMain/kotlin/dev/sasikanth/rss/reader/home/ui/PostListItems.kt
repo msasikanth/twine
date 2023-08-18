@@ -99,7 +99,7 @@ internal fun PostsList(
 
   LazyColumn(
     state = listState,
-    contentPadding = PaddingValues(top = statusBarPadding, bottom = 136.dp)
+    contentPadding = PaddingValues(top = statusBarPadding, bottom = 240.dp)
   ) {
     if (featuredPosts.isNotEmpty()) {
       item {
