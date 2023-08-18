@@ -137,7 +137,7 @@ private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
       Row(
         modifier =
           Modifier.indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
+            .pointerInput(item) {
               detectTapGestures(
                 onTap = {
                   pressInteraction(

@@ -121,7 +121,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
         modifier =
           Modifier.clip(MaterialTheme.shapes.extraLarge)
             .indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
+            .pointerInput(item) {
               detectTapGestures(
                 onTap = {
                   pressInteraction(
