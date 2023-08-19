@@ -13,4 +13,5 @@
     <string name="no_feeds">No feeds present!</string>
     <string name="swipe_up_get_started">Swipe up to get started</string>
     <string name="feed_name_hint">Feed name</string>
+    <string name="edit_feed_name">Edit</string>
 </resources>

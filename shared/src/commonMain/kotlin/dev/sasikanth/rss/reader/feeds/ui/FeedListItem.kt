@@ -32,9 +32,12 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +75,8 @@ import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import dev.sasikanth.rss.reader.utils.pressInteraction
 import dev.sasikanth.rss.reader.utils.toDp
 
@@ -88,9 +93,17 @@ internal fun FeedListItem(
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
+  val keyboardState by keyboardVisibilityAsState()
 
   var dropdownOffset by remember(feed) { mutableStateOf(Offset.Zero) }
   var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
+  var feedNameEditable by remember(feed) { mutableStateOf(false) }
+
+  LaunchedEffect(keyboardState) {
+    if (keyboardState == KeyboardState.Closed) {
+      feedNameEditable = false
+    }
+  }
 
   Box(
     modifier =
@@ -148,8 +161,11 @@ internal fun FeedListItem(
       FeedLabelInput(
         modifier = Modifier.weight(1f),
         value = feed.name,
-        onFeedNameChanged = { newFeedName -> onFeedNameChanged(newFeedName, feed.link) },
-        enabled = false
+        onFeedNameChanged = { newFeedName ->
+          feedNameEditable = false
+          onFeedNameChanged(newFeedName, feed.link)
+        },
+        enabled = feedNameEditable
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
@@ -175,6 +191,15 @@ internal fun FeedListItem(
         onDismissRequest = { dropdownMenuExpanded = false },
         offset = DpOffset(dropdownOffset.x.toDp(), dropdownOffset.y.toDp())
       ) {
+        DropdownMenuItem(
+          text = { Text(stringResource(CommonRes.strings.edit_feed_name)) },
+          leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+          onClick = {
+            dropdownMenuExpanded = false
+            feedNameEditable = true
+          }
+        )
+
         DropdownMenuShareItem(
           contentToShare = feed.link,
           onShareMenuOpened = { dropdownMenuExpanded = false }
