@@ -17,8 +17,12 @@ package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -47,4 +51,17 @@ inline fun pressInteraction(
   block()
 
   coroutineScope.launch { interactionSource.emit(PressInteraction.Release(pressInteraction)) }
+}
+
+enum class KeyboardState {
+  Opened,
+  Closed
+}
+
+@Composable
+fun keyboardVisibilityAsState(): State<KeyboardState> {
+  return rememberUpdatedState(
+    if (WindowInsets.ime.getBottom(LocalDensity.current) > 0) KeyboardState.Opened
+    else KeyboardState.Closed
+  )
 }

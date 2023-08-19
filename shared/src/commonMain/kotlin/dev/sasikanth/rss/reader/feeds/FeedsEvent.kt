@@ -26,4 +26,6 @@ sealed interface FeedsEvent {
   data class OnDeleteFeed(val feed: Feed) : FeedsEvent
 
   data class OnFeedSelected(val feed: Feed) : FeedsEvent
+
+  data class OnFeedNameUpdated(val newFeedName: String, val feedLink: String) : FeedsEvent
 }

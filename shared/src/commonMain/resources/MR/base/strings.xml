@@ -6,9 +6,12 @@
     <string name="button_go_back">Go back</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_add">Add</string>
+    <string name="button_change">Done</string>
     <string name="feed_entry_hint">Enter feed link</string>
     <string name="share">Share</string>
     <string name="scroll_to_top">Scroll to top</string>
     <string name="no_feeds">No feeds present!</string>
     <string name="swipe_up_get_started">Swipe up to get started</string>
+    <string name="feed_name_hint">Feed name</string>
+    <string name="edit_feed_name">Edit</string>
 </resources>

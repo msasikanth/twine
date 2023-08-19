@@ -114,7 +114,12 @@ internal fun FeedsBottomSheet(
           showingFeedLinkEntry = showingFeedLinkEntry,
           closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
           onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
-          onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) }
+          onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) },
+          onFeedNameChanged = { newFeedName, feedLink ->
+            feedsViewModel.dispatch(
+              FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
+            )
+          }
         )
       }
     }
@@ -130,6 +135,7 @@ private fun BottomSheetExpandedContent(
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
+  onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Column(modifier = Modifier.fillMaxSize().imePadding().then(modifier)) {
@@ -142,7 +148,8 @@ private fun BottomSheetExpandedContent(
           selected = selectedFeed == feed,
           canShowDivider = index != feeds.lastIndex,
           onDeleteFeed = onDeleteFeed,
-          onFeedSelected = onFeedSelected
+          onFeedSelected = onFeedSelected,
+          onFeedNameChanged = onFeedNameChanged
         )
       }
     }

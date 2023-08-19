@@ -15,7 +15,7 @@ upsert:
 INSERT INTO feed(name, icon, description, homepageLink, createdAt, link)
 VALUES ?
 ON CONFLICT(link) DO
-UPDATE SET name = excluded.name, icon = excluded.icon, description = excluded.description,
+UPDATE SET icon = excluded.icon, description = excluded.description,
 homepageLink = excluded.homepageLink;
 
 remove:
@@ -24,3 +24,6 @@ DELETE FROM feed WHERE link = :link;
 feeds:
 SELECT * FROM feed
 ORDER BY createdAt DESC;
+
+updateFeedName:
+UPDATE feed SET name = :newFeedName WHERE link = :link;
