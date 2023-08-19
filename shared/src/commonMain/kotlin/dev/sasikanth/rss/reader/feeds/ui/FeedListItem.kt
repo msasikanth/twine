@@ -63,7 +63,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
@@ -83,13 +82,15 @@ internal fun FeedListItem(
   selected: Boolean,
   canShowDivider: Boolean,
   onDeleteFeed: (Feed) -> Unit,
-  onFeedSelected: (Feed) -> Unit
+  onFeedSelected: (Feed) -> Unit,
+  onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
 ) {
   val hapticFeedback = LocalHapticFeedback.current
-  var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
+
   var dropdownOffset by remember(feed) { mutableStateOf(Offset.Zero) }
+  var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
 
   Box(
     modifier =
@@ -144,13 +145,11 @@ internal fun FeedListItem(
       }
       Spacer(Modifier.requiredWidth(16.dp))
 
-      Text(
+      FeedLabelInput(
         modifier = Modifier.weight(1f),
-        text = feed.name,
-        maxLines = 1,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        style = MaterialTheme.typography.titleMedium,
-        overflow = TextOverflow.Ellipsis
+        value = feed.name,
+        onFeedNameChanged = { newFeedName -> onFeedNameChanged(newFeedName, feed.link) },
+        enabled = false
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
