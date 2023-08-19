@@ -90,6 +90,7 @@ internal fun FeedListItem(
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
 ) {
+  val focusManager = LocalFocusManager.current
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
@@ -117,6 +118,7 @@ internal fun FeedListItem(
                 interactionSource = interactionSource,
                 offset = it,
               ) {
+                focusManager.clearFocus()
                 onFeedSelected(feed)
               }
             },
