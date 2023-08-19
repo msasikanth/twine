@@ -60,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
@@ -218,19 +219,17 @@ fun HomeScreen(
         .coerceAtLeast(20.dp)
         .coerceAtMost(24.dp)
 
-    val primaryActionBottomPadding =
-      navigationBarPadding - (4 * bottomSheetSwipeTransition.currentState).dp
+    val windowInsetsPadding =
+      Modifier.windowInsetsPadding(
+        WindowInsets.navigationBars
+          .only(WindowInsetsSides.Bottom)
+          .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
+      )
 
     Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
       if (state.canShowFeedLinkEntry) {
         FeedLinkInputField(
-          modifier =
-            Modifier.windowInsetsPadding(
-                WindowInsets.navigationBars
-                  .only(WindowInsetsSides.Bottom)
-                  .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-              )
-              .padding(bottom = 24.dp, end = 24.dp),
+          modifier = windowInsetsPadding.padding(bottom = 24.dp, end = 24.dp),
           isFetchingFeed = state.isFetchingFeed,
           onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
           onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
@@ -238,8 +237,9 @@ fun HomeScreen(
       } else {
         BottomSheetPrimaryActionButton(
           modifier =
-            Modifier.windowInsetsPadding(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-              .padding(bottom = primaryActionBottomPadding.coerceAtLeast(0.dp)),
+            windowInsetsPadding.graphicsLayer {
+              translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
+            },
           selected = state.isAllFeedsSelected,
           bottomSheetSwipeProgress =
             (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
