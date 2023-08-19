@@ -237,7 +237,9 @@ fun HomeScreen(
         )
       } else {
         BottomSheetPrimaryActionButton(
-          modifier = Modifier.padding(bottom = primaryActionBottomPadding.coerceAtLeast(0.dp)),
+          modifier =
+            Modifier.windowInsetsPadding(WindowInsets.ime.only(WindowInsetsSides.Bottom))
+              .padding(bottom = primaryActionBottomPadding.coerceAtLeast(0.dp)),
           selected = state.isAllFeedsSelected,
           bottomSheetSwipeProgress =
             (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
