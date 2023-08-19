@@ -154,7 +154,7 @@ internal fun FeedListItem(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier =
-              Modifier.requiredSize(48.dp).clip(RoundedCornerShape(16.dp)).align(Alignment.Center),
+              Modifier.requiredSize(48.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center),
           )
         }
       }

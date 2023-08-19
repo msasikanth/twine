@@ -68,7 +68,7 @@ internal fun BottomSheetItem(
           contentDescription = null,
           modifier =
             Modifier.requiredSize(48.dp)
-              .clip(RoundedCornerShape(16.dp))
+              .clip(RoundedCornerShape(12.dp))
               .clickable(onClick = onClick)
         )
       }
