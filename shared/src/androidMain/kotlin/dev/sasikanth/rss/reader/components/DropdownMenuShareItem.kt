@@ -34,19 +34,19 @@ actual fun DropdownMenuShareItem(
   onShareMenuOpened: () -> Unit
 ) {
   val context = LocalContext.current
-  val sendIntent =
-    Intent().apply {
-      action = Intent.ACTION_SEND
-      putExtra(Intent.EXTRA_TEXT, contentToShare)
-      type = "text/plain"
-    }
-  val shareIntent = Intent.createChooser(sendIntent, null)
 
   DropdownMenuItem(
     modifier = modifier,
     text = { Text(text = stringResource(CommonRes.strings.share)) },
     leadingIcon = { Icon(Icons.TwoTone.Share, null) },
     onClick = {
+      val sendIntent =
+        Intent().apply {
+          action = Intent.ACTION_SEND
+          putExtra(Intent.EXTRA_TEXT, contentToShare)
+          type = "text/plain"
+        }
+      val shareIntent = Intent.createChooser(sendIntent, null)
       context.startActivity(shareIntent)
       onShareMenuOpened()
     }
