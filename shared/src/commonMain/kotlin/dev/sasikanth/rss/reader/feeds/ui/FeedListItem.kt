@@ -234,6 +234,12 @@ private fun FeedLabelInput(
     }
   }
 
+  LaunchedEffect(isFocused) {
+    if (!isFocused && value != input) {
+      input = value
+    }
+  }
+
   fun onFeedNameChanged() {
     if (!isInputBlank) {
       onFeedNameChanged.invoke(input)
