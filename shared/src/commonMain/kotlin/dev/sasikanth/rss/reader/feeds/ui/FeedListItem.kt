@@ -219,6 +219,7 @@ private fun FeedLabelInput(
   enabled: Boolean = true
 ) {
   var input by remember(value) { mutableStateOf(value) }
+  var nameChangeSaved by remember(value) { mutableStateOf(false) }
 
   val focusManager = LocalFocusManager.current
   val focusRequester = remember { FocusRequester() }
@@ -235,13 +236,14 @@ private fun FeedLabelInput(
   }
 
   LaunchedEffect(isFocused) {
-    if (!isFocused && value != input) {
+    if (!isFocused && !nameChangeSaved) {
       input = value
     }
   }
 
   fun onFeedNameChanged() {
     if (!isInputBlank) {
+      nameChangeSaved = true
       onFeedNameChanged.invoke(input)
       focusManager.clearFocus()
     }
