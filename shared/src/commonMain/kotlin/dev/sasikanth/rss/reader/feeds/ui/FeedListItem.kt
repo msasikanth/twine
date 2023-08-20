@@ -263,8 +263,8 @@ private fun FeedLabelInput(
     colors =
       TextFieldDefaults.colors(
         focusedContainerColor = AppTheme.colorScheme.tintedSurface,
-        disabledContainerColor = AppTheme.colorScheme.tintedBackground,
-        unfocusedContainerColor = AppTheme.colorScheme.tintedSurface,
+        disabledContainerColor = Color.Transparent,
+        unfocusedContainerColor = Color.Transparent,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
