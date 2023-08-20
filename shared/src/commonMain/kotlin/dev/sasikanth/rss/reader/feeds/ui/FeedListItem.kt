@@ -15,10 +15,9 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -51,17 +50,14 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -77,9 +73,8 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
-import dev.sasikanth.rss.reader.utils.pressInteraction
-import dev.sasikanth.rss.reader.utils.toDp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeedListItem(
   modifier: Modifier = Modifier,
@@ -92,11 +87,8 @@ internal fun FeedListItem(
 ) {
   val focusManager = LocalFocusManager.current
   val hapticFeedback = LocalHapticFeedback.current
-  val coroutineScope = rememberCoroutineScope()
-  val interactionSource = remember { MutableInteractionSource() }
   val keyboardState by keyboardVisibilityAsState()
 
-  var dropdownOffset by remember(feed) { mutableStateOf(Offset.Zero) }
   var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
   var feedNameEditable by remember(feed) { mutableStateOf(false) }
 
@@ -109,32 +101,16 @@ internal fun FeedListItem(
   Box(
     modifier =
       modifier
-        .indication(interactionSource, LocalIndication.current)
-        .pointerInput(feed) {
-          detectTapGestures(
-            onTap = {
-              pressInteraction(
-                coroutineScope = coroutineScope,
-                interactionSource = interactionSource,
-                offset = it,
-              ) {
-                focusManager.clearFocus()
-                onFeedSelected(feed)
-              }
-            },
-            onLongPress = {
-              pressInteraction(
-                coroutineScope = coroutineScope,
-                interactionSource = interactionSource,
-                offset = it,
-              ) {
-                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                dropdownOffset = it
-                dropdownMenuExpanded = true
-              }
-            }
-          )
-        }
+        .combinedClickable(
+          onClick = {
+            focusManager.clearFocus()
+            onFeedSelected(feed)
+          },
+          onLongClick = {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            dropdownMenuExpanded = true
+          }
+        )
         .fillMaxWidth()
         .padding(start = 20.dp, end = 12.dp)
   ) {
@@ -171,12 +147,34 @@ internal fun FeedListItem(
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
-      IconButton(onClick = { onDeleteFeed(feed) }) {
-        Icon(
-          painter = painterResource(CommonRes.images.ic_delete),
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
+      Box {
+        IconButton(onClick = { onDeleteFeed(feed) }) {
+          Icon(
+            painter = painterResource(CommonRes.images.ic_delete),
+            contentDescription = null,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
+
+        DropdownMenu(
+          expanded = dropdownMenuExpanded,
+          onDismissRequest = { dropdownMenuExpanded = false },
+          offset = DpOffset(0.dp, (-48).dp)
+        ) {
+          DropdownMenuItem(
+            text = { Text(stringResource(CommonRes.strings.edit_feed_name)) },
+            leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+            onClick = {
+              dropdownMenuExpanded = false
+              feedNameEditable = true
+            }
+          )
+
+          DropdownMenuShareItem(
+            contentToShare = feed.link,
+            onShareMenuOpened = { dropdownMenuExpanded = false }
+          )
+        }
       }
     }
 
@@ -185,28 +183,6 @@ internal fun FeedListItem(
         modifier = Modifier.requiredHeight(1.dp).align(Alignment.BottomStart).padding(end = 12.dp),
         color = AppTheme.colorScheme.tintedSurface
       )
-    }
-
-    Box {
-      DropdownMenu(
-        expanded = dropdownMenuExpanded,
-        onDismissRequest = { dropdownMenuExpanded = false },
-        offset = DpOffset(dropdownOffset.x.toDp(), dropdownOffset.y.toDp())
-      ) {
-        DropdownMenuItem(
-          text = { Text(stringResource(CommonRes.strings.edit_feed_name)) },
-          leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
-          onClick = {
-            dropdownMenuExpanded = false
-            feedNameEditable = true
-          }
-        )
-
-        DropdownMenuShareItem(
-          contentToShare = feed.link,
-          onShareMenuOpened = { dropdownMenuExpanded = false }
-        )
-      }
     }
   }
 }
