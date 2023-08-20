@@ -246,7 +246,7 @@ internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl:
 
 @Composable
 private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) {
-  val feedName = post.feedName ?: "Unknown"
+  val feedName = post.feedName
   val verticalPadding = 8.dp
   val startPadding = 8.dp
   val endPadding = 16.dp
@@ -266,15 +266,13 @@ private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) 
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    post.feedIcon?.let { url ->
-      Box(modifier = Modifier.clip(CircleShape).background(Color.White)) {
-        AsyncImage(
-          url = url,
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.requiredSize(16.dp)
-        )
-      }
+    Box(modifier = Modifier.clip(CircleShape).background(Color.White)) {
+      AsyncImage(
+        url = post.feedIcon,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.requiredSize(16.dp)
+      )
     }
 
     Text(

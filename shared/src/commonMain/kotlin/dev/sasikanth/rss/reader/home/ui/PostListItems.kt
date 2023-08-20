@@ -203,7 +203,7 @@ private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
 
 @Composable
 private fun PostMetadata(post: PostWithMetadata) {
-  val feedName = post.feedName ?: "Unknown"
+  val feedName = post.feedName
   val postPublishedAt = post.date.relativeDurationString()
 
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
