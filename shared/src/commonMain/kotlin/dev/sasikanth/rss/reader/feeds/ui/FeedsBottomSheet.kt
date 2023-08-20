@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -44,6 +45,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.imePadding
@@ -192,18 +195,35 @@ private fun BottomSheetCollapsedContent(
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  LazyRow(
-    modifier = modifier.padding(start = 100.dp).fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    contentPadding = PaddingValues(end = 24.dp)
-  ) {
-    items(feeds) { feed ->
-      BottomSheetItem(
-        text = feed.name.uppercase(),
-        iconUrl = feed.icon,
-        selected = selectedFeed == feed,
-        onClick = { onFeedSelected(feed) }
-      )
+  Box {
+    LazyRow(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(start = 100.dp, end = 24.dp)
+    ) {
+      items(feeds) { feed ->
+        BottomSheetItem(
+          text = feed.name.uppercase(),
+          iconUrl = feed.icon,
+          selected = selectedFeed == feed,
+          onClick = { onFeedSelected(feed) }
+        )
+      }
     }
+
+    Box(
+      modifier =
+        Modifier.requiredSize(100.dp)
+          .background(
+            Brush.horizontalGradient(
+              colorStops =
+                arrayOf(
+                  0.7f to AppTheme.colorScheme.tintedBackground,
+                  0.8f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
+                  1f to Color.Transparent
+                )
+            )
+          )
+    )
   }
 }
