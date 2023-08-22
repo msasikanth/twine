@@ -24,6 +24,6 @@ import me.tatarka.inject.annotations.Inject
 class IOSStringReader : StringReader {
 
   override fun string(stringResource: StringResource): String {
-    return StringDesc.Resource(stringResource).toString()
+    return StringDesc.Resource(stringResource).localized()
   }
 }
