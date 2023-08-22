@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.utils
 
 import android.content.Context
-import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.utils.AndroidStringReader
-import dev.sasikanth.rss.reader.utils.StringReader
-import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
+import dev.icerock.moko.resources.StringResource
+import dev.icerock.moko.resources.desc.Resource
+import dev.icerock.moko.resources.desc.StringDesc
+import me.tatarka.inject.annotations.Inject
 
-@AppScope
-@Component
-abstract class ApplicationComponent(@get:Provides val context: Context) :
-  SharedApplicationComponent() {
+@Inject
+class AndroidStringReader(private val context: Context) : StringReader {
 
-  abstract val rssRepository: RssRepository
-
-  companion object
-
-  @AppScope @Provides fun providesStringReader(bind: AndroidStringReader): StringReader = bind
+  override fun string(stringResource: StringResource): String {
+    return StringDesc.Resource(stringResource).toString(context)
+  }
 }

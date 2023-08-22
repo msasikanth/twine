@@ -32,6 +32,8 @@ import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalStringReader
+import dev.sasikanth.rss.reader.utils.StringReader
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -42,9 +44,13 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 fun App(
   homeViewModelFactory: HomeViewModelFactory,
   imageLoader: ImageLoader,
+  stringReader: StringReader,
   @Assisted openLink: (String) -> Unit
 ) {
-  CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+  CompositionLocalProvider(
+    LocalImageLoader provides imageLoader,
+    LocalStringReader provides stringReader
+  ) {
     val dynamicColorState = rememberDynamicColorState()
     var imageUrl by remember { mutableStateOf<String?>(null) }
 

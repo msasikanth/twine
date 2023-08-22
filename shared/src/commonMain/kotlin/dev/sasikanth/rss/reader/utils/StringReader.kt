@@ -13,20 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.utils
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.utils.IOSStringReader
-import dev.sasikanth.rss.reader.utils.StringReader
-import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
+import androidx.compose.runtime.staticCompositionLocalOf
+import dev.icerock.moko.resources.StringResource
 
-@AppScope
-@Component
-abstract class ApplicationComponent : SharedApplicationComponent() {
-
-  abstract val rssRepository: RssRepository
-
-  @AppScope @Provides fun providesStringReader(bind: IOSStringReader): StringReader = bind
+interface StringReader {
+  fun string(stringResource: StringResource): String
 }
+
+internal val LocalStringReader =
+  staticCompositionLocalOf<StringReader> { error("No StringReader found") }
