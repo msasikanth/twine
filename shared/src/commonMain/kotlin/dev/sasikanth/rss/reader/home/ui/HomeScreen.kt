@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalMaterialApi::class)
-
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.AnimatedVisibility
@@ -39,7 +37,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
