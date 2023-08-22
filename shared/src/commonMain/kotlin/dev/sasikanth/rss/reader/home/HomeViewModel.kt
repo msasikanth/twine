@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import io.ktor.client.network.sockets.ConnectTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -130,7 +131,8 @@ internal class HomeViewModel(
             Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
             _effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
           }
-          is ConnectTimeoutException -> {
+          is ConnectTimeoutException,
+          is SocketTimeoutException -> {
             _effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
           }
           else -> {
