@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.slideInVertically
@@ -59,7 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.ExperimentalSoftwareKeyboardApi
 import com.moriatsushi.insetsx.ime
@@ -68,6 +69,7 @@ import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
@@ -78,6 +80,8 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
+import dev.sasikanth.rss.reader.home.HomeState
+import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
@@ -198,54 +202,7 @@ fun HomeScreen(
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
     )
 
-    /**
-     * Since we want the all button to not move when expanding and collapsing bottom bar and
-     * transform to add button. We are not placing it inside the bottom sheet content and instead
-     * place it above the home screen and bottom bar content essentially.
-     *
-     * We might have to replace this once bottom sheet exposes height or offset from bottom which
-     * would allow us to modify the offset of this item in the sheet itself instead of using
-     * workarounds.
-     *
-     * track: https://issuetracker.google.com/issues/209825720
-     */
-    val threshold = 5 // (1/0.2) 0.2 is our threshold in the 0..1 range
-    val primaryActionStartPadding =
-      (24.dp - (4 * (bottomSheetSwipeTransition.currentState * threshold).inverseProgress()).dp)
-        .coerceAtLeast(20.dp)
-        .coerceAtMost(24.dp)
-
-    val windowInsetsPadding =
-      Modifier.windowInsetsPadding(
-        WindowInsets.navigationBars
-          .only(WindowInsetsSides.Bottom)
-          .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-      )
-
-    Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
-      if (state.canShowFeedLinkEntry) {
-        FeedLinkInputField(
-          modifier = windowInsetsPadding.padding(bottom = 24.dp, end = 24.dp),
-          isFetchingFeed = state.isFetchingFeed,
-          onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
-          onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
-        )
-      } else {
-        BottomSheetPrimaryActionButton(
-          modifier =
-            windowInsetsPadding.graphicsLayer {
-              translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
-            },
-          selected = state.isAllFeedsSelected,
-          bottomSheetSwipeProgress =
-            (bottomSheetSwipeTransition.currentState * threshold).inverseProgress(),
-          bottomSheetCurrentState = bottomSheetState.currentValue,
-          bottomSheetTargetState = bottomSheetState.targetValue
-        ) {
-          viewModel.dispatch(HomeEvent.OnPrimaryActionClicked)
-        }
-      }
-    }
+    PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, viewModel, bottomSheetState)
   }
 }
 
@@ -287,6 +244,68 @@ private fun HomeScreenContent(
     }
   } else {
     NoFeeds(onNoFeedsSwipeUp)
+  }
+}
+
+/**
+ * Since we want the all button to not move when expanding and collapsing bottom bar and transform
+ * to add button. We are not placing it inside the bottom sheet content and instead place it above
+ * the home screen and bottom bar content essentially.
+ *
+ * We might have to replace this once bottom sheet exposes height or offset from bottom which would
+ * allow us to modify the offset of this item in the sheet itself instead of using workarounds.
+ *
+ * track: https://issuetracker.google.com/issues/209825720
+ */
+@OptIn(ExperimentalSoftwareKeyboardApi::class)
+@Composable
+private fun BoxScope.PrimaryActionButtonContainer(
+  bottomSheetSwipeTransition: Transition<Float>,
+  state: HomeState,
+  viewModel: HomeViewModel,
+  bottomSheetState: BottomSheetState
+) {
+  // (1/0.2) 0.2 is our threshold in the 0..1 range
+  val bottomSheetContentTransitionThreshold = 5
+  val primaryActionStartPadding =
+    (24.dp -
+        (4 *
+            (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
+              .inverseProgress())
+          .dp)
+      .coerceIn(20.dp, 24.dp)
+
+  val windowInsetsPaddingModifier =
+    Modifier.windowInsetsPadding(
+      WindowInsets.navigationBars
+        .only(WindowInsetsSides.Bottom)
+        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
+    )
+
+  Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
+    if (state.canShowFeedLinkEntry) {
+      FeedLinkInputField(
+        modifier = windowInsetsPaddingModifier.padding(bottom = 24.dp, end = 24.dp),
+        isFetchingFeed = state.isFetchingFeed,
+        onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
+        onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
+      )
+    } else {
+      BottomSheetPrimaryActionButton(
+        modifier =
+          windowInsetsPaddingModifier.graphicsLayer {
+            translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
+          },
+        selected = state.isAllFeedsSelected,
+        bottomSheetSwipeProgress =
+          (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
+            .inverseProgress(),
+        bottomSheetCurrentState = bottomSheetState.currentValue,
+        bottomSheetTargetState = bottomSheetState.targetValue
+      ) {
+        viewModel.dispatch(HomeEvent.OnPrimaryActionClicked)
+      }
+    }
   }
 }
 
