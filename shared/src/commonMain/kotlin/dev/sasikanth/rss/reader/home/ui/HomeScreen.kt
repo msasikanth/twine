@@ -69,6 +69,7 @@ import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
@@ -85,6 +86,7 @@ import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
+import dev.sasikanth.rss.reader.utils.StringReader
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
@@ -92,7 +94,6 @@ import kotlinx.coroutines.launch
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
-@OptIn(ExperimentalSoftwareKeyboardApi::class)
 @Composable
 fun HomeScreen(
   homeViewModelFactory: HomeViewModelFactory,
@@ -136,19 +137,7 @@ fun HomeScreen(
           bottomSheetState.collapse()
         }
         is HomeEffect.ShowError -> {
-          val message =
-            when (val errorType = effect.homeErrorType) {
-              HomeErrorType.UnknownFeedType ->
-                stringReader.string(CommonRes.strings.error_unsupported_feed)
-              HomeErrorType.FailedToParseXML ->
-                stringReader.string(CommonRes.strings.error_malformed_xml)
-              HomeErrorType.Timeout -> stringReader.string(CommonRes.strings.error_request_timeout)
-              is HomeErrorType.Unknown -> errorType.e.message
-            }
-
-          if (message != null) {
-            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = message)
-          }
+          displayErrorMessage(effect, stringReader, bottomSheetScaffoldState)
         }
       }
     }
@@ -382,3 +371,21 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
 @Composable
 private fun bottomSheetPeekHeight() =
   BOTTOM_SHEET_PEEK_HEIGHT + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+private suspend fun displayErrorMessage(
+  effect: HomeEffect.ShowError,
+  stringReader: StringReader,
+  bottomSheetScaffoldState: BottomSheetScaffoldState
+) {
+  val message =
+    when (val errorType = effect.homeErrorType) {
+      HomeErrorType.UnknownFeedType -> stringReader.string(CommonRes.strings.error_unsupported_feed)
+      HomeErrorType.FailedToParseXML -> stringReader.string(CommonRes.strings.error_malformed_xml)
+      HomeErrorType.Timeout -> stringReader.string(CommonRes.strings.error_request_timeout)
+      is HomeErrorType.Unknown -> errorType.e.message
+    }
+
+  if (message != null) {
+    bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = message)
+  }
+}
