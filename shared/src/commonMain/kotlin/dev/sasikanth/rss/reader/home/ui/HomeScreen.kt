@@ -59,9 +59,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import com.moriatsushi.insetsx.ExperimentalSoftwareKeyboardApi
 import com.moriatsushi.insetsx.ime
 import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
@@ -87,6 +87,7 @@ import kotlinx.coroutines.launch
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
+@OptIn(ExperimentalSoftwareKeyboardApi::class)
 @Composable
 fun HomeScreen(
   homeViewModelFactory: HomeViewModelFactory,
@@ -94,7 +95,6 @@ fun HomeScreen(
   openLink: (String) -> Unit
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val navigationBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
   val viewModel = homeViewModelFactory.viewModel
   val state by viewModel.state.collectAsState()
@@ -166,7 +166,6 @@ fun HomeScreen(
           posts = posts,
           selectedFeed = state.selectedFeed,
           isRefreshing = state.isRefreshing,
-          navigationBarPadding = navigationBarPadding,
           onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
           onFeaturedItemChange = onFeaturedItemChange
@@ -174,7 +173,6 @@ fun HomeScreen(
           coroutineScope.launch { bottomSheetState.expand() }
         }
       },
-      backgroundColor = Color.Transparent,
       sheetContent = {
         FeedsBottomSheet(
           feedsViewModel = homeViewModelFactory.feedsViewModel,
@@ -183,12 +181,6 @@ fun HomeScreen(
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
         )
       },
-      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
-      sheetContentColor = AppTheme.colorScheme.tintedForeground,
-      sheetElevation = 0.dp,
-      sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding,
-      sheetShape =
-        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
       snackbarHost = {
         SnackbarHost(
           hostState = it,
@@ -196,7 +188,14 @@ fun HomeScreen(
             Modifier.padding(bottom = 112.dp)
               .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
         )
-      }
+      },
+      backgroundColor = Color.Transparent,
+      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
+      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetElevation = 0.dp,
+      sheetPeekHeight = bottomSheetPeekHeight(),
+      sheetShape =
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
     )
 
     /**
@@ -256,7 +255,6 @@ private fun HomeScreenContent(
   posts: ImmutableList<PostWithMetadata>,
   selectedFeed: Feed?,
   isRefreshing: Boolean,
-  navigationBarPadding: Dp,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
@@ -285,9 +283,7 @@ private fun HomeScreenContent(
         modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
       )
 
-      ScrollToTopButton(visible = showScrollToTop, navigationBarPadding = navigationBarPadding) {
-        listState.animateScrollToItem(0)
-      }
+      ScrollToTopButton(visible = showScrollToTop) { listState.animateScrollToItem(0) }
     }
   } else {
     NoFeeds(onNoFeedsSwipeUp)
@@ -295,11 +291,7 @@ private fun HomeScreenContent(
 }
 
 @Composable
-private fun BoxScope.ScrollToTopButton(
-  visible: Boolean,
-  navigationBarPadding: Dp,
-  onClick: suspend () -> Unit
-) {
+private fun BoxScope.ScrollToTopButton(visible: Boolean, onClick: suspend () -> Unit) {
   val coroutineScope = rememberCoroutineScope()
   AnimatedVisibility(
     visible = visible,
@@ -309,10 +301,8 @@ private fun BoxScope.ScrollToTopButton(
   ) {
     ExtendedFloatingActionButton(
       modifier =
-        Modifier.padding(
-          end = 24.dp,
-          bottom = BOTTOM_SHEET_PEEK_HEIGHT + navigationBarPadding + 24.dp
-        ),
+        Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+          .padding(end = 24.dp, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 24.dp),
       shape = RoundedCornerShape(50),
       containerColor = AppTheme.colorScheme.tintedBackground,
       contentColor = AppTheme.colorScheme.tintedForeground,
@@ -366,3 +356,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     )
   }
 }
+
+@Composable
+private fun bottomSheetPeekHeight() =
+  BOTTOM_SHEET_PEEK_HEIGHT + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
