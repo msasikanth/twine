@@ -124,7 +124,6 @@ internal class HomeViewModel(
       } catch (e: Exception) {
         when (e) {
           is UnsupportedOperationException -> {
-            Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
             _effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
           }
           is XmlParsingError -> {
