@@ -14,4 +14,7 @@
     <string name="swipe_up_get_started">Swipe up to get started</string>
     <string name="feed_name_hint">Feed name</string>
     <string name="edit_feed_name">Edit</string>
+    <string name="error_unsupported_feed">App currently doesn't support this link</string>
+    <string name="error_malformed_xml">Provided link doesn't contain valid RSS/Atom feed</string>
+    <string name="error_request_timeout">"Timeout, check your network connection and try again later"</string>
 </resources>

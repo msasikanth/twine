@@ -84,6 +84,7 @@ import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalStringReader
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
@@ -123,6 +124,8 @@ fun HomeScreen(
   val bottomSheetCornerSize by
     bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverseProgress() }
 
+  val stringReader = LocalStringReader.current
+
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->
       when (effect) {
@@ -133,13 +136,13 @@ fun HomeScreen(
           bottomSheetState.collapse()
         }
         is HomeEffect.ShowError -> {
-          // TODO: Figure out how to move these strings to common string resource
           val message =
             when (val errorType = effect.homeErrorType) {
-              HomeErrorType.UnknownFeedType,
-              HomeErrorType.FailedToParseXML -> "Provided link doesn't contain valid RSS/Atom feed"
-              HomeErrorType.Timeout ->
-                "Request timeout. Check your network connection and try again later"
+              HomeErrorType.UnknownFeedType ->
+                stringReader.string(CommonRes.strings.error_unsupported_feed)
+              HomeErrorType.FailedToParseXML ->
+                stringReader.string(CommonRes.strings.error_malformed_xml)
+              HomeErrorType.Timeout -> stringReader.string(CommonRes.strings.error_request_timeout)
               is HomeErrorType.Unknown -> errorType.e.message
             }
 
