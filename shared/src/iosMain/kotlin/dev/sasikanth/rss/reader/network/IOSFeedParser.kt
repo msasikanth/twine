@@ -110,7 +110,7 @@ private class IOSXmlFeedParser(
         when (didStartElement) {
           RSS_TAG -> RSS
           ATOM_TAG -> ATOM
-          else -> Unknown
+          else -> throw UnsupportedOperationException("Unknown feed type: $didStartElement")
         }
     }
 
@@ -154,7 +154,6 @@ private class IOSXmlFeedParser(
         when (feedType) {
           RSS -> PostPayload.mapRssPost(currentItemData)
           ATOM -> PostPayload.mapAtomPost(currentItemData)
-          Unknown,
           null -> null
         }
 
@@ -168,7 +167,6 @@ private class IOSXmlFeedParser(
       when (feedType) {
         RSS -> FeedPayload.mapRssFeed(feedUrl, currentChannelData, posts)
         ATOM -> FeedPayload.mapAtomFeed(feedUrl, currentChannelData, posts)
-        Unknown,
         null -> null
       }
 
