@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import androidx.compose.ui.window.ComposeUIViewController
-import dev.sasikanth.rss.reader.components.ImageLoader
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+package dev.sasikanth.rss.reader
 
-fun MainViewController(
-  homeViewModelFactory: HomeViewModelFactory,
-  imageLoader: ImageLoader,
-  openLink: (String) -> Unit
-) = ComposeUIViewController {
-  App(homeViewModelFactory = homeViewModelFactory, imageLoader = imageLoader, openLink = openLink)
+import androidx.compose.ui.window.ComposeUIViewController
+import me.tatarka.inject.annotations.Inject
+import platform.Foundation.NSURL
+import platform.UIKit.UIApplication
+import platform.UIKit.UIViewController
+
+typealias HomeViewController = () -> UIViewController
+
+@Inject
+fun HomeViewController(app: App) = ComposeUIViewController {
+  app(openLink = { link -> UIApplication.sharedApplication().openURL(NSURL(string = link)) })
 }

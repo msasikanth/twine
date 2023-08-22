@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package dev.sasikanth.rss.reader
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -30,12 +32,17 @@ import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
+import me.tatarka.inject.annotations.Assisted
+import me.tatarka.inject.annotations.Inject
 
+typealias App = @Composable (openLink: (String) -> Unit) -> Unit
+
+@Inject
 @Composable
 fun App(
   homeViewModelFactory: HomeViewModelFactory,
   imageLoader: ImageLoader,
-  openLink: (String) -> Unit
+  @Assisted openLink: (String) -> Unit
 ) {
   CompositionLocalProvider(LocalImageLoader provides imageLoader) {
     val dynamicColorState = rememberDynamicColorState()

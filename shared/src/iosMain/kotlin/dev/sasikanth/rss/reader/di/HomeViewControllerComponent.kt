@@ -16,10 +16,11 @@
 package dev.sasikanth.rss.reader.di
 
 import com.arkivanov.decompose.ComponentContext
+import dev.sasikanth.rss.reader.HomeViewController
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
+import platform.UIKit.UIViewController
 
 @Component
 @ActivityScope
@@ -28,5 +29,7 @@ abstract class HomeViewControllerComponent(
   @Component val applicationComponent: ApplicationComponent
 ) {
 
-  abstract val homeViewModelFactory: HomeViewModelFactory
+  abstract val homeViewControllerFactory: () -> UIViewController
+
+  @Provides fun uiViewController(bind: HomeViewController): UIViewController = bind()
 }

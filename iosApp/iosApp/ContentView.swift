@@ -3,6 +3,7 @@ import SwiftUI
 import shared
 
 struct ComposeView: UIViewControllerRepresentable {
+    
     let homeViewControllerComponent: InjectHomeViewControllerComponent
 	
     init(homeViewControllerComponent: InjectHomeViewControllerComponent) {
@@ -10,19 +11,11 @@ struct ComposeView: UIViewControllerRepresentable {
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-        let controller = Main_iosKt.MainViewController(
-            homeViewModelFactory: homeViewControllerComponent.homeViewModelFactory,
-            imageLoader: homeViewControllerComponent.applicationComponent.imageLoader,
-            openLink: { url in
-                openLink(url: url)
-            })
-		return controller
+        return homeViewControllerComponent.homeViewControllerFactory()
 	}
-	
-	func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-    
-    private func openLink(url: String) {
-        UIApplication.shared.open(URL(string: url)!, options: [:], completionHandler: nil)
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        
     }
 }
 
@@ -40,6 +33,3 @@ struct ContentView: View {
 			.edgesIgnoringSafeArea(.all)
 	}
 }
-
-
-

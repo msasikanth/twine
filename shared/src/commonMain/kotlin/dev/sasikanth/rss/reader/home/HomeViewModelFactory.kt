@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.home
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feeds.FeedsViewModelFactory
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -25,6 +26,7 @@ import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@ActivityScope
 class HomeViewModelFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,

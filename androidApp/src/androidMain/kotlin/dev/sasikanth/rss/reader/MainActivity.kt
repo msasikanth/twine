@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader
 
-import MainView
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
@@ -30,7 +29,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -44,13 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 
-    setContent {
-      MainView(
-        homeViewModelFactory = activityComponent.homeViewModelFactory,
-        imageLoader = activityComponent.applicationComponent.imageLoader,
-        openLink = ::openLink
-      )
-    }
+    setContent { activityComponent.app(openLink = ::openLink) }
   }
 
   private fun openLink(url: String) {
@@ -71,5 +63,5 @@ abstract class ActivityComponent(
   @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity)
 ) {
 
-  abstract val homeViewModelFactory: HomeViewModelFactory
+  abstract val app: App
 }
