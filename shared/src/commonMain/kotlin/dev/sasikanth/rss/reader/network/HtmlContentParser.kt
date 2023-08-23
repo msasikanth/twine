@@ -19,18 +19,21 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
 class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
 
+  private val contentStringBuilder = StringBuilder()
   private val currentData: MutableMap<String, String> = mutableMapOf()
   private var currentTag: String? = null
 
   override fun onText(text: String) {
     when (currentTag) {
-      "p",
+      "p" -> contentStringBuilder.append("\n" + text.cleanWhitespaces())
       "a",
       "span",
       "em" -> {
-        currentData["content"] = (currentData["content"] ?: "") + text.cleanWhitespaces()
+        contentStringBuilder.append(text.cleanWhitespaces())
       }
     }
+
+    currentData["content"] = contentStringBuilder.toString()
   }
 
   override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
