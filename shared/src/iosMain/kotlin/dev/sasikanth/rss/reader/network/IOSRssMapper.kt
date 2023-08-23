@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
@@ -49,6 +50,7 @@ internal fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): Post
           if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
           description = it.content.ifBlank { descriptionToParse?.trim() }
         },
+      options = KsoupHtmlOptions(decodeEntities = false)
     )
 
   contentParser.parseComplete(descriptionToParse.orEmpty())

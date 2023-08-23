@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
@@ -40,6 +41,7 @@ internal fun PostPayload.Companion.mapAtomPost(atomMap: Map<String, String>): Po
           if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
           content = it.content.ifBlank { data?.trim() }
         },
+      options = KsoupHtmlOptions(decodeEntities = false)
     )
 
   parser.parseComplete(data.orEmpty())

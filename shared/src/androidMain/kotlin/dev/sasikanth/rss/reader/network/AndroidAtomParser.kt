@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.network
 
 import android.net.Uri
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.FeedPayload
 import dev.sasikanth.rss.reader.models.PostPayload
@@ -95,6 +96,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
                   if (image.isNullOrBlank()) image = it.imageUrl
                   content = it.content.ifBlank { rawContent.trim() }
                 },
+              options = KsoupHtmlOptions(decodeEntities = false)
             )
           contentParser.parseComplete(rawContent)
         }

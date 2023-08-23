@@ -29,7 +29,22 @@ internal interface FeedParser {
     val imageTags = setOf("media:content", "media:thumbnail")
 
     fun cleanText(text: String?): String? =
-      text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
+      text
+        ?.replace(htmlTag, "")
+        ?.replace(blankLine, "")
+        ?.replace(Regex("&(hellip|amp|lt|gt|quot|apos|nbsp);")) { matchResult ->
+          when (val value = matchResult.value) {
+            "&hellip;" -> "..."
+            "&amp;" -> "&"
+            "&lt;" -> "<"
+            "&gt;" -> ">"
+            "&quot;" -> "\""
+            "&apos;" -> "'"
+            "&nbsp;" -> " "
+            else -> value
+          }
+        }
+        ?.trim()
 
     fun cleanTextCompact(text: String?) = cleanText(text)?.take(300)
 
