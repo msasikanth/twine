@@ -30,7 +30,7 @@ class AppPresenter(
 
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
-      Config.Home -> Screen.Home(presenter = homePresenterFactory(componentContext))
+      Config.Home -> Screen.Home(presenterFactory = homePresenterFactory(componentContext))
     }
 
   sealed interface Config : Parcelable {

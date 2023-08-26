@@ -72,7 +72,7 @@ fun App(
         when (val screen = screenStack.active.instance) {
           is Screen.Home ->
             HomeScreen(
-              homePresenterFactory = screen.presenter,
+              homePresenterFactory = screen.presenterFactory,
               onFeaturedItemChange = { imageUrl = it },
               openLink = openLink
             )
