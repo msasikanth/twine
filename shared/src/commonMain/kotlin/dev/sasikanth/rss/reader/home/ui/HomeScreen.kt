@@ -81,9 +81,9 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
+import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.home.HomeState
-import dev.sasikanth.rss.reader.home.HomeViewModel
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
 import dev.sasikanth.rss.reader.utils.StringReader
@@ -96,21 +96,21 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @Composable
 fun HomeScreen(
-  homeViewModelFactory: HomeViewModelFactory,
+  homePresenterFactory: HomePresenterFactory,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   openLink: (String) -> Unit
 ) {
   val coroutineScope = rememberCoroutineScope()
 
-  val viewModel = homeViewModelFactory.viewModel
-  val state by viewModel.state.collectAsState()
+  val homePresenter = homePresenterFactory.presenter
+  val state by homePresenter.state.collectAsState()
   val (featuredPosts, posts) = state
 
   val bottomSheetState =
     rememberBottomSheetState(
       state.feedsSheetState,
       confirmStateChange = {
-        viewModel.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+        homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
         true
       }
     )
@@ -128,7 +128,7 @@ fun HomeScreen(
   val stringReader = LocalStringReader.current
 
   LaunchedEffect(Unit) {
-    viewModel.effects.collect { effect ->
+    homePresenter.effects.collect { effect ->
       when (effect) {
         is HomeEffect.OpenPost -> {
           openLink(effect.post.link)
@@ -145,7 +145,7 @@ fun HomeScreen(
 
   LaunchedEffect(bottomSheetState.targetValue) {
     if (bottomSheetState.targetValue == BottomSheetValue.Collapsed) {
-      viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked)
+      homePresenter.dispatch(HomeEvent.OnCancelAddFeedClicked)
     }
   }
 
@@ -162,8 +162,8 @@ fun HomeScreen(
           posts = posts,
           selectedFeed = state.selectedFeed,
           isRefreshing = state.isRefreshing,
-          onSwipeToRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
-          onPostClicked = { viewModel.dispatch(HomeEvent.OnPostClicked(it)) },
+          onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+          onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onFeaturedItemChange = onFeaturedItemChange
         ) {
           coroutineScope.launch { bottomSheetState.expand() }
@@ -171,7 +171,7 @@ fun HomeScreen(
       },
       sheetContent = {
         FeedsBottomSheet(
-          feedsViewModel = homeViewModelFactory.feedsViewModel,
+          feedsViewModel = homePresenterFactory.feedsViewModel,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           showingFeedLinkEntry = state.canShowFeedLinkEntry,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
@@ -194,7 +194,7 @@ fun HomeScreen(
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
     )
 
-    PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, viewModel, bottomSheetState)
+    PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, homePresenter, bottomSheetState)
   }
 }
 
@@ -254,7 +254,7 @@ private fun HomeScreenContent(
 private fun BoxScope.PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,
   state: HomeState,
-  viewModel: HomeViewModel,
+  viewModel: HomePresenter,
   bottomSheetState: BottomSheetState
 ) {
   // (1/0.2) 0.2 is our threshold in the 0..1 range

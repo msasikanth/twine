@@ -29,7 +29,7 @@ import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
-import dev.sasikanth.rss.reader.home.HomeViewModelFactory
+import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
@@ -42,7 +42,7 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 @Inject
 @Composable
 fun App(
-  homeViewModelFactory: HomeViewModelFactory,
+  homePresenterFactory: HomePresenterFactory,
   imageLoader: ImageLoader,
   stringReader: StringReader,
   @Assisted openLink: (String) -> Unit
@@ -68,7 +68,7 @@ fun App(
         color = AppTheme.colorScheme.surfaceContainerLowest
       ) {
         HomeScreen(
-          homeViewModelFactory = homeViewModelFactory,
+          homePresenterFactory = homePresenterFactory,
           onFeaturedItemChange = { imageUrl = it },
           openLink = openLink
         )

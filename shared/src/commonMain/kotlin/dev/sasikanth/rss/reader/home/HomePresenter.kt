@@ -57,7 +57,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @ActivityScope
-class HomeViewModelFactory(
+class HomePresenterFactory(
   componentContext: ComponentContext,
   rssRepository: RssRepository,
   postsListTransformationUseCase: PostsListTransformationUseCase,
@@ -66,9 +66,9 @@ class HomeViewModelFactory(
   dispatchersProvider: DispatchersProvider
 ) : ComponentContext by componentContext {
 
-  internal val viewModel =
+  internal val presenter =
     instanceKeeper.getOrCreate {
-      HomeViewModel(
+      HomePresenter(
         lifecycle = lifecycle,
         backHandler = backHandler,
         rssRepository = rssRepository,
@@ -83,7 +83,7 @@ class HomeViewModelFactory(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class HomeViewModel(
+internal class HomePresenter(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
   private val backHandler: BackHandler,
