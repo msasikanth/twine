@@ -254,7 +254,7 @@ private fun HomeScreenContent(
 private fun BoxScope.PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,
   state: HomeState,
-  viewModel: HomePresenter,
+  presenter: HomePresenter,
   bottomSheetState: BottomSheetState
 ) {
   // (1/0.2) 0.2 is our threshold in the 0..1 range
@@ -279,8 +279,8 @@ private fun BoxScope.PrimaryActionButtonContainer(
       FeedLinkInputField(
         modifier = windowInsetsPaddingModifier.padding(bottom = 24.dp, end = 24.dp),
         isFetchingFeed = state.isFetchingFeed,
-        onAddFeed = { viewModel.dispatch(HomeEvent.AddFeed(it)) },
-        onCancelFeedEntryClicked = { viewModel.dispatch(HomeEvent.OnCancelAddFeedClicked) }
+        onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
+        onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
       )
     } else {
       BottomSheetPrimaryActionButton(
@@ -295,7 +295,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
         bottomSheetCurrentState = bottomSheetState.currentValue,
         bottomSheetTargetState = bottomSheetState.targetValue
       ) {
-        viewModel.dispatch(HomeEvent.OnPrimaryActionClicked)
+        presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
       }
     }
   }
