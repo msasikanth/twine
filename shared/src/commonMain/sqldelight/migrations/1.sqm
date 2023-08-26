@@ -1,0 +1,31 @@
+CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    link TEXT NOT NULL PRIMARY KEY UNINDEXED
+);
+
+INSERT INTO post_search SELECT title, description, link FROM post;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_UPDATE
+BEFORE UPDATE ON post
+BEGIN DELETE FROM post_search WHERE link = old.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+BEGIN DELETE FROM post_search WHERE link = old.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+END;
