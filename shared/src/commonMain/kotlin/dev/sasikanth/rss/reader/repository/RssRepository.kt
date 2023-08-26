@@ -86,4 +86,31 @@ class RssRepository(
   suspend fun updateFeedName(newFeedName: String, feedLink: String) {
     withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
   }
+
+  fun search(searchQuery: String): Flow<List<PostWithMetadata>> {
+    return postQueries
+      .search(searchQuery, mapper = ::mapToPostWithMetadata)
+      .asFlow()
+      .mapToList(ioDispatcher)
+  }
+
+  private fun mapToPostWithMetadata(
+    title: String,
+    description: String,
+    imageUrl: String?,
+    date: Instant,
+    link: String,
+    feedName: String,
+    feedIcon: String
+  ): PostWithMetadata {
+    return PostWithMetadata(
+      title = title,
+      description = description,
+      imageUrl = imageUrl,
+      date = date,
+      link = link,
+      feedName = feedName,
+      feedIcon = feedIcon
+    )
+  }
 }

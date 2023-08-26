@@ -12,6 +12,38 @@ CREATE TABLE post(
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
+-- FTS --
+CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    link TEXT NOT NULL PRIMARY KEY UNINDEXED
+);
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_UPDATE
+BEFORE UPDATE ON post
+BEGIN DELETE FROM post_search WHERE link = old.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+BEGIN DELETE FROM post_search WHERE link = old.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+END;
+-- FTS --
+
 upsert {
   UPDATE post
   SET title = :title,
@@ -40,3 +72,17 @@ FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE :feedLink IS NULL OR post.feedLink = :feedLink
 ORDER BY post.date DESC;
+
+search:
+SELECT
+  post_search.title,
+  post_search.description,
+  post.imageUrl,
+  post.date,
+  post.link,
+  feed.name AS feedName,
+  feed.icon AS feedIcon
+FROM post_search
+INNER JOIN post ON post.link == post_search.link
+INNER JOIN feed ON post.feedLink == feed.link
+WHERE post_search MATCH :search_query;
