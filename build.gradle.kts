@@ -28,6 +28,7 @@ plugins {
   alias(libs.plugins.spotless).apply(false)
   alias(libs.plugins.buildKonfig).apply(false)
   alias(libs.plugins.sentry.android).apply(false)
+  alias(libs.plugins.kotlin.parcelize).apply(false)
 }
 
 allprojects {

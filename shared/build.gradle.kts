@@ -27,6 +27,7 @@ plugins {
   alias(libs.plugins.moko.resources)
   alias(libs.plugins.ksp)
   alias(libs.plugins.buildKonfig)
+  alias(libs.plugins.kotlin.parcelize)
 }
 
 buildkonfig {
