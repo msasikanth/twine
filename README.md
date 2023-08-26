@@ -1,6 +1,6 @@
-# Reader
+# Twine
 
-![CI-MAIN](https://github.com/msasikanth/reader/actions/workflows/ci_checks.yml/badge.svg?branch=main)
+![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 
 ![banner](./readme_images/banner.png)
 
