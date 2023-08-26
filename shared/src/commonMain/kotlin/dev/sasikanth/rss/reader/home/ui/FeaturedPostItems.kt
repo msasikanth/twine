@@ -48,6 +48,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -73,6 +74,7 @@ import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
 import dev.sasikanth.rss.reader.utils.pressInteraction
 import dev.sasikanth.rss.reader.utils.toDp
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -86,10 +88,13 @@ internal fun FeaturedPostItems(
   Box(modifier = modifier) {
     var selectedImage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(pagerState.settledPage, featuredPosts) {
-      val selectedFeaturedPost = featuredPosts.getOrNull(pagerState.settledPage)
-      selectedImage = selectedFeaturedPost?.imageUrl
-      onFeaturedItemChange(selectedImage)
+    LaunchedEffect(pagerState, featuredPosts) {
+      snapshotFlow { pagerState.settledPage }
+        .collectLatest { index ->
+          val selectedFeaturedPost = featuredPosts.getOrNull(index)
+          selectedImage = selectedFeaturedPost?.imageUrl
+          onFeaturedItemChange(selectedImage)
+        }
     }
 
     selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
