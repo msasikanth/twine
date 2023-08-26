@@ -25,5 +25,5 @@ typealias HomeViewController = () -> UIViewController
 
 @Inject
 fun HomeViewController(app: App) = ComposeUIViewController {
-  app(openLink = { link -> UIApplication.sharedApplication().openURL(NSURL(string = link)) })
+  app { link -> UIApplication.sharedApplication().openURL(NSURL(string = link)) }
 }

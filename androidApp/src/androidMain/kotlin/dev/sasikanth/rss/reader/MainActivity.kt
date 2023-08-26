@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 
-    setContent { activityComponent.app(openLink = ::openLink) }
+    setContent { activityComponent.app(::openLink) }
   }
 
   private fun openLink(url: String) {
