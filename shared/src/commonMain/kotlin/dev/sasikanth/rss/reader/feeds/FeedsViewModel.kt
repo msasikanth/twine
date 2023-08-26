@@ -15,10 +15,13 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
+import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -36,6 +39,28 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Assisted
+import me.tatarka.inject.annotations.Inject
+
+@Inject
+@ActivityScope
+class FeedsViewModelFactory(
+  rssRepository: RssRepository,
+  observableSelectedFeed: ObservableSelectedFeed,
+  dispatchersProvider: DispatchersProvider,
+  @Assisted componentContext: ComponentContext,
+) : ComponentContext by componentContext {
+
+  internal val viewModel =
+    instanceKeeper.getOrCreate {
+      FeedsViewModel(
+        lifecycle = lifecycle,
+        rssRepository = rssRepository,
+        observableSelectedFeed = observableSelectedFeed,
+        dispatchersProvider = dispatchersProvider
+      )
+    }
+}
 
 class FeedsViewModel(
   lifecycle: Lifecycle,
