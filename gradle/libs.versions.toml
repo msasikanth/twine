@@ -34,6 +34,7 @@ ksoup = "0.1.4"
 sentry = "0.2.1"
 sentry_android = "3.12.0"
 buildKonfig = "0.13.3"
+sqliteAndroid = "3.42.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -73,6 +74,7 @@ kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', ver
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.mohamedrejeb.ksoup:ksoup-html", version.ref = "ksoup" }
 sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
+sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

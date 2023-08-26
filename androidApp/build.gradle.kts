@@ -72,7 +72,14 @@ android {
     }
     debug { applicationIdSuffix = ".debug" }
   }
-  packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
+  packaging {
+    resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") }
+
+    // Deprecated ABIs. See https://developer.android.com/ndk/guides/abis
+    jniLibs.excludes.add("lib/mips/libsqlite3x.so")
+    jniLibs.excludes.add("lib/mips64/libsqlite3x.so")
+    jniLibs.excludes.add("lib/armeabi/libsqlite3x.so")
+  }
 }
 
 dependencies {
