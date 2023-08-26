@@ -19,6 +19,7 @@ import android.content.Context
 import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import io.requery.android.database.sqlite.RequerySQLiteOpenHelperFactory
 
 actual class DriverFactory(private val context: Context) {
 
@@ -32,7 +33,8 @@ actual class DriverFactory(private val context: Context) {
           override fun onOpen(db: SupportSQLiteDatabase) {
             db.setForeignKeyConstraintsEnabled(true)
           }
-        }
+        },
+      factory = RequerySQLiteOpenHelperFactory()
     )
   }
 }
