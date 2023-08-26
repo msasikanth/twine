@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader
+package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
