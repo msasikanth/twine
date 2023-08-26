@@ -53,17 +53,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @ActivityScope
 class HomePresenterFactory(
-  componentContext: ComponentContext,
   rssRepository: RssRepository,
   postsListTransformationUseCase: PostsListTransformationUseCase,
   observableSelectedFeed: ObservableSelectedFeed,
   feedsPresenterFactory: (ComponentContext) -> FeedsPresenterFactory,
-  dispatchersProvider: DispatchersProvider
+  dispatchersProvider: DispatchersProvider,
+  @Assisted componentContext: ComponentContext,
 ) : ComponentContext by componentContext {
 
   internal val presenter =

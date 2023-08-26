@@ -25,11 +25,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
-import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
@@ -42,7 +42,7 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 @Inject
 @Composable
 fun App(
-  homePresenterFactory: HomePresenterFactory,
+  appPresenter: AppPresenter,
   imageLoader: ImageLoader,
   stringReader: StringReader,
   @Assisted openLink: (String) -> Unit
@@ -67,11 +67,16 @@ fun App(
         modifier = Modifier.fillMaxSize(),
         color = AppTheme.colorScheme.surfaceContainerLowest
       ) {
-        HomeScreen(
-          homePresenterFactory = homePresenterFactory,
-          onFeaturedItemChange = { imageUrl = it },
-          openLink = openLink
-        )
+        val screenStack by appPresenter.screenStack.subscribeAsState()
+
+        when (val screen = screenStack.active.instance) {
+          is Screen.Home ->
+            HomeScreen(
+              homePresenterFactory = screen.presenter,
+              onFeaturedItemChange = { imageUrl = it },
+              openLink = openLink
+            )
+        }
       }
     }
   }
