@@ -92,12 +92,12 @@ internal class HomePresenter(
   private val observableSelectedFeed: ObservableSelectedFeed
 ) : InstanceKeeper.Instance {
 
-  private val viewModelScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+  private val presenterScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
   private val _state = MutableStateFlow(HomeState.DEFAULT)
   val state: StateFlow<HomeState> =
     _state.stateIn(
-      scope = viewModelScope,
+      scope = presenterScope,
       started = SharingStarted.WhileSubscribed(5000),
       initialValue = HomeState.DEFAULT
     )
@@ -106,7 +106,7 @@ internal class HomePresenter(
   val effects = _effects.asSharedFlow()
 
   private val backCallback = BackCallback {
-    viewModelScope.launch { _effects.emit(HomeEffect.MinimizeSheet) }
+    presenterScope.launch { _effects.emit(HomeEffect.MinimizeSheet) }
   }
 
   init {
@@ -138,7 +138,7 @@ internal class HomePresenter(
       .onEach { (featuredPosts, posts) ->
         _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
       }
-      .launchIn(viewModelScope)
+      .launchIn(presenterScope)
   }
 
   private fun onPrimaryActionClicked() {
@@ -150,7 +150,7 @@ internal class HomePresenter(
   }
 
   private fun addFeed(feedLink: String) {
-    viewModelScope.launch {
+    presenterScope.launch {
       _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
       try {
         rssRepository.addFeed(feedLink)
@@ -192,16 +192,16 @@ internal class HomePresenter(
   }
 
   private fun onHomeSelected() {
-    viewModelScope.launch { observableSelectedFeed.clearSelection() }
+    presenterScope.launch { observableSelectedFeed.clearSelection() }
   }
 
   private fun onPostClicked(post: PostWithMetadata) {
-    viewModelScope.launch { _effects.emit(HomeEffect.OpenPost(post)) }
+    presenterScope.launch { _effects.emit(HomeEffect.OpenPost(post)) }
   }
 
   private fun refreshContent() {
     try {
-      viewModelScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
+      presenterScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
     } catch (e: Exception) {
       Sentry.captureException(e)
     }
@@ -214,7 +214,7 @@ internal class HomePresenter(
   }
 
   override fun onDestroy() {
-    viewModelScope.cancel()
+    presenterScope.cancel()
     backHandler.unregister(backCallback)
   }
 }
