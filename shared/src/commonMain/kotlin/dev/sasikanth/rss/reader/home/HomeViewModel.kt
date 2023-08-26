@@ -18,13 +18,18 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
+import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.backhandler.BackHandler
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
+import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.feeds.FeedsViewModelFactory
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -48,6 +53,34 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Inject
+
+@Inject
+@ActivityScope
+class HomeViewModelFactory(
+  componentContext: ComponentContext,
+  rssRepository: RssRepository,
+  postsListTransformationUseCase: PostsListTransformationUseCase,
+  observableSelectedFeed: ObservableSelectedFeed,
+  feedsViewModelFactory: (ComponentContext) -> FeedsViewModelFactory,
+  dispatchersProvider: DispatchersProvider
+) : ComponentContext by componentContext {
+
+  internal val viewModel =
+    instanceKeeper.getOrCreate {
+      HomeViewModel(
+        lifecycle = lifecycle,
+        backHandler = backHandler,
+        rssRepository = rssRepository,
+        postsListTransformationUseCase = postsListTransformationUseCase,
+        observableSelectedFeed = observableSelectedFeed,
+        dispatchersProvider = dispatchersProvider
+      )
+    }
+
+  internal val feedsViewModel =
+    feedsViewModelFactory(childContext("feeds_viewmodel_factory")).viewModel
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class HomeViewModel(
