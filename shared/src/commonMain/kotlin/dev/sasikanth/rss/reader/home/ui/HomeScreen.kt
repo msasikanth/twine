@@ -171,7 +171,7 @@ fun HomeScreen(
       },
       sheetContent = {
         FeedsBottomSheet(
-          feedsViewModel = homePresenterFactory.feedsViewModel,
+          feedsPresenter = homePresenterFactory.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           showingFeedLinkEntry = state.canShowFeedLinkEntry,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }

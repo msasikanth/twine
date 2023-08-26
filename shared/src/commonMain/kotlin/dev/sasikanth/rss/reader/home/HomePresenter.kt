@@ -29,7 +29,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.feeds.FeedsViewModelFactory
+import dev.sasikanth.rss.reader.feeds.FeedsPresenterFactory
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -62,7 +62,7 @@ class HomePresenterFactory(
   rssRepository: RssRepository,
   postsListTransformationUseCase: PostsListTransformationUseCase,
   observableSelectedFeed: ObservableSelectedFeed,
-  feedsViewModelFactory: (ComponentContext) -> FeedsViewModelFactory,
+  feedsPresenterFactory: (ComponentContext) -> FeedsPresenterFactory,
   dispatchersProvider: DispatchersProvider
 ) : ComponentContext by componentContext {
 
@@ -78,8 +78,8 @@ class HomePresenterFactory(
       )
     }
 
-  internal val feedsViewModel =
-    feedsViewModelFactory(childContext("feeds_viewmodel_factory")).viewModel
+  internal val feedsPresenter =
+    feedsPresenterFactory(childContext("feeds_viewmodel_factory")).presenter
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

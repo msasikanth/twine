@@ -44,16 +44,16 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @ActivityScope
-class FeedsViewModelFactory(
+class FeedsPresenterFactory(
   rssRepository: RssRepository,
   observableSelectedFeed: ObservableSelectedFeed,
   dispatchersProvider: DispatchersProvider,
   @Assisted componentContext: ComponentContext,
 ) : ComponentContext by componentContext {
 
-  internal val viewModel =
+  internal val presenter =
     instanceKeeper.getOrCreate {
-      FeedsViewModel(
+      FeedsPresenter(
         lifecycle = lifecycle,
         rssRepository = rssRepository,
         observableSelectedFeed = observableSelectedFeed,
@@ -62,7 +62,7 @@ class FeedsViewModelFactory(
     }
 }
 
-class FeedsViewModel(
+class FeedsPresenter(
   lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,

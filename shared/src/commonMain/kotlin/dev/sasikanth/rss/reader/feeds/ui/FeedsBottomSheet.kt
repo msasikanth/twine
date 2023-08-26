@@ -56,23 +56,23 @@ import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
-import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun FeedsBottomSheet(
-  feedsViewModel: FeedsViewModel,
+  feedsPresenter: FeedsPresenter,
   bottomSheetSwipeTransition: Transition<Float>,
   showingFeedLinkEntry: Boolean,
   closeSheet: () -> Unit
 ) {
-  val state by feedsViewModel.state.collectAsState()
+  val state by feedsPresenter.state.collectAsState()
   val selectedFeed = state.selectedFeed
 
   LaunchedEffect(Unit) {
-    feedsViewModel.effects.collect { effect ->
+    feedsPresenter.effects.collect { effect ->
       when (effect) {
         FeedsEffect.MinimizeSheet -> closeSheet()
       }
@@ -95,7 +95,7 @@ internal fun FeedsBottomSheet(
           modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
           feeds = state.feeds,
           selectedFeed = selectedFeed,
-          onFeedSelected = { feed -> feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(feed)) }
+          onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
         )
       } else {
         BottomSheetExpandedContent(
@@ -115,11 +115,11 @@ internal fun FeedsBottomSheet(
           feeds = state.feeds,
           selectedFeed = state.selectedFeed,
           showingFeedLinkEntry = showingFeedLinkEntry,
-          closeSheet = { feedsViewModel.dispatch(FeedsEvent.OnGoBackClicked) },
-          onDeleteFeed = { feedsViewModel.dispatch(FeedsEvent.OnDeleteFeed(it)) },
-          onFeedSelected = { feedsViewModel.dispatch(FeedsEvent.OnFeedSelected(it)) },
+          closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
+          onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+          onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
           onFeedNameChanged = { newFeedName, feedLink ->
-            feedsViewModel.dispatch(
+            feedsPresenter.dispatch(
               FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
             )
           }
