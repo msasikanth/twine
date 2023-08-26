@@ -36,14 +36,14 @@ allprojects {
     kotlin {
       ktfmt(libs.versions.ktfmt.get()).googleStyle()
       target("src/**/*.kt")
-      targetExclude("$buildDir/**/*.kt")
+      targetExclude("${layout.buildDirectory}/**/*.kt")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"))
         .onlyIfContentMatches("missingString")
     }
     kotlinGradle {
       ktfmt(libs.versions.ktfmt.get()).googleStyle()
       target("*.kts")
-      targetExclude("$buildDir/**/*.kts")
+      targetExclude("${layout.buildDirectory}/**/*.kts")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "(^(?![\\/ ]\\*).*$)")
         .onlyIfContentMatches("missingString")
     }
