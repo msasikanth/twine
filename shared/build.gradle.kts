@@ -45,6 +45,8 @@ multiplatformResources {
 }
 
 kotlin {
+  targetHierarchy.default()
+
   android()
 
   val iOSBinaryFlags =
@@ -139,8 +141,6 @@ kotlin {
 
     val iosSimulatorArm64Main by getting
     val iosMain by getting {
-      dependsOn(commonMain)
-      iosSimulatorArm64Main.dependsOn(this)
       dependencies {
         implementation(libs.ktor.client.darwin)
         implementation(libs.sqldelight.driver.native)
@@ -149,12 +149,7 @@ kotlin {
     val iosX64Test by getting
     val iosArm64Test by getting
     val iosSimulatorArm64Test by getting
-    val iosTest by getting {
-      dependsOn(commonTest)
-      iosX64Test.dependsOn(this)
-      iosArm64Test.dependsOn(this)
-      iosSimulatorArm64Test.dependsOn(this)
-    }
+    val iosTest by getting
   }
 }
 
