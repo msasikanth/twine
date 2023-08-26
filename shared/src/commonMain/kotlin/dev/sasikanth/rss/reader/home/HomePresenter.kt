@@ -79,7 +79,7 @@ class HomePresenterFactory(
     }
 
   internal val feedsPresenter =
-    feedsPresenterFactory(childContext("feeds_viewmodel_factory")).presenter
+    feedsPresenterFactory(childContext("feeds_presenter_factory")).presenter
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
