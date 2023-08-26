@@ -69,12 +69,12 @@ class FeedsPresenter(
   private val observableSelectedFeed: ObservableSelectedFeed
 ) : InstanceKeeper.Instance {
 
-  private val viewModelScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+  private val presenterScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
   private val _state = MutableStateFlow(FeedsState.DEFAULT)
   val state: StateFlow<FeedsState> =
     _state.stateIn(
-      scope = viewModelScope,
+      scope = presenterScope,
       started = SharingStarted.WhileSubscribed(5000),
       initialValue = FeedsState.DEFAULT
     )
@@ -97,11 +97,11 @@ class FeedsPresenter(
   }
 
   private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
-    viewModelScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
+    presenterScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
   }
 
   private fun onDeleteFeed(feed: Feed) {
-    viewModelScope.launch {
+    presenterScope.launch {
       rssRepository.removeFeed(feed.link)
       if (_state.value.selectedFeed == feed) {
         observableSelectedFeed.clearSelection()
@@ -110,25 +110,25 @@ class FeedsPresenter(
   }
 
   private fun onFeedSelected(feed: Feed) {
-    viewModelScope.launch { observableSelectedFeed.selectFeed(feed) }
+    presenterScope.launch { observableSelectedFeed.selectFeed(feed) }
   }
 
   private fun onGoBackClicked() {
-    viewModelScope.launch { _effects.emit(FeedsEffect.MinimizeSheet) }
+    presenterScope.launch { _effects.emit(FeedsEffect.MinimizeSheet) }
   }
 
   private fun init() {
     rssRepository
       .allFeeds()
       .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
-      .launchIn(viewModelScope)
+      .launchIn(presenterScope)
 
     observableSelectedFeed.selectedFeed
       .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
-      .launchIn(viewModelScope)
+      .launchIn(presenterScope)
   }
 
   override fun onDestroy() {
-    viewModelScope.cancel()
+    presenterScope.cancel()
   }
 }
