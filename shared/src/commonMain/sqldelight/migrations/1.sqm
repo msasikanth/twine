@@ -1,7 +1,8 @@
 CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    link TEXT NOT NULL PRIMARY KEY UNINDEXED
+    link TEXT NOT NULL PRIMARY KEY UNINDEXED,
+    tokenize="trigram"
 );
 
 INSERT INTO post_search SELECT title, description, link FROM post;

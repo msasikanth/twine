@@ -16,7 +16,8 @@ CREATE INDEX post_feed_link_index ON post(feedLink);
 CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
     title TEXT NOT NULL,
     description TEXT NOT NULL,
-    link TEXT NOT NULL PRIMARY KEY UNINDEXED
+    link TEXT NOT NULL PRIMARY KEY UNINDEXED,
+    tokenize="trigram"
 );
 
 CREATE TRIGGER IF NOT EXISTS
