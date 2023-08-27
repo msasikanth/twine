@@ -86,4 +86,5 @@ SELECT
 FROM post_search
 INNER JOIN post ON post.link == post_search.link
 INNER JOIN feed ON post.feedLink == feed.link
-WHERE post_search MATCH :search_query;
+WHERE post_search MATCH :search_query
+ORDER BY post.date DESC;
