@@ -18,10 +18,8 @@ package dev.sasikanth.rss.reader.feeds
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.Lifecycle
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -43,92 +41,93 @@ import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@ActivityScope
-class FeedsPresenterFactory(
-  rssRepository: RssRepository,
-  observableSelectedFeed: ObservableSelectedFeed,
-  dispatchersProvider: DispatchersProvider,
-  @Assisted componentContext: ComponentContext,
-) : ComponentContext by componentContext {
-
-  internal val presenter =
-    instanceKeeper.getOrCreate {
-      FeedsPresenter(
-        lifecycle = lifecycle,
-        rssRepository = rssRepository,
-        observableSelectedFeed = observableSelectedFeed,
-        dispatchersProvider = dispatchersProvider
-      )
-    }
-}
-
 class FeedsPresenter(
-  lifecycle: Lifecycle,
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
-  private val observableSelectedFeed: ObservableSelectedFeed
-) : InstanceKeeper.Instance {
+  private val observableSelectedFeed: ObservableSelectedFeed,
+  @Assisted componentContext: ComponentContext
+) : ComponentContext by componentContext {
 
-  private val presenterScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+  private val presenterInstance =
+    instanceKeeper.getOrCreate {
+      PresenterInstance(
+        dispatchersProvider = dispatchersProvider,
+        rssRepository = rssRepository,
+        observableSelectedFeed = observableSelectedFeed
+      )
+    }
 
-  private val _state = MutableStateFlow(FeedsState.DEFAULT)
-  val state: StateFlow<FeedsState> =
-    _state.stateIn(
-      scope = presenterScope,
-      started = SharingStarted.WhileSubscribed(5000),
-      initialValue = FeedsState.DEFAULT
-    )
-
-  private val _effects = MutableSharedFlow<FeedsEffect>(extraBufferCapacity = 10)
-  val effects = _effects.asSharedFlow()
+  val state: StateFlow<FeedsState> = presenterInstance.state
+  val effects = presenterInstance.effects.asSharedFlow()
 
   init {
-    lifecycle.doOnCreate { dispatch(FeedsEvent.Init) }
+    lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }
   }
 
-  fun dispatch(event: FeedsEvent) {
-    when (event) {
-      FeedsEvent.Init -> init()
-      FeedsEvent.OnGoBackClicked -> onGoBackClicked()
-      is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
-      is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
-      is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
-    }
-  }
+  fun dispatch(event: FeedsEvent) = presenterInstance.dispatch(event)
 
-  private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
-    presenterScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
-  }
+  private class PresenterInstance(
+    dispatchersProvider: DispatchersProvider,
+    private val rssRepository: RssRepository,
+    private val observableSelectedFeed: ObservableSelectedFeed
+  ) : InstanceKeeper.Instance {
 
-  private fun onDeleteFeed(feed: Feed) {
-    presenterScope.launch {
-      rssRepository.removeFeed(feed.link)
-      if (_state.value.selectedFeed == feed) {
-        observableSelectedFeed.clearSelection()
+    private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+
+    private val _state = MutableStateFlow(FeedsState.DEFAULT)
+    val state: StateFlow<FeedsState> =
+      _state.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = FeedsState.DEFAULT
+      )
+
+    val effects = MutableSharedFlow<FeedsEffect>(extraBufferCapacity = 10)
+
+    fun dispatch(event: FeedsEvent) {
+      when (event) {
+        FeedsEvent.Init -> init()
+        FeedsEvent.OnGoBackClicked -> onGoBackClicked()
+        is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
+        is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
+        is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
       }
     }
-  }
 
-  private fun onFeedSelected(feed: Feed) {
-    presenterScope.launch { observableSelectedFeed.selectFeed(feed) }
-  }
+    private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
+      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
+    }
 
-  private fun onGoBackClicked() {
-    presenterScope.launch { _effects.emit(FeedsEffect.MinimizeSheet) }
-  }
+    private fun onDeleteFeed(feed: Feed) {
+      coroutineScope.launch {
+        rssRepository.removeFeed(feed.link)
+        if (_state.value.selectedFeed == feed) {
+          observableSelectedFeed.clearSelection()
+        }
+      }
+    }
 
-  private fun init() {
-    rssRepository
-      .allFeeds()
-      .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
-      .launchIn(presenterScope)
+    private fun onFeedSelected(feed: Feed) {
+      coroutineScope.launch { observableSelectedFeed.selectFeed(feed) }
+    }
 
-    observableSelectedFeed.selectedFeed
-      .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
-      .launchIn(presenterScope)
-  }
+    private fun onGoBackClicked() {
+      coroutineScope.launch { effects.emit(FeedsEffect.MinimizeSheet) }
+    }
 
-  override fun onDestroy() {
-    presenterScope.cancel()
+    private fun init() {
+      rssRepository
+        .allFeeds()
+        .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
+        .launchIn(coroutineScope)
+
+      observableSelectedFeed.selectedFeed
+        .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
+        .launchIn(coroutineScope)
+    }
+
+    override fun onDestroy() {
+      coroutineScope.cancel()
+    }
   }
 }

@@ -40,4 +40,6 @@ sealed interface HomeEvent {
   object OnCancelAddFeedClicked : HomeEvent
 
   data class AddFeed(val feedLink: String) : HomeEvent
+
+  object BackClicked : HomeEvent
 }

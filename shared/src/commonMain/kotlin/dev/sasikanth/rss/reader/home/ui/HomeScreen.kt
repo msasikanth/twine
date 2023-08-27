@@ -82,7 +82,6 @@ import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
@@ -96,13 +95,11 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @Composable
 fun HomeScreen(
-  homePresenterFactory: HomePresenterFactory,
+  homePresenter: HomePresenter,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   openLink: (String) -> Unit
 ) {
   val coroutineScope = rememberCoroutineScope()
-
-  val homePresenter = homePresenterFactory.presenter
   val state by homePresenter.state.collectAsState()
   val (featuredPosts, posts) = state
 
@@ -171,7 +168,7 @@ fun HomeScreen(
       },
       sheetContent = {
         FeedsBottomSheet(
-          feedsPresenter = homePresenterFactory.feedsPresenter,
+          feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           showingFeedLinkEntry = state.canShowFeedLinkEntry,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
