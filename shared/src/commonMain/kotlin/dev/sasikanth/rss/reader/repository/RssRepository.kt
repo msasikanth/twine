@@ -23,13 +23,13 @@ import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.mappers.toFeed
-import dev.sasikanth.rss.reader.models.mappers.toPost
 import dev.sasikanth.rss.reader.network.feedFetcher
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -48,7 +48,16 @@ class RssRepository(
       val feedPayload = feedFetcher.fetch(feedLink)
       feedQueries.upsert(feed = feedPayload.toFeed())
       postQueries.transaction {
-        feedPayload.posts.forEach { postQueries.insert(it.toPost(feedLink = feedPayload.link)) }
+        feedPayload.posts.forEach { post ->
+          postQueries.upsert(
+            title = post.title,
+            description = post.description,
+            imageUrl = post.imageUrl,
+            date = Instant.fromEpochMilliseconds(post.date),
+            link = post.link,
+            feedLink = feedPayload.link
+          )
+        }
       }
     }
   }

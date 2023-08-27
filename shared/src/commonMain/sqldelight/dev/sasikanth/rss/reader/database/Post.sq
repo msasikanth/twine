@@ -12,9 +12,17 @@ CREATE TABLE post(
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
-insert:
-INSERT OR REPLACE INTO post(title, description, imageUrl, date, feedLink, link)
-VALUES ?;
+upsert {
+  UPDATE post
+  SET title = :title,
+      description = :description,
+      imageUrl = :imageUrl,
+      date = :date
+  WHERE link = :link;
+
+  INSERT OR REPLACE INTO post(title, description, imageUrl, date, feedLink, link)
+  VALUES (:title, :description, :imageUrl, :date, :feedLink, :link);
+}
 
 /**
   TODO: Use multiplatform paging
