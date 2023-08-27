@@ -35,13 +35,13 @@ END;
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_UPDATE
 AFTER UPDATE ON post
-BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+BEGIN UPDATE post_search SET title = new.title, description = new.description WHERE link = new.link;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_INSERT
 AFTER INSERT ON post
-BEGIN INSERT INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+BEGIN INSERT OR REPLACE INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
 END;
 -- FTS --
 
