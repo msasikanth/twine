@@ -125,7 +125,7 @@ internal fun PostsList(
 }
 
 @Composable
-private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
+fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
