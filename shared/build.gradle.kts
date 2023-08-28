@@ -158,6 +158,8 @@ sqldelight {
     create("ReaderDatabase") {
       packageName.set("dev.sasikanth.rss.reader.database")
       dialect(libs.sqldelight.sqlite.dialect)
+      schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
+      verifyMigrations.set(true)
     }
   }
 }
