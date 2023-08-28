@@ -11,7 +11,7 @@
 ### Requirements
 
 - Android: 12+ (You can build app using lower min SDK, blur is the only thing that won't work)
-- iOS: 14.1+
+- iOS: 15.0+
 
 ## Libraries
 

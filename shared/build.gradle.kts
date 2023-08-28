@@ -74,7 +74,7 @@ kotlin {
     version = "1.0.0"
     summary = "Multiplatform RSS app built with Kotlin and Compose"
     homepage = "https://github.com/msasikanth/rss_reader"
-    ios.deploymentTarget = "14.1"
+    ios.deploymentTarget = "15.0"
     podfile = project.file("../iosApp/Podfile")
     pod("Sentry", "~> 8.4.0")
 
