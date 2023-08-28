@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
 import dev.sasikanth.rss.reader.utils.StringReader
@@ -76,6 +77,9 @@ fun App(
               onFeaturedItemChange = { imageUrl = it },
               openLink = openLink
             )
+          is Screen.Search -> {
+            SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+          }
         }
       }
     }

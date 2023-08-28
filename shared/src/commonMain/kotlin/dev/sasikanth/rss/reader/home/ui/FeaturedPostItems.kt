@@ -29,15 +29,22 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -66,6 +73,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.statusBarsPadding
+import dev.icerock.moko.resources.compose.painterResource
+import dev.icerock.moko.resources.compose.stringResource
+import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.PostWithMetadata
@@ -83,7 +93,8 @@ internal fun FeaturedPostItems(
   featuredPosts: ImmutableList<PostWithMetadata>,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit
+  onFeaturedItemChange: (imageUrl: String?) -> Unit,
+  onSearchClicked: () -> Unit
 ) {
   Box(modifier = modifier) {
     var selectedImage by remember { mutableStateOf<String?>(null) }
@@ -97,17 +108,65 @@ internal fun FeaturedPostItems(
         }
     }
 
-    selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
+    if (featuredPosts.isNotEmpty()) {
+      selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
+    }
 
-    HorizontalPager(
-      modifier = Modifier.statusBarsPadding(),
-      state = pagerState,
-      contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
-      pageSpacing = 16.dp,
-      verticalAlignment = Alignment.Top
+    Column(modifier = Modifier.statusBarsPadding()) {
+      AppBar(onSearchClicked)
+
+      if (featuredPosts.isNotEmpty()) {
+        HorizontalPager(
+          state = pagerState,
+          contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
+          pageSpacing = 16.dp,
+          verticalAlignment = Alignment.Top
+        ) {
+          val featuredPost = featuredPosts[it]
+          FeaturedPostItem(item = featuredPost) { onItemClick(featuredPost) }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun AppBar(onSearchClicked: () -> Unit) {
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 16.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Text(
+        text = stringResource(CommonRes.strings.app_name),
+        color = Color.White,
+        style = MaterialTheme.typography.headlineSmall
+      )
+
+      Spacer(Modifier.width(4.dp))
+
+      Icon(
+        painter = painterResource(CommonRes.images.ic_rss),
+        contentDescription = null,
+        tint = Color.White
+      )
+    }
+
+    Spacer(Modifier.weight(1f))
+
+    IconButton(
+      onClick = onSearchClicked,
+      colors =
+        IconButtonDefaults.filledIconButtonColors(
+          containerColor = AppTheme.colorScheme.tintedBackground,
+          contentColor = AppTheme.colorScheme.tintedForeground
+        ),
     ) {
-      val featuredPost = featuredPosts[it]
-      FeaturedPostItem(item = featuredPost) { onItemClick(featuredPost) }
+      Icon(
+        Icons.Filled.Search,
+        contentDescription = stringResource(CommonRes.strings.search_hint),
+        tint = AppTheme.colorScheme.tintedForeground
+      )
     }
   }
 }

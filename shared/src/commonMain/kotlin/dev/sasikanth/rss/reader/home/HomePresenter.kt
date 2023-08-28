@@ -61,7 +61,8 @@ class HomePresenter(
   private val rssRepository: RssRepository,
   private val postsListTransformationUseCase: PostsListTransformationUseCase,
   private val observableSelectedFeed: ObservableSelectedFeed,
-  @Assisted componentContext: ComponentContext
+  @Assisted componentContext: ComponentContext,
+  @Assisted private val openSearch: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -93,6 +94,7 @@ class HomePresenter(
       is HomeEvent.FeedsSheetStateChanged -> {
         backCallback.isEnabled = event.feedsSheetState == BottomSheetValue.Expanded
       }
+      is HomeEvent.SearchClicked -> openSearch()
       else -> {
         // no-op
       }
@@ -131,6 +133,9 @@ class HomePresenter(
         is HomeEvent.AddFeed -> addFeed(event.feedLink)
         HomeEvent.OnPrimaryActionClicked -> onPrimaryActionClicked()
         HomeEvent.BackClicked -> backClicked()
+        HomeEvent.SearchClicked -> {
+          /* no-op */
+        }
       }
     }
 

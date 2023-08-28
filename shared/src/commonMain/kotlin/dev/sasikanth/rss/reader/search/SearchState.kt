@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.search
 
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.database.PostWithMetadata
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
-internal sealed interface Screen {
-  class Home(val presenter: HomePresenter) : Screen
+data class SearchState(
+  val searchResults: ImmutableList<PostWithMetadata>,
+  val searchInProgress: Boolean,
+) {
 
-  class Search(val presenter: SearchPresenter) : Screen
+  companion object {
+    val DEFAULT = SearchState(searchResults = persistentListOf(), searchInProgress = false)
+  }
+
+  fun reset() = copy(searchResults = persistentListOf(), searchInProgress = false)
 }

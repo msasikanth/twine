@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <resources>
+    <string name="app_name">Twine</string>
     <string name="post_source_unknown">Unknown</string>
     <string name="button_all">ALL</string>
     <string name="button_add_feed">Add feed</string>
@@ -17,4 +18,5 @@
     <string name="error_unsupported_feed">App currently doesn\'t support this link</string>
     <string name="error_malformed_xml">Provided link doesn\'t contain valid RSS/Atom feed</string>
     <string name="error_request_timeout">Timeout, check your network connection and try again later</string>
+    <string name="search_hint">Search posts</string>
 </resources>

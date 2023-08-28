@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.search
 
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.search.SearchPresenter
+internal sealed interface SearchEvent {
 
-internal sealed interface Screen {
-  class Home(val presenter: HomePresenter) : Screen
+  data class SearchQueryChanged(val query: String) : SearchEvent
 
-  class Search(val presenter: SearchPresenter) : Screen
+  data class SearchPosts(val query: String) : SearchEvent
+
+  object BackClicked : SearchEvent
+
+  object ClearSearchResults : SearchEvent
 }

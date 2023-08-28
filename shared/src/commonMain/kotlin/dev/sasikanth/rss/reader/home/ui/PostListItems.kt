@@ -25,8 +25,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
@@ -61,7 +59,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.statusBars
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
@@ -81,15 +78,9 @@ internal fun PostsList(
   selectedFeed: Feed?,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   listState: LazyListState = rememberLazyListState(),
-  onPostClicked: (post: PostWithMetadata) -> Unit
+  onPostClicked: (post: PostWithMetadata) -> Unit,
+  onSearchClicked: () -> Unit
 ) {
-  val statusBarPadding =
-    if (featuredPosts.isEmpty()) {
-      WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    } else {
-      0.dp
-    }
-
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
   LaunchedEffect(selectedFeed) {
@@ -97,19 +88,15 @@ internal fun PostsList(
     featuredPostsPagerState.scrollToPage(0)
   }
 
-  LazyColumn(
-    state = listState,
-    contentPadding = PaddingValues(top = statusBarPadding, bottom = 240.dp)
-  ) {
-    if (featuredPosts.isNotEmpty()) {
-      item {
-        FeaturedPostItems(
-          pagerState = featuredPostsPagerState,
-          featuredPosts = featuredPosts,
-          onItemClick = onPostClicked,
-          onFeaturedItemChange = onFeaturedItemChange
-        )
-      }
+  LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 240.dp)) {
+    item {
+      FeaturedPostItems(
+        pagerState = featuredPostsPagerState,
+        featuredPosts = featuredPosts,
+        onItemClick = onPostClicked,
+        onFeaturedItemChange = onFeaturedItemChange,
+        onSearchClicked = onSearchClicked
+      )
     }
 
     itemsIndexed(posts) { i, post ->
@@ -125,7 +112,7 @@ internal fun PostsList(
 }
 
 @Composable
-private fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
+fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
   val hapticFeedback = LocalHapticFeedback.current
   val coroutineScope = rememberCoroutineScope()
   val interactionSource = remember { MutableInteractionSource() }
