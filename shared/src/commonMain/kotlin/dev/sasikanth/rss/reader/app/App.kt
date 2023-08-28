@@ -78,10 +78,6 @@ fun App(
               openLink = openLink
             )
           is Screen.Search -> {
-            // Reset dynamic theme when search is opened and go back to default
-            // app theme
-            LaunchedEffect(Unit) { imageUrl = "" }
-
             SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
           }
         }
