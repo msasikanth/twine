@@ -270,17 +270,16 @@ private fun BoxScope.PrimaryActionButtonContainer(
           .dp)
       .coerceIn(20.dp, 24.dp)
 
-  val windowInsetsPaddingModifier =
-    Modifier.windowInsetsPadding(
-      WindowInsets.navigationBars
-        .only(WindowInsetsSides.Bottom)
-        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-    )
+  val navigationBarWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
 
   Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
     if (state.canShowFeedLinkEntry) {
       FeedLinkInputField(
-        modifier = windowInsetsPaddingModifier.padding(bottom = 24.dp, end = 24.dp),
+        modifier =
+          Modifier.windowInsetsPadding(
+              navigationBarWindowInsets.union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
+            )
+            .padding(bottom = 24.dp, end = 24.dp),
         isFetchingFeed = state.isFetchingFeed,
         onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
         onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
@@ -288,7 +287,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
     } else {
       BottomSheetPrimaryActionButton(
         modifier =
-          windowInsetsPaddingModifier.graphicsLayer {
+          Modifier.windowInsetsPadding(navigationBarWindowInsets).graphicsLayer {
             translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
           },
         selected = state.isAllFeedsSelected,
