@@ -42,4 +42,6 @@ sealed interface HomeEvent {
   data class AddFeed(val feedLink: String) : HomeEvent
 
   object BackClicked : HomeEvent
+
+  object SearchClicked : HomeEvent
 }

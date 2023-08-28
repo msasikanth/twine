@@ -161,10 +161,10 @@ fun HomeScreen(
           isRefreshing = state.isRefreshing,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
-          onFeaturedItemChange = onFeaturedItemChange
-        ) {
-          coroutineScope.launch { bottomSheetState.expand() }
-        }
+          onFeaturedItemChange = onFeaturedItemChange,
+          onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
+          onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) }
+        )
       },
       sheetContent = {
         FeedsBottomSheet(
@@ -205,6 +205,7 @@ private fun HomeScreenContent(
   onPostClicked: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
+  onSearchClicked: () -> Unit
 ) {
   val hasContent = featuredPosts.isNotEmpty() || posts.isNotEmpty()
   if (hasContent) {
@@ -220,7 +221,8 @@ private fun HomeScreenContent(
         selectedFeed = selectedFeed,
         onPostClicked = onPostClicked,
         onFeaturedItemChange = onFeaturedItemChange,
-        listState = listState
+        listState = listState,
+        onSearchClicked = onSearchClicked
       )
 
       PullRefreshIndicator(

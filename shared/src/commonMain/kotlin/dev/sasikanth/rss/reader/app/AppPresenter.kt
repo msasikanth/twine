@@ -33,7 +33,11 @@ import me.tatarka.inject.annotations.Inject
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
-  private val homePresenter: (ComponentContext) -> HomePresenter
+  private val homePresenter:
+    (
+      ComponentContext,
+      openSearch: () -> Unit,
+    ) -> HomePresenter,
   private val searchPresenter:
     (
       ComponentContext,
@@ -53,7 +57,9 @@ class AppPresenter(
 
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
-      Config.Home -> Screen.Home(presenter = homePresenter(componentContext))
+      Config.Home -> {
+        Screen.Home(presenter = homePresenter(componentContext) { navigation.push(Config.Search) })
+      }
       Config.Search -> {
         Screen.Search(presenter = searchPresenter(componentContext) { navigation.pop() })
       }
