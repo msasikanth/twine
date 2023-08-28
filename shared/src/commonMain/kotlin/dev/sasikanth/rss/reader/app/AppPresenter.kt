@@ -19,11 +19,14 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
+import com.arkivanov.decompose.router.stack.pop
+import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.search.SearchPresenter
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -31,6 +34,11 @@ import me.tatarka.inject.annotations.Inject
 class AppPresenter(
   componentContext: ComponentContext,
   private val homePresenter: (ComponentContext) -> HomePresenter
+  private val searchPresenter:
+    (
+      ComponentContext,
+      goBack: () -> Unit,
+    ) -> SearchPresenter
 ) : ComponentContext by componentContext {
 
   private val navigation = StackNavigation<Config>()
@@ -46,9 +54,14 @@ class AppPresenter(
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
       Config.Home -> Screen.Home(presenter = homePresenter(componentContext))
+      Config.Search -> {
+        Screen.Search(presenter = searchPresenter(componentContext) { navigation.pop() })
+      }
     }
 
   sealed interface Config : Parcelable {
     @Parcelize object Home : Config
+
+    @Parcelize object Search : Config
   }
 }

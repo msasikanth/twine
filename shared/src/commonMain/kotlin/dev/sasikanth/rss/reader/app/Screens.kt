@@ -16,7 +16,10 @@
 package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.search.SearchPresenter
 
 internal sealed interface Screen {
   class Home(val presenter: HomePresenter) : Screen
+
+  class Search(val presenter: SearchPresenter) : Screen
 }
