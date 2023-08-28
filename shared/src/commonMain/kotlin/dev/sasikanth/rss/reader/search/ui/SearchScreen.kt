@@ -115,7 +115,9 @@ internal fun SearchScreen(
 
         ScrollToTopButton(
           visible = showScrollToTop,
-          modifier = Modifier.padding(end = 24.dp, bottom = 24.dp)
+          modifier =
+            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+              .padding(end = 24.dp, bottom = 24.dp)
         ) {
           listState.animateScrollToItem(0)
         }
