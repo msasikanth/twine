@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader
 
+import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.sasikanth.rss.reader.app.App
 import me.tatarka.inject.annotations.Inject
@@ -25,6 +26,7 @@ import platform.UIKit.UIViewController
 typealias HomeViewController = () -> UIViewController
 
 @Inject
-fun HomeViewController(app: App) = ComposeUIViewController {
-  app { link -> UIApplication.sharedApplication().openURL(NSURL(string = link)) }
-}
+fun HomeViewController(app: App) =
+  ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
+    app { link -> UIApplication.sharedApplication().openURL(NSURL(string = link)) }
+  }
