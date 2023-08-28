@@ -201,7 +201,12 @@ private fun SearchBar(
       },
       trailingIcon = {
         if (query.isNotBlank()) {
-          IconButton(onClick = onClearClick) {
+          IconButton(
+            onClick = {
+              focusRequester.requestFocus()
+              onClearClick()
+            }
+          ) {
             Icon(
               Icons.Filled.Close,
               contentDescription = null,
