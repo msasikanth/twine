@@ -47,7 +47,6 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -158,11 +157,6 @@ private fun AppBar(onSearchClicked: () -> Unit) {
 
     IconButton(
       onClick = onSearchClicked,
-      colors =
-        IconButtonDefaults.filledIconButtonColors(
-          containerColor = AppTheme.colorScheme.tintedBackground,
-          contentColor = AppTheme.colorScheme.tintedForeground
-        ),
     ) {
       Icon(
         Icons.Filled.Search,
