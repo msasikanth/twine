@@ -15,12 +15,9 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,7 +42,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -68,6 +64,7 @@ import com.moriatsushi.insetsx.navigationBars
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
@@ -231,7 +228,14 @@ private fun HomeScreenContent(
         modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
       )
 
-      ScrollToTopButton(visible = showScrollToTop) { listState.animateScrollToItem(0) }
+      ScrollToTopButton(
+        visible = showScrollToTop,
+        modifier =
+          Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(end = 24.dp, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 24.dp),
+      ) {
+        listState.animateScrollToItem(0)
+      }
     }
   } else {
     NoFeeds(onNoFeedsSwipeUp)
@@ -297,34 +301,6 @@ private fun BoxScope.PrimaryActionButtonContainer(
         presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
       }
     }
-  }
-}
-
-@Composable
-private fun BoxScope.ScrollToTopButton(visible: Boolean, onClick: suspend () -> Unit) {
-  val coroutineScope = rememberCoroutineScope()
-  AnimatedVisibility(
-    visible = visible,
-    enter = slideInVertically { it / 2 },
-    exit = slideOutVertically { it / 2 },
-    modifier = Modifier.Companion.align(Alignment.BottomEnd)
-  ) {
-    ExtendedFloatingActionButton(
-      modifier =
-        Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-          .padding(end = 24.dp, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 24.dp),
-      shape = RoundedCornerShape(50),
-      containerColor = AppTheme.colorScheme.tintedBackground,
-      contentColor = AppTheme.colorScheme.tintedForeground,
-      text = {
-        Text(
-          stringResource(CommonRes.strings.scroll_to_top),
-          color = AppTheme.colorScheme.tintedForeground
-        )
-      },
-      icon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
-      onClick = { coroutineScope.launch { onClick() } }
-    )
   }
 }
 

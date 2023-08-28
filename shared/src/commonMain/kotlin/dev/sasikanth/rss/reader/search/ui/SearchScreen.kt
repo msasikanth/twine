@@ -18,8 +18,12 @@ package dev.sasikanth.rss.reader.search.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -46,16 +50,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
@@ -71,6 +76,8 @@ internal fun SearchScreen(
 ) {
   val state by searchPresenter.state.collectAsState()
   val listState = rememberLazyListState()
+  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+  val layoutDirection = LocalLayoutDirection.current
 
   Scaffold(
     modifier = modifier,
@@ -84,18 +91,33 @@ internal fun SearchScreen(
       )
     },
     content = {
-      LazyColumn(
-        contentPadding = it,
-        state = listState,
-      ) {
-        itemsIndexed(state.searchResults) { index, post ->
-          PostListItem(post) { openLink(post.link) }
-          if (index != state.searchResults.lastIndex) {
-            Divider(
-              modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-              color = AppTheme.colorScheme.surfaceContainer
-            )
+      Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+          contentPadding =
+            PaddingValues(
+              start = it.calculateStartPadding(layoutDirection),
+              end = it.calculateEndPadding(layoutDirection),
+              top = it.calculateTopPadding(),
+              bottom = it.calculateBottomPadding() + 64.dp
+            ),
+          state = listState,
+        ) {
+          itemsIndexed(state.searchResults) { index, post ->
+            PostListItem(post) { openLink(post.link) }
+            if (index != state.searchResults.lastIndex) {
+              Divider(
+                modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+                color = AppTheme.colorScheme.surfaceContainer
+              )
+            }
           }
+        }
+
+        ScrollToTopButton(
+          visible = showScrollToTop,
+          modifier = Modifier.padding(end = 24.dp, bottom = 24.dp)
+        ) {
+          listState.animateScrollToItem(0)
         }
       }
     },
