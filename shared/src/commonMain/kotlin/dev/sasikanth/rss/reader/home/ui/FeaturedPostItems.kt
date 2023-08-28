@@ -28,12 +28,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -72,7 +75,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
@@ -112,7 +114,7 @@ internal fun FeaturedPostItems(
       selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
     }
 
-    Column(modifier = Modifier.statusBarsPadding()) {
+    Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
       AppBar(onSearchClicked)
 
       if (featuredPosts.isNotEmpty()) {

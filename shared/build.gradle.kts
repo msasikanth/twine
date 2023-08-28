@@ -102,7 +102,6 @@ kotlin {
         implementation(libs.ktor.core)
         implementation(libs.napier)
         implementation(libs.sqldelight.extensions.coroutines)
-        implementation(libs.insetsx)
         api(libs.decompose)
         implementation(libs.decompose.extensions.compose)
         api(libs.essenty.lifecycle)

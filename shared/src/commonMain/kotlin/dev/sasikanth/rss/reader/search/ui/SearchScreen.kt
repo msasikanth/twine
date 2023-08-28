@@ -20,14 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -57,7 +56,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
@@ -147,7 +145,7 @@ private fun SearchBar(
       // As content reaches the search bar container, we start increasing the
       // alpha of the container.
       val threshold = 100f
-      var alpha = 0f
+      var alpha: Float
 
       derivedStateOf {
         alpha =
@@ -179,8 +177,7 @@ private fun SearchBar(
         .background(
           AppTheme.colorScheme.tintedForeground.copy(alpha = animatedSearchContainerAlpha)
         )
-        .statusBarsPadding()
-        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
+        .windowInsetsPadding(WindowInsets.statusBars)
   ) {
     OutlinedTextField(
       modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(focusRequester),

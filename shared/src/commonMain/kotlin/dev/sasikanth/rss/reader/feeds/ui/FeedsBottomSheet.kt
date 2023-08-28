@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -35,7 +37,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,8 +50,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.imePadding
-import com.moriatsushi.insetsx.navigationBars
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.database.Feed
@@ -129,7 +128,6 @@ internal fun FeedsBottomSheet(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomSheetExpandedContent(
   feeds: ImmutableList<Feed>,
@@ -141,7 +139,7 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(modifier = Modifier.fillMaxSize().imePadding().then(modifier)) {
+  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
     Toolbar(onCloseClicked = closeSheet)
 
     LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {

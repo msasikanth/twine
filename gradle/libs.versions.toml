@@ -14,7 +14,6 @@ napier = "2.6.1"
 kotlinx_coroutines = "1.7.3"
 kotlinx_date_time = "0.4.0"
 kotlinx_immutable_collections = "0.3.5"
-insetsx = "0.1.0-alpha10"
 decompose = "2.0.1-compose-experimental"
 essenty = "1.1.0"
 androidx_activity = "1.7.2"
@@ -55,7 +54,6 @@ sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", ver
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-24-dialect", version.ref = "sqldelight" }
-insetsx = { module = "com.moriatsushi.insetsx:insetsx", version.ref = "insetsx" }
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
 essenty_lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }

@@ -28,9 +28,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -58,10 +61,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import com.moriatsushi.insetsx.ExperimentalSoftwareKeyboardApi
-import com.moriatsushi.insetsx.ime
-import com.moriatsushi.insetsx.navigationBars
-import com.moriatsushi.insetsx.statusBarsPadding
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
@@ -225,7 +224,7 @@ private fun HomeScreenContent(
       PullRefreshIndicator(
         refreshing = isRefreshing,
         state = swipeRefreshState,
-        modifier = Modifier.statusBarsPadding().align(Alignment.TopCenter)
+        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
       )
 
       ScrollToTopButton(
@@ -252,7 +251,6 @@ private fun HomeScreenContent(
  *
  * track: https://issuetracker.google.com/issues/209825720
  */
-@OptIn(ExperimentalSoftwareKeyboardApi::class)
 @Composable
 private fun BoxScope.PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,
