@@ -15,8 +15,6 @@
  */
 package dev.sasikanth.rss.reader.search.ui
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -29,7 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -82,7 +80,6 @@ internal fun SearchScreen(
     topBar = {
       SearchBar(
         query = searchPresenter.searchQuery,
-        listState = listState,
         onQueryChange = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged(it)) },
         onBackClick = { searchPresenter.dispatch(SearchEvent.BackClicked) },
         onClearClick = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged("")) }
@@ -95,10 +92,10 @@ internal fun SearchScreen(
             PaddingValues(
               start = it.calculateStartPadding(layoutDirection),
               end = it.calculateEndPadding(layoutDirection),
-              top = it.calculateTopPadding(),
               bottom = it.calculateBottomPadding() + 64.dp
             ),
           state = listState,
+          modifier = Modifier.padding(top = it.calculateTopPadding())
         ) {
           itemsIndexed(state.searchResults) { index, post ->
             PostListItem(post) { openLink(post.link) }
@@ -129,39 +126,13 @@ internal fun SearchScreen(
 @Composable
 private fun SearchBar(
   query: String,
-  listState: LazyListState,
   onQueryChange: (String) -> Unit,
   onBackClick: () -> Unit,
   onClearClick: () -> Unit
 ) {
-  val keyboardState by keyboardVisibilityAsState()
   val focusRequester = remember { FocusRequester() }
+  val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
-
-  val searchContainerAlpha by
-    remember(listState) {
-      // List first visible item offset before we start changing the search container alpha.
-      //
-      // As content reaches the search bar container, we start increasing the
-      // alpha of the container.
-      val threshold = 100f
-      var alpha: Float
-
-      derivedStateOf {
-        alpha =
-          if (listState.firstVisibleItemIndex == 0) {
-            val normalizedValue =
-              ((listState.firstVisibleItemScrollOffset - 0f) / (threshold - 0f)).coerceIn(0f, 1f)
-            normalizedValue
-          } else {
-            1f
-          }
-
-        alpha
-      }
-    }
-
-  val animatedSearchContainerAlpha by animateFloatAsState(searchContainerAlpha)
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -171,16 +142,12 @@ private fun SearchBar(
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-  Box(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(
-          AppTheme.colorScheme.tintedForeground.copy(alpha = animatedSearchContainerAlpha)
-        )
-        .windowInsetsPadding(WindowInsets.statusBars)
-  ) {
+  Box(modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars)) {
     OutlinedTextField(
-      modifier = Modifier.fillMaxWidth().padding(16.dp).focusRequester(focusRequester),
+      modifier =
+        Modifier.fillMaxWidth()
+          .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp)
+          .focusRequester(focusRequester),
       value = query,
       onValueChange = onQueryChange,
       placeholder = {
@@ -214,7 +181,7 @@ private fun SearchBar(
           }
         }
       },
-      shape = RoundedCornerShape(50),
+      shape = RoundedCornerShape(16.dp),
       singleLine = true,
       colors =
         TextFieldDefaults.colors(
@@ -224,6 +191,11 @@ private fun SearchBar(
           unfocusedIndicatorColor = AppTheme.colorScheme.tintedForeground,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
         )
+    )
+
+    Divider(
+      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
+      color = AppTheme.colorScheme.surfaceContainer
     )
   }
 }
