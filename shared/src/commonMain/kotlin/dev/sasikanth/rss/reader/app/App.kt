@@ -22,7 +22,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
@@ -52,8 +52,8 @@ fun App(
     LocalImageLoader provides imageLoader,
     LocalStringReader provides stringReader
   ) {
+    var imageUrl by rememberSaveable { mutableStateOf<String?>(null) }
     val dynamicColorState = rememberDynamicColorState()
-    var imageUrl by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(imageUrl) {
       if (imageUrl != null) {
