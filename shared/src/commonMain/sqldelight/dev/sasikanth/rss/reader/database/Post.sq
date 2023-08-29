@@ -1,3 +1,4 @@
+import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE post(
@@ -7,6 +8,7 @@ CREATE TABLE post(
   date INTEGER AS Instant NOT NULL,
   feedLink TEXT NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
 );
 
