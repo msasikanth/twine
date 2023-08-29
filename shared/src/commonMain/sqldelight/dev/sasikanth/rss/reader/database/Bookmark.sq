@@ -33,3 +33,6 @@ post_content_update
 AFTER UPDATE OF title, description, imageUrl, date ON post
 BEGIN UPDATE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
 END;
+
+bookmarks:
+SELECT * FROM bookmark ORDER BY date DESC;

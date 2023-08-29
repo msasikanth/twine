@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
@@ -40,6 +41,7 @@ class RssRepository(
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
+  private val bookmarkQueries: BookmarkQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -93,6 +95,17 @@ class RssRepository(
   fun search(searchQuery: String, sortOrder: SearchSortOrder): Flow<List<PostWithMetadata>> {
     return postSearchFTSQueries
       .search(searchQuery, sortOrder.value, mapper = ::mapToPostWithMetadata)
+      .asFlow()
+      .mapToList(ioDispatcher)
+  }
+
+  fun bookmarks(): Flow<List<PostWithMetadata>> {
+    return bookmarkQueries
+      .bookmarks(
+        mapper = { title, description, imageUrl, date, link, _, feedName, feedIcon, _ ->
+          mapToPostWithMetadata(title, description, imageUrl, date, link, feedName, feedIcon)
+        }
+      )
       .asFlow()
       .mapToList(ioDispatcher)
   }
