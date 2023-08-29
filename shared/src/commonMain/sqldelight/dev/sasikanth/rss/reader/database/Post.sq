@@ -34,3 +34,6 @@ FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE :feedLink IS NULL OR post.feedLink = :feedLink
 ORDER BY post.date DESC;
+
+updateBookmarkStatus:
+UPDATE post SET bookmarked = :bookmarked WHERE link = :link;

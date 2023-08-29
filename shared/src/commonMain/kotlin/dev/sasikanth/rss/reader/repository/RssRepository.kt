@@ -80,6 +80,10 @@ class RssRepository(
     return postQueries.postWithMetadata(selectedFeedLink).asFlow().mapToList(ioDispatcher)
   }
 
+  suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {
+    withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked, link) }
+  }
+
   fun allFeeds(): Flow<List<Feed>> {
     return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
   }
