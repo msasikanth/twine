@@ -1,0 +1,37 @@
+import kotlin.Boolean;
+import kotlinx.datetime.Instant;
+
+ALTER TABLE post ADD COLUMN bookmarked INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE bookmark (
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  imageUrl TEXT,
+  date INTEGER AS Instant NOT NULL,
+  link TEXT NOT NULL PRIMARY KEY,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL,
+  feedLink TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS
+post_bookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
+BEGIN
+  INSERT OR REPLACE INTO bookmark(title, description, imageUrl, date, link, bookmarked, feedName, feedIcon, feedLink)
+  SELECT new.title, new.description, new.imageUrl, new.date, new.link, new.bookmarked, feed.name, feed.icon, feed.link
+  FROM feed WHERE link == new.feedLink;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_unbookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 0
+BEGIN DELETE FROM bookmark WHERE link = new.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_content_update
+AFTER UPDATE OF title, description, imageUrl, date ON post
+BEGIN UPDATE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
+END;
