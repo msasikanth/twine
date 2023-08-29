@@ -23,7 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,7 +98,7 @@ internal fun FeedLinkInputField(
     leadingIcon = {
       IconButton(onClick = onCancelFeedEntryClicked) {
         Icon(
-          imageVector = Icons.Filled.ArrowBack,
+          imageVector = Icons.Rounded.ArrowBack,
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )

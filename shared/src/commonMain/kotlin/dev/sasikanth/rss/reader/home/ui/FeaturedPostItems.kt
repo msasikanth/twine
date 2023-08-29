@@ -42,7 +42,7 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
@@ -159,7 +159,7 @@ private fun AppBar(onSearchClicked: () -> Unit) {
       onClick = onSearchClicked,
     ) {
       Icon(
-        Icons.Filled.Search,
+        Icons.Rounded.Search,
         contentDescription = stringResource(CommonRes.strings.search_hint),
         tint = AppTheme.colorScheme.tintedForeground
       )

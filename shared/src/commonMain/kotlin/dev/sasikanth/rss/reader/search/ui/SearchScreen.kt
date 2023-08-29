@@ -32,8 +32,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -161,7 +161,7 @@ private fun SearchBar(
       leadingIcon = {
         IconButton(onClick = onBackClick) {
           Icon(
-            Icons.Filled.ArrowBack,
+            Icons.Rounded.ArrowBack,
             contentDescription = null,
             tint = AppTheme.colorScheme.tintedForeground
           )
@@ -176,7 +176,7 @@ private fun SearchBar(
             }
           ) {
             Icon(
-              Icons.Filled.Close,
+              Icons.Rounded.Close,
               contentDescription = null,
               tint = AppTheme.colorScheme.tintedForeground
             )

@@ -41,7 +41,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -333,7 +333,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(12.dp))
 
     Icon(
-      imageVector = Icons.Filled.KeyboardArrowUp,
+      imageVector = Icons.Rounded.KeyboardArrowUp,
       contentDescription = null,
       tint = AppTheme.colorScheme.tintedForeground
     )

@@ -32,7 +32,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -163,7 +163,7 @@ internal fun FeedListItem(
         ) {
           DropdownMenuItem(
             text = { Text(stringResource(CommonRes.strings.edit_feed_name)) },
-            leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },
             onClick = {
               dropdownMenuExpanded = false
               feedNameEditable = true

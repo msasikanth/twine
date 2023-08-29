@@ -21,7 +21,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -57,7 +57,7 @@ fun BoxScope.ScrollToTopButton(
           color = AppTheme.colorScheme.tintedForeground
         )
       },
-      icon = { Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null) },
+      icon = { Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null) },
       onClick = { coroutineScope.launch { onClick() } }
     )
   }

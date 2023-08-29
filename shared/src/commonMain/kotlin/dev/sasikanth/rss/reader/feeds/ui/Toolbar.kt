@@ -23,7 +23,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -36,7 +36,7 @@ internal fun Toolbar(modifier: Modifier = Modifier, onCloseClicked: () -> Unit) 
   Box(modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
     IconButton(onClick = onCloseClicked) {
       Icon(
-        imageVector = Icons.Filled.Close,
+        imageVector = Icons.Rounded.Close,
         contentDescription = null,
         tint = AppTheme.colorScheme.tintedForeground
       )
