@@ -20,6 +20,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
+import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.mappers.toFeed
@@ -37,6 +38,7 @@ import me.tatarka.inject.annotations.Inject
 class RssRepository(
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
+  private val postSearchFTSQueries: PostSearchFTSQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -88,7 +90,7 @@ class RssRepository(
   }
 
   fun search(searchQuery: String): Flow<List<PostWithMetadata>> {
-    return postQueries
+    return postSearchFTSQueries
       .search(searchQuery, mapper = ::mapToPostWithMetadata)
       .asFlow()
       .mapToList(ioDispatcher)

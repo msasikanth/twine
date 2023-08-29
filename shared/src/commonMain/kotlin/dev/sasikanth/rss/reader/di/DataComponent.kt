@@ -40,4 +40,7 @@ interface DataComponent : SqlDriverPlatformComponent {
   @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries
 
   @Provides fun providesPostQueries(database: ReaderDatabase) = database.postQueries
+
+  @Provides
+  fun providesPostSearchFTSQueries(database: ReaderDatabase) = database.postSearchFTSQueries
 }
