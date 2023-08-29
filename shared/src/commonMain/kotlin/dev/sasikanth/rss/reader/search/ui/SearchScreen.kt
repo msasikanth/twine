@@ -36,9 +36,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -143,7 +143,7 @@ private fun SearchBar(
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
   Box(modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars)) {
-    OutlinedTextField(
+    TextField(
       modifier =
         Modifier.fillMaxWidth()
           .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp)
@@ -187,9 +187,11 @@ private fun SearchBar(
         TextFieldDefaults.colors(
           focusedContainerColor = AppTheme.colorScheme.tintedBackground,
           unfocusedContainerColor = AppTheme.colorScheme.tintedBackground,
-          focusedIndicatorColor = AppTheme.colorScheme.tintedForeground,
-          unfocusedIndicatorColor = AppTheme.colorScheme.tintedForeground,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          unfocusedIndicatorColor = Color.Unspecified,
+          focusedIndicatorColor = Color.Unspecified,
+          disabledIndicatorColor = Color.Unspecified,
+          errorIndicatorColor = Color.Unspecified
         )
     )
 
