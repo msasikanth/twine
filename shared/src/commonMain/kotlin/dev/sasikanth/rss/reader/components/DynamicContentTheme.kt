@@ -44,8 +44,16 @@ import kotlinx.coroutines.withContext
 private const val TINTED_BACKGROUND = "tinted_background"
 private const val TINTED_SURFACE = "tinted_surface"
 private const val TINTED_FOREGROUND = "tinted_foreground"
+private const val OUTLINE = "outline"
+private const val OUTLINE_VARIANT = "outline_VARIANT"
+private const val SURFACE = "surface"
+private const val ON_SURFACE = "on_surface"
+private const val ON_SURFACE_VARIANT = "on_surface_variant"
 private const val SURFACE_CONTAINER = "surface_container"
+private const val SURFACE_CONTAINER_LOW = "surface_container_low"
 private const val SURFACE_CONTAINER_LOWEST = "surface_container_lowest"
+private const val SURFACE_CONTAINER_HIGH = "surface_container_high"
+private const val SURFACE_CONTAINER_HIGHEST = "surface_container_highest"
 
 @Composable
 internal fun DynamicContentTheme(
@@ -58,11 +66,36 @@ internal fun DynamicContentTheme(
     animateColorAsState(dynamicColorState.tintedSurface, spring(stiffness = Spring.StiffnessLow))
   val tintedForeground by
     animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
+  val outline by
+    animateColorAsState(dynamicColorState.outline, spring(stiffness = Spring.StiffnessLow))
+  val outlineVariant by
+    animateColorAsState(dynamicColorState.outlineVariant, spring(stiffness = Spring.StiffnessLow))
+  val surface by
+    animateColorAsState(dynamicColorState.surface, spring(stiffness = Spring.StiffnessLow))
+  val onSurface by
+    animateColorAsState(dynamicColorState.onSurface, spring(stiffness = Spring.StiffnessLow))
+  val onSurfaceVariant by
+    animateColorAsState(dynamicColorState.onSurfaceVariant, spring(stiffness = Spring.StiffnessLow))
   val surfaceContainer by
     animateColorAsState(dynamicColorState.surfaceContainer, spring(stiffness = Spring.StiffnessLow))
+  val surfaceContainerLow by
+    animateColorAsState(
+      dynamicColorState.surfaceContainerLow,
+      spring(stiffness = Spring.StiffnessLow)
+    )
   val surfaceContainerLowest by
     animateColorAsState(
       dynamicColorState.surfaceContainerLowest,
+      spring(stiffness = Spring.StiffnessLow)
+    )
+  val surfaceContainerHigh by
+    animateColorAsState(
+      dynamicColorState.surfaceContainerHigh,
+      spring(stiffness = Spring.StiffnessLow)
+    )
+  val surfaceContainerHighest by
+    animateColorAsState(
+      dynamicColorState.surfaceContainerHighest,
       spring(stiffness = Spring.StiffnessLow)
     )
 
@@ -71,8 +104,16 @@ internal fun DynamicContentTheme(
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
+      outline = outline,
+      outlineVariant = outlineVariant,
+      surface = surface,
+      onSurface = onSurface,
+      onSurfaceVariant = onSurfaceVariant,
       surfaceContainer = surfaceContainer,
-      surfaceContainerLowest = surfaceContainerLowest
+      surfaceContainerLow = surfaceContainerLow,
+      surfaceContainerLowest = surfaceContainerLowest,
+      surfaceContainerHigh = surfaceContainerHigh,
+      surfaceContainerHighest = surfaceContainerHighest,
     )
 
   AppTheme(appColorScheme = colorScheme, content = content)
@@ -83,9 +124,17 @@ internal fun rememberDynamicColorState(
   defaultTintedBackground: Color = AppTheme.colorScheme.tintedBackground,
   defaultTintedSurface: Color = AppTheme.colorScheme.tintedSurface,
   defaultTintedForeground: Color = AppTheme.colorScheme.tintedForeground,
+  defaultOutline: Color = AppTheme.colorScheme.outline,
+  defaultOutlineVariant: Color = AppTheme.colorScheme.outlineVariant,
+  defaultSurface: Color = AppTheme.colorScheme.surface,
+  defaultOnSurface: Color = AppTheme.colorScheme.onSurface,
+  defaultOnSurfaceVariant: Color = AppTheme.colorScheme.onSurfaceVariant,
   defaultSurfaceContainer: Color = AppTheme.colorScheme.surfaceContainer,
+  defaultSurfaceContainerLow: Color = AppTheme.colorScheme.surfaceContainerLow,
   defaultSurfaceContainerLowest: Color = AppTheme.colorScheme.surfaceContainerLowest,
-  cacheSize: Int = 12
+  defaultSurfaceContainerHigh: Color = AppTheme.colorScheme.surfaceContainerHigh,
+  defaultSurfaceContainerHighest: Color = AppTheme.colorScheme.surfaceContainerHighest,
+  cacheSize: Int = 15
 ): DynamicColorState {
   val imageLoader = LocalImageLoader.current
   return remember {
@@ -93,8 +142,16 @@ internal fun rememberDynamicColorState(
       defaultTintedBackground,
       defaultTintedSurface,
       defaultTintedForeground,
+      defaultOutline,
+      defaultOutlineVariant,
+      defaultSurface,
+      defaultOnSurface,
+      defaultOnSurfaceVariant,
       defaultSurfaceContainer,
+      defaultSurfaceContainerLow,
       defaultSurfaceContainerLowest,
+      defaultSurfaceContainerHigh,
+      defaultSurfaceContainerHighest,
       imageLoader,
       cacheSize
     )
@@ -112,8 +169,16 @@ class DynamicColorState(
   private val defaultTintedBackground: Color,
   private val defaultTintedSurface: Color,
   private val defaultTintedForeground: Color,
+  private val defaultOutline: Color,
+  private val defaultOutlineVariant: Color,
+  private val defaultSurface: Color,
+  private val defaultOnSurface: Color,
+  private val defaultOnSurfaceVariant: Color,
   private val defaultSurfaceContainer: Color,
+  private val defaultSurfaceContainerLow: Color,
   private val defaultSurfaceContainerLowest: Color,
+  private val defaultSurfaceContainerHigh: Color,
+  private val defaultSurfaceContainerHighest: Color,
   private val imageLoader: ImageLoader?,
   cacheSize: Int
 ) {
@@ -126,10 +191,34 @@ class DynamicColorState(
   var tintedForeground by mutableStateOf(defaultTintedForeground)
     private set
 
+  var outline by mutableStateOf(defaultOutline)
+    private set
+
+  var outlineVariant by mutableStateOf(defaultOutlineVariant)
+    private set
+
+  var surface by mutableStateOf(defaultSurfaceContainer)
+    private set
+
+  var onSurface by mutableStateOf(defaultOnSurface)
+    private set
+
+  var onSurfaceVariant by mutableStateOf(defaultOnSurfaceVariant)
+    private set
+
   var surfaceContainer by mutableStateOf(defaultSurfaceContainer)
     private set
 
+  var surfaceContainerLow by mutableStateOf(defaultSurfaceContainerLow)
+    private set
+
   var surfaceContainerLowest by mutableStateOf(defaultSurfaceContainerLowest)
+    private set
+
+  var surfaceContainerHigh by mutableStateOf(defaultSurfaceContainerHigh)
+    private set
+
+  var surfaceContainerHighest by mutableStateOf(defaultSurfaceContainerHighest)
     private set
 
   private val cache =
@@ -143,16 +232,32 @@ class DynamicColorState(
     tintedBackground = result?.tintedBackground ?: defaultTintedBackground
     tintedSurface = result?.tintedSurface ?: defaultTintedSurface
     tintedForeground = result?.tintedForeground ?: defaultTintedForeground
+    outline = result?.outline ?: defaultOutline
+    outlineVariant = result?.outlineVariant ?: defaultOutlineVariant
+    surface = result?.surface ?: defaultSurface
+    onSurface = result?.onSurface ?: defaultOnSurface
+    onSurfaceVariant = result?.onSurfaceVariant ?: defaultOnSurfaceVariant
     surfaceContainer = result?.surfaceContainer ?: defaultSurfaceContainer
+    surfaceContainerLow = result?.surfaceContainerLow ?: defaultSurfaceContainerLow
     surfaceContainerLowest = result?.surfaceContainerLowest ?: defaultSurfaceContainerLowest
+    surfaceContainerHigh = result?.surfaceContainerHigh ?: defaultSurfaceContainerHigh
+    surfaceContainerHighest = result?.surfaceContainerHighest ?: defaultSurfaceContainerHighest
   }
 
   fun reset() {
     tintedBackground = defaultTintedBackground
     tintedSurface = defaultTintedSurface
     tintedForeground = defaultTintedForeground
+    outline = defaultOutline
+    outlineVariant = defaultOutlineVariant
+    surface = defaultSurface
+    onSurface = defaultOnSurface
+    onSurfaceVariant = defaultOnSurfaceVariant
     surfaceContainer = defaultSurfaceContainer
-    surfaceContainerLowest = surfaceContainerLowest
+    surfaceContainerLow = defaultSurfaceContainerLow
+    surfaceContainerLowest = defaultSurfaceContainerLowest
+    surfaceContainerHigh = defaultSurfaceContainerHigh
+    surfaceContainerHighest = defaultSurfaceContainerHighest
   }
 
   private suspend fun fetchDynamicColors(url: String): DynamicColors? {
@@ -171,8 +276,16 @@ class DynamicColorState(
               tintedBackground = Color(colorsMap[TINTED_BACKGROUND]!!),
               tintedSurface = Color(colorsMap[TINTED_SURFACE]!!),
               tintedForeground = Color(colorsMap[TINTED_FOREGROUND]!!),
+              outline = Color(colorsMap[OUTLINE]!!),
+              outlineVariant = Color(colorsMap[OUTLINE_VARIANT]!!),
+              surface = Color(colorsMap[SURFACE]!!),
+              onSurface = Color(colorsMap[ON_SURFACE]!!),
+              onSurfaceVariant = Color(colorsMap[ON_SURFACE_VARIANT]!!),
               surfaceContainer = Color(colorsMap[SURFACE_CONTAINER]!!),
-              surfaceContainerLowest = Color(colorsMap[SURFACE_CONTAINER_LOWEST]!!)
+              surfaceContainerLow = Color(colorsMap[SURFACE_CONTAINER_LOW]!!),
+              surfaceContainerLowest = Color(colorsMap[SURFACE_CONTAINER_LOWEST]!!),
+              surfaceContainerHigh = Color(colorsMap[SURFACE_CONTAINER_HIGH]!!),
+              surfaceContainerHighest = Color(colorsMap[SURFACE_CONTAINER_HIGHEST]!!)
             )
           } else {
             null
@@ -234,8 +347,16 @@ class DynamicColorState(
                 )
               }
             ),
+          OUTLINE to dynamicColors.outline(),
+          OUTLINE_VARIANT to dynamicColors.outlineVariant(),
+          SURFACE to dynamicColors.surface(),
+          ON_SURFACE to dynamicColors.onSurface(),
+          ON_SURFACE_VARIANT to dynamicColors.onSurfaceVariant(),
           SURFACE_CONTAINER to dynamicColors.surfaceContainer(),
-          SURFACE_CONTAINER_LOWEST to dynamicColors.surfaceContainerLowest()
+          SURFACE_CONTAINER_LOW to dynamicColors.surfaceContainerLow(),
+          SURFACE_CONTAINER_LOWEST to dynamicColors.surfaceContainerLowest(),
+          SURFACE_CONTAINER_HIGH to dynamicColors.surfaceContainerHigh(),
+          SURFACE_CONTAINER_HIGHEST to dynamicColors.surfaceContainerHighest(),
         )
 
       for (token in tokens) {
@@ -251,6 +372,14 @@ private data class DynamicColors(
   val tintedBackground: Color,
   val tintedSurface: Color,
   val tintedForeground: Color,
+  val outline: Color,
+  val outlineVariant: Color,
+  val surface: Color,
+  val onSurface: Color,
+  val onSurfaceVariant: Color,
   val surfaceContainer: Color,
-  val surfaceContainerLowest: Color
+  val surfaceContainerLow: Color,
+  val surfaceContainerLowest: Color,
+  val surfaceContainerHigh: Color,
+  val surfaceContainerHighest: Color,
 )

@@ -23,19 +23,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 
-private val darkYellowGreen = Color(0xFF1A1E00)
-private val darkYellowGreenLight = Color(0xFF2E3300)
-private val vibrantYellowGreen = Color(0xFFBFD100)
-private val darkYellow = Color(0xFF0E0E0A)
-private val darkGrayishYellow = Color(0xFF20201B)
-
 @Stable
 class AppColorScheme(
-  tintedBackground: Color = darkYellowGreen,
-  tintedSurface: Color = darkYellowGreenLight,
-  tintedForeground: Color = vibrantYellowGreen,
-  surfaceContainer: Color = darkGrayishYellow,
-  surfaceContainerLowest: Color = darkYellow,
+  tintedBackground: Color = Color(0xFF002117),
+  tintedSurface: Color = Color(0xFF00382A),
+  tintedForeground: Color = Color(0xFF63DBB5),
+  outline: Color = Color(0xFF89938E),
+  outlineVariant: Color = Color(0xFF3F4944),
+  surface: Color = Color(0xFF111412),
+  onSurface: Color = Color(0xFFE1E3E0),
+  onSurfaceVariant: Color = Color(0xFFBFC9C3),
+  surfaceContainer: Color = Color(0xFF1D201F),
+  surfaceContainerLow: Color = Color(0xFF191C1B),
+  surfaceContainerLowest: Color = Color(0xFF0B0F0D),
+  surfaceContainerHigh: Color = Color(0xFF272B29),
+  surfaceContainerHighest: Color = Color(0xFF323633),
   textEmphasisHigh: Color = Color.White.copy(alpha = 0.9f),
   textEmphasisMed: Color = Color.White.copy(alpha = 0.7f)
 ) {
@@ -49,10 +51,34 @@ class AppColorScheme(
   var tintedForeground by mutableStateOf(tintedForeground, structuralEqualityPolicy())
     internal set
 
+  var outline by mutableStateOf(outline, structuralEqualityPolicy())
+    internal set
+
+  var outlineVariant by mutableStateOf(outlineVariant, structuralEqualityPolicy())
+    internal set
+
+  var surface by mutableStateOf(surface, structuralEqualityPolicy())
+    internal set
+
+  var onSurface by mutableStateOf(onSurface, structuralEqualityPolicy())
+    internal set
+
+  var onSurfaceVariant by mutableStateOf(onSurfaceVariant, structuralEqualityPolicy())
+    internal set
+
   var surfaceContainer by mutableStateOf(surfaceContainer, structuralEqualityPolicy())
     internal set
 
+  var surfaceContainerLow by mutableStateOf(surfaceContainerLow, structuralEqualityPolicy())
+    internal set
+
   var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest, structuralEqualityPolicy())
+    internal set
+
+  var surfaceContainerHigh by mutableStateOf(surfaceContainerHigh, structuralEqualityPolicy())
+    internal set
+
+  var surfaceContainerHighest by mutableStateOf(surfaceContainerHighest, structuralEqualityPolicy())
     internal set
 
   var textEmphasisHigh by mutableStateOf(textEmphasisHigh, structuralEqualityPolicy())
@@ -65,8 +91,16 @@ class AppColorScheme(
     tintedBackground: Color = this.tintedBackground,
     tintedSurface: Color = this.surfaceContainer,
     tintedForeground: Color = this.tintedForeground,
+    outline: Color = this.outline,
+    outlineVariant: Color = this.outlineVariant,
+    surface: Color = this.surface,
+    onSurface: Color = this.onSurface,
+    onSurfaceVariant: Color = this.onSurfaceVariant,
     surfaceContainer: Color = this.surfaceContainer,
+    surfaceContainerLow: Color = this.surfaceContainerLow,
     surfaceContainerLowest: Color = this.surfaceContainerLowest,
+    surfaceContainerHigh: Color = this.surfaceContainerHigh,
+    surfaceContainerHighest: Color = this.surfaceContainerHighest,
     textEmphasisHigh: Color = this.textEmphasisHigh,
     textEmphasisMed: Color = this.textEmphasisMed
   ): AppColorScheme =
@@ -74,8 +108,16 @@ class AppColorScheme(
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
+      outline = outline,
+      outlineVariant = outlineVariant,
+      surface = surface,
+      onSurface = onSurface,
+      onSurfaceVariant = onSurfaceVariant,
       surfaceContainer = surfaceContainer,
+      surfaceContainerLow = surfaceContainerLow,
       surfaceContainerLowest = surfaceContainerLowest,
+      surfaceContainerHigh = surfaceContainerHigh,
+      surfaceContainerHighest = surfaceContainerHighest,
       textEmphasisHigh = textEmphasisHigh,
       textEmphasisMed = textEmphasisMed
     )
