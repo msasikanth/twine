@@ -214,17 +214,16 @@ class HomePresenter(
     }
 
     private fun refreshContent() {
-      try {
-        coroutineScope.launch { updateLoadingState { rssRepository.updateFeeds() } }
-      } catch (e: Exception) {
-        Sentry.captureException(e)
+      coroutineScope.launch {
+        _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
+        try {
+          rssRepository.updateFeeds()
+        } catch (e: Exception) {
+          Sentry.captureException(e)
+        } finally {
+          _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
+        }
       }
-    }
-
-    private suspend fun updateLoadingState(action: suspend () -> Unit) {
-      _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
-      action()
-      _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
     }
 
     override fun onDestroy() {
