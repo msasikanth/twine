@@ -49,6 +49,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -82,10 +83,29 @@ import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.pressInteraction
 import dev.sasikanth.rss.reader.utils.toDp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
+
+private val featuredImageAspectRatio: Float
+  @Composable
+  get() =
+    when (LocalWindowSizeClass.current.widthSizeClass) {
+      WindowWidthSizeClass.Compact -> 1.77f
+      WindowWidthSizeClass.Medium -> 2.5f
+      else -> 1.77f
+    }
+
+private val featuredImageBackgroundAspectRatio: Float
+  @Composable
+  get() =
+    when (LocalWindowSizeClass.current.widthSizeClass) {
+      WindowWidthSizeClass.Compact -> 1.1f
+      WindowWidthSizeClass.Medium -> 1.55f
+      else -> 1.1f
+    }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -210,7 +230,7 @@ private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
             url = item.imageUrl!!,
             modifier =
               Modifier.clip(MaterialTheme.shapes.extraLarge)
-                .aspectRatio(1.77f)
+                .aspectRatio(featuredImageAspectRatio)
                 .background(AppTheme.colorScheme.surfaceContainerLowest),
             contentDescription = null,
             contentScale = ContentScale.Crop
@@ -269,7 +289,9 @@ internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl:
   BoxWithConstraints(modifier = modifier) {
     AsyncImage(
       url = imageUrl!!,
-      modifier = Modifier.aspectRatio(1.1f).blur(100.dp, BlurredEdgeTreatment.Unbounded),
+      modifier =
+        Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+          .blur(100.dp, BlurredEdgeTreatment.Unbounded),
       contentDescription = null,
       contentScale = ContentScale.Crop
     )
