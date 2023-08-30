@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.search.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +37,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -143,19 +144,24 @@ private fun SearchBar(
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
-  Box(modifier = Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.statusBars)) {
+  Box(
+    modifier =
+      Modifier.fillMaxWidth()
+        .windowInsetsPadding(WindowInsets.statusBars)
+        .background(AppTheme.colorScheme.surface)
+  ) {
     TextField(
       modifier =
         Modifier.fillMaxWidth()
           .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp)
-          .requiredHeight(64.dp)
           .focusRequester(focusRequester),
       value = query,
       onValueChange = onQueryChange,
       placeholder = {
         Text(
           stringResource(CommonRes.strings.search_hint),
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisHigh,
+          style = MaterialTheme.typography.bodyLarge
         )
       },
       leadingIcon = {
@@ -163,7 +169,7 @@ private fun SearchBar(
           Icon(
             Icons.Rounded.ArrowBack,
             contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
+            tint = AppTheme.colorScheme.onSurface
           )
         }
       },
@@ -178,17 +184,18 @@ private fun SearchBar(
             Icon(
               Icons.Rounded.Close,
               contentDescription = null,
-              tint = AppTheme.colorScheme.tintedForeground
+              tint = AppTheme.colorScheme.onSurface
             )
           }
         }
       },
       shape = RoundedCornerShape(16.dp),
       singleLine = true,
+      textStyle = MaterialTheme.typography.bodyLarge,
       colors =
         TextFieldDefaults.colors(
-          focusedContainerColor = AppTheme.colorScheme.tintedBackground,
-          unfocusedContainerColor = AppTheme.colorScheme.tintedBackground,
+          focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+          unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
           unfocusedIndicatorColor = Color.Unspecified,
           focusedIndicatorColor = Color.Unspecified,
