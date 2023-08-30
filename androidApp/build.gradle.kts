@@ -52,6 +52,7 @@ android {
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+    isCoreLibraryDesugaringEnabled = true
   }
   kotlin { jvmToolchain(11) }
   signingConfigs {
@@ -88,4 +89,5 @@ dependencies {
   ksp(libs.kotlininject.compiler)
   implementation(libs.androidx.work)
   implementation(libs.sentry)
+  coreLibraryDesugaring(libs.desugarJdk)
 }
