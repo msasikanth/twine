@@ -17,6 +17,8 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +36,7 @@ import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.StringReader
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -42,6 +45,7 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 
 @Inject
 @Composable
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
@@ -50,7 +54,8 @@ fun App(
 ) {
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
-    LocalStringReader provides stringReader
+    LocalStringReader provides stringReader,
+    LocalWindowSizeClass provides calculateWindowSizeClass()
   ) {
     var imageUrl by rememberSaveable { mutableStateOf<String?>(null) }
     val dynamicColorState = rememberDynamicColorState()

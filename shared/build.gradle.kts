@@ -111,6 +111,7 @@ kotlin {
         implementation(libs.material.color.utilities)
         implementation(libs.ksoup)
         implementation(libs.sentry)
+        implementation(libs.windowSizeClass)
       }
     }
     val commonTest by getting {
