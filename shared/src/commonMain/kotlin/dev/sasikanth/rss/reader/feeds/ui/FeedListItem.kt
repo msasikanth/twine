@@ -245,9 +245,9 @@ private fun FeedLabelInput(
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent,
-        disabledTextColor = AppTheme.colorScheme.tintedForeground,
-        focusedTextColor = AppTheme.colorScheme.tintedForeground,
-        unfocusedTextColor = AppTheme.colorScheme.tintedForeground,
+        disabledTextColor = AppTheme.colorScheme.textEmphasisHigh,
+        focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+        unfocusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
       ),
     trailingIcon = {
       if (isFocused) {
