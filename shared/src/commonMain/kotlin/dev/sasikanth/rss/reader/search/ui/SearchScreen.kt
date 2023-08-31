@@ -104,6 +104,8 @@ internal fun SearchScreen(
     },
     content = {
       Box(modifier = Modifier.fillMaxSize()) {
+        LaunchedEffect(searchPresenter.searchSortOrder) { listState.animateScrollToItem(0) }
+
         LazyColumn(
           contentPadding =
             PaddingValues(
