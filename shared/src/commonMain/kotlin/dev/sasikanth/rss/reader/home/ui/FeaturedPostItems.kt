@@ -154,7 +154,7 @@ internal fun FeaturedPostItems(
 @Composable
 private fun AppBar(onSearchClicked: () -> Unit) {
   Row(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 16.dp),
+    modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
