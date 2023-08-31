@@ -65,6 +65,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
@@ -99,7 +101,9 @@ internal fun SearchScreen(
         sortOrder = searchPresenter.searchSortOrder,
         onQueryChange = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged(it)) },
         onBackClick = { searchPresenter.dispatch(SearchEvent.BackClicked) },
-        onClearClick = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged("")) },
+        onClearClick = {
+          searchPresenter.dispatch(SearchEvent.SearchQueryChanged(TextFieldValue()))
+        },
         onSortOrderChanged = { searchPresenter.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
     },
@@ -145,9 +149,9 @@ internal fun SearchScreen(
 
 @Composable
 private fun SearchBar(
-  query: String,
+  query: TextFieldValue,
   sortOrder: SearchSortOrder,
-  onQueryChange: (String) -> Unit,
+  onQueryChange: (TextFieldValue) -> Unit,
   onBackClick: () -> Unit,
   onClearClick: () -> Unit,
   onSortOrderChanged: (SearchSortOrder) -> Unit
@@ -184,7 +188,7 @@ private fun SearchBar(
       ) {
         TextField(
           modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-          value = query,
+          value = query.copy(selection = TextRange(query.text.length)),
           onValueChange = onQueryChange,
           placeholder = {
             Text(
@@ -203,7 +207,7 @@ private fun SearchBar(
             }
           },
           trailingIcon = {
-            if (query.isNotBlank()) {
+            if (query.text.isNotBlank()) {
               AnimatedContent(keyboardState) {
                 if (it == KeyboardState.Opened) {
                   ClearSearchQueryButton {

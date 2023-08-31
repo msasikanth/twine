@@ -15,9 +15,11 @@
  */
 package dev.sasikanth.rss.reader.search
 
+import androidx.compose.ui.text.input.TextFieldValue
+
 internal sealed interface SearchEvent {
 
-  data class SearchQueryChanged(val query: String) : SearchEvent
+  data class SearchQueryChanged(val query: TextFieldValue) : SearchEvent
 
   data class SearchPosts(val query: String, val searchSortOrder: SearchSortOrder) : SearchEvent
 

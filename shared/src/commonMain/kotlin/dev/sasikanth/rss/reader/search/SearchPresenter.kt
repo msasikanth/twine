@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -87,7 +88,7 @@ class SearchPresenter(
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
-    var searchQuery by mutableStateOf("")
+    var searchQuery by mutableStateOf(TextFieldValue())
       private set
 
     var searchSortOrder by mutableStateOf(SearchSortOrder.Newest)
@@ -109,8 +110,8 @@ class SearchPresenter(
         .combine(searchSortOrderFlow) { searchQuery, sortOrder -> searchQuery to sortOrder }
         .distinctUntilChanged()
         .onEach { (searchQuery, sortOrder) ->
-          if (searchQuery.isNotBlank()) {
-            dispatch(SearchEvent.SearchPosts(searchQuery, sortOrder))
+          if (searchQuery.text.isNotBlank()) {
+            dispatch(SearchEvent.SearchPosts(searchQuery.text, sortOrder))
           } else {
             dispatch(SearchEvent.ClearSearchResults)
           }
