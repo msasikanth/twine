@@ -12,17 +12,11 @@ CREATE TABLE post(
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
-upsert {
-  UPDATE post
-  SET title = :title,
-      description = :description,
-      imageUrl = :imageUrl,
-      date = :date
-  WHERE link = :link;
-
-  INSERT OR REPLACE INTO post(title, description, imageUrl, date, feedLink, link)
-  VALUES (:title, :description, :imageUrl, :date, :feedLink, :link);
-}
+upsert:
+INSERT INTO post(title, description, imageUrl, date, feedLink, link)
+VALUES (:title, :description, :imageUrl, :date, :feedLink, :link)
+ON CONFLICT(link) DO
+UPDATE SET title = excluded.title, description = excluded.description, imageUrl = excluded.imageUrl, date = excluded.date;
 
 -- TODO: Use multiplatform paging
 postWithMetadata:
