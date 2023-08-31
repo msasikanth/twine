@@ -101,9 +101,7 @@ internal fun SearchScreen(
         sortOrder = searchPresenter.searchSortOrder,
         onQueryChange = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged(it)) },
         onBackClick = { searchPresenter.dispatch(SearchEvent.BackClicked) },
-        onClearClick = {
-          searchPresenter.dispatch(SearchEvent.SearchQueryChanged(TextFieldValue()))
-        },
+        onClearClick = { searchPresenter.dispatch(SearchEvent.ClearSearchQuery) },
         onSortOrderChanged = { searchPresenter.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
     },

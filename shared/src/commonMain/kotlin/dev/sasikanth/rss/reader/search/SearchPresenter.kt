@@ -132,6 +132,9 @@ class SearchPresenter(
         is SearchEvent.SearchSortOrderChanged -> {
           searchSortOrder = event.searchSortOrder
         }
+        SearchEvent.ClearSearchQuery -> {
+          searchQuery = TextFieldValue()
+        }
       }
     }
 

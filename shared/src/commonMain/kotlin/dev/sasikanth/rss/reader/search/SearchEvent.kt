@@ -28,4 +28,6 @@ internal sealed interface SearchEvent {
   object ClearSearchResults : SearchEvent
 
   data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
+
+  object ClearSearchQuery : SearchEvent
 }
