@@ -151,10 +151,7 @@ private fun SearchBar(
         .background(AppTheme.colorScheme.surface)
   ) {
     TextField(
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp)
-          .focusRequester(focusRequester),
+      modifier = Modifier.fillMaxWidth().padding(all = 16.dp).focusRequester(focusRequester),
       value = query,
       onValueChange = onQueryChange,
       placeholder = {
