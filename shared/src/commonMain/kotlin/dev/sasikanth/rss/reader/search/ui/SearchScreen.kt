@@ -114,7 +114,7 @@ internal fun SearchScreen(
           state = listState,
           modifier = Modifier.padding(top = it.calculateTopPadding())
         ) {
-          itemsIndexed(state.searchResults, key = { _, post -> post.link }) { index, post ->
+          itemsIndexed(state.searchResults) { index, post ->
             PostListItem(post) { openLink(post.link) }
             if (index != state.searchResults.lastIndex) {
               Divider(
