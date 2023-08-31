@@ -28,7 +28,11 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
       "p" -> contentStringBuilder.append("\n" + text.cleanWhitespaces())
       "a",
       "span",
-      "em" -> {
+      "em",
+      "u",
+      "b",
+      "i",
+      "strong" -> {
         contentStringBuilder.append(text.cleanWhitespaces())
       }
     }
