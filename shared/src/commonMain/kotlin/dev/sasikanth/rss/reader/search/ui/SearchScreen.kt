@@ -49,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -178,54 +179,58 @@ private fun SearchBar(
           )
           .padding(horizontal = 4.dp)
     ) {
-      TextField(
-        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-        value = query,
-        onValueChange = onQueryChange,
-        placeholder = {
-          Text(
-            stringResource(CommonRes.strings.search_hint),
-            color = AppTheme.colorScheme.textEmphasisHigh,
-            style = MaterialTheme.typography.bodyLarge
-          )
-        },
-        leadingIcon = {
-          IconButton(onClick = onBackClick) {
-            Icon(
-              Icons.Rounded.ArrowBack,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface
+      MaterialTheme(
+        colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)
+      ) {
+        TextField(
+          modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+          value = query,
+          onValueChange = onQueryChange,
+          placeholder = {
+            Text(
+              stringResource(CommonRes.strings.search_hint),
+              color = AppTheme.colorScheme.textEmphasisHigh,
+              style = MaterialTheme.typography.bodyLarge
             )
-          }
-        },
-        trailingIcon = {
-          if (query.isNotBlank()) {
-            AnimatedContent(keyboardState) {
-              if (it == KeyboardState.Opened) {
-                ClearSearchQueryButton {
-                  focusRequester.requestFocus()
-                  onClearClick()
+          },
+          leadingIcon = {
+            IconButton(onClick = onBackClick) {
+              Icon(
+                Icons.Rounded.ArrowBack,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.onSurface
+              )
+            }
+          },
+          trailingIcon = {
+            if (query.isNotBlank()) {
+              AnimatedContent(keyboardState) {
+                if (it == KeyboardState.Opened) {
+                  ClearSearchQueryButton {
+                    focusRequester.requestFocus()
+                    onClearClick()
+                  }
+                } else {
+                  SearchSortButton(sortOrder, onSortOrderChanged)
                 }
-              } else {
-                SearchSortButton(sortOrder, onSortOrderChanged)
               }
             }
-          }
-        },
-        shape = RoundedCornerShape(16.dp),
-        singleLine = true,
-        textStyle = MaterialTheme.typography.bodyLarge,
-        colors =
-          TextFieldDefaults.colors(
-            focusedContainerColor = Color.Unspecified,
-            unfocusedContainerColor = Color.Unspecified,
-            focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-            unfocusedIndicatorColor = Color.Unspecified,
-            focusedIndicatorColor = Color.Unspecified,
-            disabledIndicatorColor = Color.Unspecified,
-            errorIndicatorColor = Color.Unspecified
-          )
-      )
+          },
+          shape = RoundedCornerShape(16.dp),
+          singleLine = true,
+          textStyle = MaterialTheme.typography.bodyLarge,
+          colors =
+            TextFieldDefaults.colors(
+              focusedContainerColor = Color.Unspecified,
+              unfocusedContainerColor = Color.Unspecified,
+              focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+              unfocusedIndicatorColor = Color.Unspecified,
+              focusedIndicatorColor = Color.Unspecified,
+              disabledIndicatorColor = Color.Unspecified,
+              errorIndicatorColor = Color.Unspecified
+            )
+        )
+      }
     }
 
     Divider(
