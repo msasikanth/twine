@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.network.feedFetcher
+import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
@@ -89,9 +90,9 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
   }
 
-  fun search(searchQuery: String): Flow<List<PostWithMetadata>> {
+  fun search(searchQuery: String, sortOrder: SearchSortOrder): Flow<List<PostWithMetadata>> {
     return postSearchFTSQueries
-      .search(searchQuery, mapper = ::mapToPostWithMetadata)
+      .search(searchQuery, sortOrder.value, mapper = ::mapToPostWithMetadata)
       .asFlow()
       .mapToList(ioDispatcher)
   }

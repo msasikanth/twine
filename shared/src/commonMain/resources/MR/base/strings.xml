@@ -19,4 +19,8 @@
     <string name="error_malformed_xml">Provided link doesn\'t contain valid RSS/Atom feed</string>
     <string name="error_request_timeout">Timeout, check your network connection and try again later</string>
     <string name="search_hint">Search posts</string>
+    <string name="search_sort_newest">Newest</string>
+    <string name="search_sort_newest_first">Newest first</string>
+    <string name="search_sort_oldest">Oldest</string>
+    <string name="search_sort_oldest_first">Oldest first</string>
 </resources>

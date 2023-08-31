@@ -22,11 +22,22 @@ import kotlinx.collections.immutable.persistentListOf
 data class SearchState(
   val searchResults: ImmutableList<PostWithMetadata>,
   val searchInProgress: Boolean,
+  val searchSortOrder: SearchSortOrder
 ) {
 
   companion object {
-    val DEFAULT = SearchState(searchResults = persistentListOf(), searchInProgress = false)
+    val DEFAULT =
+      SearchState(
+        searchResults = persistentListOf(),
+        searchInProgress = false,
+        searchSortOrder = SearchSortOrder.Newest
+      )
   }
 
-  fun reset() = copy(searchResults = persistentListOf(), searchInProgress = false)
+  fun reset() =
+    copy(
+      searchResults = persistentListOf(),
+      searchInProgress = false,
+      searchSortOrder = SearchSortOrder.Newest
+    )
 }

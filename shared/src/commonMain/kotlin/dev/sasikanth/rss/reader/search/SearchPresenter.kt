@@ -33,6 +33,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -61,8 +62,12 @@ class SearchPresenter(
     }
 
   val state: StateFlow<SearchState> = presenterInstance.state
+
   val searchQuery
     get() = presenterInstance.searchQuery
+
+  val searchSortOrder
+    get() = presenterInstance.searchSortOrder
 
   internal fun dispatch(event: SearchEvent) {
     when (event) {
@@ -85,6 +90,9 @@ class SearchPresenter(
     var searchQuery by mutableStateOf("")
       private set
 
+    var searchSortOrder by mutableStateOf(SearchSortOrder.Newest)
+      private set
+
     private val _state = MutableStateFlow(SearchState.DEFAULT)
     val state: StateFlow<SearchState> =
       _state.stateIn(
@@ -94,12 +102,15 @@ class SearchPresenter(
       )
 
     init {
-      snapshotFlow { searchQuery }
-        .debounce(500.milliseconds)
+      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
+      val searchSortOrderFlow = snapshotFlow { searchSortOrder }
+
+      searchQueryFlow
+        .combine(searchSortOrderFlow) { searchQuery, sortOrder -> searchQuery to sortOrder }
         .distinctUntilChanged()
-        .onEach {
-          if (it.isNotBlank()) {
-            dispatch(SearchEvent.SearchPosts(it))
+        .onEach { (searchQuery, sortOrder) ->
+          if (searchQuery.isNotBlank()) {
+            dispatch(SearchEvent.SearchPosts(searchQuery, sortOrder))
           } else {
             dispatch(SearchEvent.ClearSearchResults)
           }
@@ -112,11 +123,14 @@ class SearchPresenter(
         is SearchEvent.SearchQueryChanged -> {
           searchQuery = event.query
         }
-        is SearchEvent.SearchPosts -> searchPosts(event.query)
+        is SearchEvent.SearchPosts -> searchPosts(event.query, event.searchSortOrder)
         SearchEvent.BackClicked -> {
           /* no-op */
         }
         SearchEvent.ClearSearchResults -> clearSearchResults()
+        is SearchEvent.SearchSortOrderChanged -> {
+          searchSortOrder = event.searchSortOrder
+        }
       }
     }
 
@@ -124,9 +138,9 @@ class SearchPresenter(
       _state.update { it.reset() }
     }
 
-    private fun searchPosts(query: String) {
+    private fun searchPosts(query: String, sortOrder: SearchSortOrder) {
       rssRepository
-        .search(query)
+        .search(query, sortOrder)
         .onStart { _state.update { it.copy(searchInProgress = true) } }
         .onEach { searchResults ->
           _state.update { it.copy(searchResults = searchResults.toImmutableList()) }

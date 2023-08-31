@@ -15,15 +15,7 @@
  */
 package dev.sasikanth.rss.reader.search
 
-internal sealed interface SearchEvent {
-
-  data class SearchQueryChanged(val query: String) : SearchEvent
-
-  data class SearchPosts(val query: String, val searchSortOrder: SearchSortOrder) : SearchEvent
-
-  object BackClicked : SearchEvent
-
-  object ClearSearchResults : SearchEvent
-
-  data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
+enum class SearchSortOrder(val value: String) {
+  Newest("newest"),
+  Oldest("oldest")
 }

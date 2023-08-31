@@ -15,9 +15,11 @@
  */
 package dev.sasikanth.rss.reader.search.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -25,16 +27,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,7 +54,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -55,13 +64,17 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.icerock.moko.resources.compose.painterResource
 import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.search.SearchSortOrder
+import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -82,9 +95,11 @@ internal fun SearchScreen(
     topBar = {
       SearchBar(
         query = searchPresenter.searchQuery,
+        sortOrder = searchPresenter.searchSortOrder,
         onQueryChange = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged(it)) },
         onBackClick = { searchPresenter.dispatch(SearchEvent.BackClicked) },
-        onClearClick = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged("")) }
+        onClearClick = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged("")) },
+        onSortOrderChanged = { searchPresenter.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
     },
     content = {
@@ -99,7 +114,7 @@ internal fun SearchScreen(
           state = listState,
           modifier = Modifier.padding(top = it.calculateTopPadding())
         ) {
-          itemsIndexed(state.searchResults) { index, post ->
+          itemsIndexed(state.searchResults, key = { _, post -> post.link }) { index, post ->
             PostListItem(post) { openLink(post.link) }
             if (index != state.searchResults.lastIndex) {
               Divider(
@@ -128,9 +143,11 @@ internal fun SearchScreen(
 @Composable
 private fun SearchBar(
   query: String,
+  sortOrder: SearchSortOrder,
   onQueryChange: (String) -> Unit,
   onBackClick: () -> Unit,
-  onClearClick: () -> Unit
+  onClearClick: () -> Unit,
+  onSortOrderChanged: (SearchSortOrder) -> Unit
 ) {
   val focusRequester = remember { FocusRequester() }
   val keyboardState by keyboardVisibilityAsState()
@@ -150,60 +167,149 @@ private fun SearchBar(
         .windowInsetsPadding(WindowInsets.statusBars)
         .background(AppTheme.colorScheme.surface)
   ) {
-    TextField(
-      modifier = Modifier.fillMaxWidth().padding(all = 16.dp).focusRequester(focusRequester),
-      value = query,
-      onValueChange = onQueryChange,
-      placeholder = {
-        Text(
-          stringResource(CommonRes.strings.search_hint),
-          color = AppTheme.colorScheme.textEmphasisHigh,
-          style = MaterialTheme.typography.bodyLarge
-        )
-      },
-      leadingIcon = {
-        IconButton(onClick = onBackClick) {
-          Icon(
-            Icons.Rounded.ArrowBack,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.onSurface
+    Box(
+      modifier =
+        Modifier.padding(all = 16.dp)
+          .background(
+            color = AppTheme.colorScheme.surfaceContainer,
+            shape = RoundedCornerShape(16.dp)
           )
-        }
-      },
-      trailingIcon = {
-        if (query.isNotBlank()) {
-          IconButton(
-            onClick = {
-              focusRequester.requestFocus()
-              onClearClick()
-            }
-          ) {
+          .padding(horizontal = 4.dp)
+    ) {
+      TextField(
+        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = {
+          Text(
+            stringResource(CommonRes.strings.search_hint),
+            color = AppTheme.colorScheme.textEmphasisHigh,
+            style = MaterialTheme.typography.bodyLarge
+          )
+        },
+        leadingIcon = {
+          IconButton(onClick = onBackClick) {
             Icon(
-              Icons.Rounded.Close,
+              Icons.Rounded.ArrowBack,
               contentDescription = null,
               tint = AppTheme.colorScheme.onSurface
             )
           }
-        }
-      },
-      shape = RoundedCornerShape(16.dp),
-      singleLine = true,
-      textStyle = MaterialTheme.typography.bodyLarge,
-      colors =
-        TextFieldDefaults.colors(
-          focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-          unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-          unfocusedIndicatorColor = Color.Unspecified,
-          focusedIndicatorColor = Color.Unspecified,
-          disabledIndicatorColor = Color.Unspecified,
-          errorIndicatorColor = Color.Unspecified
-        )
-    )
+        },
+        trailingIcon = {
+          if (query.isNotBlank()) {
+            AnimatedContent(keyboardState) {
+              if (it == KeyboardState.Opened) {
+                ClearSearchQueryButton {
+                  focusRequester.requestFocus()
+                  onClearClick()
+                }
+              } else {
+                SearchSortButton(sortOrder, onSortOrderChanged)
+              }
+            }
+          }
+        },
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyLarge,
+        colors =
+          TextFieldDefaults.colors(
+            focusedContainerColor = Color.Unspecified,
+            unfocusedContainerColor = Color.Unspecified,
+            focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+            unfocusedIndicatorColor = Color.Unspecified,
+            focusedIndicatorColor = Color.Unspecified,
+            disabledIndicatorColor = Color.Unspecified,
+            errorIndicatorColor = Color.Unspecified
+          )
+      )
+    }
 
     Divider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
       color = AppTheme.colorScheme.surfaceContainer
     )
+  }
+}
+
+@Composable
+private fun SearchSortButton(
+  sortOrder: SearchSortOrder,
+  onSortOrderChanged: (SearchSortOrder) -> Unit
+) {
+  Box {
+    var isDropdownExpanded by remember { mutableStateOf(false) }
+
+    TextButton(
+      modifier = Modifier.requiredHeight(48.dp),
+      onClick = { isDropdownExpanded = true },
+      shape = RoundedCornerShape(12.dp),
+    ) {
+      Spacer(Modifier.requiredWidth(4.dp))
+      Text(
+        text =
+          when (sortOrder) {
+            Newest -> stringResource(CommonRes.strings.search_sort_newest)
+            Oldest -> stringResource(CommonRes.strings.search_sort_oldest)
+          },
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.onSurface
+      )
+      Spacer(Modifier.requiredWidth(8.dp))
+      Icon(
+        painterResource(CommonRes.images.ic_sort),
+        contentDescription = null,
+        tint = AppTheme.colorScheme.onSurface
+      )
+      Spacer(Modifier.requiredWidth(4.dp))
+    }
+
+    if (isDropdownExpanded) {
+      SortDropdownMenu(
+        isDropdownExpanded = isDropdownExpanded,
+        onDismiss = { isDropdownExpanded = false },
+        onSortOrderChanged = {
+          isDropdownExpanded = false
+          onSortOrderChanged(it)
+        }
+      )
+    }
+  }
+}
+
+@Composable
+private fun SortDropdownMenu(
+  isDropdownExpanded: Boolean,
+  onDismiss: () -> Unit,
+  onSortOrderChanged: (SearchSortOrder) -> Unit
+) {
+  DropdownMenu(
+    expanded = isDropdownExpanded,
+    onDismissRequest = onDismiss,
+    offset = DpOffset(0.dp, (-48).dp),
+    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceContainerHigh)
+  ) {
+    DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
+      Text(
+        text = stringResource(CommonRes.strings.search_sort_newest_first),
+        style = MaterialTheme.typography.bodyLarge,
+        color = AppTheme.colorScheme.onSurface
+      )
+    }
+    DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
+      Text(
+        text = stringResource(CommonRes.strings.search_sort_oldest_first),
+        style = MaterialTheme.typography.bodyLarge,
+        color = AppTheme.colorScheme.onSurface
+      )
+    }
+  }
+}
+
+@Composable
+private fun ClearSearchQueryButton(onClearClick: () -> Unit) {
+  IconButton(onClick = onClearClick) {
+    Icon(Icons.Rounded.Close, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
   }
 }
