@@ -272,8 +272,8 @@ private fun SearchSortButton(
         isDropdownExpanded = isDropdownExpanded,
         onDismiss = { isDropdownExpanded = false },
         onSortOrderChanged = {
-          isDropdownExpanded = false
           onSortOrderChanged(it)
+          isDropdownExpanded = false
         }
       )
     }
