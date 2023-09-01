@@ -47,6 +47,7 @@ allprojects {
       targetExclude("${layout.buildDirectory}/**/*.kts")
       licenseHeaderFile(rootProject.file("spotless/copyright.txt"), "(^(?![\\/ ]\\*).*$)")
         .onlyIfContentMatches("missingString")
+      toggleOffOn()
     }
     format("xml") {
       target("src/**/*.xml")

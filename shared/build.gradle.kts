@@ -49,21 +49,14 @@ kotlin {
 
   android()
 
+  // spotless:off
   val iOSBinaryFlags =
     listOf(
-      "-linker-option",
-      "-framework",
-      "-linker-option",
-      "Metal",
-      "-linker-option",
-      "-framework",
-      "-linker-option",
-      "CoreText",
-      "-linker-option",
-      "-framework",
-      "-linker-option",
-      "CoreGraphics",
+      "-linker-option", "-framework", "-linker-option", "Metal",
+      "-linker-option", "-framework", "-linker-option", "CoreText",
+      "-linker-option", "-framework", "-linker-option", "CoreGraphics",
     )
+  // spotless:on
 
   ios()
   iosX64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
