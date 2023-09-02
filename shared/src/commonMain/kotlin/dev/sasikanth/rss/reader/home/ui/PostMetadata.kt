@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -98,7 +99,12 @@ private fun PostOptionsButtonRow(
 ) {
   Row {
     PostOptionIconButton(
-      iconRes = IconResources.bookmark,
+      iconRes =
+        if (postBookmarked) {
+          IconResources.bookmarked
+        } else {
+          IconResources.bookmark
+        },
       contentDescription = LocalStrings.current.bookmark,
       onClick = onBookmarkClick
     )
@@ -125,7 +131,8 @@ internal fun PostOptionIconButton(
     Icon(
       painter = painterResource(iconRes),
       contentDescription = contentDescription,
-      tint = Color.White
+      tint = Color.White,
+      modifier = Modifier.size(20.dp)
     )
   }
 }
