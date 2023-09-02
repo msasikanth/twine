@@ -37,7 +37,7 @@ sqliteAndroid = "3.43.0"
 windowSizeClass = "0.3.1"
 desugarJdk = "2.0.3"
 lyricist = "1.4.2"
-atomicfu = "0.17.3"
+atomicfu = "0.22.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
