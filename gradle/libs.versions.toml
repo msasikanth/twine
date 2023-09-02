@@ -36,6 +36,7 @@ buildKonfig = "0.13.3"
 sqliteAndroid = "3.43.0"
 windowSizeClass = "0.2.0"
 desugarJdk = "2.0.3"
+lyricist = "1.4.2"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -77,6 +78,8 @@ sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sent
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
+lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
