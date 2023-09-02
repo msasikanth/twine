@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -98,41 +97,38 @@ internal fun PostsList(
 
 @Composable
 fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClick: () -> Unit) {
-  Box {
-    Column {
-      Row(
-        modifier =
-          Modifier.clickable(onClick = onClick).padding(start = 24.dp, top = 24.dp, end = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Text(
-          modifier = Modifier.weight(1f),
-          style = MaterialTheme.typography.titleSmall,
-          text = item.title,
-          color = AppTheme.colorScheme.textEmphasisHigh,
-          maxLines = 2
-        )
-
-        item.imageUrl?.let { url ->
-          AsyncImage(
-            url = url,
-            modifier =
-              Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-          )
-        }
-      }
-
-      PostMetadata(
-        modifier = Modifier.padding(start = 24.dp, end = 12.dp),
-        feedName = item.feedName,
-        postPublishedAt = item.date.relativeDurationString(),
-        postLink = item.link,
-        postBookmarked = item.bookmarked,
-        onBookmarkClick = onPostBookmarkClick
+  Column(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        modifier = Modifier.weight(1f),
+        style = MaterialTheme.typography.titleSmall,
+        text = item.title,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        maxLines = 2
       )
+
+      item.imageUrl?.let { url ->
+        AsyncImage(
+          url = url,
+          modifier =
+            Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
+          contentDescription = null,
+          contentScale = ContentScale.Crop
+        )
+      }
     }
+
+    PostMetadata(
+      modifier = Modifier.padding(start = 24.dp, end = 12.dp),
+      feedName = item.feedName,
+      postPublishedAt = item.date.relativeDurationString(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      onBookmarkClick = onPostBookmarkClick
+    )
   }
 }
