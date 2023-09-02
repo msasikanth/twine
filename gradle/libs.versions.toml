@@ -8,7 +8,6 @@ android_sdk_target = "34"
 android_sdk_min = "31"
 
 sqldelight = "2.0.0"
-moko_resources = "0.23.0"
 ktor = "2.3.4"
 napier = "2.6.1"
 kotlinx_coroutines = "1.7.3"
@@ -68,8 +67,6 @@ androidx_test_runner = { module = "androidx.test:runner", version.ref = "android
 androidx_test_rules = { module = "androidx.test:rules", version.ref = "androidx_test_rules" }
 androidx_work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx_work" }
 coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-moko_resources = { module = "dev.icerock.moko:resources", version.ref = "moko_resources" }
-moko_resources_compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko_resources" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
@@ -90,7 +87,6 @@ kotlin_cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref =
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
-moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
@@ -99,5 +95,4 @@ sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_androi
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
-moko_resources = [ "moko_resources", "moko_resources_compose" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
