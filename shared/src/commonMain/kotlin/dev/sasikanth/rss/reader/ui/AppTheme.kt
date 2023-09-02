@@ -23,6 +23,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import dev.sasikanth.rss.reader.resources.GolosFontFamily
 
 @Composable
 fun AppTheme(
@@ -31,7 +32,7 @@ fun AppTheme(
 ) {
   MaterialTheme(
     colorScheme = darkColorScheme(),
-    typography = typography(),
+    typography = typography(GolosFontFamily),
   ) {
     CompositionLocalProvider(
       LocalAppColorScheme provides appColorScheme,
