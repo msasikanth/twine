@@ -124,7 +124,7 @@ fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClic
       }
 
       PostMetadata(
-        modifier = Modifier.padding(start = 24.dp, end = 8.dp),
+        modifier = Modifier.padding(start = 24.dp, end = 12.dp),
         feedName = item.feedName,
         postPublishedAt = item.date.relativeDurationString(),
         postLink = item.link,
