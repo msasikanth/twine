@@ -155,6 +155,9 @@ fun HomeScreen(
           isRefreshing = state.isRefreshing,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
+          onPostBookmarkClick = {
+            // TODO: Handle bookmark clicks
+          },
           onFeaturedItemChange = onFeaturedItemChange,
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) }
@@ -197,6 +200,7 @@ private fun HomeScreenContent(
   isRefreshing: Boolean,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
+  onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
   onSearchClicked: () -> Unit
@@ -214,6 +218,7 @@ private fun HomeScreenContent(
         posts = posts,
         selectedFeed = selectedFeed,
         onPostClicked = onPostClicked,
+        onPostBookmarkClick = onPostBookmarkClick,
         onFeaturedItemChange = onFeaturedItemChange,
         listState = listState,
         onSearchClicked = onSearchClicked

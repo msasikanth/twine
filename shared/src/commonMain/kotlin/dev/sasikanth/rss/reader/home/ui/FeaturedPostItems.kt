@@ -16,11 +16,8 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -33,6 +30,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -43,20 +41,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -67,24 +61,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
-import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.resources.IconResources
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import dev.sasikanth.rss.reader.utils.pressInteraction
-import dev.sasikanth.rss.reader.utils.toDp
+import dev.sasikanth.rss.reader.utils.relativeDurationString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
@@ -114,6 +101,7 @@ internal fun FeaturedPostItems(
   featuredPosts: ImmutableList<PostWithMetadata>,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
+  onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onSearchClicked: () -> Unit
 ) {
@@ -144,7 +132,11 @@ internal fun FeaturedPostItems(
           verticalAlignment = Alignment.Top
         ) {
           val featuredPost = featuredPosts[it]
-          FeaturedPostItem(item = featuredPost) { onItemClick(featuredPost) }
+          FeaturedPostItem(
+            item = featuredPost,
+            onClick = { onItemClick(featuredPost) },
+            onBookmarkClick = { onPostBookmarkClick(featuredPost) }
+          )
         }
       }
     }
@@ -188,99 +180,62 @@ private fun AppBar(onSearchClicked: () -> Unit) {
 }
 
 @Composable
-private fun FeaturedPostItem(item: PostWithMetadata, onClick: () -> Unit) {
-  CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
-    val hapticFeedback = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
-    val interactionSource = remember { MutableInteractionSource() }
-    var dropdownMenuExpanded by remember(item) { mutableStateOf(false) }
-    var dropdownOffset by remember(item) { mutableStateOf(Offset.Zero) }
-
+private fun FeaturedPostItem(
+  item: PostWithMetadata,
+  onClick: () -> Unit,
+  onBookmarkClick: () -> Unit
+) {
+  Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
     Box {
-      Column(
+      AsyncImage(
+        url = item.imageUrl!!,
         modifier =
           Modifier.clip(MaterialTheme.shapes.extraLarge)
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(item) {
-              detectTapGestures(
-                onTap = {
-                  pressInteraction(
-                    coroutineScope = coroutineScope,
-                    interactionSource = interactionSource,
-                    offset = it,
-                    block = onClick
-                  )
-                },
-                onLongPress = {
-                  pressInteraction(
-                    coroutineScope = coroutineScope,
-                    interactionSource = interactionSource,
-                    offset = it,
-                  ) {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    dropdownOffset = it
-                    dropdownMenuExpanded = true
-                  }
-                }
-              )
-            }
-      ) {
-        Box {
-          AsyncImage(
-            url = item.imageUrl!!,
-            modifier =
-              Modifier.clip(MaterialTheme.shapes.extraLarge)
-                .aspectRatio(featuredImageAspectRatio)
-                .background(AppTheme.colorScheme.surfaceContainerLowest),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-          )
+            .aspectRatio(featuredImageAspectRatio)
+            .background(AppTheme.colorScheme.surfaceContainerLowest),
+        contentDescription = null,
+        contentScale = ContentScale.Crop
+      )
 
-          PostMetadata(post = item, modifier = Modifier.align(Alignment.BottomStart))
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-          modifier = Modifier.padding(horizontal = 16.dp),
-          text = item.title,
-          style = MaterialTheme.typography.headlineSmall,
-          color = AppTheme.colorScheme.textEmphasisHigh,
-          minLines = 2,
-          maxLines = 2,
-          overflow = TextOverflow.Ellipsis
-        )
-
-        if (item.description.isNotBlank()) {
-          Spacer(modifier = Modifier.height(8.dp))
-
-          Text(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            text = item.description,
-            style = MaterialTheme.typography.bodySmall,
-            color = AppTheme.colorScheme.textEmphasisHigh,
-            minLines = 3,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-          )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-      }
-
-      Box {
-        DropdownMenu(
-          expanded = dropdownMenuExpanded,
-          onDismissRequest = { dropdownMenuExpanded = false },
-          offset = DpOffset(dropdownOffset.x.toDp(), dropdownOffset.y.toDp())
-        ) {
-          DropdownMenuShareItem(
-            contentToShare = item.link,
-            onShareMenuOpened = { dropdownMenuExpanded = false }
-          )
-        }
-      }
+      PostSourceChip(post = item, modifier = Modifier.align(Alignment.BottomStart))
     }
+
+    Spacer(modifier = Modifier.requiredHeight(8.dp))
+
+    Text(
+      modifier = Modifier.padding(horizontal = 16.dp),
+      text = item.title,
+      style = MaterialTheme.typography.headlineSmall,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      minLines = 2,
+      maxLines = 2,
+      overflow = TextOverflow.Ellipsis
+    )
+
+    if (item.description.isNotBlank()) {
+      Spacer(modifier = Modifier.requiredHeight(8.dp))
+
+      Text(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        text = item.description,
+        style = MaterialTheme.typography.bodySmall,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        minLines = 3,
+        maxLines = 3,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
+
+    PostMetadata(
+      modifier = Modifier.padding(start = 16.dp, end = 0.dp),
+      feedName = item.feedName,
+      postPublishedAt = item.date.relativeDurationString(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      onBookmarkClick = onBookmarkClick
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
   }
 }
 
@@ -327,7 +282,7 @@ internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl:
 }
 
 @Composable
-private fun PostMetadata(post: PostWithMetadata, modifier: Modifier = Modifier) {
+private fun PostSourceChip(post: PostWithMetadata, modifier: Modifier = Modifier) {
   val feedName = post.feedName
   val verticalPadding = 8.dp
   val startPadding = 8.dp
