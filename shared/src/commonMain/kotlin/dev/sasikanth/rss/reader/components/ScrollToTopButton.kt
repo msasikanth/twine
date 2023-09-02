@@ -20,6 +20,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -28,8 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
 
@@ -52,10 +52,7 @@ fun BoxScope.ScrollToTopButton(
       containerColor = AppTheme.colorScheme.tintedBackground,
       contentColor = AppTheme.colorScheme.tintedForeground,
       text = {
-        androidx.compose.material.Text(
-          stringResource(CommonRes.strings.scroll_to_top),
-          color = AppTheme.colorScheme.tintedForeground
-        )
+        Text(text = LocalStrings.current.scrollToTop, color = AppTheme.colorScheme.tintedForeground)
       },
       icon = { Icon(Icons.Rounded.KeyboardArrowUp, contentDescription = null) },
       onClick = { coroutineScope.launch { onClick() } }

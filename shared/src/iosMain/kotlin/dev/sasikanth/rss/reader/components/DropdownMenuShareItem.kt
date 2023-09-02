@@ -23,8 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.interop.LocalUIViewController
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import platform.UIKit.UIActivityViewController
 
 @Composable
@@ -37,7 +36,7 @@ actual fun DropdownMenuShareItem(
 
   DropdownMenuItem(
     modifier = modifier,
-    text = { Text(text = stringResource(CommonRes.strings.share)) },
+    text = { Text(text = LocalStrings.current.share) },
     leadingIcon = { Icon(Icons.TwoTone.Share, null) },
     onClick = {
       val items = listOf(contentToShare)

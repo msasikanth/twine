@@ -61,8 +61,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
@@ -79,9 +77,9 @@ import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
+import dev.sasikanth.rss.reader.resources.TwineStrings
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.LocalStringReader
-import dev.sasikanth.rss.reader.utils.StringReader
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
@@ -118,7 +116,7 @@ fun HomeScreen(
   val bottomSheetCornerSize by
     bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverseProgress() }
 
-  val stringReader = LocalStringReader.current
+  val strings = LocalStrings.current
 
   LaunchedEffect(Unit) {
     homePresenter.effects.collect { effect ->
@@ -130,7 +128,7 @@ fun HomeScreen(
           bottomSheetState.collapse()
         }
         is HomeEffect.ShowError -> {
-          displayErrorMessage(effect, stringReader, bottomSheetScaffoldState)
+          displayErrorMessage(effect, strings, bottomSheetScaffoldState)
         }
       }
     }
@@ -317,7 +315,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     verticalArrangement = Arrangement.Center
   ) {
     Text(
-      text = stringResource(CommonRes.strings.no_feeds),
+      text = LocalStrings.current.noFeeds,
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
@@ -325,7 +323,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(8.dp))
 
     Text(
-      text = stringResource(CommonRes.strings.swipe_up_get_started),
+      text = LocalStrings.current.swipeUpGetStarted,
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed
     )
@@ -346,14 +344,14 @@ private fun bottomSheetPeekHeight() =
 
 private suspend fun displayErrorMessage(
   effect: HomeEffect.ShowError,
-  stringReader: StringReader,
+  twineStrings: TwineStrings,
   bottomSheetScaffoldState: BottomSheetScaffoldState
 ) {
   val message =
     when (val errorType = effect.homeErrorType) {
-      HomeErrorType.UnknownFeedType -> stringReader.string(CommonRes.strings.error_unsupported_feed)
-      HomeErrorType.FailedToParseXML -> stringReader.string(CommonRes.strings.error_malformed_xml)
-      HomeErrorType.Timeout -> stringReader.string(CommonRes.strings.error_request_timeout)
+      HomeErrorType.UnknownFeedType -> twineStrings.errorUnsupportedFeed
+      HomeErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
+      HomeErrorType.Timeout -> twineStrings.errorRequestTimeout
       is HomeErrorType.Unknown -> errorType.e.message
     }
 

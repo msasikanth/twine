@@ -41,10 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 import kotlin.math.roundToInt
@@ -70,7 +70,7 @@ internal fun BottomSheetPrimaryActionButton(
       when {
         bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
           Pair(CommonRes.images.ic_all, null)
-        else -> Pair(CommonRes.images.ic_add, stringResource(CommonRes.strings.button_add_feed))
+        else -> Pair(CommonRes.images.ic_add, LocalStrings.current.buttonAddFeed)
       }
 
     FloatingActionButton(
@@ -82,7 +82,7 @@ internal fun BottomSheetPrimaryActionButton(
     )
 
     Text(
-      text = stringResource(CommonRes.strings.button_all),
+      text = LocalStrings.current.buttonAll,
       style = MaterialTheme.typography.bottomSheetItemLabel,
       textAlign = TextAlign.Center,
       color = AppTheme.colorScheme.textEmphasisHigh,

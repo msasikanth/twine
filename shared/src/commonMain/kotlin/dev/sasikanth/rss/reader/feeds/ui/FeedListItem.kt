@@ -65,11 +65,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
 import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -162,7 +162,7 @@ internal fun FeedListItem(
           offset = DpOffset(0.dp, (-48).dp)
         ) {
           DropdownMenuItem(
-            text = { Text(stringResource(CommonRes.strings.edit_feed_name)) },
+            text = { Text(LocalStrings.current.editFeedName) },
             leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },
             onClick = {
               dropdownMenuExpanded = false
@@ -262,7 +262,7 @@ private fun FeedLabelInput(
             )
         ) {
           Text(
-            text = stringResource(CommonRes.strings.button_change),
+            text = LocalStrings.current.buttonChange,
             style = MaterialTheme.typography.labelLarge
           )
         }
@@ -270,7 +270,7 @@ private fun FeedLabelInput(
     },
     placeholder = {
       Text(
-        text = stringResource(CommonRes.strings.feed_name_hint),
+        text = LocalStrings.current.feedNameHint,
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
       )
