@@ -81,6 +81,8 @@ kotlin {
 
     val commonMain by getting {
       dependencies {
+        implementation(projects.strings)
+
         implementation(libs.bundles.compose)
         implementation(libs.bundles.kotlinx)
         implementation(libs.ktor.core)
@@ -95,7 +97,6 @@ kotlin {
         implementation(libs.ksoup)
         implementation(libs.sentry)
         implementation(libs.windowSizeClass)
-        implementation(project(":strings"))
       }
     }
     val commonTest by getting {
