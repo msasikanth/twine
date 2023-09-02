@@ -6,6 +6,15 @@
   "automergeType": "branch",
   "packageRules": [
     {
+      "groupName": "Kotlin, KSP and Compose Compiler",
+      "groupSlug": "kotlin",
+      "matchPackageNames": [
+        "com.google.devtools.ksp",
+        "androidx.compose.compiler",
+        "org.jetbrains.kotlin"
+      ]
+    },
+    {
       "description": "Automerge minor updates",
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
