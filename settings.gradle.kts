@@ -19,7 +19,7 @@ include(":androidApp")
 
 include(":shared")
 
-include(":resources")
+include(":strings")
 
 pluginManagement {
   repositories {
