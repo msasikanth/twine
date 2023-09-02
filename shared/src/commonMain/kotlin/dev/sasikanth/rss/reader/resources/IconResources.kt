@@ -16,9 +16,9 @@
 package dev.sasikanth.rss.reader.resources
 
 internal object IconResources {
-  const val add = "icons/ic_add.xml"
-  const val all = "icons/ic_all.xml"
-  const val delete = "icons/ic_delete.xml"
-  const val rss = "icons/ic_rss.xml"
-  const val sort = "icons/ic_sort.xml"
+  const val add = "drawable/ic_add.xml"
+  const val all = "drawable/ic_all.xml"
+  const val delete = "drawable/ic_delete.xml"
+  const val rss = "drawable/ic_rss.xml"
+  const val sort = "drawable/ic_sort.xml"
 }
