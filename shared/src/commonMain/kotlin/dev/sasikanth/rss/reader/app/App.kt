@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalStringReader
@@ -69,21 +70,23 @@ fun App(
     }
 
     DynamicContentTheme(dynamicColorState) {
-      Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = AppTheme.colorScheme.surfaceContainerLowest
-      ) {
-        val screenStack by appPresenter.screenStack.subscribeAsState()
+      ProvideStrings {
+        Surface(
+          modifier = Modifier.fillMaxSize(),
+          color = AppTheme.colorScheme.surfaceContainerLowest
+        ) {
+          val screenStack by appPresenter.screenStack.subscribeAsState()
 
-        when (val screen = screenStack.active.instance) {
-          is Screen.Home ->
-            HomeScreen(
-              homePresenter = screen.presenter,
-              onFeaturedItemChange = { imageUrl = it },
-              openLink = openLink
-            )
-          is Screen.Search -> {
-            SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+          when (val screen = screenStack.active.instance) {
+            is Screen.Home ->
+              HomeScreen(
+                homePresenter = screen.presenter,
+                onFeaturedItemChange = { imageUrl = it },
+                openLink = openLink
+              )
+            is Screen.Search -> {
+              SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+            }
           }
         }
       }
