@@ -36,7 +36,7 @@ internal actual fun font(
   style: FontStyle
 ): Font {
   return cache.getOrPut(resourceId) {
-    val byteArray = runBlocking { resource("fonts/$resourceId.ttf").readBytes() }
+    val byteArray = runBlocking { resource("font/$resourceId.ttf").readBytes() }
     androidx.compose.ui.text.platform.Font(resourceId, byteArray, weight, style)
   }
 }

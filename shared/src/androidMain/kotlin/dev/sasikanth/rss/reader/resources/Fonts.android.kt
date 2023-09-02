@@ -24,8 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 
 // Copied from : https://github.com/chrisbanes/tivi
 
-private val idCache = mutableMapOf<String, Int>()
-
 @SuppressLint("DiscouragedApi")
 @Composable
 internal actual fun font(
@@ -35,9 +33,6 @@ internal actual fun font(
   style: FontStyle
 ): Font {
   val context = LocalContext.current
-  val id =
-    idCache.getOrPut(resourceId) {
-      context.resources.getIdentifier(resourceId, "fonts", context.packageName)
-    }
-  return Font(resId = id, weight = weight, style = style)
+  val id = context.resources.getIdentifier(resourceId, "font", context.packageName)
+  return Font(id, weight, style)
 }

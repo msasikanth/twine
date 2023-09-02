@@ -155,7 +155,7 @@ android {
   namespace = "dev.sasikanth.rss.reader.common"
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-  sourceSets["main"].res.srcDirs("src/androidMain/res")
+  sourceSets["main"].res.srcDirs("src/androidMain/res", "src/commonMain/resources")
   sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
   defaultConfig {
