@@ -19,6 +19,8 @@ include(":androidApp")
 
 include(":shared")
 
+include(":strings")
+
 pluginManagement {
   repositories {
     gradlePluginPortal()
