@@ -30,8 +30,8 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_content_update
-AFTER UPDATE OF title, description, imageUrl, date ON post
-BEGIN UPDATE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
+AFTER UPDATE OF title, description, imageUrl, date ON post WHEN new.bookmarked == 1
+BEGIN UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
 END;
 
 bookmarks:

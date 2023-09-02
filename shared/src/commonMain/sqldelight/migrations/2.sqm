@@ -1,8 +1,28 @@
 import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
+-- post table
 ALTER TABLE post ADD COLUMN bookmarked INTEGER NOT NULL DEFAULT 0;
+-- post table
 
+-- post search table
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_INSERT;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE link = new.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT OR IGNORE INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+END;
+-- post search table
+
+-- bookmark table
 CREATE TABLE bookmark (
   title TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -32,6 +52,7 @@ END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_content_update
-AFTER UPDATE OF title, description, imageUrl, date ON post
-BEGIN UPDATE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
+AFTER UPDATE OF title, description, imageUrl, date ON post WHEN new.bookmarked == 1
+BEGIN UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
 END;
+-- bookmark table
