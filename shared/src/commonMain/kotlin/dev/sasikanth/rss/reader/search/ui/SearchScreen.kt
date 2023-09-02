@@ -73,10 +73,9 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.resources.IconResources
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
@@ -85,6 +84,7 @@ import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun SearchScreen(
@@ -273,7 +273,7 @@ private fun SearchSortButton(
       )
       Spacer(Modifier.requiredWidth(8.dp))
       Icon(
-        painterResource(CommonRes.images.ic_sort),
+        painterResource(IconResources.sort),
         contentDescription = null,
         tint = AppTheme.colorScheme.onSurface
       )

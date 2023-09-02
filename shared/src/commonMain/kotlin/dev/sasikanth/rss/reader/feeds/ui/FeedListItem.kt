@@ -64,15 +64,15 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.resources.IconResources
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -150,7 +150,7 @@ internal fun FeedListItem(
       Box {
         IconButton(onClick = { onDeleteFeed(feed) }) {
           Icon(
-            painter = painterResource(CommonRes.images.ic_delete),
+            painter = painterResource(IconResources.delete),
             contentDescription = null,
             tint = AppTheme.colorScheme.tintedForeground
           )

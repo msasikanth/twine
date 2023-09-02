@@ -75,11 +75,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.resources.IconResources
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
@@ -88,6 +87,7 @@ import dev.sasikanth.rss.reader.utils.pressInteraction
 import dev.sasikanth.rss.reader.utils.toDp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.painterResource
 
 private val featuredImageAspectRatio: Float
   @Composable
@@ -167,7 +167,7 @@ private fun AppBar(onSearchClicked: () -> Unit) {
       Spacer(Modifier.width(4.dp))
 
       Icon(
-        painter = painterResource(CommonRes.images.ic_rss),
+        painter = painterResource(IconResources.rss),
         contentDescription = null,
         tint = Color.White
       )
