@@ -173,10 +173,10 @@ private fun SearchBar(
   Box(
     modifier =
       Modifier.fillMaxWidth()
+        .background(AppTheme.colorScheme.surface)
         .windowInsetsPadding(
           WindowInsets.statusBars.union(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         )
-        .background(AppTheme.colorScheme.surface)
   ) {
     Box(
       modifier =
