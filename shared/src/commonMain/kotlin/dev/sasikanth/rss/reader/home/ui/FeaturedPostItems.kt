@@ -103,7 +103,8 @@ internal fun FeaturedPostItems(
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
-  onSearchClicked: () -> Unit
+  onSearchClicked: () -> Unit,
+  onBookmarksClicked: () -> Unit
 ) {
   Box(modifier = modifier) {
     var selectedImage by remember { mutableStateOf<String?>(null) }
@@ -122,7 +123,7 @@ internal fun FeaturedPostItems(
     }
 
     Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
-      AppBar(onSearchClicked)
+      AppBar(onSearchClicked, onBookmarksClicked)
 
       if (featuredPosts.isNotEmpty()) {
         HorizontalPager(
@@ -144,7 +145,7 @@ internal fun FeaturedPostItems(
 }
 
 @Composable
-private fun AppBar(onSearchClicked: () -> Unit) {
+private fun AppBar(onSearchClicked: () -> Unit, onBookmarksClicked: () -> Unit) {
   Row(
     modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 16.dp),
     verticalAlignment = Alignment.CenterVertically
@@ -166,6 +167,16 @@ private fun AppBar(onSearchClicked: () -> Unit) {
     }
 
     Spacer(Modifier.weight(1f))
+
+    IconButton(
+      onClick = onBookmarksClicked,
+    ) {
+      Icon(
+        painter = painterResource(IconResources.bookmarks),
+        contentDescription = LocalStrings.current.bookmarks,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
+    }
 
     IconButton(
       onClick = onSearchClicked,

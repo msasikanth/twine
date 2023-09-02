@@ -39,7 +39,8 @@ data class TwineStrings(
   val searchSortNewestFirst: String,
   val searchSortOldest: String,
   val searchSortOldestFirst: String,
-  val bookmark: String
+  val bookmark: String,
+  val bookmarks: String,
 )
 
 object Locales {
