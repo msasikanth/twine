@@ -34,7 +34,9 @@ private val figmaLineHeightStyle =
 
 @Stable val defaultTextStyle = createDefaultTextStyle()
 
-fun typography(fontFamily: FontFamily) =
+private val fontFamily: FontFamily = FontFamily.Default
+
+fun typography() =
   Typography(
     displayLarge =
       defaultTextStyle.copy(
