@@ -63,6 +63,7 @@ class HomePresenter(
   private val observableSelectedFeed: ObservableSelectedFeed,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
+  @Assisted private val openBookmarks: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -95,6 +96,7 @@ class HomePresenter(
         backCallback.isEnabled = event.feedsSheetState == BottomSheetValue.Expanded
       }
       is HomeEvent.SearchClicked -> openSearch()
+      is HomeEvent.BookmarksClicked -> openBookmarks()
       else -> {
         // no-op
       }
@@ -137,6 +139,9 @@ class HomePresenter(
           /* no-op */
         }
         is HomeEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
+        HomeEvent.BookmarksClicked -> {
+          /* no-op */
+        }
       }
     }
 

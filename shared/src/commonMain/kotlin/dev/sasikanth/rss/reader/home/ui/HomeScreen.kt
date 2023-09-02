@@ -159,9 +159,7 @@ fun HomeScreen(
           onFeaturedItemChange = onFeaturedItemChange,
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-          onBookmarksClicked = {
-            // TODO: Navigate to bookmarks screen
-          }
+          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) }
         )
       },
       sheetContent = {
