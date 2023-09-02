@@ -77,8 +77,8 @@ import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
-import dev.sasikanth.rss.reader.resources.TwineStrings
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList

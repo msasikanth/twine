@@ -1,4 +1,4 @@
-package dev.sasikanth.rss.reader.resources
+package dev.sasikanth.rss.reader.resources.strings
 
 import cafe.adriel.lyricist.LyricistStrings
 

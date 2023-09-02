@@ -1,4 +1,4 @@
-package dev.sasikanth.rss.reader.resources
+package dev.sasikanth.rss.reader.resources.strings
 
 data class TwineStrings(
   val appName: String,

@@ -105,7 +105,7 @@ kotlin {
         implementation(libs.ksoup)
         implementation(libs.sentry)
         implementation(libs.windowSizeClass)
-        implementation(project(":strings"))
+        implementation(project(":resources"))
       }
     }
     val commonTest by getting {
