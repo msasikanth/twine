@@ -15,12 +15,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -54,7 +54,7 @@ internal fun BookmarksScreen(
     modifier = modifier,
     topBar = {
       Box {
-        TopAppBar(
+        CenterAlignedTopAppBar(
           title = { Text(LocalStrings.current.bookmarks) },
           navigationIcon = {
             IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
