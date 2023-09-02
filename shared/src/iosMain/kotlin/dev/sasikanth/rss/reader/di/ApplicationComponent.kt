@@ -17,16 +17,11 @@ package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.utils.IOSStringReader
-import dev.sasikanth.rss.reader.utils.StringReader
 import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
 
 @AppScope
 @Component
 abstract class ApplicationComponent : SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
-
-  @AppScope @Provides fun providesStringReader(bind: IOSStringReader): StringReader = bind
 }

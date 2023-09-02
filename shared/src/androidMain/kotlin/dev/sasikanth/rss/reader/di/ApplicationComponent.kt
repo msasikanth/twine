@@ -18,8 +18,6 @@ package dev.sasikanth.rss.reader.di
 import android.content.Context
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.utils.AndroidStringReader
-import dev.sasikanth.rss.reader.utils.StringReader
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -31,6 +29,4 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   abstract val rssRepository: RssRepository
 
   companion object
-
-  @AppScope @Provides fun providesStringReader(bind: AndroidStringReader): StringReader = bind
 }
