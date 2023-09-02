@@ -106,8 +106,17 @@ class RssRepository(
   fun bookmarks(): Flow<List<PostWithMetadata>> {
     return bookmarkQueries
       .bookmarks(
-        mapper = { title, description, imageUrl, date, link, _, feedName, feedIcon, _ ->
-          mapToPostWithMetadata(title, description, imageUrl, date, link, feedName, feedIcon)
+        mapper = { title, description, imageUrl, date, link, bookmarked, feedName, feedIcon, _ ->
+          mapToPostWithMetadata(
+            title,
+            description,
+            imageUrl,
+            date,
+            link,
+            bookmarked,
+            feedName,
+            feedIcon
+          )
         }
       )
       .asFlow()
@@ -120,6 +129,7 @@ class RssRepository(
     imageUrl: String?,
     date: Instant,
     link: String,
+    bookmarked: Boolean,
     feedName: String,
     feedIcon: String
   ): PostWithMetadata {
@@ -129,6 +139,7 @@ class RssRepository(
       imageUrl = imageUrl,
       date = date,
       link = link,
+      bookmarked = bookmarked,
       feedName = feedName,
       feedIcon = feedIcon
     )

@@ -30,6 +30,7 @@ SELECT
   post.imageUrl,
   post.date,
   post.link,
+  post.bookmarked,
   feed.name AS feedName,
   feed.icon AS feedIcon
 FROM post_search
