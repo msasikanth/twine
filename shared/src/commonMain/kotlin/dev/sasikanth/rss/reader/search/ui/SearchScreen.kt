@@ -124,7 +124,13 @@ internal fun SearchScreen(
           modifier = Modifier.padding(top = it.calculateTopPadding())
         ) {
           itemsIndexed(state.searchResults) { index, post ->
-            PostListItem(post) { openLink(post.link) }
+            PostListItem(
+              item = post,
+              onClick = { openLink(post.link) },
+              onPostBookmarkClick = {
+                searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
+              }
+            )
             if (index != state.searchResults.lastIndex) {
               Divider(
                 modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),

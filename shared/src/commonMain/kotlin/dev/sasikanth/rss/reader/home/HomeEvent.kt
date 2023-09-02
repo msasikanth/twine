@@ -44,4 +44,8 @@ sealed interface HomeEvent {
   object BackClicked : HomeEvent
 
   object SearchClicked : HomeEvent
+
+  data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
+
+  object BookmarksClicked : HomeEvent
 }

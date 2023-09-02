@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.di
 
 import app.cash.sqldelight.db.SqlDriver
+import dev.sasikanth.rss.reader.database.Bookmark
 import dev.sasikanth.rss.reader.database.DateAdapter
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.Post
@@ -33,7 +34,8 @@ interface DataComponent : SqlDriverPlatformComponent {
     return ReaderDatabase(
       driver = driver,
       postAdapter = Post.Adapter(dateAdapter = DateAdapter),
-      feedAdapter = Feed.Adapter(createdAtAdapter = DateAdapter)
+      feedAdapter = Feed.Adapter(createdAtAdapter = DateAdapter),
+      bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter)
     )
   }
 
@@ -43,4 +45,6 @@ interface DataComponent : SqlDriverPlatformComponent {
 
   @Provides
   fun providesPostSearchFTSQueries(database: ReaderDatabase) = database.postSearchFTSQueries
+
+  @Provides fun providesBookmarkQueries(database: ReaderDatabase) = database.bookmarkQueries
 }

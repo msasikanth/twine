@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlin.time.Duration.Companion.milliseconds
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -135,6 +137,13 @@ class SearchPresenter(
         SearchEvent.ClearSearchQuery -> {
           searchQuery = TextFieldValue()
         }
+        is SearchEvent.OnPostBookmarkClick -> onPostBookmarkClick(event.post)
+      }
+    }
+
+    private fun onPostBookmarkClick(post: PostWithMetadata) {
+      coroutineScope.launch {
+        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
       }
     }
 

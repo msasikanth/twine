@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
@@ -40,6 +41,7 @@ class RssRepository(
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
+  private val bookmarkQueries: BookmarkQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -78,6 +80,10 @@ class RssRepository(
     return postQueries.postWithMetadata(selectedFeedLink).asFlow().mapToList(ioDispatcher)
   }
 
+  suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {
+    withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked, link) }
+  }
+
   fun allFeeds(): Flow<List<Feed>> {
     return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
   }
@@ -97,12 +103,33 @@ class RssRepository(
       .mapToList(ioDispatcher)
   }
 
+  fun bookmarks(): Flow<List<PostWithMetadata>> {
+    return bookmarkQueries
+      .bookmarks(
+        mapper = { title, description, imageUrl, date, link, bookmarked, feedName, feedIcon, _ ->
+          mapToPostWithMetadata(
+            title,
+            description,
+            imageUrl,
+            date,
+            link,
+            bookmarked,
+            feedName,
+            feedIcon
+          )
+        }
+      )
+      .asFlow()
+      .mapToList(ioDispatcher)
+  }
+
   private fun mapToPostWithMetadata(
     title: String,
     description: String,
     imageUrl: String?,
     date: Instant,
     link: String,
+    bookmarked: Boolean,
     feedName: String,
     feedIcon: String
   ): PostWithMetadata {
@@ -112,6 +139,7 @@ class RssRepository(
       imageUrl = imageUrl,
       date = date,
       link = link,
+      bookmarked = bookmarked,
       feedName = feedName,
       feedIcon = feedIcon
     )

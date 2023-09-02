@@ -16,58 +16,34 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
-import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.ListItemRippleTheme
-import dev.sasikanth.rss.reader.utils.pressInteraction
 import dev.sasikanth.rss.reader.utils.relativeDurationString
-import dev.sasikanth.rss.reader.utils.toDp
 import kotlinx.collections.immutable.ImmutableList
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -79,7 +55,9 @@ internal fun PostsList(
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   listState: LazyListState = rememberLazyListState(),
   onPostClicked: (post: PostWithMetadata) -> Unit,
-  onSearchClicked: () -> Unit
+  onPostBookmarkClick: (PostWithMetadata) -> Unit,
+  onSearchClicked: () -> Unit,
+  onBookmarksClicked: () -> Unit
 ) {
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
@@ -94,13 +72,19 @@ internal fun PostsList(
         pagerState = featuredPostsPagerState,
         featuredPosts = featuredPosts,
         onItemClick = onPostClicked,
+        onPostBookmarkClick = onPostBookmarkClick,
         onFeaturedItemChange = onFeaturedItemChange,
-        onSearchClicked = onSearchClicked
+        onSearchClicked = onSearchClicked,
+        onBookmarksClicked = onBookmarksClicked
       )
     }
 
     itemsIndexed(posts) { i, post ->
-      PostListItem(post) { onPostClicked(post) }
+      PostListItem(
+        item = post,
+        onClick = { onPostClicked(post) },
+        onPostBookmarkClick = { onPostBookmarkClick(post) }
+      )
       if (i != posts.size - 1) {
         Divider(
           modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
@@ -112,111 +96,39 @@ internal fun PostsList(
 }
 
 @Composable
-fun PostListItem(item: PostWithMetadata, onClick: () -> Unit) {
-  val hapticFeedback = LocalHapticFeedback.current
-  val coroutineScope = rememberCoroutineScope()
-  val interactionSource = remember { MutableInteractionSource() }
-  var dropdownMenuExpanded by remember(item) { mutableStateOf(false) }
-  var dropdownOffset by remember(item) { mutableStateOf(Offset.Zero) }
+fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClick: () -> Unit) {
+  Column(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp),
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        modifier = Modifier.weight(1f),
+        style = MaterialTheme.typography.titleSmall,
+        text = item.title,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        maxLines = 2
+      )
 
-  CompositionLocalProvider(LocalRippleTheme provides ListItemRippleTheme) {
-    Box {
-      Row(
-        modifier =
-          Modifier.indication(interactionSource, LocalIndication.current)
-            .pointerInput(item) {
-              detectTapGestures(
-                onTap = {
-                  pressInteraction(
-                    coroutineScope = coroutineScope,
-                    interactionSource = interactionSource,
-                    offset = it,
-                    block = onClick
-                  )
-                },
-                onLongPress = {
-                  pressInteraction(
-                    coroutineScope = coroutineScope,
-                    interactionSource = interactionSource,
-                    offset = it,
-                  ) {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    dropdownOffset = it
-                    dropdownMenuExpanded = true
-                  }
-                }
-              )
-            }
-            .padding(24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            style = MaterialTheme.typography.titleSmall,
-            text = item.title,
-            color = AppTheme.colorScheme.textEmphasisHigh,
-            maxLines = 2
-          )
-          PostMetadata(post = item)
-        }
-
-        item.imageUrl?.let { url ->
-          AsyncImage(
-            url = url,
-            modifier =
-              Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop
-          )
-        }
-      }
-
-      Box {
-        DropdownMenu(
-          expanded = dropdownMenuExpanded,
-          onDismissRequest = { dropdownMenuExpanded = false },
-          offset = DpOffset(dropdownOffset.x.toDp(), dropdownOffset.y.toDp())
-        ) {
-          DropdownMenuShareItem(
-            contentToShare = item.link,
-            onShareMenuOpened = { dropdownMenuExpanded = false }
-          )
-        }
+      item.imageUrl?.let { url ->
+        AsyncImage(
+          url = url,
+          modifier =
+            Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
+          contentDescription = null,
+          contentScale = ContentScale.Crop
+        )
       }
     }
-  }
-}
 
-@Composable
-private fun PostMetadata(post: PostWithMetadata) {
-  val feedName = post.feedName
-  val postPublishedAt = post.date.relativeDurationString()
-
-  Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-    Text(
-      modifier = Modifier.requiredWidthIn(max = 72.dp),
-      style = MaterialTheme.typography.bodySmall,
-      maxLines = 1,
-      text = feedName,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      overflow = TextOverflow.Ellipsis
-    )
-
-    Text(
-      style = MaterialTheme.typography.bodySmall,
-      maxLines = 1,
-      text = "•",
-      color = AppTheme.colorScheme.textEmphasisHigh
-    )
-
-    Text(
-      modifier = Modifier.weight(1f),
-      style = MaterialTheme.typography.bodySmall,
-      maxLines = 1,
-      text = postPublishedAt,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      textAlign = TextAlign.Left
+    PostMetadata(
+      modifier = Modifier.padding(start = 24.dp, end = 12.dp),
+      feedName = item.feedName,
+      postPublishedAt = item.date.relativeDurationString(),
+      postLink = item.link,
+      postBookmarked = item.bookmarked,
+      onBookmarkClick = onPostBookmarkClick
     )
   }
 }
