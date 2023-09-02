@@ -28,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
@@ -82,6 +83,9 @@ fun App(
               )
             is Screen.Search -> {
               SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+            }
+            is Screen.Bookmarks -> {
+              BookmarksScreen(bookmarksPresenter = screen.presenter, openLink = openLink)
             }
           }
         }
