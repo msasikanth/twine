@@ -136,6 +136,13 @@ class HomePresenter(
         HomeEvent.SearchClicked -> {
           /* no-op */
         }
+        is HomeEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
+      }
+    }
+
+    private fun onPostBookmarkClicked(post: PostWithMetadata) {
+      coroutineScope.launch {
+        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
       }
     }
 

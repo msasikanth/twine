@@ -155,9 +155,7 @@ fun HomeScreen(
           isRefreshing = state.isRefreshing,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
-          onPostBookmarkClick = {
-            // TODO: Handle bookmark clicks
-          },
+          onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
           onFeaturedItemChange = onFeaturedItemChange,
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) }
