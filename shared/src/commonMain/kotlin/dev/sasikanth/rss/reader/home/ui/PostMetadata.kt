@@ -105,6 +105,12 @@ private fun PostOptionsButtonRow(
         } else {
           IconResources.bookmark
         },
+      iconTint =
+        if (postBookmarked) {
+          AppTheme.colorScheme.tintedForeground
+        } else {
+          Color.White
+        },
       contentDescription = LocalStrings.current.bookmark,
       onClick = onBookmarkClick
     )
@@ -118,6 +124,7 @@ internal fun PostOptionIconButton(
   iconRes: String,
   contentDescription: String,
   modifier: Modifier = Modifier,
+  iconTint: Color = Color.White,
   onClick: () -> Unit,
 ) {
   Box(
@@ -131,7 +138,7 @@ internal fun PostOptionIconButton(
     Icon(
       painter = painterResource(iconRes),
       contentDescription = contentDescription,
-      tint = Color.White,
+      tint = iconTint,
       modifier = Modifier.size(20.dp)
     )
   }
