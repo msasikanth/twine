@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 rootProject.name = "twine"
-
-include(":androidApp")
-
-include(":shared")
 
 pluginManagement {
   repositories {
@@ -35,3 +33,9 @@ dependencyResolutionManagement {
     maven("https://jitpack.io")
   }
 }
+
+include(":androidApp")
+
+include(":shared")
+
+include(":strings")

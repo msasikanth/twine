@@ -8,7 +8,6 @@ android_sdk_target = "34"
 android_sdk_min = "31"
 
 sqldelight = "2.0.0"
-moko_resources = "0.23.0"
 ktor = "2.3.4"
 napier = "2.6.1"
 kotlinx_coroutines = "1.7.3"
@@ -36,10 +35,13 @@ buildKonfig = "0.13.3"
 sqliteAndroid = "3.43.0"
 windowSizeClass = "0.2.0"
 desugarJdk = "2.0.3"
+lyricist = "1.4.2"
+atomicfu = "0.17.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
@@ -52,6 +54,7 @@ kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core",
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
 kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
+kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
@@ -67,8 +70,6 @@ androidx_test_runner = { module = "androidx.test:runner", version.ref = "android
 androidx_test_rules = { module = "androidx.test:rules", version.ref = "androidx_test_rules" }
 androidx_work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx_work" }
 coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-moko_resources = { module = "dev.icerock.moko:resources", version.ref = "moko_resources" }
-moko_resources_compose = { module = "dev.icerock.moko:resources-compose", version.ref = "moko_resources" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
@@ -77,6 +78,8 @@ sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sent
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
+lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
+lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
@@ -87,7 +90,6 @@ kotlin_cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref =
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
-moko_resources = { id = "dev.icerock.mobile.multiplatform-resources", version.ref = "moko_resources" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
@@ -96,5 +98,4 @@ sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_androi
 [bundles]
 compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
-moko_resources = [ "moko_resources", "moko_resources_compose" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]

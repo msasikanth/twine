@@ -23,18 +23,16 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import dev.icerock.moko.resources.compose.fontFamilyResource
-import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.resources.GolosFontFamily
 
 @Composable
 fun AppTheme(
   appColorScheme: AppColorScheme = AppTheme.colorScheme,
   content: @Composable () -> Unit
 ) {
-  val fontFamily = fontFamilyResource(CommonRes.fonts.golos.medium)
   MaterialTheme(
     colorScheme = darkColorScheme(),
-    typography = typography(fontFamily),
+    typography = typography(GolosFontFamily),
   ) {
     CompositionLocalProvider(
       LocalAppColorScheme provides appColorScheme,

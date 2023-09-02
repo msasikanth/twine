@@ -49,8 +49,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,16 +121,13 @@ internal fun FeedLinkInputField(
               disabledContentColor = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
             )
         ) {
-          Text(
-            text = stringResource(CommonRes.strings.button_add),
-            style = MaterialTheme.typography.labelLarge
-          )
+          Text(text = LocalStrings.current.buttonAdd, style = MaterialTheme.typography.labelLarge)
         }
       }
     },
     placeholder = {
       Text(
-        text = stringResource(CommonRes.strings.feed_entry_hint),
+        text = LocalStrings.current.feedEntryHint,
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
       )

@@ -50,12 +50,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlinx.collections.immutable.ImmutableList
@@ -176,7 +175,7 @@ private fun FeedsSheetBottomBar(showingFeedLinkEntry: Boolean, closeSheet: () ->
           onClick = closeSheet
         ) {
           Text(
-            text = stringResource(CommonRes.strings.button_go_back),
+            text = LocalStrings.current.buttonGoBack,
             style = MaterialTheme.typography.labelLarge,
             color = AppTheme.colorScheme.tintedForeground
           )

@@ -39,15 +39,14 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.ImageResource
-import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
+import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 import kotlin.math.roundToInt
+import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -69,8 +68,8 @@ internal fun BottomSheetPrimaryActionButton(
     val (icon, label) =
       when {
         bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
-          Pair(CommonRes.images.ic_all, null)
-        else -> Pair(CommonRes.images.ic_add, stringResource(CommonRes.strings.button_add_feed))
+          Pair(IconResources.all, null)
+        else -> Pair(IconResources.add, LocalStrings.current.buttonAddFeed)
       }
 
     FloatingActionButton(
@@ -82,7 +81,7 @@ internal fun BottomSheetPrimaryActionButton(
     )
 
     Text(
-      text = stringResource(CommonRes.strings.button_all),
+      text = LocalStrings.current.buttonAll,
       style = MaterialTheme.typography.bottomSheetItemLabel,
       textAlign = TextAlign.Center,
       color = AppTheme.colorScheme.textEmphasisHigh,
@@ -97,7 +96,7 @@ internal fun BottomSheetPrimaryActionButton(
 @Composable
 private fun FloatingActionButton(
   modifier: Modifier = Modifier,
-  icon: ImageResource,
+  icon: String,
   animationProgress: Float,
   label: String? = null,
   selected: Boolean = false,

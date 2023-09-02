@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.resources
 
-import dev.icerock.moko.resources.StringResource
-import dev.icerock.moko.resources.desc.Resource
-import dev.icerock.moko.resources.desc.StringDesc
-import me.tatarka.inject.annotations.Inject
-
-@Inject
-class IOSStringReader : StringReader {
-
-  override fun string(stringResource: StringResource): String {
-    return StringDesc.Resource(stringResource).localized()
-  }
+internal object IconResources {
+  const val add = "drawable/ic_add.xml"
+  const val all = "drawable/ic_all.xml"
+  const val delete = "drawable/ic_delete.xml"
+  const val rss = "drawable/ic_rss.xml"
+  const val sort = "drawable/ic_sort.xml"
 }

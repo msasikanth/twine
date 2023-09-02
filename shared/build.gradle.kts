@@ -15,7 +15,6 @@
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
-import dev.icerock.gradle.MRVisibility.Internal
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -24,7 +23,6 @@ plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.compose)
   alias(libs.plugins.sqldelight)
-  alias(libs.plugins.moko.resources)
   alias(libs.plugins.ksp)
   alias(libs.plugins.buildKonfig)
   alias(libs.plugins.kotlin.parcelize)
@@ -35,13 +33,6 @@ buildkonfig {
   defaultConfigs {
     buildConfigField(STRING, "SENTRY_DSN", project.properties["sentry.dsn"] as? String)
   }
-}
-
-multiplatformResources {
-  multiplatformResourcesPackage = "dev.sasikanth.rss.reader"
-  multiplatformResourcesClassName = "CommonRes"
-  multiplatformResourcesVisibility = Internal
-  disableStaticFrameworkWarning = true
 }
 
 kotlin {
@@ -78,7 +69,6 @@ kotlin {
       export(libs.decompose)
       export(libs.essenty.lifecycle)
     }
-    extraSpecAttributes["resources"] = "['src/commonMain/resources/**', 'src/iosMain/resources/**']"
   }
 
   sourceSets {
@@ -86,10 +76,13 @@ kotlin {
       languageSettings.optIn("androidx.compose.material.ExperimentalMaterialApi")
       languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
       languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+      languageSettings.optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
     }
 
     val commonMain by getting {
       dependencies {
+        implementation(projects.strings)
+
         implementation(libs.bundles.compose)
         implementation(libs.bundles.kotlinx)
         implementation(libs.ktor.core)
@@ -98,7 +91,6 @@ kotlin {
         api(libs.decompose)
         implementation(libs.decompose.extensions.compose)
         api(libs.essenty.lifecycle)
-        api(libs.bundles.moko.resources)
         implementation(libs.kotlininject.runtime)
         implementation(libs.androidx.collection)
         implementation(libs.material.color.utilities)
@@ -163,7 +155,7 @@ android {
   namespace = "dev.sasikanth.rss.reader.common"
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-  sourceSets["main"].res.srcDirs("src/androidMain/res")
+  sourceSets["main"].res.srcDirs("src/androidMain/res", "src/commonMain/resources")
   sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
   defaultConfig {
@@ -194,12 +186,4 @@ dependencies {
   add("kspIosX64", libs.kotlininject.compiler)
   add("kspIosArm64", libs.kotlininject.compiler)
   add("kspIosSimulatorArm64", libs.kotlininject.compiler)
-}
-
-afterEvaluate {
-  tasks.named("generateMRcommonMain").configure {
-    mustRunAfter(":shared:kspKotlinIosX64")
-    mustRunAfter(":shared:kspKotlinIosArm64")
-    mustRunAfter(":shared:kspKotlinIosSimulatorArm64")
-  }
 }

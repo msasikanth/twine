@@ -33,11 +33,10 @@ import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.LocalStringReader
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import dev.sasikanth.rss.reader.utils.StringReader
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -49,12 +48,10 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
-  stringReader: StringReader,
   @Assisted openLink: (String) -> Unit
 ) {
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
-    LocalStringReader provides stringReader,
     LocalWindowSizeClass provides calculateWindowSizeClass()
   ) {
     var imageUrl by rememberSaveable { mutableStateOf<String?>(null) }
@@ -69,21 +66,23 @@ fun App(
     }
 
     DynamicContentTheme(dynamicColorState) {
-      Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = AppTheme.colorScheme.surfaceContainerLowest
-      ) {
-        val screenStack by appPresenter.screenStack.subscribeAsState()
+      ProvideStrings {
+        Surface(
+          modifier = Modifier.fillMaxSize(),
+          color = AppTheme.colorScheme.surfaceContainerLowest
+        ) {
+          val screenStack by appPresenter.screenStack.subscribeAsState()
 
-        when (val screen = screenStack.active.instance) {
-          is Screen.Home ->
-            HomeScreen(
-              homePresenter = screen.presenter,
-              onFeaturedItemChange = { imageUrl = it },
-              openLink = openLink
-            )
-          is Screen.Search -> {
-            SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+          when (val screen = screenStack.active.instance) {
+            is Screen.Home ->
+              HomeScreen(
+                homePresenter = screen.presenter,
+                onFeaturedItemChange = { imageUrl = it },
+                openLink = openLink
+              )
+            is Screen.Search -> {
+              SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+            }
           }
         }
       }

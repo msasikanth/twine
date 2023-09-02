@@ -73,11 +73,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import dev.icerock.moko.resources.compose.painterResource
-import dev.icerock.moko.resources.compose.stringResource
-import dev.sasikanth.rss.reader.CommonRes
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.search.SearchSortOrder
@@ -85,6 +84,7 @@ import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun SearchScreen(
@@ -196,7 +196,7 @@ private fun SearchBar(
           onValueChange = onQueryChange,
           placeholder = {
             Text(
-              stringResource(CommonRes.strings.search_hint),
+              text = LocalStrings.current.searchHint,
               color = AppTheme.colorScheme.textEmphasisHigh,
               style = MaterialTheme.typography.bodyLarge
             )
@@ -265,15 +265,15 @@ private fun SearchSortButton(
       Text(
         text =
           when (sortOrder) {
-            Newest -> stringResource(CommonRes.strings.search_sort_newest)
-            Oldest -> stringResource(CommonRes.strings.search_sort_oldest)
+            Newest -> LocalStrings.current.searchSortNewest
+            Oldest -> LocalStrings.current.searchSortOldest
           },
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.onSurface
       )
       Spacer(Modifier.requiredWidth(8.dp))
       Icon(
-        painterResource(CommonRes.images.ic_sort),
+        painterResource(IconResources.sort),
         contentDescription = null,
         tint = AppTheme.colorScheme.onSurface
       )
@@ -307,14 +307,14 @@ private fun SortDropdownMenu(
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(
-        text = stringResource(CommonRes.strings.search_sort_newest_first),
+        text = LocalStrings.current.searchSortNewestFirst,
         style = MaterialTheme.typography.bodyLarge,
         color = AppTheme.colorScheme.onSurface
       )
     }
     DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
       Text(
-        text = stringResource(CommonRes.strings.search_sort_oldest_first),
+        text = LocalStrings.current.searchSortOldestFirst,
         style = MaterialTheme.typography.bodyLarge,
         color = AppTheme.colorScheme.onSurface
       )
