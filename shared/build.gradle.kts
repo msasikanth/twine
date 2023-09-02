@@ -15,6 +15,7 @@
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -35,6 +36,7 @@ buildkonfig {
   }
 }
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
   targetHierarchy.default()
 

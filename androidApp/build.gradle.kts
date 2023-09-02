@@ -24,7 +24,7 @@ plugins {
 
 sentry { tracingInstrumentation { enabled = false } }
 
-kotlin { android() }
+kotlin { androidTarget() }
 
 android {
   compileSdk = libs.versions.android.sdk.compile.get().toInt()
@@ -37,17 +37,19 @@ android {
     minSdk = libs.versions.android.sdk.min.get().toInt()
     targetSdk = libs.versions.android.sdk.target.get().toInt()
 
-    if (project.properties["VERSION_CODE"] != null) {
-      versionCode = (project.properties["VERSION_CODE"] as String).toInt()
-    } else {
-      versionCode = 1
-    }
+    versionCode =
+      if (project.properties["VERSION_CODE"] != null) {
+        (project.properties["VERSION_CODE"] as String).toInt()
+      } else {
+        1
+      }
 
-    if (project.properties["VERSION_NAME"] != null) {
-      versionName = project.properties["VERSION_NAME"] as String
-    } else {
-      versionName = "1.0.0"
-    }
+    versionName =
+      if (project.properties["VERSION_NAME"] != null) {
+        project.properties["VERSION_NAME"] as String
+      } else {
+        "1.0.0"
+      }
   }
   compileOptions {
     sourceCompatibility = JavaVersion.VERSION_11
