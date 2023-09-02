@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -26,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -51,21 +53,28 @@ internal fun BookmarksScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      TopAppBar(
-        title = { Text(LocalStrings.current.bookmarks) },
-        navigationIcon = {
-          IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
-            Icon(Icons.Rounded.ArrowBack, contentDescription = null)
-          }
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = AppTheme.colorScheme.surface,
-            navigationIconContentColor = AppTheme.colorScheme.onSurface,
-            titleContentColor = AppTheme.colorScheme.onSurface,
-            actionIconContentColor = AppTheme.colorScheme.onSurface
-          )
-      )
+      Box {
+        TopAppBar(
+          title = { Text(LocalStrings.current.bookmarks) },
+          navigationIcon = {
+            IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
+              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+            }
+          },
+          colors =
+            TopAppBarDefaults.topAppBarColors(
+              containerColor = AppTheme.colorScheme.surface,
+              navigationIconContentColor = AppTheme.colorScheme.onSurface,
+              titleContentColor = AppTheme.colorScheme.onSurface,
+              actionIconContentColor = AppTheme.colorScheme.onSurface
+            ),
+        )
+
+        Divider(
+          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
+          color = AppTheme.colorScheme.surfaceContainer
+        )
+      }
     },
     content = {
       Box(modifier = Modifier.fillMaxSize()) {
