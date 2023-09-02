@@ -128,7 +128,7 @@ internal fun SearchScreen(
               item = post,
               onClick = { openLink(post.link) },
               onPostBookmarkClick = {
-                // TODO: Handle bookmark clicks
+                searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
               }
             )
             if (index != state.searchResults.lastIndex) {

@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.search
 
 import androidx.compose.ui.text.input.TextFieldValue
+import dev.sasikanth.rss.reader.database.PostWithMetadata
 
 internal sealed interface SearchEvent {
 
@@ -30,4 +31,6 @@ internal sealed interface SearchEvent {
   data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
 
   object ClearSearchQuery : SearchEvent
+
+  data class OnPostBookmarkClick(val post: PostWithMetadata) : SearchEvent
 }
