@@ -26,7 +26,9 @@ import me.tatarka.inject.annotations.Provides
 
 expect interface SqlDriverPlatformComponent
 
-interface DataComponent : SqlDriverPlatformComponent {
+expect interface DataStorePlatformComponent
+
+interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent {
 
   @Provides
   @AppScope
