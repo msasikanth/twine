@@ -42,6 +42,7 @@ data class TwineStrings(
   val bookmark: String,
   val bookmarks: String,
   val settings: String,
+  val moreMenuOptions: String
 )
 
 object Locales {

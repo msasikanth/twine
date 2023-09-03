@@ -46,4 +46,5 @@ val EnTwineStrings =
     bookmark = "Bookmark",
     bookmarks = "Bookmarks",
     settings = "Settings",
+    moreMenuOptions = "More menu options"
   )

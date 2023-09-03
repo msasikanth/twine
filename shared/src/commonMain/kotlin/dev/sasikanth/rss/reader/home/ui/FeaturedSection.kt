@@ -33,7 +33,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +88,8 @@ internal fun FeaturedSection(
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit
+  onBookmarksClicked: () -> Unit,
+  onSettingsClicked: () -> Unit
 ) {
   Box(modifier = modifier) {
     var selectedImage by remember { mutableStateOf<String?>(null) }
@@ -103,7 +108,11 @@ internal fun FeaturedSection(
     }
 
     Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
-      AppBar(onSearchClicked, onBookmarksClicked)
+      AppBar(
+        onSearchClicked = onSearchClicked,
+        onBookmarksClicked = onBookmarksClicked,
+        onSettingsClicked = onSettingsClicked
+      )
 
       if (featuredPosts.isNotEmpty()) {
         HorizontalPager(
@@ -125,7 +134,11 @@ internal fun FeaturedSection(
 }
 
 @Composable
-private fun AppBar(onSearchClicked: () -> Unit, onBookmarksClicked: () -> Unit) {
+private fun AppBar(
+  onSearchClicked: () -> Unit,
+  onBookmarksClicked: () -> Unit,
+  onSettingsClicked: () -> Unit
+) {
   Row(
     modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 16.dp),
     verticalAlignment = Alignment.CenterVertically
@@ -149,6 +162,16 @@ private fun AppBar(onSearchClicked: () -> Unit, onBookmarksClicked: () -> Unit) 
     Spacer(Modifier.weight(1f))
 
     IconButton(
+      onClick = onSearchClicked,
+    ) {
+      Icon(
+        Icons.Rounded.Search,
+        contentDescription = LocalStrings.current.searchHint,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
+    }
+
+    IconButton(
       onClick = onBookmarksClicked,
     ) {
       Icon(
@@ -158,14 +181,47 @@ private fun AppBar(onSearchClicked: () -> Unit, onBookmarksClicked: () -> Unit) 
       )
     }
 
+    OverflowMenu(onSettingsClicked)
+  }
+}
+
+@Composable
+private fun OverflowMenu(onSettingsClicked: () -> Unit) {
+  Box {
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
     IconButton(
-      onClick = onSearchClicked,
+      onClick = { dropdownExpanded = true },
     ) {
       Icon(
-        Icons.Rounded.Search,
-        contentDescription = LocalStrings.current.searchHint,
+        imageVector = Icons.Rounded.MoreVert,
+        contentDescription = LocalStrings.current.moreMenuOptions,
         tint = AppTheme.colorScheme.tintedForeground
       )
+    }
+
+    if (dropdownExpanded) {
+      DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
+        DropdownMenuItem(
+          text = {
+            Text(
+              text = LocalStrings.current.settings,
+              color = AppTheme.colorScheme.textEmphasisHigh
+            )
+          },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Rounded.Settings,
+              contentDescription = LocalStrings.current.settings,
+              tint = AppTheme.colorScheme.textEmphasisHigh
+            )
+          },
+          onClick = {
+            dropdownExpanded = false
+            onSettingsClicked()
+          }
+        )
+      }
     }
   }
 }

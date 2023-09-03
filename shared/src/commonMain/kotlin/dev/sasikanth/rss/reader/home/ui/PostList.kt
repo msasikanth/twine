@@ -57,7 +57,8 @@ internal fun PostsList(
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit
+  onBookmarksClicked: () -> Unit,
+  onSettingsClicked: () -> Unit
 ) {
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
@@ -75,7 +76,8 @@ internal fun PostsList(
         onPostBookmarkClick = onPostBookmarkClick,
         onFeaturedItemChange = onFeaturedItemChange,
         onSearchClicked = onSearchClicked,
-        onBookmarksClicked = onBookmarksClicked
+        onBookmarksClicked = onBookmarksClicked,
+        onSettingsClicked = onSettingsClicked
       )
     }
 

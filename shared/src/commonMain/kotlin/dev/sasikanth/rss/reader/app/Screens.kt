@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.app
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.settings.SettingsPresenter
 
 internal sealed interface Screen {
   class Home(val presenter: HomePresenter) : Screen
@@ -25,4 +26,6 @@ internal sealed interface Screen {
   class Search(val presenter: SearchPresenter) : Screen
 
   class Bookmarks(val presenter: BookmarksPresenter) : Screen
+
+  class Settings(val presenter: SettingsPresenter) : Screen
 }

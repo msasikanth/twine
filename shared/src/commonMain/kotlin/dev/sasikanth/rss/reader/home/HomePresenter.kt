@@ -64,6 +64,7 @@ class HomePresenter(
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
+  @Assisted private val openSettings: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -97,6 +98,7 @@ class HomePresenter(
       }
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
+      is HomeEvent.SettingsClicked -> openSettings()
       else -> {
         // no-op
       }
@@ -140,6 +142,9 @@ class HomePresenter(
         }
         is HomeEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
         HomeEvent.BookmarksClicked -> {
+          /* no-op */
+        }
+        HomeEvent.SettingsClicked -> {
           /* no-op */
         }
       }

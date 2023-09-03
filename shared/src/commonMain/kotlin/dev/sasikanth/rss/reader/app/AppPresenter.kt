@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -44,24 +45,39 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import me.tatarka.inject.annotations.Inject
 
+private typealias HomePresenterFactory =
+  (
+    ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit, openSettings: () -> Unit
+  ) -> HomePresenter
+
+private typealias SearchPresentFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> SearchPresenter
+
+private typealias BookmarkPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> BookmarksPresenter
+
+private typealias SettingsPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> SettingsPresenter
+
 @Inject
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
   dispatchersProvider: DispatchersProvider,
   settingsRepository: SettingsRepository,
-  private val homePresenter:
-    (ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit) -> HomePresenter,
-  private val searchPresenter:
-    (
-      ComponentContext,
-      goBack: () -> Unit,
-    ) -> SearchPresenter,
-  private val bookmarksPresenter:
-    (
-      ComponentContext,
-      goBack: () -> Unit,
-    ) -> BookmarksPresenter
+  private val homePresenter: HomePresenterFactory,
+  private val searchPresenter: SearchPresentFactory,
+  private val bookmarksPresenter: BookmarkPresenterFactory,
+  private val settingsPresenter: SettingsPresenterFactory
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -91,7 +107,8 @@ class AppPresenter(
             homePresenter(
               componentContext,
               { navigation.push(Config.Search) },
-              { navigation.push(Config.Bookmarks) }
+              { navigation.push(Config.Bookmarks) },
+              { navigation.push(Config.Settings) }
             )
         )
       }
@@ -100,6 +117,9 @@ class AppPresenter(
       }
       Config.Bookmarks -> {
         Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
+      }
+      Config.Settings -> {
+        Screen.Settings(presenter = settingsPresenter(componentContext) { navigation.pop() })
       }
     }
 
@@ -135,5 +155,7 @@ class AppPresenter(
     @Parcelize object Search : Config
 
     @Parcelize object Bookmarks : Config
+
+    @Parcelize object Settings : Config
   }
 }

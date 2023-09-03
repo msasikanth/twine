@@ -38,6 +38,7 @@ import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
+import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
@@ -95,6 +96,9 @@ fun App(
                 bookmarksPresenter = screen.presenter,
                 openLink = { openLink(it, state.browserType) }
               )
+            }
+            is Screen.Settings -> {
+              SettingsScreen(settingsPresenter = screen.presenter)
             }
           }
         }
