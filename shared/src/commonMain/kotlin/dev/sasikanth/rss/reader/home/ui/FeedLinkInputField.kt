@@ -72,8 +72,8 @@ internal fun FeedLinkInputField(
     if (!isInputBlank) {
       onAddFeed.invoke(input)
       input = ""
-      focusManager.clearFocus()
     }
+    focusManager.clearFocus()
   }
 
   TextField(
