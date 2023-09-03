@@ -68,7 +68,7 @@ internal fun PostsList(
 
   LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 240.dp)) {
     item {
-      FeaturedPostItems(
+      FeaturedSection(
         pagerState = featuredPostsPagerState,
         featuredPosts = featuredPosts,
         onItemClick = onPostClicked,

@@ -17,8 +17,6 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -28,17 +26,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
@@ -57,13 +50,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
@@ -71,19 +61,9 @@ import dev.sasikanth.rss.reader.resources.IconResources
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import dev.sasikanth.rss.reader.utils.relativeDurationString
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
-
-private val featuredImageAspectRatio: Float
-  @Composable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Compact -> 1.77f
-      WindowWidthSizeClass.Medium -> 2.5f
-      else -> 1.77f
-    }
 
 private val featuredImageBackgroundAspectRatio: Float
   @Composable
@@ -96,7 +76,7 @@ private val featuredImageBackgroundAspectRatio: Float
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun FeaturedPostItems(
+internal fun FeaturedSection(
   pagerState: PagerState,
   featuredPosts: ImmutableList<PostWithMetadata>,
   modifier: Modifier = Modifier,
@@ -119,7 +99,7 @@ internal fun FeaturedPostItems(
     }
 
     if (featuredPosts.isNotEmpty()) {
-      selectedImage?.let { FeaturedPostItemBackground(imageUrl = it) }
+      selectedImage?.let { FeaturedSectionBlurredBackground(imageUrl = it) }
     }
 
     Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
@@ -191,67 +171,7 @@ private fun AppBar(onSearchClicked: () -> Unit, onBookmarksClicked: () -> Unit) 
 }
 
 @Composable
-private fun FeaturedPostItem(
-  item: PostWithMetadata,
-  onClick: () -> Unit,
-  onBookmarkClick: () -> Unit
-) {
-  Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
-    Box {
-      AsyncImage(
-        url = item.imageUrl!!,
-        modifier =
-          Modifier.clip(MaterialTheme.shapes.extraLarge)
-            .aspectRatio(featuredImageAspectRatio)
-            .background(AppTheme.colorScheme.surfaceContainerLowest),
-        contentDescription = null,
-        contentScale = ContentScale.Crop
-      )
-
-      PostSourceChip(post = item, modifier = Modifier.align(Alignment.BottomStart))
-    }
-
-    Spacer(modifier = Modifier.requiredHeight(8.dp))
-
-    Text(
-      modifier = Modifier.padding(horizontal = 16.dp),
-      text = item.title,
-      style = MaterialTheme.typography.headlineSmall,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      minLines = 2,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis
-    )
-
-    if (item.description.isNotBlank()) {
-      Spacer(modifier = Modifier.requiredHeight(8.dp))
-
-      Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = item.description,
-        style = MaterialTheme.typography.bodySmall,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        minLines = 3,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-
-    PostMetadata(
-      modifier = Modifier.padding(start = 16.dp, end = 0.dp),
-      feedName = item.feedName,
-      postPublishedAt = item.date.relativeDurationString(),
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      onBookmarkClick = onBookmarkClick
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
-  }
-}
-
-@Composable
-internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl: String?) {
+private fun FeaturedSectionBlurredBackground(modifier: Modifier = Modifier, imageUrl: String?) {
   BoxWithConstraints(modifier = modifier) {
     AsyncImage(
       url = imageUrl!!,
@@ -288,48 +208,6 @@ internal fun FeaturedPostItemBackground(modifier: Modifier = Modifier, imageUrl:
                 colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
               )
           )
-    )
-  }
-}
-
-@Composable
-private fun PostSourceChip(post: PostWithMetadata, modifier: Modifier = Modifier) {
-  val feedName = post.feedName
-  val verticalPadding = 8.dp
-  val startPadding = 8.dp
-  val endPadding = 16.dp
-  val margin = 12.dp
-
-  Row(
-    modifier =
-      Modifier.padding(margin)
-        .background(color = Color.Black, shape = RoundedCornerShape(50))
-        .padding(
-          start = startPadding,
-          top = verticalPadding,
-          end = endPadding,
-          bottom = verticalPadding
-        )
-        .then(modifier),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Box(modifier = Modifier.clip(CircleShape).background(Color.White)) {
-      AsyncImage(
-        url = post.feedIcon,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.requiredSize(16.dp)
-      )
-    }
-
-    Text(
-      style = MaterialTheme.typography.labelMedium,
-      maxLines = 1,
-      text = feedName.uppercase().take(12),
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      textAlign = TextAlign.Left,
-      overflow = TextOverflow.Clip
     )
   }
 }
