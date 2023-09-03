@@ -22,18 +22,34 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.instancekeeper.InstanceKeeper
+import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
+  dispatchersProvider: DispatchersProvider,
+  settingsRepository: SettingsRepository,
   private val homePresenter:
     (ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit) -> HomePresenter,
   private val searchPresenter:
@@ -48,8 +64,17 @@ class AppPresenter(
     ) -> BookmarksPresenter
 ) : ComponentContext by componentContext {
 
+  private val presenterInstance =
+    instanceKeeper.getOrCreate {
+      PresenterInstance(
+        dispatchersProvider = dispatchersProvider,
+        settingsRepository = settingsRepository
+      )
+    }
+
   private val navigation = StackNavigation<Config>()
 
+  internal val state = presenterInstance.state
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
       source = navigation,
@@ -77,6 +102,32 @@ class AppPresenter(
         Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
       }
     }
+
+  private class PresenterInstance(
+    dispatchersProvider: DispatchersProvider,
+    private val settingsRepository: SettingsRepository
+  ) : InstanceKeeper.Instance {
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+
+    private val _state = MutableStateFlow(AppState.DEFAULT)
+    val state: StateFlow<AppState> =
+      _state.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AppState.DEFAULT
+      )
+
+    init {
+      settingsRepository.browserType
+        .onEach { browserType -> _state.update { it.copy(browserType = browserType) } }
+        .launchIn(coroutineScope)
+    }
+
+    override fun onDestroy() {
+      coroutineScope.cancel()
+    }
+  }
 
   sealed interface Config : Parcelable {
     @Parcelize object Home : Config

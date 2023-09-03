@@ -22,6 +22,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -74,24 +75,25 @@ fun App(
           color = AppTheme.colorScheme.surfaceContainerLowest
         ) {
           val screenStack by appPresenter.screenStack.subscribeAsState()
+          val state by appPresenter.state.collectAsState()
 
           when (val screen = screenStack.active.instance) {
             is Screen.Home ->
               HomeScreen(
                 homePresenter = screen.presenter,
                 onFeaturedItemChange = { imageUrl = it },
-                openLink = { openLink(it, BrowserType.Default) }
+                openLink = { openLink(it, state.browserType) }
               )
             is Screen.Search -> {
               SearchScreen(
                 searchPresenter = screen.presenter,
-                openLink = { openLink(it, BrowserType.Default) }
+                openLink = { openLink(it, state.browserType) }
               )
             }
             is Screen.Bookmarks -> {
               BookmarksScreen(
                 bookmarksPresenter = screen.presenter,
-                openLink = { openLink(it, BrowserType.Default) }
+                openLink = { openLink(it, state.browserType) }
               )
             }
           }
