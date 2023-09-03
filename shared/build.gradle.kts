@@ -84,6 +84,7 @@ kotlin {
     val commonMain by getting {
       dependencies {
         implementation(projects.strings)
+        implementation(projects.resources.icons)
 
         implementation(libs.bundles.compose)
         implementation(libs.bundles.kotlinx)

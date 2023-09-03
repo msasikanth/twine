@@ -17,7 +17,8 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.interop.LocalUIViewController
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.Share
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import platform.UIKit.UIActivityViewController
 
@@ -25,7 +26,7 @@ import platform.UIKit.UIActivityViewController
 internal actual fun PostOptionShareIconButton(postLink: String) {
   val viewController = LocalUIViewController.current
   PostOptionIconButton(
-    iconRes = IconResources.share,
+    icon = TwineIcons.Share,
     contentDescription = LocalStrings.current.share,
     onClick = {
       val items = listOf(postLink)

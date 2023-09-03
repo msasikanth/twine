@@ -61,13 +61,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.Bookmarks
+import dev.sasikanth.rss.reader.resources.icons.RSS
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
-import org.jetbrains.compose.resources.painterResource
 
 private val featuredImageBackgroundAspectRatio: Float
   @Composable
@@ -152,11 +153,7 @@ private fun AppBar(
 
       Spacer(Modifier.width(4.dp))
 
-      Icon(
-        painter = painterResource(IconResources.rss),
-        contentDescription = null,
-        tint = Color.White
-      )
+      Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = Color.White)
     }
 
     Spacer(Modifier.weight(1f))
@@ -165,7 +162,7 @@ private fun AppBar(
       onClick = onSearchClicked,
     ) {
       Icon(
-        Icons.Rounded.Search,
+        imageVector = Icons.Rounded.Search,
         contentDescription = LocalStrings.current.searchHint,
         tint = AppTheme.colorScheme.tintedForeground
       )
@@ -175,7 +172,7 @@ private fun AppBar(
       onClick = onBookmarksClicked,
     ) {
       Icon(
-        painter = painterResource(IconResources.bookmarks),
+        imageVector = TwineIcons.Bookmarks,
         contentDescription = LocalStrings.current.bookmarks,
         tint = AppTheme.colorScheme.tintedForeground
       )
