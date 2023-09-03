@@ -88,6 +88,7 @@ class HomePresenter(
     lifecycle.doOnCreate {
       presenterInstance.dispatch(HomeEvent.Init)
       backHandler.register(backCallback)
+      backCallback.isEnabled = state.value.feedsSheetState == BottomSheetValue.Expanded
     }
   }
 
