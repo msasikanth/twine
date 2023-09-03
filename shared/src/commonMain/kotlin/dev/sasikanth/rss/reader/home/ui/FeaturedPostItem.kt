@@ -17,28 +17,19 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
@@ -63,19 +54,15 @@ internal fun FeaturedPostItem(
   onBookmarkClick: () -> Unit
 ) {
   Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
-    Box {
-      AsyncImage(
-        url = item.imageUrl!!,
-        modifier =
-          Modifier.clip(MaterialTheme.shapes.extraLarge)
-            .aspectRatio(featuredImageAspectRatio)
-            .background(AppTheme.colorScheme.surfaceContainerLowest),
-        contentDescription = null,
-        contentScale = ContentScale.Crop
-      )
-
-      PostSourceChip(post = item, modifier = Modifier.align(Alignment.BottomStart))
-    }
+    AsyncImage(
+      url = item.imageUrl!!,
+      modifier =
+        Modifier.clip(MaterialTheme.shapes.extraLarge)
+          .aspectRatio(featuredImageAspectRatio)
+          .background(AppTheme.colorScheme.surfaceContainerLowest),
+      contentDescription = null,
+      contentScale = ContentScale.Crop
+    )
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
@@ -113,47 +100,5 @@ internal fun FeaturedPostItem(
     )
 
     Spacer(modifier = Modifier.height(8.dp))
-  }
-}
-
-@Composable
-private fun PostSourceChip(post: PostWithMetadata, modifier: Modifier = Modifier) {
-  val feedName = post.feedName
-  val verticalPadding = 8.dp
-  val startPadding = 8.dp
-  val endPadding = 16.dp
-  val margin = 12.dp
-
-  Row(
-    modifier =
-      Modifier.padding(margin)
-        .background(color = Color.Black, shape = RoundedCornerShape(50))
-        .padding(
-          start = startPadding,
-          top = verticalPadding,
-          end = endPadding,
-          bottom = verticalPadding
-        )
-        .then(modifier),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Box(modifier = Modifier.clip(CircleShape).background(Color.White)) {
-      AsyncImage(
-        url = post.feedIcon,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.requiredSize(16.dp)
-      )
-    }
-
-    Text(
-      style = MaterialTheme.typography.labelMedium,
-      maxLines = 1,
-      text = feedName.uppercase().take(12),
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      textAlign = TextAlign.Left,
-      overflow = TextOverflow.Clip
-    )
   }
 }
