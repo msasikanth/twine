@@ -44,5 +44,9 @@ val EnTwineStrings =
     searchSortOldest = "Oldest",
     searchSortOldestFirst = "Oldest first",
     bookmark = "Bookmark",
-    bookmarks = "Bookmarks"
+    bookmarks = "Bookmarks",
+    settings = "Settings",
+    moreMenuOptions = "More menu options",
+    settingsBrowserTypeTitle = "Use in-app browser",
+    settingsBrowserTypeSubtitle = "When turned off, links will open in your default browser"
   )

@@ -22,34 +22,75 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
+import com.arkivanov.essenty.instancekeeper.InstanceKeeper
+import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import me.tatarka.inject.annotations.Inject
+
+private typealias HomePresenterFactory =
+  (
+    ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit, openSettings: () -> Unit
+  ) -> HomePresenter
+
+private typealias SearchPresentFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> SearchPresenter
+
+private typealias BookmarkPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> BookmarksPresenter
+
+private typealias SettingsPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> SettingsPresenter
 
 @Inject
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
-  private val homePresenter:
-    (ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit) -> HomePresenter,
-  private val searchPresenter:
-    (
-      ComponentContext,
-      goBack: () -> Unit,
-    ) -> SearchPresenter,
-  private val bookmarksPresenter:
-    (
-      ComponentContext,
-      goBack: () -> Unit,
-    ) -> BookmarksPresenter
+  dispatchersProvider: DispatchersProvider,
+  settingsRepository: SettingsRepository,
+  private val homePresenter: HomePresenterFactory,
+  private val searchPresenter: SearchPresentFactory,
+  private val bookmarksPresenter: BookmarkPresenterFactory,
+  private val settingsPresenter: SettingsPresenterFactory
 ) : ComponentContext by componentContext {
+
+  private val presenterInstance =
+    instanceKeeper.getOrCreate {
+      PresenterInstance(
+        dispatchersProvider = dispatchersProvider,
+        settingsRepository = settingsRepository
+      )
+    }
 
   private val navigation = StackNavigation<Config>()
 
+  internal val state = presenterInstance.state
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
       source = navigation,
@@ -66,7 +107,8 @@ class AppPresenter(
             homePresenter(
               componentContext,
               { navigation.push(Config.Search) },
-              { navigation.push(Config.Bookmarks) }
+              { navigation.push(Config.Bookmarks) },
+              { navigation.push(Config.Settings) }
             )
         )
       }
@@ -76,7 +118,36 @@ class AppPresenter(
       Config.Bookmarks -> {
         Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
       }
+      Config.Settings -> {
+        Screen.Settings(presenter = settingsPresenter(componentContext) { navigation.pop() })
+      }
     }
+
+  private class PresenterInstance(
+    dispatchersProvider: DispatchersProvider,
+    private val settingsRepository: SettingsRepository
+  ) : InstanceKeeper.Instance {
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+
+    private val _state = MutableStateFlow(AppState.DEFAULT)
+    val state: StateFlow<AppState> =
+      _state.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AppState.DEFAULT
+      )
+
+    init {
+      settingsRepository.browserType
+        .onEach { browserType -> _state.update { it.copy(browserType = browserType) } }
+        .launchIn(coroutineScope)
+    }
+
+    override fun onDestroy() {
+      coroutineScope.cancel()
+    }
+  }
 
   sealed interface Config : Parcelable {
     @Parcelize object Home : Config
@@ -84,5 +155,7 @@ class AppPresenter(
     @Parcelize object Search : Config
 
     @Parcelize object Bookmarks : Config
+
+    @Parcelize object Settings : Config
   }
 }

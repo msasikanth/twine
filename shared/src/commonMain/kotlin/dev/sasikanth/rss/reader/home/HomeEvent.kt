@@ -48,4 +48,6 @@ sealed interface HomeEvent {
   data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
 
   object BookmarksClicked : HomeEvent
+
+  object SettingsClicked : HomeEvent
 }

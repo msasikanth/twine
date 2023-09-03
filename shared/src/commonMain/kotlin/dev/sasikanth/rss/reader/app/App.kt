@@ -22,6 +22,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,14 +35,16 @@ import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
+import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App = @Composable (openLink: (String) -> Unit) -> Unit
+typealias App = @Composable (openLink: (String, BrowserType) -> Unit) -> Unit
 
 @Inject
 @Composable
@@ -49,7 +52,7 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
-  @Assisted openLink: (String) -> Unit
+  @Assisted openLink: (String, BrowserType) -> Unit
 ) {
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
@@ -73,19 +76,29 @@ fun App(
           color = AppTheme.colorScheme.surfaceContainerLowest
         ) {
           val screenStack by appPresenter.screenStack.subscribeAsState()
+          val state by appPresenter.state.collectAsState()
 
           when (val screen = screenStack.active.instance) {
             is Screen.Home ->
               HomeScreen(
                 homePresenter = screen.presenter,
                 onFeaturedItemChange = { imageUrl = it },
-                openLink = openLink
+                openLink = { openLink(it, state.browserType) }
               )
             is Screen.Search -> {
-              SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+              SearchScreen(
+                searchPresenter = screen.presenter,
+                openLink = { openLink(it, state.browserType) }
+              )
             }
             is Screen.Bookmarks -> {
-              BookmarksScreen(bookmarksPresenter = screen.presenter, openLink = openLink)
+              BookmarksScreen(
+                bookmarksPresenter = screen.presenter,
+                openLink = { openLink(it, state.browserType) }
+              )
+            }
+            is Screen.Settings -> {
+              SettingsScreen(settingsPresenter = screen.presenter)
             }
           }
         }

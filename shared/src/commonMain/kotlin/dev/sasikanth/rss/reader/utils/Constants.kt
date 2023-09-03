@@ -13,19 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.utils
 
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
-
-internal sealed interface Screen {
-  class Home(val presenter: HomePresenter) : Screen
-
-  class Search(val presenter: SearchPresenter) : Screen
-
-  class Bookmarks(val presenter: BookmarksPresenter) : Screen
-
-  class Settings(val presenter: SettingsPresenter) : Screen
+internal object Constants {
+  const val dataStoreFileName = "twine.preferences_pb"
 }

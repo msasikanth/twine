@@ -23,12 +23,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.app.App
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.BrowserType.Default
+import dev.sasikanth.rss.reader.repository.BrowserType.InApp
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -45,10 +50,18 @@ class MainActivity : AppCompatActivity() {
     setContent { activityComponent.app(::openLink) }
   }
 
-  private fun openLink(url: String) {
-    val intent =
-      Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-    startActivity(intent)
+  private fun openLink(url: String, browserType: BrowserType) {
+    when (browserType) {
+      Default -> {
+        val intent =
+          Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+        startActivity(intent)
+      }
+      InApp -> {
+        val intent = CustomTabsIntent.Builder().build()
+        intent.launchUrl(this, url.toUri())
+      }
+    }
   }
 }
 

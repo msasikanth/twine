@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.settings
 
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.repository.BrowserType
 
-internal sealed interface Screen {
-  class Home(val presenter: HomePresenter) : Screen
+data class SettingsState(val browserType: BrowserType) {
 
-  class Search(val presenter: SearchPresenter) : Screen
+  companion object {
 
-  class Bookmarks(val presenter: BookmarksPresenter) : Screen
-
-  class Settings(val presenter: SettingsPresenter) : Screen
+    val DEFAULT = SettingsState(browserType = BrowserType.Default)
+  }
 }

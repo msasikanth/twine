@@ -159,7 +159,8 @@ fun HomeScreen(
           onFeaturedItemChange = onFeaturedItemChange,
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) }
+          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) }
         )
       },
       sheetContent = {
@@ -203,7 +204,8 @@ private fun HomeScreenContent(
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
   onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit
+  onBookmarksClicked: () -> Unit,
+  onSettingsClicked: () -> Unit
 ) {
   val hasContent = featuredPosts.isNotEmpty() || posts.isNotEmpty()
   if (hasContent) {
@@ -222,7 +224,8 @@ private fun HomeScreenContent(
         onFeaturedItemChange = onFeaturedItemChange,
         listState = listState,
         onSearchClicked = onSearchClicked,
-        onBookmarksClicked = onBookmarksClicked
+        onBookmarksClicked = onBookmarksClicked,
+        onSettingsClicked = onSettingsClicked
       )
 
       PullRefreshIndicator(

@@ -23,6 +23,8 @@ androidx_collection = "1.3.0-beta01"
 androidx_test_runner = "1.5.2"
 androidx_test_rules = "1.5.0"
 androidx_work = "2.8.1"
+androidx_datastore = "1.1.0-alpha04"
+androidx_browser = "1.6.0"
 coil = "2.4.0"
 spotless = "6.21.0"
 ktfmt = "0.44"
@@ -38,6 +40,7 @@ windowSizeClass = "0.3.1"
 desugarJdk = "2.0.3"
 lyricist = "1.4.2"
 atomicfu = "0.22.0"
+okio = "3.5.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -71,6 +74,9 @@ androidx_collection = { module = "androidx.collection:collection", version.ref =
 androidx_test_runner = { module = "androidx.test:runner", version.ref = "androidx_test_runner" }
 androidx_test_rules = { module = "androidx.test:rules", version.ref = "androidx_test_rules" }
 androidx_work = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx_work" }
+androidx_datastore_okio = { module = "androidx.datastore:datastore-core-okio", version.ref = "androidx_datastore" }
+androidx_datastore_preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx_datastore" }
+androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
@@ -82,6 +88,7 @@ windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-cla
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
 lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
