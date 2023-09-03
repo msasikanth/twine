@@ -99,6 +99,9 @@ kotlin {
         implementation(libs.ksoup)
         implementation(libs.sentry)
         implementation(libs.windowSizeClass)
+        api(libs.androidx.datastore.okio)
+        api(libs.androidx.datastore.preferences)
+        api(libs.okio)
       }
     }
     val commonTest by getting {
@@ -129,6 +132,7 @@ kotlin {
 
     val iosSimulatorArm64Main by getting
     val iosMain by getting {
+      iosSimulatorArm64Main.dependsOn(this)
       dependencies {
         implementation(libs.ktor.client.darwin)
         implementation(libs.sqldelight.driver.native)
