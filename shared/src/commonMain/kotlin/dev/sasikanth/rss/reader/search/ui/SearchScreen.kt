@@ -76,8 +76,8 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
-import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Sort
+import dev.sasikanth.rss.reader.resources.icons.Sort
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter

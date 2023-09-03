@@ -18,8 +18,8 @@ package dev.sasikanth.rss.reader.home.ui
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Share
+import dev.sasikanth.rss.reader.resources.icons.Share
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 
 @Composable

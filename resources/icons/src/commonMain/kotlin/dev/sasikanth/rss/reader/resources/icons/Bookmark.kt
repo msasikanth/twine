@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.resources.icons.icon.twineicons
+package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
@@ -24,16 +24,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
 
-val TwineIcons.Bookmarks: ImageVector
+val TwineIcons.Bookmark: ImageVector
   get() {
-    if (bookmarks != null) {
-      return bookmarks!!
+    if (bookmark != null) {
+      return bookmark!!
     }
-    bookmarks =
+    bookmark =
       Builder(
-          name = "Bookmarks",
+          name = "Bookmark",
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
@@ -41,7 +40,7 @@ val TwineIcons.Bookmarks: ImageVector
         )
         .apply {
           path(
-            fill = SolidColor(Color(0xFF000000)),
+            fill = SolidColor(Color(0xFF201A18)),
             stroke = null,
             strokeLineWidth = 0.0f,
             strokeLineCap = Butt,
@@ -49,38 +48,28 @@ val TwineIcons.Bookmarks: ImageVector
             strokeLineMiter = 4.0f,
             pathFillType = NonZero
           ) {
-            moveTo(3.0f, 23.0f)
-            verticalLineTo(7.0f)
-            curveTo(3.0f, 6.45f, 3.196f, 5.979f, 3.588f, 5.588f)
-            curveTo(3.979f, 5.196f, 4.45f, 5.0f, 5.0f, 5.0f)
-            horizontalLineTo(15.0f)
-            curveTo(15.55f, 5.0f, 16.021f, 5.196f, 16.413f, 5.588f)
-            curveTo(16.804f, 5.979f, 17.0f, 6.45f, 17.0f, 7.0f)
-            verticalLineTo(23.0f)
-            lineTo(10.0f, 20.0f)
-            lineTo(3.0f, 23.0f)
+            moveTo(5.0f, 21.0f)
+            verticalLineTo(5.0f)
+            curveTo(5.0f, 4.45f, 5.196f, 3.979f, 5.588f, 3.588f)
+            curveTo(5.979f, 3.196f, 6.45f, 3.0f, 7.0f, 3.0f)
+            horizontalLineTo(17.0f)
+            curveTo(17.55f, 3.0f, 18.021f, 3.196f, 18.413f, 3.588f)
+            curveTo(18.804f, 3.979f, 19.0f, 4.45f, 19.0f, 5.0f)
+            verticalLineTo(21.0f)
+            lineTo(12.0f, 18.0f)
+            lineTo(5.0f, 21.0f)
             close()
-            moveTo(5.0f, 19.95f)
-            lineTo(10.0f, 17.8f)
-            lineTo(15.0f, 19.95f)
-            verticalLineTo(7.0f)
-            horizontalLineTo(5.0f)
-            verticalLineTo(19.95f)
-            close()
-            moveTo(19.0f, 20.0f)
-            verticalLineTo(3.0f)
-            horizontalLineTo(6.0f)
-            verticalLineTo(1.0f)
-            horizontalLineTo(19.0f)
-            curveTo(19.55f, 1.0f, 20.021f, 1.196f, 20.413f, 1.587f)
-            curveTo(20.804f, 1.979f, 21.0f, 2.45f, 21.0f, 3.0f)
-            verticalLineTo(20.0f)
-            horizontalLineTo(19.0f)
+            moveTo(7.0f, 17.95f)
+            lineTo(12.0f, 15.8f)
+            lineTo(17.0f, 17.95f)
+            verticalLineTo(5.0f)
+            horizontalLineTo(7.0f)
+            verticalLineTo(17.95f)
             close()
           }
         }
         .build()
-    return bookmarks!!
+    return bookmark!!
   }
 
-private var bookmarks: ImageVector? = null
+private var bookmark: ImageVector? = null
