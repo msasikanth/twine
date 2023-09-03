@@ -34,6 +34,7 @@ import dev.sasikanth.rss.reader.components.ImageLoader
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -41,7 +42,7 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App = @Composable (openLink: (String) -> Unit) -> Unit
+typealias App = @Composable (openLink: (String, BrowserType) -> Unit) -> Unit
 
 @Inject
 @Composable
@@ -49,7 +50,7 @@ typealias App = @Composable (openLink: (String) -> Unit) -> Unit
 fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
-  @Assisted openLink: (String) -> Unit
+  @Assisted openLink: (String, BrowserType) -> Unit
 ) {
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
@@ -79,13 +80,19 @@ fun App(
               HomeScreen(
                 homePresenter = screen.presenter,
                 onFeaturedItemChange = { imageUrl = it },
-                openLink = openLink
+                openLink = { openLink(it, BrowserType.Default) }
               )
             is Screen.Search -> {
-              SearchScreen(searchPresenter = screen.presenter, openLink = openLink)
+              SearchScreen(
+                searchPresenter = screen.presenter,
+                openLink = { openLink(it, BrowserType.Default) }
+              )
             }
             is Screen.Bookmarks -> {
-              BookmarksScreen(bookmarksPresenter = screen.presenter, openLink = openLink)
+              BookmarksScreen(
+                bookmarksPresenter = screen.presenter,
+                openLink = { openLink(it, BrowserType.Default) }
+              )
             }
           }
         }
