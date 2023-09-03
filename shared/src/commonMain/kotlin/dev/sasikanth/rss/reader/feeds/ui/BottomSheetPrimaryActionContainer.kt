@@ -35,18 +35,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Add
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.All
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 import kotlin.math.roundToInt
-import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -68,8 +70,8 @@ internal fun BottomSheetPrimaryActionButton(
     val (icon, label) =
       when {
         bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
-          Pair(IconResources.all, null)
-        else -> Pair(IconResources.add, LocalStrings.current.buttonAddFeed)
+          Pair(TwineIcons.All, null)
+        else -> Pair(TwineIcons.Add, LocalStrings.current.buttonAddFeed)
       }
 
     FloatingActionButton(
@@ -96,7 +98,7 @@ internal fun BottomSheetPrimaryActionButton(
 @Composable
 private fun FloatingActionButton(
   modifier: Modifier = Modifier,
-  icon: String,
+  icon: ImageVector,
   animationProgress: Float,
   label: String? = null,
   selected: Boolean = false,
@@ -116,7 +118,7 @@ private fun FloatingActionButton(
     ) {
       Crossfade(icon) {
         Icon(
-          painter = painterResource(icon),
+          imageVector = icon,
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )

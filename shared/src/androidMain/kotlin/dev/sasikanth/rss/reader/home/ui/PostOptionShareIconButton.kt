@@ -18,14 +18,15 @@ package dev.sasikanth.rss.reader.home.ui
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Share
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 
 @Composable
 internal actual fun PostOptionShareIconButton(postLink: String) {
   val context = LocalContext.current
   PostOptionIconButton(
-    iconRes = IconResources.share,
+    icon = TwineIcons.Share,
     contentDescription = LocalStrings.current.share,
     onClick = {
       val sendIntent =

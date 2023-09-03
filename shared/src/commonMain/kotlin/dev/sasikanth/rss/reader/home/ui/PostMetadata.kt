@@ -31,13 +31,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Bookmark
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Bookmarked
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import org.jetbrains.compose.resources.painterResource
 
 @Composable
 internal fun PostMetadata(
@@ -99,11 +101,11 @@ private fun PostOptionsButtonRow(
 ) {
   Row {
     PostOptionIconButton(
-      iconRes =
+      icon =
         if (postBookmarked) {
-          IconResources.bookmarked
+          TwineIcons.Bookmarked
         } else {
-          IconResources.bookmark
+          TwineIcons.Bookmark
         },
       iconTint =
         if (postBookmarked) {
@@ -121,7 +123,7 @@ private fun PostOptionsButtonRow(
 
 @Composable
 internal fun PostOptionIconButton(
-  iconRes: String,
+  icon: ImageVector,
   contentDescription: String,
   modifier: Modifier = Modifier,
   iconTint: Color = Color.White,
@@ -136,7 +138,7 @@ internal fun PostOptionIconButton(
     contentAlignment = Alignment.Center
   ) {
     Icon(
-      painter = painterResource(iconRes),
+      imageVector = icon,
       contentDescription = contentDescription,
       tint = iconTint,
       modifier = Modifier.size(20.dp)

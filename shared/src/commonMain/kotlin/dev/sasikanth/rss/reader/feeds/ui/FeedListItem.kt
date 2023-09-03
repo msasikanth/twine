@@ -67,12 +67,12 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.resources.IconResources
+import dev.sasikanth.rss.reader.resources.icons.icon.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.icon.twineicons.Delete
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
-import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -150,7 +150,7 @@ internal fun FeedListItem(
       Box {
         IconButton(onClick = { onDeleteFeed(feed) }) {
           Icon(
-            painter = painterResource(IconResources.delete),
+            imageVector = TwineIcons.Delete,
             contentDescription = null,
             tint = AppTheme.colorScheme.tintedForeground
           )
