@@ -66,6 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -167,6 +168,7 @@ private fun SearchBar(
   val focusRequester = remember { FocusRequester() }
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
+  var isSearchBarFocused by remember { mutableStateOf(false) }
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -197,7 +199,10 @@ private fun SearchBar(
         colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)
       ) {
         TextField(
-          modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+          modifier =
+            Modifier.fillMaxWidth().focusRequester(focusRequester).onFocusChanged {
+              isSearchBarFocused = it.isFocused
+            },
           value = query.copy(selection = TextRange(query.text.length)),
           onValueChange = onQueryChange,
           placeholder = {
@@ -218,8 +223,8 @@ private fun SearchBar(
           },
           trailingIcon = {
             if (query.text.isNotBlank()) {
-              AnimatedContent(keyboardState) {
-                if (it == KeyboardState.Opened) {
+              AnimatedContent(isSearchBarFocused) {
+                if (it) {
                   ClearSearchQueryButton {
                     focusRequester.requestFocus()
                     onClearClick()
