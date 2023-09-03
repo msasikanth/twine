@@ -44,5 +44,6 @@ val EnTwineStrings =
     searchSortOldest = "Oldest",
     searchSortOldestFirst = "Oldest first",
     bookmark = "Bookmark",
-    bookmarks = "Bookmarks"
+    bookmarks = "Bookmarks",
+    settings = "Settings",
   )
