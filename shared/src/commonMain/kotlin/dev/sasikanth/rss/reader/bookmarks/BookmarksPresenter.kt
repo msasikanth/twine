@@ -6,7 +6,6 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.database.PostWithMetadata
-import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.collections.immutable.toImmutableList
@@ -27,7 +26,6 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class BookmarksPresenter(
   dispatchersProvider: DispatchersProvider,
-  feedsPresenterFactory: (ComponentContext) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
@@ -35,10 +33,7 @@ class BookmarksPresenter(
 
   private val presenterInstance =
     instanceKeeper.getOrCreate {
-      BookmarksPresenter.PresenterInstance(
-        dispatchersProvider = dispatchersProvider,
-        rssRepository = rssRepository
-      )
+      PresenterInstance(dispatchersProvider = dispatchersProvider, rssRepository = rssRepository)
     }
 
   init {
