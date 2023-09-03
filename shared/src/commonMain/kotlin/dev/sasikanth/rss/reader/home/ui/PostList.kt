@@ -21,8 +21,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -99,7 +104,11 @@ internal fun PostsList(
 
 @Composable
 fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClick: () -> Unit) {
-  Column(modifier = Modifier.clickable(onClick = onClick)) {
+  Column(
+    modifier =
+      Modifier.clickable(onClick = onClick)
+        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+  ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),

@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -75,16 +73,16 @@ fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Mo
         )
       }
     },
-    content = {
+    content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
           contentPadding =
             PaddingValues(
-              start = it.calculateStartPadding(layoutDirection),
-              end = it.calculateEndPadding(layoutDirection),
-              bottom = it.calculateBottomPadding() + 64.dp
+              start = padding.calculateStartPadding(layoutDirection),
+              top = padding.calculateTopPadding(),
+              end = padding.calculateEndPadding(layoutDirection),
+              bottom = padding.calculateBottomPadding() + 80.dp
             ),
-          modifier = Modifier.padding(top = it.calculateTopPadding())
         ) {
           item {
             BrowserTypeSettingItem(
@@ -99,7 +97,6 @@ fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Mo
     },
     containerColor = Color.Unspecified,
     contentColor = Color.Unspecified,
-    contentWindowInsets = WindowInsets.systemBars
   )
 }
 

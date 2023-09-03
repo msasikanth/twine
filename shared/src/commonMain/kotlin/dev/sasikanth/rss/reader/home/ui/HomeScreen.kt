@@ -26,14 +26,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,6 +46,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -140,11 +140,7 @@ fun HomeScreen(
     }
   }
 
-  Box(
-    modifier =
-      Modifier.fillMaxSize()
-        .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal))
-  ) {
+  Box(modifier = Modifier.fillMaxSize()) {
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
       content = {
@@ -176,14 +172,18 @@ fun HomeScreen(
           hostState = it,
           modifier =
             Modifier.padding(bottom = 112.dp)
-              .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+              .windowInsetsPadding(
+                WindowInsets.systemBars.only(
+                  WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                )
+              )
         )
       },
       backgroundColor = Color.Transparent,
       sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
       sheetContentColor = AppTheme.colorScheme.tintedForeground,
       sheetElevation = 0.dp,
-      sheetPeekHeight = bottomSheetPeekHeight(),
+      sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
       sheetShape =
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
     )
@@ -237,7 +237,9 @@ private fun HomeScreenContent(
       ScrollToTopButton(
         visible = showScrollToTop,
         modifier =
-          Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+          Modifier.windowInsetsPadding(
+              WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+            )
             .padding(end = 24.dp, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 24.dp),
       ) {
         listState.animateScrollToItem(0)
@@ -258,6 +260,7 @@ private fun HomeScreenContent(
  *
  * track: https://issuetracker.google.com/issues/209825720
  */
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun BoxScope.PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,
@@ -275,15 +278,14 @@ private fun BoxScope.PrimaryActionButtonContainer(
           .dp)
       .coerceIn(20.dp, 24.dp)
 
-  val navigationBarWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+  val safeWindowInsets =
+    WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
 
   Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
     if (state.canShowFeedLinkEntry) {
       FeedLinkInputField(
         modifier =
-          Modifier.windowInsetsPadding(
-              navigationBarWindowInsets.union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-            )
+          Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
             .padding(bottom = 24.dp, end = 24.dp),
         isFetchingFeed = state.isFetchingFeed,
         onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
@@ -292,7 +294,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
     } else {
       BottomSheetPrimaryActionButton(
         modifier =
-          Modifier.windowInsetsPadding(navigationBarWindowInsets).graphicsLayer {
+          Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
             translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
           },
         selected = state.isAllFeedsSelected,
@@ -346,10 +348,6 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     )
   }
 }
-
-@Composable
-private fun bottomSheetPeekHeight() =
-  BOTTOM_SHEET_PEEK_HEIGHT + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
 private suspend fun displayErrorMessage(
   effect: HomeEffect.ShowError,

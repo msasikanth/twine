@@ -20,9 +20,14 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.DrawerDefaults
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
@@ -497,7 +502,8 @@ fun BottomSheetScaffold(
     SideEffect { scaffoldState.bottomSheetState.density = density }
   }
 
-  val peekHeightPx = with(LocalDensity.current) { sheetPeekHeight.toPx() }
+  val peekHeightPx =
+    with(LocalDensity.current) { sheetPeekHeight.toPx() + WindowInsets.systemBars.getBottom(this) }
   val child =
     @Composable {
       BottomSheetScaffoldLayout(
@@ -517,7 +523,11 @@ fun BottomSheetScaffold(
             } else Modifier
           BottomSheet(
             state = scaffoldState.bottomSheetState,
-            modifier = nestedScroll.fillMaxWidth().requiredHeightIn(min = sheetPeekHeight),
+            modifier =
+              nestedScroll
+                .fillMaxWidth()
+                .requiredHeightIn(min = sheetPeekHeight)
+                .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
             calculateAnchors = { sheetSize ->
               val sheetHeight = sheetSize.height.toFloat()
               val collapsedHeight = layoutHeight - peekHeightPx

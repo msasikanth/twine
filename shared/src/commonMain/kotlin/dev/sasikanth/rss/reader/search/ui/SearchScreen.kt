@@ -23,17 +23,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -110,19 +106,17 @@ internal fun SearchScreen(
         onSortOrderChanged = { searchPresenter.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
     },
-    content = {
+    content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
         LaunchedEffect(searchPresenter.searchSortOrder) { listState.animateScrollToItem(0) }
 
         LazyColumn(
           contentPadding =
             PaddingValues(
-              start = it.calculateStartPadding(layoutDirection),
-              end = it.calculateEndPadding(layoutDirection),
-              bottom = it.calculateBottomPadding() + 64.dp
+              bottom = padding.calculateBottomPadding() + 80.dp,
+              top = padding.calculateTopPadding()
             ),
-          state = listState,
-          modifier = Modifier.padding(top = it.calculateTopPadding())
+          state = listState
         ) {
           itemsIndexed(state.searchResults) { index, post ->
             PostListItem(
@@ -144,15 +138,17 @@ internal fun SearchScreen(
         ScrollToTopButton(
           visible = showScrollToTop,
           modifier =
-            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-              .padding(end = 24.dp, bottom = 24.dp)
+            Modifier.padding(
+              end = padding.calculateEndPadding(layoutDirection) + 24.dp,
+              bottom = padding.calculateBottomPadding() + 24.dp
+            )
         ) {
           listState.animateScrollToItem(0)
         }
       }
     },
     containerColor = Color.Unspecified,
-    contentColor = Color.Unspecified
+    contentColor = Color.Unspecified,
   )
 }
 
@@ -183,7 +179,7 @@ private fun SearchBar(
       Modifier.fillMaxWidth()
         .background(AppTheme.colorScheme.surface)
         .windowInsetsPadding(
-          WindowInsets.statusBars.union(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
   ) {
     Box(

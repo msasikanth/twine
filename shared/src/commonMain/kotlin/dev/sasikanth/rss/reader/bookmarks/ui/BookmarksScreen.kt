@@ -17,14 +17,10 @@ package dev.sasikanth.rss.reader.bookmarks.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -91,17 +87,15 @@ internal fun BookmarksScreen(
         )
       }
     },
-    content = {
+    content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
           contentPadding =
             PaddingValues(
-              start = it.calculateStartPadding(layoutDirection),
-              end = it.calculateEndPadding(layoutDirection),
-              bottom = it.calculateBottomPadding() + 64.dp
+              bottom = padding.calculateBottomPadding() + 80.dp,
+              top = padding.calculateTopPadding()
             ),
-          state = listState,
-          modifier = Modifier.padding(top = it.calculateTopPadding())
+          state = listState
         ) {
           itemsIndexed(state.bookmarks) { index, post ->
             PostListItem(
@@ -123,8 +117,10 @@ internal fun BookmarksScreen(
         ScrollToTopButton(
           visible = showScrollToTop,
           modifier =
-            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-              .padding(end = 24.dp, bottom = 24.dp)
+            Modifier.padding(
+              end = padding.calculateEndPadding(layoutDirection) + 24.dp,
+              bottom = padding.calculateBottomPadding() + 24.dp
+            )
         ) {
           listState.animateScrollToItem(0)
         }

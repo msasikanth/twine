@@ -24,10 +24,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -58,6 +63,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.PostWithMetadata
@@ -108,7 +114,7 @@ internal fun FeaturedSection(
       selectedImage?.let { FeaturedSectionBlurredBackground(imageUrl = it) }
     }
 
-    Column(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+    Column {
       AppBar(
         onSearchClicked = onSearchClicked,
         onBookmarksClicked = onBookmarksClicked,
@@ -116,9 +122,31 @@ internal fun FeaturedSection(
       )
 
       if (featuredPosts.isNotEmpty()) {
+        val layoutDirection = LocalLayoutDirection.current
+
+        val systemBarsPaddingValues =
+          WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+        val startPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
+        val endPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
+
+        val horizontalPadding =
+          if (startPadding > endPadding) {
+            startPadding
+          } else {
+            endPadding
+          }
+
+        val pagerContentPadding =
+          PaddingValues(
+            start = horizontalPadding + 24.dp,
+            top = 24.dp,
+            end = horizontalPadding + 24.dp,
+            bottom = 24.dp
+          )
+
         HorizontalPager(
           state = pagerState,
-          contentPadding = PaddingValues(horizontal = 24.dp, vertical = 24.dp),
+          contentPadding = pagerContentPadding,
           pageSpacing = 16.dp,
           verticalAlignment = Alignment.Top
         ) {
@@ -141,7 +169,12 @@ private fun AppBar(
   onSettingsClicked: () -> Unit
 ) {
   Row(
-    modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 12.dp, top = 16.dp),
+    modifier =
+      Modifier.fillMaxWidth()
+        .windowInsetsPadding(
+          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+        )
+        .padding(start = 24.dp, end = 12.dp, top = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {

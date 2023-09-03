@@ -26,11 +26,11 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -80,49 +80,47 @@ internal fun FeedsBottomSheet(
   Column(modifier = Modifier.fillMaxSize()) {
     BottomSheetHandle(bottomSheetSwipeTransition)
 
-    Box {
-      // Transforming the bottom sheet progress from 0-1 to 1-0,
-      // since we want to control the alpha of the content as
-      // users swipes the sheet up and down
-      val bottomSheetExpandingProgress =
-        (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
-      val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
+    // Transforming the bottom sheet progress from 0-1 to 1-0,
+    // since we want to control the alpha of the content as
+    // users swipes the sheet up and down
+    val bottomSheetExpandingProgress =
+      (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
+    val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
 
-      if (hasBottomSheetExpandedThreshold) {
-        BottomSheetCollapsedContent(
-          modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-          feeds = state.feeds,
-          selectedFeed = selectedFeed,
-          onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
-        )
-      } else {
-        BottomSheetExpandedContent(
-          modifier =
-            Modifier.graphicsLayer {
-              val threshold = 0.3
-              val scaleFactor = 1 / (1 - threshold)
-              val targetAlpha =
-                if (bottomSheetSwipeTransition.currentState > threshold) {
-                    (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
-                  } else {
-                    0f
-                  }
-                  .toFloat()
-              alpha = targetAlpha
-            },
-          feeds = state.feeds,
-          selectedFeed = state.selectedFeed,
-          showingFeedLinkEntry = showingFeedLinkEntry,
-          closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
-          onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
-          onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
-          onFeedNameChanged = { newFeedName, feedLink ->
-            feedsPresenter.dispatch(
-              FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
-            )
-          }
-        )
-      }
+    if (hasBottomSheetExpandedThreshold) {
+      BottomSheetCollapsedContent(
+        modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
+        feeds = state.feeds,
+        selectedFeed = selectedFeed,
+        onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
+      )
+    } else {
+      BottomSheetExpandedContent(
+        modifier =
+          Modifier.graphicsLayer {
+            val threshold = 0.3
+            val scaleFactor = 1 / (1 - threshold)
+            val targetAlpha =
+              if (bottomSheetSwipeTransition.currentState > threshold) {
+                  (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
+                } else {
+                  0f
+                }
+                .toFloat()
+            alpha = targetAlpha
+          },
+        feeds = state.feeds,
+        selectedFeed = state.selectedFeed,
+        showingFeedLinkEntry = showingFeedLinkEntry,
+        closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
+        onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+        onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
+        onFeedNameChanged = { newFeedName, feedLink ->
+          feedsPresenter.dispatch(
+            FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
+          )
+        }
+      )
     }
   }
 }
@@ -138,31 +136,41 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
-    Toolbar(onCloseClicked = closeSheet)
-
-    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
-      itemsIndexed(feeds) { index, feed ->
-        FeedListItem(
-          feed = feed,
-          selected = selectedFeed == feed,
-          canShowDivider = index != feeds.lastIndex,
-          onDeleteFeed = onDeleteFeed,
-          onFeedSelected = onFeedSelected,
-          onFeedNameChanged = onFeedNameChanged
-        )
+  Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
+    Column(modifier = Modifier.fillMaxSize()) {
+      Toolbar(onCloseClicked = closeSheet)
+      LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
+        itemsIndexed(feeds) { index, feed ->
+          FeedListItem(
+            feed = feed,
+            selected = selectedFeed == feed,
+            canShowDivider = index != feeds.lastIndex,
+            onDeleteFeed = onDeleteFeed,
+            onFeedSelected = onFeedSelected,
+            onFeedNameChanged = onFeedNameChanged
+          )
+        }
       }
     }
 
-    FeedsSheetBottomBar(showingFeedLinkEntry = showingFeedLinkEntry, closeSheet = closeSheet)
+    FeedsSheetBottomBar(
+      showingFeedLinkEntry = showingFeedLinkEntry,
+      closeSheet = closeSheet,
+      modifier = Modifier.align(Alignment.BottomCenter)
+    )
   }
 }
 
 @Composable
-private fun FeedsSheetBottomBar(showingFeedLinkEntry: Boolean, closeSheet: () -> Unit) {
+private fun FeedsSheetBottomBar(
+  showingFeedLinkEntry: Boolean,
+  modifier: Modifier = Modifier,
+  closeSheet: () -> Unit
+) {
   Box(
     Modifier.background(AppTheme.colorScheme.tintedBackground)
-      .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+      .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
+      .then(modifier)
   ) {
     Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
     Box(Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
