@@ -23,7 +23,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import io.github.aakira.napier.log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.request.get
@@ -126,7 +125,6 @@ class IOSImageLoader : ImageLoader {
   }
 
   private fun loadCachedImage(url: String): ByteArray? {
-    log { "Loading image from cache: $url" }
     val request = createNSURLRequest(url) ?: return null
 
     urlCache.cachedResponseForRequest(request)?.let { cachedResponse ->
@@ -138,7 +136,6 @@ class IOSImageLoader : ImageLoader {
   }
 
   private suspend fun downloadImage(url: String): ByteArray? {
-    log { "Downloading image: $url" }
     val request = createNSURLRequest(url) ?: return null
     val response = httpClient.get(url)
 
