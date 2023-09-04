@@ -136,7 +136,7 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime)) {
+  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
     Toolbar(onCloseClicked = closeSheet)
     LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
       itemsIndexed(feeds) { index, feed ->
