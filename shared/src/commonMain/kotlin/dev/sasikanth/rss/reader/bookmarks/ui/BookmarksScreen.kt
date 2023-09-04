@@ -126,7 +126,7 @@ internal fun BookmarksScreen(
         }
       }
     },
-    containerColor = Color.Unspecified,
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified
   )
 }

@@ -13,7 +13,9 @@
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:allowBackup="false"
         android:fullBackupContent="false"
-        android:dataExtractionRules="@xml/data_extraction_rules">
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="tiramisu">
         <activity
             android:name="dev.sasikanth.rss.reader.MainActivity"
             android:exported="true"

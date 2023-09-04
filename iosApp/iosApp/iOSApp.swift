@@ -17,13 +17,14 @@ struct iOSApp: App {
 	}
 	
 	var body: some Scene {
+        let backDispatcher = BackDispatcherKt.BackDispatcher()
         let homeViewControllerComponent = InjectHomeViewControllerComponent(
-            componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle),
+            componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle, stateKeeper: nil, instanceKeeper: nil, backHandler: backDispatcher),
             applicationComponent: appDelegate.applicationComponent
         )
 
 		WindowGroup {
-            ContentView(homeViewControllerComponent: homeViewControllerComponent)
+            ContentView(homeViewControllerComponent: homeViewControllerComponent, backDispatcher: backDispatcher)
 				.onChange(of: scenePhase) { newPhase in
 					switch newPhase {
                     case .background:

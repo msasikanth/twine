@@ -70,6 +70,7 @@ kotlin {
 
       export(libs.decompose)
       export(libs.essenty.lifecycle)
+      export(libs.essenty.backhandler)
     }
   }
 
@@ -94,6 +95,7 @@ kotlin {
         api(libs.decompose)
         implementation(libs.decompose.extensions.compose)
         api(libs.essenty.lifecycle)
+        api(libs.essenty.backhandler)
         implementation(libs.kotlininject.runtime)
         implementation(libs.androidx.collection)
         implementation(libs.material.color.utilities)

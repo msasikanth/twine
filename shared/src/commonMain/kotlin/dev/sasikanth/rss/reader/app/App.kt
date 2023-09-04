@@ -16,7 +16,6 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -28,7 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.plus
+import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.ImageLoader
@@ -39,7 +41,6 @@ import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
-import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -71,38 +72,50 @@ fun App(
 
     DynamicContentTheme(dynamicColorState) {
       ProvideStrings {
-        Surface(
-          modifier = Modifier.fillMaxSize(),
-          color = AppTheme.colorScheme.surfaceContainerLowest
-        ) {
-          val screenStack by appPresenter.screenStack.subscribeAsState()
-          val state by appPresenter.state.collectAsState()
+        val state by appPresenter.state.collectAsState()
 
-          when (val screen = screenStack.active.instance) {
+        Children(
+          modifier = Modifier.fillMaxSize(),
+          stack = appPresenter.screenStack,
+          animation =
+            backAnimation(
+              backHandler = appPresenter.backHandler,
+              onBack = appPresenter::onBackClicked
+            )
+        ) { child ->
+          when (val screen = child.instance) {
             is Screen.Home ->
               HomeScreen(
                 homePresenter = screen.presenter,
                 onFeaturedItemChange = { imageUrl = it },
-                openLink = { openLink(it, state.browserType) }
+                openLink = { openLink(it, state.browserType) },
+                modifier = Modifier.fillMaxSize()
               )
-            is Screen.Search -> {
+            is Screen.Search ->
               SearchScreen(
                 searchPresenter = screen.presenter,
-                openLink = { openLink(it, state.browserType) }
+                openLink = { openLink(it, state.browserType) },
+                modifier = Modifier.fillMaxSize()
               )
-            }
-            is Screen.Bookmarks -> {
+            is Screen.Bookmarks ->
               BookmarksScreen(
                 bookmarksPresenter = screen.presenter,
-                openLink = { openLink(it, state.browserType) }
+                openLink = { openLink(it, state.browserType) },
+                modifier = Modifier.fillMaxSize()
               )
-            }
-            is Screen.Settings -> {
-              SettingsScreen(settingsPresenter = screen.presenter)
-            }
+            is Screen.Settings ->
+              SettingsScreen(
+                settingsPresenter = screen.presenter,
+                modifier = Modifier.fillMaxSize()
+              )
           }
         }
       }
     }
   }
 }
+
+expect fun <C : Any, T : Any> backAnimation(
+  backHandler: BackHandler,
+  onBack: () -> Unit,
+): StackAnimation<C, T>
