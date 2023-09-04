@@ -38,6 +38,6 @@ include(":androidApp")
 
 include(":shared")
 
-include(":strings")
+include(":resources:strings")
 
 include(":resources:icons")
