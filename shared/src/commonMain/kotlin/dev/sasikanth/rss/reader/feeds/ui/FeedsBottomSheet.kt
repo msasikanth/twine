@@ -136,27 +136,23 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
-    Column(modifier = Modifier.fillMaxSize()) {
-      Toolbar(onCloseClicked = closeSheet)
-      LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
-        itemsIndexed(feeds) { index, feed ->
-          FeedListItem(
-            feed = feed,
-            selected = selectedFeed == feed,
-            canShowDivider = index != feeds.lastIndex,
-            onDeleteFeed = onDeleteFeed,
-            onFeedSelected = onFeedSelected,
-            onFeedNameChanged = onFeedNameChanged
-          )
-        }
+  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime)) {
+    Toolbar(onCloseClicked = closeSheet)
+    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
+      itemsIndexed(feeds) { index, feed ->
+        FeedListItem(
+          feed = feed,
+          selected = selectedFeed == feed,
+          canShowDivider = index != feeds.lastIndex,
+          onDeleteFeed = onDeleteFeed,
+          onFeedSelected = onFeedSelected,
+          onFeedNameChanged = onFeedNameChanged
+        )
       }
     }
-
     FeedsSheetBottomBar(
       showingFeedLinkEntry = showingFeedLinkEntry,
       closeSheet = closeSheet,
-      modifier = Modifier.align(Alignment.BottomCenter)
     )
   }
 }
