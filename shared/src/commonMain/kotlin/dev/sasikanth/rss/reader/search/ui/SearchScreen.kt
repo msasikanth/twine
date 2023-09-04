@@ -147,7 +147,7 @@ internal fun SearchScreen(
         }
       }
     },
-    containerColor = Color.Unspecified,
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
 }

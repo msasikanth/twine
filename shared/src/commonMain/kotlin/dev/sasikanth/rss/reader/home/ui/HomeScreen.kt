@@ -56,7 +56,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceIn
@@ -91,7 +90,8 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 fun HomeScreen(
   homePresenter: HomePresenter,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
-  openLink: (String) -> Unit
+  openLink: (String) -> Unit,
+  modifier: Modifier = Modifier
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
@@ -140,7 +140,7 @@ fun HomeScreen(
     }
   }
 
-  Box(modifier = Modifier.fillMaxSize()) {
+  Box(modifier = modifier) {
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
       content = {
@@ -179,7 +179,7 @@ fun HomeScreen(
               )
         )
       },
-      backgroundColor = Color.Transparent,
+      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
       sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
       sheetContentColor = AppTheme.colorScheme.tintedForeground,
       sheetElevation = 0.dp,

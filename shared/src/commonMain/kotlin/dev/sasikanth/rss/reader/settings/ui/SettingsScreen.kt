@@ -43,7 +43,7 @@ import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Modifier) {
+internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Modifier) {
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
 
@@ -95,7 +95,7 @@ fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Mo
         }
       }
     },
-    containerColor = Color.Unspecified,
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
 }

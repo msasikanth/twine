@@ -16,7 +16,6 @@
 package dev.sasikanth.rss.reader.bookmarks
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
@@ -52,15 +51,10 @@ class BookmarksPresenter(
     }
 
   init {
-    lifecycle.doOnCreate {
-      presenterInstance.dispatch(BookmarksEvent.Init)
-      backHandler.register(backCallback)
-    }
+    lifecycle.doOnCreate { presenterInstance.dispatch(BookmarksEvent.Init) }
   }
 
   val state = presenterInstance.state
-
-  private val backCallback = BackCallback { dispatch(BookmarksEvent.BackClicked) }
 
   fun dispatch(event: BookmarksEvent) {
     when (event) {

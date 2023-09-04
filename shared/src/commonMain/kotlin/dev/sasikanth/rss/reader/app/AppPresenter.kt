@@ -99,6 +99,10 @@ class AppPresenter(
       childFactory = ::createScreen,
     )
 
+  fun onBackClicked() {
+    navigation.pop()
+  }
+
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
       Config.Home -> {

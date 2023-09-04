@@ -16,10 +16,8 @@
 package dev.sasikanth.rss.reader.settings
 
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -52,13 +50,8 @@ class SettingsPresenter(
         settingsRepository = settingsRepository
       )
     }
-  private val backCallback = BackCallback { dispatch(SettingsEvent.BackClicked) }
 
   internal val state = presenterInstance.state
-
-  init {
-    lifecycle.doOnCreate { backHandler.register(backCallback) }
-  }
 
   fun dispatch(event: SettingsEvent) {
     when (event) {
