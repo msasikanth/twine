@@ -181,7 +181,8 @@ private fun BottomSheetExpandedContent(
 
     LazyColumn(
       modifier =
-        Modifier.padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
+        Modifier.fillMaxSize()
+          .padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
       contentPadding =
         PaddingValues(
           start = padding.calculateStartPadding(layoutDirection),
