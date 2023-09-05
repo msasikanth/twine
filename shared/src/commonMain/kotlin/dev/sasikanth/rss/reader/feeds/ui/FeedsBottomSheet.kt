@@ -23,6 +23,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
@@ -30,16 +34,24 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
@@ -136,9 +149,47 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.ime).then(modifier)) {
-    Toolbar(onCloseClicked = closeSheet)
-    LazyColumn(contentPadding = PaddingValues(bottom = 112.dp), modifier = Modifier.weight(1f)) {
+  Scaffold(
+    modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
+    topBar = {
+      CenterAlignedTopAppBar(
+        title = { Text(LocalStrings.current.feeds) },
+        navigationIcon = {
+          IconButton(modifier = Modifier.padding(start = 4.dp), onClick = closeSheet) {
+            Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
+          }
+        },
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = AppTheme.colorScheme.tintedBackground,
+            navigationIconContentColor = AppTheme.colorScheme.onSurface,
+            titleContentColor = AppTheme.colorScheme.onSurface,
+            actionIconContentColor = AppTheme.colorScheme.onSurface
+          )
+      )
+    },
+    bottomBar = {
+      FeedsSheetBottomBar(
+        showingFeedLinkEntry = showingFeedLinkEntry,
+        closeSheet = closeSheet,
+      )
+    },
+    containerColor = AppTheme.colorScheme.tintedBackground
+  ) { padding ->
+    val layoutDirection = LocalLayoutDirection.current
+    val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+
+    LazyColumn(
+      modifier =
+        Modifier.padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
+      contentPadding =
+        PaddingValues(
+          start = padding.calculateStartPadding(layoutDirection),
+          top = padding.calculateTopPadding(),
+          end = padding.calculateEndPadding(layoutDirection),
+          bottom = padding.calculateBottomPadding() + 64.dp
+        )
+    ) {
       itemsIndexed(feeds) { index, feed ->
         FeedListItem(
           feed = feed,
@@ -150,10 +201,6 @@ private fun BottomSheetExpandedContent(
         )
       }
     }
-    FeedsSheetBottomBar(
-      showingFeedLinkEntry = showingFeedLinkEntry,
-      closeSheet = closeSheet,
-    )
   }
 }
 
@@ -163,8 +210,16 @@ private fun FeedsSheetBottomBar(
   modifier: Modifier = Modifier,
   closeSheet: () -> Unit
 ) {
+  val imeModifier =
+    if (showingFeedLinkEntry) {
+      Modifier.windowInsetsPadding(WindowInsets.ime)
+    } else {
+      Modifier
+    }
+
   Box(
-    Modifier.background(AppTheme.colorScheme.tintedBackground)
+    imeModifier
+      .background(AppTheme.colorScheme.tintedBackground)
       .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
       .then(modifier)
   ) {
