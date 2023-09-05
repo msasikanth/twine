@@ -153,6 +153,7 @@ private fun BottomSheetExpandedContent(
     modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
       CenterAlignedTopAppBar(
+        modifier = Modifier.background(AppTheme.colorScheme.tintedBackground),
         title = { Text(LocalStrings.current.feeds) },
         navigationIcon = {
           IconButton(modifier = Modifier.padding(start = 4.dp), onClick = closeSheet) {
@@ -161,7 +162,7 @@ private fun BottomSheetExpandedContent(
         },
         colors =
           TopAppBarDefaults.topAppBarColors(
-            containerColor = AppTheme.colorScheme.tintedBackground,
+            containerColor = Color.Transparent,
             navigationIconContentColor = AppTheme.colorScheme.onSurface,
             titleContentColor = AppTheme.colorScheme.onSurface,
             actionIconContentColor = AppTheme.colorScheme.onSurface
