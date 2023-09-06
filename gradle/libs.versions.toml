@@ -41,6 +41,7 @@ desugarJdk = "2.0.3"
 lyricist = "1.4.2"
 atomicfu = "0.22.0"
 okio = "3.5.0"
+paging = "3.2.0-alpha05-0.2.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -63,6 +64,7 @@ kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "a
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+sqldelight_extensions_paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-24-dialect", version.ref = "sqldelight" }
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
@@ -90,6 +92,8 @@ desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "des
 lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
+paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
