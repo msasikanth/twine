@@ -28,6 +28,7 @@ class AppColorScheme(
   tintedBackground: Color = Color(0xFF002117),
   tintedSurface: Color = Color(0xFF00382A),
   tintedForeground: Color = Color(0xFF63DBB5),
+  tintedHighlight: Color = Color(0xFF63DBB5),
   outline: Color = Color(0xFF89938E),
   outlineVariant: Color = Color(0xFF3F4944),
   surface: Color = Color(0xFF111412),
@@ -49,6 +50,9 @@ class AppColorScheme(
     internal set
 
   var tintedForeground by mutableStateOf(tintedForeground, structuralEqualityPolicy())
+    internal set
+
+  var tintedHighlight by mutableStateOf(tintedHighlight, structuralEqualityPolicy())
     internal set
 
   var outline by mutableStateOf(outline, structuralEqualityPolicy())
@@ -91,6 +95,7 @@ class AppColorScheme(
     tintedBackground: Color = this.tintedBackground,
     tintedSurface: Color = this.surfaceContainer,
     tintedForeground: Color = this.tintedForeground,
+    tintedHighlight: Color = this.tintedHighlight,
     outline: Color = this.outline,
     outlineVariant: Color = this.outlineVariant,
     surface: Color = this.surface,
@@ -108,6 +113,7 @@ class AppColorScheme(
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
+      tintedHighlight = tintedHighlight,
       outline = outline,
       outlineVariant = outlineVariant,
       surface = surface,
