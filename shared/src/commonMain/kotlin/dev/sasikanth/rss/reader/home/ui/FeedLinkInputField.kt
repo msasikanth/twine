@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FeedLinkInputField(
   modifier: Modifier = Modifier,
@@ -87,8 +85,9 @@ internal fun FeedLinkInputField(
     shape = RoundedCornerShape(16.dp),
     enabled = !isFetchingFeed,
     colors =
-      TextFieldDefaults.textFieldColors(
-        containerColor = AppTheme.colorScheme.tintedSurface,
+      TextFieldDefaults.colors(
+        unfocusedContainerColor = AppTheme.colorScheme.tintedSurface,
+        focusedContainerColor = AppTheme.colorScheme.tintedSurface,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,

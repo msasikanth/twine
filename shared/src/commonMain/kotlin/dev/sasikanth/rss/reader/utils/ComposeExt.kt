@@ -24,11 +24,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 
-@Composable
-@ReadOnlyComposable
-inline fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
+@Composable @ReadOnlyComposable fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
-inline fun Float.inverseProgress() = 1f - this
+fun Float.inverseProgress() = 1f - this
 
 enum class KeyboardState {
   Opened,

@@ -311,9 +311,9 @@ class DynamicColorState(
           TINTED_BACKGROUND to
             DynamicColor.fromPalette(
               palette = { s: DynamicScheme -> s.primaryPalette },
-              tone = { s: DynamicScheme -> 10.0 },
+              tone = { _ -> 10.0 },
               background = { s: DynamicScheme -> dynamicColors.highestSurface(s) },
-              toneDeltaConstraint = { s: DynamicScheme ->
+              toneDeltaConstraint = { _ ->
                 ToneDeltaConstraint(
                   MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
                   dynamicColors.primaryContainer(),
@@ -324,9 +324,9 @@ class DynamicColorState(
           TINTED_SURFACE to
             DynamicColor.fromPalette(
               palette = { s: DynamicScheme -> s.primaryPalette },
-              tone = { s: DynamicScheme -> 20.0 },
+              tone = { _ -> 20.0 },
               background = { s: DynamicScheme -> dynamicColors.highestSurface(s) },
-              toneDeltaConstraint = { s: DynamicScheme ->
+              toneDeltaConstraint = { _ ->
                 ToneDeltaConstraint(
                   MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
                   dynamicColors.primaryContainer(),
@@ -337,9 +337,9 @@ class DynamicColorState(
           TINTED_FOREGROUND to
             DynamicColor.fromPalette(
               palette = { s: DynamicScheme -> s.primaryPalette },
-              tone = { s: DynamicScheme -> 80.0 },
+              tone = { _ -> 80.0 },
               background = { s: DynamicScheme -> dynamicColors.highestSurface(s) },
-              toneDeltaConstraint = { s: DynamicScheme ->
+              toneDeltaConstraint = { _ ->
                 ToneDeltaConstraint(
                   MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
                   dynamicColors.primaryContainer(),
