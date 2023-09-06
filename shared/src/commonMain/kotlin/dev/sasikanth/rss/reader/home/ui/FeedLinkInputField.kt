@@ -88,6 +88,7 @@ internal fun FeedLinkInputField(
       TextFieldDefaults.colors(
         unfocusedContainerColor = AppTheme.colorScheme.tintedSurface,
         focusedContainerColor = AppTheme.colorScheme.tintedSurface,
+        disabledContainerColor = AppTheme.colorScheme.tintedSurface,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
