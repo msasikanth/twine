@@ -79,9 +79,7 @@ import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.inverseProgress
-import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
@@ -282,14 +280,6 @@ private fun BoxScope.PrimaryActionButtonContainer(
 
   val safeWindowInsets =
     WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
-
-  val keyboardState by keyboardVisibilityAsState()
-
-  LaunchedEffect(keyboardState) {
-    if (keyboardState == KeyboardState.Closed && state.canShowFeedLinkEntry) {
-      presenter.dispatch(HomeEvent.HideFeedLinkEntry)
-    }
-  }
 
   Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
     if (state.canShowFeedLinkEntry) {
