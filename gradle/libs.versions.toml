@@ -6,7 +6,7 @@ compose_compiler = "1.5.2"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
-android_sdk_min = "31"
+android_sdk_min = "23"
 
 sqldelight = "2.0.0"
 ktor = "2.3.4"
