@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -63,10 +62,7 @@ import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeedListItem(
   modifier: Modifier = Modifier,
@@ -77,26 +73,9 @@ internal fun FeedListItem(
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
 ) {
-  val focusManager = LocalFocusManager.current
-  val keyboardState by keyboardVisibilityAsState()
-
-  var feedNameEditable by remember(feed) { mutableStateOf(false) }
-
-  LaunchedEffect(keyboardState) {
-    if (keyboardState == KeyboardState.Closed) {
-      feedNameEditable = false
-    }
-  }
-
   Box(
     modifier =
-      modifier
-        .clickable {
-          focusManager.clearFocus()
-          onFeedSelected(feed)
-        }
-        .fillMaxWidth()
-        .padding(start = 20.dp, end = 12.dp)
+      modifier.clickable { onFeedSelected(feed) }.fillMaxWidth().padding(start = 20.dp, end = 12.dp)
   ) {
     Row(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
@@ -123,11 +102,8 @@ internal fun FeedListItem(
       FeedLabelInput(
         modifier = Modifier.weight(1f),
         value = feed.name,
-        onFeedNameChanged = { newFeedName ->
-          feedNameEditable = false
-          onFeedNameChanged(newFeedName, feed.link)
-        },
-        enabled = feedNameEditable
+        onFeedNameChanged = { newFeedName -> onFeedNameChanged(newFeedName, feed.link) },
+        enabled = false
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
