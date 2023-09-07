@@ -188,6 +188,7 @@ fun HomeScreen(
       sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
       sheetShape =
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = state.feedsSheetMode != Edit
     )
 
     PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, homePresenter, bottomSheetState)
