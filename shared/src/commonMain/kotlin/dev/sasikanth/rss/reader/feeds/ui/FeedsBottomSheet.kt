@@ -48,6 +48,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -86,7 +87,8 @@ internal fun FeedsBottomSheet(
   bottomSheetSwipeTransition: Transition<Float>,
   feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
-  editFeeds: () -> Unit
+  editFeeds: () -> Unit,
+  exitFeedsEdit: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
   val selectedFeed = state.selectedFeed
@@ -138,6 +140,7 @@ internal fun FeedsBottomSheet(
         onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
         editFeeds = editFeeds,
+        exitFeedsEdit = exitFeedsEdit,
         onFeedNameChanged = { newFeedName, feedLink ->
           feedsPresenter.dispatch(
             FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
@@ -158,6 +161,7 @@ private fun BottomSheetExpandedContent(
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
+  exitFeedsEdit: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -167,8 +171,18 @@ private fun BottomSheetExpandedContent(
         modifier = Modifier.background(AppTheme.colorScheme.tintedBackground),
         title = { Text(LocalStrings.current.feeds) },
         navigationIcon = {
-          IconButton(modifier = Modifier.padding(start = 4.dp), onClick = closeSheet) {
-            Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
+          when (feedsSheetMode) {
+            Default,
+            LinkEntry -> {
+              IconButton(modifier = Modifier.padding(start = 4.dp), onClick = closeSheet) {
+                Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
+              }
+            }
+            Edit -> {
+              IconButton(modifier = Modifier.padding(start = 4.dp), onClick = exitFeedsEdit) {
+                Icon(imageVector = Icons.Rounded.ArrowBack, contentDescription = null)
+              }
+            }
           }
         },
         colors =

@@ -52,4 +52,6 @@ sealed interface HomeEvent {
   object SettingsClicked : HomeEvent
 
   object EditFeedsClicked : HomeEvent
+
+  object ExitFeedsEdit : HomeEvent
 }
