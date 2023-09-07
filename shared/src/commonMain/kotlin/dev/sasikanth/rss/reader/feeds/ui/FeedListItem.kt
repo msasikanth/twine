@@ -83,7 +83,8 @@ internal fun FeedListItem(
       verticalAlignment = Alignment.CenterVertically
     ) {
       Box(contentAlignment = Alignment.Center) {
-        SelectionIndicator(selected = selected, animationProgress = 1f)
+        SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
+
         Box(
           modifier =
             Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
