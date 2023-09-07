@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -31,12 +31,8 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,15 +53,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
-import dev.sasikanth.rss.reader.components.DropdownMenuShareItem
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -86,10 +78,8 @@ internal fun FeedListItem(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
 ) {
   val focusManager = LocalFocusManager.current
-  val hapticFeedback = LocalHapticFeedback.current
   val keyboardState by keyboardVisibilityAsState()
 
-  var dropdownMenuExpanded by remember(feed) { mutableStateOf(false) }
   var feedNameEditable by remember(feed) { mutableStateOf(false) }
 
   LaunchedEffect(keyboardState) {
@@ -101,16 +91,10 @@ internal fun FeedListItem(
   Box(
     modifier =
       modifier
-        .combinedClickable(
-          onClick = {
-            focusManager.clearFocus()
-            onFeedSelected(feed)
-          },
-          onLongClick = {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-            dropdownMenuExpanded = true
-          }
-        )
+        .clickable {
+          focusManager.clearFocus()
+          onFeedSelected(feed)
+        }
         .fillMaxWidth()
         .padding(start = 20.dp, end = 12.dp)
   ) {
@@ -147,34 +131,13 @@ internal fun FeedListItem(
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
-      Box {
-        IconButton(onClick = { onDeleteFeed(feed) }) {
-          Icon(
-            imageVector = TwineIcons.Delete,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
-          )
-        }
 
-        DropdownMenu(
-          expanded = dropdownMenuExpanded,
-          onDismissRequest = { dropdownMenuExpanded = false },
-          offset = DpOffset(0.dp, (-48).dp)
-        ) {
-          DropdownMenuItem(
-            text = { Text(LocalStrings.current.editFeedName) },
-            leadingIcon = { Icon(Icons.Rounded.Edit, contentDescription = null) },
-            onClick = {
-              dropdownMenuExpanded = false
-              feedNameEditable = true
-            }
-          )
-
-          DropdownMenuShareItem(
-            contentToShare = feed.link,
-            onShareMenuOpened = { dropdownMenuExpanded = false }
-          )
-        }
+      IconButton(onClick = { onDeleteFeed(feed) }) {
+        Icon(
+          imageVector = TwineIcons.Delete,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
       }
     }
 
