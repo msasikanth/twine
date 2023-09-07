@@ -57,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
@@ -73,6 +74,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.canBlurImage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
 
@@ -259,14 +261,35 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
 @Composable
 private fun FeaturedSectionBlurredBackground(modifier: Modifier = Modifier, imageUrl: String?) {
   BoxWithConstraints(modifier = modifier) {
-    AsyncImage(
-      url = imageUrl!!,
-      modifier =
-        Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
-          .blur(100.dp, BlurredEdgeTreatment.Unbounded),
-      contentDescription = null,
-      contentScale = ContentScale.Crop
-    )
+    if (canBlurImage) {
+      AsyncImage(
+        url = imageUrl!!,
+        modifier =
+          Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+            .blur(100.dp, BlurredEdgeTreatment.Unbounded),
+        contentDescription = null,
+        contentScale = ContentScale.Crop
+      )
+    } else {
+      Box(
+        modifier =
+          Modifier.aspectRatio(0.8f).composed {
+            val colorStops =
+              listOf(
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
+                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+              )
+
+            background(Brush.verticalGradient(colorStops))
+          }
+      )
+    }
 
     Box(
       modifier =

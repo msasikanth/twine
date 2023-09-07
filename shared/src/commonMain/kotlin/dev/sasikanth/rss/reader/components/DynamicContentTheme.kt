@@ -44,6 +44,7 @@ import kotlinx.coroutines.withContext
 private const val TINTED_BACKGROUND = "tinted_background"
 private const val TINTED_SURFACE = "tinted_surface"
 private const val TINTED_FOREGROUND = "tinted_foreground"
+private const val TINTED_HIGHLIGHT = "tinted_highlight"
 private const val OUTLINE = "outline"
 private const val OUTLINE_VARIANT = "outline_VARIANT"
 private const val SURFACE = "surface"
@@ -65,6 +66,8 @@ internal fun DynamicContentTheme(
   val tintedSurface by
     animateColorAsState(dynamicColorState.tintedSurface, spring(stiffness = Spring.StiffnessLow))
   val tintedForeground by
+    animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
+  val tintedHighlight by
     animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
   val outline by
     animateColorAsState(dynamicColorState.outline, spring(stiffness = Spring.StiffnessLow))
@@ -104,6 +107,7 @@ internal fun DynamicContentTheme(
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
+      tintedHighlight = tintedHighlight,
       outline = outline,
       outlineVariant = outlineVariant,
       surface = surface,
@@ -124,6 +128,7 @@ internal fun rememberDynamicColorState(
   defaultTintedBackground: Color = AppTheme.colorScheme.tintedBackground,
   defaultTintedSurface: Color = AppTheme.colorScheme.tintedSurface,
   defaultTintedForeground: Color = AppTheme.colorScheme.tintedForeground,
+  defaultTintedHighlight: Color = AppTheme.colorScheme.tintedHighlight,
   defaultOutline: Color = AppTheme.colorScheme.outline,
   defaultOutlineVariant: Color = AppTheme.colorScheme.outlineVariant,
   defaultSurface: Color = AppTheme.colorScheme.surface,
@@ -142,6 +147,7 @@ internal fun rememberDynamicColorState(
       defaultTintedBackground,
       defaultTintedSurface,
       defaultTintedForeground,
+      defaultTintedHighlight,
       defaultOutline,
       defaultOutlineVariant,
       defaultSurface,
@@ -169,6 +175,7 @@ class DynamicColorState(
   private val defaultTintedBackground: Color,
   private val defaultTintedSurface: Color,
   private val defaultTintedForeground: Color,
+  private val defaultTintedHighlight: Color,
   private val defaultOutline: Color,
   private val defaultOutlineVariant: Color,
   private val defaultSurface: Color,
@@ -189,6 +196,9 @@ class DynamicColorState(
     private set
 
   var tintedForeground by mutableStateOf(defaultTintedForeground)
+    private set
+
+  var tintedHighlight by mutableStateOf(defaultTintedHighlight)
     private set
 
   var outline by mutableStateOf(defaultOutline)
@@ -232,6 +242,7 @@ class DynamicColorState(
     tintedBackground = result?.tintedBackground ?: defaultTintedBackground
     tintedSurface = result?.tintedSurface ?: defaultTintedSurface
     tintedForeground = result?.tintedForeground ?: defaultTintedForeground
+    tintedHighlight = result?.tintedHighlight ?: defaultTintedHighlight
     outline = result?.outline ?: defaultOutline
     outlineVariant = result?.outlineVariant ?: defaultOutlineVariant
     surface = result?.surface ?: defaultSurface
@@ -248,6 +259,7 @@ class DynamicColorState(
     tintedBackground = defaultTintedBackground
     tintedSurface = defaultTintedSurface
     tintedForeground = defaultTintedForeground
+    tintedHighlight = defaultTintedHighlight
     outline = defaultOutline
     outlineVariant = defaultOutlineVariant
     surface = defaultSurface
@@ -276,6 +288,7 @@ class DynamicColorState(
               tintedBackground = Color(colorsMap[TINTED_BACKGROUND]!!),
               tintedSurface = Color(colorsMap[TINTED_SURFACE]!!),
               tintedForeground = Color(colorsMap[TINTED_FOREGROUND]!!),
+              tintedHighlight = Color(colorsMap[TINTED_HIGHLIGHT]!!),
               outline = Color(colorsMap[OUTLINE]!!),
               outlineVariant = Color(colorsMap[OUTLINE_VARIANT]!!),
               surface = Color(colorsMap[SURFACE]!!),
@@ -347,6 +360,19 @@ class DynamicColorState(
                 )
               }
             ),
+          TINTED_HIGHLIGHT to
+            DynamicColor.fromPalette(
+              palette = { s: DynamicScheme -> s.primaryPalette },
+              tone = { s: DynamicScheme -> 40.0 },
+              background = { s: DynamicScheme -> dynamicColors.highestSurface(s) },
+              toneDeltaConstraint = { s: DynamicScheme ->
+                ToneDeltaConstraint(
+                  MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
+                  dynamicColors.primaryContainer(),
+                  TonePolarity.DARKER
+                )
+              }
+            ),
           OUTLINE to dynamicColors.outline(),
           OUTLINE_VARIANT to dynamicColors.outlineVariant(),
           SURFACE to dynamicColors.surface(),
@@ -372,6 +398,7 @@ private data class DynamicColors(
   val tintedBackground: Color,
   val tintedSurface: Color,
   val tintedForeground: Color,
+  val tintedHighlight: Color,
   val outline: Color,
   val outlineVariant: Color,
   val surface: Color,
