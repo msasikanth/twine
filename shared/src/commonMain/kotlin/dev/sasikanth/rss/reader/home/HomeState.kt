@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -32,7 +33,7 @@ data class HomeState(
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
   val selectedFeed: Feed?,
-  val canShowFeedLinkEntry: Boolean,
+  val feedsSheetMode: FeedsSheetMode,
   val feedFetchingState: FeedFetchingState
 ) {
 
@@ -45,7 +46,7 @@ data class HomeState(
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
         selectedFeed = null,
-        canShowFeedLinkEntry = false,
+        feedsSheetMode = FeedsSheetMode.Default,
         feedFetchingState = FeedFetchingState.Idle
       )
   }

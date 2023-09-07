@@ -71,6 +71,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -163,7 +164,7 @@ fun HomeScreen(
         FeedsBottomSheet(
           feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-          showingFeedLinkEntry = state.canShowFeedLinkEntry,
+          feedsSheetMode = state.feedsSheetMode,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
         )
       },
@@ -282,29 +283,32 @@ private fun BoxScope.PrimaryActionButtonContainer(
     WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
 
   Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
-    if (state.canShowFeedLinkEntry) {
-      FeedLinkInputField(
-        modifier =
-          Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
-            .padding(bottom = 24.dp, end = 24.dp),
-        isFetchingFeed = state.isFetchingFeed,
-        onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
-        onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
-      )
-    } else {
-      BottomSheetPrimaryActionButton(
-        modifier =
-          Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
-            translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
-          },
-        selected = state.isAllFeedsSelected,
-        bottomSheetSwipeProgress =
-          (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-            .inverseProgress(),
-        bottomSheetCurrentState = bottomSheetState.currentValue,
-        bottomSheetTargetState = bottomSheetState.targetValue
-      ) {
-        presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
+    when (state.feedsSheetMode) {
+      Default -> {
+        BottomSheetPrimaryActionButton(
+          modifier =
+            Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
+              translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
+            },
+          selected = state.isAllFeedsSelected,
+          bottomSheetSwipeProgress =
+            (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
+              .inverseProgress(),
+          bottomSheetCurrentState = bottomSheetState.currentValue,
+          bottomSheetTargetState = bottomSheetState.targetValue
+        ) {
+          presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
+        }
+      }
+      LinkEntry -> {
+        FeedLinkInputField(
+          modifier =
+            Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
+              .padding(bottom = 24.dp, end = 24.dp),
+          isFetchingFeed = state.isFetchingFeed,
+          onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
+          onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
+        )
       }
     }
   }

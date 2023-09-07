@@ -19,6 +19,7 @@ import androidx.compose.animation.core.Transition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -67,6 +68,7 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
@@ -76,7 +78,7 @@ import kotlinx.collections.immutable.ImmutableList
 internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
   bottomSheetSwipeTransition: Transition<Float>,
-  showingFeedLinkEntry: Boolean,
+  feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
@@ -124,7 +126,7 @@ internal fun FeedsBottomSheet(
           },
         feeds = state.feeds,
         selectedFeed = state.selectedFeed,
-        showingFeedLinkEntry = showingFeedLinkEntry,
+        feedsSheetMode = feedsSheetMode,
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
@@ -142,7 +144,7 @@ internal fun FeedsBottomSheet(
 private fun BottomSheetExpandedContent(
   feeds: ImmutableList<Feed>,
   selectedFeed: Feed?,
-  showingFeedLinkEntry: Boolean,
+  feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
@@ -171,7 +173,7 @@ private fun BottomSheetExpandedContent(
     },
     bottomBar = {
       FeedsSheetBottomBar(
-        showingFeedLinkEntry = showingFeedLinkEntry,
+        feedsSheetMode = feedsSheetMode,
         closeSheet = closeSheet,
       )
     },
@@ -208,12 +210,12 @@ private fun BottomSheetExpandedContent(
 
 @Composable
 private fun FeedsSheetBottomBar(
-  showingFeedLinkEntry: Boolean,
+  feedsSheetMode: FeedsSheetMode,
   modifier: Modifier = Modifier,
   closeSheet: () -> Unit
 ) {
   val imeModifier =
-    if (showingFeedLinkEntry) {
+    if (feedsSheetMode == LinkEntry) {
       Modifier.windowInsetsPadding(WindowInsets.ime)
     } else {
       Modifier
@@ -230,19 +232,29 @@ private fun FeedsSheetBottomBar(
       // Placeholder view with similar height of primary action button and input field
       // from the home screen
       Box(Modifier.requiredHeight(56.dp))
-      if (!showingFeedLinkEntry) {
-        TextButton(
-          modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
-          onClick = closeSheet
-        ) {
-          Text(
-            text = LocalStrings.current.buttonGoBack,
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground
-          )
+      when (feedsSheetMode) {
+        Default -> {
+          GoBackButton(closeSheet)
+        }
+        LinkEntry -> {
+          // no-op
         }
       }
     }
+  }
+}
+
+@Composable
+private fun BoxScope.GoBackButton(closeSheet: () -> Unit) {
+  TextButton(
+    modifier = Modifier.Companion.align(Alignment.CenterEnd).padding(end = 24.dp),
+    onClick = closeSheet
+  ) {
+    Text(
+      text = LocalStrings.current.buttonGoBack,
+      style = MaterialTheme.typography.labelLarge,
+      color = AppTheme.colorScheme.tintedForeground
+    )
   }
 }
 

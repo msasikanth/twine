@@ -27,6 +27,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -216,11 +217,11 @@ class HomePresenter(
     }
 
     private fun onCancelAddFeedClicked() {
-      _state.update { it.copy(canShowFeedLinkEntry = false) }
+      _state.update { it.copy(feedsSheetMode = FeedsSheetMode.Default) }
     }
 
     private fun onAddFeedClicked() {
-      _state.update { it.copy(canShowFeedLinkEntry = true) }
+      _state.update { it.copy(feedsSheetMode = FeedsSheetMode.LinkEntry) }
     }
 
     private fun onHomeSelected() {
