@@ -199,6 +199,7 @@ private fun BottomSheetExpandedContent(
           feed = feed,
           selected = selectedFeed == feed,
           canShowDivider = index != feeds.lastIndex,
+          feedsSheetMode = feedsSheetMode,
           onDeleteFeed = onDeleteFeed,
           onFeedSelected = onFeedSelected,
           onFeedNameChanged = onFeedNameChanged

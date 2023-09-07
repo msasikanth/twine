@@ -58,7 +58,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -69,6 +70,7 @@ internal fun FeedListItem(
   feed: Feed,
   selected: Boolean,
   canShowDivider: Boolean,
+  feedsSheetMode: FeedsSheetMode,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
@@ -97,6 +99,7 @@ internal fun FeedListItem(
           )
         }
       }
+
       Spacer(Modifier.requiredWidth(16.dp))
 
       FeedLabelInput(
@@ -108,13 +111,7 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      IconButton(onClick = { onDeleteFeed(feed) }) {
-        Icon(
-          imageVector = TwineIcons.Delete,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
-      }
+      ActionButtons(feed = feed, feedsSheetMode = feedsSheetMode)
     }
 
     if (canShowDivider) {
@@ -122,6 +119,20 @@ internal fun FeedListItem(
         modifier = Modifier.requiredHeight(1.dp).align(Alignment.BottomStart).padding(end = 12.dp),
         color = AppTheme.colorScheme.tintedSurface
       )
+    }
+  }
+}
+
+@Composable
+private fun ActionButtons(feed: Feed, feedsSheetMode: FeedsSheetMode) {
+  Row {
+    when (feedsSheetMode) {
+      Default -> {
+        ShareIconButton(content = { feed.link })
+      }
+      LinkEntry -> {
+        // no-op
+      }
     }
   }
 }
@@ -215,4 +226,17 @@ private fun FeedLabelInput(
       )
     }
   )
+}
+
+@Composable internal expect fun ShareIconButton(content: () -> String)
+
+@Composable
+internal fun ShareIconButtonInternal(onClick: () -> Unit) {
+  IconButton(onClick = onClick) {
+    Icon(
+      imageVector = TwineIcons.Share,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.tintedForeground
+    )
+  }
 }
