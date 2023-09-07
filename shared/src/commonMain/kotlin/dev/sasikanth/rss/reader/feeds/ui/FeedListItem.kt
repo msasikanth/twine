@@ -131,9 +131,7 @@ private fun ActionButtons(
 ) {
   Row {
     when (feedsSheetMode) {
-      LinkEntry -> {
-        // no-op
-      }
+      LinkEntry,
       Default -> {
         ShareIconButton(content = { feed.link })
       }
