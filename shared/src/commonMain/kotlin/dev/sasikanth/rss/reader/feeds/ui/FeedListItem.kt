@@ -49,8 +49,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -107,7 +105,7 @@ internal fun FeedListItem(
         modifier = Modifier.weight(1f),
         value = feed.name,
         onFeedNameChanged = { newFeedName -> onFeedNameChanged(newFeedName, feed.link) },
-        enabled = false
+        enabled = feedsSheetMode == Edit
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
@@ -162,18 +160,9 @@ private fun FeedLabelInput(
   var nameChangeSaved by remember(value) { mutableStateOf(false) }
 
   val focusManager = LocalFocusManager.current
-  val focusRequester = remember { FocusRequester() }
   val isInputBlank by derivedStateOf { input.isBlank() }
   val interactionSource = remember { MutableInteractionSource() }
   val isFocused by interactionSource.collectIsFocusedAsState()
-
-  LaunchedEffect(enabled) {
-    if (enabled) {
-      focusRequester.requestFocus()
-    } else {
-      focusRequester.freeFocus()
-    }
-  }
 
   LaunchedEffect(isFocused) {
     if (!isFocused && !nameChangeSaved) {
@@ -190,7 +179,7 @@ private fun FeedLabelInput(
   }
 
   TextField(
-    modifier = modifier.requiredHeight(56.dp).fillMaxWidth().focusRequester(focusRequester),
+    modifier = modifier.requiredHeight(56.dp).fillMaxWidth(),
     value = input,
     onValueChange = { input = it },
     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
@@ -203,8 +192,8 @@ private fun FeedLabelInput(
     colors =
       TextFieldDefaults.colors(
         focusedContainerColor = AppTheme.colorScheme.tintedSurface,
-        disabledContainerColor = Color.Transparent,
-        unfocusedContainerColor = Color.Transparent,
+        unfocusedContainerColor = AppTheme.colorScheme.tintedSurface,
+        disabledContainerColor = AppTheme.colorScheme.tintedBackground,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,

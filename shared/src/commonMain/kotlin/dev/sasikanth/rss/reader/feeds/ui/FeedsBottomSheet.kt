@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.database.Feed
@@ -71,7 +72,9 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.inverseProgress
+import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.collections.immutable.ImmutableList
 
 @Composable
@@ -180,7 +183,15 @@ private fun BottomSheetExpandedContent(
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
     val layoutDirection = LocalLayoutDirection.current
+    val focusManager = LocalFocusManager.current
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    val keyboardState by keyboardVisibilityAsState()
+
+    LaunchedEffect(keyboardState) {
+      if (keyboardState == KeyboardState.Closed) {
+        focusManager.clearFocus()
+      }
+    }
 
     LazyColumn(
       modifier =
