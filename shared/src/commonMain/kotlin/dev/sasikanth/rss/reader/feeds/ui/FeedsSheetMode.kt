@@ -17,5 +17,6 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 enum class FeedsSheetMode {
   Default,
-  LinkEntry
+  LinkEntry,
+  Edit
 }

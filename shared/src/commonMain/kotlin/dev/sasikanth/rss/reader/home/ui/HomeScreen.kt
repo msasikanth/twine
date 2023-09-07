@@ -310,6 +310,9 @@ private fun BoxScope.PrimaryActionButtonContainer(
           onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
         )
       }
+      Edit -> {
+        // no-op
+      }
     }
   }
 }

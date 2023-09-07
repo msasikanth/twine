@@ -240,6 +240,9 @@ private fun FeedsSheetBottomBar(
         LinkEntry -> {
           // no-op
         }
+        Edit -> {
+          // no-op
+        }
       }
     }
   }

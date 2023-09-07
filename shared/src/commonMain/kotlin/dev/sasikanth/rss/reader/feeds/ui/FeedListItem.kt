@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -111,7 +112,7 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      ActionButtons(feed = feed, feedsSheetMode = feedsSheetMode)
+      ActionButtons(feed = feed, feedsSheetMode = feedsSheetMode, onDeleteFeed = onDeleteFeed)
     }
 
     if (canShowDivider) {
@@ -124,14 +125,27 @@ internal fun FeedListItem(
 }
 
 @Composable
-private fun ActionButtons(feed: Feed, feedsSheetMode: FeedsSheetMode) {
+private fun ActionButtons(
+  feed: Feed,
+  feedsSheetMode: FeedsSheetMode,
+  onDeleteFeed: (Feed) -> Unit
+) {
   Row {
     when (feedsSheetMode) {
+      LinkEntry -> {
+        // no-op
+      }
       Default -> {
         ShareIconButton(content = { feed.link })
       }
-      LinkEntry -> {
-        // no-op
+      Edit -> {
+        IconButton(onClick = { onDeleteFeed(feed) }) {
+          Icon(
+            imageVector = TwineIcons.Delete,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
       }
     }
   }
