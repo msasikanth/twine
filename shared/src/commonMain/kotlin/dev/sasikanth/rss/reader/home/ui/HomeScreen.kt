@@ -165,7 +165,8 @@ fun HomeScreen(
           feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           feedsSheetMode = state.feedsSheetMode,
-          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
+          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
+          editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) }
         )
       },
       snackbarHost = {

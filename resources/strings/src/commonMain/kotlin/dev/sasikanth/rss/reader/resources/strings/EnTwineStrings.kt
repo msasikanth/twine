@@ -49,5 +49,6 @@ val EnTwineStrings =
     moreMenuOptions = "More menu options",
     settingsBrowserTypeTitle = "Use in-app browser",
     settingsBrowserTypeSubtitle = "When turned off, links will open in your default browser",
-    feeds = "Feeds"
+    feeds = "Feeds",
+    editFeeds = "Edit feeds"
   )

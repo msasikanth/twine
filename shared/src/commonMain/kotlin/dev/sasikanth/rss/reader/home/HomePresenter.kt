@@ -149,7 +149,12 @@ class HomePresenter(
         HomeEvent.SettingsClicked -> {
           /* no-op */
         }
+        HomeEvent.EditFeedsClicked -> editFeedsClicked()
       }
+    }
+
+    private fun editFeedsClicked() {
+      _state.update { it.copy(feedsSheetMode = FeedsSheetMode.Edit) }
     }
 
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
