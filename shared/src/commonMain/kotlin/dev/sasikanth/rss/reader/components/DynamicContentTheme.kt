@@ -363,9 +363,9 @@ class DynamicColorState(
           TINTED_HIGHLIGHT to
             DynamicColor.fromPalette(
               palette = { s: DynamicScheme -> s.primaryPalette },
-              tone = { s: DynamicScheme -> 40.0 },
+              tone = { _: DynamicScheme -> 40.0 },
               background = { s: DynamicScheme -> dynamicColors.highestSurface(s) },
-              toneDeltaConstraint = { s: DynamicScheme ->
+              toneDeltaConstraint = { _: DynamicScheme ->
                 ToneDeltaConstraint(
                   MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
                   dynamicColors.primaryContainer(),
