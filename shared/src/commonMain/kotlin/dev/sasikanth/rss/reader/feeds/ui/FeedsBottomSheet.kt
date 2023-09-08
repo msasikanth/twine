@@ -195,10 +195,12 @@ private fun BottomSheetExpandedContent(
       )
     },
     bottomBar = {
-      FeedsSheetBottomBar(
-        feedsSheetMode = feedsSheetMode,
-        editFeeds = editFeeds,
-      )
+      if (feedsSheetMode != Edit) {
+        FeedsSheetBottomBar(
+          feedsSheetMode = feedsSheetMode,
+          editFeeds = editFeeds,
+        )
+      }
     },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
