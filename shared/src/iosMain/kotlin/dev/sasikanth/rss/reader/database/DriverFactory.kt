@@ -19,7 +19,11 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import app.cash.sqldelight.driver.native.wrapConnection
 import co.touchlab.sqliter.DatabaseConfiguration
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import me.tatarka.inject.annotations.Inject
 
+@Inject
+@AppScope
 actual class DriverFactory {
 
   actual fun createDriver(): SqlDriver {

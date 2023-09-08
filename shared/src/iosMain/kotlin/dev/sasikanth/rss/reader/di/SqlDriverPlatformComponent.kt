@@ -24,7 +24,7 @@ actual interface SqlDriverPlatformComponent {
 
   @Provides
   @AppScope
-  fun providesIOSSqlDriver(): SqlDriver {
-    return DriverFactory().createDriver()
+  fun providesIOSSqlDriver(driverFactory: DriverFactory): SqlDriver {
+    return driverFactory.createDriver()
   }
 }

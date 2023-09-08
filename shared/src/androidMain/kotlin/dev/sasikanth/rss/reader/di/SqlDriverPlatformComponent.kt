@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -25,7 +24,7 @@ actual interface SqlDriverPlatformComponent {
 
   @Provides
   @AppScope
-  fun providesAndroidSqlDriver(context: Context): SqlDriver {
-    return DriverFactory(context).createDriver()
+  fun providesAndroidSqlDriver(driverFactory: DriverFactory): SqlDriver {
+    return driverFactory.createDriver()
   }
 }
