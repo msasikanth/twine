@@ -84,6 +84,10 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked, link) }
   }
 
+  suspend fun deleteBookmark(link: String) {
+    withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
+  }
+
   fun allFeeds(): Flow<List<Feed>> {
     return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
   }

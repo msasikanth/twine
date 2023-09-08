@@ -36,3 +36,6 @@ END;
 
 bookmarks:
 SELECT * FROM bookmark ORDER BY date DESC;
+
+deleteBookmark:
+DELETE FROM bookmark WHERE link = :link;
