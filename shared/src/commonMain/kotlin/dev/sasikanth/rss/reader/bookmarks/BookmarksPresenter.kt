@@ -94,7 +94,11 @@ class BookmarksPresenter(
 
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
-        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
+        if (rssRepository.hasFeed(post.feedLink)) {
+          rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
+        } else {
+          rssRepository.deleteBookmark(link = post.link)
+        }
       }
     }
 

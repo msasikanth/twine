@@ -27,3 +27,6 @@ ORDER BY createdAt DESC;
 
 updateFeedName:
 UPDATE feed SET name = :newFeedName WHERE link = :link;
+
+hasFeed:
+SELECT EXISTS(SELECT 1 FROM feed WHERE link = :link);
