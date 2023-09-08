@@ -82,7 +82,7 @@ internal fun PostMetadata(
       maxLines = 1,
       text = postPublishedAt,
       color = AppTheme.colorScheme.textEmphasisMed,
-      textAlign = TextAlign.Left
+      textAlign = TextAlign.Start
     )
 
     PostOptionsButtonRow(
