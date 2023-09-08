@@ -165,7 +165,9 @@ fun HomeScreen(
           feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           feedsSheetMode = state.feedsSheetMode,
-          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } }
+          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
+          editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
+          exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) }
         )
       },
       snackbarHost = {
@@ -187,6 +189,7 @@ fun HomeScreen(
       sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
       sheetShape =
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = state.feedsSheetMode != Edit
     )
 
     PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, homePresenter, bottomSheetState)
@@ -309,6 +312,9 @@ private fun BoxScope.PrimaryActionButtonContainer(
           onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
           onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
         )
+      }
+      Edit -> {
+        // no-op
       }
     }
   }

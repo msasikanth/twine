@@ -15,8 +15,17 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-enum class FeedsSheetMode {
-  Default,
-  LinkEntry,
-  Edit
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.interop.LocalUIViewController
+import platform.UIKit.UIActivityViewController
+
+@Composable
+internal actual fun ShareIconButton(content: () -> String) {
+  val viewController = LocalUIViewController.current
+
+  ShareIconButtonInternal {
+    val items = listOf(content())
+    val activityController = UIActivityViewController(items, null)
+    viewController.presentViewController(activityController, true, null)
+  }
 }

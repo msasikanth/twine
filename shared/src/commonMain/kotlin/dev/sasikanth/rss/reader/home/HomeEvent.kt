@@ -50,4 +50,8 @@ sealed interface HomeEvent {
   object BookmarksClicked : HomeEvent
 
   object SettingsClicked : HomeEvent
+
+  object EditFeedsClicked : HomeEvent
+
+  object ExitFeedsEdit : HomeEvent
 }

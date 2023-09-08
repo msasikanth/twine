@@ -27,7 +27,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
@@ -149,7 +149,17 @@ class HomePresenter(
         HomeEvent.SettingsClicked -> {
           /* no-op */
         }
+        HomeEvent.EditFeedsClicked -> editFeedsClicked()
+        HomeEvent.ExitFeedsEdit -> exitFeedsEdit()
       }
+    }
+
+    private fun exitFeedsEdit() {
+      _state.update { it.copy(feedsSheetMode = Default) }
+    }
+
+    private fun editFeedsClicked() {
+      _state.update { it.copy(feedsSheetMode = Edit) }
     }
 
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
@@ -159,7 +169,17 @@ class HomePresenter(
     }
 
     private fun backClicked() {
-      coroutineScope.launch { effects.emit(HomeEffect.MinimizeSheet) }
+      coroutineScope.launch {
+        when (state.value.feedsSheetMode) {
+          Default,
+          LinkEntry -> {
+            effects.emit(HomeEffect.MinimizeSheet)
+          }
+          Edit -> {
+            _state.update { it.copy(feedsSheetMode = Default) }
+          }
+        }
+      }
     }
 
     private fun init() {
@@ -217,11 +237,11 @@ class HomePresenter(
     }
 
     private fun onCancelAddFeedClicked() {
-      _state.update { it.copy(feedsSheetMode = FeedsSheetMode.Default) }
+      _state.update { it.copy(feedsSheetMode = Default) }
     }
 
     private fun onAddFeedClicked() {
-      _state.update { it.copy(feedsSheetMode = FeedsSheetMode.LinkEntry) }
+      _state.update { it.copy(feedsSheetMode = LinkEntry) }
     }
 
     private fun onHomeSelected() {

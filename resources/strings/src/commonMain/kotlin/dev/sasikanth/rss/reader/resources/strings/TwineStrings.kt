@@ -45,7 +45,8 @@ data class TwineStrings(
   val moreMenuOptions: String,
   val settingsBrowserTypeTitle: String,
   val settingsBrowserTypeSubtitle: String,
-  val feeds: String
+  val feeds: String,
+  val editFeeds: String
 )
 
 object Locales {
