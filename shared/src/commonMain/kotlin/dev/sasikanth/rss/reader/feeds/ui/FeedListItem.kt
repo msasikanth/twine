@@ -30,13 +30,11 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -62,6 +60,7 @@ import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun FeedListItem(
@@ -155,26 +154,43 @@ private fun FeedLabelInput(
   modifier: Modifier = Modifier,
   enabled: Boolean = true
 ) {
+  // Maintaining local state so that it updates the text field in the UI
+  // instantly and doesn't have any weird UI state issues.
+  //
+  // I probably can extract this out into the presenter, we would have to
+  // maintain a list of text field states that are derived from the feeds list
+  // but this seems like a good alternative.
+  //
   var input by remember(value) { mutableStateOf(value) }
-  var nameChangeSaved by remember(value) { mutableStateOf(false) }
+  var inputModified by remember(value) { mutableStateOf(false) }
 
   val focusManager = LocalFocusManager.current
   val isInputBlank by derivedStateOf { input.isBlank() }
   val interactionSource = remember { MutableInteractionSource() }
   val isFocused by interactionSource.collectIsFocusedAsState()
 
+  fun onFeedNameChanged(clearFocus: Boolean = true) {
+    inputModified = input != value
+
+    if (!isInputBlank && inputModified) {
+      onFeedNameChanged.invoke(input)
+    }
+
+    if (clearFocus) {
+      focusManager.clearFocus()
+    }
+  }
+
   LaunchedEffect(isFocused) {
-    if (!isFocused && !nameChangeSaved) {
+    if (!isFocused && !inputModified) {
       input = value
     }
   }
 
-  fun onFeedNameChanged() {
-    if (!isInputBlank) {
-      nameChangeSaved = true
-      onFeedNameChanged.invoke(input)
-      focusManager.clearFocus()
-    }
+  LaunchedEffect(input) {
+    // Same as setting a debounce
+    delay(500)
+    onFeedNameChanged(clearFocus = false)
   }
 
   TextField(
@@ -201,25 +217,6 @@ private fun FeedLabelInput(
         focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
         unfocusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
       ),
-    trailingIcon = {
-      if (isFocused) {
-        TextButton(
-          modifier = Modifier.padding(end = 8.dp),
-          enabled = !isInputBlank,
-          onClick = { onFeedNameChanged() },
-          colors =
-            ButtonDefaults.textButtonColors(
-              contentColor = AppTheme.colorScheme.tintedForeground,
-              disabledContentColor = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
-            )
-        ) {
-          Text(
-            text = LocalStrings.current.buttonChange,
-            style = MaterialTheme.typography.labelLarge
-          )
-        }
-      }
-    },
     placeholder = {
       Text(
         text = LocalStrings.current.feedNameHint,
