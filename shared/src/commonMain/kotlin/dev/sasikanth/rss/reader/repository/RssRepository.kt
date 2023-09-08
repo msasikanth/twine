@@ -105,22 +105,13 @@ class RssRepository(
 
   fun bookmarks(): Flow<List<PostWithMetadata>> {
     return bookmarkQueries
-      .bookmarks(
-        mapper = { title, description, imageUrl, date, link, bookmarked, feedName, feedIcon, _ ->
-          mapToPostWithMetadata(
-            title,
-            description,
-            imageUrl,
-            date,
-            link,
-            bookmarked,
-            feedName,
-            feedIcon
-          )
-        }
-      )
+      .bookmarks(mapper = ::mapToPostWithMetadata)
       .asFlow()
       .mapToList(ioDispatcher)
+  }
+
+  suspend fun hasFeed(link: String): Boolean {
+    return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
   }
 
   private fun mapToPostWithMetadata(
@@ -131,7 +122,8 @@ class RssRepository(
     link: String,
     bookmarked: Boolean,
     feedName: String,
-    feedIcon: String
+    feedIcon: String,
+    feedLink: String
   ): PostWithMetadata {
     return PostWithMetadata(
       title = title,
@@ -141,7 +133,8 @@ class RssRepository(
       link = link,
       bookmarked = bookmarked,
       feedName = feedName,
-      feedIcon = feedIcon
+      feedIcon = feedIcon,
+      feedLink = feedLink
     )
   }
 }
