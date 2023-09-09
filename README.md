@@ -10,7 +10,7 @@
 
 ### Requirements
 
-- Android: 6+
+- Android: 8.0+
 - iOS: 15.0+
 
 ## Libraries
