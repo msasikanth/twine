@@ -91,7 +91,12 @@ class FeedsPresenter(
         is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
         is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
         is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
+        is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
       }
+    }
+
+    private fun onFeedPinClicked(feed: Feed) {
+      coroutineScope.launch { rssRepository.updateFeedPinStatus(!feed.pinned, feed.link) }
     }
 
     private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {

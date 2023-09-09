@@ -145,7 +145,8 @@ internal fun FeedsBottomSheet(
           feedsPresenter.dispatch(
             FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
           )
-        }
+        },
+        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) }
       )
     }
   }
@@ -162,6 +163,7 @@ private fun BottomSheetExpandedContent(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit,
+  onFeedPinClick: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -235,7 +237,8 @@ private fun BottomSheetExpandedContent(
           feedsSheetMode = feedsSheetMode,
           onDeleteFeed = onDeleteFeed,
           onFeedSelected = onFeedSelected,
-          onFeedNameChanged = onFeedNameChanged
+          onFeedNameChanged = onFeedNameChanged,
+          onFeedPinClick = onFeedPinClick
         )
       }
     }

@@ -56,6 +56,8 @@ import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.Pin
+import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -72,6 +74,7 @@ internal fun FeedListItem(
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
+  onFeedPinClick: (Feed) -> Unit
 ) {
   Box(
     modifier =
@@ -110,7 +113,12 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      ActionButtons(feed = feed, feedsSheetMode = feedsSheetMode, onDeleteFeed = onDeleteFeed)
+      ActionButtons(
+        feed = feed,
+        feedsSheetMode = feedsSheetMode,
+        onDeleteFeed = onDeleteFeed,
+        onFeedPinClick = onFeedPinClick
+      )
     }
 
     if (canShowDivider) {
@@ -126,7 +134,8 @@ internal fun FeedListItem(
 private fun ActionButtons(
   feed: Feed,
   feedsSheetMode: FeedsSheetMode,
-  onDeleteFeed: (Feed) -> Unit
+  onDeleteFeed: (Feed) -> Unit,
+  onFeedPinClick: (Feed) -> Unit
 ) {
   Row {
     when (feedsSheetMode) {
@@ -135,6 +144,18 @@ private fun ActionButtons(
         ShareIconButton(content = { feed.link })
       }
       Edit -> {
+        IconButton(onClick = { onFeedPinClick(feed) }) {
+          Icon(
+            imageVector =
+              if (feed.pinned) {
+                TwineIcons.PinFilled
+              } else {
+                TwineIcons.Pin
+              },
+            contentDescription = null,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
         IconButton(onClick = { onDeleteFeed(feed) }) {
           Icon(
             imageVector = TwineIcons.Delete,
