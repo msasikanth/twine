@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
     title TEXT NOT NULL,
     description TEXT NOT NULL,
@@ -6,6 +8,8 @@ CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
 );
 
 INSERT INTO post_search SELECT title, description, link FROM post;
+
+COMMIT;
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_BEFORE_DELETE
