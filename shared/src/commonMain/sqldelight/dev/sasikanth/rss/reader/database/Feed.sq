@@ -36,3 +36,6 @@ SELECT EXISTS(SELECT 1 FROM feed WHERE link = :link);
 
 updatePinStatus:
 UPDATE feed SET pinned = :pinned WHERE link = :link;
+
+numberOfPinnedFeeds:
+SELECT COUNT(*) FROM feed WHERE pinned = 1;

@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
@@ -120,6 +121,10 @@ class RssRepository(
 
   suspend fun updateFeedPinStatus(pinned: Boolean, link: String) {
     withContext(ioDispatcher) { feedQueries.updatePinStatus(pinned, link) }
+  }
+
+  fun numberOfPinnedFeeds(): Flow<Long> {
+    return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
   private fun mapToPostWithMetadata(
