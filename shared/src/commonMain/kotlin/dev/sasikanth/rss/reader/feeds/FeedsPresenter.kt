@@ -123,7 +123,15 @@ class FeedsPresenter(
     private fun init() {
       rssRepository
         .allFeeds()
-        .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
+        .onEach { feeds ->
+          val feedsGroup = feeds.groupBy { it.pinned }
+          _state.update {
+            it.copy(
+              pinnedFeeds = feedsGroup[true].orEmpty().toImmutableList(),
+              feeds = feedsGroup[false].orEmpty().toImmutableList()
+            )
+          }
+        }
         .launchIn(coroutineScope)
 
       observableSelectedFeed.selectedFeed

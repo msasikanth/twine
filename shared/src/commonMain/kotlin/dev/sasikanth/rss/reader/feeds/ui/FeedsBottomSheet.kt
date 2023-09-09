@@ -114,7 +114,7 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        feeds = state.feeds,
+        feeds = state.allFeeds,
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
@@ -133,6 +133,7 @@ internal fun FeedsBottomSheet(
                 .toFloat()
             alpha = targetAlpha
           },
+        pinnedFeeds = state.pinnedFeeds,
         feeds = state.feeds,
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
@@ -154,6 +155,7 @@ internal fun FeedsBottomSheet(
 
 @Composable
 private fun BottomSheetExpandedContent(
+  pinnedFeeds: ImmutableList<Feed>,
   feeds: ImmutableList<Feed>,
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
@@ -229,6 +231,28 @@ private fun BottomSheetExpandedContent(
           bottom = padding.calculateBottomPadding() + 64.dp
         )
     ) {
+      itemsIndexed(pinnedFeeds) { index, feed ->
+        FeedListItem(
+          feed = feed,
+          selected = selectedFeed == feed,
+          canShowDivider = index != pinnedFeeds.lastIndex,
+          feedsSheetMode = feedsSheetMode,
+          onDeleteFeed = onDeleteFeed,
+          onFeedSelected = onFeedSelected,
+          onFeedNameChanged = onFeedNameChanged,
+          onFeedPinClick = onFeedPinClick
+        )
+      }
+
+      if (pinnedFeeds.isNotEmpty() && feeds.isNotEmpty()) {
+        item {
+          Divider(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            color = AppTheme.colorScheme.tintedSurface
+          )
+        }
+      }
+
       itemsIndexed(feeds) { index, feed ->
         FeedListItem(
           feed = feed,
