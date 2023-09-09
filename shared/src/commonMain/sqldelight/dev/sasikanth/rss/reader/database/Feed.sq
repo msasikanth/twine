@@ -33,3 +33,6 @@ UPDATE feed SET name = :newFeedName WHERE link = :link;
 
 hasFeed:
 SELECT EXISTS(SELECT 1 FROM feed WHERE link = :link);
+
+updatePinStatus:
+UPDATE feed SET pinned = :pinned WHERE link = :link;

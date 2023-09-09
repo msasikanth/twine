@@ -118,6 +118,10 @@ class RssRepository(
     return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
   }
 
+  suspend fun updateFeedPinStatus(pinned: Boolean, link: String) {
+    withContext(ioDispatcher) { feedQueries.updatePinStatus(pinned, link) }
+  }
+
   private fun mapToPostWithMetadata(
     title: String,
     description: String,
