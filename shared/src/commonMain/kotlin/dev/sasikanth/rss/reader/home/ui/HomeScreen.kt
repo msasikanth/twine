@@ -15,9 +15,12 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -285,36 +288,41 @@ private fun BoxScope.PrimaryActionButtonContainer(
   val safeWindowInsets =
     WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
 
-  Box(Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)) {
-    when (state.feedsSheetMode) {
-      Default -> {
-        BottomSheetPrimaryActionButton(
-          modifier =
-            Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
-              translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
-            },
-          selected = state.isAllFeedsSelected,
-          bottomSheetSwipeProgress =
-            (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-              .inverseProgress(),
-          bottomSheetCurrentState = bottomSheetState.currentValue,
-          bottomSheetTargetState = bottomSheetState.targetValue
-        ) {
-          presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
+  AnimatedVisibility(
+    visible = state.feedsSheetMode != Edit,
+    enter = slideInVertically { it },
+    exit = slideOutVertically { it },
+    modifier = Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)
+  ) {
+    Box {
+      when (state.feedsSheetMode) {
+        Default,
+        Edit -> {
+          BottomSheetPrimaryActionButton(
+            modifier =
+              Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
+                translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
+              },
+            selected = state.isAllFeedsSelected,
+            bottomSheetSwipeProgress =
+              (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
+                .inverseProgress(),
+            bottomSheetCurrentState = bottomSheetState.currentValue,
+            bottomSheetTargetState = bottomSheetState.targetValue
+          ) {
+            presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
+          }
         }
-      }
-      LinkEntry -> {
-        FeedLinkInputField(
-          modifier =
-            Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
-              .padding(bottom = 24.dp, end = 24.dp),
-          isFetchingFeed = state.isFetchingFeed,
-          onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
-          onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
-        )
-      }
-      Edit -> {
-        // no-op
+        LinkEntry -> {
+          FeedLinkInputField(
+            modifier =
+              Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
+                .padding(bottom = 24.dp, end = 24.dp),
+            isFetchingFeed = state.isFetchingFeed,
+            onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
+            onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
+          )
+        }
       }
     }
   }

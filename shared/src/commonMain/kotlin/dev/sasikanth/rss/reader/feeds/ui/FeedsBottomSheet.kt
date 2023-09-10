@@ -15,7 +15,10 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -201,12 +204,10 @@ private fun BottomSheetExpandedContent(
       )
     },
     bottomBar = {
-      if (feedsSheetMode != Edit) {
-        FeedsSheetBottomBar(
-          feedsSheetMode = feedsSheetMode,
-          editFeeds = editFeeds,
-        )
-      }
+      FeedsSheetBottomBar(
+        feedsSheetMode = feedsSheetMode,
+        editFeeds = editFeeds,
+      )
     },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
@@ -286,26 +287,30 @@ private fun FeedsSheetBottomBar(
       Modifier
     }
 
-  Box(
-    imeModifier
-      .background(AppTheme.colorScheme.tintedBackground)
-      .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
-      .then(modifier)
+  AnimatedVisibility(
+    visible = feedsSheetMode != Edit,
+    enter = slideInVertically { it },
+    exit = slideOutVertically { it }
   ) {
-    Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
-    Box(Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
-      // Placeholder view with similar height of primary action button and input field
-      // from the home screen
-      Box(Modifier.requiredHeight(56.dp))
-      when (feedsSheetMode) {
-        Default -> {
-          EditFeeds(editFeeds)
-        }
-        LinkEntry -> {
-          // no-op
-        }
-        Edit -> {
-          // no-op
+    Box(
+      imeModifier
+        .background(AppTheme.colorScheme.tintedBackground)
+        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
+        .then(modifier)
+    ) {
+      Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+      Box(Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
+        // Placeholder view with similar height of primary action button and input field
+        // from the home screen
+        Box(Modifier.requiredHeight(56.dp))
+        when (feedsSheetMode) {
+          Default,
+          Edit -> {
+            EditFeeds(editFeeds)
+          }
+          LinkEntry -> {
+            // no-op
+          }
         }
       }
     }
