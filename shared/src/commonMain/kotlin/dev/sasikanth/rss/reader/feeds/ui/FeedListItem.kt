@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -118,13 +119,15 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      ActionButtons(
-        feed = feed,
-        feedsSheetMode = feedsSheetMode,
-        canPinFeed = canPinFeeds,
-        onDeleteFeed = onDeleteFeed,
-        onFeedPinClick = onFeedPinClick
-      )
+      AnimatedContent(feedsSheetMode) {
+        ActionButtons(
+          feed = feed,
+          feedsSheetMode = it,
+          canPinFeed = canPinFeeds,
+          onDeleteFeed = onDeleteFeed,
+          onFeedPinClick = onFeedPinClick
+        )
+      }
     }
 
     if (canShowDivider) {
