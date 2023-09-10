@@ -42,8 +42,8 @@ fun BoxScope.ScrollToTopButton(
   val coroutineScope = rememberCoroutineScope()
   AnimatedVisibility(
     visible = visible,
-    enter = slideInVertically { it / 2 },
-    exit = slideOutVertically { it / 2 },
+    enter = slideInVertically { it },
+    exit = slideOutVertically { it },
     modifier = Modifier.align(Alignment.BottomEnd)
   ) {
     ExtendedFloatingActionButton(
