@@ -125,7 +125,7 @@ class FeedsPresenter(
         .allFeeds()
         .onEach { feeds ->
           val feedsGroup = feeds.groupBy { it.pinnedAt != null }.entries
-          val pinnedFeeds = feedsGroup.firstOrNull()?.value.orEmpty()
+          val pinnedFeeds = feedsGroup.firstOrNull()?.value.orEmpty().sortedBy { it.pinnedAt }
           val unPinnedFeeds = feedsGroup.elementAtOrNull(1)?.value.orEmpty()
 
           _state.update {
