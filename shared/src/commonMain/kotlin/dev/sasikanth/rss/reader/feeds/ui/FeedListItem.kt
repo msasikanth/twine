@@ -119,10 +119,10 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      AnimatedContent(feedsSheetMode) {
+      AnimatedContent(feedsSheetMode == Edit) {
         ActionButtons(
           feed = feed,
-          feedsSheetMode = it,
+          isInEditMode = it,
           canPinFeed = canPinFeeds,
           onDeleteFeed = onDeleteFeed,
           onFeedPinClick = onFeedPinClick
@@ -142,28 +142,24 @@ internal fun FeedListItem(
 @Composable
 private fun ActionButtons(
   feed: Feed,
-  feedsSheetMode: FeedsSheetMode,
+  isInEditMode: Boolean,
   canPinFeed: Boolean,
   onDeleteFeed: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit
 ) {
   Row {
-    when (feedsSheetMode) {
-      LinkEntry,
-      Default -> {
-        ShareIconButton(content = { feed.link })
-      }
-      Edit -> {
-        PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
+    if (isInEditMode) {
+      PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
 
-        IconButton(onClick = { onDeleteFeed(feed) }) {
-          Icon(
-            imageVector = TwineIcons.Delete,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
-          )
-        }
+      IconButton(onClick = { onDeleteFeed(feed) }) {
+        Icon(
+          imageVector = TwineIcons.Delete,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
       }
+    } else {
+      ShareIconButton(content = { feed.link })
     }
   }
 }
