@@ -8,8 +8,7 @@ CREATE TABLE feed(
   homepageLink TEXT NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
-  pinned INTEGER AS Boolean NOT NULL DEFAULT 0,
-  rank INTEGER NOT NULL DEFAULT 0
+  pinned INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
