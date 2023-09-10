@@ -76,10 +76,14 @@ internal fun FeedListItem(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   onFeedPinClick: (Feed) -> Unit
 ) {
-  Box(
-    modifier =
-      modifier.clickable { onFeedSelected(feed) }.fillMaxWidth().padding(start = 20.dp, end = 12.dp)
-  ) {
+  val clickableModifier =
+    if (feedsSheetMode != Edit) {
+      modifier.clickable { onFeedSelected(feed) }
+    } else {
+      modifier
+    }
+
+  Box(modifier = clickableModifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp)) {
     Row(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
