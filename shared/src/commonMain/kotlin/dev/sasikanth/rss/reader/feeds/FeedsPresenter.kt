@@ -91,7 +91,12 @@ class FeedsPresenter(
         is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
         is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
         is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
+        is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
       }
+    }
+
+    private fun onFeedPinClicked(feed: Feed) {
+      coroutineScope.launch { rssRepository.toggleFeedPinStatus(feed) }
     }
 
     private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
@@ -118,7 +123,25 @@ class FeedsPresenter(
     private fun init() {
       rssRepository
         .allFeeds()
-        .onEach { feeds -> _state.update { it.copy(feeds = feeds.toImmutableList()) } }
+        .onEach { feeds ->
+          val feedsGroup = feeds.groupBy { it.pinnedAt != null }.entries
+          val pinnedFeeds = feedsGroup.firstOrNull()?.value.orEmpty().sortedBy { it.pinnedAt }
+          val unPinnedFeeds = feedsGroup.elementAtOrNull(1)?.value.orEmpty()
+
+          _state.update {
+            it.copy(
+              pinnedFeeds = pinnedFeeds.toImmutableList(),
+              feeds = unPinnedFeeds.toImmutableList()
+            )
+          }
+        }
+        .launchIn(coroutineScope)
+
+      rssRepository
+        .numberOfPinnedFeeds()
+        .onEach { numberOfPinnedFeeds ->
+          _state.update { it.copy(numberOfPinnedFeeds = numberOfPinnedFeeds) }
+        }
         .launchIn(coroutineScope)
 
       observableSelectedFeed.selectedFeed

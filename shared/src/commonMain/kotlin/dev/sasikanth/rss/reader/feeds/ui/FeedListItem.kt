@@ -56,6 +56,8 @@ import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.Pin
+import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -68,15 +70,21 @@ internal fun FeedListItem(
   feed: Feed,
   selected: Boolean,
   canShowDivider: Boolean,
+  canPinFeeds: Boolean,
   feedsSheetMode: FeedsSheetMode,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
+  onFeedPinClick: (Feed) -> Unit
 ) {
-  Box(
-    modifier =
-      modifier.clickable { onFeedSelected(feed) }.fillMaxWidth().padding(start = 20.dp, end = 12.dp)
-  ) {
+  val clickableModifier =
+    if (feedsSheetMode != Edit) {
+      modifier.clickable { onFeedSelected(feed) }
+    } else {
+      modifier
+    }
+
+  Box(modifier = clickableModifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp)) {
     Row(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
@@ -110,7 +118,13 @@ internal fun FeedListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      ActionButtons(feed = feed, feedsSheetMode = feedsSheetMode, onDeleteFeed = onDeleteFeed)
+      ActionButtons(
+        feed = feed,
+        feedsSheetMode = feedsSheetMode,
+        canPinFeed = canPinFeeds,
+        onDeleteFeed = onDeleteFeed,
+        onFeedPinClick = onFeedPinClick
+      )
     }
 
     if (canShowDivider) {
@@ -126,7 +140,9 @@ internal fun FeedListItem(
 private fun ActionButtons(
   feed: Feed,
   feedsSheetMode: FeedsSheetMode,
-  onDeleteFeed: (Feed) -> Unit
+  canPinFeed: Boolean,
+  onDeleteFeed: (Feed) -> Unit,
+  onFeedPinClick: (Feed) -> Unit
 ) {
   Row {
     when (feedsSheetMode) {
@@ -135,6 +151,8 @@ private fun ActionButtons(
         ShareIconButton(content = { feed.link })
       }
       Edit -> {
+        PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
+
         IconButton(onClick = { onDeleteFeed(feed) }) {
           Icon(
             imageVector = TwineIcons.Delete,
@@ -144,6 +162,33 @@ private fun ActionButtons(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun PinFeedIconButton(
+  feed: Feed,
+  canPinFeed: Boolean,
+  onFeedPinClick: (Feed) -> Unit,
+) {
+  val pinnedIconColor =
+    if (canPinFeed) {
+      AppTheme.colorScheme.tintedForeground
+    } else {
+      AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
+    }
+
+  IconButton(onClick = { onFeedPinClick(feed) }, enabled = canPinFeed) {
+    Icon(
+      imageVector =
+        if (feed.pinnedAt != null) {
+          TwineIcons.PinFilled
+        } else {
+          TwineIcons.Pin
+        },
+      contentDescription = null,
+      tint = pinnedIconColor
+    )
   }
 }
 

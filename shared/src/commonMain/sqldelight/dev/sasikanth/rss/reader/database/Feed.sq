@@ -6,7 +6,8 @@ CREATE TABLE feed(
   description TEXT NOT NULL,
   homepageLink TEXT NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
-  link TEXT NOT NULL PRIMARY KEY
+  link TEXT NOT NULL PRIMARY KEY,
+  pinnedAt INTEGER AS Instant
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -23,10 +24,16 @@ DELETE FROM feed WHERE link = :link;
 
 feeds:
 SELECT * FROM feed
-ORDER BY createdAt DESC;
+ORDER BY pinnedAt DESC, createdAt DESC;
 
 updateFeedName:
 UPDATE feed SET name = :newFeedName WHERE link = :link;
 
 hasFeed:
 SELECT EXISTS(SELECT 1 FROM feed WHERE link = :link);
+
+updatePinnedAt:
+UPDATE feed SET pinnedAt = :pinnedAt WHERE link = :link;
+
+numberOfPinnedFeeds:
+SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;

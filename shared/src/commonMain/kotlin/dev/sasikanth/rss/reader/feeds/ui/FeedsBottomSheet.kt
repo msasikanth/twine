@@ -114,7 +114,7 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        feeds = state.feeds,
+        feeds = state.allFeeds,
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
@@ -133,9 +133,11 @@ internal fun FeedsBottomSheet(
                 .toFloat()
             alpha = targetAlpha
           },
+        pinnedFeeds = state.pinnedFeeds,
         feeds = state.feeds,
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
+        canPinFeeds = state.canPinFeeds,
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
@@ -145,7 +147,8 @@ internal fun FeedsBottomSheet(
           feedsPresenter.dispatch(
             FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
           )
-        }
+        },
+        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) }
       )
     }
   }
@@ -153,15 +156,18 @@ internal fun FeedsBottomSheet(
 
 @Composable
 private fun BottomSheetExpandedContent(
+  pinnedFeeds: ImmutableList<Feed>,
   feeds: ImmutableList<Feed>,
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
+  canPinFeeds: Boolean,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit,
+  onFeedPinClick: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -227,15 +233,40 @@ private fun BottomSheetExpandedContent(
           bottom = padding.calculateBottomPadding() + 64.dp
         )
     ) {
+      itemsIndexed(pinnedFeeds) { index, feed ->
+        FeedListItem(
+          feed = feed,
+          selected = selectedFeed == feed,
+          canShowDivider = index != pinnedFeeds.lastIndex,
+          canPinFeeds = true,
+          feedsSheetMode = feedsSheetMode,
+          onDeleteFeed = onDeleteFeed,
+          onFeedSelected = onFeedSelected,
+          onFeedNameChanged = onFeedNameChanged,
+          onFeedPinClick = onFeedPinClick
+        )
+      }
+
+      if (pinnedFeeds.isNotEmpty() && feeds.isNotEmpty()) {
+        item {
+          Divider(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            color = AppTheme.colorScheme.tintedSurface
+          )
+        }
+      }
+
       itemsIndexed(feeds) { index, feed ->
         FeedListItem(
           feed = feed,
           selected = selectedFeed == feed,
           canShowDivider = index != feeds.lastIndex,
+          canPinFeeds = canPinFeeds,
           feedsSheetMode = feedsSheetMode,
           onDeleteFeed = onDeleteFeed,
           onFeedSelected = onFeedSelected,
-          onFeedNameChanged = onFeedNameChanged
+          onFeedNameChanged = onFeedNameChanged,
+          onFeedPinClick = onFeedPinClick
         )
       }
     }

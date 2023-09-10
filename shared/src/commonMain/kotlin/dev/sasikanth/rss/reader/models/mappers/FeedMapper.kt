@@ -26,5 +26,6 @@ fun FeedPayload.toFeed() =
     description = description,
     homepageLink = homepageLink,
     createdAt = Clock.System.now(),
-    link = link
+    link = link,
+    pinnedAt = null
   )

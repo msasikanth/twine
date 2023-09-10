@@ -30,7 +30,7 @@ For full list of dependencies used, please take a look at the [catalog](/gradle/
 - [x] Background sync
 - [x] Bookmarks
 - [x] Search
-- [ ] Rearrange feeds
+- [x] ~~Rearrange~~ Pinned feeds
 - [x] Rename feed
 
 ## Made by

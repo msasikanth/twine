@@ -18,11 +18,29 @@ package dev.sasikanth.rss.reader.feeds
 import dev.sasikanth.rss.reader.database.Feed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
-data class FeedsState(val feeds: ImmutableList<Feed>, val selectedFeed: Feed?) {
+data class FeedsState(
+  val pinnedFeeds: ImmutableList<Feed>,
+  val feeds: ImmutableList<Feed>,
+  val selectedFeed: Feed?,
+  val numberOfPinnedFeeds: Long
+) {
+
+  val allFeeds: ImmutableList<Feed>
+    get() = (pinnedFeeds + feeds).toImmutableList()
+
+  val canPinFeeds: Boolean
+    get() = numberOfPinnedFeeds <= 10L
 
   companion object {
 
-    val DEFAULT = FeedsState(feeds = persistentListOf(), selectedFeed = null)
+    val DEFAULT =
+      FeedsState(
+        pinnedFeeds = persistentListOf(),
+        feeds = persistentListOf(),
+        selectedFeed = null,
+        numberOfPinnedFeeds = 0
+      )
   }
 }

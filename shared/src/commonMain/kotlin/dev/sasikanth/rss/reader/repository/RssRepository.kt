@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOne
 import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
@@ -116,6 +118,20 @@ class RssRepository(
 
   suspend fun hasFeed(link: String): Boolean {
     return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
+  }
+
+  suspend fun toggleFeedPinStatus(feed: Feed) {
+    val now =
+      if (feed.pinnedAt == null) {
+        Clock.System.now()
+      } else {
+        null
+      }
+    withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
+  }
+
+  fun numberOfPinnedFeeds(): Flow<Long> {
+    return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
   private fun mapToPostWithMetadata(
