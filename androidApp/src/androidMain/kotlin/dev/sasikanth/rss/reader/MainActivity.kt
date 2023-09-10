@@ -55,13 +55,21 @@ class MainActivity : AppCompatActivity() {
       Default -> {
         val intent =
           Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
-        startActivity(intent)
+        if (intent.resolveActivity(packageManager) != null) {
+          startActivity(intent)
+        } else {
+          openCustomTab(url)
+        }
       }
       InApp -> {
-        val intent = CustomTabsIntent.Builder().build()
-        intent.launchUrl(this, url.toUri())
+        openCustomTab(url)
       }
     }
+  }
+
+  private fun openCustomTab(url: String) {
+    val intent = CustomTabsIntent.Builder().build()
+    intent.launchUrl(this, url.toUri())
   }
 }
 
