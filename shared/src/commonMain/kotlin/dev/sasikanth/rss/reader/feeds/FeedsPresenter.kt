@@ -134,6 +134,13 @@ class FeedsPresenter(
         }
         .launchIn(coroutineScope)
 
+      rssRepository
+        .numberOfPinnedFeeds()
+        .onEach { numberOfPinnedFeeds ->
+          _state.update { it.copy(numberOfPinnedFeeds = numberOfPinnedFeeds) }
+        }
+        .launchIn(coroutineScope)
+
       observableSelectedFeed.selectedFeed
         .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
         .launchIn(coroutineScope)

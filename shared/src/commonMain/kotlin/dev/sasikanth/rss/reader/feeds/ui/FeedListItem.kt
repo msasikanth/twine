@@ -70,6 +70,7 @@ internal fun FeedListItem(
   feed: Feed,
   selected: Boolean,
   canShowDivider: Boolean,
+  canPinFeeds: Boolean,
   feedsSheetMode: FeedsSheetMode,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
@@ -120,6 +121,7 @@ internal fun FeedListItem(
       ActionButtons(
         feed = feed,
         feedsSheetMode = feedsSheetMode,
+        canPinFeed = canPinFeeds,
         onDeleteFeed = onDeleteFeed,
         onFeedPinClick = onFeedPinClick
       )
@@ -138,6 +140,7 @@ internal fun FeedListItem(
 private fun ActionButtons(
   feed: Feed,
   feedsSheetMode: FeedsSheetMode,
+  canPinFeed: Boolean,
   onDeleteFeed: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit
 ) {
@@ -148,18 +151,8 @@ private fun ActionButtons(
         ShareIconButton(content = { feed.link })
       }
       Edit -> {
-        IconButton(onClick = { onFeedPinClick(feed) }) {
-          Icon(
-            imageVector =
-              if (feed.pinned) {
-                TwineIcons.PinFilled
-              } else {
-                TwineIcons.Pin
-              },
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
-          )
-        }
+        PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
+
         IconButton(onClick = { onDeleteFeed(feed) }) {
           Icon(
             imageVector = TwineIcons.Delete,
@@ -169,6 +162,33 @@ private fun ActionButtons(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun PinFeedIconButton(
+  feed: Feed,
+  canPinFeed: Boolean,
+  onFeedPinClick: (Feed) -> Unit,
+) {
+  val pinnedIconColor =
+    if (canPinFeed) {
+      AppTheme.colorScheme.tintedForeground
+    } else {
+      AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
+    }
+
+  IconButton(onClick = { onFeedPinClick(feed) }, enabled = canPinFeed) {
+    Icon(
+      imageVector =
+        if (feed.pinned) {
+          TwineIcons.PinFilled
+        } else {
+          TwineIcons.Pin
+        },
+      contentDescription = null,
+      tint = pinnedIconColor
+    )
   }
 }
 
