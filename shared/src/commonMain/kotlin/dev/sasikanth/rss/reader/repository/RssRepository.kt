@@ -120,14 +120,14 @@ class RssRepository(
     return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
   }
 
-  suspend fun updateFeedPinStatus(feed: Feed) {
+  suspend fun toggleFeedPinStatus(feed: Feed) {
     val now =
       if (feed.pinnedAt == null) {
         Clock.System.now()
       } else {
         null
       }
-    withContext(ioDispatcher) { feedQueries.updatePinStatus(pinnedAt = now, link = feed.link) }
+    withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
   }
 
   fun numberOfPinnedFeeds(): Flow<Long> {

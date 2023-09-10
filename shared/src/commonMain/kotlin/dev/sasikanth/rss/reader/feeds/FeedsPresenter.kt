@@ -96,7 +96,7 @@ class FeedsPresenter(
     }
 
     private fun onFeedPinClicked(feed: Feed) {
-      coroutineScope.launch { rssRepository.updateFeedPinStatus(feed) }
+      coroutineScope.launch { rssRepository.toggleFeedPinStatus(feed) }
     }
 
     private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
