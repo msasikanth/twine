@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
@@ -119,8 +120,14 @@ class RssRepository(
     return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
   }
 
-  suspend fun updateFeedPinStatus(pinned: Boolean, link: String) {
-    withContext(ioDispatcher) { feedQueries.updatePinStatus(pinned, link) }
+  suspend fun updateFeedPinStatus(feed: Feed) {
+    val now =
+      if (feed.pinnedAt == null) {
+        Clock.System.now()
+      } else {
+        null
+      }
+    withContext(ioDispatcher) { feedQueries.updatePinStatus(pinnedAt = now, link = feed.link) }
   }
 
   fun numberOfPinnedFeeds(): Flow<Long> {

@@ -96,7 +96,7 @@ class FeedsPresenter(
     }
 
     private fun onFeedPinClicked(feed: Feed) {
-      coroutineScope.launch { rssRepository.updateFeedPinStatus(!feed.pinned, feed.link) }
+      coroutineScope.launch { rssRepository.updateFeedPinStatus(feed) }
     }
 
     private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
@@ -124,11 +124,14 @@ class FeedsPresenter(
       rssRepository
         .allFeeds()
         .onEach { feeds ->
-          val feedsGroup = feeds.groupBy { it.pinned }
+          val feedsGroup = feeds.groupBy { it.pinnedAt != null }.entries
+          val pinnedFeeds = feedsGroup.firstOrNull()?.value.orEmpty()
+          val unPinnedFeeds = feedsGroup.elementAtOrNull(1)?.value.orEmpty()
+
           _state.update {
             it.copy(
-              pinnedFeeds = feedsGroup[true].orEmpty().toImmutableList(),
-              feeds = feedsGroup[false].orEmpty().toImmutableList()
+              pinnedFeeds = pinnedFeeds.toImmutableList(),
+              feeds = unPinnedFeeds.toImmutableList()
             )
           }
         }

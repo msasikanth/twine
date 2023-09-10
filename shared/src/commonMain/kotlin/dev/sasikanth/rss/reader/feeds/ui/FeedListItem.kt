@@ -181,7 +181,7 @@ private fun PinFeedIconButton(
   IconButton(onClick = { onFeedPinClick(feed) }, enabled = canPinFeed) {
     Icon(
       imageVector =
-        if (feed.pinned) {
+        if (feed.pinnedAt != null) {
           TwineIcons.PinFilled
         } else {
           TwineIcons.Pin
