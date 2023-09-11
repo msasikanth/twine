@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.components.bottomsheet
 
+import androidx.compose.foundation.AtomicReference
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.runtime.Stable
 import kotlinx.coroutines.CancellationException
@@ -22,18 +23,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-
-/**
- * This is an internal copy of androidx.compose.foundation.MutatorMutex with an additional tryMutate
- * method. Do not modify, except for tryMutate. **
- */
-expect class InternalAtomicReference<V>(value: V) {
-  fun get(): V
-
-  fun set(value: V)
-
-  fun compareAndSet(expect: V, newValue: V): Boolean
-}
 
 /**
  * Mutual exclusion for UI state mutation over time.
@@ -57,7 +46,7 @@ internal class InternalMutatorMutex {
     fun cancel() = job.cancel()
   }
 
-  private val currentMutator = InternalAtomicReference<Mutator?>(null)
+  private val currentMutator = AtomicReference<Mutator?>(null)
   private val mutex = Mutex()
 
   private fun tryMutateOrCancel(mutator: Mutator) {
