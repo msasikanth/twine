@@ -1,7 +1,5 @@
-*.iml
 .gradle
 /local.properties
-/.idea
 .DS_Store
 build/
 /captures
@@ -14,3 +12,13 @@ iosApp/iosApp.xcodeproj/*
 !iosApp/iosApp.xcodeproj/project.pbxproj
 shared/shared.podspec
 androidApp/release
+
+# IntelliJ .idea folder
+.idea/workspace.xml
+.idea/misc.xml
+.idea/caches
+.idea/compiler.xml
+.idea/artifacts
+.idea/deploymentTargetDropDown.xml
+gradle.xml
+*.iml
