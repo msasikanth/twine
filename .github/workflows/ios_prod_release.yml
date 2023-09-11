@@ -89,6 +89,14 @@ jobs:
           --project ${{ secrets.SENTRY_PROJECT }} \
           $RUNNER_TEMP/twine.xcarchive/dSYMs
 
+      - name: Upload app to TestFlight
+        env:
+          API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
+          API_ISSUER: ${{ secrets.APP_STORE_ISSUER_ID }}
+          APP_PATH: ${{ runner.temp }}/build/twine.ipa
+        run: |
+          xcrun altool --upload-app --type ios -f $APP_PATH --apiKey $API_KEY --apiIssuer $API_ISSUER
+
       - name: Upload application
         uses: actions/upload-artifact@v3
         with:
