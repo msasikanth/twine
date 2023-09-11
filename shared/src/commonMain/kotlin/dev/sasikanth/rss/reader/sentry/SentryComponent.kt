@@ -15,4 +15,15 @@
  */
 package dev.sasikanth.rss.reader.sentry
 
-expect interface SentryComponent
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
+import me.tatarka.inject.annotations.IntoSet
+import me.tatarka.inject.annotations.Provides
+
+interface SentryComponent {
+
+  @IntoSet
+  @Provides
+  @AppScope
+  fun providesSentryInitializer(bind: SentryInitializer): Initializer = bind
+}

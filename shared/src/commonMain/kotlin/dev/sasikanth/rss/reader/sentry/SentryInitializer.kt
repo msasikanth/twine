@@ -15,15 +15,17 @@
  */
 package dev.sasikanth.rss.reader.sentry
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.reader.BuildKonfig
 import dev.sasikanth.rss.reader.initializers.Initializer
-import me.tatarka.inject.annotations.IntoSet
-import me.tatarka.inject.annotations.Provides
+import io.sentry.kotlin.multiplatform.Sentry
+import me.tatarka.inject.annotations.Inject
 
-actual interface SentryComponent {
+@Inject
+class SentryInitializer : Initializer {
 
-  @IntoSet
-  @Provides
-  @AppScope
-  fun providesSentryInitializer(bind: SentryInitializer): Initializer = bind
+  override fun initialize() {
+    if (BuildKonfig.SENTRY_DSN.isNotBlank()) {
+      Sentry.init { options -> options.dsn = BuildKonfig.SENTRY_DSN }
+    }
+  }
 }
