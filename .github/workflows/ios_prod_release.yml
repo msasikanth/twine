@@ -97,6 +97,12 @@ jobs:
           --project ${{ secrets.SENTRY_PROJECT }} \
           $RUNNER_TEMP/twine.xcarchive/dSYMs
 
+      - name: Clean up keychain and provisioning profile
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
       - name: Upload app to TestFlight
         env:
           API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
@@ -110,9 +116,3 @@ jobs:
         with:
           name: app
           path: ${{ runner.temp }}/build/twine.ipa
-
-      - name: Clean up keychain and provisioning profile
-        if: ${{ always() }}
-        run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
