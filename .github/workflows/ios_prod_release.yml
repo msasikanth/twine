@@ -28,6 +28,14 @@ jobs:
           distribution: zulu
           cache: 'gradle'
 
+      - name: Install private API key P8
+        env:
+          PRIVATE_API_KEY_BASE64: ${{ secrets.APP_STORE_API_PRIVATE_KEY }}
+          API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
+        run: |
+          mkdir -p ~/private_keys
+          echo -n "$PRIVATE_API_KEY_BASE64" | base64 --decode --output ~/private_keys/AuthKey_$API_KEY.p8
+
       - name: Install the Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
