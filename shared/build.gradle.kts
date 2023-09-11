@@ -32,7 +32,8 @@ plugins {
 buildkonfig {
   packageName = "dev.sasikanth.reader"
   defaultConfigs {
-    buildConfigField(STRING, "SENTRY_DSN", project.properties["sentry.dsn"] as? String)
+    val sentryDsn = System.getenv("SENTRY_DSN")
+    buildConfigField(STRING, "SENTRY_DSN", sentryDsn.orEmpty())
   }
 }
 

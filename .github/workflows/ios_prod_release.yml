@@ -15,6 +15,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      TERM: dumb
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - uses: actions/checkout@v3
 

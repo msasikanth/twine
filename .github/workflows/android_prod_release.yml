@@ -22,6 +22,7 @@ jobs:
       SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
       SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
       - name: Setup versionName regardless of how this action is triggered
         id: version_name
@@ -50,7 +51,7 @@ jobs:
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
       - name: Build release artifacts
-        run: ./gradlew --no-daemon androidApp:bundleRelease -Psentry.dsn=${{ secrets.SENTRY_DSN }}
+        run: ./gradlew --no-daemon androidApp:bundleRelease
 
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v3
