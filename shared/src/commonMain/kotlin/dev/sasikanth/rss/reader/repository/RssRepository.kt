@@ -15,9 +15,11 @@
  */
 package dev.sasikanth.rss.reader.repository
 
+import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
@@ -109,11 +111,15 @@ class RssRepository(
       .mapToList(ioDispatcher)
   }
 
-  fun bookmarks(): Flow<List<PostWithMetadata>> {
-    return bookmarkQueries
-      .bookmarks(mapper = ::mapToPostWithMetadata)
-      .asFlow()
-      .mapToList(ioDispatcher)
+  fun bookmarks(): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery = bookmarkQueries.countBookmarks(),
+      transacter = bookmarkQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        bookmarkQueries.bookmarks(limit, offset, ::mapToPostWithMetadata)
+      }
+    )
   }
 
   suspend fun hasFeed(link: String): Boolean {

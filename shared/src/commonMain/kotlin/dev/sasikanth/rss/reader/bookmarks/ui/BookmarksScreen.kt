@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -43,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
@@ -57,6 +57,7 @@ internal fun BookmarksScreen(
   modifier: Modifier = Modifier
 ) {
   val state by bookmarksPresenter.state.collectAsState()
+  val bookmarks = state.bookmarks.collectAsLazyPagingItems()
   val listState = rememberLazyListState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
   val layoutDirection = LocalLayoutDirection.current
@@ -97,19 +98,22 @@ internal fun BookmarksScreen(
             ),
           state = listState
         ) {
-          itemsIndexed(state.bookmarks) { index, post ->
-            PostListItem(
-              item = post,
-              onClick = { openLink(post.link) },
-              onPostBookmarkClick = {
-                bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
-              }
-            )
-            if (index != state.bookmarks.lastIndex) {
-              Divider(
-                modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                color = AppTheme.colorScheme.surfaceContainer
+          items(count = bookmarks.itemCount) { index ->
+            val post = bookmarks[index]
+            if (post != null) {
+              PostListItem(
+                item = post,
+                onClick = { openLink(post.link) },
+                onPostBookmarkClick = {
+                  bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
+                }
               )
+              if (index != bookmarks.itemCount) {
+                Divider(
+                  modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+                  color = AppTheme.colorScheme.surfaceContainer
+                )
+              }
             }
           }
         }
