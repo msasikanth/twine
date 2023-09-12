@@ -28,6 +28,14 @@ jobs:
           distribution: zulu
           cache: 'gradle'
 
+      - name: Install private API key P8
+        env:
+          PRIVATE_API_KEY_BASE64: ${{ secrets.APP_STORE_API_PRIVATE_KEY }}
+          API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
+        run: |
+          mkdir -p ~/private_keys
+          echo -n "$PRIVATE_API_KEY_BASE64" | base64 --decode --output ~/private_keys/AuthKey_$API_KEY.p8
+
       - name: Install the Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -69,7 +77,10 @@ jobs:
           -sdk iphoneos \
           -configuration Release \
           -destination generic/platform=iOS \
+          DEVELOPMENT_TEAM=6XCS8KZXDA \
+          PROVISIONING_PROFILE=${{ secrets.PROVISION_PROFILE_ID }} \
           clean archive
+          CODE_SIGN_IDENTITY="iPhone Distribution: Sasi Kanth (6XCS8KZXDA)"
 
       - name: Export ipa
         env:
@@ -89,6 +100,12 @@ jobs:
           --project ${{ secrets.SENTRY_PROJECT }} \
           $RUNNER_TEMP/twine.xcarchive/dSYMs
 
+      - name: Clean up keychain and provisioning profile
+        if: ${{ always() }}
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
       - name: Upload app to TestFlight
         env:
           API_KEY: ${{ secrets.APP_STORE_KEY_ID }}
@@ -102,9 +119,3 @@ jobs:
         with:
           name: app
           path: ${{ runner.temp }}/build/twine.ipa
-
-      - name: Clean up keychain and provisioning profile
-        if: ${{ always() }}
-        run: |
-          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
-          rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
