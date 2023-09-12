@@ -15,12 +15,13 @@
  */
 package dev.sasikanth.rss.reader.search
 
+import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.database.PostWithMetadata
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 data class SearchState(
-  val searchResults: ImmutableList<PostWithMetadata>,
+  val searchResults: Flow<PagingData<PostWithMetadata>>,
   val searchInProgress: Boolean,
   val searchSortOrder: SearchSortOrder
 ) {
@@ -28,7 +29,7 @@ data class SearchState(
   companion object {
     val DEFAULT =
       SearchState(
-        searchResults = persistentListOf(),
+        searchResults = emptyFlow(),
         searchInProgress = false,
         searchSortOrder = SearchSortOrder.Newest
       )
@@ -36,7 +37,7 @@ data class SearchState(
 
   fun reset() =
     copy(
-      searchResults = persistentListOf(),
+      searchResults = emptyFlow(),
       searchInProgress = false,
       searchSortOrder = SearchSortOrder.Newest
     )

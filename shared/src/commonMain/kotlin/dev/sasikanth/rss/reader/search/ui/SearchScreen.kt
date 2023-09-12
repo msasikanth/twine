@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenuItem
@@ -70,6 +69,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.resources.icons.Sort
@@ -93,6 +93,7 @@ internal fun SearchScreen(
   val listState = rememberLazyListState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
   val layoutDirection = LocalLayoutDirection.current
+  val searchResults = state.searchResults.collectAsLazyPagingItems()
 
   Scaffold(
     modifier = modifier,
@@ -118,19 +119,23 @@ internal fun SearchScreen(
             ),
           state = listState
         ) {
-          itemsIndexed(state.searchResults) { index, post ->
-            PostListItem(
-              item = post,
-              onClick = { openLink(post.link) },
-              onPostBookmarkClick = {
-                searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
-              }
-            )
-            if (index != state.searchResults.lastIndex) {
-              Divider(
-                modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                color = AppTheme.colorScheme.surfaceContainer
+          items(count = searchResults.itemCount) { index ->
+            val post = searchResults[index]
+            if (post != null) {
+              PostListItem(
+                item = post,
+                onClick = { openLink(post.link) },
+                onPostBookmarkClick = {
+                  searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
+                }
               )
+
+              if (index != searchResults.itemCount) {
+                Divider(
+                  modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+                  color = AppTheme.colorScheme.surfaceContainer
+                )
+              }
             }
           }
         }

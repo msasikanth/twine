@@ -104,11 +104,21 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): Flow<List<PostWithMetadata>> {
-    return postSearchFTSQueries
-      .search(searchQuery, sortOrder.value, mapper = ::mapToPostWithMetadata)
-      .asFlow()
-      .mapToList(ioDispatcher)
+  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery = postSearchFTSQueries.countSearchResults(searchQuery),
+      transacter = postSearchFTSQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        postSearchFTSQueries.search(
+          searchQuery = searchQuery,
+          sortOrder = sortOrder.value,
+          limit = limit,
+          offset = offset,
+          mapper = ::mapToPostWithMetadata
+        )
+      }
+    )
   }
 
   fun bookmarks(): PagingSource<Int, PostWithMetadata> {

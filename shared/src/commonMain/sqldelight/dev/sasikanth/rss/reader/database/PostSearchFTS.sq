@@ -23,6 +23,9 @@ AFTER INSERT ON post
 BEGIN INSERT OR IGNORE INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
 END;
 
+countSearchResults:
+SELECT COUNT(*) FROM post_search WHERE post_search MATCH :searchQuery;
+
 search:
 SELECT
   post_search.title,
@@ -37,7 +40,8 @@ SELECT
 FROM post_search
 INNER JOIN post ON post.link == post_search.link
 INNER JOIN feed ON post.feedLink == feed.link
-WHERE post_search MATCH :search_query
+WHERE post_search MATCH :searchQuery
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.date END ASC,
-  CASE WHEN :sortOrder = 'newest' THEN post.date END DESC;
+  CASE WHEN :sortOrder = 'newest' THEN post.date END DESC
+LIMIT :limit OFFSET :offset;
