@@ -48,6 +48,10 @@ class RssRepository(
   dispatchersProvider: DispatchersProvider
 ) {
 
+  companion object {
+    private const val NUMBER_OF_FEATURED_POSTS = 6L
+  }
+
   private val ioDispatcher = dispatchersProvider.io
   private val feedFetcher = feedFetcher(ioDispatcher)
 
@@ -86,11 +90,36 @@ class RssRepository(
     results.joinAll()
   }
 
-  fun posts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
+  fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
     return postQueries
-      .postWithMetadata(selectedFeedLink, mapper = ::mapToPostWithMetadata)
+      .featuredPosts(
+        feedLink = selectedFeedLink,
+        limit = NUMBER_OF_FEATURED_POSTS,
+        mapper = ::mapToPostWithMetadata
+      )
       .asFlow()
       .mapToList(ioDispatcher)
+  }
+
+  fun posts(selectedFeedLink: String?): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery =
+        postQueries.count(
+          feedLink = selectedFeedLink,
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS
+        ),
+      transacter = postQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        postQueries.posts(
+          feedLink = selectedFeedLink,
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          limit = limit,
+          offset = offset,
+          mapper = ::mapToPostWithMetadata
+        )
+      }
+    )
   }
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {

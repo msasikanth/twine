@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
@@ -55,7 +55,7 @@ import kotlinx.collections.immutable.ImmutableList
 @Composable
 internal fun PostsList(
   featuredPosts: ImmutableList<PostWithMetadata>,
-  posts: ImmutableList<PostWithMetadata>,
+  posts: LazyPagingItems<PostWithMetadata>,
   selectedFeed: Feed?,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   listState: LazyListState = rememberLazyListState(),
@@ -86,17 +86,21 @@ internal fun PostsList(
       )
     }
 
-    itemsIndexed(posts) { i, post ->
-      PostListItem(
-        item = post,
-        onClick = { onPostClicked(post) },
-        onPostBookmarkClick = { onPostBookmarkClick(post) }
-      )
-      if (i != posts.size - 1) {
-        Divider(
-          modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-          color = AppTheme.colorScheme.surfaceContainer
+    items(posts.itemCount) { index ->
+      val post = posts[index]
+      if (post != null) {
+        PostListItem(
+          item = post,
+          onClick = { onPostClicked(post) },
+          onPostBookmarkClick = { onPostBookmarkClick(post) }
         )
+
+        if (index != posts.itemCount) {
+          Divider(
+            modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+            color = AppTheme.colorScheme.surfaceContainer
+          )
+        }
       }
     }
   }
