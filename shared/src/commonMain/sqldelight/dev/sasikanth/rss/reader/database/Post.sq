@@ -20,7 +20,6 @@ VALUES (:title, :description, :imageUrl, :date, :feedLink, :link)
 ON CONFLICT(link) DO
 UPDATE SET title = excluded.title, description = excluded.description, imageUrl = excluded.imageUrl, date = excluded.date;
 
--- TODO: Use multiplatform paging
 postWithMetadata:
 SELECT
   post.title,

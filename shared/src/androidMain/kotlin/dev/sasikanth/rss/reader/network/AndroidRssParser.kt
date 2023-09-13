@@ -18,8 +18,8 @@ package dev.sasikanth.rss.reader.network
 import android.net.Uri
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
-import dev.sasikanth.rss.reader.models.FeedPayload
-import dev.sasikanth.rss.reader.models.PostPayload
+import dev.sasikanth.rss.reader.models.remote.FeedPayload
+import dev.sasikanth.rss.reader.models.remote.PostPayload
 import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime

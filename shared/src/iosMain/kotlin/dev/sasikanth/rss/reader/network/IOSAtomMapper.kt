@@ -17,8 +17,8 @@ package dev.sasikanth.rss.reader.network
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
-import dev.sasikanth.rss.reader.models.FeedPayload
-import dev.sasikanth.rss.reader.models.PostPayload
+import dev.sasikanth.rss.reader.models.remote.FeedPayload
+import dev.sasikanth.rss.reader.models.remote.PostPayload
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry

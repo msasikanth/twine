@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.models.mappers
 
 import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.models.FeedPayload
+import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import kotlinx.datetime.Clock
 
 fun FeedPayload.toFeed() =
