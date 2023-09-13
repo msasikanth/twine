@@ -20,9 +20,9 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material.ExperimentalMaterialApi
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
-import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
+import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf

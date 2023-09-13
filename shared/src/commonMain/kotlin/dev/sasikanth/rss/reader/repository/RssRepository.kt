@@ -21,13 +21,12 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.database.BookmarkQueries
-import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
-import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.network.feedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -55,7 +54,14 @@ class RssRepository(
   suspend fun addFeed(feedLink: String) {
     withContext(ioDispatcher) {
       val feedPayload = feedFetcher.fetch(feedLink)
-      feedQueries.upsert(feed = feedPayload.toFeed())
+      feedQueries.upsert(
+        name = feedPayload.name,
+        icon = feedPayload.icon,
+        description = feedPayload.description,
+        homepageLink = feedPayload.homepageLink,
+        createdAt = Clock.System.now(),
+        link = feedPayload.link
+      )
       postQueries.transaction {
         feedPayload.posts.forEach { post ->
           postQueries.upsert(
@@ -96,7 +102,7 @@ class RssRepository(
   }
 
   fun allFeeds(): Flow<List<Feed>> {
-    return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
+    return feedQueries.feeds(mapper = ::mapToFeed).asFlow().mapToList(ioDispatcher)
   }
 
   suspend fun removeFeed(feedLink: String) {
@@ -174,6 +180,26 @@ class RssRepository(
       feedName = feedName,
       feedIcon = feedIcon,
       feedLink = feedLink
+    )
+  }
+
+  private fun mapToFeed(
+    name: String,
+    icon: String,
+    description: String,
+    homepageLink: String,
+    createdAt: Instant,
+    link: String,
+    pinnedAt: Instant?
+  ): Feed {
+    return Feed(
+      name = name,
+      icon = icon,
+      description = description,
+      homepageLink = homepageLink,
+      createdAt = createdAt,
+      link = link,
+      pinnedAt = pinnedAt
     )
   }
 }

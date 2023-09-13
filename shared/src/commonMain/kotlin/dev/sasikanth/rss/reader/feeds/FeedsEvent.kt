@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
-import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.models.local.Feed
 
 sealed interface FeedsEvent {
 

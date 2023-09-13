@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
-import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.models.local.Feed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
