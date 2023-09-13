@@ -3,14 +3,9 @@ name: iOS Prod Release
 on:
   workflow_dispatch:
     inputs:
-      versionName:
-        description: 'User-facing release version name'
-        required: true
-        default: "1.0.0"
-      versionCode:
-        description: 'versionCode or build number'
-        required: true
-        default: '1'
+      tramline-input:
+        description: "Tramline input"
+        required: false
 
 jobs:
   build:
@@ -19,7 +14,11 @@ jobs:
       TERM: dumb
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Configure Tramline
+        id: tramline
+        uses: tramlinehq/deploy-action@v0.1.5
+        with:
+          input: ${{ github.event.inputs.tramline-input }}
 
       - name: Setup JDK 17
         uses: actions/setup-java@v3
@@ -62,8 +61,8 @@ jobs:
 
       - name: Update Archive Version
         run: |
-          /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ github.event.inputs.versionCode }}" "iosApp/iosApp/Info.plist"
-          /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString ${{ github.event.inputs.versionName }}" "iosApp/iosApp/Info.plist"
+          /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ steps.tramline.outputs.version_code }}" "iosApp/iosApp/Info.plist"
+          /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString ${{ steps.tramline.outputs.version_name }}" "iosApp/iosApp/Info.plist"
 
       - name: Pod Install
         run:  |

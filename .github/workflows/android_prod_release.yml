@@ -3,14 +3,9 @@ name: Android Prod Release
 on:
   workflow_dispatch:
     inputs:
-      versionName:
-        description: 'User-facing release version name'
-        required: true
-        default: "1.0.0"
-      versionCode:
-        description: 'versionCode or build number'
-        required: true
-        default: '1'
+      tramline-input:
+        description: "Tramline input"
+        required: false
 
 jobs:
   build:
@@ -24,21 +19,25 @@ jobs:
       SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
     steps:
+      - name: Configure Tramline
+        id: tramline
+        uses: tramlinehq/deploy-action@v0.1.5
+        with:
+          input: ${{ github.event.inputs.tramline-input }}
+
       - name: Setup versionName regardless of how this action is triggered
         id: version_name
         run: |
-          WORKFLOW_INPUT=${{ github.event.inputs.versionName }}
+          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_code }}
           VERSION_NAME=${WORKFLOW_INPUT:-"1.0.0"}
           echo "ORG_GRADLE_PROJECT_VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
       - name: Setup versionCode regardless of how this action is triggered
         id: version_code
         run: |
-          WORKFLOW_INPUT=${{ github.event.inputs.versionCode }}
+          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_name }}
           VERSION_CODE=${WORKFLOW_INPUT:-"1"}
           echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-
-      - uses: actions/checkout@v3
 
       - name: Setup JDK 17
         uses: actions/setup-java@v3
