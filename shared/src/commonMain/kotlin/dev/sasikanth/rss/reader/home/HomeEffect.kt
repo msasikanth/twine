@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home
 
-import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 
 sealed interface HomeEffect {
 

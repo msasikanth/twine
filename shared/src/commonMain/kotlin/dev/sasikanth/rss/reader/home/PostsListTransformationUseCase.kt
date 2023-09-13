@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home
 
-import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

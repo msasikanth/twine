@@ -25,8 +25,8 @@ import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
-import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.models.mappers.toFeed
 import dev.sasikanth.rss.reader.network.feedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
@@ -81,7 +81,10 @@ class RssRepository(
   }
 
   fun posts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
-    return postQueries.postWithMetadata(selectedFeedLink).asFlow().mapToList(ioDispatcher)
+    return postQueries
+      .postWithMetadata(selectedFeedLink, mapper = ::mapToPostWithMetadata)
+      .asFlow()
+      .mapToList(ioDispatcher)
   }
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {
