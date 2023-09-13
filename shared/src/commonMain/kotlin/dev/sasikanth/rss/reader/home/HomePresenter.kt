@@ -63,7 +63,6 @@ class HomePresenter(
   dispatchersProvider: DispatchersProvider,
   feedsPresenterFactory: (ComponentContext) -> FeedsPresenter,
   private val rssRepository: RssRepository,
-  private val postsListTransformationUseCase: PostsListTransformationUseCase,
   private val observableSelectedFeed: ObservableSelectedFeed,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
@@ -76,7 +75,6 @@ class HomePresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        postsListTransformationUseCase = postsListTransformationUseCase,
         observableSelectedFeed = observableSelectedFeed,
       )
     }
@@ -114,7 +112,6 @@ class HomePresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val postsListTransformationUseCase: PostsListTransformationUseCase,
     private val observableSelectedFeed: ObservableSelectedFeed,
   ) : InstanceKeeper.Instance {
 
