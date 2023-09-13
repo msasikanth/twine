@@ -34,8 +34,12 @@ AFTER UPDATE OF title, description, imageUrl, date ON post WHEN new.bookmarked =
 BEGIN UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date WHERE link = new.link;
 END;
 
+countBookmarks:
+SELECT COUNT(*) FROM bookmark;
+
 bookmarks:
-SELECT * FROM bookmark ORDER BY date DESC;
+SELECT *FROM bookmark ORDER BY date DESC
+LIMIT :limit OFFSET :offset;
 
 deleteBookmark:
 DELETE FROM bookmark WHERE link = :link;

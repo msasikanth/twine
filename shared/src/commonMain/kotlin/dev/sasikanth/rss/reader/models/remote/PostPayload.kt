@@ -13,19 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.models.mappers
+package dev.sasikanth.rss.reader.models.remote
 
-import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.models.FeedPayload
-import kotlinx.datetime.Clock
-
-fun FeedPayload.toFeed() =
-  Feed(
-    name = name,
-    icon = icon,
-    description = description,
-    homepageLink = homepageLink,
-    createdAt = Clock.System.now(),
-    link = link,
-    pinnedAt = null
-  )
+data class PostPayload(
+  val title: String,
+  val link: String,
+  val description: String,
+  val imageUrl: String?,
+  val date: Long
+) {
+  companion object
+}

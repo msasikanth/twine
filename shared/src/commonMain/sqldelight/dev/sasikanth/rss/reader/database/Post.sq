@@ -20,8 +20,15 @@ VALUES (:title, :description, :imageUrl, :date, :feedLink, :link)
 ON CONFLICT(link) DO
 UPDATE SET title = excluded.title, description = excluded.description, imageUrl = excluded.imageUrl, date = excluded.date;
 
--- TODO: Use multiplatform paging
-postWithMetadata:
+count:
+SELECT COUNT(*) FROM post
+WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.link NOT IN (
+  SELECT post.link FROM post
+  WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
+  ORDER BY post.date DESC LIMIT :featuredPostsLimit
+);
+
+featuredPosts:
 SELECT
   post.title,
   post.description,
@@ -34,8 +41,29 @@ SELECT
   feedLink
 FROM post
 INNER JOIN feed ON post.feedLink == feed.link
-WHERE :feedLink IS NULL OR post.feedLink = :feedLink
-ORDER BY post.date DESC;
+WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
+ORDER BY post.date DESC LIMIT :limit;
+
+posts:
+SELECT
+  post.title,
+  post.description,
+  post.imageUrl,
+  post.date,
+  post.link,
+  post.bookmarked,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feedLink
+FROM post
+INNER JOIN feed ON post.feedLink == feed.link
+WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.link NOT IN (
+  SELECT post.link FROM post
+  WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
+  ORDER BY post.date DESC LIMIT :featuredPostsLimit
+)
+ORDER BY post.date DESC
+LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
 UPDATE post SET bookmarked = :bookmarked WHERE link = :link;

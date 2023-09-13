@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.search
 
 import androidx.compose.ui.text.input.TextFieldValue
-import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 
 internal sealed interface SearchEvent {
 

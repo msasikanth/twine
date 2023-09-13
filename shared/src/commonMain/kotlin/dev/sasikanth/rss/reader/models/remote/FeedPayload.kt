@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.models
+package dev.sasikanth.rss.reader.models.remote
 
-data class PostPayload(
-  val title: String,
-  val link: String,
+data class FeedPayload(
+  val name: String,
+  val icon: String,
   val description: String,
-  val imageUrl: String?,
-  val date: Long
+  val homepageLink: String,
+  val link: String,
+  val posts: List<PostPayload>,
 ) {
   companion object
 }

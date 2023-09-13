@@ -17,8 +17,8 @@ package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.atomXmlContent
 import dev.sasikanth.rss.reader.feedUrl
-import dev.sasikanth.rss.reader.models.FeedPayload
-import dev.sasikanth.rss.reader.models.PostPayload
+import dev.sasikanth.rss.reader.models.remote.FeedPayload
+import dev.sasikanth.rss.reader.models.remote.PostPayload
 import dev.sasikanth.rss.reader.rssXmlContent
 import kotlin.test.Test
 import kotlin.test.assertEquals

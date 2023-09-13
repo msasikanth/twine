@@ -49,7 +49,6 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,6 +62,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import app.cash.paging.compose.LazyPagingItems
+import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
@@ -70,8 +71,6 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
-import dev.sasikanth.rss.reader.database.Feed
-import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
@@ -80,6 +79,8 @@ import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
+import dev.sasikanth.rss.reader.models.local.Feed
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -99,7 +100,8 @@ fun HomeScreen(
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
-  val (featuredPosts, posts) = state
+  val featuredPosts = state.featuredPosts
+  val posts = state.posts.collectAsLazyPagingItems()
 
   val bottomSheetState =
     rememberBottomSheetState(
@@ -202,7 +204,7 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
   featuredPosts: ImmutableList<PostWithMetadata>,
-  posts: ImmutableList<PostWithMetadata>,
+  posts: LazyPagingItems<PostWithMetadata>,
   selectedFeed: Feed?,
   isRefreshing: Boolean,
   onSwipeToRefresh: () -> Unit,
@@ -214,10 +216,9 @@ private fun HomeScreenContent(
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit
 ) {
-  val hasContent = featuredPosts.isNotEmpty() || posts.isNotEmpty()
+  val hasContent = featuredPosts.isNotEmpty() || posts.itemCount != 0
   if (hasContent) {
     val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
-
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
       val listState = rememberLazyListState()
       val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
@@ -267,7 +268,6 @@ private fun HomeScreenContent(
  *
  * track: https://issuetracker.google.com/issues/209825720
  */
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun BoxScope.PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,

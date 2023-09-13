@@ -93,6 +93,7 @@ kotlin {
         implementation(libs.ktor.core)
         implementation(libs.napier)
         implementation(libs.sqldelight.extensions.coroutines)
+        implementation(libs.sqldelight.extensions.paging)
         api(libs.decompose)
         implementation(libs.decompose.extensions.compose)
         api(libs.essenty.lifecycle)
@@ -106,6 +107,8 @@ kotlin {
         api(libs.androidx.datastore.okio)
         api(libs.androidx.datastore.preferences)
         api(libs.okio)
+        implementation(libs.paging.common)
+        implementation(libs.paging.compose)
       }
     }
     val commonTest by getting {

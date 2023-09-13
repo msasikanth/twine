@@ -15,14 +15,17 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
-import dev.sasikanth.rss.reader.database.PostWithMetadata
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import androidx.compose.runtime.Stable
+import app.cash.paging.PagingData
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
-data class BookmarksState(val bookmarks: ImmutableList<PostWithMetadata>) {
+@Stable
+data class BookmarksState(val bookmarks: Flow<PagingData<PostWithMetadata>>) {
 
   companion object {
 
-    val DEFAULT = BookmarksState(bookmarks = persistentListOf())
+    val DEFAULT = BookmarksState(bookmarks = emptyFlow())
   }
 }

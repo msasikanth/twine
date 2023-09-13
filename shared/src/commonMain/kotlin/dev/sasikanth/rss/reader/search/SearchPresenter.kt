@@ -20,14 +20,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import app.cash.paging.cachedIn
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
@@ -39,9 +41,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -152,14 +152,14 @@ class SearchPresenter(
     }
 
     private fun searchPosts(query: String, sortOrder: SearchSortOrder) {
-      rssRepository
-        .search(query, sortOrder)
-        .onStart { _state.update { it.copy(searchInProgress = true) } }
-        .onEach { searchResults ->
-          _state.update { it.copy(searchResults = searchResults.toImmutableList()) }
-        }
-        .onCompletion { _state.update { it.copy(searchInProgress = false) } }
-        .launchIn(coroutineScope)
+      val searchResults =
+        Pager<Int, PostWithMetadata>(PagingConfig(pageSize = 20)) {
+            rssRepository.search(query, sortOrder)
+          }
+          .flow
+          .cachedIn(coroutineScope)
+
+      _state.update { it.copy(searchResults = searchResults) }
     }
 
     override fun onDestroy() {

@@ -15,17 +15,18 @@
  */
 package dev.sasikanth.rss.reader.repository
 
+import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.database.BookmarkQueries
-import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
-import dev.sasikanth.rss.reader.database.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.models.mappers.toFeed
+import dev.sasikanth.rss.reader.models.local.Feed
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.network.feedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -47,13 +48,24 @@ class RssRepository(
   dispatchersProvider: DispatchersProvider
 ) {
 
+  companion object {
+    private const val NUMBER_OF_FEATURED_POSTS = 6L
+  }
+
   private val ioDispatcher = dispatchersProvider.io
   private val feedFetcher = feedFetcher(ioDispatcher)
 
   suspend fun addFeed(feedLink: String) {
     withContext(ioDispatcher) {
       val feedPayload = feedFetcher.fetch(feedLink)
-      feedQueries.upsert(feed = feedPayload.toFeed())
+      feedQueries.upsert(
+        name = feedPayload.name,
+        icon = feedPayload.icon,
+        description = feedPayload.description,
+        homepageLink = feedPayload.homepageLink,
+        createdAt = Clock.System.now(),
+        link = feedPayload.link
+      )
       postQueries.transaction {
         feedPayload.posts.forEach { post ->
           postQueries.upsert(
@@ -78,8 +90,36 @@ class RssRepository(
     results.joinAll()
   }
 
-  fun posts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
-    return postQueries.postWithMetadata(selectedFeedLink).asFlow().mapToList(ioDispatcher)
+  fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
+    return postQueries
+      .featuredPosts(
+        feedLink = selectedFeedLink,
+        limit = NUMBER_OF_FEATURED_POSTS,
+        mapper = ::mapToPostWithMetadata
+      )
+      .asFlow()
+      .mapToList(ioDispatcher)
+  }
+
+  fun posts(selectedFeedLink: String?): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery =
+        postQueries.count(
+          feedLink = selectedFeedLink,
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS
+        ),
+      transacter = postQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        postQueries.posts(
+          feedLink = selectedFeedLink,
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          limit = limit,
+          offset = offset,
+          mapper = ::mapToPostWithMetadata
+        )
+      }
+    )
   }
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {
@@ -91,7 +131,7 @@ class RssRepository(
   }
 
   fun allFeeds(): Flow<List<Feed>> {
-    return feedQueries.feeds().asFlow().mapToList(ioDispatcher)
+    return feedQueries.feeds(mapper = ::mapToFeed).asFlow().mapToList(ioDispatcher)
   }
 
   suspend fun removeFeed(feedLink: String) {
@@ -102,18 +142,32 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): Flow<List<PostWithMetadata>> {
-    return postSearchFTSQueries
-      .search(searchQuery, sortOrder.value, mapper = ::mapToPostWithMetadata)
-      .asFlow()
-      .mapToList(ioDispatcher)
+  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery = postSearchFTSQueries.countSearchResults(searchQuery),
+      transacter = postSearchFTSQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        postSearchFTSQueries.search(
+          searchQuery = searchQuery,
+          sortOrder = sortOrder.value,
+          limit = limit,
+          offset = offset,
+          mapper = ::mapToPostWithMetadata
+        )
+      }
+    )
   }
 
-  fun bookmarks(): Flow<List<PostWithMetadata>> {
-    return bookmarkQueries
-      .bookmarks(mapper = ::mapToPostWithMetadata)
-      .asFlow()
-      .mapToList(ioDispatcher)
+  fun bookmarks(): PagingSource<Int, PostWithMetadata> {
+    return QueryPagingSource(
+      countQuery = bookmarkQueries.countBookmarks(),
+      transacter = bookmarkQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        bookmarkQueries.bookmarks(limit, offset, ::mapToPostWithMetadata)
+      }
+    )
   }
 
   suspend fun hasFeed(link: String): Boolean {
@@ -155,6 +209,26 @@ class RssRepository(
       feedName = feedName,
       feedIcon = feedIcon,
       feedLink = feedLink
+    )
+  }
+
+  private fun mapToFeed(
+    name: String,
+    icon: String,
+    description: String,
+    homepageLink: String,
+    createdAt: Instant,
+    link: String,
+    pinnedAt: Instant?
+  ): Feed {
+    return Feed(
+      name = name,
+      icon = icon,
+      description = description,
+      homepageLink = homepageLink,
+      createdAt = createdAt,
+      link = link,
+      pinnedAt = pinnedAt
     )
   }
 }

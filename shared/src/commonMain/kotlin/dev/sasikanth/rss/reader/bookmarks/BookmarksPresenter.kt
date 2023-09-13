@@ -15,22 +15,22 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
+import app.cash.paging.Pager
+import app.cash.paging.PagingConfig
+import app.cash.paging.cachedIn
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import dev.sasikanth.rss.reader.database.PostWithMetadata
+import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -103,10 +103,12 @@ class BookmarksPresenter(
     }
 
     private fun init() {
-      rssRepository
-        .bookmarks()
-        .onEach { bookmarks -> _state.update { it.copy(bookmarks = bookmarks.toImmutableList()) } }
-        .launchIn(coroutineScope)
+      val bookmarks =
+        Pager<Int, PostWithMetadata>(PagingConfig(pageSize = 20)) { rssRepository.bookmarks() }
+          .flow
+          .cachedIn(coroutineScope)
+
+      _state.update { it.copy(bookmarks = bookmarks) }
     }
 
     override fun onDestroy() {
