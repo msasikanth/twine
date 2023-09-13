@@ -108,7 +108,7 @@ internal fun BookmarksScreen(
                   bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
                 }
               )
-              if (index != bookmarks.itemCount) {
+              if (index != bookmarks.itemCount - 1) {
                 Divider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                   color = AppTheme.colorScheme.surfaceContainer

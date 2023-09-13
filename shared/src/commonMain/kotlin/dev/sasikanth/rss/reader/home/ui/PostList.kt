@@ -95,7 +95,7 @@ internal fun PostsList(
           onPostBookmarkClick = { onPostBookmarkClick(post) }
         )
 
-        if (index != posts.itemCount) {
+        if (index != posts.itemCount - 1) {
           Divider(
             modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
             color = AppTheme.colorScheme.surfaceContainer

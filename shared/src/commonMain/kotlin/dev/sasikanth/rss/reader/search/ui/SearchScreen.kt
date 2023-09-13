@@ -130,7 +130,7 @@ internal fun SearchScreen(
                 }
               )
 
-              if (index != searchResults.itemCount) {
+              if (index != searchResults.itemCount - 1) {
                 Divider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                   color = AppTheme.colorScheme.surfaceContainer
