@@ -59,6 +59,13 @@ const val rssXmlContent =
       </content:encoded>
       <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
     </item>
+    <item>
+      <title>Post with relative path image</title>
+      <link>https://example.com/post-with-relative-image</link>
+      <description>Relative image post description.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <media:content url="/relative-media-url" />
+    </item>
   </channel>
   </rss>
   """
@@ -92,6 +99,15 @@ const val atomXmlContent =
       <published>2023-05-24T14:00:00Z</published>
       <content type="html">
         &lt;p&gt;Post summary of the third post. &lt;a href="https://example.com/hyperlink" &gt;click here&lt;/a&gt;.&lt;/p&gt;
+      </content>
+    </entry>
+    <entry>
+      <title>Post with relative image</title>
+      <link rel="alternate" href="https://example.com/relative-image-post" />
+      <published>2023-05-25T10:00:00Z</published>
+      <content type="html">
+        &lt;img alt="Relative Image" src="/resources/image.jpg" /&gt;
+        &lt;p&gt;Post summary with an image.&lt;/p&gt;
       </content>
     </entry>
   </feed>

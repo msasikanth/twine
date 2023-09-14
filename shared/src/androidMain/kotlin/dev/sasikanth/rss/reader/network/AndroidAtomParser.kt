@@ -55,7 +55,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
             skip(parser)
           }
         "subtitle" -> description = readTagText("subtitle", parser)
-        "entry" -> posts.add(readAtomEntry(parser))
+        "entry" -> posts.add(readAtomEntry(parser, link!!))
         else -> skip(parser)
       }
     }
@@ -73,7 +73,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
     )
   }
 
-  private fun readAtomEntry(parser: XmlPullParser): PostPayload {
+  private fun readAtomEntry(parser: XmlPullParser, hostLink: String): PostPayload {
     parser.require(XmlPullParser.START_TAG, null, "entry")
 
     var title: String? = null
@@ -121,7 +121,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link).orEmpty(),
       description = FeedParser.cleanTextCompact(content).orEmpty(),
-      imageUrl = image,
+      imageUrl = FeedParser.safeImageUrl(hostLink, image),
       date = dateLong
     )
   }

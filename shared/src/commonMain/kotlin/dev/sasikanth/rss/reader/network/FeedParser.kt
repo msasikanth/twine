@@ -16,6 +16,9 @@
 package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.http.set
 
 internal interface FeedParser {
 
@@ -50,6 +53,28 @@ internal interface FeedParser {
 
     fun feedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
+    }
+
+    fun safeImageUrl(host: String, imageUrl: String?): String? {
+      return if (!imageUrl.isNullOrBlank()) {
+        if (isAbsoluteUrl(imageUrl)) {
+          URLBuilder(imageUrl).apply { protocol = URLProtocol.HTTPS }.buildString()
+        } else {
+          URLBuilder(host)
+            .apply {
+              set(path = imageUrl)
+              protocol = URLProtocol.HTTPS
+            }
+            .buildString()
+        }
+      } else {
+        null
+      }
+    }
+
+    private fun isAbsoluteUrl(url: String): Boolean {
+      val pattern = """^\w+://""".toRegex()
+      return pattern.containsMatchIn(url)
     }
   }
 

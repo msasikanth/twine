@@ -27,7 +27,10 @@ import platform.Foundation.timeIntervalSince1970
 
 private val atomDateFormatter = NSDateFormatter().apply { dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ" }
 
-internal fun PostPayload.Companion.mapAtomPost(atomMap: Map<String, String>): PostPayload {
+internal fun PostPayload.Companion.mapAtomPost(
+  atomMap: Map<String, String>,
+  hostLink: String
+): PostPayload {
   val pubDate = atomMap["published"]
   val link = atomMap["link"]?.trim()
   val data = atomMap["content"]
@@ -50,7 +53,7 @@ internal fun PostPayload.Companion.mapAtomPost(atomMap: Map<String, String>): Po
     title = FeedParser.cleanText(atomMap["title"])!!,
     link = link!!,
     description = content.orEmpty(),
-    imageUrl = imageUrl,
+    imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
     date = pubDate.atomDateStringToEpochSeconds()
   )
 }

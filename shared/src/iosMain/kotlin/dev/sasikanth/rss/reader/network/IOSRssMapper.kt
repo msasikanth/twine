@@ -30,7 +30,10 @@ private val offsetTimezoneDateFormatter =
 private val abbrevTimezoneDateFormatter =
   NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss z" }
 
-internal fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): PostPayload {
+internal fun PostPayload.Companion.mapRssPost(
+  rssMap: Map<String, String>,
+  hostLink: String
+): PostPayload {
   val pubDate = rssMap["pubDate"]
   val link = rssMap["link"]
   var description = rssMap["description"]
@@ -59,7 +62,7 @@ internal fun PostPayload.Companion.mapRssPost(rssMap: Map<String, String>): Post
     title = FeedParser.cleanText(rssMap["title"])!!,
     link = FeedParser.cleanText(link)!!,
     description = FeedParser.cleanTextCompact(description).orEmpty(),
-    imageUrl = imageUrl,
+    imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
     date = pubDate.rssDateStringToEpochSeconds()
   )
 }

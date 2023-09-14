@@ -78,6 +78,13 @@ class AndroidFeedParserTest {
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000
             ),
+            PostPayload(
+              title = "Post with relative path image",
+              link = "https://example.com/post-with-relative-image",
+              description = "Relative image post description.",
+              imageUrl = "https://example.com/relative-media-url",
+              date = 1685005200000
+            ),
           )
       )
 
@@ -120,6 +127,13 @@ class AndroidFeedParserTest {
               description = "Post summary of the third post. click here.",
               imageUrl = null,
               date = 1684936800000
+            ),
+            PostPayload(
+              title = "Post with relative image",
+              link = "https://example.com/relative-image-post",
+              description = "Post summary with an image.",
+              imageUrl = "https://example.com/resources/image.jpg",
+              date = 1685008800000
             ),
           )
       )

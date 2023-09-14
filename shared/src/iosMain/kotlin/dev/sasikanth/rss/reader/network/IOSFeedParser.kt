@@ -150,10 +150,11 @@ private class IOSXmlFeedParser(
     qualifiedName: String?
   ) {
     if (didEndElement == RSS_ITEM_TAG || didEndElement == ATOM_ENTRY_TAG) {
+      val hostLink = currentChannelData["link"]!!
       val post =
         when (feedType) {
-          RSS -> PostPayload.mapRssPost(currentItemData)
-          ATOM -> PostPayload.mapAtomPost(currentItemData)
+          RSS -> PostPayload.mapRssPost(currentItemData, hostLink)
+          ATOM -> PostPayload.mapAtomPost(currentItemData, hostLink)
           null -> null
         }
 

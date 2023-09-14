@@ -57,7 +57,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         "title" -> title = readTagText("title", parser)
         "link" -> link = readTagText("link", parser)
         "description" -> description = readTagText("description", parser)
-        "item" -> posts.add(readRssItem(parser))
+        "item" -> posts.add(readRssItem(parser, link!!))
         else -> skip(parser)
       }
     }
@@ -75,7 +75,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
     )
   }
 
-  private fun readRssItem(parser: XmlPullParser): PostPayload {
+  private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload {
     parser.require(XmlPullParser.START_TAG, namespace, "item")
 
     var title: String? = null
@@ -129,7 +129,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link).orEmpty(),
       description = FeedParser.cleanTextCompact(description).orEmpty(),
-      imageUrl = image,
+      imageUrl = FeedParser.safeImageUrl(hostLink, image),
       date = dateLong
     )
   }
