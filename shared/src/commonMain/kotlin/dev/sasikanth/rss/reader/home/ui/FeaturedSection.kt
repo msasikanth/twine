@@ -95,6 +95,7 @@ internal fun FeaturedSection(
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
+  onPostCommentsClick: (String) -> Unit,
   onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -156,7 +157,8 @@ internal fun FeaturedSection(
           FeaturedPostItem(
             item = featuredPost,
             onClick = { onItemClick(featuredPost) },
-            onBookmarkClick = { onPostBookmarkClick(featuredPost) }
+            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }
           )
         }
       }

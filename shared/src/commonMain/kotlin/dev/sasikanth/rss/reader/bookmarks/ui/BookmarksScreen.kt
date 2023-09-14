@@ -106,7 +106,8 @@ internal fun BookmarksScreen(
                 onClick = { openLink(post.link) },
                 onPostBookmarkClick = {
                   bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
-                }
+                },
+                onPostCommentsClick = { openLink(post.commentsLink!!) }
               )
               if (index != bookmarks.itemCount - 1) {
                 Divider(

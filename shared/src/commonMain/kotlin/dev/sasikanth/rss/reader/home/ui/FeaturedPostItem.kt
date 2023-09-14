@@ -51,7 +51,8 @@ private val featuredImageAspectRatio: Float
 internal fun FeaturedPostItem(
   item: PostWithMetadata,
   onClick: () -> Unit,
-  onBookmarkClick: () -> Unit
+  onBookmarkClick: () -> Unit,
+  onCommentsClick: () -> Unit
 ) {
   Column(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
     AsyncImage(
@@ -91,12 +92,14 @@ internal fun FeaturedPostItem(
     }
 
     PostMetadata(
-      modifier = Modifier.padding(start = 16.dp, end = 0.dp),
       feedName = item.feedName,
       postPublishedAt = item.date.relativeDurationString(),
       postLink = item.link,
       postBookmarked = item.bookmarked,
-      onBookmarkClick = onBookmarkClick
+      commentsLink = item.commentsLink,
+      onBookmarkClick = onBookmarkClick,
+      onCommentsClick = onCommentsClick,
+      modifier = Modifier.padding(start = 16.dp, end = 0.dp)
     )
 
     Spacer(modifier = Modifier.height(8.dp))

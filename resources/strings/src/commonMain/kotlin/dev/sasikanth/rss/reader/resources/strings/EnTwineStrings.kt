@@ -50,5 +50,6 @@ val EnTwineStrings =
     settingsBrowserTypeTitle = "Use in-app browser",
     settingsBrowserTypeSubtitle = "When turned off, links will open in your default browser",
     feeds = "Feeds",
-    editFeeds = "Edit feeds"
+    editFeeds = "Edit feeds",
+    comments = "Comments"
   )

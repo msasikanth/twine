@@ -61,9 +61,10 @@ internal fun PostsList(
   listState: LazyListState = rememberLazyListState(),
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
+  onPostCommentsClick: (String) -> Unit,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit
+  onSettingsClicked: () -> Unit,
 ) {
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
@@ -79,6 +80,7 @@ internal fun PostsList(
         featuredPosts = featuredPosts,
         onItemClick = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
+        onPostCommentsClick = onPostCommentsClick,
         onFeaturedItemChange = onFeaturedItemChange,
         onSearchClicked = onSearchClicked,
         onBookmarksClicked = onBookmarksClicked,
@@ -92,7 +94,8 @@ internal fun PostsList(
         PostListItem(
           item = post,
           onClick = { onPostClicked(post) },
-          onPostBookmarkClick = { onPostBookmarkClick(post) }
+          onPostBookmarkClick = { onPostBookmarkClick(post) },
+          onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) }
         )
 
         if (index != posts.itemCount - 1) {
@@ -107,7 +110,12 @@ internal fun PostsList(
 }
 
 @Composable
-fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClick: () -> Unit) {
+fun PostListItem(
+  item: PostWithMetadata,
+  onClick: () -> Unit,
+  onPostBookmarkClick: () -> Unit,
+  onPostCommentsClick: () -> Unit
+) {
   Column(
     modifier =
       Modifier.clickable(onClick = onClick)
@@ -138,12 +146,14 @@ fun PostListItem(item: PostWithMetadata, onClick: () -> Unit, onPostBookmarkClic
     }
 
     PostMetadata(
-      modifier = Modifier.padding(start = 24.dp, end = 12.dp),
       feedName = item.feedName,
       postPublishedAt = item.date.relativeDurationString(),
       postLink = item.link,
       postBookmarked = item.bookmarked,
-      onBookmarkClick = onPostBookmarkClick
+      commentsLink = item.commentsLink,
+      onBookmarkClick = onPostBookmarkClick,
+      onCommentsClick = onPostCommentsClick,
+      modifier = Modifier.padding(start = 24.dp, end = 12.dp)
     )
   }
 }

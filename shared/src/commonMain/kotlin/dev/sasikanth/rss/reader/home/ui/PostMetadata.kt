@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
+import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -47,7 +48,9 @@ internal fun PostMetadata(
   postPublishedAt: String,
   postLink: String,
   postBookmarked: Boolean,
+  commentsLink: String?,
   onBookmarkClick: () -> Unit,
+  onCommentsClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Row(
@@ -88,7 +91,9 @@ internal fun PostMetadata(
     PostOptionsButtonRow(
       postLink = postLink,
       postBookmarked = postBookmarked,
-      onBookmarkClick = onBookmarkClick
+      commentsLink = commentsLink,
+      onBookmarkClick = onBookmarkClick,
+      onCommentsClick = onCommentsClick
     )
   }
 }
@@ -97,9 +102,20 @@ internal fun PostMetadata(
 private fun PostOptionsButtonRow(
   postLink: String,
   postBookmarked: Boolean,
-  onBookmarkClick: () -> Unit
+  commentsLink: String?,
+  onBookmarkClick: () -> Unit,
+  onCommentsClick: () -> Unit
 ) {
   Row {
+    if (!commentsLink.isNullOrBlank()) {
+      PostOptionIconButton(
+        icon = TwineIcons.Comments,
+        iconTint = Color.White,
+        contentDescription = LocalStrings.current.comments,
+        onClick = onCommentsClick
+      )
+    }
+
     PostOptionIconButton(
       icon =
         if (postBookmarked) {
