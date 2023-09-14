@@ -34,6 +34,7 @@ SELECT
   post.date,
   post.link,
   post.bookmarked,
+  post.commentsLink,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink

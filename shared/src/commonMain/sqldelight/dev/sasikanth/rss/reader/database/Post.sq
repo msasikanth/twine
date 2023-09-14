@@ -9,14 +9,15 @@ CREATE TABLE post(
   feedLink TEXT NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  commentsLink TEXT DEFAULT NULL,
   FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
 );
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
 upsert:
-INSERT INTO post(title, description, imageUrl, date, feedLink, link)
-VALUES (:title, :description, :imageUrl, :date, :feedLink, :link)
+INSERT INTO post(title, description, imageUrl, date, feedLink, link, commentsLink)
+VALUES (:title, :description, :imageUrl, :date, :feedLink, :link, :commnetsLink)
 ON CONFLICT(link) DO
 UPDATE SET title = excluded.title, description = excluded.description, imageUrl = excluded.imageUrl, date = excluded.date;
 
@@ -36,6 +37,7 @@ SELECT
   post.date,
   post.link,
   post.bookmarked,
+  post.commentsLink,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink
@@ -52,6 +54,7 @@ SELECT
   post.date,
   post.link,
   post.bookmarked,
+  post.commentsLink,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink

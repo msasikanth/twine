@@ -74,7 +74,8 @@ class RssRepository(
             imageUrl = post.imageUrl,
             date = Instant.fromEpochMilliseconds(post.date),
             link = post.link,
-            feedLink = feedPayload.link
+            commnetsLink = post.commentsLink,
+            feedLink = feedPayload.link,
           )
         }
       }
@@ -165,7 +166,30 @@ class RssRepository(
       transacter = bookmarkQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(limit, offset, ::mapToPostWithMetadata)
+        bookmarkQueries.bookmarks(limit, offset) {
+          title,
+          description,
+          imageUrl,
+          date,
+          link,
+          bookmarked,
+          feedName,
+          feedIcon,
+          feedLink,
+          commentsLink ->
+          mapToPostWithMetadata(
+            title = title,
+            description = description,
+            imageUrl = imageUrl,
+            date = date,
+            link = link,
+            bookmarked = bookmarked,
+            commentsLink = commentsLink,
+            feedName = feedName,
+            feedIcon = feedIcon,
+            feedLink = feedLink
+          )
+        }
       }
     )
   }
@@ -195,6 +219,7 @@ class RssRepository(
     date: Instant,
     link: String,
     bookmarked: Boolean,
+    commentsLink: String?,
     feedName: String,
     feedIcon: String,
     feedLink: String
@@ -206,6 +231,7 @@ class RssRepository(
       date = date,
       link = link,
       bookmarked = bookmarked,
+      commentsLink = commentsLink,
       feedName = feedName,
       feedIcon = feedIcon,
       feedLink = feedLink
