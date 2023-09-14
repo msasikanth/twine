@@ -39,6 +39,7 @@ internal fun PostPayload.Companion.mapRssPost(
   var description = rssMap["description"]
   val encodedContent = rssMap["content:encoded"]
   var imageUrl: String? = rssMap["imageUrl"]
+  val commentsLink: String? = rssMap["comments"]
 
   val descriptionToParse =
     if (encodedContent.isNullOrBlank()) {
@@ -63,7 +64,8 @@ internal fun PostPayload.Companion.mapRssPost(
     link = FeedParser.cleanText(link)!!,
     description = FeedParser.cleanTextCompact(description).orEmpty(),
     imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
-    date = pubDate.rssDateStringToEpochSeconds()
+    date = pubDate.rssDateStringToEpochSeconds(),
+    commentsLink = commentsLink?.trim()
   )
 }
 

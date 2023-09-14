@@ -66,6 +66,13 @@ const val rssXmlContent =
       <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
       <media:content url="/relative-media-url" />
     </item>
+    <item>
+      <title>Post with comments</title>
+      <link>https://example.com/post-with-comments</link>
+      <description>Really long post with comments.</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <comments>https://example/post-with-comments/comments</comments>
+    </item>
   </channel>
   </rss>
   """

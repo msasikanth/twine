@@ -83,6 +83,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
     var description: String? = null
     var date: String? = null
     var image: String? = null
+    var commentsLink: String? = null
 
     while (parser.next() != XmlPullParser.END_TAG) {
       if (parser.eventType != XmlPullParser.START_TAG) continue
@@ -97,6 +98,8 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         name == "pubDate" -> date = readTagText("pubDate", parser)
         image.isNullOrBlank() && hasRssImageUrl(name, parser) -> image = readAttrText("url", parser)
         image.isNullOrBlank() && name == "featuredImage" -> image = readTagText(name, parser)
+        commentsLink.isNullOrBlank() && name == "comments" ->
+          commentsLink = readTagText(name, parser)
         else -> skip(parser)
       }
     }
@@ -130,7 +133,8 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       link = FeedParser.cleanText(link).orEmpty(),
       description = FeedParser.cleanTextCompact(description).orEmpty(),
       imageUrl = FeedParser.safeImageUrl(hostLink, image),
-      date = dateLong
+      date = dateLong,
+      commentsLink = commentsLink?.trim()
     )
   }
 

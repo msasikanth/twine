@@ -122,7 +122,8 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       link = FeedParser.cleanText(link).orEmpty(),
       description = FeedParser.cleanTextCompact(content).orEmpty(),
       imageUrl = FeedParser.safeImageUrl(hostLink, image),
-      date = dateLong
+      date = dateLong,
+      commentsLink = null
     )
   }
 

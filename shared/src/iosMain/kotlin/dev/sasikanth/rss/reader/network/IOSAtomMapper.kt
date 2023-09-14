@@ -54,7 +54,8 @@ internal fun PostPayload.Companion.mapAtomPost(
     link = link!!,
     description = content.orEmpty(),
     imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
-    date = pubDate.atomDateStringToEpochSeconds()
+    date = pubDate.atomDateStringToEpochSeconds(),
+    commentsLink = null
   )
 }
 
