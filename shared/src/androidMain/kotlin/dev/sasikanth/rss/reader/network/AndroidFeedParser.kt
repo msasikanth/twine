@@ -19,17 +19,19 @@ import android.util.Xml
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
-internal class AndroidFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
+@Inject
+class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return try {
-      withContext(ioDispatcher) {
+      withContext(dispatchersProvider.io) {
         val parser =
           Xml.newPullParser().apply { setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false) }
 

@@ -23,13 +23,14 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import dev.sasikanth.rss.reader.network.FeedType.*
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSString
 import platform.Foundation.NSUTF8StringEncoding
 import platform.Foundation.NSXMLParser
@@ -42,13 +43,14 @@ private const val RSS_ITEM_TAG = "item"
 private const val ATOM_FEED_TAG = "feed"
 private const val ATOM_ENTRY_TAG = "entry"
 
+@Inject
 @Suppress("CAST_NEVER_SUCCEEDS")
-internal class IOSFeedParser(private val ioDispatcher: CoroutineDispatcher) : FeedParser {
+class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
   private var feedType: FeedType? = null
   private var feedPayload: FeedPayload? = null
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
-    return withContext(ioDispatcher) {
+    return withContext(dispatchersProvider.io) {
       suspendCoroutine { continuation ->
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         val xmlFeedParser =

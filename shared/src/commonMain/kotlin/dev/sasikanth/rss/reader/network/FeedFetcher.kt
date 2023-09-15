@@ -21,11 +21,10 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
-import kotlinx.coroutines.CoroutineDispatcher
+import me.tatarka.inject.annotations.Inject
 
-internal expect fun feedFetcher(ioDispatcher: CoroutineDispatcher): FeedFetcher
-
-internal class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
+@Inject
+class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
   suspend fun fetch(url: String): FeedPayload {
     val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()

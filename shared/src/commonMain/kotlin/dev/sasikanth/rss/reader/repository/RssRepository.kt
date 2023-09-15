@@ -27,7 +27,7 @@ import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
-import dev.sasikanth.rss.reader.network.feedFetcher
+import dev.sasikanth.rss.reader.network.FeedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
@@ -41,6 +41,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @AppScope
 class RssRepository(
+  private val feedFetcher: FeedFetcher,
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
@@ -53,7 +54,6 @@ class RssRepository(
   }
 
   private val ioDispatcher = dispatchersProvider.io
-  private val feedFetcher = feedFetcher(ioDispatcher)
 
   suspend fun addFeed(feedLink: String) {
     withContext(ioDispatcher) {

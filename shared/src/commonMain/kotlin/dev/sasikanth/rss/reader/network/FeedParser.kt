@@ -20,7 +20,7 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
 
-internal interface FeedParser {
+interface FeedParser {
 
   companion object {
     const val RSS_TAG = "rss"
