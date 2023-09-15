@@ -25,6 +25,10 @@ interface FeedParser {
   companion object {
     const val RSS_TAG = "rss"
     const val ATOM_TAG = "feed"
+    const val HTML_TAG = "html"
+
+    const val RSS_MEDIA_TYPE = "application/rss+xml"
+    const val ATOM_MEDIA_TYPE = "application/atom+xml"
 
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
@@ -80,3 +84,5 @@ interface FeedParser {
 
   suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload
 }
+
+internal class HtmlContentException : Exception()

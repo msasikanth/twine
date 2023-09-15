@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.network
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import dev.sasikanth.rss.reader.network.FeedType.*
@@ -112,6 +113,7 @@ private class IOSXmlFeedParser(
         when (didStartElement) {
           RSS_TAG -> RSS
           ATOM_TAG -> ATOM
+          HTML_TAG -> throw HtmlContentException()
           else -> throw UnsupportedOperationException("Unknown feed type: $didStartElement")
         }
     }

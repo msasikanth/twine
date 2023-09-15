@@ -15,12 +15,17 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
+import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -39,8 +44,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
       when (response.status) {
         HttpStatusCode.OK -> {
-          val feedPayload = feedParser.parse(xmlContent = response.bodyAsText(), feedUrl = url)
-          FeedFetchResult.Success(feedPayload)
+          parseContent(response, url)
         }
         HttpStatusCode.MultipleChoices,
         HttpStatusCode.MovedPermanently,
@@ -66,6 +70,55 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       }
     } catch (e: Exception) {
       FeedFetchResult.Error(e)
+    }
+  }
+
+  private suspend fun parseContent(response: HttpResponse, url: String): FeedFetchResult {
+    val responseContent = response.bodyAsText()
+    return try {
+      val feedPayload = feedParser.parse(xmlContent = responseContent, feedUrl = url)
+      FeedFetchResult.Success(feedPayload)
+    } catch (e: HtmlContentException) {
+      val newUrl = fetchFeedLinkFromHtmlIfExists(responseContent)
+      val host = URLBuilder(url).build().host
+      val rootUrl = "https://$host"
+      val feedUrl = FeedParser.safeUrl(rootUrl, newUrl)
+
+      if (!feedUrl.isNullOrBlank()) {
+        fetch(feedUrl)
+      } else {
+        throw UnsupportedOperationException()
+      }
+    }
+  }
+
+  private suspend fun fetchFeedLinkFromHtmlIfExists(htmlContent: String): String? {
+    return suspendCoroutine { continuation ->
+      var link: String? = null
+      KsoupHtmlParser(
+          handler =
+            object : KsoupHtmlHandler {
+              override fun onOpenTag(
+                name: String,
+                attributes: Map<String, String>,
+                isImplied: Boolean
+              ) {
+                if (
+                  link.isNullOrBlank() &&
+                    name == "link" &&
+                    (attributes["type"] == FeedParser.RSS_MEDIA_TYPE ||
+                      attributes["type"] == FeedParser.ATOM_MEDIA_TYPE)
+                ) {
+                  link = attributes["href"]
+                }
+              }
+
+              override fun onEnd() {
+                continuation.resume(link)
+              }
+            }
+        )
+        .parseComplete(htmlContent)
     }
   }
 }
