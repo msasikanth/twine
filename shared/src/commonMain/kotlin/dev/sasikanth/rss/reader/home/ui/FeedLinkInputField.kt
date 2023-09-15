@@ -78,7 +78,12 @@ internal fun FeedLinkInputField(
     modifier = modifier.requiredHeight(56.dp).fillMaxWidth().focusRequester(focusRequester),
     value = input,
     onValueChange = { input = it },
-    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.Uri),
+    keyboardOptions =
+      KeyboardOptions(
+        imeAction = ImeAction.Done,
+        keyboardType = KeyboardType.Uri,
+        autoCorrect = false
+      ),
     keyboardActions = KeyboardActions(onDone = { onAddFeed() }),
     singleLine = true,
     textStyle = MaterialTheme.typography.labelLarge,
