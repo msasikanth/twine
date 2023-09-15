@@ -63,7 +63,7 @@ internal fun PostPayload.Companion.mapRssPost(
     title = FeedParser.cleanText(rssMap["title"])!!,
     link = FeedParser.cleanText(link)!!,
     description = FeedParser.cleanTextCompact(description).orEmpty(),
-    imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
+    imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
     date = pubDate.rssDateStringToEpochSeconds(),
     commentsLink = commentsLink?.trim()
   )

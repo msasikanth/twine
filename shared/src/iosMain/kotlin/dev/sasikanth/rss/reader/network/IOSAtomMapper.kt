@@ -53,7 +53,7 @@ internal fun PostPayload.Companion.mapAtomPost(
     title = FeedParser.cleanText(atomMap["title"])!!,
     link = link!!,
     description = content.orEmpty(),
-    imageUrl = FeedParser.safeImageUrl(hostLink, imageUrl),
+    imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
     date = pubDate.atomDateStringToEpochSeconds(),
     commentsLink = null
   )

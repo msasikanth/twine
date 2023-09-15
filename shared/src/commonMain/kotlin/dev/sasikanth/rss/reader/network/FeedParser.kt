@@ -55,14 +55,14 @@ interface FeedParser {
       return "https://icon.horse/icon/$host"
     }
 
-    fun safeImageUrl(host: String, imageUrl: String?): String? {
-      return if (!imageUrl.isNullOrBlank()) {
-        if (isAbsoluteUrl(imageUrl)) {
-          URLBuilder(imageUrl).apply { protocol = URLProtocol.HTTPS }.buildString()
+    fun safeUrl(host: String, url: String?): String? {
+      return if (!url.isNullOrBlank()) {
+        if (isAbsoluteUrl(url)) {
+          URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.buildString()
         } else {
           URLBuilder(host)
             .apply {
-              set(path = imageUrl)
+              set(path = url)
               protocol = URLProtocol.HTTPS
             }
             .buildString()

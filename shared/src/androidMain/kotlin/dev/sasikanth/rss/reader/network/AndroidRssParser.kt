@@ -132,7 +132,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link).orEmpty(),
       description = FeedParser.cleanTextCompact(description).orEmpty(),
-      imageUrl = FeedParser.safeImageUrl(hostLink, image),
+      imageUrl = FeedParser.safeUrl(hostLink, image),
       date = dateLong,
       commentsLink = commentsLink?.trim()
     )
