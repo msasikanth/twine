@@ -37,22 +37,28 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
   private var redirectCount = 0
 
-  suspend fun fetch(url: String): FeedFetchResult {
+  suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
     return try {
-      // Currently Ktor Url parses relative URLs,
-      // if it fails to properly parse the given URL, it
-      // default to localhost.
-      //
-      // This will cause the network call to fail,
-      // so we are setting the host manually
-      // https://youtrack.jetbrains.com/issue/KTOR-360
+      // We are mainly doing this check to avoid creating duplicates while refreshing feeds
+      // after the app update
       val transformedUrl =
-        URLBuilder()
-          .apply {
-            protocol = URLProtocol.HTTPS
-            host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
-          }
-          .build()
+        if (transformUrl) {
+          // Currently Ktor Url parses relative URLs,
+          // if it fails to properly parse the given URL, it
+          // default to localhost.
+          //
+          // This will cause the network call to fail,
+          // so we are setting the host manually
+          // https://youtrack.jetbrains.com/issue/KTOR-360
+          URLBuilder()
+            .apply {
+              protocol = URLProtocol.HTTPS
+              host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
+            }
+            .build()
+        } else {
+          URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
+        }
 
       val response = httpClient.get(transformedUrl.toString())
 

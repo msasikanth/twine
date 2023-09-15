@@ -56,9 +56,9 @@ class RssRepository(
 
   private val ioDispatcher = dispatchersProvider.io
 
-  suspend fun addFeed(feedLink: String): FeedAddResult {
+  suspend fun addFeed(feedLink: String, transformUrl: Boolean = true): FeedAddResult {
     return withContext(ioDispatcher) {
-      when (val feedFetchResult = feedFetcher.fetch(feedLink)) {
+      when (val feedFetchResult = feedFetcher.fetch(feedLink, transformUrl)) {
         is FeedFetchResult.Success -> {
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
@@ -105,7 +105,7 @@ class RssRepository(
     val results =
       withContext(ioDispatcher) {
         val feeds = feedQueries.feeds().executeAsList()
-        feeds.map { feed -> launch { addFeed(feed.link) } }
+        feeds.map { feed -> launch { addFeed(feed.link, false) } }
       }
     results.joinAll()
   }
