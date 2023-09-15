@@ -10,4 +10,6 @@ sealed interface FeedFetchResult {
   data class HttpStatusError(val statusCode: HttpStatusCode) : FeedFetchResult
 
   data class Error(val exception: Exception) : FeedFetchResult
+
+  object TooManyRedirects : FeedFetchResult
 }

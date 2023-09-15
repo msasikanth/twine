@@ -11,4 +11,6 @@ sealed interface FeedAddResult {
   data class NetworkError(val exception: Exception) : FeedAddResult
 
   data class DatabaseError(val exception: Exception) : FeedAddResult
+
+  object TooManyRedirects : FeedAddResult
 }

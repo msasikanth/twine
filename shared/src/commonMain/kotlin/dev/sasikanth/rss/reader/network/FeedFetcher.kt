@@ -26,17 +26,43 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
+  companion object {
+    private const val MAX_REDIRECTS_ALLOWED = 3
+  }
+
+  private var redirectCount = 0
+
   suspend fun fetch(url: String): FeedFetchResult {
     return try {
       val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
       val response = httpClient.get(transformedUrl)
 
-      if (response.status == HttpStatusCode.OK) {
-        val feedPayload = feedParser.parse(xmlContent = response.bodyAsText(), feedUrl = url)
-
-        FeedFetchResult.Success(feedPayload)
-      } else {
-        FeedFetchResult.HttpStatusError(statusCode = response.status)
+      when (response.status) {
+        HttpStatusCode.OK -> {
+          val feedPayload = feedParser.parse(xmlContent = response.bodyAsText(), feedUrl = url)
+          FeedFetchResult.Success(feedPayload)
+        }
+        HttpStatusCode.MultipleChoices,
+        HttpStatusCode.MovedPermanently,
+        HttpStatusCode.Found,
+        HttpStatusCode.SeeOther,
+        HttpStatusCode.TemporaryRedirect,
+        HttpStatusCode.PermanentRedirect -> {
+          if (redirectCount < MAX_REDIRECTS_ALLOWED) {
+            val newUrl = response.headers["Location"]
+            if (newUrl != null) {
+              redirectCount += 1
+              fetch(newUrl)
+            } else {
+              FeedFetchResult.Error(Exception("Failed to fetch the feed"))
+            }
+          } else {
+            FeedFetchResult.TooManyRedirects
+          }
+        }
+        else -> {
+          FeedFetchResult.HttpStatusError(statusCode = response.status)
+        }
       }
     } catch (e: Exception) {
       FeedFetchResult.Error(e)

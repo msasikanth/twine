@@ -94,6 +94,9 @@ class RssRepository(
         is FeedFetchResult.Error -> {
           return@withContext FeedAddResult.NetworkError(feedFetchResult.exception)
         }
+        FeedFetchResult.TooManyRedirects -> {
+          return@withContext FeedAddResult.TooManyRedirects
+        }
       }
     }
   }
