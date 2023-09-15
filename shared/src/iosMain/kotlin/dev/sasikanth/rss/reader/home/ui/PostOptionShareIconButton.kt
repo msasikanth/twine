@@ -16,21 +16,39 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.interop.LocalUIViewController
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.CoreGraphics.CGRectGetMaxY
+import platform.CoreGraphics.CGRectGetMidX
+import platform.CoreGraphics.CGRectMake
 import platform.UIKit.UIActivityViewController
+import platform.UIKit.popoverPresentationController
 
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun PostOptionShareIconButton(postLink: String) {
   val viewController = LocalUIViewController.current
+
   PostOptionIconButton(
     icon = TwineIcons.Share,
     contentDescription = LocalStrings.current.share,
     onClick = {
       val items = listOf(postLink)
       val activityController = UIActivityViewController(items, null)
+      activityController.popoverPresentationController?.setSourceView(viewController.view)
+      activityController.popoverPresentationController?.setSourceRect(
+        CGRectMake(
+          x = CGRectGetMidX(viewController.view.bounds),
+          y = CGRectGetMaxY(viewController.view.bounds),
+          width = 0.0,
+          height = 0.0
+        )
+      )
       viewController.presentViewController(activityController, true, null)
     }
   )

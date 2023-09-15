@@ -16,9 +16,17 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.interop.LocalUIViewController
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.CoreGraphics.CGRectGetMaxY
+import platform.CoreGraphics.CGRectGetMidX
+import platform.CoreGraphics.CGRectMake
 import platform.UIKit.UIActivityViewController
+import platform.UIKit.popoverPresentationController
 
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun ShareIconButton(content: () -> String) {
   val viewController = LocalUIViewController.current
@@ -26,6 +34,15 @@ internal actual fun ShareIconButton(content: () -> String) {
   ShareIconButtonInternal {
     val items = listOf(content())
     val activityController = UIActivityViewController(items, null)
+    activityController.popoverPresentationController?.setSourceView(viewController.view)
+    activityController.popoverPresentationController?.setSourceRect(
+      CGRectMake(
+        x = CGRectGetMidX(viewController.view.bounds),
+        y = CGRectGetMaxY(viewController.view.bounds),
+        width = 0.0,
+        height = 0.0
+      )
+    )
     viewController.presentViewController(activityController, true, null)
   }
 }

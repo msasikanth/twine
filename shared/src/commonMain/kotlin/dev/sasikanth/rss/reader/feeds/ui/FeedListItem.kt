@@ -274,8 +274,8 @@ private fun FeedLabelInput(
 @Composable internal expect fun ShareIconButton(content: () -> String)
 
 @Composable
-internal fun ShareIconButtonInternal(onClick: () -> Unit) {
-  IconButton(onClick = onClick) {
+internal fun ShareIconButtonInternal(modifier: Modifier = Modifier, onClick: () -> Unit) {
+  IconButton(modifier = modifier, onClick = onClick) {
     Icon(
       imageVector = TwineIcons.Share,
       contentDescription = null,
