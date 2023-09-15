@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import dev.sasikanth.rss.reader.TestDispatchersProvider
 import dev.sasikanth.rss.reader.atomXmlContent
 import dev.sasikanth.rss.reader.feedUrl
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
@@ -22,14 +23,11 @@ import dev.sasikanth.rss.reader.models.remote.PostPayload
 import dev.sasikanth.rss.reader.rssXmlContent
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class AndroidFeedParserTest {
 
-  private val feedParser = AndroidFeedParser(ioDispatcher = UnconfinedTestDispatcher())
+  private val feedParser = AndroidFeedParser(dispatchersProvider = TestDispatchersProvider())
 
   @Test
   fun parsingRssFeedShouldWorkCorrectly() = runTest {
