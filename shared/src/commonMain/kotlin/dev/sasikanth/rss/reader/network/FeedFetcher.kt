@@ -39,12 +39,26 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
   suspend fun fetch(url: String): FeedFetchResult {
     return try {
-      val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
-      val response = httpClient.get(transformedUrl)
+      // Currently Ktor Url parses relative URLs,
+      // if it fails to properly parse the given URL, it
+      // default to localhost.
+      //
+      // This will cause the network call to fail,
+      // so we are setting the host manually
+      // https://youtrack.jetbrains.com/issue/KTOR-360
+      val transformedUrl =
+        URLBuilder()
+          .apply {
+            protocol = URLProtocol.HTTPS
+            host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
+          }
+          .build()
+
+      val response = httpClient.get(transformedUrl.toString())
 
       when (response.status) {
         HttpStatusCode.OK -> {
-          parseContent(response, url)
+          parseContent(response, transformedUrl.toString())
         }
         HttpStatusCode.MultipleChoices,
         HttpStatusCode.MovedPermanently,
