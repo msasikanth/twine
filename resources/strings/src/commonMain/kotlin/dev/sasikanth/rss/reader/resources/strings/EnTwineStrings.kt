@@ -38,6 +38,13 @@ val EnTwineStrings =
     errorUnsupportedFeed = "App currently doesn\'t support this link",
     errorMalformedXml = "Provided link doesn\'t contain valid RSS/Atom feed",
     errorRequestTimeout = "Timeout, check your network connection and try again later",
+    errorFeedNotFound = { "($it): No content found at the given link." },
+    errorServer = {
+      "($it): Server error. Please try again later or contact the website administrator."
+    },
+    errorTooManyRedirects = "The given URL has too many redirects. Please use a different URL.",
+    errorUnAuthorized = { "($it): You are not authorized to access content at this link." },
+    errorUnknownHttpStatus = { "Failed to load content with HTTP code: ($it)" },
     searchHint = "Search posts",
     searchSortNewest = "Newest",
     searchSortNewestFirst = "Newest first",

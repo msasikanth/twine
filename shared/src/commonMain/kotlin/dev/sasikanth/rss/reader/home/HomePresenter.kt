@@ -29,14 +29,18 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
+import io.ktor.http.HttpStatusCode
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -216,28 +220,80 @@ class HomePresenter(
       coroutineScope.launch {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
         try {
-          rssRepository.addFeed(feedLink)
-        } catch (e: Exception) {
-          when (e) {
-            is UnsupportedOperationException -> {
-              effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
+          when (val feedAddResult = rssRepository.addFeed(feedLink)) {
+            is FeedAddResult.DatabaseError -> handleDatabaseErrors(feedAddResult, feedLink)
+            is FeedAddResult.HttpStatusError -> handleHttpStatusErrors(feedAddResult)
+            is FeedAddResult.NetworkError -> handleNetworkErrors(feedAddResult, feedLink)
+            FeedAddResult.TooManyRedirects -> {
+              effects.emit(HomeEffect.ShowError(HomeErrorType.TooManyRedirects))
             }
-            is XmlParsingError -> {
-              Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
-              effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
-            }
-            is ConnectTimeoutException,
-            is SocketTimeoutException -> {
-              effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
-            }
-            else -> {
-              Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
-              effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
+            FeedAddResult.Success -> {
+              // no-op
             }
           }
+        } catch (e: Exception) {
+          Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
+          effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
         } finally {
           _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
         }
+      }
+    }
+
+    private suspend fun handleNetworkErrors(
+      feedAddResult: FeedAddResult.NetworkError,
+      feedLink: String
+    ) {
+      when (feedAddResult.exception) {
+        is UnsupportedOperationException -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
+        }
+        is XmlParsingError -> {
+          Sentry.captureException(feedAddResult.exception) { scope ->
+            scope.setContext("feed_url", feedLink)
+          }
+          effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
+        }
+        is ConnectTimeoutException,
+        is SocketTimeoutException -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
+        }
+        else -> {
+          Sentry.captureException(feedAddResult.exception) { scope ->
+            scope.setContext("feed_url", feedLink)
+          }
+          effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(feedAddResult.exception)))
+        }
+      }
+    }
+
+    private suspend fun handleHttpStatusErrors(httpStatusError: FeedAddResult.HttpStatusError) {
+      when (val statusCode = httpStatusError.statusCode) {
+        HttpStatusCode.BadRequest,
+        HttpStatusCode.Unauthorized,
+        HttpStatusCode.PaymentRequired,
+        HttpStatusCode.Forbidden -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.UnAuthorized(statusCode)))
+        }
+        HttpStatusCode.NotFound -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.FeedNotFound(statusCode)))
+        }
+        HttpStatusCode.InternalServerError,
+        HttpStatusCode.NotImplemented,
+        HttpStatusCode.BadGateway,
+        HttpStatusCode.ServiceUnavailable,
+        HttpStatusCode.GatewayTimeout -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.ServerError(statusCode)))
+        }
+        else -> {
+          effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownHttpStatusError(statusCode)))
+        }
+      }
+    }
+
+    private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
+      Sentry.captureException(databaseError.exception) { scope ->
+        scope.setContext("feed_url", feedLink)
       }
     }
 

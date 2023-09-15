@@ -381,6 +381,12 @@ private suspend fun displayErrorMessage(
       HomeErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
       HomeErrorType.Timeout -> twineStrings.errorRequestTimeout
       is HomeErrorType.Unknown -> errorType.e.message
+      is HomeErrorType.FeedNotFound -> twineStrings.errorFeedNotFound(errorType.statusCode.value)
+      is HomeErrorType.ServerError -> twineStrings.errorServer(errorType.statusCode.value)
+      HomeErrorType.TooManyRedirects -> twineStrings.errorTooManyRedirects
+      is HomeErrorType.UnAuthorized -> twineStrings.errorUnAuthorized(errorType.statusCode.value)
+      is HomeErrorType.UnknownHttpStatusError ->
+        twineStrings.errorUnknownHttpStatus(errorType.statusCode.value)
     }
 
   if (message != null) {
