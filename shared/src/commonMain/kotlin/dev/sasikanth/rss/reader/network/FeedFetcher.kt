@@ -15,10 +15,10 @@
  */
 package dev.sasikanth.rss.reader.network
 
-import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import me.tatarka.inject.annotations.Inject
@@ -26,9 +26,20 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
-  suspend fun fetch(url: String): FeedPayload {
-    val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
-    val xml = httpClient.get(transformedUrl).bodyAsText()
-    return feedParser.parse(xml, url)
+  suspend fun fetch(url: String): FeedFetchResult {
+    return try {
+      val transformedUrl = URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
+      val response = httpClient.get(transformedUrl)
+
+      if (response.status == HttpStatusCode.OK) {
+        val feedPayload = feedParser.parse(xmlContent = response.bodyAsText(), feedUrl = url)
+
+        FeedFetchResult.Success(feedPayload)
+      } else {
+        FeedFetchResult.HttpStatusError(statusCode = response.status)
+      }
+    } catch (e: Exception) {
+      FeedFetchResult.Error(e)
+    }
   }
 }

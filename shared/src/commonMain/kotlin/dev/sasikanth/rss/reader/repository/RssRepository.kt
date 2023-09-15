@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.network.FeedFetchResult
 import dev.sasikanth.rss.reader.network.FeedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -55,28 +56,43 @@ class RssRepository(
 
   private val ioDispatcher = dispatchersProvider.io
 
-  suspend fun addFeed(feedLink: String) {
-    withContext(ioDispatcher) {
-      val feedPayload = feedFetcher.fetch(feedLink)
-      feedQueries.upsert(
-        name = feedPayload.name,
-        icon = feedPayload.icon,
-        description = feedPayload.description,
-        homepageLink = feedPayload.homepageLink,
-        createdAt = Clock.System.now(),
-        link = feedPayload.link
-      )
-      postQueries.transaction {
-        feedPayload.posts.forEach { post ->
-          postQueries.upsert(
-            title = post.title,
-            description = post.description,
-            imageUrl = post.imageUrl,
-            date = Instant.fromEpochMilliseconds(post.date),
-            link = post.link,
-            commnetsLink = post.commentsLink,
-            feedLink = feedPayload.link,
-          )
+  suspend fun addFeed(feedLink: String): FeedAddResult {
+    return withContext(ioDispatcher) {
+      when (val feedFetchResult = feedFetcher.fetch(feedLink)) {
+        is FeedFetchResult.Success -> {
+          return@withContext try {
+            val feedPayload = feedFetchResult.feedPayload
+            feedQueries.upsert(
+              name = feedPayload.name,
+              icon = feedPayload.icon,
+              description = feedPayload.description,
+              homepageLink = feedPayload.homepageLink,
+              createdAt = Clock.System.now(),
+              link = feedPayload.link
+            )
+            postQueries.transaction {
+              feedPayload.posts.forEach { post ->
+                postQueries.upsert(
+                  title = post.title,
+                  description = post.description,
+                  imageUrl = post.imageUrl,
+                  date = Instant.fromEpochMilliseconds(post.date),
+                  link = post.link,
+                  commnetsLink = post.commentsLink,
+                  feedLink = feedPayload.link,
+                )
+              }
+            }
+            FeedAddResult.Success
+          } catch (e: Exception) {
+            FeedAddResult.DatabaseError(e)
+          }
+        }
+        is FeedFetchResult.HttpStatusError -> {
+          return@withContext FeedAddResult.HttpStatusError(feedFetchResult.statusCode)
+        }
+        is FeedFetchResult.Error -> {
+          return@withContext FeedAddResult.NetworkError(feedFetchResult.exception)
         }
       }
     }
