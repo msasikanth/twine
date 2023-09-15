@@ -53,3 +53,5 @@ data class TwineStrings(
 object Locales {
   const val EN = "en"
 }
+
+expect fun String.fmt(vararg args: Any?): String

@@ -22,5 +22,6 @@ androidApp/release
 .idea/deploymentTargetDropDown.xml
 .idea/androidTestResultsUserPreferences.xml
 .idea/assetWizardSettings.xml
+.idea/modules.xml
 gradle.xml
 *.iml
