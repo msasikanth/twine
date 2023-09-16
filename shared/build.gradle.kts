@@ -109,7 +109,7 @@ kotlin {
         api(libs.okio)
         implementation(libs.paging.common)
         implementation(libs.paging.compose)
-        implementation(libs.imageloader)
+        api(libs.imageloader)
       }
     }
     val commonTest by getting {
