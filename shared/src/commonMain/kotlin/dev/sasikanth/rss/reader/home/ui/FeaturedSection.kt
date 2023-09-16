@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,10 +81,12 @@ import kotlinx.coroutines.flow.collectLatest
 
 private val featuredImageBackgroundAspectRatio: Float
   @Composable
+  @ReadOnlyComposable
   get() =
     when (LocalWindowSizeClass.current.widthSizeClass) {
       WindowWidthSizeClass.Compact -> 1.1f
       WindowWidthSizeClass.Medium -> 1.55f
+      WindowWidthSizeClass.Expanded -> 3.1f
       else -> 1.1f
     }
 
