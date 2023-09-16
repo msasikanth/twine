@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.network
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
+import dev.sasikanth.rss.reader.utils.XmlParsingError
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -98,21 +99,33 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     return try {
       val feedPayload = feedParser.parse(xmlContent = responseContent, feedUrl = url)
       FeedFetchResult.Success(feedPayload)
-    } catch (e: HtmlContentException) {
-      val newUrl = fetchFeedLinkFromHtmlIfExists(responseContent)
-      val host = URLBuilder(url).build().host
-      val rootUrl = "https://$host"
-      val feedUrl = FeedParser.safeUrl(rootUrl, newUrl)
-
-      if (!feedUrl.isNullOrBlank()) {
-        fetch(feedUrl)
-      } else {
-        throw UnsupportedOperationException()
+    } catch (e: Exception) {
+      when (e) {
+        // There are situation where XML parsers fail to identify if it's
+        // a HTML document and fail, so trying to fetch link with HTML one
+        // last time just to be safe if it fails with XML parsing issue.
+        is HtmlContentException,
+        is XmlParsingError -> {
+          val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
+          if (!feedUrl.isNullOrBlank()) {
+            fetch(feedUrl)
+          } else {
+            if (e is XmlParsingError) {
+              throw e
+            } else {
+              throw UnsupportedOperationException()
+            }
+          }
+        }
+        else -> throw e
       }
     }
   }
 
-  private suspend fun fetchFeedLinkFromHtmlIfExists(htmlContent: String): String? {
+  private suspend fun fetchFeedLinkFromHtmlIfExists(
+    htmlContent: String,
+    originalUrl: String
+  ): String? {
     return suspendCoroutine { continuation ->
       var link: String? = null
       KsoupHtmlParser(
@@ -134,7 +147,11 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
               }
 
               override fun onEnd() {
-                continuation.resume(link)
+                val host = URLBuilder(originalUrl).build().host
+                val rootUrl = "https://$host"
+                val feedUrl = FeedParser.safeUrl(rootUrl, link)
+
+                continuation.resume(feedUrl)
               }
             }
         )
