@@ -28,14 +28,14 @@ jobs:
       - name: Setup versionName regardless of how this action is triggered
         id: version_name
         run: |
-          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_code }}
+          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_name }}
           VERSION_NAME=${WORKFLOW_INPUT:-"1.0.0"}
           echo "ORG_GRADLE_PROJECT_VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
       - name: Setup versionCode regardless of how this action is triggered
         id: version_code
         run: |
-          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_name }}
+          WORKFLOW_INPUT=${{ steps.tramline.outputs.version_code }}
           VERSION_CODE=${WORKFLOW_INPUT:-"1"}
           echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
