@@ -77,7 +77,7 @@ interface FeedParser {
     }
 
     private fun isAbsoluteUrl(url: String): Boolean {
-      val pattern = """^\w+://""".toRegex()
+      val pattern = """^(?:\w+:)?//""".toRegex()
       return pattern.containsMatchIn(url)
     }
   }
