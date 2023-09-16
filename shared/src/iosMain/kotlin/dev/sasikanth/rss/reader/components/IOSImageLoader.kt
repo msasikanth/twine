@@ -18,8 +18,10 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -62,15 +64,20 @@ internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
       ImageLoaderState.Loading
     }
   val imageLoader = LocalImageLoader.current
+  val result = remember(url, imageLoader) { mutableStateOf(initialState) }
 
-  return produceState(initialState, url) {
-    value =
+  LaunchedEffect(url) {
+    val imageLoaderState =
       try {
         ImageLoaderState.Loaded(imageLoader?.getImage(url!!, size = null)!!)
       } catch (e: Exception) {
         ImageLoaderState.Error
       }
+
+    result.value = imageLoaderState
   }
+
+  return result
 }
 
 internal sealed interface ImageLoaderState {
