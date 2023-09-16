@@ -15,11 +15,30 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.components.AndroidImageLoader
-import dev.sasikanth.rss.reader.components.ImageLoader
+import android.content.Context
+import com.seiko.imageloader.ImageLoader
+import com.seiko.imageloader.component.setupDefaultComponents
+import com.seiko.imageloader.defaultImageResultMemoryCache
+import com.seiko.imageloader.option.androidContext
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
+import okio.Path.Companion.toOkioPath
 
 actual interface ImageLoaderComponent {
 
-  @Provides fun AndroidImageLoader.bind(): ImageLoader = this
+  @Provides
+  @AppScope
+  fun providesImageLoader(context: Context): ImageLoader {
+    return ImageLoader {
+      options { androidContext(context) }
+      components { setupDefaultComponents() }
+      interceptor {
+        defaultImageResultMemoryCache()
+        diskCacheConfig {
+          directory(context.cacheDir.resolve("image_cache").toOkioPath())
+          maxSizeBytes(512L * 1024 * 1024) // 512MB
+        }
+      }
+    }
+  }
 }
