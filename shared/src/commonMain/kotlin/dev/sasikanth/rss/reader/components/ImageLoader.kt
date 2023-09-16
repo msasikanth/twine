@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.components
 
-import dev.sasikanth.rss.reader.components.IOSImageLoader
-import dev.sasikanth.rss.reader.components.ImageLoader
-import me.tatarka.inject.annotations.Provides
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.ImageBitmap
 
-actual interface ImageLoaderComponent {
-
-  @Provides fun IOSImageLoader.bind(): ImageLoader = this
+interface ImageLoader {
+  suspend fun getImage(url: String, size: Int?): ImageBitmap?
 }
+
+val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }

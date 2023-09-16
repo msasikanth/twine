@@ -109,7 +109,6 @@ kotlin {
         api(libs.okio)
         implementation(libs.paging.common)
         implementation(libs.paging.compose)
-        api(libs.imageloader)
       }
     }
     val commonTest by getting {
@@ -126,6 +125,7 @@ kotlin {
         api(libs.androidx.core)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.sqldelight.driver.android)
+        implementation(libs.coil.compose)
         api(libs.sqliteAndroid)
       }
     }

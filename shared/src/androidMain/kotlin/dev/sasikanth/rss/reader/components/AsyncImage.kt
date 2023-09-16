@@ -13,13 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
+package dev.sasikanth.rss.reader.components
 
-import dev.sasikanth.rss.reader.components.IOSImageLoader
-import dev.sasikanth.rss.reader.components.ImageLoader
-import me.tatarka.inject.annotations.Provides
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 
-actual interface ImageLoaderComponent {
-
-  @Provides fun IOSImageLoader.bind(): ImageLoader = this
+@Composable
+actual fun AsyncImage(
+  url: String,
+  contentDescription: String?,
+  contentScale: ContentScale,
+  modifier: Modifier,
+) {
+  Box(modifier) {
+    coil.compose.AsyncImage(
+      modifier = Modifier.matchParentSize(),
+      model = url,
+      contentDescription = contentDescription,
+      contentScale = ContentScale.Crop
+    )
+  }
 }

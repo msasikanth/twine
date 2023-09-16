@@ -26,15 +26,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import com.seiko.imageloader.ImageLoader
-import com.seiko.imageloader.LocalImageLoader
-import com.seiko.imageloader.asImageBitmap
-import com.seiko.imageloader.model.ImageRequest
-import com.seiko.imageloader.model.ImageResult
-import com.seiko.imageloader.option.SizeResolver
 import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
 import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
 import dev.sasikanth.material.color.utilities.dynamiccolor.ToneDeltaConstraint
@@ -46,8 +39,6 @@ import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.score.Score
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 private const val TINTED_BACKGROUND = "tinted_background"
@@ -288,15 +279,9 @@ class DynamicColorState(
       return cached
     }
 
-    val imageRequest = ImageRequest {
-      data(url)
-      size(SizeResolver(Size(128f, 128f)))
-    }
-    val imageResult =
-      imageLoader?.async(imageRequest)?.filterIsInstance<ImageResult.Bitmap>()?.first()
-
-    return if (imageResult != null) {
-      extractColorsFromImage(imageResult.bitmap.asImageBitmap())
+    val image = imageLoader?.getImage(url, size = 128)
+    return if (image != null) {
+      extractColorsFromImage(image)
         .let { colorsMap ->
           return@let if (colorsMap.isNotEmpty()) {
             DynamicColors(
