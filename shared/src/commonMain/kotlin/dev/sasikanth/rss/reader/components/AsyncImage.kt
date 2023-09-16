@@ -15,14 +15,39 @@
  */
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.ContentScale
+import com.seiko.imageloader.model.ImageRequest
+import com.seiko.imageloader.option.SizeResolver
+import com.seiko.imageloader.rememberImagePainter
 
 @Composable
-expect fun AsyncImage(
+fun AsyncImage(
   url: String,
   contentDescription: String?,
-  contentScale: ContentScale = ContentScale.Fit,
+  contentScale: ContentScale = ContentScale.Crop,
   modifier: Modifier = Modifier,
-)
+  size: Size = Size(1024f, 1024f)
+) {
+  val request =
+    remember(url) {
+      ImageRequest {
+        data(url)
+        size(SizeResolver(size))
+      }
+    }
+  val painter = rememberImagePainter(request)
+  Box(modifier) {
+    Image(
+      modifier = Modifier.matchParentSize(),
+      painter = painter,
+      contentDescription = contentDescription,
+      contentScale = contentScale,
+    )
+  }
+}

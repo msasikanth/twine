@@ -25,7 +25,6 @@ androidx_test_rules = "1.5.0"
 androidx_work = "2.8.1"
 androidx_datastore = "1.1.0-alpha05"
 androidx_browser = "1.6.0"
-coil = "2.4.0"
 spotless = "6.21.0"
 ktfmt = "0.44"
 kotlininject = "0.6.3"
@@ -42,6 +41,7 @@ lyricist = "1.4.2"
 atomicfu = "0.22.0"
 okio = "3.5.0"
 paging = "3.2.0-alpha05-0.2.3"
+imageloader = "1.6.7"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -80,7 +80,6 @@ androidx_work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 androidx_datastore_okio = { module = "androidx.datastore:datastore-core-okio", version.ref = "androidx_datastore" }
 androidx_datastore_preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx_datastore" }
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
-coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
@@ -94,6 +93,7 @@ lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", versi
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
+imageloader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "imageloader" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
