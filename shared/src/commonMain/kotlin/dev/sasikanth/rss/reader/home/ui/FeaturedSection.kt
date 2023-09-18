@@ -90,6 +90,17 @@ private val featuredImageBackgroundAspectRatio: Float
       else -> 1.1f
     }
 
+private val featuredGradientBackgroundAspectRatio: Float
+  @Composable
+  @ReadOnlyComposable
+  get() =
+    when (LocalWindowSizeClass.current.widthSizeClass) {
+      WindowWidthSizeClass.Compact -> 0.8f
+      WindowWidthSizeClass.Medium -> 1.11f
+      WindowWidthSizeClass.Expanded -> 2.3f
+      else -> 0.8f
+    }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeaturedSection(
@@ -278,7 +289,7 @@ private fun FeaturedSectionBlurredBackground(modifier: Modifier = Modifier, imag
     } else {
       Box(
         modifier =
-          Modifier.aspectRatio(0.8f).composed {
+          Modifier.aspectRatio(featuredGradientBackgroundAspectRatio).composed {
             val colorStops =
               listOf(
                 AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
