@@ -124,13 +124,7 @@ class IOSImageLoader : ImageLoader {
           NSCharacterSet.URLFragmentAllowedCharacterSet
         )
           ?: return@withContext null
-      val cachedImage = loadCachedImage(encodedUrl)
-      val data =
-        if (cachedImage != null) {
-          cachedImage
-        } else {
-          downloadImage(encodedUrl) ?: return@withContext null
-        }
+      val data = loadCachedImage(encodedUrl) ?: downloadImage(encodedUrl) ?: return@withContext null
 
       return@withContext Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
     }
