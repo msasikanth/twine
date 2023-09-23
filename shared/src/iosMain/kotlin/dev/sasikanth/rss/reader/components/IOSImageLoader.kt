@@ -48,12 +48,16 @@ import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Rect
 import org.jetbrains.skia.SamplingMode
 import platform.Foundation.NSCachedURLResponse
+import platform.Foundation.NSCharacterSet
 import platform.Foundation.NSData
 import platform.Foundation.NSHTTPURLResponse
+import platform.Foundation.NSString
 import platform.Foundation.NSURL
 import platform.Foundation.NSURLCache
 import platform.Foundation.NSURLRequest
+import platform.Foundation.URLFragmentAllowedCharacterSet
 import platform.Foundation.create
+import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 
 @Composable
 internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
@@ -112,23 +116,24 @@ class IOSImageLoader : ImageLoader {
       diskPath = "dev_sasikanth_rss_reader_images_cache"
     )
 
+  @Suppress("CAST_NEVER_SUCCEEDS")
   override suspend fun getImage(url: String, size: Int?): ImageBitmap? {
     return withContext(Dispatchers.IO) {
-      val cachedImage = loadCachedImage(url)
+      val encodedUrl =
+        (url as NSString).stringByAddingPercentEncodingWithAllowedCharacters(
+          NSCharacterSet.URLFragmentAllowedCharacterSet
+        )
+          ?: return@withContext null
+      val cachedImage = loadCachedImage(encodedUrl)
       val data =
         if (cachedImage != null) {
           cachedImage
         } else {
-          downloadImage(url) ?: return@withContext null
+          downloadImage(encodedUrl) ?: return@withContext null
         }
 
       return@withContext Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
     }
-  }
-
-  private fun hasImageCache(url: String): Boolean {
-    val request = createNSURLRequest(url) ?: return false
-    return urlCache.cachedResponseForRequest(request) != null
   }
 
   private fun loadCachedImage(url: String): ByteArray? {
