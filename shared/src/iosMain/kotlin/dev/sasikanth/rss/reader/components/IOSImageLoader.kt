@@ -31,6 +31,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readBytes
 import io.ktor.util.toMap
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.convert
@@ -96,6 +97,7 @@ internal sealed interface ImageLoaderState {
 
 @Inject
 @AppScope
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class IOSImageLoader : ImageLoader {
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
