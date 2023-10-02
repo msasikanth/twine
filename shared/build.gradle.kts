@@ -109,6 +109,8 @@ kotlin {
         api(libs.okio)
         implementation(libs.paging.common)
         implementation(libs.paging.compose)
+        implementation(libs.stately.isolate)
+        implementation(libs.stately.iso.collections)
       }
     }
     val commonTest by getting {

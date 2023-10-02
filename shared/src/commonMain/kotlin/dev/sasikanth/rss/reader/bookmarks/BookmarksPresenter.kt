@@ -15,9 +15,9 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import app.cash.paging.cachedIn
+import app.cash.paging.createPager
+import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -104,7 +104,7 @@ class BookmarksPresenter(
 
     private fun init() {
       val bookmarks =
-        Pager<Int, PostWithMetadata>(PagingConfig(pageSize = 20)) { rssRepository.bookmarks() }
+        createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.bookmarks() }
           .flow
           .cachedIn(coroutineScope)
 

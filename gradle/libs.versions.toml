@@ -41,7 +41,8 @@ desugarJdk = "2.0.3"
 lyricist = "1.4.2"
 atomicfu = "0.22.0"
 okio = "3.6.0"
-paging = "3.2.0-alpha05-0.2.3"
+paging = "3.3.0-alpha02-0.4.0"
+stately = "2.0.4"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -95,6 +96,8 @@ lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", versi
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
+stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
+stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

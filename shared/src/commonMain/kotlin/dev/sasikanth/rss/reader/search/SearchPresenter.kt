@@ -20,9 +20,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import app.cash.paging.cachedIn
+import app.cash.paging.createPager
+import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -153,7 +153,7 @@ class SearchPresenter(
 
     private fun searchPosts(query: String, sortOrder: SearchSortOrder) {
       val searchResults =
-        Pager<Int, PostWithMetadata>(PagingConfig(pageSize = 20)) {
+        createPager(config = createPagingConfig(pageSize = 20)) {
             rssRepository.search(query, sortOrder)
           }
           .flow

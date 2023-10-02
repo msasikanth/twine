@@ -18,9 +18,9 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
-import app.cash.paging.Pager
-import app.cash.paging.PagingConfig
 import app.cash.paging.cachedIn
+import app.cash.paging.createPager
+import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.backhandler.BackCallback
@@ -191,7 +191,7 @@ class HomePresenter(
         .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
         .onEach { selectedFeed ->
           val posts =
-            Pager<Int, PostWithMetadata>(PagingConfig(pageSize = 20)) {
+            createPager(config = createPagingConfig(pageSize = 20)) {
                 rssRepository.posts(selectedFeedLink = selectedFeed?.link)
               }
               .flow
