@@ -168,16 +168,19 @@ fun HomeScreen(
         )
       },
       snackbarHost = {
-        SnackbarHost(
-          hostState = it,
-          modifier =
-            Modifier.padding(bottom = 112.dp)
+        val snackbarModifier =
+          if (bottomSheetState.isExpanded) {
+            Modifier.padding(bottom = BOTTOM_SHEET_PEEK_HEIGHT)
               .windowInsetsPadding(
                 WindowInsets.systemBars.only(
                   WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
                 )
               )
-        )
+          } else {
+            Modifier
+          }
+
+        SnackbarHost(hostState = it, modifier = snackbarModifier)
       },
       backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
       sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
