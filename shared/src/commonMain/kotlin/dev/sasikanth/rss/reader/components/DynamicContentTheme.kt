@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.unit.IntSize
@@ -140,9 +141,9 @@ internal fun rememberDynamicColorState(
   defaultSurfaceContainerLowest: Color = AppTheme.colorScheme.surfaceContainerLowest,
   defaultSurfaceContainerHigh: Color = AppTheme.colorScheme.surfaceContainerHigh,
   defaultSurfaceContainerHighest: Color = AppTheme.colorScheme.surfaceContainerHighest,
-  cacheSize: Int = 15
+  cacheSize: Int = 15,
+  imageLoader: ImageLoader? = null
 ): DynamicColorState {
-  val imageLoader = LocalImageLoader.current
   return remember {
     DynamicColorState(
       defaultTintedBackground,
@@ -411,3 +412,8 @@ private data class DynamicColors(
   val surfaceContainerHigh: Color,
   val surfaceContainerHighest: Color,
 )
+
+internal val LocalDynamicColorState =
+  staticCompositionLocalOf<DynamicColorState> {
+    throw NullPointerException("Please provide a dynamic color state")
+  }

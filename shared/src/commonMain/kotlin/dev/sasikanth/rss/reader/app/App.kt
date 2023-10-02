@@ -20,11 +20,8 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
@@ -34,6 +31,7 @@ import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.ImageLoader
+import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
@@ -55,21 +53,13 @@ fun App(
   imageLoader: ImageLoader,
   @Assisted openLink: (String, BrowserType) -> Unit
 ) {
+  val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
+
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
-    LocalWindowSizeClass provides calculateWindowSizeClass()
+    LocalWindowSizeClass provides calculateWindowSizeClass(),
+    LocalDynamicColorState provides dynamicColorState
   ) {
-    var imageUrl by rememberSaveable { mutableStateOf<String?>(null) }
-    val dynamicColorState = rememberDynamicColorState()
-
-    LaunchedEffect(imageUrl) {
-      if (imageUrl != null) {
-        dynamicColorState.updateColorsFromImageUrl(imageUrl!!)
-      } else {
-        dynamicColorState.reset()
-      }
-    }
-
     DynamicContentTheme(dynamicColorState) {
       ProvideStrings {
         val state by appPresenter.state.collectAsState()
@@ -87,7 +77,6 @@ fun App(
             is Screen.Home ->
               HomeScreen(
                 homePresenter = screen.presenter,
-                onFeaturedItemChange = { imageUrl = it },
                 openLink = { openLink(it, state.browserType) },
                 modifier = Modifier.fillMaxSize()
               )

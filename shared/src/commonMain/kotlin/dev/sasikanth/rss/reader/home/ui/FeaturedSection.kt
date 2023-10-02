@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachReversed
 import dev.sasikanth.rss.reader.components.AsyncImage
+import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.RSS
@@ -115,27 +116,25 @@ internal fun FeaturedSection(
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit
 ) {
   Box(modifier = modifier) {
-    var selectedImage by remember { mutableStateOf<String?>(null) }
+    val dynamicColorState = LocalDynamicColorState.current
 
     LaunchedEffect(pagerState, featuredPosts) {
       snapshotFlow { pagerState.settledPage }
         .collectLatest { index ->
           val selectedFeaturedPost = featuredPosts.getOrNull(index)
-          selectedImage = selectedFeaturedPost?.imageUrl
-          onFeaturedItemChange(selectedImage)
+          selectedFeaturedPost?.imageUrl?.let { url ->
+            dynamicColorState.updateColorsFromImageUrl(selectedFeaturedPost.imageUrl)
+          }
         }
     }
 
     if (featuredPosts.isNotEmpty()) {
-      selectedImage?.let {
-        FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
-      }
+      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
     }
 
     Column {

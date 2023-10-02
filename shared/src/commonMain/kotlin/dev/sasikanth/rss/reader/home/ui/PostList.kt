@@ -69,7 +69,6 @@ internal fun PostsList(
   featuredPosts: ImmutableList<PostWithMetadata>,
   posts: LazyPagingItems<PostWithMetadata>,
   selectedFeed: Feed?,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit,
   listState: LazyListState = rememberLazyListState(),
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
@@ -93,7 +92,6 @@ internal fun PostsList(
         onItemClick = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
-        onFeaturedItemChange = onFeaturedItemChange,
         onSearchClicked = onSearchClicked,
         onBookmarksClicked = onBookmarksClicked,
         onSettingsClicked = onSettingsClicked

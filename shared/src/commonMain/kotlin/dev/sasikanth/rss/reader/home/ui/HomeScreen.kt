@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
@@ -94,7 +95,6 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 @Composable
 fun HomeScreen(
   homePresenter: HomePresenter,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit,
   openLink: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -159,7 +159,6 @@ fun HomeScreen(
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
           onPostCommentsClick = { commentsLink -> openLink(commentsLink) },
-          onFeaturedItemChange = onFeaturedItemChange,
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
           onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
@@ -212,13 +211,20 @@ private fun HomeScreenContent(
   onPostClicked: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
-  onFeaturedItemChange: (imageUrl: String?) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit
 ) {
   val hasContent = featuredPosts.isNotEmpty() || posts.itemCount != 0
+  val dynamicColorState = LocalDynamicColorState.current
+
+  LaunchedEffect(hasContent) {
+    if (!hasContent) {
+      dynamicColorState.reset()
+    }
+  }
+
   if (hasContent) {
     val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
@@ -232,7 +238,6 @@ private fun HomeScreenContent(
         onPostClicked = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
-        onFeaturedItemChange = onFeaturedItemChange,
         listState = listState,
         onSearchClicked = onSearchClicked,
         onBookmarksClicked = onBookmarksClicked,
