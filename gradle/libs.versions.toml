@@ -47,6 +47,7 @@ paging = "3.2.0-alpha05-0.2.3"
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
 compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
@@ -110,6 +111,6 @@ buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig"
 sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
 
 [bundles]
-compose = [ "compose-runtime", "compose-foundation", "compose_material", "compose_material3", "compose_resources" ]
+compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
