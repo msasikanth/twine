@@ -18,11 +18,13 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.IntSize
 
 @Composable
 expect fun AsyncImage(
   url: String,
   contentDescription: String?,
   contentScale: ContentScale = ContentScale.Fit,
+  size: IntSize? = null,
   modifier: Modifier = Modifier,
 )

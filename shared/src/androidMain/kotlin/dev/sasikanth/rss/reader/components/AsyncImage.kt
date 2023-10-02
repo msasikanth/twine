@@ -15,24 +15,40 @@
  */
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.IntSize
 
 @Composable
 actual fun AsyncImage(
   url: String,
   contentDescription: String?,
   contentScale: ContentScale,
+  size: IntSize?,
   modifier: Modifier,
 ) {
+  val imageLoader = LocalImageLoader.current
+  var image: ImageBitmap? by remember { mutableStateOf(null) }
+
+  LaunchedEffect(url) { image = imageLoader?.getImage(url, size) }
+
   Box(modifier) {
-    coil.compose.AsyncImage(
-      modifier = Modifier.matchParentSize(),
-      model = url,
-      contentDescription = contentDescription,
-      contentScale = ContentScale.Crop
-    )
+    image?.let { bitmap ->
+      Image(
+        modifier = Modifier.matchParentSize(),
+        bitmap = bitmap,
+        contentDescription = contentDescription,
+        contentScale = ContentScale.Crop
+      )
+    }
   }
 }

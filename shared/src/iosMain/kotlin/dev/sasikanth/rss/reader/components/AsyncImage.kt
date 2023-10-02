@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.IntSize
 import io.ktor.client.request.get
 import org.jetbrains.skia.Image
 
@@ -29,10 +30,11 @@ actual fun AsyncImage(
   url: String,
   contentDescription: String?,
   contentScale: ContentScale,
+  size: IntSize?,
   modifier: Modifier,
 ) {
   Box(modifier) {
-    val imageState by rememberImageLoaderState(url)
+    val imageState by rememberImageLoaderState(url, size)
 
     when (imageState) {
       is ImageLoaderState.Loaded -> {

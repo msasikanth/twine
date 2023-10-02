@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
+import androidx.compose.ui.unit.IntSize
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
@@ -61,7 +62,10 @@ import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 
 @Composable
-internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
+internal fun rememberImageLoaderState(
+  url: String?,
+  size: IntSize? = null
+): State<ImageLoaderState> {
   val initialState =
     if (url.isNullOrBlank()) {
       ImageLoaderState.Error
@@ -74,7 +78,7 @@ internal fun rememberImageLoaderState(url: String?): State<ImageLoaderState> {
   LaunchedEffect(url) {
     val imageLoaderState =
       try {
-        ImageLoaderState.Loaded(imageLoader?.getImage(url!!, size = null)!!)
+        ImageLoaderState.Loaded(imageLoader?.getImage(url!!, size = size)!!)
       } catch (e: Exception) {
         ImageLoaderState.Error
       }
@@ -119,7 +123,7 @@ class IOSImageLoader : ImageLoader {
     )
 
   @Suppress("CAST_NEVER_SUCCEEDS")
-  override suspend fun getImage(url: String, size: Int?): ImageBitmap? {
+  override suspend fun getImage(url: String, size: IntSize?): ImageBitmap? {
     return withContext(Dispatchers.IO) {
       val encodedUrl =
         (url as NSString).stringByAddingPercentEncodingWithAllowedCharacters(
@@ -185,9 +189,10 @@ class IOSImageLoader : ImageLoader {
     this.usePinned { NSData.create(bytes = it.addressOf(0), length = this.size.convert()) }
 }
 
-private fun Image.toBitmap(size: Int? = null): Bitmap {
-  val width = size ?: this.width
-  val height = size ?: this.height
+private fun Image.toBitmap(size: IntSize? = null): Bitmap {
+  val width = size?.width ?: this.width
+  val height = size?.height ?: this.height
+
   val bitmap = Bitmap()
   bitmap.allocPixels(ImageInfo.makeN32(width, height, ColorAlphaType.PREMUL))
   val canvas = Canvas(bitmap)

@@ -17,9 +17,20 @@ package dev.sasikanth.rss.reader.components
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.unit.IntSize
 
 interface ImageLoader {
-  suspend fun getImage(url: String, size: Int?): ImageBitmap?
+  suspend fun getImage(url: String, size: IntSize?): ImageBitmap?
+}
+
+internal sealed interface ImageLoaderState {
+  object Idle : ImageLoaderState
+
+  object Loading : ImageLoaderState
+
+  data class Loaded(val image: ImageBitmap) : ImageLoaderState
+
+  object Error : ImageLoaderState
 }
 
 val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }

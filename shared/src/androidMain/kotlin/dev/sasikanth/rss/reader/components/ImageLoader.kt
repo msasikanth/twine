@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.components
 import android.content.Context
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.IntSize
 import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -30,7 +31,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class AndroidImageLoader(private val context: Context) : ImageLoader {
 
-  override suspend fun getImage(url: String, size: Int?): ImageBitmap? {
+  override suspend fun getImage(url: String, size: IntSize?): ImageBitmap? {
     val requestBuilder =
       ImageRequest.Builder(context)
         .data(url)
@@ -39,7 +40,7 @@ class AndroidImageLoader(private val context: Context) : ImageLoader {
         .memoryCacheKey("$url.dynamic_colors")
 
     if (size != null) {
-      requestBuilder.size(size)
+      requestBuilder.size(size.width, size.height)
     }
 
     return when (val result = context.imageLoader.execute(requestBuilder.build())) {

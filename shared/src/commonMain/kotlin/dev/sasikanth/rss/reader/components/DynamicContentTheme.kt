@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.unit.IntSize
 import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
 import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
 import dev.sasikanth.material.color.utilities.dynamiccolor.ToneDeltaConstraint
@@ -279,7 +280,7 @@ class DynamicColorState(
       return cached
     }
 
-    val image = imageLoader?.getImage(url, size = 128)
+    val image = imageLoader?.getImage(url, size = IntSize(64, 64))
     return if (image != null) {
       extractColorsFromImage(image)
         .let { colorsMap ->
