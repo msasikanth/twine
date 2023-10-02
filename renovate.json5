@@ -15,6 +15,13 @@
       ]
     },
     {
+      "matchPackagePatterns": [
+        "^com.arkivanov.decompose"
+      ],
+      "groupName": "Decompose",
+      "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+\\-compose-experimental$/"
+    },
+    {
       "description": "Automerge minor updates",
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
