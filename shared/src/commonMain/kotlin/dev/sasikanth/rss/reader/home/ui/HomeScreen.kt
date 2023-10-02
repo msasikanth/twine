@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -49,6 +50,7 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -60,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -180,7 +183,20 @@ fun HomeScreen(
             Modifier
           }
 
-        SnackbarHost(hostState = it, modifier = snackbarModifier)
+        SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
+          Snackbar(
+            modifier = Modifier.padding(12.dp),
+            content = {
+              Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+            },
+            action = null,
+            actionOnNewLine = false,
+            shape = SnackbarDefaults.shape,
+            backgroundColor = SnackbarDefaults.color,
+            contentColor = SnackbarDefaults.contentColor,
+            elevation = 0.dp
+          )
+        }
       },
       backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
       sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
