@@ -17,11 +17,6 @@
 
 package dev.sasikanth.rss.reader.components
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.unit.IntSize
@@ -60,44 +55,6 @@ import platform.Foundation.NSURLRequest
 import platform.Foundation.URLFragmentAllowedCharacterSet
 import platform.Foundation.create
 import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
-
-@Composable
-internal fun rememberImageLoaderState(
-  url: String?,
-  size: IntSize? = null
-): State<ImageLoaderState> {
-  val initialState =
-    if (url.isNullOrBlank()) {
-      ImageLoaderState.Error
-    } else {
-      ImageLoaderState.Loading
-    }
-  val imageLoader = LocalImageLoader.current
-  val result = remember(url, imageLoader) { mutableStateOf(initialState) }
-
-  LaunchedEffect(url) {
-    val imageLoaderState =
-      try {
-        ImageLoaderState.Loaded(imageLoader?.getImage(url!!, size = size)!!)
-      } catch (e: Exception) {
-        ImageLoaderState.Error
-      }
-
-    result.value = imageLoaderState
-  }
-
-  return result
-}
-
-internal sealed interface ImageLoaderState {
-  object Idle : ImageLoaderState
-
-  object Loading : ImageLoaderState
-
-  data class Loaded(val image: ImageBitmap) : ImageLoaderState
-
-  object Error : ImageLoaderState
-}
 
 @Inject
 @AppScope

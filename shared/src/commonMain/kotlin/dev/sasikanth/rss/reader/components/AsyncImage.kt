@@ -15,16 +15,37 @@
  */
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
 
 @Composable
-expect fun AsyncImage(
+fun AsyncImage(
   url: String,
   contentDescription: String?,
   contentScale: ContentScale = ContentScale.Fit,
   size: IntSize? = null,
   modifier: Modifier = Modifier,
-)
+) {
+  Box(modifier) {
+    val imageState by rememberImageLoaderState(url, size)
+
+    when (imageState) {
+      is ImageLoaderState.Loaded -> {
+        Image(
+          modifier = Modifier.matchParentSize(),
+          bitmap = (imageState as ImageLoaderState.Loaded).image,
+          contentDescription = contentDescription,
+          contentScale = contentScale
+        )
+      }
+      else -> {
+        // TODO: Handle other cases instead of just showing blank space?
+      }
+    }
+  }
+}
