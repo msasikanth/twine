@@ -40,7 +40,7 @@ windowSizeClass = "0.3.1"
 desugarJdk = "2.0.3"
 lyricist = "1.4.2"
 atomicfu = "0.22.0"
-okio = "3.5.0"
+okio = "3.6.0"
 paging = "3.2.0-alpha05-0.2.3"
 
 [libraries]
