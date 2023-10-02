@@ -62,7 +62,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
@@ -80,13 +79,11 @@ import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
-import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
@@ -100,8 +97,6 @@ fun HomeScreen(
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
-  val featuredPosts = state.featuredPosts
-  val posts = state.posts.collectAsLazyPagingItems()
 
   val bottomSheetState =
     rememberBottomSheetState(
@@ -151,10 +146,7 @@ fun HomeScreen(
       scaffoldState = bottomSheetScaffoldState,
       content = {
         HomeScreenContent(
-          featuredPosts = featuredPosts,
-          posts = posts,
-          selectedFeed = state.selectedFeed,
-          isRefreshing = state.isRefreshing,
+          state = state,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
@@ -203,10 +195,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContent(
-  featuredPosts: ImmutableList<PostWithMetadata>,
-  posts: LazyPagingItems<PostWithMetadata>,
-  selectedFeed: Feed?,
-  isRefreshing: Boolean,
+  state: HomeState,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
@@ -216,6 +205,8 @@ private fun HomeScreenContent(
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit
 ) {
+  val featuredPosts = state.featuredPosts
+  val posts = state.posts.collectAsLazyPagingItems()
   val hasContent = featuredPosts.isNotEmpty() || posts.itemCount != 0
   val dynamicColorState = LocalDynamicColorState.current
 
@@ -226,7 +217,8 @@ private fun HomeScreenContent(
   }
 
   if (hasContent) {
-    val swipeRefreshState = rememberPullRefreshState(isRefreshing, onRefresh = onSwipeToRefresh)
+    val swipeRefreshState =
+      rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
       val listState = rememberLazyListState()
       val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
@@ -234,7 +226,7 @@ private fun HomeScreenContent(
       PostsList(
         featuredPosts = featuredPosts,
         posts = posts,
-        selectedFeed = selectedFeed,
+        selectedFeed = state.selectedFeed,
         onPostClicked = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
@@ -245,7 +237,7 @@ private fun HomeScreenContent(
       )
 
       PullRefreshIndicator(
-        refreshing = isRefreshing,
+        refreshing = state.isRefreshing,
         state = swipeRefreshState,
         modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
       )
