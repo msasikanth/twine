@@ -64,9 +64,12 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEachReversed
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
@@ -76,6 +79,8 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.canBlurImage
+import dev.sasikanth.rss.reader.utils.inverseProgress
+import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
 
@@ -128,7 +133,9 @@ internal fun FeaturedSection(
     }
 
     if (featuredPosts.isNotEmpty()) {
-      selectedImage?.let { FeaturedSectionBlurredBackground(imageUrl = it) }
+      selectedImage?.let {
+        FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+      }
     }
 
     Column {
@@ -274,18 +281,29 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeaturedSectionBlurredBackground(modifier: Modifier = Modifier, imageUrl: String?) {
+private fun FeaturedSectionBlurredBackground(
+  modifier: Modifier = Modifier,
+  featuredPosts: ImmutableList<PostWithMetadata>,
+  pagerState: PagerState
+) {
   BoxWithConstraints(modifier = modifier) {
     if (canBlurImage) {
-      AsyncImage(
-        url = imageUrl!!,
-        modifier =
-          Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
-            .blur(100.dp, BlurredEdgeTreatment.Unbounded),
-        contentDescription = null,
-        contentScale = ContentScale.Crop
-      )
+      featuredPosts.fastForEachReversed { post ->
+        val actualIndex = featuredPosts.indexOf(post)
+
+        AsyncImage(
+          url = post.imageUrl!!,
+          modifier =
+            Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+              .blur(100.dp, BlurredEdgeTreatment.Unbounded)
+              .alpha(actualIndex, pagerState),
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          size = IntSize(64, 64)
+        )
+      }
     } else {
       Box(
         modifier =
@@ -334,5 +352,29 @@ private fun FeaturedSectionBlurredBackground(modifier: Modifier = Modifier, imag
               )
           )
     )
+  }
+}
+
+private const val EPSILON = 1e-6f
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {
+  val settledPage = pagerState.settledPage
+  val offsetFraction = pagerState.getOffsetFractionForPage(settledPage)
+
+  return graphicsLayer {
+    alpha =
+      when {
+        index == settledPage -> {
+          if (offsetFraction > EPSILON) {
+            offsetFraction.inverseProgress()
+          } else {
+            1f
+          }
+        }
+        index == settledPage - 1 && offsetFraction < -EPSILON -> offsetFraction.absoluteValue
+        index < settledPage -> 0f
+        else -> 1f
+      }
   }
 }
