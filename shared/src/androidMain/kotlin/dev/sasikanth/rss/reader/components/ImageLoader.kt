@@ -24,6 +24,7 @@ import coil.imageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Scale
+import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Inject
 

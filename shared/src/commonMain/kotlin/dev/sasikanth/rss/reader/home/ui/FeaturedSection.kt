@@ -34,8 +34,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,8 +50,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.util.lerp
-import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
+import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass

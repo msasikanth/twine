@@ -37,7 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.AsyncImage
+import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass

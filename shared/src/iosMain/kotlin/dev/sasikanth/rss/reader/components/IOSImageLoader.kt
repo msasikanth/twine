@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.unit.IntSize
+import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.components
+package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.IntSize
 fun AsyncImage(
   url: String,
   contentDescription: String?,
-  contentScale: ContentScale = ContentScale.Fit,
-  size: IntSize? = null,
   modifier: Modifier = Modifier,
+  contentScale: ContentScale = ContentScale.Fit,
+  size: IntSize? = null
 ) {
   Box(modifier) {
     val imageState by rememberImageLoaderState(url, size)

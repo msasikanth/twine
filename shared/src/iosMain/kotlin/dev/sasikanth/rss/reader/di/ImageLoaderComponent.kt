@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.components.IOSImageLoader
-import dev.sasikanth.rss.reader.components.ImageLoader
+import dev.sasikanth.rss.reader.components.image.ImageLoader
 import me.tatarka.inject.annotations.Provides
 
 actual interface ImageLoaderComponent {

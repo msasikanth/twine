@@ -53,7 +53,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.AsyncImage
+import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.Delete
