@@ -15,6 +15,8 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,6 +31,7 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -136,11 +139,18 @@ internal fun FeaturedSection(
           state = pagerState,
           contentPadding = pagerContentPadding,
           pageSpacing = 16.dp,
-          verticalAlignment = Alignment.Top
-        ) {
-          val featuredPost = featuredPosts[it]
+          verticalAlignment = Alignment.Top,
+          flingBehavior =
+            PagerDefaults.flingBehavior(
+              state = pagerState,
+              snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+            )
+        ) { page ->
+          val featuredPost = featuredPosts[page]
           FeaturedPostItem(
             item = featuredPost,
+            page = page,
+            pagerState = pagerState,
             onClick = { onItemClick(featuredPost) },
             onBookmarkClick = { onPostBookmarkClick(featuredPost) },
             onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }

@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -34,6 +38,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,6 +62,8 @@ private val featuredImageAspectRatio: Float
 @Composable
 internal fun FeaturedPostItem(
   item: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit
@@ -65,9 +72,21 @@ internal fun FeaturedPostItem(
     LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
   Box(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
     if (isLargeScreenLayout) {
-      LargeScreenFeaturedPostItem(item, onBookmarkClick, onCommentsClick)
+      LargeScreenFeaturedPostItem(
+        item = item,
+        page = page,
+        pagerState = pagerState,
+        onBookmarkClick = onBookmarkClick,
+        onCommentsClick = onCommentsClick
+      )
     } else {
-      DefaultFeaturedPostItem(item, onBookmarkClick, onCommentsClick)
+      DefaultFeaturedPostItem(
+        item = item,
+        page = page,
+        pagerState = pagerState,
+        onBookmarkClick = onBookmarkClick,
+        onCommentsClick = onCommentsClick
+      )
     }
   }
 }
@@ -75,6 +94,8 @@ internal fun FeaturedPostItem(
 @Composable
 private fun DefaultFeaturedPostItem(
   item: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit
 ) {
@@ -84,9 +105,10 @@ private fun DefaultFeaturedPostItem(
       modifier =
         Modifier.clip(MaterialTheme.shapes.extraLarge)
           .aspectRatio(featuredImageAspectRatio)
-          .background(AppTheme.colorScheme.surfaceContainerLowest),
+          .background(AppTheme.colorScheme.surfaceContainerLowest)
+          .graphicsLayer { translationX = pagerState.getOffsetFractionForPage(page) * 250f },
       contentDescription = null,
-      contentScale = ContentScale.Crop
+      contentScale = ContentScale.Crop,
     )
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))
@@ -133,6 +155,8 @@ private fun DefaultFeaturedPostItem(
 @Composable
 private fun LargeScreenFeaturedPostItem(
   item: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit
 ) {
@@ -143,9 +167,10 @@ private fun LargeScreenFeaturedPostItem(
         Modifier.clip(MaterialTheme.shapes.extraLarge)
           .aspectRatio(featuredImageAspectRatio)
           .weight(0.92f)
-          .background(AppTheme.colorScheme.surfaceContainerLowest),
+          .background(AppTheme.colorScheme.surfaceContainerLowest)
+          .graphicsLayer { translationX = pagerState.getOffsetFractionForPage(page) * 250f },
       contentDescription = null,
-      contentScale = ContentScale.Crop
+      contentScale = ContentScale.Crop,
     )
 
     Spacer(modifier = Modifier.requiredWidth(8.dp))
