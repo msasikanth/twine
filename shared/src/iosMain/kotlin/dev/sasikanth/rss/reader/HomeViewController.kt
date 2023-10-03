@@ -30,6 +30,7 @@ import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSURL
 import platform.SafariServices.SFSafariViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIModalPresentationPageSheet
 import platform.UIKit.UIViewController
 
 typealias HomeViewController = (backDispatcher: BackDispatcher) -> UIViewController
@@ -52,6 +53,8 @@ fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher) =
           }
           InApp -> {
             val safari = SFSafariViewController(NSURL(string = link))
+            safari.modalPresentationStyle = UIModalPresentationPageSheet
+
             uiViewController.presentViewController(safari, animated = true, completion = null)
           }
         }
