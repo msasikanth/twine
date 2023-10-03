@@ -173,7 +173,7 @@ private fun FeaturedSectionBlurredBackground(
               .alpha(actualIndex, pagerState),
           contentDescription = null,
           contentScale = ContentScale.Crop,
-          size = IntSize(64, 64)
+          size = IntSize(128, 128)
         )
       }
     } else {
