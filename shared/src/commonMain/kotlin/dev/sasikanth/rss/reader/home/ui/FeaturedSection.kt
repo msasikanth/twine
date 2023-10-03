@@ -128,7 +128,7 @@ internal fun FeaturedSection(
         .collectLatest { index ->
           val selectedFeaturedPost = featuredPosts.getOrNull(index)
           selectedFeaturedPost?.imageUrl?.let { url ->
-            dynamicColorState.updateColorsFromImageUrl(selectedFeaturedPost.imageUrl)
+            dynamicColorState.updateColorsFromImageUrl(url)
           }
         }
     }
