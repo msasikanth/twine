@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachReversed
+import androidx.compose.ui.util.lerp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
@@ -80,7 +81,6 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.canBlurImage
-import dev.sasikanth.rss.reader.utils.inverseProgress
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.collectLatest
@@ -364,14 +364,9 @@ private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {
   return graphicsLayer {
     alpha =
       when {
-        index == settledPage -> {
-          if (offsetFraction > EPSILON) {
-            offsetFraction.inverseProgress()
-          } else {
-            1f
-          }
-        }
-        index == settledPage - 1 && offsetFraction < -EPSILON -> offsetFraction.absoluteValue
+        index == settledPage -> lerp(1f, 0f, offsetFraction)
+        index == settledPage - 1 && offsetFraction < -EPSILON ->
+          lerp(0f, 1f, offsetFraction.absoluteValue)
         index < settledPage -> 0f
         else -> 1f
       }
