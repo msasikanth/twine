@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -38,6 +39,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Snackbar
@@ -58,6 +60,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -112,6 +115,8 @@ fun HomeScreen(
   val bottomSheetScaffoldState =
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
+  val listState = rememberLazyListState()
+
   val bottomSheetSwipeTransition =
     updateTransition(
       targetState = bottomSheetState.offsetProgress,
@@ -147,17 +152,24 @@ fun HomeScreen(
   Box(modifier = modifier) {
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
-      content = {
+      topBar = {
+        HomeTopAppBar(
+          listState = listState,
+          onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
+          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) }
+        )
+      },
+      content = { paddingValues ->
         HomeScreenContent(
+          paddingValues = paddingValues,
           state = state,
+          listState = listState,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
           onPostCommentsClick = { commentsLink -> openLink(commentsLink) },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
-          onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) }
         )
       },
       sheetContent = {
@@ -214,15 +226,14 @@ fun HomeScreen(
 
 @Composable
 private fun HomeScreenContent(
+  paddingValues: PaddingValues,
   state: HomeState,
+  listState: LazyListState,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit
 ) {
   val featuredPosts = state.featuredPosts
   val posts = state.posts.collectAsLazyPagingItems()
@@ -239,10 +250,10 @@ private fun HomeScreenContent(
     val swipeRefreshState =
       rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
-      val listState = rememberLazyListState()
       val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
       PostsList(
+        paddingValues = paddingValues,
         featuredPosts = featuredPosts,
         posts = posts,
         selectedFeed = state.selectedFeed,
@@ -250,9 +261,6 @@ private fun HomeScreenContent(
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
         listState = listState,
-        onSearchClicked = onSearchClicked,
-        onBookmarksClicked = onBookmarksClicked,
-        onSettingsClicked = onSettingsClicked
       )
 
       PullRefreshIndicator(
@@ -267,7 +275,7 @@ private fun HomeScreenContent(
           Modifier.windowInsetsPadding(
               WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
             )
-            .padding(end = 24.dp, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 24.dp),
+            .padding(end = 24.dp, bottom = 24.dp),
       ) {
         listState.animateScrollToItem(0)
       }

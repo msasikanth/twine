@@ -681,7 +681,7 @@ private fun BottomSheetScaffoldLayout(
     val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight - topBarHeight)
     val bodyPlaceables =
       subcompose(BottomSheetScaffoldLayoutSlot.Body) {
-          body(PaddingValues(bottom = sheetPeekHeight))
+          body(PaddingValues(top = topBarHeight.toDp(), bottom = sheetPeekHeight))
         }
         .map { it.measure(bodyConstraints) }
 
@@ -716,7 +716,7 @@ private fun BottomSheetScaffoldLayout(
       }
     layout(layoutWidth, layoutHeight) {
       // Placement order is important for elevation
-      bodyPlaceables.fastForEach { it.placeRelative(0, topBarHeight) }
+      bodyPlaceables.fastForEach { it.placeRelative(0, 0) }
       topBarPlaceables?.fastForEach { it.placeRelative(0, 0) }
       sheetPlaceables.fastForEach { it.placeRelative(0, sheetOffsetY) }
       fabPlaceable?.fastForEach { it.placeRelative(fabOffsetX, fabOffsetY) }

@@ -66,6 +66,7 @@ internal val postListPadding
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PostsList(
+  paddingValues: PaddingValues,
   featuredPosts: ImmutableList<PostWithMetadata>,
   posts: LazyPagingItems<PostWithMetadata>,
   selectedFeed: Feed?,
@@ -73,9 +74,6 @@ internal fun PostsList(
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit,
 ) {
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
@@ -87,14 +85,12 @@ internal fun PostsList(
   LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 240.dp)) {
     item {
       FeaturedSection(
+        paddingValues = paddingValues,
         pagerState = featuredPostsPagerState,
         featuredPosts = featuredPosts,
         onItemClick = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
-        onSearchClicked = onSearchClicked,
-        onBookmarksClicked = onBookmarksClicked,
-        onSettingsClicked = onSettingsClicked
       )
     }
 

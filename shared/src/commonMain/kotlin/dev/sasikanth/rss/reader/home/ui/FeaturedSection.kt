@@ -19,41 +19,22 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -74,10 +55,6 @@ import androidx.compose.ui.util.lerp
 import dev.sasikanth.rss.reader.components.AsyncImage
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
-import dev.sasikanth.rss.reader.resources.icons.Bookmarks
-import dev.sasikanth.rss.reader.resources.icons.RSS
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.canBlurImage
@@ -110,15 +87,13 @@ private val featuredGradientBackgroundAspectRatio: Float
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeaturedSection(
+  paddingValues: PaddingValues,
   pagerState: PagerState,
   featuredPosts: ImmutableList<PostWithMetadata>,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit
 ) {
   Box(modifier = modifier) {
     val dynamicColorState = LocalDynamicColorState.current
@@ -134,38 +109,30 @@ internal fun FeaturedSection(
     }
 
     if (featuredPosts.isNotEmpty()) {
-      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
-    }
+      val layoutDirection = LocalLayoutDirection.current
 
-    Column {
-      AppBar(
-        onSearchClicked = onSearchClicked,
-        onBookmarksClicked = onBookmarksClicked,
-        onSettingsClicked = onSettingsClicked
-      )
+      val systemBarsPaddingValues =
+        WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+      val startPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
+      val endPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
 
-      if (featuredPosts.isNotEmpty()) {
-        val layoutDirection = LocalLayoutDirection.current
+      val horizontalPadding =
+        if (startPadding > endPadding) {
+          startPadding
+        } else {
+          endPadding
+        }
 
-        val systemBarsPaddingValues =
-          WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-        val startPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
-        val endPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
+      val pagerContentPadding =
+        PaddingValues(
+          start = horizontalPadding + 24.dp,
+          top = 24.dp + paddingValues.calculateTopPadding(),
+          end = horizontalPadding + 24.dp,
+          bottom = 24.dp
+        )
 
-        val horizontalPadding =
-          if (startPadding > endPadding) {
-            startPadding
-          } else {
-            endPadding
-          }
-
-        val pagerContentPadding =
-          PaddingValues(
-            start = horizontalPadding + 24.dp,
-            top = 24.dp,
-            end = horizontalPadding + 24.dp,
-            bottom = 24.dp
-          )
+      Box {
+        FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
 
         HorizontalPager(
           state = pagerState,
@@ -181,100 +148,6 @@ internal fun FeaturedSection(
             onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }
           )
         }
-      }
-    }
-  }
-}
-
-@Composable
-private fun AppBar(
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit
-) {
-  Row(
-    modifier =
-      Modifier.fillMaxWidth()
-        .windowInsetsPadding(
-          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-        )
-        .padding(start = 24.dp, end = 12.dp, top = 16.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      Text(
-        text = LocalStrings.current.appName,
-        color = Color.White,
-        style = MaterialTheme.typography.headlineSmall
-      )
-
-      Spacer(Modifier.width(4.dp))
-
-      Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = Color.White)
-    }
-
-    Spacer(Modifier.weight(1f))
-
-    IconButton(
-      onClick = onSearchClicked,
-    ) {
-      Icon(
-        imageVector = Icons.Rounded.Search,
-        contentDescription = LocalStrings.current.searchHint,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    IconButton(
-      onClick = onBookmarksClicked,
-    ) {
-      Icon(
-        imageVector = TwineIcons.Bookmarks,
-        contentDescription = LocalStrings.current.bookmarks,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    OverflowMenu(onSettingsClicked)
-  }
-}
-
-@Composable
-private fun OverflowMenu(onSettingsClicked: () -> Unit) {
-  Box {
-    var dropdownExpanded by remember { mutableStateOf(false) }
-
-    IconButton(
-      onClick = { dropdownExpanded = true },
-    ) {
-      Icon(
-        imageVector = Icons.Rounded.MoreVert,
-        contentDescription = LocalStrings.current.moreMenuOptions,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    if (dropdownExpanded) {
-      DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
-        DropdownMenuItem(
-          text = {
-            Text(
-              text = LocalStrings.current.settings,
-              color = AppTheme.colorScheme.textEmphasisHigh
-            )
-          },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Rounded.Settings,
-              contentDescription = LocalStrings.current.settings,
-              tint = AppTheme.colorScheme.textEmphasisHigh
-            )
-          },
-          onClick = {
-            dropdownExpanded = false
-            onSettingsClicked()
-          }
-        )
       }
     }
   }
