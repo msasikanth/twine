@@ -17,6 +17,7 @@
 
 import com.diffplug.gradle.spotless.SpotlessExtension
 import org.jetbrains.compose.ComposeExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   // this is necessary to avoid the plugins to be loaded multiple times
@@ -61,5 +62,27 @@ allprojects {
   plugins.withId("org.jetbrains.compose") {
     val compose = extensions.getByName("compose") as ComposeExtension
     compose.kotlinCompilerPlugin.set(libs.versions.compose.compiler)
+  }
+
+  tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    compilerOptions {
+      // Treat all Kotlin warnings as errors
+      allWarningsAsErrors = true
+
+      if (project.providers.gradleProperty("twine.enableComposeCompilerReports").isPresent) {
+        freeCompilerArgs.addAll(
+          "-P",
+          "plugin:androidx.compose.compiler.plugins.kotlin:reportsDestination=" +
+            layout.buildDirectory.asFile.get().absolutePath +
+            "/compose_metrics",
+        )
+        freeCompilerArgs.addAll(
+          "-P",
+          "plugin:androidx.compose.compiler.plugins.kotlin:metricsDestination=" +
+            layout.buildDirectory.asFile.get().absolutePath +
+            "/compose_metrics",
+        )
+      }
+    }
   }
 }
