@@ -210,6 +210,18 @@ fun HomeScreen(
           )
         }
       },
+      floatingActionButton = {
+        val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+        ScrollToTopButton(
+          visible = showScrollToTop,
+          modifier =
+            Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+              .padding(end = 24.dp, bottom = 24.dp),
+        ) {
+          listState.animateScrollToItem(0)
+        }
+      },
       backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
       sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
       sheetContentColor = AppTheme.colorScheme.tintedForeground,
@@ -250,8 +262,6 @@ private fun HomeScreenContent(
     val swipeRefreshState =
       rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
     Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
-      val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-
       PostsList(
         paddingValues = paddingValues,
         featuredPosts = featuredPosts,
@@ -268,17 +278,6 @@ private fun HomeScreenContent(
         state = swipeRefreshState,
         modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
       )
-
-      ScrollToTopButton(
-        visible = showScrollToTop,
-        modifier =
-          Modifier.windowInsetsPadding(
-              WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-            )
-            .padding(end = 24.dp, bottom = 24.dp),
-      ) {
-        listState.animateScrollToItem(0)
-      }
     }
   } else {
     NoFeeds(onNoFeedsSwipeUp)

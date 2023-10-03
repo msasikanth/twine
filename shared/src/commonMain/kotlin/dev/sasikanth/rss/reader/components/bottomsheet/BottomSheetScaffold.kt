@@ -694,13 +694,9 @@ private fun BottomSheetScaffoldLayout(
     val fabOffsetX =
       when (floatingActionButtonPosition) {
         FabPosition.Center -> (layoutWidth - fabWidth) / 2
-        else -> layoutWidth - fabWidth - FabSpacing.roundToPx()
+        else -> layoutWidth - fabWidth
       }
-    // In case sheet peek height < (FAB height / 2), give the FAB some minimum space
-    val fabOffsetY =
-      if (sheetPeekHeight.toPx() < fabHeight / 2) {
-        sheetOffsetY - fabHeight - FabSpacing.roundToPx()
-      } else sheetOffsetY - (fabHeight / 2)
+    val fabOffsetY = sheetOffsetY - fabHeight
 
     val snackbarPlaceables =
       subcompose(BottomSheetScaffoldLayoutSlot.Snackbar, snackbarHost).map {
@@ -718,9 +714,9 @@ private fun BottomSheetScaffoldLayout(
       // Placement order is important for elevation
       bodyPlaceables.fastForEach { it.placeRelative(0, 0) }
       topBarPlaceables?.fastForEach { it.placeRelative(0, 0) }
-      sheetPlaceables.fastForEach { it.placeRelative(0, sheetOffsetY) }
       fabPlaceable?.fastForEach { it.placeRelative(fabOffsetX, fabOffsetY) }
       snackbarPlaceables.fastForEach { it.placeRelative(snackbarOffsetX, snackbarOffsetY) }
+      sheetPlaceables.fastForEach { it.placeRelative(0, sheetOffsetY) }
     }
   }
 }
@@ -807,6 +803,5 @@ private fun BottomSheetScaffoldAnchorChangeCallback(
     }
   }
 
-private val FabSpacing = 16.dp
 private val BottomSheetScaffoldPositionalThreshold = 56.dp
 private val BottomSheetScaffoldVelocityThreshold = 125.dp
