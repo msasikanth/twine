@@ -15,11 +15,13 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.models.local.Feed
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
+@Immutable
 data class FeedsState(
   val pinnedFeeds: ImmutableList<Feed>,
   val feeds: ImmutableList<Feed>,

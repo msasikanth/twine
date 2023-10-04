@@ -15,13 +15,13 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-@Stable
+@Immutable
 data class BookmarksState(val bookmarks: Flow<PagingData<PostWithMetadata>>) {
 
   companion object {

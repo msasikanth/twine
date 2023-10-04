@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
@@ -30,6 +31,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
+@Immutable
 data class HomeState(
   val featuredPosts: ImmutableList<PostWithMetadata>,
   val posts: Flow<PagingData<PostWithMetadata>>,
