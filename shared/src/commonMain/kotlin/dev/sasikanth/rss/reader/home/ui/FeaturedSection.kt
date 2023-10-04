@@ -127,7 +127,7 @@ internal fun FeaturedSection(
       val pagerContentPadding =
         PaddingValues(
           start = horizontalPadding + 24.dp,
-          top = 24.dp + paddingValues.calculateTopPadding(),
+          top = 8.dp + paddingValues.calculateTopPadding(),
           end = horizontalPadding + 24.dp,
           bottom = 24.dp
         )

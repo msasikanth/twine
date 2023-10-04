@@ -84,7 +84,7 @@ fun HomeTopAppBar(
         .windowInsetsPadding(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
-        .padding(start = 24.dp, end = 12.dp, top = 16.dp),
+        .padding(start = 24.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
