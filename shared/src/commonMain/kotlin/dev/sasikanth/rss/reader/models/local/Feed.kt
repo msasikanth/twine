@@ -15,8 +15,10 @@
  */
 package dev.sasikanth.rss.reader.models.local
 
+import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
 
+@Immutable
 data class Feed(
   val name: String,
   val icon: String,
