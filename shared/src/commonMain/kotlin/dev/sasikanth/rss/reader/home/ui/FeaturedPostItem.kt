@@ -106,7 +106,11 @@ private fun DefaultFeaturedPostItem(
         Modifier.clip(MaterialTheme.shapes.extraLarge)
           .aspectRatio(featuredImageAspectRatio)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .graphicsLayer { translationX = pagerState.getOffsetFractionForPage(page) * 250f },
+          .graphicsLayer {
+            translationX = pagerState.getOffsetFractionForPage(page) * 250f
+            scaleX = 1.08f
+            scaleY = 1.08f
+          },
       contentDescription = null,
       contentScale = ContentScale.Crop,
     )
@@ -168,7 +172,11 @@ private fun LargeScreenFeaturedPostItem(
           .aspectRatio(featuredImageAspectRatio)
           .weight(0.92f)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .graphicsLayer { translationX = pagerState.getOffsetFractionForPage(page) * 250f },
+          .graphicsLayer {
+            translationX = pagerState.getOffsetFractionForPage(page) * 250f
+            scaleX = 1.08f
+            scaleY = 1.08f
+          },
       contentDescription = null,
       contentScale = ContentScale.Crop,
     )
