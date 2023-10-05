@@ -44,6 +44,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func refreshFeeds(task: BGAppRefreshTask) {
         scheduledRefreshFeeds()
         applicationComponent.rssRepository.updateFeeds { error in
+            if error != nil {
+                self.applicationComponent.lastUpdatedAt.refresh { error in
+                    // no-op
+                }
+            }
             task.setTaskCompleted(success: error == nil)
         }
     }
