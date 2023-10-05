@@ -22,6 +22,7 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
+import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
 import io.sentry.kotlin.multiplatform.Sentry
 import java.lang.Exception
@@ -30,7 +31,8 @@ import java.time.Duration
 class FeedsRefreshWorker(
   context: Context,
   workerParameters: WorkerParameters,
-  private val rssRepository: RssRepository
+  private val rssRepository: RssRepository,
+  private val lastUpdatedAt: LastUpdatedAt
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
@@ -53,6 +55,7 @@ class FeedsRefreshWorker(
   override suspend fun doWork(): Result {
     return try {
       rssRepository.updateFeeds()
+      lastUpdatedAt.refresh()
       Result.success()
     } catch (e: Exception) {
       Sentry.captureException(e)

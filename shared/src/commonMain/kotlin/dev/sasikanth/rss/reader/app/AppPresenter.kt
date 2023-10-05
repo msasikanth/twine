@@ -24,11 +24,14 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.doOnStart
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
+import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
@@ -43,6 +46,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 private typealias HomePresenterFactory =
@@ -77,14 +81,18 @@ class AppPresenter(
   private val homePresenter: HomePresenterFactory,
   private val searchPresenter: SearchPresentFactory,
   private val bookmarksPresenter: BookmarkPresenterFactory,
-  private val settingsPresenter: SettingsPresenterFactory
+  private val settingsPresenter: SettingsPresenterFactory,
+  private val lastUpdatedAt: LastUpdatedAt,
+  private val rssRepository: RssRepository
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
-        settingsRepository = settingsRepository
+        settingsRepository = settingsRepository,
+        lastUpdatedAt = lastUpdatedAt,
+        rssRepository = rssRepository
       )
     }
 
@@ -98,6 +106,10 @@ class AppPresenter(
       handleBackButton = true,
       childFactory = ::createScreen,
     )
+
+  init {
+    lifecycle.doOnStart { presenterInstance.refreshFeedsIfExpired() }
+  }
 
   fun onBackClicked() {
     navigation.pop()
@@ -129,7 +141,9 @@ class AppPresenter(
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
-    private val settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    private val lastUpdatedAt: LastUpdatedAt,
+    private val rssRepository: RssRepository
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -146,6 +160,15 @@ class AppPresenter(
       settingsRepository.browserType
         .onEach { browserType -> _state.update { it.copy(browserType = browserType) } }
         .launchIn(coroutineScope)
+    }
+
+    fun refreshFeedsIfExpired() {
+      coroutineScope.launch {
+        if (lastUpdatedAt.hasExpired()) {
+          rssRepository.updateFeeds()
+          lastUpdatedAt.refresh()
+        }
+      }
     }
 
     override fun onDestroy() {
