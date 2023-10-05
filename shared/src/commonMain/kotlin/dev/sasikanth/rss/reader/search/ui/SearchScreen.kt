@@ -34,13 +34,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -70,6 +68,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.resources.icons.Sort
@@ -315,21 +315,18 @@ private fun SortDropdownMenu(
   DropdownMenu(
     expanded = isDropdownExpanded,
     onDismissRequest = onDismiss,
-    offset = DpOffset(0.dp, (-48).dp),
-    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceContainerHigh)
+    offset = DpOffset(0.dp, (-48).dp)
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(
         text = LocalStrings.current.searchSortNewestFirst,
-        style = MaterialTheme.typography.bodyLarge,
-        color = AppTheme.colorScheme.onSurface
+        style = MaterialTheme.typography.bodyLarge
       )
     }
     DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
       Text(
         text = LocalStrings.current.searchSortOldestFirst,
-        style = MaterialTheme.typography.bodyLarge,
-        color = AppTheme.colorScheme.onSurface
+        style = MaterialTheme.typography.bodyLarge
       )
     }
   }

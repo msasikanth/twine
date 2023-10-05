@@ -33,8 +33,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +47,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -143,17 +143,11 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
     if (dropdownExpanded) {
       DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
         DropdownMenuItem(
-          text = {
-            Text(
-              text = LocalStrings.current.settings,
-              color = AppTheme.colorScheme.textEmphasisHigh
-            )
-          },
+          text = { Text(text = LocalStrings.current.settings) },
           leadingIcon = {
             Icon(
               imageVector = Icons.Rounded.Settings,
-              contentDescription = LocalStrings.current.settings,
-              tint = AppTheme.colorScheme.textEmphasisHigh
+              contentDescription = LocalStrings.current.settings
             )
           },
           onClick = {
