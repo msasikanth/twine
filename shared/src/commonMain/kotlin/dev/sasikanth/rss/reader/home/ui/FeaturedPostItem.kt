@@ -108,7 +108,12 @@ private fun DefaultFeaturedPostItem(
           .aspectRatio(featuredImageAspectRatio)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
           .graphicsLayer {
-            translationX = pagerState.getOffsetFractionForPage(page) * 250f
+            translationX =
+              if (page in 0..pagerState.pageCount) {
+                pagerState.getOffsetFractionForPage(page) * 250f
+              } else {
+                0f
+              }
             scaleX = 1.08f
             scaleY = 1.08f
           },
@@ -175,7 +180,12 @@ private fun LargeScreenFeaturedPostItem(
           .weight(0.92f)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
           .graphicsLayer {
-            translationX = pagerState.getOffsetFractionForPage(page) * 250f
+            translationX =
+              if (page in 0..pagerState.pageCount) {
+                pagerState.getOffsetFractionForPage(page) * 250f
+              } else {
+                0f
+              }
             scaleX = 1.08f
             scaleY = 1.08f
           },
