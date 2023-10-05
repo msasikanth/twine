@@ -41,7 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
@@ -119,7 +118,6 @@ private fun DefaultFeaturedPostItem(
           },
       contentDescription = null,
       contentScale = ContentScale.Crop,
-      size = IntSize(512, 512)
     )
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))
@@ -191,7 +189,6 @@ private fun LargeScreenFeaturedPostItem(
           },
       contentDescription = null,
       contentScale = ContentScale.Crop,
-      size = IntSize(512, 512)
     )
 
     Spacer(modifier = Modifier.requiredWidth(8.dp))
