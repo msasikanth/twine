@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +50,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.RSS
+import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -145,10 +145,7 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
         DropdownMenuItem(
           text = { Text(text = LocalStrings.current.settings) },
           leadingIcon = {
-            Icon(
-              imageVector = Icons.Rounded.Settings,
-              contentDescription = LocalStrings.current.settings
-            )
+            Icon(imageVector = TwineIcons.Tune, contentDescription = LocalStrings.current.settings)
           },
           onClick = {
             dropdownExpanded = false
