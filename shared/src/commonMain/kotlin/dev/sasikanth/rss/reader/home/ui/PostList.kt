@@ -82,7 +82,17 @@ internal fun PostsList(
     featuredPostsPagerState.scrollToPage(0)
   }
 
-  LazyColumn(state = listState, contentPadding = PaddingValues(bottom = 128.dp)) {
+  val topContentPadding =
+    if (featuredPosts.isEmpty()) {
+      paddingValues.calculateTopPadding()
+    } else {
+      0.dp
+    }
+
+  LazyColumn(
+    state = listState,
+    contentPadding = PaddingValues(top = topContentPadding, bottom = 128.dp)
+  ) {
     item {
       FeaturedSection(
         paddingValues = paddingValues,
