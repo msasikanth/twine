@@ -59,7 +59,12 @@ class ReaderApplication : Application(), Configuration.Provider {
             workerClassName: String,
             workerParameters: WorkerParameters
           ): ListenableWorker {
-            return FeedsRefreshWorker(appContext, workerParameters, appComponent.rssRepository)
+            return FeedsRefreshWorker(
+              context = appContext,
+              workerParameters = workerParameters,
+              rssRepository = appComponent.rssRepository,
+              lastUpdatedAt = appComponent.lastUpdatedAt
+            )
           }
         }
       )
