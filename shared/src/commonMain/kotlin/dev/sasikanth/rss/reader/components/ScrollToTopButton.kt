@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -26,13 +27,14 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun ScrollToTopButton(
+fun BoxScope.ScrollToTopButton(
   visible: Boolean,
   modifier: Modifier = Modifier,
   onClick: suspend () -> Unit
@@ -41,7 +43,8 @@ fun ScrollToTopButton(
   AnimatedVisibility(
     visible = visible,
     enter = slideInVertically { it },
-    exit = slideOutVertically { it }
+    exit = slideOutVertically { it },
+    modifier = Modifier.align(Alignment.BottomEnd)
   ) {
     ExtendedFloatingActionButton(
       modifier = modifier,
