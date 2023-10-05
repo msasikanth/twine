@@ -100,7 +100,7 @@ internal fun FeaturedSection(
     val dynamicColorState = LocalDynamicColorState.current
 
     LaunchedEffect(pagerState, featuredPosts) {
-      snapshotFlow { pagerState.settledPage }
+      snapshotFlow { pagerState.currentPage }
         .collectLatest { index ->
           val selectedFeaturedPost = featuredPosts.getOrNull(index)
           selectedFeaturedPost?.imageUrl?.let { url ->
