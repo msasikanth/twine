@@ -19,10 +19,13 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import io.github.aakira.napier.log
 
 @Composable @ReadOnlyComposable fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
@@ -39,4 +42,16 @@ fun keyboardVisibilityAsState(): State<KeyboardState> {
     if (WindowInsets.ime.getBottom(LocalDensity.current) > 0) KeyboardState.Opened
     else KeyboardState.Closed
   )
+}
+
+internal class Ref(var value: Int)
+
+// Note the inline function below which ensures that this function is essentially
+// copied at the call site to ensure that its logging only recompositions from the
+// original call site.
+@Composable
+internal fun LogCompositions(tag: String, msg: String) {
+  val ref = remember { Ref(0) }
+  SideEffect { ref.value++ }
+  log(tag = tag) { "Compositions: $msg ${ref.value}" }
 }
