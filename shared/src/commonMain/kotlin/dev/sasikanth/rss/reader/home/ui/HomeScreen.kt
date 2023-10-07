@@ -252,8 +252,8 @@ private fun HomeScreenContent(
   val hasContent = featuredPosts.isNotEmpty() || posts.itemCount != 0
   val dynamicColorState = LocalDynamicColorState.current
 
-  LaunchedEffect(hasContent) {
-    if (!hasContent) {
+  LaunchedEffect(featuredPosts) {
+    if (featuredPosts.isEmpty()) {
       dynamicColorState.reset()
     }
   }
