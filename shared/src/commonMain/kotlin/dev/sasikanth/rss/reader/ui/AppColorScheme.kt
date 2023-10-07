@@ -16,10 +16,10 @@
 package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 
@@ -129,4 +129,4 @@ class AppColorScheme(
     )
 }
 
-internal val LocalAppColorScheme = staticCompositionLocalOf { AppColorScheme() }
+internal val LocalAppColorScheme = compositionLocalOf { AppColorScheme() }
