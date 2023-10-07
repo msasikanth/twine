@@ -45,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -79,6 +80,7 @@ fun HomeTopAppBar(
   Row(
     modifier =
       modifier
+        .pointerInput(Unit) {}
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha))
         .windowInsetsPadding(
