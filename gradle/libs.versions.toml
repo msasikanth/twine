@@ -42,7 +42,7 @@ lyricist = "1.4.2"
 atomicfu = "0.22.0"
 okio = "3.6.0"
 paging = "3.3.0-alpha02-0.4.0"
-stately = "2.0.4"
+stately = "2.0.5"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
