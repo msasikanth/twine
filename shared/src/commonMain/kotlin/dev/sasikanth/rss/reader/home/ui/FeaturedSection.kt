@@ -57,6 +57,7 @@ import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.canBlurImage
 import kotlin.math.absoluteValue
@@ -89,28 +90,17 @@ private val featuredGradientBackgroundAspectRatio: Float
 @Composable
 internal fun FeaturedSection(
   paddingValues: PaddingValues,
-  pagerState: PagerState,
   featuredPosts: ImmutableList<PostWithMetadata>,
+  pagerState: PagerState,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
 ) {
   Box(modifier = modifier) {
-    val dynamicColorState = LocalDynamicColorState.current
-
-    LaunchedEffect(pagerState, featuredPosts) {
-      snapshotFlow { pagerState.currentPage }
-        .collectLatest { index ->
-          val selectedFeaturedPost = featuredPosts.getOrNull(index)
-          selectedFeaturedPost?.imageUrl?.let { url ->
-            dynamicColorState.updateColorsFromImageUrl(url)
-          }
-        }
-    }
-
     if (featuredPosts.isNotEmpty()) {
       val layoutDirection = LocalLayoutDirection.current
+      val dynamicColorState = LocalDynamicColorState.current
 
       val systemBarsPaddingValues =
         WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -132,30 +122,54 @@ internal fun FeaturedSection(
           bottom = 24.dp
         )
 
-      Box {
-        FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+      LaunchedEffect(pagerState, featuredPosts) {
+        dynamicColorState.onContentChange(featuredPosts.map { it.imageUrl!! })
 
-        HorizontalPager(
-          state = pagerState,
-          contentPadding = pagerContentPadding,
-          pageSpacing = 16.dp,
-          verticalAlignment = Alignment.Top,
-          flingBehavior =
-            PagerDefaults.flingBehavior(
-              state = pagerState,
-              snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-            )
-        ) { page ->
-          val featuredPost = featuredPosts[page]
-          FeaturedPostItem(
-            item = featuredPost,
-            page = page,
-            pagerState = pagerState,
-            onClick = { onItemClick(featuredPost) },
-            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }
+        snapshotFlow {
+            val settledPage = pagerState.settledPage
+            val offset = pagerState.getOffsetFractionForPage(settledPage).coerceIn(-1f, 1f)
+
+            settledPage to
+              when {
+                (settledPage == 0 && offset < -EPSILON) ||
+                  (settledPage == featuredPosts.lastIndex && offset > EPSILON) -> {
+                  offset.coerceAtMost(0f)
+                }
+                else -> offset
+              }
+          }
+          .collectLatest { (settledPage, offset) ->
+            val previousImageUrl = featuredPosts.getOrNull(settledPage - 1)?.imageUrl
+            val currentImageUrl = featuredPosts[settledPage].imageUrl!!
+            val nextImageUrl = featuredPosts.getOrNull(settledPage + 1)?.imageUrl
+
+            dynamicColorState.updateOffset(previousImageUrl, currentImageUrl, nextImageUrl, offset)
+          }
+      }
+
+      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+
+      HorizontalPager(
+        state = pagerState,
+        contentPadding = pagerContentPadding,
+        pageSpacing = 16.dp,
+        verticalAlignment = Alignment.Top,
+        flingBehavior =
+          PagerDefaults.flingBehavior(
+            state = pagerState,
+            snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
           )
-        }
+      ) { page ->
+        val featuredPost = featuredPosts[page]
+
+        FeaturedPostItem(
+          item = featuredPost,
+          page = page,
+          pagerState = pagerState,
+          onClick = { onItemClick(featuredPost) },
+          onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+          onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }
+        )
       }
     }
   }
@@ -234,8 +248,6 @@ private fun FeaturedSectionBlurredBackground(
     )
   }
 }
-
-private const val EPSILON = 1e-6f
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {

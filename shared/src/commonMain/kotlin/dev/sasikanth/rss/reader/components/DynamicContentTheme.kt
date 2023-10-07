@@ -16,9 +16,6 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.collection.LruCache
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
@@ -29,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.IntSize
 import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
 import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
@@ -41,6 +39,9 @@ import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.score.Score
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.inverseProgress
+import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -64,63 +65,22 @@ internal fun DynamicContentTheme(
   dynamicColorState: DynamicColorState = rememberDynamicColorState(),
   content: @Composable () -> Unit
 ) {
-  val tintedBackground by
-    animateColorAsState(dynamicColorState.tintedBackground, spring(stiffness = Spring.StiffnessLow))
-  val tintedSurface by
-    animateColorAsState(dynamicColorState.tintedSurface, spring(stiffness = Spring.StiffnessLow))
-  val tintedForeground by
-    animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
-  val tintedHighlight by
-    animateColorAsState(dynamicColorState.tintedForeground, spring(stiffness = Spring.StiffnessLow))
-  val outline by
-    animateColorAsState(dynamicColorState.outline, spring(stiffness = Spring.StiffnessLow))
-  val outlineVariant by
-    animateColorAsState(dynamicColorState.outlineVariant, spring(stiffness = Spring.StiffnessLow))
-  val surface by
-    animateColorAsState(dynamicColorState.surface, spring(stiffness = Spring.StiffnessLow))
-  val onSurface by
-    animateColorAsState(dynamicColorState.onSurface, spring(stiffness = Spring.StiffnessLow))
-  val onSurfaceVariant by
-    animateColorAsState(dynamicColorState.onSurfaceVariant, spring(stiffness = Spring.StiffnessLow))
-  val surfaceContainer by
-    animateColorAsState(dynamicColorState.surfaceContainer, spring(stiffness = Spring.StiffnessLow))
-  val surfaceContainerLow by
-    animateColorAsState(
-      dynamicColorState.surfaceContainerLow,
-      spring(stiffness = Spring.StiffnessLow)
-    )
-  val surfaceContainerLowest by
-    animateColorAsState(
-      dynamicColorState.surfaceContainerLowest,
-      spring(stiffness = Spring.StiffnessLow)
-    )
-  val surfaceContainerHigh by
-    animateColorAsState(
-      dynamicColorState.surfaceContainerHigh,
-      spring(stiffness = Spring.StiffnessLow)
-    )
-  val surfaceContainerHighest by
-    animateColorAsState(
-      dynamicColorState.surfaceContainerHighest,
-      spring(stiffness = Spring.StiffnessLow)
-    )
-
   val colorScheme =
     AppTheme.colorScheme.copy(
-      tintedBackground = tintedBackground,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
-      tintedHighlight = tintedHighlight,
-      outline = outline,
-      outlineVariant = outlineVariant,
-      surface = surface,
-      onSurface = onSurface,
-      onSurfaceVariant = onSurfaceVariant,
-      surfaceContainer = surfaceContainer,
-      surfaceContainerLow = surfaceContainerLow,
-      surfaceContainerLowest = surfaceContainerLowest,
-      surfaceContainerHigh = surfaceContainerHigh,
-      surfaceContainerHighest = surfaceContainerHighest,
+      tintedBackground = dynamicColorState.tintedBackground,
+      tintedSurface = dynamicColorState.tintedSurface,
+      tintedForeground = dynamicColorState.tintedForeground,
+      tintedHighlight = dynamicColorState.tintedHighlight,
+      outline = dynamicColorState.outline,
+      outlineVariant = dynamicColorState.outlineVariant,
+      surface = dynamicColorState.surface,
+      onSurface = dynamicColorState.onSurface,
+      onSurfaceVariant = dynamicColorState.onSurfaceVariant,
+      surfaceContainer = dynamicColorState.surfaceContainer,
+      surfaceContainerLow = dynamicColorState.surfaceContainerLow,
+      surfaceContainerLowest = dynamicColorState.surfaceContainerLowest,
+      surfaceContainerHigh = dynamicColorState.surfaceContainerHigh,
+      surfaceContainerHighest = dynamicColorState.surfaceContainerHighest,
     )
 
   AppTheme(appColorScheme = colorScheme, content = content)
@@ -239,23 +199,137 @@ class DynamicColorState(
       cacheSize > 0 -> LruCache<String, DynamicColors>(cacheSize)
       else -> null
     }
+  private var images = emptyList<String>()
 
-  suspend fun updateColorsFromImageUrl(url: String) {
-    val result = fetchDynamicColors(url)
-    tintedBackground = result?.tintedBackground ?: defaultTintedBackground
-    tintedSurface = result?.tintedSurface ?: defaultTintedSurface
-    tintedForeground = result?.tintedForeground ?: defaultTintedForeground
-    tintedHighlight = result?.tintedHighlight ?: defaultTintedHighlight
-    outline = result?.outline ?: defaultOutline
-    outlineVariant = result?.outlineVariant ?: defaultOutlineVariant
-    surface = result?.surface ?: defaultSurface
-    onSurface = result?.onSurface ?: defaultOnSurface
-    onSurfaceVariant = result?.onSurfaceVariant ?: defaultOnSurfaceVariant
-    surfaceContainer = result?.surfaceContainer ?: defaultSurfaceContainer
-    surfaceContainerLow = result?.surfaceContainerLow ?: defaultSurfaceContainerLow
-    surfaceContainerLowest = result?.surfaceContainerLowest ?: defaultSurfaceContainerLowest
-    surfaceContainerHigh = result?.surfaceContainerHigh ?: defaultSurfaceContainerHigh
-    surfaceContainerHighest = result?.surfaceContainerHighest ?: defaultSurfaceContainerHighest
+  suspend fun onContentChange(images: List<String>) {
+    if (!this.images.containsAll(images)) {
+      this.images = images
+      this.images.forEach { imageUrl -> fetchDynamicColors(imageUrl) }
+    }
+  }
+
+  fun updateOffset(
+    previousImageUrl: String?,
+    currentImageUrl: String,
+    nextImageUrl: String?,
+    offset: Float
+  ) {
+    val previousDynamicColors = previousImageUrl?.let { cache?.get(it) }
+    val currentDynamicColors = cache?.get(currentImageUrl)
+    val nextDynamicColors = nextImageUrl?.let { cache?.get(it) }
+
+    tintedBackground =
+      interpolateColors(
+        previous = previousDynamicColors?.tintedBackground,
+        current = currentDynamicColors?.tintedBackground,
+        next = nextDynamicColors?.tintedBackground,
+        default = defaultTintedBackground,
+        fraction = offset
+      )
+    tintedSurface =
+      interpolateColors(
+        previous = previousDynamicColors?.tintedSurface,
+        current = currentDynamicColors?.tintedSurface,
+        next = nextDynamicColors?.tintedSurface,
+        default = defaultTintedSurface,
+        fraction = offset
+      )
+    tintedForeground =
+      interpolateColors(
+        previous = previousDynamicColors?.tintedForeground,
+        current = currentDynamicColors?.tintedForeground,
+        next = nextDynamicColors?.tintedForeground,
+        default = defaultTintedForeground,
+        fraction = offset
+      )
+    tintedHighlight =
+      interpolateColors(
+        previous = previousDynamicColors?.tintedHighlight,
+        current = currentDynamicColors?.tintedHighlight,
+        next = nextDynamicColors?.tintedHighlight,
+        default = defaultTintedHighlight,
+        fraction = offset
+      )
+    outline =
+      interpolateColors(
+        previous = previousDynamicColors?.outline,
+        current = currentDynamicColors?.outline,
+        next = nextDynamicColors?.outline,
+        default = defaultOutline,
+        fraction = offset
+      )
+    outlineVariant =
+      interpolateColors(
+        previous = previousDynamicColors?.outlineVariant,
+        current = currentDynamicColors?.outlineVariant,
+        next = nextDynamicColors?.outlineVariant,
+        default = defaultOutlineVariant,
+        fraction = offset
+      )
+    surface =
+      interpolateColors(
+        previous = previousDynamicColors?.surface,
+        current = currentDynamicColors?.surface,
+        next = nextDynamicColors?.surface,
+        default = defaultSurface,
+        fraction = offset
+      )
+    onSurface =
+      interpolateColors(
+        previous = previousDynamicColors?.onSurface,
+        current = currentDynamicColors?.onSurface,
+        next = nextDynamicColors?.onSurface,
+        default = defaultOnSurface,
+        fraction = offset
+      )
+    onSurfaceVariant =
+      interpolateColors(
+        previous = previousDynamicColors?.onSurfaceVariant,
+        current = currentDynamicColors?.onSurfaceVariant,
+        next = nextDynamicColors?.onSurfaceVariant,
+        default = defaultOnSurfaceVariant,
+        fraction = offset
+      )
+    surfaceContainer =
+      interpolateColors(
+        previous = previousDynamicColors?.surfaceContainer,
+        current = currentDynamicColors?.surfaceContainer,
+        next = nextDynamicColors?.surfaceContainer,
+        default = defaultSurfaceContainer,
+        fraction = offset
+      )
+    surfaceContainerLow =
+      interpolateColors(
+        previous = previousDynamicColors?.surfaceContainerLow,
+        current = currentDynamicColors?.surfaceContainerLow,
+        next = nextDynamicColors?.surfaceContainerLow,
+        default = defaultSurfaceContainerLow,
+        fraction = offset
+      )
+    surfaceContainerLowest =
+      interpolateColors(
+        previous = previousDynamicColors?.surfaceContainerLowest,
+        current = currentDynamicColors?.surfaceContainerLowest,
+        next = nextDynamicColors?.surfaceContainerLowest,
+        default = defaultSurfaceContainerLowest,
+        fraction = offset
+      )
+    surfaceContainerHigh =
+      interpolateColors(
+        previous = previousDynamicColors?.surfaceContainerHigh,
+        current = currentDynamicColors?.surfaceContainerHigh,
+        next = nextDynamicColors?.surfaceContainerHigh,
+        default = defaultSurfaceContainerHigh,
+        fraction = offset
+      )
+    surfaceContainerHighest =
+      interpolateColors(
+        previous = previousDynamicColors?.surfaceContainerHighest,
+        current = currentDynamicColors?.surfaceContainerHighest,
+        next = nextDynamicColors?.surfaceContainerHighest,
+        default = defaultSurfaceContainerHighest,
+        fraction = offset
+      )
   }
 
   fun reset() {
@@ -393,6 +467,41 @@ class DynamicColorState(
       }
     }
     return colorMap
+  }
+
+  private fun interpolateColors(
+    previous: Color?,
+    current: Color?,
+    next: Color?,
+    default: Color,
+    fraction: Float
+  ): Color {
+    val startColor =
+      if (fraction < -EPSILON) {
+        previous
+      } else {
+        current
+      }
+
+    val endColor =
+      if (fraction > EPSILON) {
+        next
+      } else {
+        current
+      }
+
+    if (startColor == null || endColor == null) {
+      return default
+    }
+
+    val normalizedOffset =
+      if (fraction < -EPSILON) {
+        fraction.absoluteValue.inverseProgress()
+      } else {
+        fraction
+      }
+
+    return lerp(startColor, endColor, normalizedOffset)
   }
 }
 
