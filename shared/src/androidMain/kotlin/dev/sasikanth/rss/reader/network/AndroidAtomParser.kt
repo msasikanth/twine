@@ -26,8 +26,11 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import org.xmlpull.v1.XmlPullParser
 
-internal class AndroidAtomParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  Parser() {
+internal class AndroidAtomParser(
+  private val parser: XmlPullParser,
+  private val feedUrl: String,
+  private val fetchPosts: Boolean
+) : Parser() {
 
   private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
@@ -55,7 +58,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
             skip(parser)
           }
         "subtitle" -> description = readTagText("subtitle", parser)
-        "entry" -> posts.add(readAtomEntry(parser, link!!))
+        "entry" -> if (fetchPosts) posts.add(readAtomEntry(parser, link!!))
         else -> skip(parser)
       }
     }

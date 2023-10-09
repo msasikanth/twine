@@ -56,9 +56,16 @@ class RssRepository(
 
   private val ioDispatcher = dispatchersProvider.io
 
-  suspend fun addFeed(feedLink: String, transformUrl: Boolean = true): FeedAddResult {
+  suspend fun addFeed(
+    feedLink: String,
+    transformUrl: Boolean = true,
+    fetchPosts: Boolean = true
+  ): FeedAddResult {
     return withContext(ioDispatcher) {
-      when (val feedFetchResult = feedFetcher.fetch(feedLink, transformUrl)) {
+      when (
+        val feedFetchResult =
+          feedFetcher.fetch(url = feedLink, transformUrl = transformUrl, fetchPosts = fetchPosts)
+      ) {
         is FeedFetchResult.Success -> {
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
@@ -70,19 +77,23 @@ class RssRepository(
               createdAt = Clock.System.now(),
               link = feedPayload.link
             )
-            postQueries.transaction {
-              feedPayload.posts.forEach { post ->
-                postQueries.upsert(
-                  title = post.title,
-                  description = post.description,
-                  imageUrl = post.imageUrl,
-                  date = Instant.fromEpochMilliseconds(post.date),
-                  link = post.link,
-                  commnetsLink = post.commentsLink,
-                  feedLink = feedPayload.link,
-                )
+
+            if (fetchPosts) {
+              postQueries.transaction {
+                feedPayload.posts.forEach { post ->
+                  postQueries.upsert(
+                    title = post.title,
+                    description = post.description,
+                    imageUrl = post.imageUrl,
+                    date = Instant.fromEpochMilliseconds(post.date),
+                    link = post.link,
+                    commnetsLink = post.commentsLink,
+                    feedLink = feedPayload.link,
+                  )
+                }
               }
             }
+
             FeedAddResult.Success
           } catch (e: Exception) {
             FeedAddResult.DatabaseError(e)

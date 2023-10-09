@@ -50,12 +50,16 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
   private var feedType: FeedType? = null
   private var feedPayload: FeedPayload? = null
 
-  override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
+  override suspend fun parse(
+    xmlContent: String,
+    feedUrl: String,
+    fetchPosts: Boolean
+  ): FeedPayload {
     return withContext(dispatchersProvider.io) {
       suspendCoroutine { continuation ->
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         val xmlFeedParser =
-          IOSXmlFeedParser(feedUrl) { feedType, feedPayload ->
+          IOSXmlFeedParser(feedUrl, fetchPosts) { feedType, feedPayload ->
             this@IOSFeedParser.feedType = feedType
             this@IOSFeedParser.feedPayload = feedPayload
           }
@@ -76,6 +80,7 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
 
 private class IOSXmlFeedParser(
   private val feedUrl: String,
+  private val fetchPosts: Boolean,
   private val onEnd: (FeedType, FeedPayload) -> Unit
 ) : NSObject(), NSXMLParserDelegateProtocol {
 
@@ -153,7 +158,7 @@ private class IOSXmlFeedParser(
     namespaceURI: String?,
     qualifiedName: String?
   ) {
-    if (didEndElement == RSS_ITEM_TAG || didEndElement == ATOM_ENTRY_TAG) {
+    if (fetchPosts && (didEndElement == RSS_ITEM_TAG || didEndElement == ATOM_ENTRY_TAG)) {
       val hostLink = currentChannelData["link"]!!
       val post =
         when (feedType) {

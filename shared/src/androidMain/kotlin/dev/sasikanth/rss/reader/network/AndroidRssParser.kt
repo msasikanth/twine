@@ -27,8 +27,11 @@ import java.time.format.DateTimeFormatterBuilder
 import java.util.Locale
 import org.xmlpull.v1.XmlPullParser
 
-internal class AndroidRssParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  Parser() {
+internal class AndroidRssParser(
+  private val parser: XmlPullParser,
+  private val feedUrl: String,
+  private val fetchPosts: Boolean
+) : Parser() {
 
   private val rssDateFormat =
     DateTimeFormatterBuilder()
@@ -57,7 +60,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
         "title" -> title = readTagText("title", parser)
         "link" -> link = readTagText("link", parser)
         "description" -> description = readTagText("description", parser)
-        "item" -> posts.add(readRssItem(parser, link!!))
+        "item" -> if (fetchPosts) posts.add(readRssItem(parser, link!!))
         else -> skip(parser)
       }
     }
