@@ -26,6 +26,11 @@ feeds:
 SELECT * FROM feed
 ORDER BY pinnedAt DESC, createdAt DESC;
 
+feed:
+SELECT * FROM feed
+WHERE link = :link
+ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
+
 updateFeedName:
 UPDATE feed SET name = :newFeedName WHERE link = :link;
 

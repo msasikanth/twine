@@ -154,6 +154,10 @@ class RssRepository(
     return feedQueries.feeds(mapper = ::mapToFeed).asFlow().mapToList(ioDispatcher)
   }
 
+  fun feed(feedLink: String): Feed {
+    return feedQueries.feed(link = feedLink, mapper = ::mapToFeed).executeAsOne()
+  }
+
   suspend fun removeFeed(feedLink: String) {
     withContext(ioDispatcher) { feedQueries.remove(feedLink) }
   }
