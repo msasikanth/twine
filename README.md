@@ -1,40 +1,53 @@
-# Twine
+# Twine - RSS Reader
 
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 
 ![banner](./readme_images/banner.png)
+
+Twine is a multiplatform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
+user interface and experience to browse through the feeds, and supports Material 3 content based 
+[dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color).
 
 ## Download
 
 <a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
 <a href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us;releaseDate=1694390400" alt="Download on the App Store" width="200px"></a>
 
-### Requirements
+## Features ✨
 
-- Android: 8.0+
-- iOS: 15.0+
+- Supports RSS & Atom feeds
+- Bookmarks
+- Search
+- Background sync
+- Feed management: Add, Edit & Pin feeds
 
-## Libraries
+## Tech Stack 📚
 
-- [Kotlin Mutliplatform](https://kotlinlang.org/lp/multiplatform/)
+- [Kotlin Multiplatform](https://kotlinlang.org/lp/multiplatform/)
+- [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
-- [Ktor Client](https://ktor.io/)
+- [Ktor](https://ktor.io/)
 - [SQLDelight](https://cashapp.github.io/sqldelight/2.0.0-alpha05/)
 - [Decompose](https://arkivanov.github.io/Decompose/)
 - [Kotlin-inject](https://github.com/evant/kotlin-inject)
 
-For full list of dependencies used, please take a look at the [catalog](/gradle/libs.versions.toml) file
+For full list of dependencies used, please take a look at the [catalog](/gradle/libs.versions.toml) file.
 
-## TODO
+## Development 🛠️
 
-- [x] Add Atom feeds support
-- [x] Background sync
-- [x] Bookmarks
-- [x] Search
-- [x] ~~Rearrange~~ Pinned feeds
-- [x] Rename feed
+You can just clone the repo and build it locally without requiring any changes. 
 
-## Made by
+Project requires JDK 17+, and based on the AGP version defined in [`libs.versions.toml`](/gradle/libs.versions.toml) file, 
+you can use appropriate Android Studio to import the project.
+
+## Contributing 🛠️
+
+You can contribute bug fixes to the project via PRs, for anything else open an issue to start a conversation.
+
+This project uses ktfmt, provided via the spotless gradle plugin, and the bundled project IntelliJ codestyle. Run
+`./gradlew spotlessApply` to format the code before raising a PR.
+
+## Made by ❤️
 
 - [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development
 - [Eduardo Pratti](https://twitter.com/edpratti) / Design
