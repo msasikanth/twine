@@ -155,6 +155,14 @@ class HomePresenter(
         }
         HomeEvent.EditFeedsClicked -> editFeedsClicked()
         HomeEvent.ExitFeedsEdit -> exitFeedsEdit()
+        is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
+      }
+    }
+
+    private fun postSourceClicked(feedLink: String) {
+      coroutineScope.launch {
+        val feed = rssRepository.feed(feedLink)
+        observableSelectedFeed.selectFeed(feed)
       }
     }
 

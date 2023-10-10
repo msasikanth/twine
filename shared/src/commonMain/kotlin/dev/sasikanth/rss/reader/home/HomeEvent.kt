@@ -29,6 +29,8 @@ sealed interface HomeEvent {
 
   data class OnPostClicked(val post: PostWithMetadata) : HomeEvent
 
+  data class OnPostSourceClicked(val feedLink: String) : HomeEvent
+
   data class FeedsSheetStateChanged(val feedsSheetState: BottomSheetValue) : HomeEvent
 
   object OnHomeSelected : HomeEvent

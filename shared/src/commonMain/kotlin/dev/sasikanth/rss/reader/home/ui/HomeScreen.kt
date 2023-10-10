@@ -169,8 +169,8 @@ fun HomeScreen(
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
           onPostCommentsClick = { commentsLink -> openLink(commentsLink) },
-          onPostSourceClick = {
-            // TODO
+          onPostSourceClick = { feedLink ->
+            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
           },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
         )
