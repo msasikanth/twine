@@ -66,7 +66,8 @@ internal fun FeaturedPostItem(
   pagerState: PagerState,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit
+  onCommentsClick: () -> Unit,
+  onSourceClick: () -> Unit
 ) {
   val isLargeScreenLayout =
     LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
@@ -77,7 +78,8 @@ internal fun FeaturedPostItem(
         page = page,
         pagerState = pagerState,
         onBookmarkClick = onBookmarkClick,
-        onCommentsClick = onCommentsClick
+        onCommentsClick = onCommentsClick,
+        onSourceClick = onSourceClick
       )
     } else {
       DefaultFeaturedPostItem(
@@ -85,7 +87,8 @@ internal fun FeaturedPostItem(
         page = page,
         pagerState = pagerState,
         onBookmarkClick = onBookmarkClick,
-        onCommentsClick = onCommentsClick
+        onCommentsClick = onCommentsClick,
+        onSourceClick = onSourceClick
       )
     }
   }
@@ -97,7 +100,8 @@ private fun DefaultFeaturedPostItem(
   page: Int,
   pagerState: PagerState,
   onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit
+  onCommentsClick: () -> Unit,
+  onSourceClick: () -> Unit
 ) {
   Column {
     AsyncImage(
@@ -152,8 +156,10 @@ private fun DefaultFeaturedPostItem(
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      enablePostSource = true,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
+      onSourceClick = onSourceClick,
       modifier = Modifier.padding(start = 16.dp, end = 0.dp)
     )
 
@@ -167,7 +173,8 @@ private fun LargeScreenFeaturedPostItem(
   page: Int,
   pagerState: PagerState,
   onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit
+  onCommentsClick: () -> Unit,
+  onSourceClick: () -> Unit
 ) {
   Row(verticalAlignment = Alignment.CenterVertically) {
     AsyncImage(
@@ -223,8 +230,10 @@ private fun LargeScreenFeaturedPostItem(
         postLink = item.link,
         postBookmarked = item.bookmarked,
         commentsLink = item.commentsLink,
+        enablePostSource = true,
         onBookmarkClick = onBookmarkClick,
         onCommentsClick = onCommentsClick,
+        onSourceClick = onSourceClick
       )
     }
   }

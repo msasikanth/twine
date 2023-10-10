@@ -15,14 +15,14 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,6 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -51,7 +53,9 @@ internal fun PostMetadata(
   commentsLink: String?,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  enablePostSource: Boolean,
+  onSourceClick: () -> Unit,
 ) {
   Row(
     modifier =
@@ -60,31 +64,42 @@ internal fun PostMetadata(
           bottom = 8.dp,
         )
         .then(modifier),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Text(
-      modifier = Modifier.requiredWidthIn(max = 72.dp),
-      style = MaterialTheme.typography.bodySmall,
-      maxLines = 1,
-      text = feedName,
-      color = AppTheme.colorScheme.textEmphasisMed,
-      overflow = TextOverflow.Ellipsis
-    )
+    Box(modifier = Modifier.weight(1f)) {
+      val postSourceClickableModifier =
+        if (enablePostSource) {
+          Modifier.clip(RoundedCornerShape(50))
+            .clickable(onClick = onSourceClick)
+            .background(color = Color.White.copy(alpha = 0.12f))
+            .padding(horizontal = 12.dp, vertical = 4.dp)
+        } else {
+          Modifier
+        }
+
+      val postSourceTextColor =
+        if (enablePostSource) {
+          Color.White
+        } else {
+          AppTheme.colorScheme.onSurfaceVariant
+        }
+
+      Text(
+        modifier = postSourceClickableModifier,
+        style = MaterialTheme.typography.bodySmall,
+        maxLines = 1,
+        text = feedName.capitalize(Locale.current),
+        color = postSourceTextColor,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
 
     Text(
-      style = MaterialTheme.typography.bodySmall,
-      maxLines = 1,
-      text = "•",
-      color = AppTheme.colorScheme.textEmphasisMed
-    )
-
-    Text(
-      modifier = Modifier.weight(1f),
+      modifier = Modifier.padding(horizontal = 8.dp),
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
-      color = AppTheme.colorScheme.textEmphasisMed,
+      color = Color.White,
       textAlign = TextAlign.Start
     )
 

@@ -96,6 +96,7 @@ internal fun FeaturedSection(
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
+  onPostSourceClick: (String) -> Unit,
 ) {
   Box(modifier = modifier) {
     if (featuredPosts.isNotEmpty()) {
@@ -168,7 +169,8 @@ internal fun FeaturedSection(
           pagerState = pagerState,
           onClick = { onItemClick(featuredPost) },
           onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-          onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) }
+          onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
+          onSourceClick = { onPostSourceClick(featuredPost.feedLink) }
         )
       }
     }

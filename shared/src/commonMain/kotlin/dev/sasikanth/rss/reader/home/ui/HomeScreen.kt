@@ -169,6 +169,9 @@ fun HomeScreen(
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
           onPostCommentsClick = { commentsLink -> openLink(commentsLink) },
+          onPostSourceClick = {
+            // TODO
+          },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
         )
       },
@@ -245,6 +248,7 @@ private fun HomeScreenContent(
   onPostClicked: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
+  onPostSourceClick: (String) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
 ) {
   val featuredPosts = state.featuredPosts
@@ -270,6 +274,7 @@ private fun HomeScreenContent(
         onPostClicked = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
+        onPostSourceClick = onPostSourceClick,
         listState = listState,
       )
 

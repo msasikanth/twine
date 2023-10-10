@@ -43,6 +43,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
@@ -74,6 +75,7 @@ internal fun PostsList(
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
+  onPostSourceClick: (String) -> Unit
 ) {
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
 
@@ -101,6 +103,7 @@ internal fun PostsList(
         onItemClick = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
+        onPostSourceClick = onPostSourceClick
       )
     }
 
@@ -109,9 +112,11 @@ internal fun PostsList(
       if (post != null) {
         PostListItem(
           item = post,
+          enablePostSource = true,
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
-          onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) }
+          onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
+          onPostSourceClick = { onPostSourceClick(post.feedLink) }
         )
 
         if (index != posts.itemCount - 1) {
@@ -128,9 +133,11 @@ internal fun PostsList(
 @Composable
 fun PostListItem(
   item: PostWithMetadata,
+  enablePostSource: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
-  onPostCommentsClick: () -> Unit
+  onPostCommentsClick: () -> Unit,
+  onPostSourceClick: () -> Unit
 ) {
   Column(
     modifier =
@@ -139,15 +146,14 @@ fun PostListItem(
         .padding(postListPadding)
   ) {
     Row(
-      modifier = Modifier.padding(start = 24.dp, top = 24.dp, end = 24.dp),
+      modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.weight(1f).align(Alignment.Top),
         style = MaterialTheme.typography.titleSmall,
         text = item.title,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = Color.White,
         maxLines = 2
       )
 
@@ -155,7 +161,9 @@ fun PostListItem(
         AsyncImage(
           url = url,
           modifier =
-            Modifier.requiredSize(width = 128.dp, height = 72.dp).clip(RoundedCornerShape(12.dp)),
+            Modifier.requiredSize(width = 128.dp, height = 72.dp)
+              .clip(RoundedCornerShape(12.dp))
+              .align(Alignment.CenterVertically),
           contentDescription = null,
           contentScale = ContentScale.Crop
         )
@@ -168,8 +176,10 @@ fun PostListItem(
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      enablePostSource = enablePostSource,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
+      onSourceClick = onPostSourceClick,
       modifier = Modifier.padding(start = 24.dp, end = 12.dp)
     )
   }

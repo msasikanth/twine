@@ -124,11 +124,15 @@ internal fun SearchScreen(
             if (post != null) {
               PostListItem(
                 item = post,
+                enablePostSource = false,
                 onClick = { openLink(post.link) },
                 onPostBookmarkClick = {
                   searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
                 },
-                onPostCommentsClick = { openLink(post.commentsLink!!) }
+                onPostCommentsClick = { openLink(post.commentsLink!!) },
+                onPostSourceClick = {
+                  // no-op
+                },
               )
 
               if (index != searchResults.itemCount - 1) {
