@@ -9,6 +9,7 @@
 import UIKit
 import shared
 import BackgroundTasks
+import Sentry
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 	let rootHolder: RootHolder = RootHolder()
@@ -18,7 +19,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
 
         applicationComponent.initializers
-            .compactMap { $0 as! any Initializer }
+            .compactMap { ($0 as! any Initializer) }
             .forEach { initializer in
                 initializer.initialize()
             }
@@ -43,13 +44,26 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     func refreshFeeds(task: BGAppRefreshTask) {
         scheduledRefreshFeeds()
-        applicationComponent.rssRepository.updateFeeds { error in
-            if error != nil {
-                self.applicationComponent.lastUpdatedAt.refresh { error in
-                    // no-op
+        Task(priority: .background) {
+            do {
+                let hasLastUpdatedAtExpired = try await applicationComponent.lastUpdatedAt.hasExpired().boolValue
+                if hasLastUpdatedAtExpired {
+                    try await applicationComponent.rssRepository.updateFeeds()
+                    try await applicationComponent.lastUpdatedAt.refresh()
                 }
+                
+                task.setTaskCompleted(success: true)
+            } catch {
+                let breadcrumb = Breadcrumb()
+                breadcrumb.level = .info
+                breadcrumb.category = "Background"
+                
+                let scope = Scope()
+                scope.addBreadcrumb(breadcrumb)
+
+                SentrySDK.capture(error: error, scope: scope)
+                task.setTaskCompleted(success: false)
             }
-            task.setTaskCompleted(success: error == nil)
         }
     }
 }

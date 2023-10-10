@@ -25,6 +25,8 @@ import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
 import io.sentry.kotlin.multiplatform.Sentry
+import io.sentry.kotlin.multiplatform.SentryLevel
+import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
 import java.lang.Exception
 import java.time.Duration
 
@@ -53,12 +55,18 @@ class FeedsRefreshWorker(
   }
 
   override suspend fun doWork(): Result {
-    return try {
-      rssRepository.updateFeeds()
-      lastUpdatedAt.refresh()
-      Result.success()
-    } catch (e: Exception) {
-      Sentry.captureException(e)
+    return if (lastUpdatedAt.hasExpired()) {
+      try {
+        rssRepository.updateFeeds()
+        lastUpdatedAt.refresh()
+        Result.success()
+      } catch (e: Exception) {
+        Sentry.captureException(e) {
+          it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
+        }
+        Result.failure()
+      }
+    } else {
       Result.failure()
     }
   }
