@@ -19,5 +19,11 @@ import android.text.format.DateUtils
 import kotlinx.datetime.Instant
 
 actual fun Instant.relativeDurationString(): String {
-  return DateUtils.getRelativeTimeSpanString(toEpochMilliseconds()).toString()
+  return DateUtils.getRelativeTimeSpanString(
+      toEpochMilliseconds(),
+      System.currentTimeMillis(),
+      DateUtils.MINUTE_IN_MILLIS,
+      DateUtils.FORMAT_ABBREV_ALL
+    )
+    .toString()
 }
