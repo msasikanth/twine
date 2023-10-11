@@ -27,17 +27,19 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import io.github.aakira.napier.log
 
-@Composable @ReadOnlyComposable fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
+@Composable
+@ReadOnlyComposable
+internal fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
-fun Float.inverseProgress() = 1f - this
+internal fun Float.inverseProgress() = 1f - this
 
-enum class KeyboardState {
+internal enum class KeyboardState {
   Opened,
   Closed
 }
 
 @Composable
-fun keyboardVisibilityAsState(): State<KeyboardState> {
+internal fun keyboardVisibilityAsState(): State<KeyboardState> {
   return rememberUpdatedState(
     if (WindowInsets.ime.getBottom(LocalDensity.current) > 0) KeyboardState.Opened
     else KeyboardState.Closed

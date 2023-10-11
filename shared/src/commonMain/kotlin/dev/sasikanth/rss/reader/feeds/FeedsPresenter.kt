@@ -57,8 +57,8 @@ class FeedsPresenter(
       )
     }
 
-  val state: StateFlow<FeedsState> = presenterInstance.state
-  val effects = presenterInstance.effects.asSharedFlow()
+  internal val state: StateFlow<FeedsState> = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }

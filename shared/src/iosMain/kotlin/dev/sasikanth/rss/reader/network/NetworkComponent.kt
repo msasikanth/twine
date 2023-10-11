@@ -20,7 +20,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import me.tatarka.inject.annotations.Provides
 
-actual interface NetworkComponent {
+internal actual interface NetworkComponent {
 
   val IOSFeedParser.bind: FeedParser
     @Provides @AppScope get() = this

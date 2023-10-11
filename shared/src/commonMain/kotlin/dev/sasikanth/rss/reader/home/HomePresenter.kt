@@ -83,8 +83,8 @@ class HomePresenter(
       )
     }
 
-  val state = presenterInstance.state
-  val effects = presenterInstance.effects.asSharedFlow()
+  internal val state = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
 

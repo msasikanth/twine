@@ -35,7 +35,7 @@ import com.arkivanov.essenty.backhandler.BackEvent
 import com.arkivanov.essenty.backhandler.BackHandler
 
 @OptIn(ExperimentalDecomposeApi::class)
-actual fun <C : Any, T : Any> backAnimation(
+internal actual fun <C : Any, T : Any> backAnimation(
   backHandler: BackHandler,
   onBack: () -> Unit,
 ): StackAnimation<C, T> =

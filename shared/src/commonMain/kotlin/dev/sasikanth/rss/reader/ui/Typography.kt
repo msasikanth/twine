@@ -32,9 +32,9 @@ expect fun createDefaultTextStyle(): TextStyle
 private val figmaLineHeightStyle =
   LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.None)
 
-@Stable val defaultTextStyle = createDefaultTextStyle()
+@Stable private val defaultTextStyle = createDefaultTextStyle()
 
-fun typography(fontFamily: FontFamily) =
+internal fun typography(fontFamily: FontFamily) =
   Typography(
     displayLarge =
       defaultTextStyle.copy(

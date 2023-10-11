@@ -15,9 +15,11 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.repository.BrowserType
 
-data class AppState(val browserType: BrowserType) {
+@Immutable
+internal data class AppState(val browserType: BrowserType) {
 
   companion object {
 

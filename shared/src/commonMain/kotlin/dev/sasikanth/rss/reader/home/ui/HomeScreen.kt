@@ -96,7 +96,7 @@ private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @Composable
-fun HomeScreen(
+internal fun HomeScreen(
   homePresenter: HomePresenter,
   openLink: (String) -> Unit,
   modifier: Modifier = Modifier

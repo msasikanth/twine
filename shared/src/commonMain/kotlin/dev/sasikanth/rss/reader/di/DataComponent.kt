@@ -24,11 +24,11 @@ import dev.sasikanth.rss.reader.database.ReaderDatabase
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
-expect interface SqlDriverPlatformComponent
+internal expect interface SqlDriverPlatformComponent
 
-expect interface DataStorePlatformComponent
+internal expect interface DataStorePlatformComponent
 
-interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent {
+internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent {
 
   @Provides
   @AppScope

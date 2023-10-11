@@ -64,12 +64,12 @@ class SearchPresenter(
       )
     }
 
-  val state: StateFlow<SearchState> = presenterInstance.state
+  internal val state: StateFlow<SearchState> = presenterInstance.state
 
-  val searchQuery
+  internal val searchQuery
     get() = presenterInstance.searchQuery
 
-  val searchSortOrder
+  internal val searchSortOrder
     get() = presenterInstance.searchSortOrder
 
   internal fun dispatch(event: SearchEvent) {

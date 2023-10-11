@@ -24,7 +24,7 @@ import dev.sasikanth.rss.reader.utils.Constants
 import me.tatarka.inject.annotations.Provides
 import okio.Path.Companion.toPath
 
-actual interface DataStorePlatformComponent {
+internal actual interface DataStorePlatformComponent {
 
   @Provides
   @AppScope

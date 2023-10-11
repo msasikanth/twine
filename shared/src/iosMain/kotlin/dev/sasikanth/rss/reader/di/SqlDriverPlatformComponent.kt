@@ -20,7 +20,7 @@ import dev.sasikanth.rss.reader.database.DriverFactory
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
-actual interface SqlDriverPlatformComponent {
+internal actual interface SqlDriverPlatformComponent {
 
   @Provides
   @AppScope

@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.database
 import app.cash.sqldelight.ColumnAdapter
 import kotlinx.datetime.Instant
 
-object DateAdapter : ColumnAdapter<Instant, Long> {
+internal object DateAdapter : ColumnAdapter<Instant, Long> {
 
   override fun decode(databaseValue: Long): Instant {
     return Instant.fromEpochMilliseconds(databaseValue)

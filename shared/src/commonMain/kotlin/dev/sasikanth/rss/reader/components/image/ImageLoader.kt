@@ -63,4 +63,4 @@ internal sealed interface ImageLoaderState {
   object Error : ImageLoaderState
 }
 
-val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }
+internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }

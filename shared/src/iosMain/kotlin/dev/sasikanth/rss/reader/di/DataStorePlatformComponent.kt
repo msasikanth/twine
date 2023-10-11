@@ -31,7 +31,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-actual interface DataStorePlatformComponent {
+internal actual interface DataStorePlatformComponent {
 
   @Provides
   @AppScope

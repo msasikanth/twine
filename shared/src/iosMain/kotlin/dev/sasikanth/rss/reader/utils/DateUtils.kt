@@ -22,7 +22,7 @@ import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.NSRelativeDateTimeFormatterUnitsStyleShort
 import platform.Foundation.now
 
-actual fun Instant.relativeDurationString(): String {
+internal actual fun Instant.relativeDurationString(): String {
   val formatter = NSRelativeDateTimeFormatter()
   formatter.unitsStyle = NSRelativeDateTimeFormatterUnitsStyleShort
 

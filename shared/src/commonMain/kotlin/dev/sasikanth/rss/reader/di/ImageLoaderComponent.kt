@@ -15,4 +15,4 @@
  */
 package dev.sasikanth.rss.reader.di
 
-expect interface ImageLoaderComponent
+internal expect interface ImageLoaderComponent

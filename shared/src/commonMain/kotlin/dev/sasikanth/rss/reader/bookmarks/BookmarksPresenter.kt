@@ -54,7 +54,7 @@ class BookmarksPresenter(
     lifecycle.doOnCreate { presenterInstance.dispatch(BookmarksEvent.Init) }
   }
 
-  val state = presenterInstance.state
+  internal val state = presenterInstance.state
 
   fun dispatch(event: BookmarksEvent) {
     when (event) {

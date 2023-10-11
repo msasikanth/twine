@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
 
 @Composable
-fun AsyncImage(
+internal fun AsyncImage(
   url: String,
   contentDescription: String?,
   modifier: Modifier = Modifier,

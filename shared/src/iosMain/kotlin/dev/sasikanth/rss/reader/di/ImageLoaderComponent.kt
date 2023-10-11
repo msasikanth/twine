@@ -19,7 +19,7 @@ import dev.sasikanth.rss.reader.components.IOSImageLoader
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import me.tatarka.inject.annotations.Provides
 
-actual interface ImageLoaderComponent {
+internal actual interface ImageLoaderComponent {
 
   @Provides fun IOSImageLoader.bind(): ImageLoader = this
 }

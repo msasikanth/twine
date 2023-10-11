@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
-data class BookmarksState(val bookmarks: Flow<PagingData<PostWithMetadata>>) {
+internal data class BookmarksState(val bookmarks: Flow<PagingData<PostWithMetadata>>) {
 
   companion object {
 

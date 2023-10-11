@@ -55,7 +55,7 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.relativeDurationString
 import kotlinx.collections.immutable.ImmutableList
 
-internal val postListPadding
+private val postListPadding
   @Composable
   @ReadOnlyComposable
   get() =

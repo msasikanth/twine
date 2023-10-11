@@ -102,7 +102,7 @@ fun App(
   }
 }
 
-expect fun <C : Any, T : Any> backAnimation(
+internal expect fun <C : Any, T : Any> backAnimation(
   backHandler: BackHandler,
   onBack: () -> Unit,
 ): StackAnimation<C, T>

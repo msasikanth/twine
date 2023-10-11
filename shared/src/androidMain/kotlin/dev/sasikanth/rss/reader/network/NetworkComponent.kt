@@ -21,7 +21,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import java.time.Duration
 import me.tatarka.inject.annotations.Provides
 
-actual interface NetworkComponent {
+internal actual interface NetworkComponent {
 
   val AndroidFeedParser.bind: FeedParser
     @Provides @AppScope get() = this

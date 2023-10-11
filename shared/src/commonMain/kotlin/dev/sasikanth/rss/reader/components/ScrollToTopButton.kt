@@ -34,7 +34,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
 
 @Composable
-fun BoxScope.ScrollToTopButton(
+internal fun BoxScope.ScrollToTopButton(
   visible: Boolean,
   modifier: Modifier = Modifier,
   onClick: suspend () -> Unit

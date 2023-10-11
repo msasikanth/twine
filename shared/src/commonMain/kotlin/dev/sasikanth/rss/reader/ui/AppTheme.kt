@@ -26,7 +26,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import dev.sasikanth.rss.reader.resources.GolosFontFamily
 
 @Composable
-fun AppTheme(
+internal fun AppTheme(
   appColorScheme: AppColorScheme = AppTheme.colorScheme,
   content: @Composable () -> Unit
 ) {

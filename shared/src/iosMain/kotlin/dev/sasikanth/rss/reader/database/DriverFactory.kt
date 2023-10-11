@@ -24,7 +24,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class DriverFactory {
+internal actual class DriverFactory {
 
   actual fun createDriver(): SqlDriver {
     return NativeSqliteDriver(

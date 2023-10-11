@@ -15,4 +15,4 @@
  */
 package dev.sasikanth.rss.reader.utils
 
-data class XmlParsingError(override val message: String?) : RuntimeException(message)
+internal data class XmlParsingError(override val message: String?) : RuntimeException(message)

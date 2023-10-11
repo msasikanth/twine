@@ -22,7 +22,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 @Immutable
-data class FeedsState(
+internal data class FeedsState(
   val pinnedFeeds: ImmutableList<Feed>,
   val feeds: ImmutableList<Feed>,
   val selectedFeed: Feed?,

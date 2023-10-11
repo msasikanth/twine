@@ -134,7 +134,7 @@ internal fun rememberDynamicColorState(
  *   cache.
  */
 @Stable
-class DynamicColorState(
+internal class DynamicColorState(
   private val defaultTintedBackground: Color,
   private val defaultTintedSurface: Color,
   private val defaultTintedForeground: Color,

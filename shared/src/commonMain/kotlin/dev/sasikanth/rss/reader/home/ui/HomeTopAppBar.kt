@@ -59,7 +59,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
 @Composable
-fun HomeTopAppBar(
+internal fun HomeTopAppBar(
   modifier: Modifier = Modifier,
   listState: LazyListState,
   onSearchClicked: () -> Unit,

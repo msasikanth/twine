@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
-data class HomeState(
+internal data class HomeState(
   val featuredPosts: ImmutableList<PostWithMetadata>,
   val posts: Flow<PagingData<PostWithMetadata>>,
   val loadingState: HomeLoadingState,

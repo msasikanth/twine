@@ -19,7 +19,7 @@ import dev.sasikanth.rss.reader.components.AndroidImageLoader
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import me.tatarka.inject.annotations.Provides
 
-actual interface ImageLoaderComponent {
+internal actual interface ImageLoaderComponent {
 
   @Provides fun AndroidImageLoader.bind(): ImageLoader = this
 }
