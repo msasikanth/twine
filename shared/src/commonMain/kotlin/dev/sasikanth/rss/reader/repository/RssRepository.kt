@@ -52,6 +52,7 @@ class RssRepository(
 
   companion object {
     private const val NUMBER_OF_FEATURED_POSTS = 6L
+    private const val UPDATE_CHUNKS = 20
   }
 
   private val ioDispatcher = dispatchersProvider.io
@@ -115,10 +116,13 @@ class RssRepository(
   suspend fun updateFeeds() {
     val results =
       withContext(ioDispatcher) {
-        val feeds = feedQueries.feeds().executeAsList()
-        feeds.map { feed -> launch { addFeed(feed.link, false) } }
+        val feedsChunk = feedQueries.feeds().executeAsList().chunked(UPDATE_CHUNKS)
+        feedsChunk.map { feeds ->
+          feeds.map { feed -> launch { addFeed(feedLink = feed.link, transformUrl = false) } }
+        }
       }
-    results.joinAll()
+
+    results.flatten().joinAll()
   }
 
   fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
