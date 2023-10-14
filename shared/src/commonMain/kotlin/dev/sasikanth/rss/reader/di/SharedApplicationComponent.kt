@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
+import dev.sasikanth.rss.reader.logging.LoggingComponent
 import dev.sasikanth.rss.reader.network.NetworkComponent
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.sentry.SentryComponent
@@ -26,7 +27,7 @@ import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import me.tatarka.inject.annotations.Provides
 
 abstract class SharedApplicationComponent :
-  DataComponent, ImageLoaderComponent, SentryComponent, NetworkComponent {
+  DataComponent, ImageLoaderComponent, SentryComponent, NetworkComponent, LoggingComponent {
 
   abstract val imageLoader: ImageLoader
 

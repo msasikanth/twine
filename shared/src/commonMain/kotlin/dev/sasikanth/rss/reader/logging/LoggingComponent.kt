@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
 
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
+package dev.sasikanth.rss.reader.logging
 
-fun initialiseLogging() {
-  Napier.base(DebugAntilog())
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
+import me.tatarka.inject.annotations.IntoSet
+import me.tatarka.inject.annotations.Provides
+
+interface LoggingComponent {
+
+  @IntoSet
+  @Provides
+  @AppScope
+  fun providesLoggingInitializer(bind: LoggingInitializer): Initializer = bind
 }

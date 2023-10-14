@@ -11,11 +11,7 @@ struct iOSApp: App {
 	var scenePhase: ScenePhase
 	
 	var rootHolder: RootHolder { appDelegate.rootHolder }
-	
-	init() {
-		LoggingKt.initialiseLogging()
-	}
-	
+
 	var body: some Scene {
         let backDispatcher = BackDispatcherKt.BackDispatcher()
         let homeViewControllerComponent = InjectHomeViewControllerComponent(

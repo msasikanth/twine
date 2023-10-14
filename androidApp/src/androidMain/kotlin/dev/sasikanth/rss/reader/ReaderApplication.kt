@@ -26,7 +26,6 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
-import dev.sasikanth.rss.reader.utils.initialiseLogging
 
 class ReaderApplication : Application(), Configuration.Provider {
 
@@ -37,7 +36,6 @@ class ReaderApplication : Application(), Configuration.Provider {
 
   override fun onCreate() {
     super.onCreate()
-    initialiseLogging()
     enqueuePeriodicFeedsRefresh()
 
     appComponent.initializers.forEach { it.initialize() }
