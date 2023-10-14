@@ -197,7 +197,8 @@ private fun FeaturedSectionBlurredBackground(
               .alpha(actualIndex, pagerState),
           contentDescription = null,
           contentScale = ContentScale.Crop,
-          size = IntSize(128, 128)
+          size = IntSize(128, 128),
+          backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
         )
       }
     } else {

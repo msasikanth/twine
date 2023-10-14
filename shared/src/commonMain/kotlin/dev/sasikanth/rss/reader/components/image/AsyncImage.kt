@@ -16,10 +16,12 @@
 package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.IntSize
 
@@ -29,9 +31,17 @@ internal fun AsyncImage(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: IntSize? = null
+  size: IntSize? = null,
+  backgroundColor: Color? = null
 ) {
-  Box(modifier) {
+  val backgroundColorModifier =
+    if (backgroundColor != null) {
+      Modifier.background(color = backgroundColor)
+    } else {
+      Modifier
+    }
+
+  Box(modifier.then(backgroundColorModifier)) {
     val imageState by rememberImageLoaderState(url, size)
 
     when (imageState) {
