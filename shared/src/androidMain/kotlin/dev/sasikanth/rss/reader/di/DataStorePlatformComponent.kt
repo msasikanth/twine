@@ -30,7 +30,9 @@ internal actual interface DataStorePlatformComponent {
   @AppScope
   fun providesDataStore(context: Context): DataStore<Preferences> {
     return PreferenceDataStoreFactory.createWithPath(
-      produceFile = { context.filesDir.resolve(Constants.dataStoreFileName).absolutePath.toPath() }
+      produceFile = {
+        context.filesDir.resolve(Constants.DATA_STORE_FILE_NAME).absolutePath.toPath()
+      }
     )
   }
 }

@@ -16,6 +16,6 @@
 package dev.sasikanth.rss.reader.utils
 
 internal object Constants {
-  const val dataStoreFileName = "twine.preferences_pb"
+  const val DATA_STORE_FILE_NAME = "twine.preferences_pb"
   const val EPSILON = 1e-6f
 }

@@ -48,7 +48,7 @@ internal actual interface DataStorePlatformComponent {
             error = null,
           )
 
-        (requireNotNull(documentDirectory).path + "/${Constants.dataStoreFileName}").toPath()
+        (requireNotNull(documentDirectory).path + "/${Constants.DATA_STORE_FILE_NAME}").toPath()
       },
       corruptionHandler = null,
       migrations = emptyList(),
