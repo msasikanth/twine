@@ -27,6 +27,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -81,7 +82,15 @@ class SettingsPresenter(
 
     init {
       settingsRepository.browserType
-        .onEach { browserType -> _state.update { it.copy(browserType = browserType) } }
+        .combine(settingsRepository.enableFeaturedItemBlur) { browserType, featuredItemBlurEnabled
+          ->
+          browserType to featuredItemBlurEnabled
+        }
+        .onEach { (browserType, featuredItemBlurEnabled) ->
+          _state.update {
+            it.copy(browserType = browserType, enableHomePageBlur = featuredItemBlurEnabled)
+          }
+        }
         .launchIn(coroutineScope)
     }
 
@@ -91,7 +100,12 @@ class SettingsPresenter(
           // no-op
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
+        is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
       }
+    }
+
+    private fun toggleFeaturedItemBlur(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleFeaturedItemBlur(value) }
     }
 
     private fun updateBrowserType(browserType: BrowserType) {

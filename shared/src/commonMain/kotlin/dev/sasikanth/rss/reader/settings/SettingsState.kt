@@ -19,10 +19,13 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.repository.BrowserType
 
 @Immutable
-internal data class SettingsState(val browserType: BrowserType) {
+internal data class SettingsState(
+  val browserType: BrowserType,
+  val enableHomePageBlur: Boolean,
+) {
 
   companion object {
 
-    val DEFAULT = SettingsState(browserType = BrowserType.Default)
+    val DEFAULT = SettingsState(browserType = BrowserType.Default, enableHomePageBlur = true)
   }
 }

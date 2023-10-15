@@ -22,4 +22,6 @@ sealed interface SettingsEvent {
   object BackClicked : SettingsEvent
 
   data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
+
+  data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
 }

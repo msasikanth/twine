@@ -107,12 +107,79 @@ internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modi
               }
             )
           }
+
+          // TODO: Enable it once featured item blur is handled
+          if (false) {
+            item {
+              FeaturedItemBlurSettingItem(
+                featuredItemBlurEnabled = state.enableHomePageBlur,
+                onValueChanged = { newValue ->
+                  settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
+                }
+              )
+            }
+          }
         }
       }
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun FeaturedItemBlurSettingItem(
+  featuredItemBlurEnabled: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  var checked by remember(featuredItemBlurEnabled) { mutableStateOf(featuredItemBlurEnabled) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!featuredItemBlurEnabled)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsEnableBlurTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsEnableBlurSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(8.dp))
+
+      MaterialTheme(
+        colorScheme =
+          darkColorScheme(
+            primary = AppTheme.colorScheme.tintedSurface,
+            onPrimary = AppTheme.colorScheme.tintedForeground,
+            outline = AppTheme.colorScheme.outline,
+            surfaceVariant = AppTheme.colorScheme.surfaceContainer
+          )
+      ) {
+        Switch(
+          checked = checked,
+          onCheckedChange = { checked -> onValueChanged(checked) },
+        )
+      }
+    }
+
+    Divider(
+      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 24.dp),
+      color = AppTheme.colorScheme.surfaceContainer
+    )
+  }
 }
 
 @Composable

@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -29,13 +30,22 @@ import me.tatarka.inject.annotations.Inject
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
+  private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
+
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
       mapToBrowserType(preferences[browserTypeKey]) ?: BrowserType.Default
     }
 
+  val enableFeaturedItemBlur: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[enableFeaturedItemBlurKey] ?: true }
+
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }
+  }
+
+  suspend fun toggleFeaturedItemBlur(value: Boolean) {
+    dataStore.edit { preferences -> preferences[enableFeaturedItemBlurKey] = value }
   }
 
   private fun mapToBrowserType(pref: String?): BrowserType? {

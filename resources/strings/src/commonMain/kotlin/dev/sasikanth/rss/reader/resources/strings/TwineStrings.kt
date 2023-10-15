@@ -50,6 +50,8 @@ data class TwineStrings(
   val moreMenuOptions: String,
   val settingsBrowserTypeTitle: String,
   val settingsBrowserTypeSubtitle: String,
+  val settingsEnableBlurTitle: String,
+  val settingsEnableBlurSubtitle: String,
   val feeds: String,
   val editFeeds: String,
   val comments: String
