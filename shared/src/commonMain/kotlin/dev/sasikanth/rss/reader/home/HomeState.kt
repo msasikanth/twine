@@ -39,7 +39,8 @@ internal data class HomeState(
   val feedsSheetState: BottomSheetValue,
   val selectedFeed: Feed?,
   val feedsSheetMode: FeedsSheetMode,
-  val feedFetchingState: FeedFetchingState
+  val feedFetchingState: FeedFetchingState,
+  val featuredItemBlurEnabled: Boolean
 ) {
 
   companion object {
@@ -52,7 +53,8 @@ internal data class HomeState(
         feedsSheetState = Collapsed,
         selectedFeed = null,
         feedsSheetMode = FeedsSheetMode.Default,
-        feedFetchingState = FeedFetchingState.Idle
+        feedFetchingState = FeedFetchingState.Idle,
+        featuredItemBlurEnabled = true
       )
   }
 

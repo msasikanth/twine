@@ -36,6 +36,7 @@ import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import io.ktor.client.network.sockets.ConnectTimeoutException
@@ -68,6 +69,7 @@ class HomePresenter(
   feedsPresenterFactory: (ComponentContext) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableSelectedFeed: ObservableSelectedFeed,
+  private val settingsRepository: SettingsRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
@@ -80,6 +82,7 @@ class HomePresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         observableSelectedFeed = observableSelectedFeed,
+        settingsRepository = settingsRepository,
       )
     }
 
@@ -117,6 +120,7 @@ class HomePresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableSelectedFeed: ObservableSelectedFeed,
+    private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -213,6 +217,10 @@ class HomePresenter(
         .onEach { featuredPosts ->
           _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
         }
+        .launchIn(coroutineScope)
+
+      settingsRepository.enableFeaturedItemBlur
+        .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
     }
 

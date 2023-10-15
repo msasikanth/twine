@@ -108,16 +108,13 @@ internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modi
             )
           }
 
-          // TODO: Enable it once featured item blur is handled
-          if (false) {
-            item {
-              FeaturedItemBlurSettingItem(
-                featuredItemBlurEnabled = state.enableHomePageBlur,
-                onValueChanged = { newValue ->
-                  settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
-                }
-              )
-            }
+          item {
+            FeaturedItemBlurSettingItem(
+              featuredItemBlurEnabled = state.enableHomePageBlur,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
+              }
+            )
           }
         }
       }

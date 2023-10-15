@@ -92,6 +92,7 @@ internal fun FeaturedSection(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<PostWithMetadata>,
   pagerState: PagerState,
+  featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
@@ -148,7 +149,11 @@ internal fun FeaturedSection(
           }
       }
 
-      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+      FeaturedSectionBlurredBackground(
+        featuredPosts = featuredPosts,
+        pagerState = pagerState,
+        featuredItemBlurEnabled = featuredItemBlurEnabled
+      )
 
       HorizontalPager(
         state = pagerState,
@@ -180,12 +185,13 @@ internal fun FeaturedSection(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FeaturedSectionBlurredBackground(
-  modifier: Modifier = Modifier,
   featuredPosts: ImmutableList<PostWithMetadata>,
-  pagerState: PagerState
+  pagerState: PagerState,
+  featuredItemBlurEnabled: Boolean,
+  modifier: Modifier = Modifier,
 ) {
   BoxWithConstraints(modifier = modifier) {
-    if (canBlurImage) {
+    if (canBlurImage && featuredItemBlurEnabled) {
       featuredPosts.fastForEachReversed { post ->
         val actualIndex = featuredPosts.indexOf(post)
 

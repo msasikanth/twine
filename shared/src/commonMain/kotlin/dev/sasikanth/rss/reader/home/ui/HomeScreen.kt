@@ -60,7 +60,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -271,6 +270,7 @@ private fun HomeScreenContent(
         featuredPosts = featuredPosts,
         posts = posts,
         selectedFeed = state.selectedFeed,
+        featuredItemBlurEnabled = state.featuredItemBlurEnabled,
         onPostClicked = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
