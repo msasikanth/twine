@@ -56,6 +56,7 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.canBlurImage
 
 @Composable
 internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Modifier) {
@@ -108,13 +109,15 @@ internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modi
             )
           }
 
-          item {
-            FeaturedItemBlurSettingItem(
-              featuredItemBlurEnabled = state.enableHomePageBlur,
-              onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
-              }
-            )
+          if (canBlurImage) {
+            item {
+              FeaturedItemBlurSettingItem(
+                featuredItemBlurEnabled = state.enableHomePageBlur,
+                onValueChanged = { newValue ->
+                  settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
+                }
+              )
+            }
           }
         }
       }
