@@ -20,10 +20,24 @@ package dev.sasikanth.rss.reader.network
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_URL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_ALTERNATE
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ENCLOSURE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_CHANNEL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
-import dev.sasikanth.rss.reader.network.FeedType.*
+import dev.sasikanth.rss.reader.network.FeedType.ATOM
+import dev.sasikanth.rss.reader.network.FeedType.RSS
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlin.collections.set
@@ -39,15 +53,9 @@ import platform.Foundation.NSXMLParserDelegateProtocol
 import platform.Foundation.dataUsingEncoding
 import platform.darwin.NSObject
 
-private const val RSS_CHANNEL_TAG = "channel"
-private const val RSS_ITEM_TAG = "item"
-private const val ATOM_FEED_TAG = "feed"
-private const val ATOM_ENTRY_TAG = "entry"
-
 @Inject
 @Suppress("CAST_NEVER_SUCCEEDS")
 class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
-  private var feedType: FeedType? = null
   private var feedPayload: FeedPayload? = null
 
   override suspend fun parse(
@@ -59,8 +67,7 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
       suspendCoroutine { continuation ->
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         val xmlFeedParser =
-          IOSXmlFeedParser(feedUrl, fetchPosts) { feedType, feedPayload ->
-            this@IOSFeedParser.feedType = feedType
+          IOSXmlFeedParser(feedUrl, fetchPosts) { feedPayload ->
             this@IOSFeedParser.feedPayload = feedPayload
           }
 
@@ -81,12 +88,12 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
 private class IOSXmlFeedParser(
   private val feedUrl: String,
   private val fetchPosts: Boolean,
-  private val onEnd: (FeedType, FeedPayload) -> Unit
+  private val onEnd: (FeedPayload) -> Unit
 ) : NSObject(), NSXMLParserDelegateProtocol {
 
   private val posts = mutableListOf<PostPayload>()
 
-  var feedType: FeedType? = null
+  private var feedType: FeedType? = null
   private var currentChannelData: MutableMap<String, String> = mutableMapOf()
   private var currentItemData: MutableMap<String, String> = mutableMapOf()
   private var currentData: MutableMap<String, String>? = null
@@ -97,8 +104,8 @@ private class IOSXmlFeedParser(
     val currentData = currentData ?: return
 
     when {
-      !currentData.containsKey("imageUrl") && currentElement == "featuredImage" -> {
-        currentData["imageUrl"] = foundCharacters
+      !currentData.containsKey(TAG_IMAGE_URL) && currentElement == TAG_FEATURED_IMAGE -> {
+        currentData[TAG_IMAGE_URL] = foundCharacters
       }
       else -> {
         currentData[currentElement] = (currentData[currentElement] ?: "") + foundCharacters
@@ -126,28 +133,26 @@ private class IOSXmlFeedParser(
     currentElement = didStartElement
 
     when {
-      !currentItemData.containsKey("imageUrl") && hasRssImageUrl(attributes) -> {
-        currentItemData["imageUrl"] = attributes["url"] as String
+      !currentItemData.containsKey(TAG_IMAGE_URL) && hasRssImageUrl(attributes) -> {
+        currentItemData[TAG_IMAGE_URL] = attributes[ATTR_URL] as String
       }
       hasPodcastRssUrl() -> {
-        currentItemData["link"] = attributes["url"] as String
+        currentItemData[TAG_LINK] = attributes[ATTR_URL] as String
       }
-      feedType == ATOM &&
-        currentElement == "link" &&
-        (attributes["rel"] == "alternate" || attributes["rel"] == null) -> {
-        if (currentChannelData["link"].isNullOrBlank()) {
-          currentChannelData["link"] = attributes["href"] as String
+      hasAtomLink(attributes) -> {
+        if (currentChannelData[TAG_LINK].isNullOrBlank()) {
+          currentChannelData[TAG_LINK] = attributes[ATTR_HREF] as String
         }
-        currentItemData["link"] = attributes["href"] as String
+        currentItemData[TAG_LINK] = attributes[ATTR_HREF] as String
       }
     }
 
     currentData =
       when (currentElement) {
-        RSS_CHANNEL_TAG,
-        ATOM_FEED_TAG -> currentChannelData
-        RSS_ITEM_TAG,
-        ATOM_ENTRY_TAG -> currentItemData
+        TAG_RSS_CHANNEL,
+        TAG_ATOM_FEED -> currentChannelData
+        TAG_RSS_ITEM,
+        TAG_ATOM_ENTRY -> currentItemData
         else -> currentData
       }
   }
@@ -158,8 +163,8 @@ private class IOSXmlFeedParser(
     namespaceURI: String?,
     qualifiedName: String?
   ) {
-    if (fetchPosts && (didEndElement == RSS_ITEM_TAG || didEndElement == ATOM_ENTRY_TAG)) {
-      val hostLink = currentChannelData["link"]!!
+    if (fetchPosts && (didEndElement == TAG_RSS_ITEM || didEndElement == TAG_ATOM_ENTRY)) {
+      val hostLink = currentChannelData[TAG_LINK]!!
       val post =
         when (feedType) {
           RSS -> PostPayload.mapRssPost(currentItemData, hostLink)
@@ -180,17 +185,21 @@ private class IOSXmlFeedParser(
         null -> null
       }
 
-    val feedType = feedType
-    if (feedType != null && payload != null) {
-      onEnd(feedType, payload)
+    if (payload != null) {
+      onEnd(payload)
     }
   }
 
   private fun hasPodcastRssUrl() =
-    currentElement == "enclosure" && currentItemData["link"].isNullOrBlank()
+    currentElement == TAG_ENCLOSURE && currentItemData[TAG_LINK].isNullOrBlank()
 
   private fun hasRssImageUrl(attributes: Map<Any?, *>) =
     (imageTags.contains(currentElement) ||
-      (currentElement == "enclosure" && attributes["type"] == "image/jpeg")) &&
-      attributes.containsKey("url")
+      (currentElement == TAG_ENCLOSURE && attributes[ATTR_TYPE] == "image/jpeg")) &&
+      attributes.containsKey(ATTR_URL)
+
+  private fun hasAtomLink(attributes: Map<Any?, *>) =
+    feedType == ATOM &&
+      currentElement == TAG_LINK &&
+      (attributes[ATTR_REL] == ATTR_VALUE_ALTERNATE || attributes[ATTR_REL] == null)
 }

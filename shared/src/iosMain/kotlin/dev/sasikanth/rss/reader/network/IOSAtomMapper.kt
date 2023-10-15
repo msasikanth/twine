@@ -19,6 +19,12 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUBLISHED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
@@ -31,14 +37,14 @@ internal fun PostPayload.Companion.mapAtomPost(
   atomMap: Map<String, String>,
   hostLink: String
 ): PostPayload {
-  val pubDate = atomMap["published"]
-  val link = atomMap["link"]?.trim()
-  val data = atomMap["content"]
-  var imageUrl = atomMap["imageUrl"]
+  val title = atomMap[TAG_TITLE]
+  val pubDate = atomMap[TAG_PUBLISHED]
+  val link = atomMap[TAG_LINK]?.trim()
+  val data = atomMap[TAG_CONTENT]
+  var imageUrl = atomMap[TAG_IMAGE_URL]
   var content: String? = null
 
-  val parser =
-    KsoupHtmlParser(
+  KsoupHtmlParser(
       handler =
         HtmlContentParser {
           if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
@@ -46,11 +52,10 @@ internal fun PostPayload.Companion.mapAtomPost(
         },
       options = KsoupHtmlOptions(decodeEntities = false)
     )
-
-  parser.parseComplete(data.orEmpty())
+    .parseComplete(data.orEmpty())
 
   return PostPayload(
-    title = FeedParser.cleanText(atomMap["title"])!!,
+    title = FeedParser.cleanText(title)!!,
     link = link!!,
     description = content.orEmpty(),
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
@@ -64,7 +69,7 @@ internal fun FeedPayload.Companion.mapAtomFeed(
   atomMap: Map<String, String>,
   posts: List<PostPayload>
 ): FeedPayload {
-  val link = atomMap["link"]!!.trim()
+  val link = atomMap[TAG_LINK]!!.trim()
   val domain = Url(link)
   val iconUrl =
     FeedParser.feedIcon(
@@ -73,10 +78,10 @@ internal fun FeedPayload.Companion.mapAtomFeed(
     )
 
   return FeedPayload(
-    name = FeedParser.cleanText(atomMap["title"])!!,
+    name = FeedParser.cleanText(atomMap[TAG_TITLE])!!,
     homepageLink = link,
     link = feedUrl,
-    description = FeedParser.cleanText(atomMap["subtitle"]).orEmpty(),
+    description = FeedParser.cleanText(atomMap[TAG_SUBTITLE]).orEmpty(),
     icon = iconUrl,
     posts = posts
   )

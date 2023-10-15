@@ -20,6 +20,19 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_URL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_IMAGE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_COMMENTS
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_CONTENT_ENCODED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_DESCRIPTION
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ENCLOSURE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUB_DATE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_CHANNEL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_ITEM
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
 import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime
@@ -44,11 +57,11 @@ internal class AndroidRssParser(
       .optionalEnd()
       .toFormatter(Locale.US)
 
+  private val posts = mutableListOf<PostPayload>()
+
   override fun parse(): FeedPayload {
     parser.nextTag()
-    parser.require(XmlPullParser.START_TAG, namespace, "channel")
-
-    val posts = mutableListOf<PostPayload>()
+    parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_CHANNEL)
 
     var title: String? = null
     var link: String? = null
@@ -56,11 +69,19 @@ internal class AndroidRssParser(
 
     while (parser.next() != XmlPullParser.END_TAG) {
       if (parser.eventType != XmlPullParser.START_TAG) continue
-      when (parser.name) {
-        "title" -> title = readTagText("title", parser)
-        "link" -> link = readTagText("link", parser)
-        "description" -> description = readTagText("description", parser)
-        "item" -> if (fetchPosts) posts.add(readRssItem(parser, link!!))
+      when (val name = parser.name) {
+        TAG_TITLE -> {
+          title = readTagText(name, parser)
+        }
+        TAG_LINK -> {
+          link = readTagText(name, parser)
+        }
+        TAG_DESCRIPTION -> {
+          description = readTagText(name, parser)
+        }
+        TAG_RSS_ITEM -> {
+          if (fetchPosts) posts.add(readRssItem(parser, link!!))
+        }
         else -> skip(parser)
       }
     }
@@ -79,7 +100,7 @@ internal class AndroidRssParser(
   }
 
   private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload {
-    parser.require(XmlPullParser.START_TAG, namespace, "item")
+    parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_ITEM)
 
     var title: String? = null
     var link: String? = null
@@ -90,19 +111,33 @@ internal class AndroidRssParser(
 
     while (parser.next() != XmlPullParser.END_TAG) {
       if (parser.eventType != XmlPullParser.START_TAG) continue
-
       val name = parser.name
+
       when {
-        name == "title" -> title = readTagText("title", parser)
-        name == "link" -> link = readTagText("link", parser)
-        name == "enclosure" && link.isNullOrBlank() -> link = readAttrText("url", parser)
-        name == "description" || name == "content:encoded" ->
+        name == TAG_TITLE -> {
+          title = readTagText(name, parser)
+        }
+        name == TAG_LINK -> {
+          link = readTagText(name, parser)
+        }
+        name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
+          link = readAttrText(ATTR_URL, parser)
+        }
+        name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           description = readTagText(name, parser)
-        name == "pubDate" -> date = readTagText("pubDate", parser)
-        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> image = readAttrText("url", parser)
-        image.isNullOrBlank() && name == "featuredImage" -> image = readTagText(name, parser)
-        commentsLink.isNullOrBlank() && name == "comments" ->
+        }
+        name == TAG_PUB_DATE -> {
+          date = readTagText(name, parser)
+        }
+        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
+          image = readAttrText(ATTR_URL, parser)
+        }
+        image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
+          image = readTagText(name, parser)
+        }
+        commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
           commentsLink = readTagText(name, parser)
+        }
         else -> skip(parser)
       }
     }
@@ -119,8 +154,7 @@ internal class AndroidRssParser(
       }
         ?: System.currentTimeMillis()
 
-    val contentParser =
-      KsoupHtmlParser(
+    KsoupHtmlParser(
         handler =
           HtmlContentParser {
             if (image.isNullOrBlank()) image = it.imageUrl
@@ -128,8 +162,7 @@ internal class AndroidRssParser(
           },
         options = KsoupHtmlOptions(decodeEntities = false)
       )
-
-    contentParser.parseComplete(description.orEmpty())
+      .parseComplete(description.orEmpty())
 
     return PostPayload(
       title = FeedParser.cleanText(title).orEmpty(),
@@ -143,6 +176,7 @@ internal class AndroidRssParser(
 
   private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
     (FeedParser.imageTags.contains(name) ||
-      (name == "enclosure" && parser.getAttributeValue(namespace, "type") == "image/jpeg")) &&
-      !parser.getAttributeValue(namespace, "url").isNullOrBlank()
+      (name == TAG_ENCLOSURE &&
+        parser.getAttributeValue(namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
+      !parser.getAttributeValue(namespace, ATTR_URL).isNullOrBlank()
 }

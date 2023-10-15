@@ -33,7 +33,33 @@ interface FeedParser {
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
 
-    val imageTags = setOf("media:content", "media:thumbnail")
+    internal val imageTags = setOf("media:content", "media:thumbnail")
+
+    internal const val TAG_RSS_CHANNEL = "channel"
+    internal const val TAG_ATOM_FEED = "feed"
+    internal const val TAG_RSS_ITEM = "item"
+    internal const val TAG_ATOM_ENTRY = "entry"
+
+    internal const val TAG_TITLE = "title"
+    internal const val TAG_LINK = "link"
+    internal const val TAG_DESCRIPTION = "description"
+    internal const val TAG_ENCLOSURE = "enclosure"
+    internal const val TAG_CONTENT_ENCODED = "content:encoded"
+    internal const val TAG_CONTENT = "content"
+    internal const val TAG_SUBTITLE = "subtitle"
+    internal const val TAG_PUB_DATE = "pubDate"
+    internal const val TAG_PUBLISHED = "published"
+    internal const val TAG_FEATURED_IMAGE = "featuredImage"
+    internal const val TAG_COMMENTS = "comments"
+    internal const val TAG_IMAGE_URL = "imageUrl"
+
+    internal const val ATTR_URL = "url"
+    internal const val ATTR_TYPE = "type"
+    internal const val ATTR_REL = "rel"
+    internal const val ATTR_HREF = "href"
+
+    internal const val ATTR_VALUE_ALTERNATE = "alternate"
+    internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?): String? =
       text

@@ -19,6 +19,13 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_COMMENTS
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_CONTENT_ENCODED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_DESCRIPTION
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUB_DATE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
@@ -34,12 +41,13 @@ internal fun PostPayload.Companion.mapRssPost(
   rssMap: Map<String, String>,
   hostLink: String
 ): PostPayload {
-  val pubDate = rssMap["pubDate"]
-  val link = rssMap["link"]
-  var description = rssMap["description"]
-  val encodedContent = rssMap["content:encoded"]
-  var imageUrl: String? = rssMap["imageUrl"]
-  val commentsLink: String? = rssMap["comments"]
+  val title = rssMap[TAG_TITLE]
+  val pubDate = rssMap[TAG_PUB_DATE]
+  val link = rssMap[TAG_LINK]
+  var description = rssMap[TAG_DESCRIPTION]
+  val encodedContent = rssMap[TAG_CONTENT_ENCODED]
+  var imageUrl: String? = rssMap[TAG_IMAGE_URL]
+  val commentsLink: String? = rssMap[TAG_COMMENTS]
 
   val descriptionToParse =
     if (encodedContent.isNullOrBlank()) {
@@ -47,8 +55,8 @@ internal fun PostPayload.Companion.mapRssPost(
     } else {
       encodedContent
     }
-  val contentParser =
-    KsoupHtmlParser(
+
+  KsoupHtmlParser(
       handler =
         HtmlContentParser {
           if (imageUrl.isNullOrBlank()) imageUrl = it.imageUrl
@@ -56,11 +64,10 @@ internal fun PostPayload.Companion.mapRssPost(
         },
       options = KsoupHtmlOptions(decodeEntities = false)
     )
-
-  contentParser.parseComplete(descriptionToParse.orEmpty())
+    .parseComplete(descriptionToParse.orEmpty())
 
   return PostPayload(
-    title = FeedParser.cleanText(rssMap["title"])!!,
+    title = FeedParser.cleanText(title)!!,
     link = FeedParser.cleanText(link)!!,
     description = FeedParser.cleanTextCompact(description).orEmpty(),
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
@@ -74,7 +81,7 @@ internal fun FeedPayload.Companion.mapRssFeed(
   rssMap: Map<String, String>,
   posts: List<PostPayload>
 ): FeedPayload {
-  val link = rssMap["link"]!!.trim()
+  val link = rssMap[TAG_LINK]!!.trim()
   val domain = Url(link)
   val iconUrl =
     FeedParser.feedIcon(
@@ -83,10 +90,10 @@ internal fun FeedPayload.Companion.mapRssFeed(
     )
 
   return FeedPayload(
-    name = FeedParser.cleanText(rssMap["title"])!!,
+    name = FeedParser.cleanText(rssMap[TAG_TITLE])!!,
     homepageLink = link,
     link = feedUrl,
-    description = FeedParser.cleanText(rssMap["description"])!!,
+    description = FeedParser.cleanText(rssMap[TAG_DESCRIPTION])!!,
     icon = iconUrl,
     posts = posts
   )

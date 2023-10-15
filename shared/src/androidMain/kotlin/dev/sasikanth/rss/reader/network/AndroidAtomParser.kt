@@ -20,6 +20,16 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_ALTERNATE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUBLISHED
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
 import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime
@@ -33,15 +43,10 @@ internal class AndroidAtomParser(
 ) : Parser() {
 
   private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+  private val posts = mutableListOf<PostPayload>()
 
   override fun parse(): FeedPayload {
-    return readAtomFeed(parser, feedUrl)
-  }
-
-  private fun readAtomFeed(parser: XmlPullParser, feedUrl: String): FeedPayload {
-    parser.require(XmlPullParser.START_TAG, namespace, "feed")
-
-    val posts = mutableListOf<PostPayload>()
+    parser.require(XmlPullParser.START_TAG, namespace, TAG_ATOM_FEED)
 
     var title: String? = null
     var description: String? = null
@@ -49,16 +54,23 @@ internal class AndroidAtomParser(
 
     while (parser.next() != XmlPullParser.END_TAG) {
       if (parser.eventType != XmlPullParser.START_TAG) continue
-      when (parser.name) {
-        "title" -> title = readTagText("title", parser)
-        "link" ->
+      when (val name = parser.name) {
+        TAG_TITLE -> {
+          title = readTagText(name, parser)
+        }
+        TAG_LINK -> {
           if (link.isNullOrBlank()) {
-            link = readAtomLink(parser)
+            link = readAtomLink(name, parser)
           } else {
             skip(parser)
           }
-        "subtitle" -> description = readTagText("subtitle", parser)
-        "entry" -> if (fetchPosts) posts.add(readAtomEntry(parser, link!!))
+        }
+        TAG_SUBTITLE -> {
+          description = readTagText(name, parser)
+        }
+        TAG_ATOM_ENTRY -> {
+          if (fetchPosts) posts.add(readAtomEntry(parser, link!!))
+        }
         else -> skip(parser)
       }
     }
@@ -87,13 +99,17 @@ internal class AndroidAtomParser(
 
     while (parser.next() != XmlPullParser.END_TAG) {
       if (parser.eventType != XmlPullParser.START_TAG) continue
+
       when (val tagName = parser.name) {
-        "title" -> title = readTagText(tagName, parser)
-        "link" -> link = readAtomLink(parser)
-        "content" -> {
+        TAG_TITLE -> {
+          title = readTagText(tagName, parser)
+        }
+        TAG_LINK -> {
+          link = readAtomLink(tagName, parser)
+        }
+        TAG_CONTENT -> {
           val rawContent = readTagText(tagName, parser)
-          val contentParser =
-            KsoupHtmlParser(
+          KsoupHtmlParser(
               handler =
                 HtmlContentParser {
                   if (image.isNullOrBlank()) image = it.imageUrl
@@ -101,9 +117,11 @@ internal class AndroidAtomParser(
                 },
               options = KsoupHtmlOptions(decodeEntities = false)
             )
-          contentParser.parseComplete(rawContent)
+            .parseComplete(rawContent)
         }
-        "published" -> date = readTagText(tagName, parser)
+        TAG_PUBLISHED -> {
+          date = readTagText(tagName, parser)
+        }
         else -> skip(parser)
       }
     }
@@ -130,15 +148,15 @@ internal class AndroidAtomParser(
     )
   }
 
-  private fun readAtomLink(parser: XmlPullParser): String? {
+  private fun readAtomLink(tagName: String, parser: XmlPullParser): String? {
     var link: String? = null
-    parser.require(XmlPullParser.START_TAG, namespace, "link")
-    val relType = parser.getAttributeValue(namespace, "rel")
-    if (relType == "alternate" || relType.isNullOrBlank()) {
-      link = parser.getAttributeValue(namespace, "href")
+    parser.require(XmlPullParser.START_TAG, namespace, tagName)
+    val relType = parser.getAttributeValue(namespace, ATTR_REL)
+    if (relType == ATTR_VALUE_ALTERNATE || relType.isNullOrBlank()) {
+      link = parser.getAttributeValue(namespace, ATTR_HREF)
     }
     parser.nextTag()
-    parser.require(XmlPullParser.END_TAG, namespace, "link")
+    parser.require(XmlPullParser.END_TAG, namespace, tagName)
     return link
   }
 }
