@@ -21,6 +21,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,6 +73,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
@@ -222,55 +224,68 @@ private fun BottomSheetExpandedContent(
     LaunchedEffect(keyboardState) {
       if (keyboardState == KeyboardState.Closed) {
         focusManager.clearFocus()
+        exitFeedsEdit()
       }
     }
 
-    LazyColumn(
-      modifier =
-        Modifier.fillMaxSize()
-          .padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
-      contentPadding =
-        PaddingValues(
-          start = padding.calculateStartPadding(layoutDirection),
-          top = padding.calculateTopPadding(),
-          end = padding.calculateEndPadding(layoutDirection),
-          bottom = padding.calculateBottomPadding() + 64.dp
-        )
-    ) {
-      itemsIndexed(pinnedFeeds) { index, feed ->
-        FeedListItem(
-          feed = feed,
-          selected = selectedFeed == feed,
-          canShowDivider = index != pinnedFeeds.lastIndex,
-          canPinFeeds = true,
-          feedsSheetMode = feedsSheetMode,
-          onDeleteFeed = onDeleteFeed,
-          onFeedSelected = onFeedSelected,
-          onFeedNameChanged = onFeedNameChanged,
-          onFeedPinClick = onFeedPinClick
-        )
-      }
+    Box {
+      LazyColumn(
+        modifier =
+          Modifier.fillMaxSize()
+            .padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
+        contentPadding =
+          PaddingValues(
+            start = padding.calculateStartPadding(layoutDirection),
+            top = padding.calculateTopPadding(),
+            end = padding.calculateEndPadding(layoutDirection),
+            bottom = padding.calculateBottomPadding() + 64.dp
+          )
+      ) {
+        itemsIndexed(pinnedFeeds) { index, feed ->
+          FeedListItem(
+            feed = feed,
+            selected = selectedFeed == feed,
+            canShowDivider = index != pinnedFeeds.lastIndex,
+            canPinFeeds = true,
+            feedsSheetMode = feedsSheetMode,
+            onDeleteFeed = onDeleteFeed,
+            onFeedSelected = onFeedSelected,
+            onFeedNameChanged = onFeedNameChanged,
+            onFeedPinClick = onFeedPinClick
+          )
+        }
 
-      if (pinnedFeeds.isNotEmpty() && feeds.isNotEmpty()) {
-        item {
-          Divider(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-            color = AppTheme.colorScheme.tintedSurface
+        if (pinnedFeeds.isNotEmpty() && feeds.isNotEmpty()) {
+          item {
+            Divider(
+              modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+              color = AppTheme.colorScheme.tintedSurface
+            )
+          }
+        }
+
+        itemsIndexed(feeds) { index, feed ->
+          FeedListItem(
+            feed = feed,
+            selected = selectedFeed == feed,
+            canShowDivider = index != feeds.lastIndex,
+            canPinFeeds = canPinFeeds,
+            feedsSheetMode = feedsSheetMode,
+            onDeleteFeed = onDeleteFeed,
+            onFeedSelected = onFeedSelected,
+            onFeedNameChanged = onFeedNameChanged,
+            onFeedPinClick = onFeedPinClick
           )
         }
       }
 
-      itemsIndexed(feeds) { index, feed ->
-        FeedListItem(
-          feed = feed,
-          selected = selectedFeed == feed,
-          canShowDivider = index != feeds.lastIndex,
-          canPinFeeds = canPinFeeds,
-          feedsSheetMode = feedsSheetMode,
-          onDeleteFeed = onDeleteFeed,
-          onFeedSelected = onFeedSelected,
-          onFeedNameChanged = onFeedNameChanged,
-          onFeedPinClick = onFeedPinClick
+      if (keyboardState == KeyboardState.Opened && feedsSheetMode == LinkEntry) {
+        // Scrim when keyboard is open
+        Box(
+          Modifier.fillMaxSize()
+            .padding(padding)
+            .background(AppTheme.colorScheme.tintedBackground.copy(alpha = 0.8f))
+            .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
         )
       }
     }
