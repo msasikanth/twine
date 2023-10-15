@@ -363,7 +363,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
 private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
   Column(
     modifier =
-      Modifier.fillMaxSize().padding(bottom = 136.dp).pointerInput(Unit) {
+      Modifier.fillMaxSize().pointerInput(Unit) {
         detectDragGestures { change, dragAmount ->
           change.consume()
           if (dragAmount.y < 0) {
