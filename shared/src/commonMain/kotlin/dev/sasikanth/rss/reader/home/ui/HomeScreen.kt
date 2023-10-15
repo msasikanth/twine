@@ -219,7 +219,7 @@ internal fun HomeScreen(
           visible = showScrollToTop,
           modifier =
             Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-              .padding(end = 24.dp, bottom = 24.dp),
+              .padding(end = 16.dp, bottom = 16.dp),
         ) {
           listState.animateScrollToItem(0)
         }

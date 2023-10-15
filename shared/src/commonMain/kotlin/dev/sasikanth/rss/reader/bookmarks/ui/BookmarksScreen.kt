@@ -127,8 +127,8 @@ internal fun BookmarksScreen(
           visible = showScrollToTop,
           modifier =
             Modifier.padding(
-              end = padding.calculateEndPadding(layoutDirection) + 24.dp,
-              bottom = padding.calculateBottomPadding() + 24.dp
+              end = padding.calculateEndPadding(layoutDirection) + 16.dp,
+              bottom = padding.calculateBottomPadding() + 16.dp
             )
         ) {
           listState.animateScrollToItem(0)
