@@ -105,7 +105,11 @@ internal class AndroidAtomParser(
           title = readTagText(tagName, parser)
         }
         TAG_LINK -> {
-          link = readAtomLink(tagName, parser)
+          if (link.isNullOrBlank()) {
+            link = readAtomLink(tagName, parser)
+          } else {
+            skip(parser)
+          }
         }
         TAG_CONTENT -> {
           val rawContent = readTagText(tagName, parser)
