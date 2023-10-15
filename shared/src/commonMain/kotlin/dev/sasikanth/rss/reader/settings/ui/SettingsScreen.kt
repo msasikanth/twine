@@ -141,7 +141,7 @@ private fun FeaturedItemBlurSettingItem(
       }
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       Column(modifier = Modifier.weight(1f)) {
@@ -157,7 +157,7 @@ private fun FeaturedItemBlurSettingItem(
         )
       }
 
-      Spacer(Modifier.width(8.dp))
+      Spacer(Modifier.width(16.dp))
 
       MaterialTheme(
         colorScheme =
@@ -204,7 +204,7 @@ private fun BrowserTypeSettingItem(
       }
   ) {
     Row(
-      modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       Column(modifier = Modifier.weight(1f)) {
@@ -220,7 +220,7 @@ private fun BrowserTypeSettingItem(
         )
       }
 
-      Spacer(Modifier.width(8.dp))
+      Spacer(Modifier.width(16.dp))
 
       MaterialTheme(
         colorScheme =
