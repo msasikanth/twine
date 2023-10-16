@@ -95,11 +95,20 @@ internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modi
           contentPadding =
             PaddingValues(
               start = padding.calculateStartPadding(layoutDirection),
-              top = padding.calculateTopPadding(),
+              top = padding.calculateTopPadding() + 8.dp,
               end = padding.calculateEndPadding(layoutDirection),
               bottom = padding.calculateBottomPadding() + 80.dp
             ),
         ) {
+          item {
+            Text(
+              text = LocalStrings.current.settingsHeaderBehaviour,
+              style = MaterialTheme.typography.titleMedium,
+              color = AppTheme.colorScheme.textEmphasisHigh,
+              modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+            )
+          }
+
           item {
             BrowserTypeSettingItem(
               browserType = state.browserType,

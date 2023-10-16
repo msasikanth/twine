@@ -54,6 +54,7 @@ val EnTwineStrings =
     bookmarks = "Bookmarks",
     settings = "Settings",
     moreMenuOptions = "More menu options",
+    settingsHeaderBehaviour = "Behavior",
     settingsBrowserTypeTitle = "Use in-app browser",
     settingsBrowserTypeSubtitle = "When turned off, links will open in your default browser.",
     settingsEnableBlurTitle = "Enable blur in homepage",

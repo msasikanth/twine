@@ -48,6 +48,7 @@ data class TwineStrings(
   val bookmarks: String,
   val settings: String,
   val moreMenuOptions: String,
+  val settingsHeaderBehaviour: String,
   val settingsBrowserTypeTitle: String,
   val settingsBrowserTypeSubtitle: String,
   val settingsEnableBlurTitle: String,
