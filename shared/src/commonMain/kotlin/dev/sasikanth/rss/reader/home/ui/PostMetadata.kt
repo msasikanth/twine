@@ -40,8 +40,10 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
@@ -148,12 +150,17 @@ private fun PostOptionsButtonRow(
       onClick = onBookmarkClick
     )
 
-    PostOptionShareIconButton(postLink)
+    val shareHandler = LocalShareHandler.current
+    PostOptionIconButton(
+      icon = TwineIcons.Share,
+      contentDescription = LocalStrings.current.share,
+      onClick = { shareHandler.share(postLink) }
+    )
   }
 }
 
 @Composable
-internal fun PostOptionIconButton(
+private fun PostOptionIconButton(
   icon: ImageVector,
   contentDescription: String,
   modifier: Modifier = Modifier,
@@ -176,5 +183,3 @@ internal fun PostOptionIconButton(
     )
   }
 }
-
-@Composable internal expect fun PostOptionShareIconButton(postLink: String)

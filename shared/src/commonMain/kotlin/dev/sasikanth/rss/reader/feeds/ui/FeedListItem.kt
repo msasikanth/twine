@@ -62,6 +62,7 @@ import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.delay
 
@@ -159,7 +160,8 @@ private fun ActionButtons(
         )
       }
     } else {
-      ShareIconButton(content = { feed.link })
+      val shareHandler = LocalShareHandler.current
+      ShareIconButton(onClick = { shareHandler.share(feed.link) })
     }
   }
 }
@@ -271,10 +273,8 @@ private fun FeedLabelInput(
   )
 }
 
-@Composable internal expect fun ShareIconButton(content: () -> String)
-
 @Composable
-internal fun ShareIconButtonInternal(modifier: Modifier = Modifier, onClick: () -> Unit) {
+internal fun ShareIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
   IconButton(modifier = modifier, onClick = onClick) {
     Icon(
       imageVector = TwineIcons.Share,

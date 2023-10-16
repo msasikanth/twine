@@ -13,26 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.interop.LocalUIViewController
+package dev.sasikanth.rss.reader.share
+
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.cinterop.ExperimentalForeignApi
+import me.tatarka.inject.annotations.Inject
 import platform.CoreGraphics.CGRectGetMaxY
 import platform.CoreGraphics.CGRectGetMidX
 import platform.CoreGraphics.CGRectMake
 import platform.UIKit.UIActivityViewController
+import platform.UIKit.UIViewController
 import platform.UIKit.popoverPresentationController
 
-@OptIn(ExperimentalForeignApi::class)
-@Composable
-internal actual fun ShareIconButton(content: () -> String) {
-  val viewController = LocalUIViewController.current
+@Inject
+@AppScope
+class IOSShareHandler(private val viewControllerProvider: () -> UIViewController) : ShareHandler {
 
-  ShareIconButtonInternal {
-    val items = listOf(content())
+  @OptIn(ExperimentalForeignApi::class)
+  override fun share(content: String) {
+    val viewController = viewControllerProvider()
+    val items = listOf(content)
     val activityController = UIActivityViewController(items, null)
     activityController.popoverPresentationController?.setSourceView(viewController.view)
     activityController.popoverPresentationController?.setSourceRect(

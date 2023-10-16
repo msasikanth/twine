@@ -37,6 +37,8 @@ import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
+import dev.sasikanth.rss.reader.share.LocalShareHandler
+import dev.sasikanth.rss.reader.share.ShareHandler
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -49,6 +51,7 @@ typealias App = @Composable (openLink: (String, BrowserType) -> Unit) -> Unit
 fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
+  shareHandler: ShareHandler,
   @Assisted openLink: (String, BrowserType) -> Unit
 ) {
   val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
@@ -56,7 +59,8 @@ fun App(
   CompositionLocalProvider(
     LocalImageLoader provides imageLoader,
     LocalWindowSizeClass provides calculateWindowSizeClass(),
-    LocalDynamicColorState provides dynamicColorState
+    LocalDynamicColorState provides dynamicColorState,
+    LocalShareHandler provides shareHandler
   ) {
     DynamicContentTheme(dynamicColorState) {
       ProvideStrings {

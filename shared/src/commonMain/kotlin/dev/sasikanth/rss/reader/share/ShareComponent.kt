@@ -13,24 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.feeds.ui
 
-import android.content.Intent
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+package dev.sasikanth.rss.reader.share
 
-@Composable
-internal actual fun ShareIconButton(content: () -> String) {
-  val context = LocalContext.current
-
-  ShareIconButtonInternal {
-    val sendIntent =
-      Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, content())
-        type = "text/plain"
-      }
-    val shareIntent = Intent.createChooser(sendIntent, null)
-    context.startActivity(shareIntent)
-  }
-}
+expect interface ShareComponent
