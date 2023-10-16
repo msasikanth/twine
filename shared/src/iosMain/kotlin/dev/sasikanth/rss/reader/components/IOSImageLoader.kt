@@ -90,7 +90,11 @@ class IOSImageLoader : ImageLoader {
           ?: return@withContext null
       val data = loadCachedImage(encodedUrl) ?: downloadImage(encodedUrl) ?: return@withContext null
 
-      return@withContext Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
+      return@withContext try {
+        Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
+      } catch (e: Exception) {
+        null
+      }
     }
   }
 
