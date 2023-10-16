@@ -348,7 +348,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
           FeedLinkInputField(
             modifier =
               Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
-                .padding(bottom = 24.dp, end = 24.dp),
+                .padding(bottom = 20.dp, end = 24.dp),
             isFetchingFeed = state.isFetchingFeed,
             onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
             onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
