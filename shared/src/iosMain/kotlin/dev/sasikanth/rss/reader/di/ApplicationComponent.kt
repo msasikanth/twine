@@ -18,10 +18,14 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
+import me.tatarka.inject.annotations.Provides
+import platform.UIKit.UIViewController
 
 @AppScope
 @Component
-abstract class ApplicationComponent : SharedApplicationComponent() {
+abstract class ApplicationComponent(
+  @get:Provides val uiViewControllerProvider: () -> UIViewController,
+) : SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
 }
