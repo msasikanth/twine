@@ -114,9 +114,11 @@ class IOSImageLoader : ImageLoader {
     val response = httpClient.get(url)
 
     return response.readBytes().also { data ->
-      val cachedResponse =
-        createCachedResponse(httpResponse = response, data = data, requestUrl = url)
-      urlCache.storeCachedResponse(cachedResponse = cachedResponse, forRequest = request)
+      if (data.isNotEmpty()) {
+        val cachedResponse =
+          createCachedResponse(httpResponse = response, data = data, requestUrl = url)
+        urlCache.storeCachedResponse(cachedResponse = cachedResponse, forRequest = request)
+      }
     }
   }
 
