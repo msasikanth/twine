@@ -29,9 +29,14 @@ import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
 
-private val atomDateFormatter = NSDateFormatter().apply { dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ" }
+private val atomDateFormatter =
+  NSDateFormatter().apply {
+    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+    locale = NSLocale("en_US_POSIX")
+  }
 
 internal fun PostPayload.Companion.mapAtomPost(
   atomMap: Map<String, String>,

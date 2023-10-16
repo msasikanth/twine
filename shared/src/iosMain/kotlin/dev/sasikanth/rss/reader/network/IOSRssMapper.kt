@@ -30,12 +30,19 @@ import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
 
 private val offsetTimezoneDateFormatter =
-  NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss Z" }
+  NSDateFormatter().apply {
+    dateFormat = "E, d MMM yyyy HH:mm:ss Z"
+    locale = NSLocale("en_US_POSIX")
+  }
 private val abbrevTimezoneDateFormatter =
-  NSDateFormatter().apply { dateFormat = "E, d MMM yyyy HH:mm:ss z" }
+  NSDateFormatter().apply {
+    dateFormat = "E, d MMM yyyy HH:mm:ss z"
+    locale = NSLocale("en_US_POSIX")
+  }
 
 internal fun PostPayload.Companion.mapRssPost(
   rssMap: Map<String, String>,
