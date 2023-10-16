@@ -28,7 +28,7 @@ class AppColorScheme(
   tintedBackground: Color = Color(0xFF002117),
   tintedSurface: Color = Color(0xFF00382A),
   tintedForeground: Color = Color(0xFF63DBB5),
-  tintedHighlight: Color = Color(0xFF63DBB5),
+  tintedHighlight: Color = Color(0xFF006C53),
   outline: Color = Color(0xFF89938E),
   outlineVariant: Color = Color(0xFF3F4944),
   surface: Color = Color(0xFF111412),
