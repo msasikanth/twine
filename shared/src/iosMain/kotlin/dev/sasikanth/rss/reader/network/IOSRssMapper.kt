@@ -26,9 +26,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
-import io.github.aakira.napier.Napier
 import io.ktor.http.Url
-import io.sentry.kotlin.multiplatform.Sentry
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
@@ -109,17 +107,13 @@ internal fun FeedPayload.Companion.mapRssFeed(
 private fun String?.rssDateStringToEpochSeconds(): Long {
   if (this.isNullOrBlank()) return 0L
 
+  val dateString = this.trim()
   val date =
     try {
-      offsetTimezoneDateFormatter.dateFromString(this.trim())
+      offsetTimezoneDateFormatter.dateFromString(dateString)
+        ?: abbrevTimezoneDateFormatter.dateFromString(dateString)
     } catch (e: Exception) {
-      try {
-        abbrevTimezoneDateFormatter.dateFromString(this.trim())
-      } catch (e: Exception) {
-        Sentry.captureException(e)
-        Napier.e("Parse date error: ${e.message}")
-        null
-      }
+      null
     }
 
   return date?.timeIntervalSince1970?.times(1000)?.toLong() ?: 0L
