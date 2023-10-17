@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,20 +30,20 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
-import dev.sasikanth.rss.reader.resources.icons.Add
-import dev.sasikanth.rss.reader.resources.icons.All
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.allToPlus
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
@@ -67,15 +66,13 @@ internal fun BottomSheetPrimaryActionButton(
         .padding(bottom = (4.dp * bottomSheetSwipeProgress).coerceAtLeast(0.dp)),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
-    val (icon, label) =
+    val label =
       when {
-        bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed ->
-          Pair(TwineIcons.All, null)
-        else -> Pair(TwineIcons.Add, LocalStrings.current.buttonAddFeed)
+        bottomSheetCurrentState == Collapsed && bottomSheetTargetState == Collapsed -> null
+        else -> LocalStrings.current.buttonAddFeed
       }
 
     FloatingActionButton(
-      icon = icon,
       selected = selected,
       animationProgress = bottomSheetSwipeProgress,
       onClick = onClick,
@@ -89,7 +86,7 @@ internal fun BottomSheetPrimaryActionButton(
       color = AppTheme.colorScheme.textEmphasisHigh,
       modifier =
         Modifier.wrapContentHeight().requiredWidth(56.dp).graphicsLayer {
-          alpha = bottomSheetSwipeProgress
+          alpha = bottomSheetSwipeProgress.coerceIn(0f, 1f)
         }
     )
   }
@@ -98,7 +95,6 @@ internal fun BottomSheetPrimaryActionButton(
 @Composable
 private fun FloatingActionButton(
   modifier: Modifier = Modifier,
-  icon: ImageVector,
   animationProgress: Float,
   label: String? = null,
   selected: Boolean = false,
@@ -116,34 +112,31 @@ private fun FloatingActionButton(
           .align(Alignment.Center),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Crossfade(icon) {
-        Icon(
-          imageVector = icon,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
-      }
+      // We want the button to expand smoothly as the bottom sheet
+      // expands. But since this component receives animation progress
+      // within a threshold 0..0.2. We are converting the progress back
+      // to original progress to have the smooth transition
+      val progress by derivedStateOf { (1f - animationProgress) / 5f }
+
+      Icon(
+        imageVector = TwineIcons.allToPlus(progress),
+        contentDescription = null,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
 
       if (label != null) {
-        // We want the button to expand smoothly as the bottom sheet
-        // expands. But since this component receives animation progress
-        // within a threshold 0..0.2. We are converting the progress back
-        // to original progress to have the smooth transition
-        val labelAnimationProgress = (1f - animationProgress) / 5f
         Row(
           modifier =
             Modifier.layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 layout(
-                  (placeable.width * labelAnimationProgress)
-                    .coerceAtMost(placeable.width.toFloat())
-                    .roundToInt(),
+                  (placeable.width * progress).coerceAtMost(placeable.width.toFloat()).roundToInt(),
                   placeable.height
                 ) {
                   placeable.place(0, 0)
                 }
               }
-              .graphicsLayer { alpha = labelAnimationProgress }
+              .graphicsLayer { alpha = progress }
         ) {
           Spacer(Modifier.requiredWidth(12.dp))
           Text(
@@ -151,6 +144,7 @@ private fun FloatingActionButton(
             style = MaterialTheme.typography.labelLarge,
             color = AppTheme.colorScheme.tintedForeground
           )
+          Spacer(Modifier.requiredWidth(4.dp))
         }
       }
     }

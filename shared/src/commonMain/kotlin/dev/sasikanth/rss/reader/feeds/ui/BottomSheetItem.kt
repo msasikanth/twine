@@ -16,7 +16,6 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -32,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,7 +42,6 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
-import dev.sasikanth.rss.reader.utils.inverseProgress
 
 @Composable
 internal fun BottomSheetItem(
@@ -85,24 +84,32 @@ internal fun BottomSheetItem(
   }
 }
 
-@OptIn(ExperimentalAnimationApi::class)
+/**
+ * This component receives animation progress within the threshold of 0..0.2 of the original bottom
+ * sheet transition.
+ */
 @Composable
 internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
-  val alpha =
-    if (animationProgress.inverseProgress() > 1e-6f) {
-      0f
-    } else {
-      1f
-    }
+  // Set alpha to 0 once the progress goes below this threshold
+  val threshold = 0.89f
 
-  Box(Modifier.requiredSize(64.dp).graphicsLayer { this.alpha = alpha }) {
+  val size = (64.dp * animationProgress).coerceAtLeast(56.dp)
+  val cornerRadius = (20.dp * animationProgress).coerceAtLeast(16.dp)
+  val alpha = animationProgress.takeIf { it >= threshold } ?: 0f
+
+  Box(
+    Modifier.requiredSize(size).graphicsLayer { this.alpha = alpha },
+    contentAlignment = Alignment.Center
+  ) {
     AnimatedVisibility(
       modifier = Modifier.matchParentSize(),
       visible = selected,
       enter = scaleIn() + fadeIn(),
       exit = fadeOut() + scaleOut()
     ) {
-      Box(Modifier.background(AppTheme.colorScheme.tintedForeground, RoundedCornerShape(20.dp)))
+      Box(
+        Modifier.background(AppTheme.colorScheme.tintedForeground, RoundedCornerShape(cornerRadius))
+      )
     }
   }
 }
