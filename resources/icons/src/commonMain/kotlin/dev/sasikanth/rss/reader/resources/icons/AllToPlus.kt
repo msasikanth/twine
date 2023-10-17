@@ -111,8 +111,8 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
             pivotX = 12.0f,
             pivotY = 12.0f,
           ) {
-            val transformedMove = (5.0f + (12.0f - 5.0f) * (1.0f - progress)).coerceAtLeast(5.0f)
-            val transformedLine = 12.0f + (19.0f - 12.0f) * progress
+            val transformedMove = lerp(12.0f, 5.0f, progress)
+            val transformedLine = lerp(12.0f, 19.0f, progress)
 
             path(
               name = "plus_horizontal",
