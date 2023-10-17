@@ -54,6 +54,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -320,7 +321,7 @@ private fun FeedsSheetBottomBar(
         .then(modifier)
     ) {
       Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
-      Box(Modifier.fillMaxWidth().padding(vertical = 24.dp)) {
+      Box(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 20.dp)) {
         // Placeholder view with similar height of primary action button and input field
         // from the home screen
         Box(Modifier.requiredHeight(56.dp))
@@ -341,10 +342,12 @@ private fun FeedsSheetBottomBar(
 @Composable
 private fun BoxScope.EditFeeds(onClick: () -> Unit) {
   TextButton(
-    modifier = Modifier.Companion.align(Alignment.CenterEnd).padding(end = 24.dp),
-    onClick = onClick
+    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
+    onClick = onClick,
+    contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
+    shape = MaterialTheme.shapes.large
   ) {
-    Icon(imageVector = Icons.Filled.Edit, contentDescription = LocalStrings.current.editFeeds)
+    Icon(imageVector = Icons.Outlined.Edit, contentDescription = LocalStrings.current.editFeeds)
     Spacer(Modifier.width(12.dp))
     Text(
       text = LocalStrings.current.editFeeds,
