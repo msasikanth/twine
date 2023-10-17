@@ -90,9 +90,9 @@ internal class AndroidRssParser(
     val iconUrl = FeedParser.feedIcon(domain.host ?: domain.path!!)
 
     return FeedPayload(
-      name = title!!,
+      name = title ?: link,
       icon = iconUrl,
-      description = description!!,
+      description = description.orEmpty(),
       homepageLink = link,
       link = feedUrl,
       posts = posts
@@ -166,7 +166,7 @@ internal class AndroidRssParser(
 
     return PostPayload(
       title = FeedParser.cleanText(title).orEmpty(),
-      link = FeedParser.cleanText(link).orEmpty(),
+      link = FeedParser.cleanText(link)!!,
       description = FeedParser.cleanTextCompact(description).orEmpty(),
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = dateLong,

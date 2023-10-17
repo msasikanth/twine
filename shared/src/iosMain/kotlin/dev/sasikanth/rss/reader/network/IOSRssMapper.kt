@@ -72,7 +72,7 @@ internal fun PostPayload.Companion.mapRssPost(
     .parseComplete(descriptionToParse.orEmpty())
 
   return PostPayload(
-    title = FeedParser.cleanText(title)!!,
+    title = FeedParser.cleanText(title).orEmpty(),
     link = FeedParser.cleanText(link)!!,
     description = FeedParser.cleanTextCompact(description).orEmpty(),
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
@@ -95,10 +95,10 @@ internal fun FeedPayload.Companion.mapRssFeed(
     )
 
   return FeedPayload(
-    name = FeedParser.cleanText(rssMap[TAG_TITLE])!!,
+    name = FeedParser.cleanText(rssMap[TAG_TITLE] ?: link)!!,
     homepageLink = link,
     link = feedUrl,
-    description = FeedParser.cleanText(rssMap[TAG_DESCRIPTION])!!,
+    description = FeedParser.cleanText(rssMap[TAG_DESCRIPTION]).orEmpty(),
     icon = iconUrl,
     posts = posts
   )
