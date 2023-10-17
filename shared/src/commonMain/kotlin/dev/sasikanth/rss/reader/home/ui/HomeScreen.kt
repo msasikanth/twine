@@ -21,6 +21,7 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,8 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
@@ -94,6 +97,7 @@ import kotlinx.coroutines.launch
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeScreen(
   homePresenter: HomePresenter,
@@ -115,6 +119,7 @@ internal fun HomeScreen(
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
   val listState = rememberLazyListState()
+  val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts.size })
 
   val bottomSheetSwipeTransition =
     updateTransition(
@@ -137,6 +142,10 @@ internal fun HomeScreen(
         }
         is HomeEffect.ShowError -> {
           displayErrorMessage(effect, strings, bottomSheetScaffoldState)
+        }
+        is HomeEffect.ScrollToTop -> {
+          listState.scrollToItem(0)
+          featuredPostsPagerState.scrollToPage(0)
         }
       }
     }
@@ -164,6 +173,7 @@ internal fun HomeScreen(
           paddingValues = paddingValues,
           state = state,
           listState = listState,
+          featuredPostsPagerState = featuredPostsPagerState,
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
@@ -239,10 +249,12 @@ internal fun HomeScreen(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun HomeScreenContent(
   paddingValues: PaddingValues,
   state: HomeState,
   listState: LazyListState,
+  featuredPostsPagerState: PagerState,
   onSwipeToRefresh: () -> Unit,
   onPostClicked: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
@@ -269,13 +281,13 @@ private fun HomeScreenContent(
         paddingValues = paddingValues,
         featuredPosts = featuredPosts,
         posts = posts,
-        selectedFeed = state.selectedFeed,
         featuredItemBlurEnabled = state.featuredItemBlurEnabled,
+        listState = listState,
+        featuredPostsPagerState = featuredPostsPagerState,
         onPostClicked = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
         onPostSourceClick = onPostSourceClick,
-        listState = listState,
       )
 
       PullRefreshIndicator(

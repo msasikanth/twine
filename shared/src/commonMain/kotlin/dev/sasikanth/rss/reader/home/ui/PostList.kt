@@ -30,15 +30,13 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +46,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -64,27 +61,20 @@ private val postListPadding
       else -> PaddingValues(0.dp)
     }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 internal fun PostsList(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<PostWithMetadata>,
   posts: LazyPagingItems<PostWithMetadata>,
-  selectedFeed: Feed?,
   featuredItemBlurEnabled: Boolean,
-  listState: LazyListState = rememberLazyListState(),
+  listState: LazyListState,
+  featuredPostsPagerState: PagerState,
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit
 ) {
-  val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
-
-  LaunchedEffect(selectedFeed) {
-    listState.scrollToItem(0)
-    featuredPostsPagerState.scrollToPage(0)
-  }
-
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
       paddingValues.calculateTopPadding()
