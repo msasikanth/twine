@@ -57,7 +57,7 @@ internal class AndroidRssParser(
       .optionalEnd()
       .toFormatter(Locale.US)
 
-  private val posts = mutableListOf<PostPayload>()
+  private val posts = mutableListOf<PostPayload?>()
 
   override fun parse(): FeedPayload {
     parser.nextTag()
@@ -95,11 +95,11 @@ internal class AndroidRssParser(
       description = description.orEmpty(),
       homepageLink = link,
       link = feedUrl,
-      posts = posts
+      posts = posts.filterNotNull()
     )
   }
 
-  private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload {
+  private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload? {
     parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_ITEM)
 
     var title: String? = null
@@ -163,6 +163,10 @@ internal class AndroidRssParser(
         options = KsoupHtmlOptions(decodeEntities = false)
       )
       .parseComplete(description.orEmpty())
+
+    if (title.isNullOrBlank() && description.isNullOrBlank()) {
+      return null
+    }
 
     return PostPayload(
       title = FeedParser.cleanText(title).orEmpty(),

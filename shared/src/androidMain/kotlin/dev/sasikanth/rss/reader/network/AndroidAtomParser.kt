@@ -43,7 +43,7 @@ internal class AndroidAtomParser(
 ) : Parser() {
 
   private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-  private val posts = mutableListOf<PostPayload>()
+  private val posts = mutableListOf<PostPayload?>()
 
   override fun parse(): FeedPayload {
     parser.require(XmlPullParser.START_TAG, namespace, TAG_ATOM_FEED)
@@ -84,11 +84,11 @@ internal class AndroidAtomParser(
       description = FeedParser.cleanText(description).orEmpty(),
       homepageLink = link!!,
       link = feedUrl,
-      posts = posts
+      posts = posts.filterNotNull()
     )
   }
 
-  private fun readAtomEntry(parser: XmlPullParser, hostLink: String): PostPayload {
+  private fun readAtomEntry(parser: XmlPullParser, hostLink: String): PostPayload? {
     parser.require(XmlPullParser.START_TAG, null, "entry")
 
     var title: String? = null
@@ -141,6 +141,10 @@ internal class AndroidAtomParser(
         }
       }
         ?: System.currentTimeMillis()
+
+    if (title.isNullOrBlank() && content.isNullOrBlank()) {
+      return null
+    }
 
     return PostPayload(
       title = FeedParser.cleanText(title).orEmpty(),

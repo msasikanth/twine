@@ -41,7 +41,7 @@ private val atomDateFormatter =
 internal fun PostPayload.Companion.mapAtomPost(
   atomMap: Map<String, String>,
   hostLink: String
-): PostPayload {
+): PostPayload? {
   val title = atomMap[TAG_TITLE]
   val pubDate = atomMap[TAG_PUBLISHED]
   val link = atomMap[TAG_LINK]?.trim()
@@ -58,6 +58,10 @@ internal fun PostPayload.Companion.mapAtomPost(
       options = KsoupHtmlOptions(decodeEntities = false)
     )
     .parseComplete(data.orEmpty())
+
+  if (title.isNullOrBlank() && content.isNullOrBlank()) {
+    return null
+  }
 
   return PostPayload(
     title = FeedParser.cleanText(title)!!,

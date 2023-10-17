@@ -45,7 +45,7 @@ private val abbrevTimezoneDateFormatter =
 internal fun PostPayload.Companion.mapRssPost(
   rssMap: Map<String, String>,
   hostLink: String
-): PostPayload {
+): PostPayload? {
   val title = rssMap[TAG_TITLE]
   val pubDate = rssMap[TAG_PUB_DATE]
   val link = rssMap[TAG_LINK]
@@ -70,6 +70,10 @@ internal fun PostPayload.Companion.mapRssPost(
       options = KsoupHtmlOptions(decodeEntities = false)
     )
     .parseComplete(descriptionToParse.orEmpty())
+
+  if (title.isNullOrBlank() && description.isNullOrBlank()) {
+    return null
+  }
 
   return PostPayload(
     title = FeedParser.cleanText(title).orEmpty(),

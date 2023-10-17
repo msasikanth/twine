@@ -91,7 +91,7 @@ private class IOSXmlFeedParser(
   private val onEnd: (FeedPayload) -> Unit
 ) : NSObject(), NSXMLParserDelegateProtocol {
 
-  private val posts = mutableListOf<PostPayload>()
+  private val posts = mutableListOf<PostPayload?>()
 
   private var feedType: FeedType? = null
   private var currentChannelData: MutableMap<String, String> = mutableMapOf()
@@ -178,6 +178,7 @@ private class IOSXmlFeedParser(
   }
 
   override fun parserDidEndDocument(parser: NSXMLParser) {
+    val posts = posts.filterNotNull()
     val payload =
       when (feedType) {
         RSS -> FeedPayload.mapRssFeed(feedUrl, currentChannelData, posts)
