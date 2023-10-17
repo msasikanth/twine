@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -200,8 +201,7 @@ class HomePresenter(
 
     private fun init() {
       observableSelectedFeed.selectedFeed
-        .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
-        .onEach { selectedFeed ->
+        .flatMapLatest { selectedFeed ->
           val posts =
             createPager(config = createPagingConfig(pageSize = 20)) {
                 rssRepository.posts(selectedFeedLink = selectedFeed?.link)
@@ -209,13 +209,14 @@ class HomePresenter(
               .flow
               .cachedIn(coroutineScope)
 
-          _state.update { it.copy(posts = posts) }
+          rssRepository.featuredPosts(selectedFeedLink = selectedFeed?.link).map { featuredPosts ->
+            Triple(selectedFeed, featuredPosts.toImmutableList(), posts)
+          }
         }
-        .flatMapLatest { selectedFeed ->
-          rssRepository.featuredPosts(selectedFeedLink = selectedFeed?.link)
-        }
-        .onEach { featuredPosts ->
-          _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
+        .onEach { (selectedFeed, featuredPosts, posts) ->
+          _state.update {
+            it.copy(selectedFeed = selectedFeed, posts = posts, featuredPosts = featuredPosts)
+          }
         }
         .launchIn(coroutineScope)
 
