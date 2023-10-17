@@ -15,10 +15,12 @@
  */
 package dev.sasikanth.rss.reader.di
 
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
+import platform.Foundation.NSBundle
 import platform.UIKit.UIViewController
 
 @AppScope
@@ -28,4 +30,14 @@ abstract class ApplicationComponent(
 ) : SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
+
+  @Provides
+  @AppScope
+  fun providesAppInfo(): AppInfo =
+    AppInfo(
+      versionCode =
+        (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0,
+      versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
+          ?: "",
+    )
 }

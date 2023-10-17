@@ -39,11 +39,14 @@ import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App = @Composable (openLink: (String, BrowserType) -> Unit) -> Unit
+typealias App =
+  @Composable
+  (openLink: (String, BrowserType) -> Unit, openReportIssuePage: (String) -> Unit) -> Unit
 
 @Inject
 @Composable
@@ -52,7 +55,8 @@ fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
   shareHandler: ShareHandler,
-  @Assisted openLink: (String, BrowserType) -> Unit
+  @Assisted openLink: (String, BrowserType) -> Unit,
+  @Assisted openReportIssuePage: (String) -> Unit
 ) {
   val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
 
@@ -97,7 +101,8 @@ fun App(
             is Screen.Settings ->
               SettingsScreen(
                 settingsPresenter = screen.presenter,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                openReportIssuePage = { openReportIssuePage(Constants.REPORT_ISSUE_LINK) }
               )
           }
         }

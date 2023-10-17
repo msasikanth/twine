@@ -55,11 +55,14 @@ val EnTwineStrings =
     settings = "Settings",
     moreMenuOptions = "More menu options",
     settingsHeaderBehaviour = "Behavior",
+    settingsHeaderFeedback = "Feedback & bug reports",
     settingsBrowserTypeTitle = "Use in-app browser",
     settingsBrowserTypeSubtitle = "When turned off, links will open in your default browser.",
     settingsEnableBlurTitle = "Enable blur in homepage",
     settingsEnableBlurSubtitle =
       "When disabled, displays gradients instead of blurred images. May improve performance.",
+    settingsReportIssue = "Report an issue",
+    settingsVersion = { versionName, versionCode -> "$versionName ($versionCode)" },
     feeds = "Feeds",
     editFeeds = "Edit feeds",
     comments = "Comments"

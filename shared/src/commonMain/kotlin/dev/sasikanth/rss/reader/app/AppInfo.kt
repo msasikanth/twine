@@ -13,22 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.settings
 
-import androidx.compose.runtime.Immutable
-import dev.sasikanth.rss.reader.app.AppInfo
-import dev.sasikanth.rss.reader.repository.BrowserType
+package dev.sasikanth.rss.reader.app
 
-@Immutable
-internal data class SettingsState(
-  val browserType: BrowserType,
-  val enableHomePageBlur: Boolean,
-  val appInfo: AppInfo,
-) {
-
-  companion object {
-
-    fun default(appInfo: AppInfo) =
-      SettingsState(browserType = BrowserType.Default, enableHomePageBlur = true, appInfo = appInfo)
-  }
-}
+data class AppInfo(val versionCode: Int, val versionName: String)

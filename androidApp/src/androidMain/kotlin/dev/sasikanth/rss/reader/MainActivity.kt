@@ -47,7 +47,9 @@ class MainActivity : AppCompatActivity() {
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 
-    setContent { activityComponent.app(::openLink) }
+    setContent {
+      activityComponent.app(::openLink) { reportIssueLink -> openLink(reportIssueLink, Default) }
+    }
   }
 
   private fun openLink(url: String, browserType: BrowserType) {

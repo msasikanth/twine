@@ -16,6 +16,8 @@
 package dev.sasikanth.rss.reader.di
 
 import android.content.Context
+import android.os.Build
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
@@ -27,6 +29,24 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
+
+  @Provides
+  @AppScope
+  fun providesAppInfo(context: Context): AppInfo {
+    val packageManager = context.packageManager
+    val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
+    val versionCode =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        (packageInfo.longVersionCode and 0xffffffffL).toInt()
+      } else {
+        @Suppress("DEPRECATION") packageInfo.versionCode
+      }
+
+    return AppInfo(
+      versionName = packageInfo.versionName,
+      versionCode = versionCode,
+    )
+  }
 
   companion object
 }

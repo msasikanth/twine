@@ -24,6 +24,7 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.app.App
+import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.BrowserType.*
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -46,18 +47,23 @@ fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher) =
       backIcon = null,
       modifier = Modifier.fillMaxSize()
     ) {
-      app { link, browserType ->
-        when (browserType) {
-          Default -> {
-            UIApplication.sharedApplication().openURL(NSURL(string = link))
-          }
-          InApp -> {
-            val safari = SFSafariViewController(NSURL(string = link))
-            safari.modalPresentationStyle = UIModalPresentationPageSheet
-
-            uiViewController.presentViewController(safari, animated = true, completion = null)
-          }
-        }
-      }
+      app(
+        { link, browserType -> openLink(link, browserType, uiViewController) },
+        { reportIssueLink -> openLink(reportIssueLink, Default, uiViewController) }
+      )
     }
   }
+
+private fun openLink(link: String, browserType: BrowserType, uiViewController: UIViewController) {
+  when (browserType) {
+    Default -> {
+      UIApplication.sharedApplication().openURL(NSURL(string = link))
+    }
+    InApp -> {
+      val safari = SFSafariViewController(NSURL(string = link))
+      safari.modalPresentationStyle = UIModalPresentationPageSheet
+
+      uiViewController.presentViewController(safari, animated = true, completion = null)
+    }
+  }
+}

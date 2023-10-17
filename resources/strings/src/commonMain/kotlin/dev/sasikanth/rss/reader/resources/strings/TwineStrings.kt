@@ -49,10 +49,13 @@ data class TwineStrings(
   val settings: String,
   val moreMenuOptions: String,
   val settingsHeaderBehaviour: String,
+  val settingsHeaderFeedback: String,
   val settingsBrowserTypeTitle: String,
   val settingsBrowserTypeSubtitle: String,
   val settingsEnableBlurTitle: String,
   val settingsEnableBlurSubtitle: String,
+  val settingsReportIssue: String,
+  val settingsVersion: (String, Int) -> String,
   val feeds: String,
   val editFeeds: String,
   val comments: String

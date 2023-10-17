@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -59,7 +60,11 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.canBlurImage
 
 @Composable
-internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modifier = Modifier) {
+internal fun SettingsScreen(
+  settingsPresenter: SettingsPresenter,
+  modifier: Modifier = Modifier,
+  openReportIssuePage: () -> Unit
+) {
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
 
@@ -128,6 +133,17 @@ internal fun SettingsScreen(settingsPresenter: SettingsPresenter, modifier: Modi
               )
             }
           }
+
+          item {
+            Text(
+              text = LocalStrings.current.settingsHeaderFeedback,
+              style = MaterialTheme.typography.titleMedium,
+              color = AppTheme.colorScheme.textEmphasisHigh,
+              modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+            )
+          }
+
+          item { ReportIssueItem(appInfo = state.appInfo, onClick = openReportIssuePage) }
         }
       }
     },
@@ -252,6 +268,34 @@ private fun BrowserTypeSettingItem(
 
             onBrowserTypeChanged(newBrowserType)
           },
+        )
+      }
+    }
+
+    Divider(
+      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 24.dp),
+      color = AppTheme.colorScheme.surfaceContainer
+    )
+  }
+}
+
+@Composable
+private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
+  Box(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsReportIssue,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
         )
       }
     }

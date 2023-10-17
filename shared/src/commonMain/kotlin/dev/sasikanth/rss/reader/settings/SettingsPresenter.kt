@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.settings
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
@@ -40,6 +41,7 @@ import me.tatarka.inject.annotations.Inject
 class SettingsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val settingsRepository: SettingsRepository,
+  private val appInfo: AppInfo,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
 ) : ComponentContext by componentContext {
@@ -48,6 +50,7 @@ class SettingsPresenter(
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
+        appInfo = appInfo,
         settingsRepository = settingsRepository
       )
     }
@@ -67,17 +70,18 @@ class SettingsPresenter(
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
-    private val settingsRepository: SettingsRepository
+    appInfo: AppInfo,
+    private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
-    private val _state = MutableStateFlow(SettingsState.DEFAULT)
+    private val _state = MutableStateFlow(SettingsState.default(appInfo))
     val state: StateFlow<SettingsState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = SettingsState.DEFAULT
+        initialValue = SettingsState.default(appInfo)
       )
 
     init {
