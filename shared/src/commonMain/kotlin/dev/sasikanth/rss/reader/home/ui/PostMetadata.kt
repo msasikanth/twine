@@ -101,7 +101,7 @@ internal fun PostMetadata(
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
-      color = Color.White,
+      color = AppTheme.colorScheme.textEmphasisMed,
       textAlign = TextAlign.Start
     )
 
