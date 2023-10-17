@@ -128,7 +128,7 @@ private fun DefaultFeaturedPostItem(
 
     Text(
       modifier = Modifier.padding(horizontal = 16.dp),
-      text = item.title,
+      text = item.title.ifBlank { item.description },
       style = MaterialTheme.typography.headlineSmall,
       color = AppTheme.colorScheme.textEmphasisHigh,
       minLines = 2,
@@ -136,7 +136,7 @@ private fun DefaultFeaturedPostItem(
       overflow = TextOverflow.Ellipsis
     )
 
-    if (item.description.isNotBlank()) {
+    if (item.title.isNotBlank() && item.description.isNotBlank()) {
       Spacer(modifier = Modifier.requiredHeight(8.dp))
 
       Text(

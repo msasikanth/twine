@@ -144,7 +144,7 @@ fun PostListItem(
       Text(
         modifier = Modifier.weight(1f).align(Alignment.Top),
         style = MaterialTheme.typography.titleMedium,
-        text = item.title,
+        text = item.title.ifBlank { item.description },
         color = Color.White,
         maxLines = 2
       )
