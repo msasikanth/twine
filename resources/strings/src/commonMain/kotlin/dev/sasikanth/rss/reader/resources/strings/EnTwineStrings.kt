@@ -63,6 +63,8 @@ val EnTwineStrings =
       "When disabled, displays gradients instead of blurred images. May improve performance.",
     settingsReportIssue = "Report an issue",
     settingsVersion = { versionName, versionCode -> "$versionName ($versionCode)" },
+    settingsAboutTitle = "About Twine",
+    settingsAboutSubtitle = "Get to know the authors",
     feeds = "Feeds",
     editFeeds = "Edit feeds",
     comments = "Comments"

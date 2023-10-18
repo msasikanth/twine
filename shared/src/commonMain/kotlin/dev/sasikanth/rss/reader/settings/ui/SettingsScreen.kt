@@ -26,8 +26,10 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,10 +50,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -154,6 +160,15 @@ internal fun SettingsScreen(
                 coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
               }
             )
+          }
+
+          // TODO: Remove feature flag after about page is implemented
+          if (false) {
+            item {
+              AboutItem {
+                // TODO: Open about page
+              }
+            }
           }
         }
       }
@@ -312,6 +327,77 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
     }
 
     Divider()
+  }
+}
+
+@Composable
+private fun AboutItem(onClick: () -> Unit) {
+  Column() {
+    Box(modifier = Modifier.clickable(onClick = onClick)) {
+      Row(
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            LocalStrings.current.settingsAboutTitle,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppTheme.colorScheme.textEmphasisHigh
+          )
+          Text(
+            LocalStrings.current.settingsAboutSubtitle,
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisMed
+          )
+        }
+
+        AboutProfileImages()
+      }
+    }
+
+    Divider()
+  }
+}
+
+@Composable
+private fun AboutProfileImages() {
+  Box(contentAlignment = Alignment.Center) {
+    val backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+
+    AsyncImage(
+      url = Constants.ABOUT_ED_PIC,
+      contentDescription = null,
+      contentScale = ContentScale.Crop,
+      modifier =
+        Modifier.padding(start = 72.dp)
+          .requiredSize(62.dp)
+          .drawWithCache {
+            onDrawBehind {
+              drawCircle(
+                color = backgroundColor,
+              )
+            }
+          }
+          .padding(8.dp)
+          .clip(CircleShape)
+    )
+
+    AsyncImage(
+      url = Constants.ABOUT_SASI_PIC,
+      contentDescription = null,
+      contentScale = ContentScale.Crop,
+      modifier =
+        Modifier.requiredSize(62.dp)
+          .drawWithCache {
+            onDrawBehind {
+              drawCircle(
+                color = backgroundColor,
+              )
+            }
+          }
+          .padding(8.dp)
+          .clip(CircleShape)
+    )
   }
 }
 
