@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -219,8 +220,9 @@ class HomePresenter(
           _state.update {
             it.copy(selectedFeed = selectedFeed, posts = posts, featuredPosts = featuredPosts)
           }
-          effects.tryEmit(HomeEffect.ScrollToTop)
         }
+        .distinctUntilChangedBy { (selectedFeed, _, _) -> selectedFeed }
+        .onEach { effects.tryEmit(HomeEffect.ScrollToTop) }
         .launchIn(coroutineScope)
 
       settingsRepository.enableFeaturedItemBlur
