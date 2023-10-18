@@ -45,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,21 +53,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.canBlurImage
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun SettingsScreen(
   settingsPresenter: SettingsPresenter,
   modifier: Modifier = Modifier,
-  openReportIssuePage: () -> Unit
 ) {
+  val coroutineScope = rememberCoroutineScope()
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
+  val linkHandler = LocalLinkHandler.current
 
   Scaffold(
     modifier = modifier,
@@ -143,7 +148,14 @@ internal fun SettingsScreen(
             )
           }
 
-          item { ReportIssueItem(appInfo = state.appInfo, onClick = openReportIssuePage) }
+          item {
+            ReportIssueItem(
+              appInfo = state.appInfo,
+              onClick = {
+                coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
+              }
+            )
+          }
         }
       }
     },

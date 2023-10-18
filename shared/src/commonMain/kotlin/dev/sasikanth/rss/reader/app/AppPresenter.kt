@@ -32,20 +32,12 @@ import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
@@ -77,7 +69,6 @@ private typealias SettingsPresenterFactory =
 class AppPresenter(
   componentContext: ComponentContext,
   dispatchersProvider: DispatchersProvider,
-  settingsRepository: SettingsRepository,
   private val homePresenter: HomePresenterFactory,
   private val searchPresenter: SearchPresentFactory,
   private val bookmarksPresenter: BookmarkPresenterFactory,
@@ -90,7 +81,6 @@ class AppPresenter(
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
-        settingsRepository = settingsRepository,
         lastUpdatedAt = lastUpdatedAt,
         rssRepository = rssRepository
       )
@@ -98,7 +88,6 @@ class AppPresenter(
 
   private val navigation = StackNavigation<Config>()
 
-  internal val state = presenterInstance.state
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
       source = navigation,
@@ -141,26 +130,11 @@ class AppPresenter(
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
-    settingsRepository: SettingsRepository,
     private val lastUpdatedAt: LastUpdatedAt,
     private val rssRepository: RssRepository
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
-
-    private val _state = MutableStateFlow(AppState.DEFAULT)
-    val state: StateFlow<AppState> =
-      _state.stateIn(
-        scope = coroutineScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = AppState.DEFAULT
-      )
-
-    init {
-      settingsRepository.browserType
-        .onEach { browserType -> _state.update { it.copy(browserType = browserType) } }
-        .launchIn(coroutineScope)
-    }
 
     fun refreshFeedsIfExpired() {
       coroutineScope.launch {

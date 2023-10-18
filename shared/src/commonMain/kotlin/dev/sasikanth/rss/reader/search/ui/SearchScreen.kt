@@ -54,6 +54,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -82,18 +84,17 @@ import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import kotlinx.coroutines.launch
 
 @Composable
-internal fun SearchScreen(
-  searchPresenter: SearchPresenter,
-  openLink: (String) -> Unit,
-  modifier: Modifier = Modifier
-) {
+internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier = Modifier) {
   val state by searchPresenter.state.collectAsState()
   val listState = rememberLazyListState()
+  val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-  val layoutDirection = LocalLayoutDirection.current
   val searchResults = state.searchResults.collectAsLazyPagingItems()
+  val layoutDirection = LocalLayoutDirection.current
+  val linkHandler = LocalLinkHandler.current
 
   Scaffold(
     modifier = modifier,
@@ -125,11 +126,13 @@ internal fun SearchScreen(
               PostListItem(
                 item = post,
                 enablePostSource = false,
-                onClick = { openLink(post.link) },
+                onClick = { coroutineScope.launch { linkHandler.openLink(post.link) } },
                 onPostBookmarkClick = {
                   searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
                 },
-                onPostCommentsClick = { openLink(post.commentsLink!!) },
+                onPostCommentsClick = {
+                  post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
+                },
                 onPostSourceClick = {
                   // no-op
                 },

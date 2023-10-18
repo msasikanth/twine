@@ -17,21 +17,15 @@ package dev.sasikanth.rss.reader
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.interop.LocalUIViewController
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.app.App
-import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.BrowserType.*
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-import platform.Foundation.NSURL
-import platform.SafariServices.SFSafariViewController
-import platform.UIKit.UIApplication
-import platform.UIKit.UIModalPresentationPageSheet
 import platform.UIKit.UIViewController
 
 typealias HomeViewController = (backDispatcher: BackDispatcher) -> UIViewController
@@ -40,30 +34,11 @@ typealias HomeViewController = (backDispatcher: BackDispatcher) -> UIViewControl
 @Inject
 fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher) =
   ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
-    val uiViewController = LocalUIViewController.current
-
     PredictiveBackGestureOverlay(
       backDispatcher = backDispatcher,
       backIcon = null,
       modifier = Modifier.fillMaxSize()
     ) {
-      app(
-        { link, browserType -> openLink(link, browserType, uiViewController) },
-        { reportIssueLink -> openLink(reportIssueLink, Default, uiViewController) }
-      )
+      app()
     }
   }
-
-private fun openLink(link: String, browserType: BrowserType, uiViewController: UIViewController) {
-  when (browserType) {
-    Default -> {
-      UIApplication.sharedApplication().openURL(NSURL(string = link))
-    }
-    InApp -> {
-      val safari = SFSafariViewController(NSURL(string = link))
-      safari.modalPresentationStyle = UIModalPresentationPageSheet
-
-      uiViewController.presentViewController(safari, animated = true, completion = null)
-    }
-  }
-}

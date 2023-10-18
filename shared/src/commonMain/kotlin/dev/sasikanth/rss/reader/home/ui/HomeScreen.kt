@@ -88,6 +88,7 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -99,11 +100,7 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun HomeScreen(
-  homePresenter: HomePresenter,
-  openLink: (String) -> Unit,
-  modifier: Modifier = Modifier
-) {
+internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modifier) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
 
@@ -130,12 +127,13 @@ internal fun HomeScreen(
     bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverseProgress() }
 
   val strings = LocalStrings.current
+  val linkHandler = LocalLinkHandler.current
 
   LaunchedEffect(Unit) {
     homePresenter.effects.collect { effect ->
       when (effect) {
         is HomeEffect.OpenPost -> {
-          openLink(effect.post.link)
+          linkHandler.openLink(effect.post.link)
         }
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
@@ -177,7 +175,9 @@ internal fun HomeScreen(
           onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
           onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
           onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
-          onPostCommentsClick = { commentsLink -> openLink(commentsLink) },
+          onPostCommentsClick = { commentsLink ->
+            coroutineScope.launch { linkHandler.openLink(commentsLink) }
+          },
           onPostSourceClick = { feedLink ->
             homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
           },

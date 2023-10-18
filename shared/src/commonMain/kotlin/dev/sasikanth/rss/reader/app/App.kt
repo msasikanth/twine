@@ -20,7 +20,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
@@ -33,20 +32,17 @@ import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.components.image.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
-import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
-import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App =
-  @Composable
-  (openLink: (String, BrowserType) -> Unit, openReportIssuePage: (String) -> Unit) -> Unit
+typealias App = @Composable () -> Unit
 
 @Inject
 @Composable
@@ -55,8 +51,7 @@ fun App(
   appPresenter: AppPresenter,
   imageLoader: ImageLoader,
   shareHandler: ShareHandler,
-  @Assisted openLink: (String, BrowserType) -> Unit,
-  @Assisted openReportIssuePage: (String) -> Unit
+  linkHandler: LinkHandler,
 ) {
   val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
 
@@ -64,12 +59,11 @@ fun App(
     LocalImageLoader provides imageLoader,
     LocalWindowSizeClass provides calculateWindowSizeClass(),
     LocalDynamicColorState provides dynamicColorState,
-    LocalShareHandler provides shareHandler
+    LocalShareHandler provides shareHandler,
+    LocalLinkHandler provides linkHandler
   ) {
     DynamicContentTheme(dynamicColorState) {
       ProvideStrings {
-        val state by appPresenter.state.collectAsState()
-
         Children(
           modifier = Modifier.fillMaxSize(),
           stack = appPresenter.screenStack,
@@ -79,31 +73,20 @@ fun App(
               onBack = appPresenter::onBackClicked
             )
         ) { child ->
+          val fillMaxSizeModifier = Modifier.fillMaxSize()
           when (val screen = child.instance) {
-            is Screen.Home ->
-              HomeScreen(
-                homePresenter = screen.presenter,
-                openLink = { openLink(it, state.browserType) },
-                modifier = Modifier.fillMaxSize()
-              )
-            is Screen.Search ->
-              SearchScreen(
-                searchPresenter = screen.presenter,
-                openLink = { openLink(it, state.browserType) },
-                modifier = Modifier.fillMaxSize()
-              )
-            is Screen.Bookmarks ->
-              BookmarksScreen(
-                bookmarksPresenter = screen.presenter,
-                openLink = { openLink(it, state.browserType) },
-                modifier = Modifier.fillMaxSize()
-              )
-            is Screen.Settings ->
-              SettingsScreen(
-                settingsPresenter = screen.presenter,
-                modifier = Modifier.fillMaxSize(),
-                openReportIssuePage = { openReportIssuePage(Constants.REPORT_ISSUE_LINK) }
-              )
+            is Screen.Home -> {
+              HomeScreen(homePresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Search -> {
+              SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Bookmarks -> {
+              BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Settings -> {
+              SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
           }
         }
       }

@@ -37,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,20 +48,23 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun BookmarksScreen(
   bookmarksPresenter: BookmarksPresenter,
-  openLink: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
   val state by bookmarksPresenter.state.collectAsState()
   val bookmarks = state.bookmarks.collectAsLazyPagingItems()
   val listState = rememberLazyListState()
+  val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
   val layoutDirection = LocalLayoutDirection.current
+  val linkHandler = LocalLinkHandler.current
 
   Scaffold(
     modifier = modifier,
@@ -104,11 +108,13 @@ internal fun BookmarksScreen(
               PostListItem(
                 item = post,
                 enablePostSource = false,
-                onClick = { openLink(post.link) },
+                onClick = { coroutineScope.launch { linkHandler.openLink(post.link) } },
                 onPostBookmarkClick = {
                   bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
                 },
-                onPostCommentsClick = { openLink(post.commentsLink!!) },
+                onPostCommentsClick = {
+                  post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
+                },
                 onPostSourceClick = {
                   // no-op
                 }
