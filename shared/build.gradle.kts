@@ -125,6 +125,7 @@ kotlin {
         api(libs.androidx.activity.compose)
         api(libs.androidx.appcompat)
         api(libs.androidx.core)
+        api(libs.androidx.browser)
         implementation(libs.ktor.client.okhttp)
         implementation(libs.sqldelight.driver.android)
         implementation(libs.coil.compose)
