@@ -31,7 +31,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -93,7 +92,7 @@ internal fun SettingsScreen(
             ),
         )
 
-        Divider(
+        androidx.compose.material3.Divider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -170,52 +169,51 @@ private fun FeaturedItemBlurSettingItem(
   onValueChanged: (Boolean) -> Unit
 ) {
   var checked by remember(featuredItemBlurEnabled) { mutableStateOf(featuredItemBlurEnabled) }
-  Box(
-    modifier =
-      Modifier.clickable {
-        checked = !checked
-        onValueChanged(!featuredItemBlurEnabled)
-      }
-  ) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+  Column {
+    Box(
+      modifier =
+        Modifier.clickable {
+          checked = !checked
+          onValueChanged(!featuredItemBlurEnabled)
+        }
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          LocalStrings.current.settingsEnableBlurTitle,
-          style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
-        )
-        Text(
-          LocalStrings.current.settingsEnableBlurSubtitle,
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
-        )
-      }
-
-      Spacer(Modifier.width(16.dp))
-
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
+      Row(
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            LocalStrings.current.settingsEnableBlurTitle,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppTheme.colorScheme.textEmphasisHigh
+          )
+          Text(
+            LocalStrings.current.settingsEnableBlurSubtitle,
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisMed
+          )
+        }
+
+        Spacer(Modifier.width(16.dp))
+
+        MaterialTheme(
+          colorScheme =
+            darkColorScheme(
+              primary = AppTheme.colorScheme.tintedSurface,
+              onPrimary = AppTheme.colorScheme.tintedForeground,
+              outline = AppTheme.colorScheme.outline,
+              surfaceVariant = AppTheme.colorScheme.surfaceContainer
+            )
+        ) {
+          Switch(
+            checked = checked,
+            onCheckedChange = { checked -> onValueChanged(checked) },
+          )
+        }
       }
     }
 
-    Divider(
-      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 24.dp),
-      color = AppTheme.colorScheme.surfaceContainer
-    )
+    Divider()
   }
 }
 
@@ -226,95 +224,101 @@ private fun BrowserTypeSettingItem(
 ) {
   var checked by remember(browserType) { mutableStateOf(browserType == BrowserType.InApp) }
 
-  Box(
-    modifier =
-      Modifier.clickable {
-        checked = !checked
-        val newBrowserType =
-          if (checked) {
-            BrowserType.InApp
-          } else {
-            BrowserType.Default
-          }
+  Column {
+    Box(
+      modifier =
+        Modifier.clickable {
+          checked = !checked
+          val newBrowserType =
+            if (checked) {
+              BrowserType.InApp
+            } else {
+              BrowserType.Default
+            }
 
-        onBrowserTypeChanged(newBrowserType)
-      }
-  ) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+          onBrowserTypeChanged(newBrowserType)
+        }
     ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          LocalStrings.current.settingsBrowserTypeTitle,
-          style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
-        )
-        Text(
-          LocalStrings.current.settingsBrowserTypeSubtitle,
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
-        )
-      }
-
-      Spacer(Modifier.width(16.dp))
-
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
+      Row(
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked ->
-            val newBrowserType =
-              if (checked) {
-                BrowserType.InApp
-              } else {
-                BrowserType.Default
-              }
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            LocalStrings.current.settingsBrowserTypeTitle,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppTheme.colorScheme.textEmphasisHigh
+          )
+          Text(
+            LocalStrings.current.settingsBrowserTypeSubtitle,
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisMed
+          )
+        }
 
-            onBrowserTypeChanged(newBrowserType)
-          },
-        )
+        Spacer(Modifier.width(16.dp))
+
+        MaterialTheme(
+          colorScheme =
+            darkColorScheme(
+              primary = AppTheme.colorScheme.tintedSurface,
+              onPrimary = AppTheme.colorScheme.tintedForeground,
+              outline = AppTheme.colorScheme.outline,
+              surfaceVariant = AppTheme.colorScheme.surfaceContainer
+            )
+        ) {
+          Switch(
+            checked = checked,
+            onCheckedChange = { checked ->
+              val newBrowserType =
+                if (checked) {
+                  BrowserType.InApp
+                } else {
+                  BrowserType.Default
+                }
+
+              onBrowserTypeChanged(newBrowserType)
+            },
+          )
+        }
       }
     }
 
-    Divider(
-      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 24.dp),
-      color = AppTheme.colorScheme.surfaceContainer
-    )
+    Divider()
   }
 }
 
 @Composable
 private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
-  Box(modifier = Modifier.clickable(onClick = onClick)) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          LocalStrings.current.settingsReportIssue,
-          style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
-        )
-        Text(
-          LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
-        )
+  Column {
+    Box(modifier = Modifier.clickable(onClick = onClick)) {
+      Row(
+        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            LocalStrings.current.settingsReportIssue,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppTheme.colorScheme.textEmphasisHigh
+          )
+          Text(
+            LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisMed
+          )
+        }
       }
     }
 
-    Divider(
-      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(horizontal = 24.dp),
-      color = AppTheme.colorScheme.surfaceContainer
-    )
+    Divider()
   }
+}
+
+@Composable
+private fun Divider() {
+  androidx.compose.material3.Divider(
+    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp),
+    color = AppTheme.colorScheme.surfaceContainer
+  )
 }
