@@ -43,7 +43,8 @@ class SettingsPresenter(
   private val settingsRepository: SettingsRepository,
   private val appInfo: AppInfo,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val goBack: () -> Unit
+  @Assisted private val goBack: () -> Unit,
+  @Assisted private val openAbout: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -60,6 +61,7 @@ class SettingsPresenter(
   fun dispatch(event: SettingsEvent) {
     when (event) {
       SettingsEvent.BackClicked -> goBack()
+      SettingsEvent.AboutClicked -> openAbout()
       else -> {
         // no-op
       }
@@ -105,6 +107,9 @@ class SettingsPresenter(
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
         is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
+        SettingsEvent.AboutClicked -> {
+          // no-op
+        }
       }
     }
 

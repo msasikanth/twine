@@ -27,6 +27,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnStart
 import com.arkivanov.essenty.parcelable.Parcelable
 import com.arkivanov.essenty.parcelable.Parcelize
+import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
@@ -62,7 +63,14 @@ private typealias SettingsPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openAbout: () -> Unit,
   ) -> SettingsPresenter
+
+private typealias AboutPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> AboutPresenter
 
 @Inject
 @ActivityScope
@@ -73,6 +81,7 @@ class AppPresenter(
   private val searchPresenter: SearchPresentFactory,
   private val bookmarksPresenter: BookmarkPresenterFactory,
   private val settingsPresenter: SettingsPresenterFactory,
+  private val aboutPresenter: AboutPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository
 ) : ComponentContext by componentContext {
@@ -124,7 +133,17 @@ class AppPresenter(
         Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
       }
       Config.Settings -> {
-        Screen.Settings(presenter = settingsPresenter(componentContext) { navigation.pop() })
+        Screen.Settings(
+          presenter =
+            settingsPresenter(
+              componentContext,
+              { navigation.pop() },
+              { navigation.push(Config.About) }
+            )
+        )
+      }
+      Config.About -> {
+        Screen.About(presenter = aboutPresenter(componentContext) { navigation.pop() })
       }
     }
 
@@ -158,5 +177,7 @@ class AppPresenter(
     @Parcelize object Bookmarks : Config
 
     @Parcelize object Settings : Config
+
+    @Parcelize object About : Config
   }
 }

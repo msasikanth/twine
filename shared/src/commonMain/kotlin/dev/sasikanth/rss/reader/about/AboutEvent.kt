@@ -13,17 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.settings
 
-import dev.sasikanth.rss.reader.repository.BrowserType
+package dev.sasikanth.rss.reader.about
 
-sealed interface SettingsEvent {
-
-  object BackClicked : SettingsEvent
-
-  data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
-
-  data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
-
-  object AboutClicked : SettingsEvent
+sealed interface AboutEvent {
+  object BackClicked : AboutEvent
 }

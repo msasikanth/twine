@@ -162,14 +162,7 @@ internal fun SettingsScreen(
             )
           }
 
-          // TODO: Remove feature flag after about page is implemented
-          if (false) {
-            item {
-              AboutItem {
-                // TODO: Open about page
-              }
-            }
-          }
+          item { AboutItem { settingsPresenter.dispatch(SettingsEvent.AboutClicked) } }
         }
       }
     },

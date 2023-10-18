@@ -13,17 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.settings
 
-import dev.sasikanth.rss.reader.repository.BrowserType
+package dev.sasikanth.rss.reader.about
 
-sealed interface SettingsEvent {
+import androidx.compose.ui.graphics.vector.ImageVector
 
-  object BackClicked : SettingsEvent
+internal data class Person(
+  val name: String,
+  val role: String,
+  val profilePicture: String,
+  val socials: List<Social>
+)
 
-  data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
-
-  data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
-
-  object AboutClicked : SettingsEvent
-}
+internal data class Social(val service: String, val link: String, val icon: ImageVector)

@@ -67,5 +67,12 @@ val EnTwineStrings =
     settingsAboutSubtitle = "Get to know the authors",
     feeds = "Feeds",
     editFeeds = "Edit feeds",
-    comments = "Comments"
+    comments = "Comments",
+    about = "About",
+    aboutRoleDeveloper = "Developer",
+    aboutRoleDesigner = "Designer",
+    aboutSocialTwitter = "Twitter",
+    aboutSocialThreads = "Threads",
+    aboutSocialGitHub = "GitHub",
+    aboutSocialWebsite = "Website",
   )

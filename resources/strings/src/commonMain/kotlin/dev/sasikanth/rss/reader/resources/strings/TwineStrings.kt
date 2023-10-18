@@ -60,7 +60,18 @@ data class TwineStrings(
   val settingsAboutSubtitle: String,
   val feeds: String,
   val editFeeds: String,
-  val comments: String
+  val comments: String,
+  val about: String,
+  val aboutRoleDeveloper: String,
+  val aboutRoleDesigner: String,
+  // don't translate
+  val aboutSocialTwitter: String,
+  // don't translate
+  val aboutSocialThreads: String,
+  // don't translate
+  val aboutSocialGitHub: String,
+  // don't translate
+  val aboutSocialWebsite: String,
 )
 
 object Locales {

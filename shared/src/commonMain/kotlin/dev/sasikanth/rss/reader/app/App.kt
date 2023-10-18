@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
 import com.arkivanov.essenty.backhandler.BackHandler
+import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
@@ -86,6 +87,9 @@ fun App(
             }
             is Screen.Settings -> {
               SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.About -> {
+              AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
             }
           }
         }

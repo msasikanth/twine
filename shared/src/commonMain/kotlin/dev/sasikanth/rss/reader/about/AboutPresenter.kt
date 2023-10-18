@@ -13,17 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.settings
 
-import dev.sasikanth.rss.reader.repository.BrowserType
+package dev.sasikanth.rss.reader.about
 
-sealed interface SettingsEvent {
+import com.arkivanov.decompose.ComponentContext
+import me.tatarka.inject.annotations.Assisted
+import me.tatarka.inject.annotations.Inject
 
-  object BackClicked : SettingsEvent
+@Inject
+class AboutPresenter(
+  @Assisted componentContext: ComponentContext,
+  @Assisted private val goBack: () -> Unit
+) : ComponentContext by componentContext {
 
-  data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
-
-  data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
-
-  object AboutClicked : SettingsEvent
+  fun dispatch(event: AboutEvent) {
+    when (event) {
+      AboutEvent.BackClicked -> goBack()
+    }
+  }
 }

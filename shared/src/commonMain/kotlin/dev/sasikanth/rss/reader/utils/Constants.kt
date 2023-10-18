@@ -19,7 +19,18 @@ internal object Constants {
   const val DATA_STORE_FILE_NAME = "twine.preferences_pb"
   const val EPSILON = 1e-6f
   const val REPORT_ISSUE_LINK = "https://github.com/msasikanth/twine/issues"
+
+  const val ABOUT_SASI_NAME = "Sasikanth Miriyampalli"
+  const val ABOUT_ED_NAME = "Eduardo Pratti"
+
   const val ABOUT_SASI_PIC =
     "https://www.gravatar.com/avatar/b03fa943d54ac5377813c44bfb8954d2?s=250"
   const val ABOUT_ED_PIC = "https://www.gravatar.com/avatar/b9fc51480a2bdf036e2e5f6e5a52bf19?s=250"
+
+  const val ABOUT_SASI_THREADS = "https://www.threads.net/@its_sasikanth"
+  const val ABOUT_SASI_TWITTER = "https://twitter.com/its_sasikanth"
+  const val ABOUT_SASI_GITHUB = "https://github.com/msasikanth/"
+  const val ABOUT_SASI_WEBSITE = "https://sasikanth.dev"
+  const val ABOUT_ED_THREADS = "https://www.threads.net/@edpratti"
+  const val ABOUT_ED_TWITTER = "https://twitter.com/edpratti"
 }
