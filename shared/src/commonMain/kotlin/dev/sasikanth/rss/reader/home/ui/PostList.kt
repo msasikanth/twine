@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -146,7 +147,8 @@ fun PostListItem(
         style = MaterialTheme.typography.titleMedium,
         text = item.title.ifBlank { item.description },
         color = Color.White,
-        maxLines = 2
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis
       )
 
       item.imageUrl?.let { url ->
