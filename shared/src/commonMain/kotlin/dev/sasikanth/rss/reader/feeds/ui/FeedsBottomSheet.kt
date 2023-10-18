@@ -226,7 +226,7 @@ private fun BottomSheetExpandedContent(
     val keyboardState by keyboardVisibilityAsState()
 
     LaunchedEffect(keyboardState, isFetchingFeed) {
-      if (keyboardState == KeyboardState.Closed && !isFetchingFeed) {
+      if (keyboardState == KeyboardState.Closed && !isFetchingFeed && feedsSheetMode == LinkEntry) {
         focusManager.clearFocus()
         exitFeedsEdit()
       }
