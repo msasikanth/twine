@@ -95,6 +95,7 @@ internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
   bottomSheetSwipeTransition: Transition<Float>,
   feedsSheetMode: FeedsSheetMode,
+  isFetchingFeed: Boolean,
   closeSheet: () -> Unit,
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit
@@ -147,6 +148,7 @@ internal fun FeedsBottomSheet(
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
+        isFetchingFeed = isFetchingFeed,
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
@@ -170,6 +172,7 @@ private fun BottomSheetExpandedContent(
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
+  isFetchingFeed: Boolean,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
@@ -222,8 +225,8 @@ private fun BottomSheetExpandedContent(
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val keyboardState by keyboardVisibilityAsState()
 
-    LaunchedEffect(keyboardState) {
-      if (keyboardState == KeyboardState.Closed) {
+    LaunchedEffect(keyboardState, isFetchingFeed) {
+      if (keyboardState == KeyboardState.Closed && !isFetchingFeed) {
         focusManager.clearFocus()
         exitFeedsEdit()
       }
