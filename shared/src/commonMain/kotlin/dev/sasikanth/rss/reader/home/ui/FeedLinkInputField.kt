@@ -100,7 +100,7 @@ internal fun FeedLinkInputField(
         errorIndicatorColor = Color.Transparent,
       ),
     leadingIcon = {
-      IconButton(onClick = onCancelFeedEntryClicked) {
+      IconButton(onClick = onCancelFeedEntryClicked, enabled = !isFetchingFeed) {
         Icon(
           imageVector = Icons.Rounded.ArrowBack,
           contentDescription = null,
