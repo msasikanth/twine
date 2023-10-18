@@ -16,15 +16,14 @@
 
 package dev.sasikanth.rss.reader.share
 
-import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import androidx.activity.ComponentActivity
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@AppScope
-class AndroidShareHandler(private val context: Context) : ShareHandler {
+@ActivityScope
+class AndroidShareHandler(private val activity: ComponentActivity) : ShareHandler {
 
   override fun share(content: String) {
     val sendIntent =
@@ -33,8 +32,7 @@ class AndroidShareHandler(private val context: Context) : ShareHandler {
         putExtra(Intent.EXTRA_TEXT, content)
         type = "text/plain"
       }
-    val shareIntent =
-      Intent.createChooser(sendIntent, null).apply { addFlags(FLAG_ACTIVITY_NEW_TASK) }
-    context.startActivity(shareIntent)
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    activity.startActivity(shareIntent)
   }
 }

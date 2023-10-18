@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.share
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Inject
 import platform.CoreGraphics.CGRectGetMaxY
@@ -27,7 +27,7 @@ import platform.UIKit.UIViewController
 import platform.UIKit.popoverPresentationController
 
 @Inject
-@AppScope
+@ActivityScope
 class IOSShareHandler(private val viewControllerProvider: () -> UIViewController) : ShareHandler {
 
   @OptIn(ExperimentalForeignApi::class)
