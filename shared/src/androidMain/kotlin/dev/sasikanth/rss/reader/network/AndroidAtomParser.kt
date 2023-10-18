@@ -79,7 +79,7 @@ internal class AndroidAtomParser(
     val iconUrl = FeedParser.feedIcon(domain)
 
     return FeedPayload(
-      name = title!!,
+      name = FeedParser.cleanText(title ?: link)!!,
       icon = iconUrl,
       description = FeedParser.cleanText(description).orEmpty(),
       homepageLink = link!!,
