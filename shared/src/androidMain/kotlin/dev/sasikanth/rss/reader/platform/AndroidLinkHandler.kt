@@ -58,7 +58,8 @@ class AndroidLinkHandler(
   }
 
   private fun openCustomTab(url: String) {
-    val intent = CustomTabsIntent.Builder().build()
+    val intent =
+      CustomTabsIntent.Builder().build().apply { intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
     intent.launchUrl(context, url.toUri())
   }
 }
