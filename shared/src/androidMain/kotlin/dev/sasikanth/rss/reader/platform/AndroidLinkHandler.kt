@@ -16,21 +16,21 @@
 
 package dev.sasikanth.rss.reader.platform
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@AppScope
+@ActivityScope
 class AndroidLinkHandler(
-  private val context: Context,
+  private val activity: ComponentActivity,
   private val settingsRepository: SettingsRepository
 ) : LinkHandler {
 
@@ -47,19 +47,17 @@ class AndroidLinkHandler(
   }
 
   private fun openDefaultBrowserIfExists(link: String) {
-    val packageManager = context.packageManager
-    val intent =
-      Intent(Intent.ACTION_VIEW, Uri.parse(link)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+    val packageManager = activity.packageManager
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
     if (intent.resolveActivity(packageManager) != null) {
-      context.startActivity(intent)
+      activity.startActivity(intent)
     } else {
       openCustomTab(link)
     }
   }
 
   private fun openCustomTab(url: String) {
-    val intent =
-      CustomTabsIntent.Builder().build().apply { intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
-    intent.launchUrl(context, url.toUri())
+    val intent = CustomTabsIntent.Builder().build()
+    intent.launchUrl(activity, url.toUri())
   }
 }

@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.platform
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
@@ -28,7 +28,7 @@ import platform.UIKit.UIModalPresentationPageSheet
 import platform.UIKit.UIViewController
 
 @Inject
-@AppScope
+@ActivityScope
 class IOSLinkHandler(
   private val uiViewControllerProvider: () -> UIViewController,
   private val settingsRepository: SettingsRepository,

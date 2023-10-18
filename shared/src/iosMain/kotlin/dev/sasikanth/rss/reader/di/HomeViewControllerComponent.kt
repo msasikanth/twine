@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 import com.arkivanov.decompose.ComponentContext
 import dev.sasikanth.rss.reader.HomeViewController
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.platform.PlatformComponent
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -26,7 +27,7 @@ import me.tatarka.inject.annotations.Provides
 abstract class HomeViewControllerComponent(
   @get:Provides val componentContext: ComponentContext,
   @Component val applicationComponent: ApplicationComponent
-) {
+) : PlatformComponent {
 
   abstract val homeViewControllerFactory: HomeViewController
 }

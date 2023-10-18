@@ -27,6 +27,7 @@ import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.app.App
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.platform.PlatformComponent
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -53,7 +54,7 @@ abstract class ActivityComponent(
   @get:Provides val activity: ComponentActivity,
   @get:Provides val componentContext: ComponentContext = activity.defaultComponentContext(),
   @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity)
-) {
+) : PlatformComponent {
 
   abstract val app: App
 }

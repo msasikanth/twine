@@ -20,7 +20,6 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.logging.LoggingComponent
 import dev.sasikanth.rss.reader.network.NetworkComponent
-import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.sentry.SentryComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
@@ -34,8 +33,7 @@ abstract class SharedApplicationComponent :
   SentryComponent,
   NetworkComponent,
   LoggingComponent,
-  ShareComponent,
-  PlatformComponent {
+  ShareComponent {
 
   abstract val imageLoader: ImageLoader
 
