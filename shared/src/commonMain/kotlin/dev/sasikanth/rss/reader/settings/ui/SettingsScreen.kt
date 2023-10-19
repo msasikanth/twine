@@ -33,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider as MaterialDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -99,7 +100,7 @@ internal fun SettingsScreen(
             ),
         )
 
-        androidx.compose.material3.Divider(
+        MaterialDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -216,7 +217,7 @@ private fun FeaturedItemBlurSettingItem(
       }
     }
 
-    Divider()
+    InsetDivider()
   }
 }
 
@@ -287,7 +288,7 @@ private fun BrowserTypeSettingItem(
       }
     }
 
-    Divider()
+    InsetDivider()
   }
 }
 
@@ -314,7 +315,7 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
       }
     }
 
-    Divider()
+    InsetDivider()
   }
 }
 
@@ -343,7 +344,7 @@ private fun AboutItem(onClick: () -> Unit) {
       }
     }
 
-    Divider()
+    InsetDivider()
   }
 }
 
@@ -390,8 +391,8 @@ private fun AboutProfileImages() {
 }
 
 @Composable
-private fun Divider() {
-  androidx.compose.material3.Divider(
+private fun InsetDivider() {
+  MaterialDivider(
     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp),
     color = AppTheme.colorScheme.surfaceContainer
   )
