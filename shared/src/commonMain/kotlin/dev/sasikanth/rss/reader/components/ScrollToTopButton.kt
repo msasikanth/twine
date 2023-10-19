@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ElevationTokens
 import kotlinx.coroutines.launch
 
 @Composable
@@ -54,7 +55,13 @@ internal fun BoxScope.ScrollToTopButton(
         ),
       shape = MaterialTheme.shapes.medium,
       contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-      onClick = { coroutineScope.launch { onClick() } }
+      onClick = { coroutineScope.launch { onClick() } },
+      elevation =
+        ButtonDefaults.filledTonalButtonElevation(
+          defaultElevation = ElevationTokens.Level3,
+          hoveredElevation = ElevationTokens.Level5,
+          pressedElevation = ElevationTokens.Level5,
+        )
     ) {
       Text(
         text = LocalStrings.current.scrollToTop,
