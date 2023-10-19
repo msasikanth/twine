@@ -50,6 +50,12 @@ val EnTwineStrings =
     searchSortNewestFirst = "Newest first",
     searchSortOldest = "Oldest",
     searchSortOldestFirst = "Oldest first",
+    searchResultsCount = { count ->
+      when (count) {
+        1 -> "$count result"
+        else -> "$count results"
+      }
+    },
     bookmark = "Bookmark",
     bookmarks = "Bookmarks",
     settings = "Settings",

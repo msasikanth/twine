@@ -72,6 +72,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
+import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Sort
@@ -120,6 +121,15 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
             ),
           state = listState
         ) {
+          if (searchResults.itemCount > 0) {
+            item {
+              SubHeader(
+                text = LocalStrings.current.searchResultsCount(searchResults.itemCount),
+                modifier = Modifier.padding(top = 8.dp)
+              )
+            }
+          }
+
           items(count = searchResults.itemCount) { index ->
             val post = searchResults[index]
             if (post != null) {

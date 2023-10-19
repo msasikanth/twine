@@ -44,6 +44,7 @@ data class TwineStrings(
   val searchSortNewestFirst: String,
   val searchSortOldest: String,
   val searchSortOldestFirst: String,
+  val searchResultsCount: (Int) -> String,
   val bookmark: String,
   val bookmarks: String,
   val settings: String,
