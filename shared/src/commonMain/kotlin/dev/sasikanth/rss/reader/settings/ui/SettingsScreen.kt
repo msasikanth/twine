@@ -57,6 +57,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.repository.BrowserType
@@ -116,11 +117,8 @@ internal fun SettingsScreen(
             ),
         ) {
           item {
-            Text(
+            SubHeader(
               text = LocalStrings.current.settingsHeaderBehaviour,
-              style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.textEmphasisHigh,
-              modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
             )
           }
 
@@ -145,11 +143,8 @@ internal fun SettingsScreen(
           }
 
           item {
-            Text(
+            SubHeader(
               text = LocalStrings.current.settingsHeaderFeedback,
-              style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.textEmphasisHigh,
-              modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
             )
           }
 
