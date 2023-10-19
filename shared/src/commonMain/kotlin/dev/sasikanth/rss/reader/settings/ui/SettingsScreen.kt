@@ -133,6 +133,8 @@ internal fun SettingsScreen(
           }
 
           if (canBlurImage) {
+            item { InsetDivider() }
+
             item {
               FeaturedItemBlurSettingItem(
                 featuredItemBlurEnabled = state.enableHomePageBlur,
@@ -245,67 +247,63 @@ private fun BrowserTypeSettingItem(
 ) {
   var checked by remember(browserType) { mutableStateOf(browserType == BrowserType.InApp) }
 
-  Column {
-    Box(
-      modifier =
-        Modifier.clickable {
-          checked = !checked
-          val newBrowserType =
-            if (checked) {
-              BrowserType.InApp
-            } else {
-              BrowserType.Default
-            }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        val newBrowserType =
+          if (checked) {
+            BrowserType.InApp
+          } else {
+            BrowserType.Default
+          }
 
-          onBrowserTypeChanged(newBrowserType)
-        }
+        onBrowserTypeChanged(newBrowserType)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-      Row(
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsBrowserTypeTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsBrowserTypeSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      MaterialTheme(
+        colorScheme =
+          darkColorScheme(
+            primary = AppTheme.colorScheme.tintedSurface,
+            onPrimary = AppTheme.colorScheme.tintedForeground,
+            outline = AppTheme.colorScheme.outline,
+            surfaceVariant = AppTheme.colorScheme.surfaceContainer
+          )
       ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            LocalStrings.current.settingsBrowserTypeTitle,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh
-          )
-          Text(
-            LocalStrings.current.settingsBrowserTypeSubtitle,
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
-        }
+        Switch(
+          checked = checked,
+          onCheckedChange = { checked ->
+            val newBrowserType =
+              if (checked) {
+                BrowserType.InApp
+              } else {
+                BrowserType.Default
+              }
 
-        Spacer(Modifier.width(16.dp))
-
-        MaterialTheme(
-          colorScheme =
-            darkColorScheme(
-              primary = AppTheme.colorScheme.tintedSurface,
-              onPrimary = AppTheme.colorScheme.tintedForeground,
-              outline = AppTheme.colorScheme.outline,
-              surfaceVariant = AppTheme.colorScheme.surfaceContainer
-            )
-        ) {
-          Switch(
-            checked = checked,
-            onCheckedChange = { checked ->
-              val newBrowserType =
-                if (checked) {
-                  BrowserType.InApp
-                } else {
-                  BrowserType.Default
-                }
-
-              onBrowserTypeChanged(newBrowserType)
-            },
-          )
-        }
+            onBrowserTypeChanged(newBrowserType)
+          },
+        )
       }
     }
-
-    InsetDivider()
   }
 }
 
