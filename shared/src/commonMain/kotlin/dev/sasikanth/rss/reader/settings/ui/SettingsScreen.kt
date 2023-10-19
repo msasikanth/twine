@@ -144,6 +144,13 @@ internal fun SettingsScreen(
           }
 
           item {
+            MaterialDivider(
+              modifier = Modifier.fillMaxWidth(),
+              color = AppTheme.colorScheme.surfaceContainer
+            )
+          }
+
+          item {
             SubHeader(
               text = LocalStrings.current.settingsHeaderFeedback,
             )
@@ -158,7 +165,21 @@ internal fun SettingsScreen(
             )
           }
 
+          item {
+            MaterialDivider(
+              modifier = Modifier.fillMaxWidth(),
+              color = AppTheme.colorScheme.surfaceContainer
+            )
+          }
+
           item { AboutItem { settingsPresenter.dispatch(SettingsEvent.AboutClicked) } }
+
+          item {
+            MaterialDivider(
+              modifier = Modifier.fillMaxWidth(),
+              color = AppTheme.colorScheme.surfaceContainer
+            )
+          }
         }
       }
     },
@@ -173,51 +194,47 @@ private fun FeaturedItemBlurSettingItem(
   onValueChanged: (Boolean) -> Unit
 ) {
   var checked by remember(featuredItemBlurEnabled) { mutableStateOf(featuredItemBlurEnabled) }
-  Column {
-    Box(
-      modifier =
-        Modifier.clickable {
-          checked = !checked
-          onValueChanged(!featuredItemBlurEnabled)
-        }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!featuredItemBlurEnabled)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
     ) {
-      Row(
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsEnableBlurTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsEnableBlurSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      MaterialTheme(
+        colorScheme =
+          darkColorScheme(
+            primary = AppTheme.colorScheme.tintedSurface,
+            onPrimary = AppTheme.colorScheme.tintedForeground,
+            outline = AppTheme.colorScheme.outline,
+            surfaceVariant = AppTheme.colorScheme.surfaceContainer
+          )
       ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            LocalStrings.current.settingsEnableBlurTitle,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh
-          )
-          Text(
-            LocalStrings.current.settingsEnableBlurSubtitle,
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        MaterialTheme(
-          colorScheme =
-            darkColorScheme(
-              primary = AppTheme.colorScheme.tintedSurface,
-              onPrimary = AppTheme.colorScheme.tintedForeground,
-              outline = AppTheme.colorScheme.outline,
-              surfaceVariant = AppTheme.colorScheme.surfaceContainer
-            )
-        ) {
-          Switch(
-            checked = checked,
-            onCheckedChange = { checked -> onValueChanged(checked) },
-          )
-        }
+        Switch(
+          checked = checked,
+          onCheckedChange = { checked -> onValueChanged(checked) },
+        )
       }
     }
-
-    InsetDivider()
   }
 }
 
@@ -294,57 +311,49 @@ private fun BrowserTypeSettingItem(
 
 @Composable
 private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
-  Column {
-    Box(modifier = Modifier.clickable(onClick = onClick)) {
-      Row(
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            LocalStrings.current.settingsReportIssue,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh
-          )
-          Text(
-            LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
-        }
+  Box(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsReportIssue,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
       }
     }
-
-    InsetDivider()
   }
 }
 
 @Composable
 private fun AboutItem(onClick: () -> Unit) {
-  Column() {
-    Box(modifier = Modifier.clickable(onClick = onClick)) {
-      Row(
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            LocalStrings.current.settingsAboutTitle,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh
-          )
-          Text(
-            LocalStrings.current.settingsAboutSubtitle,
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
-        }
-
-        AboutProfileImages()
+  Box(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsAboutTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsAboutSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
       }
-    }
 
-    InsetDivider()
+      AboutProfileImages()
+    }
   }
 }
 
