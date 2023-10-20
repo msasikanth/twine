@@ -50,3 +50,6 @@ UPDATE feed SET pinnedAt = :pinnedAt WHERE link = :link;
 
 numberOfPinnedFeeds:
 SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
+
+numberOfFeeds:
+SELECT COUNT(*) FROM feed;

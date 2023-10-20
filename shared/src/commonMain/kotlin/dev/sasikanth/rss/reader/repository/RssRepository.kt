@@ -269,6 +269,10 @@ class RssRepository(
     return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
+  fun numberOfFeeds(): Flow<Long> {
+    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
+  }
+
   private fun mapToPostWithMetadata(
     title: String,
     description: String,
