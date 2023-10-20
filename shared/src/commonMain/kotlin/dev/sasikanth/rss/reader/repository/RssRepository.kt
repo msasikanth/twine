@@ -61,6 +61,7 @@ class RssRepository(
 
   suspend fun addFeed(
     feedLink: String,
+    title: String? = null,
     transformUrl: Boolean = true,
     fetchPosts: Boolean = true
   ): FeedAddResult {
@@ -73,7 +74,7 @@ class RssRepository(
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
             feedQueries.upsert(
-              name = feedPayload.name,
+              name = title ?: feedPayload.name,
               icon = feedPayload.icon,
               description = feedPayload.description,
               homepageLink = feedPayload.homepageLink,
