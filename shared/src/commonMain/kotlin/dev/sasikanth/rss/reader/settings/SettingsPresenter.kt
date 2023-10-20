@@ -20,6 +20,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,7 @@ import me.tatarka.inject.annotations.Inject
 class SettingsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val settingsRepository: SettingsRepository,
+  private val rssRepository: RssRepository,
   private val appInfo: AppInfo,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
@@ -52,7 +54,8 @@ class SettingsPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         appInfo = appInfo,
-        settingsRepository = settingsRepository
+        settingsRepository = settingsRepository,
+        rssRepository = rssRepository
       )
     }
 
@@ -73,6 +76,7 @@ class SettingsPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     appInfo: AppInfo,
+    rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
@@ -87,14 +91,21 @@ class SettingsPresenter(
       )
 
     init {
-      settingsRepository.browserType
-        .combine(settingsRepository.enableFeaturedItemBlur) { browserType, featuredItemBlurEnabled
-          ->
-          browserType to featuredItemBlurEnabled
+      combine(
+          settingsRepository.browserType,
+          settingsRepository.enableFeaturedItemBlur,
+          rssRepository.numberOfFeeds()
+        ) { browserType, featuredItemBlurEnabled, numberOfFeeds ->
+          val hasFeeds = numberOfFeeds > 0
+          Triple(browserType, featuredItemBlurEnabled, hasFeeds)
         }
-        .onEach { (browserType, featuredItemBlurEnabled) ->
+        .onEach { (browserType, featuredItemBlurEnabled, hasFeeds) ->
           _state.update {
-            it.copy(browserType = browserType, enableHomePageBlur = featuredItemBlurEnabled)
+            it.copy(
+              browserType = browserType,
+              enableHomePageBlur = featuredItemBlurEnabled,
+              hasFeeds = hasFeeds
+            )
           }
         }
         .launchIn(coroutineScope)

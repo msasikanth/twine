@@ -23,12 +23,18 @@ import dev.sasikanth.rss.reader.repository.BrowserType
 internal data class SettingsState(
   val browserType: BrowserType,
   val enableHomePageBlur: Boolean,
+  val hasFeeds: Boolean,
   val appInfo: AppInfo,
 ) {
 
   companion object {
 
     fun default(appInfo: AppInfo) =
-      SettingsState(browserType = BrowserType.Default, enableHomePageBlur = true, appInfo = appInfo)
+      SettingsState(
+        browserType = BrowserType.Default,
+        enableHomePageBlur = true,
+        hasFeeds = false,
+        appInfo = appInfo
+      )
   }
 }
