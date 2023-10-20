@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.repository.RssRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
@@ -28,6 +29,8 @@ import platform.UIKit.UIViewController
 abstract class ApplicationComponent(
   @get:Provides val uiViewControllerProvider: () -> UIViewController,
 ) : SharedApplicationComponent() {
+
+  abstract val fileManager: FileManager
 
   abstract val rssRepository: RssRepository
 
