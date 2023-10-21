@@ -57,11 +57,11 @@ internal class AndroidRssParser(
       .optionalEnd()
       .toFormatter(Locale.US)
 
-  private val posts = mutableListOf<PostPayload?>()
-
   override fun parse(): FeedPayload {
     parser.nextTag()
     parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_CHANNEL)
+
+    val posts = mutableListOf<PostPayload?>()
 
     var title: String? = null
     var link: String? = null

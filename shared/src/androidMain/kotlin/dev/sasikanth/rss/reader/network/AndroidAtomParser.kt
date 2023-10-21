@@ -43,10 +43,11 @@ internal class AndroidAtomParser(
 ) : Parser() {
 
   private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-  private val posts = mutableListOf<PostPayload?>()
 
   override fun parse(): FeedPayload {
     parser.require(XmlPullParser.START_TAG, namespace, TAG_ATOM_FEED)
+
+    val posts = mutableListOf<PostPayload?>()
 
     var title: String? = null
     var description: String? = null
