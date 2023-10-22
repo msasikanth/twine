@@ -41,6 +41,8 @@ buildkonfig {
 kotlin {
   targetHierarchy.default()
 
+  jvmToolchain(20)
+
   android()
 
   // spotless:off
@@ -178,11 +180,8 @@ android {
     minSdk = libs.versions.android.sdk.min.get().toInt()
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-  }
-  kotlin { jvmToolchain(11) }
+
+  @Suppress("UnstableApiUsage")
   testOptions {
     managedDevices {
       devices {

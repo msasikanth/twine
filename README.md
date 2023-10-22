@@ -37,7 +37,7 @@ For full list of dependencies used, please take a look at the [catalog](/gradle/
 
 You can just clone the repo and build it locally without requiring any changes. 
 
-Project requires JDK 17+, and based on the AGP version defined in [`libs.versions.toml`](/gradle/libs.versions.toml) file, 
+Project requires JDK 20+, and based on the AGP version defined in [`libs.versions.toml`](/gradle/libs.versions.toml) file, 
 you can use appropriate Android Studio to import the project.
 
 ## Contributing 🛠️

@@ -39,10 +39,10 @@ jobs:
           VERSION_CODE=${WORKFLOW_INPUT:-"1"}
           echo "ORG_GRADLE_PROJECT_VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
-      - name: Setup JDK 17
+      - name: Setup JDK 20
         uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: 20
           distribution: zulu
           cache: 'gradle'
 

@@ -24,7 +24,11 @@ plugins {
 
 sentry { tracingInstrumentation { enabled = false } }
 
-kotlin { androidTarget() }
+kotlin {
+  jvmToolchain(20)
+
+  androidTarget()
+}
 
 android {
   compileSdk = libs.versions.android.sdk.compile.get().toInt()
@@ -51,12 +55,9 @@ android {
         "1.0.0"
       }
   }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    isCoreLibraryDesugaringEnabled = true
-  }
-  kotlin { jvmToolchain(11) }
+
+  compileOptions { isCoreLibraryDesugaringEnabled = true }
+
   signingConfigs {
     create("release") {
       storeFile = file("$rootDir/release/reader.jks")
@@ -65,6 +66,7 @@ android {
       keyPassword = "${project.properties["READER_KEY_PASSWORD"]}"
     }
   }
+
   buildTypes {
     release {
       isMinifyEnabled = true
@@ -75,6 +77,7 @@ android {
     }
     debug { applicationIdSuffix = ".debug" }
   }
+
   packaging {
     resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") }
 
@@ -83,6 +86,8 @@ android {
     jniLibs.excludes.add("lib/mips64/libsqlite3x.so")
     jniLibs.excludes.add("lib/armeabi/libsqlite3x.so")
   }
+
+  buildFeatures { buildConfig = true }
 }
 
 dependencies {
