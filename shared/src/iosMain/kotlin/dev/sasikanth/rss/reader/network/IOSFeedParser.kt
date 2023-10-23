@@ -56,7 +56,6 @@ import platform.darwin.NSObject
 @Inject
 @Suppress("CAST_NEVER_SUCCEEDS")
 class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
-  private var feedPayload: FeedPayload? = null
 
   override suspend fun parse(
     xmlContent: String,
@@ -65,18 +64,19 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
   ): FeedPayload {
     return withContext(dispatchersProvider.io) {
       suspendCoroutine { continuation ->
+        var feedPayload: FeedPayload? = null
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         val xmlFeedParser =
-          IOSXmlFeedParser(feedUrl, fetchPosts) { feedPayload ->
-            this@IOSFeedParser.feedPayload = feedPayload
+          IOSXmlFeedParser(feedUrl, fetchPosts) { parsedFeedPayload ->
+            feedPayload = parsedFeedPayload
           }
 
         val parser = NSXMLParser(data).apply { delegate = xmlFeedParser }
         val parserResult = parser.parse()
 
-        val feedPayload = feedPayload
-        if (parserResult && feedPayload != null) {
-          continuation.resume(feedPayload)
+        val nullableFeedPayload = feedPayload
+        if (parserResult && nullableFeedPayload != null) {
+          continuation.resume(nullableFeedPayload)
         } else if (!parserResult && parser.parserError() != null) {
           continuation.resumeWithException(XmlParsingError(parser.parserError()?.description))
         }
