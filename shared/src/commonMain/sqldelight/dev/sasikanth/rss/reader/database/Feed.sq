@@ -22,9 +22,17 @@ homepageLink = excluded.homepageLink;
 remove:
 DELETE FROM feed WHERE link = :link;
 
+count:
+SELECT COUNT(*) FROM feed;
+
 feeds:
 SELECT * FROM feed
 ORDER BY pinnedAt DESC, createdAt DESC;
+
+feedsPaginated:
+SELECT * FROM feed
+ORDER BY pinnedAt DESC , createdAt DESC
+LIMIT :limit OFFSET :offset;
 
 feed:
 SELECT * FROM feed

@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,7 +70,6 @@ internal fun FeedListItem(
   modifier: Modifier = Modifier,
   feed: Feed,
   selected: Boolean,
-  canShowDivider: Boolean,
   canPinFeeds: Boolean,
   feedsSheetMode: FeedsSheetMode,
   onDeleteFeed: (Feed) -> Unit,
@@ -129,13 +127,6 @@ internal fun FeedListItem(
           onFeedPinClick = onFeedPinClick
         )
       }
-    }
-
-    if (canShowDivider) {
-      Divider(
-        modifier = Modifier.requiredHeight(1.dp).align(Alignment.BottomStart).padding(end = 12.dp),
-        color = AppTheme.colorScheme.tintedSurface
-      )
     }
   }
 }

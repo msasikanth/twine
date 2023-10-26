@@ -48,12 +48,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
@@ -78,6 +75,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import app.cash.paging.compose.LazyPagingItems
+import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
@@ -88,7 +87,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.inverseProgress
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
-import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun FeedsBottomSheet(
@@ -124,7 +122,7 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        feeds = state.allFeeds,
+        feeds = state.feedsOnly.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
@@ -143,8 +141,7 @@ internal fun FeedsBottomSheet(
                 .toFloat()
             alpha = targetAlpha
           },
-        pinnedFeeds = state.pinnedFeeds,
-        feeds = state.feeds,
+        feedsListItemTypes = state.feedsListItemTypes.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
@@ -167,8 +164,7 @@ internal fun FeedsBottomSheet(
 
 @Composable
 private fun BottomSheetExpandedContent(
-  pinnedFeeds: ImmutableList<Feed>,
-  feeds: ImmutableList<Feed>,
+  feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
@@ -245,41 +241,41 @@ private fun BottomSheetExpandedContent(
             bottom = padding.calculateBottomPadding() + 64.dp
           )
       ) {
-        itemsIndexed(pinnedFeeds) { index, feed ->
-          FeedListItem(
-            feed = feed,
-            selected = selectedFeed == feed,
-            canShowDivider = index != pinnedFeeds.lastIndex,
-            canPinFeeds = true,
-            feedsSheetMode = feedsSheetMode,
-            onDeleteFeed = onDeleteFeed,
-            onFeedSelected = onFeedSelected,
-            onFeedNameChanged = onFeedNameChanged,
-            onFeedPinClick = onFeedPinClick
-          )
-        }
-
-        if (pinnedFeeds.isNotEmpty() && feeds.isNotEmpty()) {
-          item {
-            Divider(
-              modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-              color = AppTheme.colorScheme.tintedSurface
-            )
+        items(feedsListItemTypes.itemCount) { index ->
+          when (val feedListItemType = feedsListItemTypes[index]) {
+            is FeedsListItemType.FeedListItem -> {
+              val feed = feedListItemType.feed
+              FeedListItem(
+                feed = feed,
+                selected = selectedFeed == feed,
+                canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
+                feedsSheetMode = feedsSheetMode,
+                onDeleteFeed = onDeleteFeed,
+                onFeedSelected = onFeedSelected,
+                onFeedNameChanged = onFeedNameChanged,
+                onFeedPinClick = onFeedPinClick
+              )
+            }
+            FeedsListItemType.FeedSeparator -> {
+              Divider(
+                modifier =
+                  Modifier.requiredHeight(1.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(start = 24.dp, end = 12.dp)
+                    .graphicsLayer { translationY = -1f },
+                color = AppTheme.colorScheme.tintedSurface
+              )
+            }
+            FeedsListItemType.SectionSeparator -> {
+              Divider(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                color = AppTheme.colorScheme.tintedSurface
+              )
+            }
+            null -> {
+              // no-op
+            }
           }
-        }
-
-        itemsIndexed(feeds) { index, feed ->
-          FeedListItem(
-            feed = feed,
-            selected = selectedFeed == feed,
-            canShowDivider = index != feeds.lastIndex,
-            canPinFeeds = canPinFeeds,
-            feedsSheetMode = feedsSheetMode,
-            onDeleteFeed = onDeleteFeed,
-            onFeedSelected = onFeedSelected,
-            onFeedNameChanged = onFeedNameChanged,
-            onFeedPinClick = onFeedPinClick
-          )
         }
       }
 
@@ -362,7 +358,7 @@ private fun BoxScope.EditFeeds(onClick: () -> Unit) {
 
 @Composable
 private fun BottomSheetCollapsedContent(
-  feeds: ImmutableList<Feed>,
+  feeds: LazyPagingItems<FeedsListItemType.FeedListItem>,
   selectedFeed: Feed?,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
@@ -373,13 +369,16 @@ private fun BottomSheetCollapsedContent(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       contentPadding = PaddingValues(start = 100.dp, end = 24.dp)
     ) {
-      items(feeds) { feed ->
-        BottomSheetItem(
-          text = feed.name.uppercase(),
-          iconUrl = feed.icon,
-          selected = selectedFeed == feed,
-          onClick = { onFeedSelected(feed) }
-        )
+      items(feeds.itemCount) { index ->
+        val feed = feeds[index]?.feed
+        if (feed != null) {
+          BottomSheetItem(
+            text = feed.name.uppercase(),
+            iconUrl = feed.icon,
+            selected = selectedFeed == feed,
+            onClick = { onFeedSelected(feed) }
+          )
+        }
       }
     }
 
