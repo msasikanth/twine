@@ -123,7 +123,10 @@ class FeedsPresenter(
     }
 
     private fun onFeedSelected(feed: Feed) {
-      coroutineScope.launch { observableSelectedFeed.selectFeed(feed) }
+      coroutineScope.launch {
+        observableSelectedFeed.selectFeed(feed)
+        effects.emit(FeedsEffect.MinimizeSheet)
+      }
     }
 
     private fun onGoBackClicked() {
