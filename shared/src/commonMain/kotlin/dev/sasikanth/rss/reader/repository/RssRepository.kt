@@ -165,10 +165,6 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }
 
-  fun allFeeds(): Flow<List<Feed>> {
-    return feedQueries.feeds(mapper = ::mapToFeed).asFlow().mapToList(ioDispatcher)
-  }
-
   fun allFeedsPaginated(): PagingSource<Int, Feed> {
     return QueryPagingSource(
       countQuery = feedQueries.count(),
