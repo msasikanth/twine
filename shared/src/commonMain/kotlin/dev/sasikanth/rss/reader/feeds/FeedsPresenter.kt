@@ -15,24 +15,34 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import app.cash.paging.PagingData
+import app.cash.paging.cachedIn
+import app.cash.paging.createPager
+import app.cash.paging.createPagingConfig
+import app.cash.paging.insertSeparators
+import app.cash.paging.map
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -121,31 +131,48 @@ class FeedsPresenter(
     }
 
     private fun init() {
-      rssRepository
-        .allFeeds()
-        .onEach { feeds ->
-          val feedsGroup = feeds.groupBy { it.pinnedAt != null }.entries
-          val pinnedFeeds = feedsGroup.firstOrNull()?.value.orEmpty().sortedBy { it.pinnedAt }
-          val unPinnedFeeds = feedsGroup.elementAtOrNull(1)?.value.orEmpty()
+      observableSelectedFeed.selectedFeed
+        .flatMapLatest { selectedFeed ->
+          val feedListItemTypes: Flow<PagingData<FeedsListItemType>> =
+            createPager(config = createPagingConfig(pageSize = 20)) {
+                rssRepository.allFeedsPaginated()
+              }
+              .flow
+              .cachedIn(coroutineScope)
+              .map { feeds ->
+                feeds
+                  .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
+                  .insertSeparators { before, after ->
+                    when {
+                      before?.feed?.pinnedAt != null &&
+                        after != null &&
+                        after.feed.pinnedAt == null -> {
+                        FeedsListItemType.SectionSeparator
+                      }
+                      before?.feed != null && after?.feed != null -> {
+                        FeedsListItemType.FeedSeparator
+                      }
+                      else -> {
+                        null
+                      }
+                    }
+                  }
+              }
 
+          rssRepository.numberOfPinnedFeeds().map { numberOfPinnedFeeds ->
+            Triple(selectedFeed, feedListItemTypes, numberOfPinnedFeeds)
+          }
+        }
+        .distinctUntilChanged()
+        .onEach { (selectedFeed, feedListItemTypes, numberOfPinnedFeeds) ->
           _state.update {
             it.copy(
-              pinnedFeeds = pinnedFeeds.toImmutableList(),
-              feeds = unPinnedFeeds.toImmutableList()
+              feedsListItemTypes = feedListItemTypes,
+              numberOfPinnedFeeds = numberOfPinnedFeeds,
+              selectedFeed = selectedFeed
             )
           }
         }
-        .launchIn(coroutineScope)
-
-      rssRepository
-        .numberOfPinnedFeeds()
-        .onEach { numberOfPinnedFeeds ->
-          _state.update { it.copy(numberOfPinnedFeeds = numberOfPinnedFeeds) }
-        }
-        .launchIn(coroutineScope)
-
-      observableSelectedFeed.selectedFeed
-        .onEach { selectedFeed -> _state.update { it.copy(selectedFeed = selectedFeed) } }
         .launchIn(coroutineScope)
     }
 
