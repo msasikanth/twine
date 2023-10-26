@@ -165,7 +165,7 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }
 
-  fun allFeedsPaginated(): PagingSource<Int, Feed> {
+  fun allFeeds(): PagingSource<Int, Feed> {
     return QueryPagingSource(
       countQuery = feedQueries.count(),
       transacter = feedQueries,

@@ -134,9 +134,7 @@ class FeedsPresenter(
       observableSelectedFeed.selectedFeed
         .flatMapLatest { selectedFeed ->
           val feedListItemTypes: Flow<PagingData<FeedsListItemType>> =
-            createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.allFeedsPaginated()
-              }
+            createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allFeeds() }
               .flow
               .cachedIn(coroutineScope)
               .map { feeds ->
