@@ -169,6 +169,15 @@ class RssRepository(
     return feedQueries.feeds(mapper = ::mapToFeed).asFlow().mapToList(ioDispatcher)
   }
 
+  fun allFeedsPaginated(): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedQueries.count(),
+      transacter = feedQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset -> feedQueries.feedsPaginated(limit, offset, ::mapToFeed) }
+    )
+  }
+
   fun feed(feedLink: String): Feed {
     return feedQueries.feed(link = feedLink, mapper = ::mapToFeed).executeAsOne()
   }
