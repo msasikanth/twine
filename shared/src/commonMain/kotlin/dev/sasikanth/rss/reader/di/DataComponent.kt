@@ -49,4 +49,7 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
   fun providesPostSearchFTSQueries(database: ReaderDatabase) = database.postSearchFTSQueries
 
   @Provides fun providesBookmarkQueries(database: ReaderDatabase) = database.bookmarkQueries
+
+  @Provides
+  fun providesFeedSearchFTSQueries(database: ReaderDatabase) = database.feedSearchFTSQueries
 }

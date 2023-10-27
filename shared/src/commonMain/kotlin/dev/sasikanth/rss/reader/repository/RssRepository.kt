@@ -22,6 +22,7 @@ import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.FeedQueries
+import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -47,6 +48,7 @@ class RssRepository(
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
   private val bookmarkQueries: BookmarkQueries,
+  private val feedSearchFTSQueries: FeedSearchFTSQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -171,6 +173,18 @@ class RssRepository(
       transacter = feedQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset -> feedQueries.feedsPaginated(limit, offset, ::mapToFeed) }
+    )
+  }
+
+  /** Search feeds, returns all feeds if [searchQuery] is empty */
+  fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedSearchFTSQueries.countSearchResults(searchQuery = searchQuery),
+      transacter = feedSearchFTSQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedSearchFTSQueries.search(searchQuery = searchQuery, limit, offset, ::mapToFeed)
+      }
     )
   }
 
