@@ -39,7 +39,7 @@ data class TwineStrings(
   val errorTooManyRedirects: String,
   val errorUnAuthorized: (Int) -> String,
   val errorUnknownHttpStatus: (Int) -> String,
-  val searchHint: String,
+  val postsSearchHint: String,
   val searchSortNewest: String,
   val searchSortNewestFirst: String,
   val searchSortOldest: String,

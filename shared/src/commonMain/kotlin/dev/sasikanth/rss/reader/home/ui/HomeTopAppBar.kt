@@ -108,7 +108,7 @@ internal fun HomeTopAppBar(
     ) {
       Icon(
         imageVector = Icons.Rounded.Search,
-        contentDescription = LocalStrings.current.searchHint,
+        contentDescription = LocalStrings.current.postsSearchHint,
         tint = AppTheme.colorScheme.tintedForeground
       )
     }

@@ -226,7 +226,7 @@ private fun SearchBar(
           onValueChange = onQueryChange,
           placeholder = {
             Text(
-              text = LocalStrings.current.searchHint,
+              text = LocalStrings.current.postsSearchHint,
               color = AppTheme.colorScheme.textEmphasisHigh,
               style = MaterialTheme.typography.bodyLarge
             )
