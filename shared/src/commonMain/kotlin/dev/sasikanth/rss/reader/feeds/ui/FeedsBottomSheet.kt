@@ -122,7 +122,7 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        feeds = state.feedsOnly.collectAsLazyPagingItems(),
+        feeds = state.feeds.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
@@ -141,7 +141,7 @@ internal fun FeedsBottomSheet(
                 .toFloat()
             alpha = targetAlpha
           },
-        feedsListItemTypes = state.feedsListItemTypes.collectAsLazyPagingItems(),
+        feedsListItemTypes = state.feedsListInExpandedState.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
@@ -358,7 +358,7 @@ private fun BoxScope.EditFeeds(onClick: () -> Unit) {
 
 @Composable
 private fun BottomSheetCollapsedContent(
-  feeds: LazyPagingItems<FeedsListItemType.FeedListItem>,
+  feeds: LazyPagingItems<Feed>,
   selectedFeed: Feed?,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
@@ -370,7 +370,7 @@ private fun BottomSheetCollapsedContent(
       contentPadding = PaddingValues(start = 100.dp, end = 24.dp)
     ) {
       items(feeds.itemCount) { index ->
-        val feed = feeds[index]?.feed
+        val feed = feeds[index]
         if (feed != null) {
           BottomSheetItem(
             text = feed.name.uppercase(),

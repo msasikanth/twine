@@ -17,34 +17,45 @@ package dev.sasikanth.rss.reader.feeds
 
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
-import androidx.paging.filter
+import app.cash.paging.insertSeparators
+import app.cash.paging.map
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.models.local.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 
 @Immutable
 internal data class FeedsState(
-  val feedsListItemTypes: Flow<PagingData<FeedsListItemType>>,
+  val feeds: Flow<PagingData<Feed>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long
 ) {
 
-  val feedsOnly: Flow<PagingData<FeedsListItemType.FeedListItem>> =
-    feedsListItemTypes
-      .map { feeds ->
-        feeds.filter { feedListItemType -> feedListItemType is FeedsListItemType.FeedListItem }
-      }
-      .filterIsInstance()
+  val feedsListInExpandedState: Flow<PagingData<FeedsListItemType>> =
+    feeds.map { feeds ->
+      feeds
+        .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
+        .insertSeparators { before, after ->
+          when {
+            before?.feed?.pinnedAt != null && after != null && after.feed.pinnedAt == null -> {
+              FeedsListItemType.SectionSeparator
+            }
+            before?.feed != null && after?.feed != null -> {
+              FeedsListItemType.FeedSeparator
+            }
+            else -> {
+              null
+            }
+          }
+        }
+    }
 
   val canPinFeeds: Boolean
     get() = numberOfPinnedFeeds < 10L
 
   companion object {
 
-    val DEFAULT =
-      FeedsState(feedsListItemTypes = emptyFlow(), selectedFeed = null, numberOfPinnedFeeds = 0)
+    val DEFAULT = FeedsState(feeds = emptyFlow(), selectedFeed = null, numberOfPinnedFeeds = 0)
   }
 }

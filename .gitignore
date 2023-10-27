@@ -23,5 +23,6 @@ androidApp/release
 .idea/androidTestResultsUserPreferences.xml
 .idea/assetWizardSettings.xml
 .idea/modules.xml
+.idea/appInsightsSettings.xml
 gradle.xml
 *.iml
