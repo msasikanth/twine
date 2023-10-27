@@ -37,5 +37,5 @@ WHERE (
   OR
   link IN (SELECT link FROM feed_search WHERE feed_search MATCH :searchQuery)
 )
-ORDER BY createdAt DESC
+ORDER BY pinnedAt DESC , createdAt DESC
 LIMIT :limit OFFSET :offset;
