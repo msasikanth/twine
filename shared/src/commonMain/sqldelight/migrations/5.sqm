@@ -1,0 +1,29 @@
+BEGIN TRANSACTION;
+
+CREATE VIRTUAL TABLE IF NOT EXISTS feed_search USING FTS5(
+    name TEXT NOT NULL,
+    link TEXT NOT NULL PRIMARY KEY UNINDEXED,
+    tokenize="trigram"
+);
+
+INSERT INTO feed_search SELECT name, link FROM feed;
+
+COMMIT;
+
+CREATE TRIGGER IF NOT EXISTS
+feed_search_fts_BEFORE_DELETE
+BEFORE DELETE ON feed
+BEGIN DELETE FROM feed_search WHERE link = old.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+feed_search_fts_AFTER_UPDATE
+AFTER UPDATE ON feed
+BEGIN UPDATE OR IGNORE feed_search SET name = new.name WHERE link = new.link;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+feed_search_fts_AFTER_INSERT
+AFTER INSERT ON feed
+BEGIN INSERT OR IGNORE INTO feed_search(name, link) VALUES (new.name, new.link);
+END;

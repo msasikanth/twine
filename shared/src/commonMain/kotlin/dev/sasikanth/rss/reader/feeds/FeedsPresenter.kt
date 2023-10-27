@@ -15,10 +15,14 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.text.input.TextFieldValue
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import app.cash.paging.map
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -27,7 +31,9 @@ import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -65,6 +72,8 @@ class FeedsPresenter(
 
   internal val state: StateFlow<FeedsState> = presenterInstance.state
   internal val effects = presenterInstance.effects.asSharedFlow()
+  internal val searchQuery
+    get() = presenterInstance.searchQuery
 
   init {
     lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }
@@ -77,6 +86,9 @@ class FeedsPresenter(
     private val rssRepository: RssRepository,
     private val observableSelectedFeed: ObservableSelectedFeed
   ) : InstanceKeeper.Instance {
+
+    var searchQuery by mutableStateOf(TextFieldValue())
+      private set
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
@@ -98,7 +110,17 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
         is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
+        FeedsEvent.ClearSearchQuery -> clearSearchQuery()
+        is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
       }
+    }
+
+    private fun onSearchQueryChanged(searchQuery: TextFieldValue) {
+      this.searchQuery = searchQuery
+    }
+
+    private fun clearSearchQuery() {
+      searchQuery = TextFieldValue()
     }
 
     private fun onFeedPinClicked(feed: Feed) {
@@ -129,6 +151,7 @@ class FeedsPresenter(
       coroutineScope.launch { effects.emit(FeedsEffect.MinimizeSheet) }
     }
 
+    @OptIn(FlowPreview::class)
     private fun init() {
       observableSelectedFeed.selectedFeed
         .flatMapLatest { selectedFeed ->
@@ -150,6 +173,29 @@ class FeedsPresenter(
               selectedFeed = selectedFeed
             )
           }
+        }
+        .launchIn(coroutineScope)
+
+      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
+      searchQueryFlow
+        .distinctUntilChanged()
+        .onEach { searchQuery ->
+          val searchQueryText = searchQuery.text
+          val transformedSearchQuery =
+            if (searchQueryText.length >= 3) {
+              searchQueryText
+            } else {
+              ""
+            }
+
+          val feedSearchResults =
+            createPager(config = createPagingConfig(pageSize = 20)) {
+                rssRepository.searchFeed(transformedSearchQuery)
+              }
+              .flow
+              .cachedIn(coroutineScope)
+
+          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
         }
         .launchIn(coroutineScope)
     }

@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds
 
+import androidx.compose.ui.text.input.TextFieldValue
 import dev.sasikanth.rss.reader.models.local.Feed
 
 sealed interface FeedsEvent {
@@ -30,4 +31,8 @@ sealed interface FeedsEvent {
   data class OnFeedNameUpdated(val newFeedName: String, val feedLink: String) : FeedsEvent
 
   data class OnFeedPinClicked(val feed: Feed) : FeedsEvent
+
+  data class SearchQueryChanged(val searchQuery: TextFieldValue) : FeedsEvent
+
+  object ClearSearchQuery : FeedsEvent
 }
