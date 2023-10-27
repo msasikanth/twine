@@ -28,6 +28,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
+import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
@@ -79,6 +80,10 @@ class HomePresenter(
   @Assisted private val openSettings: () -> Unit,
 ) : ComponentContext by componentContext {
 
+  private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
+
+  internal val feedsPresenter = feedsPresenterFactory(childContext("feeds_presenter"))
+
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
@@ -86,15 +91,12 @@ class HomePresenter(
         rssRepository = rssRepository,
         observableSelectedFeed = observableSelectedFeed,
         settingsRepository = settingsRepository,
+        feedsPresenter = feedsPresenter
       )
     }
 
   internal val state = presenterInstance.state
   internal val effects = presenterInstance.effects.asSharedFlow()
-
-  private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
-
-  internal val feedsPresenter = feedsPresenterFactory(childContext("feeds_presenter"))
 
   init {
     lifecycle.doOnCreate {
@@ -124,6 +126,7 @@ class HomePresenter(
     private val rssRepository: RssRepository,
     private val observableSelectedFeed: ObservableSelectedFeed,
     private val settingsRepository: SettingsRepository,
+    private val feedsPresenter: FeedsPresenter,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -320,7 +323,14 @@ class HomePresenter(
     }
 
     private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
-      _state.update { it.copy(feedsSheetState = feedsSheetState) }
+      _state.update {
+        // Clear search query once feeds sheet is collapsed
+        if (feedsSheetState == BottomSheetValue.Collapsed) {
+          feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery)
+        }
+
+        it.copy(feedsSheetState = feedsSheetState)
+      }
     }
 
     private fun onCancelAddFeedClicked() {
