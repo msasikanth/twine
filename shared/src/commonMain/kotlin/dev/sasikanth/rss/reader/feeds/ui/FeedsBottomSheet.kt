@@ -423,6 +423,7 @@ private fun SearchBar(
   Box(
     modifier =
       Modifier.fillMaxWidth()
+        .background(AppTheme.colorScheme.tintedBackground)
         .windowInsetsPadding(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
@@ -479,6 +480,11 @@ private fun SearchBar(
         )
       }
     }
+
+    Divider(
+      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
+      color = AppTheme.colorScheme.tintedSurface
+    )
   }
 }
 
