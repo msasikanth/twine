@@ -21,7 +21,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.mapSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -102,29 +104,27 @@ internal fun rememberDynamicColorState(
   defaultSurfaceContainerLowest: Color = AppTheme.colorScheme.surfaceContainerLowest,
   defaultSurfaceContainerHigh: Color = AppTheme.colorScheme.surfaceContainerHigh,
   defaultSurfaceContainerHighest: Color = AppTheme.colorScheme.surfaceContainerHighest,
-  cacheSize: Int = 15,
   imageLoader: ImageLoader? = null
 ): DynamicColorState {
-  return remember {
-    DynamicColorState(
-      defaultTintedBackground,
-      defaultTintedSurface,
-      defaultTintedForeground,
-      defaultTintedHighlight,
-      defaultOutline,
-      defaultOutlineVariant,
-      defaultSurface,
-      defaultOnSurface,
-      defaultOnSurfaceVariant,
-      defaultSurfaceContainer,
-      defaultSurfaceContainerLow,
-      defaultSurfaceContainerLowest,
-      defaultSurfaceContainerHigh,
-      defaultSurfaceContainerHighest,
-      imageLoader,
-      cacheSize
-    )
-  }
+  return rememberSaveable(saver = DynamicColorState.Saver) {
+      DynamicColorState(
+        defaultTintedBackground,
+        defaultTintedSurface,
+        defaultTintedForeground,
+        defaultTintedHighlight,
+        defaultOutline,
+        defaultOutlineVariant,
+        defaultSurface,
+        defaultOnSurface,
+        defaultOnSurfaceVariant,
+        defaultSurfaceContainer,
+        defaultSurfaceContainerLow,
+        defaultSurfaceContainerLowest,
+        defaultSurfaceContainerHigh,
+        defaultSurfaceContainerHighest,
+      )
+    }
+    .also { it.setImageLoader(imageLoader) }
 }
 
 /**
@@ -149,8 +149,7 @@ internal class DynamicColorState(
   private val defaultSurfaceContainerLowest: Color,
   private val defaultSurfaceContainerHigh: Color,
   private val defaultSurfaceContainerHighest: Color,
-  private val imageLoader: ImageLoader?,
-  cacheSize: Int
+  cacheSize: Int = 15
 ) {
   var tintedBackground by mutableStateOf(defaultTintedBackground)
     private set
@@ -200,6 +199,55 @@ internal class DynamicColorState(
       else -> null
     }
   private var images = emptyList<String>()
+  private var imageLoader: ImageLoader? = null
+
+  companion object {
+    val Saver: Saver<DynamicColorState, *> =
+      mapSaver(
+        save = {
+          mapOf(
+            TINTED_BACKGROUND to it.tintedBackground.value.toString(),
+            TINTED_SURFACE to it.tintedSurface.value.toString(),
+            TINTED_FOREGROUND to it.tintedForeground.value.toString(),
+            TINTED_HIGHLIGHT to it.tintedHighlight.value.toString(),
+            OUTLINE to it.outline.value.toString(),
+            OUTLINE_VARIANT to it.outlineVariant.value.toString(),
+            SURFACE to it.surface.value.toString(),
+            ON_SURFACE to it.onSurface.value.toString(),
+            ON_SURFACE_VARIANT to it.onSurfaceVariant.value.toString(),
+            SURFACE_CONTAINER to it.surfaceContainer.value.toString(),
+            SURFACE_CONTAINER_LOW to it.surfaceContainerLow.value.toString(),
+            SURFACE_CONTAINER_LOWEST to it.surfaceContainerLowest.value.toString(),
+            SURFACE_CONTAINER_HIGH to it.surfaceContainerHigh.value.toString(),
+            SURFACE_CONTAINER_HIGHEST to it.surfaceContainerHighest.value.toString(),
+          )
+        },
+        restore = {
+          DynamicColorState(
+            defaultTintedBackground = Color(it[TINTED_BACKGROUND].toString().toULong()),
+            defaultTintedSurface = Color(it[TINTED_SURFACE].toString().toULong()),
+            defaultTintedForeground = Color(it[TINTED_FOREGROUND].toString().toULong()),
+            defaultTintedHighlight = Color(it[TINTED_HIGHLIGHT].toString().toULong()),
+            defaultOutline = Color(it[OUTLINE].toString().toULong()),
+            defaultOutlineVariant = Color(it[OUTLINE_VARIANT].toString().toULong()),
+            defaultSurface = Color(it[SURFACE].toString().toULong()),
+            defaultOnSurface = Color(it[ON_SURFACE].toString().toULong()),
+            defaultOnSurfaceVariant = Color(it[ON_SURFACE_VARIANT].toString().toULong()),
+            defaultSurfaceContainer = Color(it[SURFACE_CONTAINER].toString().toULong()),
+            defaultSurfaceContainerLow = Color(it[SURFACE_CONTAINER_LOW].toString().toULong()),
+            defaultSurfaceContainerLowest =
+              Color(it[SURFACE_CONTAINER_LOWEST].toString().toULong()),
+            defaultSurfaceContainerHigh = Color(it[SURFACE_CONTAINER_HIGH].toString().toULong()),
+            defaultSurfaceContainerHighest =
+              Color(it[SURFACE_CONTAINER_HIGHEST].toString().toULong()),
+          )
+        }
+      )
+  }
+
+  fun setImageLoader(imageLoader: ImageLoader?) {
+    this.imageLoader = imageLoader
+  }
 
   suspend fun onContentChange(images: List<String>) {
     if (!this.images.containsAll(images)) {
