@@ -73,6 +73,7 @@ data class TwineStrings(
   val aboutSocialGitHub: String,
   // don't translate
   val aboutSocialWebsite: String,
+  val feedsSearchHint: String,
 )
 
 object Locales {

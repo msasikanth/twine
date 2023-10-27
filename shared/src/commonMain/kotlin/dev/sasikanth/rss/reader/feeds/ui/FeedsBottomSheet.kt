@@ -48,19 +48,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -74,13 +77,17 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -141,11 +148,14 @@ internal fun FeedsBottomSheet(
                 .toFloat()
             alpha = targetAlpha
           },
+        searchQuery = feedsPresenter.searchQuery,
         feedsListItemTypes = state.feedsListInExpandedState.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
         isFetchingFeed = isFetchingFeed,
+        onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+        onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
@@ -169,6 +179,9 @@ private fun BottomSheetExpandedContent(
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
   isFetchingFeed: Boolean,
+  searchQuery: TextFieldValue,
+  onSearchQueryChanged: (TextFieldValue) -> Unit,
+  onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
@@ -181,31 +194,18 @@ private fun BottomSheetExpandedContent(
   Scaffold(
     modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
-      CenterAlignedTopAppBar(
-        modifier = Modifier.background(AppTheme.colorScheme.tintedBackground),
-        title = { Text(LocalStrings.current.feeds) },
-        navigationIcon = {
+      SearchBar(
+        query = searchQuery,
+        feedsSheetMode = feedsSheetMode,
+        onQueryChange = { onSearchQueryChanged(it) },
+        onNavigationIconClick = {
           when (feedsSheetMode) {
             Default,
-            LinkEntry -> {
-              IconButton(modifier = Modifier.padding(start = 4.dp), onClick = closeSheet) {
-                Icon(imageVector = Icons.Rounded.Close, contentDescription = null)
-              }
-            }
-            Edit -> {
-              IconButton(modifier = Modifier.padding(start = 4.dp), onClick = exitFeedsEdit) {
-                Icon(imageVector = Icons.Rounded.ArrowBack, contentDescription = null)
-              }
-            }
+            LinkEntry -> closeSheet()
+            Edit -> exitFeedsEdit()
           }
         },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            navigationIconContentColor = AppTheme.colorScheme.onSurface,
-            titleContentColor = AppTheme.colorScheme.onSurface,
-            actionIconContentColor = AppTheme.colorScheme.onSurface
-          )
+        onClearClick = onClearSearchQuery
       )
     },
     bottomBar = {
@@ -346,7 +346,11 @@ private fun BoxScope.EditFeeds(onClick: () -> Unit) {
     contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
     shape = MaterialTheme.shapes.large
   ) {
-    Icon(imageVector = Icons.Outlined.Edit, contentDescription = LocalStrings.current.editFeeds)
+    Icon(
+      imageVector = Icons.Outlined.Edit,
+      contentDescription = LocalStrings.current.editFeeds,
+      tint = AppTheme.colorScheme.tintedForeground
+    )
     Spacer(Modifier.width(12.dp))
     Text(
       text = LocalStrings.current.editFeeds,
@@ -395,6 +399,96 @@ private fun BottomSheetCollapsedContent(
                 )
             )
           )
+    )
+  }
+}
+
+@Composable
+private fun SearchBar(
+  query: TextFieldValue,
+  feedsSheetMode: FeedsSheetMode,
+  onQueryChange: (TextFieldValue) -> Unit,
+  onNavigationIconClick: () -> Unit,
+  onClearClick: () -> Unit,
+) {
+  val keyboardState by keyboardVisibilityAsState()
+  val focusManager = LocalFocusManager.current
+
+  LaunchedEffect(keyboardState) {
+    if (keyboardState == KeyboardState.Closed) {
+      focusManager.clearFocus()
+    }
+  }
+
+  Box(
+    modifier =
+      Modifier.fillMaxWidth()
+        .windowInsetsPadding(
+          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+        )
+  ) {
+    Box(
+      modifier =
+        Modifier.padding(all = 16.dp)
+          .background(color = AppTheme.colorScheme.tintedSurface, shape = RoundedCornerShape(16.dp))
+          .padding(horizontal = 4.dp)
+    ) {
+      MaterialTheme(
+        colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)
+      ) {
+        TextField(
+          modifier = Modifier.fillMaxWidth(),
+          value = query.copy(selection = TextRange(query.text.length)),
+          onValueChange = onQueryChange,
+          placeholder = {
+            Text(
+              text = LocalStrings.current.feedsSearchHint,
+              color = AppTheme.colorScheme.textEmphasisHigh,
+              style = MaterialTheme.typography.bodyLarge
+            )
+          },
+          leadingIcon = {
+            val icon =
+              when (feedsSheetMode) {
+                Default,
+                LinkEntry -> Icons.Rounded.KeyboardArrowDown
+                Edit -> Icons.Rounded.ArrowBack
+              }
+            IconButton(onClick = onNavigationIconClick) {
+              Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.tintedForeground)
+            }
+          },
+          trailingIcon = {
+            if (query.text.isNotBlank()) {
+              ClearSearchQueryButton { onClearClick() }
+            }
+          },
+          shape = RoundedCornerShape(16.dp),
+          singleLine = true,
+          textStyle = MaterialTheme.typography.bodyLarge,
+          colors =
+            TextFieldDefaults.colors(
+              focusedContainerColor = Color.Unspecified,
+              unfocusedContainerColor = Color.Unspecified,
+              focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+              unfocusedIndicatorColor = Color.Unspecified,
+              focusedIndicatorColor = Color.Unspecified,
+              disabledIndicatorColor = Color.Unspecified,
+              errorIndicatorColor = Color.Unspecified
+            )
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun ClearSearchQueryButton(onClearClick: () -> Unit) {
+  IconButton(onClick = onClearClick) {
+    Icon(
+      Icons.Rounded.Close,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.tintedForeground
     )
   }
 }

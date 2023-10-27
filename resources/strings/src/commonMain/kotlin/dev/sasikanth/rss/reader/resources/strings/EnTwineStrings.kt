@@ -81,4 +81,5 @@ val EnTwineStrings =
     aboutSocialThreads = "Threads",
     aboutSocialGitHub = "GitHub",
     aboutSocialWebsite = "Website",
+    feedsSearchHint = "Search feeds"
   )
