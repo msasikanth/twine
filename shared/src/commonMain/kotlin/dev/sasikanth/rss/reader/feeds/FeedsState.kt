@@ -28,12 +28,13 @@ import kotlinx.coroutines.flow.map
 @Immutable
 internal data class FeedsState(
   val feeds: Flow<PagingData<Feed>>,
+  val feedsSearchResults: Flow<PagingData<Feed>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long
 ) {
 
   val feedsListInExpandedState: Flow<PagingData<FeedsListItemType>> =
-    feeds.map { feeds ->
+    feedsSearchResults.map { feeds ->
       feeds
         .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
         .insertSeparators { before, after ->
@@ -56,6 +57,12 @@ internal data class FeedsState(
 
   companion object {
 
-    val DEFAULT = FeedsState(feeds = emptyFlow(), selectedFeed = null, numberOfPinnedFeeds = 0)
+    val DEFAULT =
+      FeedsState(
+        feeds = emptyFlow(),
+        feedsSearchResults = emptyFlow(),
+        selectedFeed = null,
+        numberOfPinnedFeeds = 0
+      )
   }
 }
