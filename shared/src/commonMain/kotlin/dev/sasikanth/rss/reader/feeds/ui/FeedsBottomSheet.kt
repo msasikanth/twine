@@ -428,10 +428,17 @@ private fun SearchBar(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
   ) {
+    val background =
+      when (feedsSheetMode) {
+        Default,
+        Edit -> AppTheme.colorScheme.tintedSurface
+        LinkEntry -> AppTheme.colorScheme.tintedBackground
+      }
+
     Box(
       modifier =
         Modifier.padding(all = 16.dp)
-          .background(color = AppTheme.colorScheme.tintedSurface, shape = RoundedCornerShape(16.dp))
+          .background(color = background, shape = RoundedCornerShape(16.dp))
           .padding(horizontal = 4.dp)
     ) {
       MaterialTheme(
@@ -442,11 +449,13 @@ private fun SearchBar(
           value = query.copy(selection = TextRange(query.text.length)),
           onValueChange = onQueryChange,
           placeholder = {
-            Text(
-              text = LocalStrings.current.feedsSearchHint,
-              color = AppTheme.colorScheme.textEmphasisHigh,
-              style = MaterialTheme.typography.bodyLarge
-            )
+            if (feedsSheetMode != LinkEntry) {
+              Text(
+                text = LocalStrings.current.feedsSearchHint,
+                color = AppTheme.colorScheme.textEmphasisHigh,
+                style = MaterialTheme.typography.bodyLarge
+              )
+            }
           },
           leadingIcon = {
             val icon =
@@ -467,11 +476,14 @@ private fun SearchBar(
           shape = RoundedCornerShape(16.dp),
           singleLine = true,
           textStyle = MaterialTheme.typography.bodyLarge,
+          enabled = feedsSheetMode != LinkEntry,
           colors =
             TextFieldDefaults.colors(
               focusedContainerColor = Color.Unspecified,
               unfocusedContainerColor = Color.Unspecified,
+              disabledContainerColor = Color.Unspecified,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+              disabledTextColor = Color.Unspecified,
               unfocusedIndicatorColor = Color.Unspecified,
               focusedIndicatorColor = Color.Unspecified,
               disabledIndicatorColor = Color.Unspecified,
