@@ -36,7 +36,7 @@ fun OutlinedButton(
       containerColor = AppTheme.colorScheme.surfaceContainerLow,
       contentColor = AppTheme.colorScheme.tintedForeground
     ),
-  border: BorderStroke = BorderStroke(1.dp, AppTheme.colorScheme.surfaceContainerHigh),
+  border: BorderStroke? = BorderStroke(1.dp, AppTheme.colorScheme.surfaceContainerHigh),
   content: @Composable RowScope.() -> Unit
 ) {
   androidx.compose.material3.OutlinedButton(
