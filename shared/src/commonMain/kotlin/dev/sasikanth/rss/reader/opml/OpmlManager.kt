@@ -16,19 +16,25 @@
 
 package dev.sasikanth.rss.reader.opml
 
+import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -46,6 +52,10 @@ class OpmlManager(
   private val _result = MutableSharedFlow<OpmlResult>(replay = 1)
   val result: SharedFlow<OpmlResult> = _result
 
+  companion object {
+    private const val IMPORT_CHUNKS = 20
+  }
+
   init {
     _result.tryEmit(OpmlResult.Idle)
   }
@@ -59,8 +69,7 @@ class OpmlManager(
           _result.emit(OpmlResult.InProgress.Importing(0))
           val opmlFeeds = feedsOpml.decode(opmlXmlContent)
 
-          rssRepository
-            .addOpmlFeeds(opmlFeeds)
+          addOpmlFeeds(opmlFeeds)
             .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
             .onCompletion { _result.emit(OpmlResult.Idle) }
             .collect()
@@ -112,6 +121,22 @@ class OpmlManager(
   fun cancel() {
     job.cancelChildren()
     _result.tryEmit(OpmlResult.Idle)
+  }
+
+  private fun addOpmlFeeds(feedLinks: List<OpmlFeed>): Flow<Int> = channelFlow {
+    val totalFeedCount = feedLinks.size
+    val processedFeedsCount = AtomicInt(0)
+
+    feedLinks.chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
+      feedsGroup
+        .map { feed -> launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) } }
+        .joinAll()
+
+      val size = processedFeedsCount.addAndGet(feedsGroup.size)
+      // We are converting the total feed count to float
+      // so that we can get the precise progress like 0.1, 0.2..etc.,
+      send(((size / totalFeedCount.toFloat()) * 100).roundToInt())
+    }
   }
 }
 
