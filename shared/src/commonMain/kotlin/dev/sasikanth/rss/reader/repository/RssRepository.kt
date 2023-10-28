@@ -20,6 +20,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
+import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.database.BookmarkQueries
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
@@ -30,9 +31,12 @@ import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.network.FeedFetchResult
 import dev.sasikanth.rss.reader.network.FeedFetcher
+import dev.sasikanth.rss.reader.opml.OpmlFeed
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -113,6 +117,22 @@ class RssRepository(
           return@withContext FeedAddResult.TooManyRedirects
         }
       }
+    }
+  }
+
+  fun addOpmlFeeds(feedLinks: List<OpmlFeed>): Flow<Int> = channelFlow {
+    val totalFeedCount = feedLinks.size
+    val processedFeedsCount = AtomicInt(0)
+
+    feedLinks.chunked(UPDATE_CHUNKS).forEach { feedsGroup ->
+      feedsGroup
+        .map { feed -> launch { addFeed(feedLink = feed.link, title = feed.title) } }
+        .joinAll()
+
+      val size = processedFeedsCount.addAndGet(feedsGroup.size)
+      // We are converting the total feed count to float
+      // so that we can get the precise progress like 0.1, 0.2..etc.,
+      send(((size / totalFeedCount.toFloat()) * 100).roundToInt())
     }
   }
 
