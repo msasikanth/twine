@@ -17,9 +17,12 @@
 package dev.sasikanth.rss.reader.filemanager
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSString
 import platform.Foundation.NSURL
@@ -38,7 +41,12 @@ import platform.darwin.NSObject
 @Inject
 @AppScope
 @OptIn(ExperimentalForeignApi::class)
-class IOSFileManager(private val viewControllerProvider: () -> UIViewController) : FileManager {
+class IOSFileManager(
+  private val dispatchersProvider: DispatchersProvider,
+  private val viewControllerProvider: () -> UIViewController
+) : FileManager {
+
+  private val mainScope = CoroutineScope(dispatchersProvider.main)
 
   @Suppress("CAST_NEVER_SUCCEEDS")
   override suspend fun save(name: String, content: String) {
@@ -77,13 +85,15 @@ class IOSFileManager(private val viewControllerProvider: () -> UIViewController)
   }
 
   private fun presentDocumentPicker(type: UTType, delegate: UIDocumentPickerDelegateProtocol) {
-    val documentPickerViewController =
-      UIDocumentPickerViewController(forOpeningContentTypes = listOf(type))
-    documentPickerViewController.delegate = delegate
-    documentPickerViewController.allowsMultipleSelection = false
-    documentPickerViewController.modalPresentationStyle = UIModalPresentationPageSheet
+    mainScope.launch {
+      val documentPickerViewController =
+        UIDocumentPickerViewController(forOpeningContentTypes = listOf(type))
+      documentPickerViewController.delegate = delegate
+      documentPickerViewController.allowsMultipleSelection = false
+      documentPickerViewController.modalPresentationStyle = UIModalPresentationPageSheet
 
-    viewControllerProvider().presentViewController(documentPickerViewController, true, null)
+      viewControllerProvider().presentViewController(documentPickerViewController, true, null)
+    }
   }
 }
 
