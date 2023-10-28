@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.opml
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.models.local.Feed
+import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.serialization.serializer
 import me.tatarka.inject.annotations.Inject
 import nl.adaptivity.xmlutil.serialization.XML
@@ -35,36 +36,46 @@ class FeedsOpml {
   }
 
   fun encode(feeds: List<Feed>): String {
-    val opml =
-      Opml(
-        version = "2.0",
-        head = Head("Twine RSS Feeds"),
-        body = Body(outlines = feeds.map(::mapFeedToOutline))
-      )
+    return try {
+      val opml =
+        Opml(
+          version = "2.0",
+          head = Head("Twine RSS Feeds"),
+          body = Body(outlines = feeds.map(::mapFeedToOutline))
+        )
 
-    val xmlString = xml.encodeToString(serializer<Opml>(), opml)
+      val xmlString = xml.encodeToString(serializer<Opml>(), opml)
 
-    return StringBuilder(xmlString)
-      .insert(0, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-      .appendLine()
-      .toString()
+      StringBuilder(xmlString)
+        .insert(0, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+        .appendLine()
+        .toString()
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      ""
+    }
   }
 
   fun decode(content: String): List<OpmlFeed> {
-    val opml = xml.decodeFromString(serializer<Opml>(), content)
-    val opmlFeeds = mutableListOf<OpmlFeed>()
+    return try {
+      val opml = xml.decodeFromString(serializer<Opml>(), content)
+      val opmlFeeds = mutableListOf<OpmlFeed>()
 
-    fun flatten(outline: Outline) {
-      if (outline.outlines.isNullOrEmpty() && !outline.xmlUrl.isNullOrBlank()) {
-        opmlFeeds.add(mapOutlineToOpmlFeed(outline))
+      fun flatten(outline: Outline) {
+        if (outline.outlines.isNullOrEmpty() && !outline.xmlUrl.isNullOrBlank()) {
+          opmlFeeds.add(mapOutlineToOpmlFeed(outline))
+        }
+
+        outline.outlines?.forEach { nestedOutline -> flatten(nestedOutline) }
       }
 
-      outline.outlines?.forEach { nestedOutline -> flatten(nestedOutline) }
+      opml.body.outlines.forEach { outline -> flatten(outline) }
+
+      opmlFeeds.distinctBy { it.link }
+    } catch (e: Exception) {
+      Sentry.captureException(e)
+      emptyList()
     }
-
-    opml.body.outlines.forEach { outline -> flatten(outline) }
-
-    return opmlFeeds.distinctBy { it.link }
   }
 
   private fun mapFeedToOutline(feed: Feed) =
