@@ -79,7 +79,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         HttpStatusCode.PermanentRedirect -> {
           if (redirectCount < MAX_REDIRECTS_ALLOWED) {
             val newUrl = response.headers["Location"]
-            if (newUrl != null) {
+            if (newUrl != url && newUrl != null) {
               redirectCount += 1
               fetch(url = newUrl, fetchPosts = fetchPosts)
             } else {
@@ -119,7 +119,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         is HtmlContentException,
         is XmlParsingError -> {
           val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
-          if (!feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
+          if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
             redirectCount += 1
             fetch(url = feedUrl, fetchPosts = fetchPosts)
           } else {
