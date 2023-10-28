@@ -197,6 +197,10 @@ class RssRepository(
     )
   }
 
+  suspend fun allFeedsBlocking(): List<Feed> {
+    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::mapToFeed).executeAsList() }
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
     return QueryPagingSource(
