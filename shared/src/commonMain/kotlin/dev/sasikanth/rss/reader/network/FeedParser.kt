@@ -61,25 +61,18 @@ interface FeedParser {
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
-    fun cleanText(text: String?): String? =
-      text
-        ?.replace(htmlTag, "")
-        ?.replace(blankLine, "")
-        ?.replace(Regex("&(hellip|amp|lt|gt|quot|apos|nbsp);")) { matchResult ->
-          when (val value = matchResult.value) {
-            "&hellip;" -> "..."
-            "&amp;" -> "&"
-            "&lt;" -> "<"
-            "&gt;" -> ">"
-            "&quot;" -> "\""
-            "&apos;" -> "'"
-            "&nbsp;" -> " "
-            else -> value
-          }
-        }
-        ?.trim()
+    fun cleanText(text: String?, decodeUrlEncoding: Boolean = false): String? {
+      var sanitizedString = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
 
-    fun cleanTextCompact(text: String?) = cleanText(text)?.take(300)
+      if (decodeUrlEncoding) {
+        sanitizedString = sanitizedString?.decodeUrlEncodedString()
+      }
+
+      return sanitizedString
+    }
+
+    fun cleanTextCompact(text: String?, decodeUrlEncoding: Boolean = false) =
+      cleanText(text, decodeUrlEncoding)?.take(300)
 
     fun feedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
@@ -112,3 +105,5 @@ interface FeedParser {
 }
 
 internal class HtmlContentException : Exception()
+
+internal expect fun String.decodeUrlEncodedString(): String

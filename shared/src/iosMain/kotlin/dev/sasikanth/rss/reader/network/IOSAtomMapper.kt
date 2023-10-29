@@ -64,9 +64,9 @@ internal fun PostPayload.Companion.mapAtomPost(
   }
 
   return PostPayload(
-    title = FeedParser.cleanText(title)!!,
-    link = link!!,
-    description = content.orEmpty(),
+    title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
+    description = FeedParser.cleanTextCompact(content, decodeUrlEncoding = true).orEmpty(),
+    link = FeedParser.cleanText(link)!!,
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
     date = pubDate.atomDateStringToEpochSeconds(),
     commentsLink = null
@@ -87,10 +87,10 @@ internal fun FeedPayload.Companion.mapAtomFeed(
     )
 
   return FeedPayload(
-    name = FeedParser.cleanText(atomMap[TAG_TITLE])!!,
+    name = FeedParser.cleanText(atomMap[TAG_TITLE] ?: link, decodeUrlEncoding = true)!!,
+    description = FeedParser.cleanText(atomMap[TAG_SUBTITLE], decodeUrlEncoding = true).orEmpty(),
     homepageLink = link,
     link = feedUrl,
-    description = FeedParser.cleanText(atomMap[TAG_SUBTITLE]).orEmpty(),
     icon = iconUrl,
     posts = posts
   )

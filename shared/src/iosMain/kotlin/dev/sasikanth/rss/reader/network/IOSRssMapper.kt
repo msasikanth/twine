@@ -76,9 +76,9 @@ internal fun PostPayload.Companion.mapRssPost(
   }
 
   return PostPayload(
-    title = FeedParser.cleanText(title).orEmpty(),
+    title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
+    description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
     link = FeedParser.cleanText(link)!!,
-    description = FeedParser.cleanTextCompact(description).orEmpty(),
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
     date = pubDate.rssDateStringToEpochSeconds(),
     commentsLink = commentsLink?.trim()
@@ -99,10 +99,10 @@ internal fun FeedPayload.Companion.mapRssFeed(
     )
 
   return FeedPayload(
-    name = FeedParser.cleanText(rssMap[TAG_TITLE] ?: link)!!,
+    name = FeedParser.cleanText(rssMap[TAG_TITLE] ?: link, decodeUrlEncoding = true)!!,
+    description = FeedParser.cleanText(rssMap[TAG_DESCRIPTION], decodeUrlEncoding = true).orEmpty(),
     homepageLink = link,
     link = feedUrl,
-    description = FeedParser.cleanText(rssMap[TAG_DESCRIPTION]).orEmpty(),
     icon = iconUrl,
     posts = posts
   )

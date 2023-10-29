@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import android.text.Html
 import android.util.Xml
 import dev.sasikanth.rss.reader.models.remote.FeedPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
@@ -55,5 +56,13 @@ class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) : 
     } catch (e: XmlPullParserException) {
       throw XmlParsingError(e.stackTraceToString())
     }
+  }
+}
+
+internal actual fun String.decodeUrlEncodedString(): String {
+  return try {
+    Html.fromHtml(this, Html.FROM_HTML_MODE_COMPACT).toString()
+  } catch (e: Exception) {
+    this
   }
 }
