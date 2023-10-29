@@ -53,7 +53,6 @@ internal actual fun <C : Any, T : Any> backAnimation(
 private fun scale(
   animationSpec: FiniteAnimationSpec<Float> = tween(),
   frontFactor: Float = 1.15F,
-  backFactor: Float = 0.95F,
 ): StackAnimator =
   stackAnimator(animationSpec = animationSpec) { factor, _, content ->
     content(
@@ -61,7 +60,7 @@ private fun scale(
         if (factor >= 0F) {
           factor * (1f - frontFactor) + 1F
         } else {
-          factor * (1F - backFactor) + 1F
+          1F
         }
       )
     )
