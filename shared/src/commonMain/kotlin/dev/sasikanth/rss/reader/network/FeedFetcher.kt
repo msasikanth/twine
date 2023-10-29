@@ -79,7 +79,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         HttpStatusCode.PermanentRedirect -> {
           if (redirectCount < MAX_REDIRECTS_ALLOWED) {
             val newUrl = response.headers["Location"]
-            if (newUrl != null) {
+            if (newUrl != url && newUrl != null) {
               redirectCount += 1
               fetch(url = newUrl, fetchPosts = fetchPosts)
             } else {
@@ -113,10 +113,14 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         // There are situation where XML parsers fail to identify if it's
         // a HTML document and fail, so trying to fetch link with HTML one
         // last time just to be safe if it fails with XML parsing issue.
+        //
+        // In some cases the link that is returned might be same as the original
+        // causing it to loop. So, we are using the redirect check here.
         is HtmlContentException,
         is XmlParsingError -> {
           val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
-          if (!feedUrl.isNullOrBlank()) {
+          if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
+            redirectCount += 1
             fetch(url = feedUrl, fetchPosts = fetchPosts)
           } else {
             if (e is XmlParsingError) {

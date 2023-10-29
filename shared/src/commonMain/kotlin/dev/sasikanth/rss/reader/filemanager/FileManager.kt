@@ -13,21 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.darwin.Darwin
-import me.tatarka.inject.annotations.Provides
+package dev.sasikanth.rss.reader.filemanager
 
-internal actual interface NetworkComponent {
+interface FileManager {
+  suspend fun save(name: String, content: String)
 
-  val IOSFeedParser.bind: FeedParser
-    @Provides @AppScope get() = this
-
-  @Provides
-  @AppScope
-  fun providesHttpClient(): HttpClient {
-    return HttpClient(Darwin) { engine { configureRequest { setAllowsCellularAccess(true) } } }
-  }
+  suspend fun read(): String?
 }

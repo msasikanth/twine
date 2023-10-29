@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.network
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import java.time.Duration
 import me.tatarka.inject.annotations.Provides
 
 internal actual interface NetworkComponent {
@@ -29,13 +28,6 @@ internal actual interface NetworkComponent {
   @Provides
   @AppScope
   fun providesHttpClient(): HttpClient {
-    return HttpClient(OkHttp) {
-      engine {
-        config {
-          retryOnConnectionFailure(true)
-          callTimeout(Duration.ofMinutes(2))
-        }
-      }
-    }
+    return HttpClient(OkHttp) { engine { config { retryOnConnectionFailure(true) } } }
   }
 }

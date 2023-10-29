@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.settings.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,12 +27,14 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider as MaterialDivider
 import androidx.compose.material3.Icon
@@ -56,10 +59,13 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -133,7 +139,7 @@ internal fun SettingsScreen(
           }
 
           if (canBlurImage) {
-            item { InsetDivider() }
+            item { Divider(horizontalInsets = 24.dp) }
 
             item {
               FeaturedItemBlurSettingItem(
@@ -145,12 +151,21 @@ internal fun SettingsScreen(
             }
           }
 
+          item { Divider(24.dp) }
+
           item {
-            MaterialDivider(
-              modifier = Modifier.fillMaxWidth(),
-              color = AppTheme.colorScheme.surfaceContainer
+            OPMLSettingItem(
+              opmlResult = state.opmlResult,
+              hasFeeds = state.hasFeeds,
+              onImportClicked = { settingsPresenter.dispatch(SettingsEvent.ImportOpmlClicked) },
+              onExportClicked = { settingsPresenter.dispatch(SettingsEvent.ExportOpmlClicked) },
+              onCancelClicked = {
+                settingsPresenter.dispatch(SettingsEvent.CancelOpmlImportOrExport)
+              }
             )
           }
+
+          item { Divider() }
 
           item {
             SubHeader(
@@ -167,21 +182,11 @@ internal fun SettingsScreen(
             )
           }
 
-          item {
-            MaterialDivider(
-              modifier = Modifier.fillMaxWidth(),
-              color = AppTheme.colorScheme.surfaceContainer
-            )
-          }
+          item { Divider() }
 
           item { AboutItem { settingsPresenter.dispatch(SettingsEvent.AboutClicked) } }
 
-          item {
-            MaterialDivider(
-              modifier = Modifier.fillMaxWidth(),
-              color = AppTheme.colorScheme.surfaceContainer
-            )
-          }
+          item { Divider() }
         }
       }
     },
@@ -308,6 +313,100 @@ private fun BrowserTypeSettingItem(
 }
 
 @Composable
+private fun OPMLSettingItem(
+  opmlResult: OpmlResult?,
+  hasFeeds: Boolean,
+  onImportClicked: () -> Unit,
+  onExportClicked: () -> Unit,
+  onCancelClicked: () -> Unit
+) {
+  Column {
+    SubHeader(text = LocalStrings.current.settingsHeaderOpml)
+
+    when (opmlResult) {
+      is OpmlResult.InProgress.Importing,
+      is OpmlResult.InProgress.Exporting -> {
+        Row(
+          modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+          OutlinedButton(
+            modifier = Modifier.weight(1f),
+            onClick = {
+              // no-op
+            },
+            enabled = false,
+            colors =
+              ButtonDefaults.outlinedButtonColors(
+                containerColor = AppTheme.colorScheme.tintedSurface,
+                disabledContainerColor = AppTheme.colorScheme.tintedSurface,
+                contentColor = AppTheme.colorScheme.tintedForeground,
+                disabledContentColor = AppTheme.colorScheme.tintedForeground,
+              ),
+            border = null
+          ) {
+            val string =
+              when (opmlResult) {
+                is OpmlResult.InProgress.Importing -> {
+                  LocalStrings.current.settingsOpmlImporting(opmlResult.progress)
+                }
+                is OpmlResult.InProgress.Exporting -> {
+                  LocalStrings.current.settingsOpmlExporting(opmlResult.progress)
+                }
+                else -> {
+                  ""
+                }
+              }
+
+            Text(string)
+          }
+
+          OutlinedButton(
+            modifier = Modifier.weight(1f),
+            onClick = onCancelClicked,
+            colors =
+              ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.Unspecified,
+                contentColor = AppTheme.colorScheme.tintedForeground,
+              ),
+          ) {
+            Text(LocalStrings.current.settingsOpmlCancel)
+          }
+        }
+      }
+
+      // TODO: Handle error states
+      OpmlResult.Idle,
+      OpmlResult.Error.NoContentInOpmlFile,
+      is OpmlResult.Error.UnknownFailure, -> {
+        Row(
+          modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+          OutlinedButton(
+            modifier = Modifier.weight(1f),
+            onClick = onImportClicked,
+          ) {
+            Text(LocalStrings.current.settingsOpmlImport)
+          }
+
+          OutlinedButton(
+            modifier = Modifier.weight(1f),
+            enabled = hasFeeds,
+            onClick = onExportClicked,
+          ) {
+            Text(LocalStrings.current.settingsOpmlExport)
+          }
+        }
+      }
+      null -> {
+        Box(Modifier.requiredHeight(64.dp))
+      }
+    }
+  }
+}
+
+@Composable
 private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
   Box(modifier = Modifier.clickable(onClick = onClick)) {
     Row(
@@ -398,9 +497,9 @@ private fun AboutProfileImages() {
 }
 
 @Composable
-private fun InsetDivider() {
+private fun Divider(horizontalInsets: Dp = 0.dp) {
   MaterialDivider(
-    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 24.dp),
+    modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
     color = AppTheme.colorScheme.surfaceContainer
   )
 }

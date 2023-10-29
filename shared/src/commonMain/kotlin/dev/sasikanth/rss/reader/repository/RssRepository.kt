@@ -61,6 +61,7 @@ class RssRepository(
 
   suspend fun addFeed(
     feedLink: String,
+    title: String? = null,
     transformUrl: Boolean = true,
     fetchPosts: Boolean = true
   ): FeedAddResult {
@@ -73,7 +74,7 @@ class RssRepository(
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
             feedQueries.upsert(
-              name = feedPayload.name,
+              name = title ?: feedPayload.name,
               icon = feedPayload.icon,
               description = feedPayload.description,
               homepageLink = feedPayload.homepageLink,
@@ -176,6 +177,10 @@ class RssRepository(
     )
   }
 
+  suspend fun allFeedsBlocking(): List<Feed> {
+    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::mapToFeed).executeAsList() }
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
     return QueryPagingSource(
@@ -267,6 +272,10 @@ class RssRepository(
 
   fun numberOfPinnedFeeds(): Flow<Long> {
     return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
+  }
+
+  fun numberOfFeeds(): Flow<Long> {
+    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
   private fun mapToPostWithMetadata(

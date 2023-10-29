@@ -19,7 +19,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.opml.OpmlManager
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +43,9 @@ import me.tatarka.inject.annotations.Inject
 class SettingsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val settingsRepository: SettingsRepository,
+  private val rssRepository: RssRepository,
   private val appInfo: AppInfo,
+  private val opmlManager: OpmlManager,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
@@ -52,7 +56,9 @@ class SettingsPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         appInfo = appInfo,
-        settingsRepository = settingsRepository
+        settingsRepository = settingsRepository,
+        rssRepository = rssRepository,
+        opmlManager = opmlManager,
       )
     }
 
@@ -73,7 +79,9 @@ class SettingsPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     appInfo: AppInfo,
+    private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
+    private val opmlManager: OpmlManager,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -87,15 +95,29 @@ class SettingsPresenter(
       )
 
     init {
-      settingsRepository.browserType
-        .combine(settingsRepository.enableFeaturedItemBlur) { browserType, featuredItemBlurEnabled
-          ->
-          browserType to featuredItemBlurEnabled
+      combine(
+          settingsRepository.browserType,
+          settingsRepository.enableFeaturedItemBlur,
+          rssRepository.numberOfFeeds()
+        ) { browserType, featuredItemBlurEnabled, numberOfFeeds ->
+          val hasFeeds = numberOfFeeds > 0
+          Triple(browserType, featuredItemBlurEnabled, hasFeeds)
         }
-        .onEach { (browserType, featuredItemBlurEnabled) ->
+        .onEach { (browserType, featuredItemBlurEnabled, hasFeeds) ->
           _state.update {
-            it.copy(browserType = browserType, enableHomePageBlur = featuredItemBlurEnabled)
+            it.copy(
+              browserType = browserType,
+              enableHomePageBlur = featuredItemBlurEnabled,
+              hasFeeds = hasFeeds
+            )
           }
+        }
+        .launchIn(coroutineScope)
+
+      opmlManager.result
+        .onEach { result ->
+          println(result)
+          _state.update { it.copy(opmlResult = result) }
         }
         .launchIn(coroutineScope)
     }
@@ -110,7 +132,22 @@ class SettingsPresenter(
         SettingsEvent.AboutClicked -> {
           // no-op
         }
+        SettingsEvent.ImportOpmlClicked -> importOpmlClicked()
+        SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
+        SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
       }
+    }
+
+    private fun cancelOpmlImportOrExport() {
+      opmlManager.cancel()
+    }
+
+    private fun exportOpmlClicked() {
+      coroutineScope.launch { opmlManager.export() }
+    }
+
+    private fun importOpmlClicked() {
+      coroutineScope.launch { opmlManager.import() }
     }
 
     private fun toggleFeaturedItemBlur(value: Boolean) {

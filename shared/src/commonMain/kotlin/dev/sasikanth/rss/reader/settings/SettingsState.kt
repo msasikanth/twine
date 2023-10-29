@@ -17,18 +17,27 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.repository.BrowserType
 
 @Immutable
 internal data class SettingsState(
   val browserType: BrowserType,
   val enableHomePageBlur: Boolean,
+  val hasFeeds: Boolean,
   val appInfo: AppInfo,
+  val opmlResult: OpmlResult?,
 ) {
 
   companion object {
 
     fun default(appInfo: AppInfo) =
-      SettingsState(browserType = BrowserType.Default, enableHomePageBlur = true, appInfo = appInfo)
+      SettingsState(
+        browserType = BrowserType.Default,
+        enableHomePageBlur = true,
+        hasFeeds = false,
+        appInfo = appInfo,
+        opmlResult = null
+      )
   }
 }

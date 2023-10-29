@@ -26,4 +26,10 @@ sealed interface SettingsEvent {
   data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
 
   object AboutClicked : SettingsEvent
+
+  object ImportOpmlClicked : SettingsEvent
+
+  object ExportOpmlClicked : SettingsEvent
+
+  object CancelOpmlImportOrExport : SettingsEvent
 }

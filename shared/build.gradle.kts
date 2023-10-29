@@ -27,6 +27,7 @@ plugins {
   alias(libs.plugins.ksp)
   alias(libs.plugins.buildKonfig)
   alias(libs.plugins.kotlin.parcelize)
+  alias(libs.plugins.kotlinx.serialization)
 }
 
 buildkonfig {
@@ -113,6 +114,7 @@ kotlin {
         implementation(libs.paging.compose)
         implementation(libs.stately.isolate)
         implementation(libs.stately.iso.collections)
+        implementation(libs.bundles.xmlutil)
       }
     }
     val commonTest by getting {
