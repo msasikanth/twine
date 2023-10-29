@@ -127,7 +127,7 @@ class OpmlManager(
     val totalFeedCount = feedLinks.size
     val processedFeedsCount = AtomicInt(0)
 
-    feedLinks.chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
+    feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
       feedsGroup
         .map { feed -> launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) } }
         .joinAll()
