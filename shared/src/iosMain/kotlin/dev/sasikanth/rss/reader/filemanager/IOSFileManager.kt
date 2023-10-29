@@ -114,7 +114,17 @@ private class DocumentPickerDelegate(
     controller: UIDocumentPickerViewController,
     didPickDocumentAtURL: NSURL
   ) {
-    didPickDocument(didPickDocumentAtURL)
+    try {
+      val scoped = didPickDocumentAtURL.startAccessingSecurityScopedResource()
+      if (scoped) {
+        didPickDocument(didPickDocumentAtURL)
+      }
+    } catch (e: Exception) {
+      cancelledDocumentPicker()
+      throw e
+    } finally {
+      didPickDocumentAtURL.stopAccessingSecurityScopedResource()
+    }
   }
 
   override fun documentPickerWasCancelled(controller: UIDocumentPickerViewController) {
