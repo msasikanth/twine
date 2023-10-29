@@ -58,6 +58,7 @@ val EnTwineStrings =
     },
     bookmark = "Bookmark",
     bookmarks = "Bookmarks",
+    bookmarksPlaceholder = "Bookmarked posts will appear here 🔖",
     settings = "Settings",
     moreMenuOptions = "More menu options",
     settingsHeaderBehaviour = "Behavior",

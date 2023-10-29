@@ -47,6 +47,7 @@ data class TwineStrings(
   val searchResultsCount: (Int) -> String,
   val bookmark: String,
   val bookmarks: String,
+  val bookmarksPlaceholder: String,
   val settings: String,
   val moreMenuOptions: String,
   val settingsHeaderBehaviour: String,

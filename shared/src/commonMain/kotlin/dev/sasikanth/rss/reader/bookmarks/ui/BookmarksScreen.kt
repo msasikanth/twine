@@ -16,11 +16,15 @@
 package dev.sasikanth.rss.reader.bookmarks.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -29,6 +33,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,6 +54,8 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.Bookmarks
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
@@ -93,51 +100,72 @@ internal fun BookmarksScreen(
       }
     },
     content = { padding ->
-      Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-          contentPadding =
-            PaddingValues(
-              bottom = padding.calculateBottomPadding() + 80.dp,
-              top = padding.calculateTopPadding()
-            ),
-          state = listState
-        ) {
-          items(count = bookmarks.itemCount) { index ->
-            val post = bookmarks[index]
-            if (post != null) {
-              PostListItem(
-                item = post,
-                enablePostSource = false,
-                onClick = { coroutineScope.launch { linkHandler.openLink(post.link) } },
-                onPostBookmarkClick = {
-                  bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
-                },
-                onPostCommentsClick = {
-                  post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
-                },
-                onPostSourceClick = {
-                  // no-op
-                }
-              )
-              if (index != bookmarks.itemCount - 1) {
-                Divider(
-                  modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                  color = AppTheme.colorScheme.surfaceContainer
+      if (bookmarks.itemCount > 0) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          LazyColumn(
+            contentPadding =
+              PaddingValues(
+                bottom = padding.calculateBottomPadding() + 80.dp,
+                top = padding.calculateTopPadding()
+              ),
+            state = listState
+          ) {
+            items(count = bookmarks.itemCount) { index ->
+              val post = bookmarks[index]
+              if (post != null) {
+                PostListItem(
+                  item = post,
+                  enablePostSource = false,
+                  onClick = { coroutineScope.launch { linkHandler.openLink(post.link) } },
+                  onPostBookmarkClick = {
+                    bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
+                  },
+                  onPostCommentsClick = {
+                    post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
+                  },
+                  onPostSourceClick = {
+                    // no-op
+                  }
                 )
+                if (index != bookmarks.itemCount - 1) {
+                  Divider(
+                    modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+                    color = AppTheme.colorScheme.surfaceContainer
+                  )
+                }
               }
             }
           }
-        }
 
-        ScrollToTopButton(
-          visible = showScrollToTop,
-          modifier =
-            Modifier.padding(
-              end = padding.calculateEndPadding(layoutDirection) + 16.dp,
-              bottom = padding.calculateBottomPadding() + 16.dp
+          ScrollToTopButton(
+            visible = showScrollToTop,
+            modifier =
+              Modifier.padding(
+                end = padding.calculateEndPadding(layoutDirection) + 16.dp,
+                bottom = padding.calculateBottomPadding() + 16.dp
+              )
+          ) {
+            listState.animateScrollToItem(0)
+          }
+        }
+      } else {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+              imageVector = TwineIcons.Bookmarks,
+              contentDescription = null,
+              modifier = Modifier.size(120.dp),
+              tint = AppTheme.colorScheme.textEmphasisHigh
             )
-        ) {
-          listState.animateScrollToItem(0)
+
+            Spacer(Modifier.requiredHeight(16.dp))
+
+            Text(
+              text = LocalStrings.current.bookmarksPlaceholder,
+              style = MaterialTheme.typography.labelLarge,
+              color = AppTheme.colorScheme.textEmphasisMed
+            )
+          }
         }
       }
     },
