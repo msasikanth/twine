@@ -151,7 +151,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
 
   LaunchedEffect(bottomSheetState.targetValue) {
     if (bottomSheetState.targetValue == BottomSheetValue.Collapsed) {
-      homePresenter.dispatch(HomeEvent.OnExitFeedLinkEntry)
+      homePresenter.dispatch(HomeEvent.OnCancelAddFeedClicked)
     }
   }
 
@@ -364,7 +364,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
                 .padding(bottom = 20.dp, end = 24.dp),
             isFetchingFeed = state.isFetchingFeed,
             onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
-            exitFeedLinkEntry = { presenter.dispatch(HomeEvent.OnExitFeedLinkEntry) }
+            onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
           )
         }
       }

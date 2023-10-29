@@ -149,7 +149,7 @@ class HomePresenter(
         is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
         HomeEvent.OnHomeSelected -> onHomeSelected()
         HomeEvent.OnAddFeedClicked -> onAddFeedClicked()
-        HomeEvent.OnExitFeedLinkEntry -> onExitFeedLinkEntry()
+        HomeEvent.OnCancelAddFeedClicked -> onCancelAddFeedClicked()
         is HomeEvent.AddFeed -> addFeed(event.feedLink)
         HomeEvent.OnPrimaryActionClicked -> onPrimaryActionClicked()
         HomeEvent.BackClicked -> backClicked()
@@ -333,7 +333,7 @@ class HomePresenter(
       }
     }
 
-    private fun onExitFeedLinkEntry() {
+    private fun onCancelAddFeedClicked() {
       _state.update { it.copy(feedsSheetMode = Default) }
     }
 

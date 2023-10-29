@@ -39,7 +39,7 @@ sealed interface HomeEvent {
 
   object OnPrimaryActionClicked : HomeEvent
 
-  object OnExitFeedLinkEntry : HomeEvent
+  object OnCancelAddFeedClicked : HomeEvent
 
   data class AddFeed(val feedLink: String) : HomeEvent
 

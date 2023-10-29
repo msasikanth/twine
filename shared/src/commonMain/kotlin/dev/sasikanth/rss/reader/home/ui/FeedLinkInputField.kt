@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -57,15 +56,13 @@ internal fun FeedLinkInputField(
   modifier: Modifier = Modifier,
   isFetchingFeed: Boolean,
   onAddFeed: (String) -> Unit,
-  exitFeedLinkEntry: () -> Unit
+  onCancelFeedEntryClicked: () -> Unit
 ) {
   var input by remember { mutableStateOf("") }
   val isInputBlank by derivedStateOf { input.isBlank() }
 
   val focusRequester = remember { FocusRequester() }
   val focusManager = LocalFocusManager.current
-
-  var lastFocusState by remember { mutableStateOf(false) }
 
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
@@ -77,16 +74,7 @@ internal fun FeedLinkInputField(
   }
 
   TextField(
-    modifier =
-      modifier.requiredHeight(56.dp).fillMaxWidth().focusRequester(focusRequester).onFocusChanged {
-        if (lastFocusState != it.isFocused) {
-          lastFocusState = it.isFocused
-
-          if (!lastFocusState) {
-            exitFeedLinkEntry()
-          }
-        }
-      },
+    modifier = modifier.requiredHeight(56.dp).fillMaxWidth().focusRequester(focusRequester),
     value = input,
     onValueChange = { input = it },
     keyboardOptions =
@@ -111,7 +99,7 @@ internal fun FeedLinkInputField(
         errorIndicatorColor = Color.Transparent,
       ),
     leadingIcon = {
-      IconButton(onClick = exitFeedLinkEntry, enabled = !isFetchingFeed) {
+      IconButton(onClick = onCancelFeedEntryClicked, enabled = !isFetchingFeed) {
         Icon(
           imageVector = Icons.Rounded.ArrowBack,
           contentDescription = null,
