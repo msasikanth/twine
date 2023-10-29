@@ -432,7 +432,7 @@ private fun SearchBar(
       when (feedsSheetMode) {
         Default,
         Edit -> AppTheme.colorScheme.tintedSurface
-        LinkEntry -> AppTheme.colorScheme.tintedBackground
+        LinkEntry -> AppTheme.colorScheme.tintedSurface.copy(alpha = 0.6f)
       }
 
     Box(
@@ -449,13 +449,17 @@ private fun SearchBar(
           value = query.copy(selection = TextRange(query.text.length)),
           onValueChange = onQueryChange,
           placeholder = {
-            if (feedsSheetMode != LinkEntry) {
-              Text(
-                text = LocalStrings.current.feedsSearchHint,
-                color = AppTheme.colorScheme.textEmphasisHigh,
-                style = MaterialTheme.typography.bodyLarge
-              )
-            }
+            val hintColor =
+              when (feedsSheetMode) {
+                Default,
+                Edit -> AppTheme.colorScheme.textEmphasisHigh
+                LinkEntry -> AppTheme.colorScheme.textEmphasisMed
+              }
+            Text(
+              text = LocalStrings.current.feedsSearchHint,
+              color = hintColor,
+              style = MaterialTheme.typography.bodyLarge
+            )
           },
           leadingIcon = {
             val icon =
