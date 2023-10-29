@@ -79,7 +79,7 @@ class SettingsPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     appInfo: AppInfo,
-    private val rssRepository: RssRepository,
+    rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val opmlManager: OpmlManager,
   ) : InstanceKeeper.Instance {
@@ -115,10 +115,7 @@ class SettingsPresenter(
         .launchIn(coroutineScope)
 
       opmlManager.result
-        .onEach { result ->
-          println(result)
-          _state.update { it.copy(opmlResult = result) }
-        }
+        .onEach { result -> _state.update { it.copy(opmlResult = result) } }
         .launchIn(coroutineScope)
     }
 
