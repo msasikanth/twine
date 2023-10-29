@@ -52,16 +52,20 @@ class IOSFileManager(
   override suspend fun save(name: String, content: String) {
     suspendCoroutine { continuation ->
       if (content.isNotBlank()) {
-        val delegate = DocumentPickerDelegate { url ->
-          (content as NSString).writeToFile(
-            path = "${url.path}/$name",
-            atomically = true,
-            encoding = NSUTF8StringEncoding,
-            error = null
-          )
+        val delegate =
+          DocumentPickerDelegate(
+            didPickDocument = { url ->
+              (content as NSString).writeToFile(
+                path = "${url.path}/$name",
+                atomically = true,
+                encoding = NSUTF8StringEncoding,
+                error = null
+              )
 
-          continuation.resume(Unit)
-        }
+              continuation.resume(Unit)
+            },
+            cancelledDocumentPicker = { continuation.resume(Unit) }
+          )
 
         presentDocumentPicker(type = UTTypeFolder, delegate = delegate)
       }
@@ -70,16 +74,20 @@ class IOSFileManager(
 
   override suspend fun read(): String? {
     return suspendCoroutine { continuation ->
-      val delegate = DocumentPickerDelegate { url ->
-        val content =
-          NSString.stringWithContentsOfFile(
-            path = url.path!!,
-            encoding = NSUTF8StringEncoding,
-            error = null
-          )
+      val delegate =
+        DocumentPickerDelegate(
+          didPickDocument = { url ->
+            val content =
+              NSString.stringWithContentsOfFile(
+                path = url.path!!,
+                encoding = NSUTF8StringEncoding,
+                error = null
+              )
 
-        continuation.resume(content)
-      }
+            continuation.resume(content)
+          },
+          cancelledDocumentPicker = { continuation.resume(null) }
+        )
       presentDocumentPicker(type = UTTypeXML, delegate = delegate)
     }
   }
@@ -97,13 +105,19 @@ class IOSFileManager(
   }
 }
 
-private class DocumentPickerDelegate(private val didPickDocument: (url: NSURL) -> Unit) :
-  NSObject(), UIDocumentPickerDelegateProtocol {
+private class DocumentPickerDelegate(
+  private val didPickDocument: (url: NSURL) -> Unit,
+  private val cancelledDocumentPicker: () -> Unit
+) : NSObject(), UIDocumentPickerDelegateProtocol {
 
   override fun documentPicker(
     controller: UIDocumentPickerViewController,
     didPickDocumentAtURL: NSURL
   ) {
     didPickDocument(didPickDocumentAtURL)
+  }
+
+  override fun documentPickerWasCancelled(controller: UIDocumentPickerViewController) {
+    cancelledDocumentPicker()
   }
 }
