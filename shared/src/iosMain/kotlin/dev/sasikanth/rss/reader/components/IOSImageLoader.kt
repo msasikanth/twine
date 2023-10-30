@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.IntSize
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readBytes
@@ -60,25 +59,19 @@ import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 @Inject
 @AppScope
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
-class IOSImageLoader : ImageLoader {
+class IOSImageLoader(private val httpClient: HttpClient) : ImageLoader {
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
   private val diskCacheSize = (50 * 1024 * 1024).toULong() // 50 MB cache size
-  private val httpClient =
-    HttpClient(Darwin) {
-      engine {
-        configureRequest {
-          setTimeoutInterval(60.0)
-          setAllowsCellularAccess(true)
-        }
-      }
+
+  private val urlCache by
+    lazy(LazyThreadSafetyMode.NONE) {
+      NSURLCache(
+        memoryCapacity = memoryCacheSize,
+        diskCapacity = diskCacheSize,
+        diskPath = "dev_sasikanth_rss_reader_images_cache"
+      )
     }
-  private val urlCache =
-    NSURLCache(
-      memoryCapacity = memoryCacheSize,
-      diskCapacity = diskCacheSize,
-      diskPath = "dev_sasikanth_rss_reader_images_cache"
-    )
 
   @Suppress("CAST_NEVER_SUCCEEDS")
   override suspend fun getImage(url: String, size: IntSize?): ImageBitmap? {
