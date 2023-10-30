@@ -36,6 +36,8 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
+  private var redirectCount = 0
+
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
     return try {
       // We are mainly doing this check to avoid creating duplicates while refreshing feeds
@@ -71,7 +73,6 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         HttpStatusCode.SeeOther,
         HttpStatusCode.TemporaryRedirect,
         HttpStatusCode.PermanentRedirect -> {
-          var redirectCount = 0
           if (redirectCount < MAX_REDIRECTS_ALLOWED) {
             val newUrl = response.headers["Location"]
             if (newUrl != url && newUrl != null) {
@@ -108,7 +109,6 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         // causing it to loop. So, we are using the redirect check here.
         is HtmlContentException,
         is XmlParsingError -> {
-          var redirectCount = 0
           val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
           if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
             redirectCount += 1
