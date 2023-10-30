@@ -33,7 +33,7 @@ import me.tatarka.inject.annotations.Inject
 class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
   companion object {
-    private const val MAX_REDIRECTS_ALLOWED = 3
+    private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
   private var redirectCount = 0
