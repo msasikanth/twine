@@ -26,6 +26,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readBytes
+import io.ktor.http.HttpStatusCode
 import io.ktor.util.toMap
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -60,6 +61,10 @@ import platform.Foundation.stringByAddingPercentEncodingWithAllowedCharacters
 @AppScope
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class IOSImageLoader(private val httpClient: HttpClient) : ImageLoader {
+
+  companion object {
+    private const val MAX_REDIRECTS_ALLOWED = 5
+  }
 
   private val memoryCacheSize = (10 * 1024 * 1024).toULong() // 10 MB cache size
   private val diskCacheSize = (50 * 1024 * 1024).toULong() // 50 MB cache size
@@ -105,6 +110,34 @@ class IOSImageLoader(private val httpClient: HttpClient) : ImageLoader {
   private suspend fun downloadImage(url: String): ByteArray? {
     val request = createNSURLRequest(url) ?: return null
     val response = httpClient.get(url)
+
+    when (response.status) {
+      HttpStatusCode.MultipleChoices,
+      HttpStatusCode.MovedPermanently,
+      HttpStatusCode.Found,
+      HttpStatusCode.SeeOther,
+      HttpStatusCode.TemporaryRedirect,
+      HttpStatusCode.PermanentRedirect -> {
+        var redirectCount = 0
+        if (redirectCount < MAX_REDIRECTS_ALLOWED) {
+          val newUrl = response.headers["Location"]
+          if (newUrl != url && newUrl != null) {
+            redirectCount += 1
+            downloadImage(url = newUrl)
+          } else {
+            return null
+          }
+        } else {
+          return null
+        }
+      }
+      HttpStatusCode.OK -> {
+        // continue
+      }
+      else -> {
+        return null
+      }
+    }
 
     return response.readBytes().also { data ->
       if (data.isNotEmpty()) {
