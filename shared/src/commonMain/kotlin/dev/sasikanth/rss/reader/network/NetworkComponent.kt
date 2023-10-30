@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import io.github.aakira.napier.log
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -41,14 +42,14 @@ internal fun <T : HttpClientEngineConfig> httpClient(
       logger =
         object : Logger {
           override fun log(message: String) {
-            println(
+            log(tag = "HttpClient") {
               """
               |---
               |$message
               |---
             """
                 .trimMargin("|")
-            )
+            }
           }
         }
     }
