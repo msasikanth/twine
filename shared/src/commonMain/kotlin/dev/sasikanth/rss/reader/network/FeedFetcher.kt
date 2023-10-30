@@ -17,14 +17,16 @@ package dev.sasikanth.rss.reader.network
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
-import dev.sasikanth.rss.reader.utils.XmlParsingError
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import me.tatarka.inject.annotations.Inject
@@ -36,93 +38,95 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
-  private var redirectCount = 0
-
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
-    return try {
-      // We are mainly doing this check to avoid creating duplicates while refreshing feeds
-      // after the app update
-      val transformedUrl =
-        if (transformUrl) {
-          // Currently Ktor Url parses relative URLs,
-          // if it fails to properly parse the given URL, it
-          // default to localhost.
-          //
-          // This will cause the network call to fail,
-          // so we are setting the host manually
-          // https://youtrack.jetbrains.com/issue/KTOR-360
-          URLBuilder()
-            .apply {
-              protocol = URLProtocol.HTTPS
-              host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
-            }
-            .build()
-        } else {
-          URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
-        }
+    return fetch(url, transformUrl, redirectCount = 0)
+  }
 
-      val response = httpClient.get(transformedUrl.toString())
+  private suspend fun fetch(
+    url: String,
+    transformUrl: Boolean,
+    redirectCount: Int,
+  ): FeedFetchResult {
+    return if (redirectCount < MAX_REDIRECTS_ALLOWED) {
+      try {
+        // We are mainly doing this check to avoid creating duplicates while refreshing feeds
+        // after the app update
+        val transformedUrl = transformUrl(url, transformUrl)
+        val response = httpClient.get(transformedUrl.toString())
 
-      when (response.status) {
-        HttpStatusCode.OK -> {
-          parseContent(response, transformedUrl.toString())
-        }
-        HttpStatusCode.MultipleChoices,
-        HttpStatusCode.MovedPermanently,
-        HttpStatusCode.Found,
-        HttpStatusCode.SeeOther,
-        HttpStatusCode.TemporaryRedirect,
-        HttpStatusCode.PermanentRedirect -> {
-          if (redirectCount < MAX_REDIRECTS_ALLOWED) {
-            val newUrl = response.headers["Location"]
-            if (newUrl != url && newUrl != null) {
-              redirectCount += 1
-              fetch(url = newUrl, transformUrl = false)
-            } else {
-              FeedFetchResult.Error(Exception("Failed to fetch the feed"))
-            }
-          } else {
-            FeedFetchResult.TooManyRedirects
+        when (response.status) {
+          HttpStatusCode.OK -> {
+            parseContent(response, url, redirectCount)
+          }
+          HttpStatusCode.MultipleChoices,
+          HttpStatusCode.MovedPermanently,
+          HttpStatusCode.Found,
+          HttpStatusCode.SeeOther,
+          HttpStatusCode.TemporaryRedirect,
+          HttpStatusCode.PermanentRedirect -> {
+            handleHttpRedirect(response, url, redirectCount)
+          }
+          else -> {
+            FeedFetchResult.HttpStatusError(statusCode = response.status)
           }
         }
-        else -> {
-          FeedFetchResult.HttpStatusError(statusCode = response.status)
-        }
+      } catch (e: Exception) {
+        FeedFetchResult.Error(e)
       }
-    } catch (e: Exception) {
-      FeedFetchResult.Error(e)
+    } else {
+      FeedFetchResult.TooManyRedirects
     }
   }
 
-  private suspend fun parseContent(response: HttpResponse, url: String): FeedFetchResult {
+  private suspend fun parseContent(
+    response: HttpResponse,
+    url: String,
+    redirectCount: Int
+  ): FeedFetchResult {
     val responseContent = response.bodyAsText()
-    return try {
+    return if (response.contentType()?.withoutParameters() == ContentType.Text.Html) {
+      val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
+      if (feedUrl != url && !feedUrl.isNullOrBlank()) {
+        fetch(url = feedUrl, transformUrl = false, redirectCount = redirectCount + 1)
+      } else {
+        throw UnsupportedOperationException()
+      }
+    } else {
       val feedPayload = feedParser.parse(xmlContent = responseContent, feedUrl = url)
       FeedFetchResult.Success(feedPayload)
-    } catch (e: Exception) {
-      when (e) {
-        // There are situation where XML parsers fail to identify if it's
-        // a HTML document and fail, so trying to fetch link with HTML one
-        // last time just to be safe if it fails with XML parsing issue.
-        //
-        // In some cases the link that is returned might be same as the original
-        // causing it to loop. So, we are using the redirect check here.
-        is HtmlContentException,
-        is XmlParsingError -> {
-          val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
-          if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
-            redirectCount += 1
-            fetch(url = feedUrl, transformUrl = false)
-          } else {
-            if (e is XmlParsingError) {
-              throw e
-            } else {
-              throw UnsupportedOperationException()
-            }
-          }
+    }
+  }
+
+  private suspend fun handleHttpRedirect(
+    response: HttpResponse,
+    url: String,
+    redirectCount: Int
+  ): FeedFetchResult {
+    val newUrl = response.headers["Location"]
+    return if (newUrl != url && !newUrl.isNullOrBlank()) {
+      fetch(url = newUrl, transformUrl = false, redirectCount = redirectCount + 1)
+    } else {
+      FeedFetchResult.Error(Exception("Failed to fetch the feed"))
+    }
+  }
+
+  private fun transformUrl(url: String, transformUrl: Boolean): Url {
+    return if (transformUrl) {
+      // Currently Ktor Url parses relative URLs,
+      // if it fails to properly parse the given URL, it
+      // default to localhost.
+      //
+      // This will cause the network call to fail,
+      // so we are setting the host manually
+      // https://youtrack.jetbrains.com/issue/KTOR-360
+      URLBuilder()
+        .apply {
+          protocol = URLProtocol.HTTPS
+          host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
         }
-        else -> throw e
-      }
+        .build()
+    } else {
+      URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
     }
   }
 
