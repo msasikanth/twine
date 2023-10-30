@@ -53,6 +53,7 @@ interface FeedParser {
     internal const val TAG_FEATURED_IMAGE = "featuredImage"
     internal const val TAG_COMMENTS = "comments"
     internal const val TAG_IMAGE_URL = "imageUrl"
+    internal const val TAG_FEED_IMAGE = "image"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"

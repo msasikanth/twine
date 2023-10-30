@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_ENTRY
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_FEED
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ENCLOSURE
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_CHANNEL
@@ -92,7 +93,11 @@ private class IOSXmlFeedParser(
   private var currentData: MutableMap<String, String>? = null
   private var currentElement: String? = null
 
+  private val skippedTagsStack = mutableListOf<String>()
+
   override fun parser(parser: NSXMLParser, foundCharacters: String) {
+    if (skippedTagsStack.isNotEmpty()) return
+
     val currentElement = currentElement ?: return
     val currentData = currentData ?: return
 
@@ -113,6 +118,11 @@ private class IOSXmlFeedParser(
     qualifiedName: String?,
     attributes: Map<Any?, *>
   ) {
+    if (didStartElement == TAG_FEED_IMAGE) {
+      skippedTagsStack.add(TAG_FEATURED_IMAGE)
+      return
+    }
+
     if (feedType == null) {
       feedType =
         when (didStartElement) {
@@ -156,6 +166,10 @@ private class IOSXmlFeedParser(
     namespaceURI: String?,
     qualifiedName: String?
   ) {
+    if (didEndElement == TAG_FEED_IMAGE) {
+      skippedTagsStack.remove(TAG_FEATURED_IMAGE)
+    }
+
     if (didEndElement == TAG_RSS_ITEM || didEndElement == TAG_ATOM_ENTRY) {
       val hostLink = currentChannelData[TAG_LINK]!!
       val post =
