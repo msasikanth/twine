@@ -177,12 +177,14 @@ class RssRepository(
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
+    val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
+
     return QueryPagingSource(
-      countQuery = feedSearchFTSQueries.countSearchResults(searchQuery = searchQuery),
+      countQuery = feedSearchFTSQueries.countSearchResults(searchQuery = sanitizedSearchQuery),
       transacter = feedSearchFTSQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        feedSearchFTSQueries.search(searchQuery = searchQuery, limit, offset, ::mapToFeed)
+        feedSearchFTSQueries.search(searchQuery = sanitizedSearchQuery, limit, offset, ::mapToFeed)
       }
     )
   }
@@ -200,13 +202,15 @@ class RssRepository(
   }
 
   fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
+    val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
+
     return QueryPagingSource(
-      countQuery = postSearchFTSQueries.countSearchResults(searchQuery),
+      countQuery = postSearchFTSQueries.countSearchResults(sanitizedSearchQuery),
       transacter = postSearchFTSQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
         postSearchFTSQueries.search(
-          searchQuery = searchQuery,
+          searchQuery = sanitizedSearchQuery,
           sortOrder = sortOrder.value,
           limit = limit,
           offset = offset,
@@ -270,6 +274,10 @@ class RssRepository(
 
   fun numberOfFeeds(): Flow<Long> {
     return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
+  }
+
+  private fun sanitizeSearchQuery(searchQuery: String): String {
+    return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
 
   private fun mapToPostWithMetadata(

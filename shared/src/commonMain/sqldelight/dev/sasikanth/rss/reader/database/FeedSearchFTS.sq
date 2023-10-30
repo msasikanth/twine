@@ -25,7 +25,7 @@ END;
 countSearchResults:
 SELECT COUNT(*) FROM feed_search
 WHERE (
-  :searchQuery = ''
+  :searchQuery = '""'
   OR
   link IN (SELECT link FROM feed_search WHERE feed_search MATCH :searchQuery)
 );
@@ -33,7 +33,7 @@ WHERE (
 search:
 SELECT * FROM feed
 WHERE (
-  :searchQuery = ''
+  :searchQuery = '""'
   OR
   link IN (SELECT link FROM feed_search WHERE feed_search MATCH :searchQuery)
 )
