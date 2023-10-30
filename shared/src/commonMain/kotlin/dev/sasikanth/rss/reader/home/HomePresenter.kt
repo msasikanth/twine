@@ -260,7 +260,9 @@ class HomePresenter(
           Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
         } finally {
-          _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
+          _state.update {
+            it.copy(feedFetchingState = FeedFetchingState.Idle, feedsSheetMode = Default)
+          }
         }
       }
     }
