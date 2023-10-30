@@ -118,6 +118,8 @@ private class DocumentPickerDelegate(
       val scoped = didPickDocumentAtURL.startAccessingSecurityScopedResource()
       if (scoped) {
         didPickDocument(didPickDocumentAtURL)
+      } else {
+        cancelledDocumentPicker()
       }
     } catch (e: Exception) {
       cancelledDocumentPicker()
