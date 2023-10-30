@@ -81,7 +81,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
             val newUrl = response.headers["Location"]
             if (newUrl != url && newUrl != null) {
               redirectCount += 1
-              fetch(url = newUrl, fetchPosts = fetchPosts)
+              fetch(url = newUrl, fetchPosts = fetchPosts, transformUrl = false)
             } else {
               FeedFetchResult.Error(Exception("Failed to fetch the feed"))
             }
@@ -121,7 +121,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
           val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
           if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
             redirectCount += 1
-            fetch(url = feedUrl, fetchPosts = fetchPosts)
+            fetch(url = feedUrl, fetchPosts = fetchPosts, transformUrl = false)
           } else {
             if (e is XmlParsingError) {
               throw e

@@ -30,6 +30,8 @@ internal fun <T : HttpClientEngineConfig> httpClient(
   config: T.() -> Unit
 ): HttpClient {
   return HttpClient(engine) {
+    followRedirects = false
+
     engine { config() }
 
     install(HttpCache)
