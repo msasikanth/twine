@@ -64,19 +64,13 @@ import platform.darwin.NSObject
 @Suppress("CAST_NEVER_SUCCEEDS")
 class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
 
-  override suspend fun parse(
-    xmlContent: String,
-    feedUrl: String,
-    fetchPosts: Boolean
-  ): FeedPayload {
+  override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return withContext(dispatchersProvider.io) {
       suspendCoroutine { continuation ->
         var feedPayload: FeedPayload? = null
         val data = (xmlContent as NSString).dataUsingEncoding(NSUTF8StringEncoding)!!
         val xmlFeedParser =
-          IOSXmlFeedParser(feedUrl, fetchPosts) { parsedFeedPayload ->
-            feedPayload = parsedFeedPayload
-          }
+          IOSXmlFeedParser(feedUrl) { parsedFeedPayload -> feedPayload = parsedFeedPayload }
 
         val parser = NSXMLParser(data).apply { delegate = xmlFeedParser }
         val parserResult = parser.parse()
@@ -94,7 +88,6 @@ class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : Feed
 
 private class IOSXmlFeedParser(
   private val feedUrl: String,
-  private val fetchPosts: Boolean,
   private val onEnd: (FeedPayload) -> Unit
 ) : NSObject(), NSXMLParserDelegateProtocol {
 
@@ -170,7 +163,7 @@ private class IOSXmlFeedParser(
     namespaceURI: String?,
     qualifiedName: String?
   ) {
-    if (fetchPosts && (didEndElement == TAG_RSS_ITEM || didEndElement == TAG_ATOM_ENTRY)) {
+    if (didEndElement == TAG_RSS_ITEM || didEndElement == TAG_ATOM_ENTRY) {
       val hostLink = currentChannelData[TAG_LINK]!!
       val post =
         when (feedType) {

@@ -38,11 +38,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
   private var redirectCount = 0
 
-  suspend fun fetch(
-    url: String,
-    transformUrl: Boolean = true,
-    fetchPosts: Boolean
-  ): FeedFetchResult {
+  suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
     return try {
       // We are mainly doing this check to avoid creating duplicates while refreshing feeds
       // after the app update
@@ -69,7 +65,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
       when (response.status) {
         HttpStatusCode.OK -> {
-          parseContent(response, transformedUrl.toString(), fetchPosts)
+          parseContent(response, transformedUrl.toString())
         }
         HttpStatusCode.MultipleChoices,
         HttpStatusCode.MovedPermanently,
@@ -81,7 +77,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
             val newUrl = response.headers["Location"]
             if (newUrl != url && newUrl != null) {
               redirectCount += 1
-              fetch(url = newUrl, fetchPosts = fetchPosts, transformUrl = false)
+              fetch(url = newUrl, transformUrl = false)
             } else {
               FeedFetchResult.Error(Exception("Failed to fetch the feed"))
             }
@@ -98,15 +94,10 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     }
   }
 
-  private suspend fun parseContent(
-    response: HttpResponse,
-    url: String,
-    fetchPosts: Boolean
-  ): FeedFetchResult {
+  private suspend fun parseContent(response: HttpResponse, url: String): FeedFetchResult {
     val responseContent = response.bodyAsText()
     return try {
-      val feedPayload =
-        feedParser.parse(xmlContent = responseContent, feedUrl = url, fetchPosts = fetchPosts)
+      val feedPayload = feedParser.parse(xmlContent = responseContent, feedUrl = url)
       FeedFetchResult.Success(feedPayload)
     } catch (e: Exception) {
       when (e) {
@@ -121,7 +112,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
           val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
           if (feedUrl != url && !feedUrl.isNullOrBlank() && redirectCount < MAX_REDIRECTS_ALLOWED) {
             redirectCount += 1
-            fetch(url = feedUrl, fetchPosts = fetchPosts, transformUrl = false)
+            fetch(url = feedUrl, transformUrl = false)
           } else {
             if (e is XmlParsingError) {
               throw e

@@ -31,11 +31,7 @@ import org.xmlpull.v1.XmlPullParserException
 @Inject
 class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
 
-  override suspend fun parse(
-    xmlContent: String,
-    feedUrl: String,
-    fetchPosts: Boolean
-  ): FeedPayload {
+  override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
         val parser =
@@ -46,8 +42,8 @@ class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) : 
           parser.nextTag()
 
           when (parser.name) {
-            RSS_TAG -> AndroidRssParser(parser, feedUrl, fetchPosts).parse()
-            ATOM_TAG -> AndroidAtomParser(parser, feedUrl, fetchPosts).parse()
+            RSS_TAG -> AndroidRssParser(parser, feedUrl).parse()
+            ATOM_TAG -> AndroidAtomParser(parser, feedUrl).parse()
             HTML_TAG -> throw HtmlContentException()
             else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
           }

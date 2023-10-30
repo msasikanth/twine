@@ -101,7 +101,7 @@ interface FeedParser {
     }
   }
 
-  suspend fun parse(xmlContent: String, feedUrl: String, fetchPosts: Boolean = true): FeedPayload
+  suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload
 }
 
 internal class HtmlContentException : Exception()

@@ -62,14 +62,10 @@ class RssRepository(
   suspend fun addFeed(
     feedLink: String,
     title: String? = null,
-    transformUrl: Boolean = true,
-    fetchPosts: Boolean = true
+    transformUrl: Boolean = true
   ): FeedAddResult {
     return withContext(ioDispatcher) {
-      when (
-        val feedFetchResult =
-          feedFetcher.fetch(url = feedLink, transformUrl = transformUrl, fetchPosts = fetchPosts)
-      ) {
+      when (val feedFetchResult = feedFetcher.fetch(url = feedLink, transformUrl = transformUrl)) {
         is FeedFetchResult.Success -> {
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
@@ -82,19 +78,17 @@ class RssRepository(
               link = feedPayload.link
             )
 
-            if (fetchPosts) {
-              postQueries.transaction {
-                feedPayload.posts.forEach { post ->
-                  postQueries.upsert(
-                    title = post.title,
-                    description = post.description,
-                    imageUrl = post.imageUrl,
-                    date = Instant.fromEpochMilliseconds(post.date),
-                    link = post.link,
-                    commnetsLink = post.commentsLink,
-                    feedLink = feedPayload.link,
-                  )
-                }
+            postQueries.transaction {
+              feedPayload.posts.forEach { post ->
+                postQueries.upsert(
+                  title = post.title,
+                  description = post.description,
+                  imageUrl = post.imageUrl,
+                  date = Instant.fromEpochMilliseconds(post.date),
+                  link = post.link,
+                  commnetsLink = post.commentsLink,
+                  feedLink = feedPayload.link,
+                )
               }
             }
 
