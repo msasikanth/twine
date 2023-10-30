@@ -28,6 +28,6 @@ internal actual interface NetworkComponent {
   @Provides
   @AppScope
   fun providesHttpClient(): HttpClient {
-    return HttpClient(OkHttp) { engine { config { retryOnConnectionFailure(true) } } }
+    return httpClient(engine = OkHttp, config = { config { retryOnConnectionFailure(true) } })
   }
 }

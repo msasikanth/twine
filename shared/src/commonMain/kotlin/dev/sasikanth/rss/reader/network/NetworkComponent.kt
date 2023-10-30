@@ -15,4 +15,40 @@
  */
 package dev.sasikanth.rss.reader.network
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngineConfig
+import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.plugins.cache.HttpCache
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+
 internal expect interface NetworkComponent
+
+internal fun <T : HttpClientEngineConfig> httpClient(
+  engine: HttpClientEngineFactory<T>,
+  config: T.() -> Unit
+): HttpClient {
+  return HttpClient(engine) {
+    engine { config() }
+
+    install(HttpCache)
+
+    install(Logging) {
+      level = LogLevel.INFO
+      logger =
+        object : Logger {
+          override fun log(message: String) {
+            println(
+              """
+              |---
+              |$message
+              |---
+            """
+                .trimMargin("|")
+            )
+          }
+        }
+    }
+  }
+}

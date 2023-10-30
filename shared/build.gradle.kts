@@ -94,6 +94,7 @@ kotlin {
         implementation(libs.bundles.compose)
         implementation(libs.bundles.kotlinx)
         implementation(libs.ktor.core)
+        implementation(libs.ktor.client.logging)
         implementation(libs.napier)
         implementation(libs.sqldelight.extensions.coroutines)
         implementation(libs.sqldelight.extensions.paging)

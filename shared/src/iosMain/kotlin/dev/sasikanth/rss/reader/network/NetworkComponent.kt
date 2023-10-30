@@ -28,6 +28,9 @@ internal actual interface NetworkComponent {
   @Provides
   @AppScope
   fun providesHttpClient(): HttpClient {
-    return HttpClient(Darwin) { engine { configureRequest { setAllowsCellularAccess(true) } } }
+    return httpClient(
+      engine = Darwin,
+      config = { configureRequest { setAllowsCellularAccess(true) } }
+    )
   }
 }
