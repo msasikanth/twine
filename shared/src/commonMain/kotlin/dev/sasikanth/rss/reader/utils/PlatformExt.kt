@@ -16,3 +16,5 @@
 package dev.sasikanth.rss.reader.utils
 
 internal expect val canBlurImage: Boolean
+
+internal expect fun String.decodeUrlEncodedString(): String
