@@ -715,8 +715,8 @@ private fun BottomSheetScaffoldLayout(
       bodyPlaceables.fastForEach { it.placeRelative(0, 0) }
       topBarPlaceables?.fastForEach { it.placeRelative(0, 0) }
       fabPlaceable?.fastForEach { it.placeRelative(fabOffsetX, fabOffsetY) }
-      snackbarPlaceables.fastForEach { it.placeRelative(snackbarOffsetX, snackbarOffsetY) }
       sheetPlaceables.fastForEach { it.placeRelative(0, sheetOffsetY) }
+      snackbarPlaceables.fastForEach { it.placeRelative(snackbarOffsetX, snackbarOffsetY) }
     }
   }
 }
