@@ -56,7 +56,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
         when (response.status) {
           HttpStatusCode.OK -> {
-            parseContent(response, url, redirectCount)
+            parseContent(response, transformedUrl.toString(), redirectCount)
           }
           HttpStatusCode.MultipleChoices,
           HttpStatusCode.MovedPermanently,
@@ -64,7 +64,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
           HttpStatusCode.SeeOther,
           HttpStatusCode.TemporaryRedirect,
           HttpStatusCode.PermanentRedirect -> {
-            handleHttpRedirect(response, url, redirectCount)
+            handleHttpRedirect(response, transformedUrl.toString(), redirectCount)
           }
           else -> {
             FeedFetchResult.HttpStatusError(statusCode = response.status)
