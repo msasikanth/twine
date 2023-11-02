@@ -80,11 +80,13 @@ internal fun FeedPayload.Companion.mapAtomFeed(
 ): FeedPayload {
   val link = atomMap[TAG_LINK]!!.trim()
   val domain = Url(link)
-  val iconUrl =
-    FeedParser.feedIcon(
-      if (domain.host != "localhost") domain.host
-      else domain.pathSegments.first().split(" ").first().trim()
-    )
+  val host =
+    if (domain.host != "localhost") {
+      domain.host
+    } else {
+      throw NullPointerException("Unable to get host domain")
+    }
+  val iconUrl = FeedParser.feedIcon(host)
 
   return FeedPayload(
     name = FeedParser.cleanText(atomMap[TAG_TITLE] ?: link, decodeUrlEncoding = true)!!,

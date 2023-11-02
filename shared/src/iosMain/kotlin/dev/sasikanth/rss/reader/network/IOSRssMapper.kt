@@ -92,11 +92,13 @@ internal fun FeedPayload.Companion.mapRssFeed(
 ): FeedPayload {
   val link = rssMap[TAG_LINK]!!.trim()
   val domain = Url(link)
-  val iconUrl =
-    FeedParser.feedIcon(
-      if (domain.host != "localhost") domain.host
-      else domain.pathSegments.first().split(" ").first().trim()
-    )
+  val host =
+    if (domain.host != "localhost") {
+      domain.host
+    } else {
+      throw NullPointerException("Unable to get host domain")
+    }
+  val iconUrl = FeedParser.feedIcon(host)
 
   return FeedPayload(
     name = FeedParser.cleanText(rssMap[TAG_TITLE] ?: link, decodeUrlEncoding = true)!!,
