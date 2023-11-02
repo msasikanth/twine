@@ -93,6 +93,7 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverseProgress
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 private val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
@@ -130,7 +131,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   val linkHandler = LocalLinkHandler.current
 
   LaunchedEffect(Unit) {
-    homePresenter.effects.collect { effect ->
+    homePresenter.effects.collectLatest { effect ->
       when (effect) {
         is HomeEffect.OpenPost -> {
           linkHandler.openLink(effect.post.link)

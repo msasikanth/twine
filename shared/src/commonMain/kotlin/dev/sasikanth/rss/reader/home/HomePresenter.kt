@@ -139,7 +139,7 @@ class HomePresenter(
         initialValue = HomeState.DEFAULT
       )
 
-    val effects = MutableSharedFlow<HomeEffect>(extraBufferCapacity = 10)
+    val effects = MutableSharedFlow<HomeEffect>()
 
     fun dispatch(event: HomeEvent) {
       when (event) {
