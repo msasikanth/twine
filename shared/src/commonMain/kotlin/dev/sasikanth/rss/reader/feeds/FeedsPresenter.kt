@@ -153,13 +153,13 @@ class FeedsPresenter(
 
     @OptIn(FlowPreview::class)
     private fun init() {
+      val feeds =
+        createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allFeeds() }
+          .flow
+          .cachedIn(coroutineScope)
+
       observableSelectedFeed.selectedFeed
         .flatMapLatest { selectedFeed ->
-          val feeds =
-            createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allFeeds() }
-              .flow
-              .cachedIn(coroutineScope)
-
           rssRepository.numberOfPinnedFeeds().map { numberOfPinnedFeeds ->
             Triple(selectedFeed, feeds, numberOfPinnedFeeds)
           }
