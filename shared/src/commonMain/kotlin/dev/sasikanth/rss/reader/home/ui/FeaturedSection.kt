@@ -129,7 +129,12 @@ internal fun FeaturedSection(
 
         snapshotFlow {
             val settledPage = pagerState.settledPage
-            val offset = pagerState.getOffsetFractionForPage(settledPage).coerceIn(-1f, 1f)
+            val offset =
+              if (settledPage in 0..pagerState.pageCount) {
+                pagerState.getOffsetFractionForPage(settledPage).coerceIn(-1f, 1f)
+              } else {
+                0f
+              }
 
             settledPage to
               when {
@@ -261,7 +266,12 @@ private fun FeaturedSectionBlurredBackground(
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {
   val settledPage = pagerState.settledPage
-  val offsetFraction = pagerState.getOffsetFractionForPage(settledPage)
+  val offsetFraction =
+    if (settledPage in 0..pagerState.pageCount) {
+      pagerState.getOffsetFractionForPage(settledPage)
+    } else {
+      0f
+    }
 
   return graphicsLayer {
     alpha =
