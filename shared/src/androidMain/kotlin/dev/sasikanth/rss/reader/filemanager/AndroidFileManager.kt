@@ -51,7 +51,9 @@ class AndroidFileManager(context: Context) : FileManager {
   }
 
   override suspend fun read(): String? {
-    openDocumentLauncher.launch(arrayOf("application/xml", "text/xml", "text/x-opml"))
+    openDocumentLauncher.launch(
+      arrayOf("application/xml", "application/octet-stream", "text/xml", "text/x-opml")
+    )
     return result.receiveAsFlow().first()
   }
 
