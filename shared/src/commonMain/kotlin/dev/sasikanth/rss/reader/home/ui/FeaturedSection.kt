@@ -20,7 +20,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -43,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -195,7 +195,28 @@ private fun FeaturedSectionBlurredBackground(
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  BoxWithConstraints(modifier = modifier) {
+  Box(modifier = modifier) {
+    val gradientOverlayModifier =
+      Modifier.drawWithCache {
+        val radialGradient =
+          Brush.radialGradient(
+            colors =
+              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+            center = Offset(x = this.size.width, y = 40f)
+          )
+
+        val linearGradient =
+          Brush.verticalGradient(
+            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+          )
+
+        onDrawWithContent {
+          drawContent()
+          drawRect(radialGradient)
+          drawRect(linearGradient)
+        }
+      }
+
     if (canBlurImage && featuredItemBlurEnabled) {
       featuredPosts.fastForEachReversed { post ->
         val actualIndex = featuredPosts.indexOf(post)
@@ -205,6 +226,7 @@ private fun FeaturedSectionBlurredBackground(
           modifier =
             Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
               .blur(100.dp, BlurredEdgeTreatment.Unbounded)
+              .then(gradientOverlayModifier)
               .alpha(actualIndex, pagerState),
           contentDescription = null,
           contentScale = ContentScale.Crop,
@@ -215,51 +237,25 @@ private fun FeaturedSectionBlurredBackground(
     } else {
       Box(
         modifier =
-          Modifier.aspectRatio(featuredGradientBackgroundAspectRatio).composed {
-            val colorStops =
-              listOf(
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
-                AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
-              )
+          Modifier.aspectRatio(featuredGradientBackgroundAspectRatio)
+            .composed {
+              val colorStops =
+                listOf(
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
+                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+                )
 
-            background(Brush.verticalGradient(colorStops))
-          }
+              background(Brush.verticalGradient(colorStops))
+            }
+            .then(gradientOverlayModifier)
       )
     }
-
-    Box(
-      modifier =
-        Modifier.matchParentSize()
-          .background(
-            brush =
-              Brush.radialGradient(
-                colors =
-                  listOf(
-                    Color.Black,
-                    Color.Black.copy(alpha = 0.0f),
-                    Color.Black.copy(alpha = 0.0f)
-                  ),
-                center = Offset(x = constraints.maxWidth.toFloat(), y = 40f)
-              )
-          )
-    )
-
-    Box(
-      modifier =
-        Modifier.matchParentSize()
-          .background(
-            brush =
-              Brush.verticalGradient(
-                colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-              )
-          )
-    )
   }
 }
 
