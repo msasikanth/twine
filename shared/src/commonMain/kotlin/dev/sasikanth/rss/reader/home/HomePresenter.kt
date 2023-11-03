@@ -225,7 +225,7 @@ class HomePresenter(
           }
         }
         .distinctUntilChangedBy { (selectedFeed, _, _) -> selectedFeed }
-        .onEach { effects.tryEmit(HomeEffect.ScrollToTop) }
+        .onEach { effects.emit(HomeEffect.ScrollToTop) }
         .launchIn(coroutineScope)
 
       settingsRepository.enableFeaturedItemBlur
