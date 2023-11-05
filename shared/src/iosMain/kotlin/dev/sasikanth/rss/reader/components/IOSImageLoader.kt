@@ -28,6 +28,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.readBytes
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.toMap
+import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
@@ -81,16 +82,18 @@ class IOSImageLoader(private val httpClient: HttpClient) : ImageLoader {
   @Suppress("CAST_NEVER_SUCCEEDS")
   override suspend fun getImage(url: String, size: IntSize?): ImageBitmap? {
     return withContext(Dispatchers.IO) {
-      val encodedUrl =
-        (url as NSString).stringByAddingPercentEncodingWithAllowedCharacters(
-          NSCharacterSet.URLFragmentAllowedCharacterSet
-        )
-          ?: return@withContext null
-      val data = loadCachedImage(encodedUrl) ?: downloadImage(encodedUrl) ?: return@withContext null
-
       return@withContext try {
+        val encodedUrl =
+          (url as NSString).stringByAddingPercentEncodingWithAllowedCharacters(
+            NSCharacterSet.URLFragmentAllowedCharacterSet
+          )
+            ?: return@withContext null
+        val data =
+          loadCachedImage(encodedUrl) ?: downloadImage(encodedUrl) ?: return@withContext null
+
         Image.makeFromEncoded(data).toBitmap(size).asComposeImageBitmap()
       } catch (e: Exception) {
+        Sentry.captureException(e) { scope -> scope.setContext("image_url", url) }
         null
       }
     }
