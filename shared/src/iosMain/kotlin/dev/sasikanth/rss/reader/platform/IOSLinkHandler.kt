@@ -26,6 +26,8 @@ import platform.SafariServices.SFSafariViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIModalPresentationPageSheet
 import platform.UIKit.UIViewController
+import platform.darwin.dispatch_async
+import platform.darwin.dispatch_get_main_queue
 
 @Inject
 @ActivityScope
@@ -36,16 +38,29 @@ class IOSLinkHandler(
 
   override suspend fun openLink(link: String) {
     val browserType = settingsRepository.browserType.first()
+    val url = NSURL(string = link)
+
     when (browserType) {
       BrowserType.Default -> {
-        UIApplication.sharedApplication().openURL(NSURL(string = link))
+        val canOpenUrl = UIApplication.sharedApplication().canOpenURL(url)
+        if (canOpenUrl) {
+          dispatch_async(dispatch_get_main_queue()) {
+            UIApplication.sharedApplication().openURL(url)
+          }
+        } else {
+          inAppBrowser(url)
+        }
       }
       BrowserType.InApp -> {
-        val safari = SFSafariViewController(NSURL(string = link))
-        safari.modalPresentationStyle = UIModalPresentationPageSheet
-
-        uiViewControllerProvider().presentViewController(safari, animated = true, completion = null)
+        inAppBrowser(url)
       }
     }
+  }
+
+  private fun inAppBrowser(url: NSURL) {
+    val safari = SFSafariViewController(url)
+    safari.modalPresentationStyle = UIModalPresentationPageSheet
+
+    uiViewControllerProvider().presentViewController(safari, animated = true, completion = null)
   }
 }
