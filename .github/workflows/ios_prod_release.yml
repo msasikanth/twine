@@ -91,7 +91,7 @@ jobs:
 
       - name: Upload debug symbols to Sentry
         run: |
-          brew install getsentry/tools/sentry-cli;
+          curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION=2.21.2 bash;
 
           sentry-cli debug-files upload --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} \
           --include-sources \
