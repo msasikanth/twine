@@ -138,6 +138,7 @@ internal fun BookmarksScreen(
           }
 
           CompactFloatingActionButton(
+            label = LocalStrings.current.scrollToTop,
             visible = showScrollToTop,
             modifier =
               Modifier.padding(

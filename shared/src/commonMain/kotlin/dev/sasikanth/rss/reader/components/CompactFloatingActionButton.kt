@@ -29,13 +29,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ElevationTokens
 import kotlinx.coroutines.launch
 
 @Composable
 internal fun BoxScope.CompactFloatingActionButton(
+  label: String,
   visible: Boolean,
   modifier: Modifier = Modifier,
   onClick: suspend () -> Unit
@@ -64,7 +64,7 @@ internal fun BoxScope.CompactFloatingActionButton(
         )
     ) {
       Text(
-        text = LocalStrings.current.scrollToTop,
+        text = label,
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.textEmphasisHigh
       )

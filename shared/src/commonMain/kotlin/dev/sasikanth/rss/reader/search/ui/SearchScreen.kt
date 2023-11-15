@@ -159,6 +159,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
         }
 
         CompactFloatingActionButton(
+          label = LocalStrings.current.scrollToTop,
           visible = showScrollToTop,
           modifier =
             Modifier.padding(

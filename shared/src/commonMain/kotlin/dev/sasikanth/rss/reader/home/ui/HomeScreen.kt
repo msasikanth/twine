@@ -228,6 +228,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
         val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
         CompactFloatingActionButton(
+          label = LocalStrings.current.scrollToTop,
           visible = showScrollToTop,
           modifier =
             Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
