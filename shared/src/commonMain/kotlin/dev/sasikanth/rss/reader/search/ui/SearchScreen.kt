@@ -69,9 +69,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -158,7 +158,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
           }
         }
 
-        ScrollToTopButton(
+        CompactFloatingActionButton(
           visible = showScrollToTop,
           modifier =
             Modifier.padding(

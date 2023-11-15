@@ -71,8 +71,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
-import dev.sasikanth.rss.reader.components.ScrollToTopButton
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
@@ -227,7 +227,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       floatingActionButton = {
         val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
-        ScrollToTopButton(
+        CompactFloatingActionButton(
           visible = showScrollToTop,
           modifier =
             Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
