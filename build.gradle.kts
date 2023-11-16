@@ -29,7 +29,7 @@ plugins {
   alias(libs.plugins.buildKonfig).apply(false)
   alias(libs.plugins.sentry.android).apply(false)
   alias(libs.plugins.kotlin.parcelize).apply(false)
-  alias(libs.plugins.kotlinx.serialization).apply(false)
+  alias(libs.plugins.kotlin.serialization).apply(false)
 }
 
 allprojects {
