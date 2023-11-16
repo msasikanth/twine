@@ -14,7 +14,6 @@ napier = "2.6.1"
 kotlinx_coroutines = "1.7.3"
 kotlinx_date_time = "0.4.1"
 kotlinx_immutable_collections = "0.3.6"
-kotlinx_serialization = "1.9.10"
 decompose = "2.1.4-compose-experimental"
 essenty = "1.2.0"
 androidx_activity = "1.8.1"
@@ -111,7 +110,7 @@ kotlin_multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin_cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
-kotlinx_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinx_serialization" }
+kotlinx_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
