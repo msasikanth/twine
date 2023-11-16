@@ -16,7 +16,6 @@
 @file:Suppress("DSL_SCOPE_VIOLATION")
 
 import com.diffplug.gradle.spotless.SpotlessExtension
-import org.jetbrains.compose.ComposeExtension
 
 plugins {
   // this is necessary to avoid the plugins to be loaded multiple times
@@ -57,10 +56,5 @@ allprojects {
       trimTrailingWhitespace()
       endWithNewline()
     }
-  }
-
-  plugins.withId("org.jetbrains.compose") {
-    val compose = extensions.getByName("compose") as ComposeExtension
-    compose.kotlinCompilerPlugin.set(libs.versions.compose.compiler)
   }
 }

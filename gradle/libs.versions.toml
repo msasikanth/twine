@@ -2,7 +2,6 @@
 kotlin = "1.9.10"
 android_gradle_plugin = "8.1.3"
 compose = "1.5.10"
-compose_compiler = "1.5.2"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
@@ -53,7 +52,6 @@ compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
-compose_compiler = { module = "org.jetbrains.compose.compiler:compiler", version.ref = "compose_compiler" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
