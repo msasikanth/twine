@@ -355,7 +355,12 @@ class HomePresenter(
       coroutineScope.launch {
         _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
         try {
-          rssRepository.updateFeeds()
+          val selectedFeed = _state.value.selectedFeed
+          if (selectedFeed != null) {
+            rssRepository.updateFeed(selectedFeed.link)
+          } else {
+            rssRepository.updateFeeds()
+          }
         } catch (e: Exception) {
           Sentry.captureException(e)
         } finally {

@@ -122,6 +122,10 @@ class RssRepository(
     results.flatten().joinAll()
   }
 
+  suspend fun updateFeed(selectedFeedLink: String) {
+    withContext(ioDispatcher) { addFeed(feedLink = selectedFeedLink, transformUrl = false) }
+  }
+
   fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
     return postQueries
       .featuredPosts(
