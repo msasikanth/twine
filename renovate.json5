@@ -7,10 +7,13 @@
     {
       "groupName": "Kotlin, KSP and Compose Multiplatform",
       "groupSlug": "kotlin",
-      "matchPackagePatterns": [
-        "^org.jetbrains.kotlin.*",
-        "^com.google.devtools.ksp",
-        "^org.jetbrains.compose.*",
+      "matchPackagePrefixes": [
+        "org.jetbrains.kotlin",
+        "com.google.devtools.ksp",
+        "org.jetbrains.compose"
+      ],
+      excludePackagePrefixes: [
+        "org.jetbrains.kotlinx"
       ]
     },
     {
