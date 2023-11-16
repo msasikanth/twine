@@ -3,15 +3,14 @@
   "extends": [
     "config:base"
   ],
-  "automergeType": "branch",
   "packageRules": [
     {
-      "groupName": "Kotlin, KSP and Compose Compiler",
+      "groupName": "Kotlin, KSP and Compose Multiplatform",
       "groupSlug": "kotlin",
       "matchPackageNames": [
+        "org.jetbrains.kotlin",
         "com.google.devtools.ksp",
-        "org.jetbrains.compose.compiler",
-        "org.jetbrains.kotlin"
+        "org.jetbrains.compose",
       ]
     },
     {
@@ -24,7 +23,9 @@
     {
       "description": "Automerge minor updates",
       "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true
     }
   ]
 }
