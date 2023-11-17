@@ -190,7 +190,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           feedsSheetMode = state.feedsSheetMode,
-          isFetchingFeed = { state.isFetchingFeed },
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
           editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
           exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) }

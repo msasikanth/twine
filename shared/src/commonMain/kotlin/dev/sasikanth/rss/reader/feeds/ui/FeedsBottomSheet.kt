@@ -100,7 +100,6 @@ internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
   bottomSheetSwipeTransition: Transition<Float>,
   feedsSheetMode: FeedsSheetMode,
-  isFetchingFeed: () -> Boolean,
   closeSheet: () -> Unit,
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit
@@ -135,6 +134,24 @@ internal fun FeedsBottomSheet(
       )
     } else {
       BottomSheetExpandedContent(
+        searchQuery = feedsPresenter.searchQuery,
+        feedsListItemTypes = state.feedsListInExpandedState.collectAsLazyPagingItems(),
+        selectedFeed = state.selectedFeed,
+        feedsSheetMode = feedsSheetMode,
+        canPinFeeds = state.canPinFeeds,
+        onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+        onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
+        closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
+        onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+        onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
+        onFeedNameChanged = { newFeedName, feedLink ->
+          feedsPresenter.dispatch(
+            FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
+          )
+        },
+        editFeeds = editFeeds,
+        exitFeedsEdit = exitFeedsEdit,
+        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -147,26 +164,7 @@ internal fun FeedsBottomSheet(
                 }
                 .toFloat()
             alpha = targetAlpha
-          },
-        searchQuery = feedsPresenter.searchQuery,
-        feedsListItemTypes = state.feedsListInExpandedState.collectAsLazyPagingItems(),
-        selectedFeed = state.selectedFeed,
-        feedsSheetMode = feedsSheetMode,
-        canPinFeeds = state.canPinFeeds,
-        isFetchingFeed = isFetchingFeed,
-        onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
-        onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
-        onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
-        editFeeds = editFeeds,
-        exitFeedsEdit = exitFeedsEdit,
-        onFeedNameChanged = { newFeedName, feedLink ->
-          feedsPresenter.dispatch(
-            FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
-          )
-        },
-        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) }
+          }
       )
     }
   }
@@ -179,7 +177,6 @@ private fun BottomSheetExpandedContent(
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
   searchQuery: TextFieldValue,
-  isFetchingFeed: () -> Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
@@ -220,15 +217,6 @@ private fun BottomSheetExpandedContent(
     val focusManager = LocalFocusManager.current
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val keyboardState by keyboardVisibilityAsState()
-
-    LaunchedEffect(keyboardState) {
-      if (
-        keyboardState == KeyboardState.Closed && !isFetchingFeed() && feedsSheetMode == LinkEntry
-      ) {
-        focusManager.clearFocus()
-        exitFeedsEdit()
-      }
-    }
 
     Box {
       LazyColumn(
