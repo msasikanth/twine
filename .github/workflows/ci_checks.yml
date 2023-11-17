@@ -15,7 +15,7 @@ jobs:
   code-formatting:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 20
         uses: actions/setup-java@v3
@@ -30,7 +30,7 @@ jobs:
   common-tests:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 20
         uses: actions/setup-java@v3
@@ -46,7 +46,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup JDK 20
         uses: actions/setup-java@v3
