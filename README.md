@@ -13,6 +13,19 @@ user interface and experience to browse through the feeds, and supports Material
 <a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
 <a href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us;releaseDate=1694390400" alt="Download on the App Store" width="200px"></a>
 
+## Screenshots
+
+<p style="text-align: center;">
+  <img src="readme_images/home.png" width="250" alt="Home Screen"/>
+  <img src="readme_images/home_scrolled.png" width="250" alt="Home Screen Scrolled"/>
+  <img src="readme_images/feeds_sheet.png" width="250" alt="Feeds Sheet"/>
+  <img src="readme_images/feeds_sheet_add_feed.png" width="250" alt="Add Feed"/>
+  <img src="readme_images/feeds_sheet_edit.png" width="250" alt="Edit Feeds"/>
+  <img src="readme_images/search.png" width="250" alt="Search Screen"/>
+  <img src="readme_images/bookmarks.png" width="250" alt="Bookmarks Screen"/>
+  <img src="readme_images/settings.png" width="250" alt="Settings Screen"/>
+</p>
+
 ## Features ✨
 
 - Supports RSS & Atom feeds
