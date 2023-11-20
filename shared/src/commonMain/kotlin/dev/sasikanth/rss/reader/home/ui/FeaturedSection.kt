@@ -261,15 +261,15 @@ private fun FeaturedSectionBlurredBackground(
 
 @OptIn(ExperimentalFoundationApi::class)
 private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {
-  val settledPage = pagerState.settledPage
-  val offsetFraction =
-    if (settledPage in 0..pagerState.pageCount) {
-      pagerState.getOffsetFractionForPage(settledPage)
-    } else {
-      0f
-    }
-
   return graphicsLayer {
+    val settledPage = pagerState.settledPage
+    val offsetFraction =
+      if (settledPage in 0..pagerState.pageCount) {
+        pagerState.getOffsetFractionForPage(settledPage)
+      } else {
+        0f
+      }
+
     alpha =
       when {
         index == settledPage -> lerp(1f, 0f, offsetFraction)
