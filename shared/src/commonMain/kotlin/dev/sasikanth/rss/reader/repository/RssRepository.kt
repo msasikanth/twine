@@ -131,7 +131,7 @@ class RssRepository(
       .featuredPosts(
         feedLink = selectedFeedLink,
         limit = NUMBER_OF_FEATURED_POSTS,
-        mapper = ::mapToPostWithMetadata
+        mapper = ::PostWithMetadata
       )
       .asFlow()
       .mapToList(ioDispatcher)
@@ -152,7 +152,7 @@ class RssRepository(
           featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
           limit = limit,
           offset = offset,
-          mapper = ::mapToPostWithMetadata
+          mapper = ::PostWithMetadata
         )
       }
     )
@@ -218,7 +218,7 @@ class RssRepository(
           sortOrder = sortOrder.value,
           limit = limit,
           offset = offset,
-          mapper = ::mapToPostWithMetadata
+          mapper = ::PostWithMetadata
         )
       }
     )
@@ -230,30 +230,7 @@ class RssRepository(
       transacter = bookmarkQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(limit, offset) {
-          title,
-          description,
-          imageUrl,
-          date,
-          link,
-          bookmarked,
-          feedName,
-          feedIcon,
-          feedLink,
-          commentsLink ->
-          mapToPostWithMetadata(
-            title = title,
-            description = description,
-            imageUrl = imageUrl,
-            date = date,
-            link = link,
-            bookmarked = bookmarked,
-            commentsLink = commentsLink,
-            feedName = feedName,
-            feedIcon = feedIcon,
-            feedLink = feedLink
-          )
-        }
+        bookmarkQueries.bookmarks(limit, offset, ::PostWithMetadata)
       }
     )
   }
@@ -282,32 +259,6 @@ class RssRepository(
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
-  }
-
-  private fun mapToPostWithMetadata(
-    title: String,
-    description: String,
-    imageUrl: String?,
-    date: Instant,
-    link: String,
-    bookmarked: Boolean,
-    commentsLink: String?,
-    feedName: String,
-    feedIcon: String,
-    feedLink: String
-  ): PostWithMetadata {
-    return PostWithMetadata(
-      title = title,
-      description = description,
-      imageUrl = imageUrl,
-      date = date,
-      link = link,
-      bookmarked = bookmarked,
-      commentsLink = commentsLink,
-      feedName = feedName,
-      feedIcon = feedIcon,
-      feedLink = feedLink
-    )
   }
 
   private fun mapToFeed(

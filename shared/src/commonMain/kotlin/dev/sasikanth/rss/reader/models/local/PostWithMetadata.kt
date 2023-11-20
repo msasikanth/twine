@@ -26,8 +26,8 @@ data class PostWithMetadata(
   val date: Instant,
   val link: String,
   val bookmarked: Boolean,
-  val commentsLink: String?,
   val feedName: String,
   val feedIcon: String,
   val feedLink: String,
+  val commentsLink: String?,
 )

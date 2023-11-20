@@ -37,10 +37,10 @@ SELECT
   post.date,
   post.link,
   post.bookmarked,
-  post.commentsLink,
   feed.name AS feedName,
   feed.icon AS feedIcon,
-  feedLink
+  feedLink,
+  post.commentsLink
 FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
@@ -54,10 +54,10 @@ SELECT
   post.date,
   post.link,
   post.bookmarked,
-  post.commentsLink,
   feed.name AS feedName,
   feed.icon AS feedIcon,
-  feedLink
+  feedLink,
+  post.commentsLink
 FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.link NOT IN (
