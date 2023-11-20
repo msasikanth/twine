@@ -171,12 +171,12 @@ class RssRepository(
       countQuery = feedQueries.count(),
       transacter = feedQueries,
       context = ioDispatcher,
-      queryProvider = { limit, offset -> feedQueries.feedsPaginated(limit, offset, ::mapToFeed) }
+      queryProvider = { limit, offset -> feedQueries.feedsPaginated(limit, offset, ::Feed) }
     )
   }
 
   suspend fun allFeedsBlocking(): List<Feed> {
-    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::mapToFeed).executeAsList() }
+    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::Feed).executeAsList() }
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -188,13 +188,13 @@ class RssRepository(
       transacter = feedSearchFTSQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        feedSearchFTSQueries.search(searchQuery = sanitizedSearchQuery, limit, offset, ::mapToFeed)
+        feedSearchFTSQueries.search(searchQuery = sanitizedSearchQuery, limit, offset, ::Feed)
       }
     )
   }
 
   fun feed(feedLink: String): Feed {
-    return feedQueries.feed(link = feedLink, mapper = ::mapToFeed).executeAsOne()
+    return feedQueries.feed(link = feedLink, mapper = ::Feed).executeAsOne()
   }
 
   suspend fun removeFeed(feedLink: String) {
@@ -259,25 +259,5 @@ class RssRepository(
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
-  }
-
-  private fun mapToFeed(
-    name: String,
-    icon: String,
-    description: String,
-    homepageLink: String,
-    createdAt: Instant,
-    link: String,
-    pinnedAt: Instant?
-  ): Feed {
-    return Feed(
-      name = name,
-      icon = icon,
-      description = description,
-      homepageLink = homepageLink,
-      createdAt = createdAt,
-      link = link,
-      pinnedAt = pinnedAt
-    )
   }
 }
