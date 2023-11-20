@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "android-instrumented-test",
+            "name": "Android Instrumented Tests",
+            "module": "twine.shared.androidTest",
+            "destination": "Resizable (Experimental) API 34",
+        },
+    ]
+}
