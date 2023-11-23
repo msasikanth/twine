@@ -39,20 +39,19 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachReversed
-import androidx.compose.ui.util.lerp
+import androidx.compose.ui.util.fastForEachIndexed
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.models.local.PostWithMetadata
@@ -154,7 +153,7 @@ internal fun FeaturedSection(
           }
       }
 
-      FeaturedSectionBlurredBackground(
+      FeaturedSectionBackground(
         featuredPosts = featuredPosts,
         pagerState = pagerState,
         featuredItemBlurEnabled = featuredItemBlurEnabled
@@ -187,96 +186,102 @@ internal fun FeaturedSection(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun FeaturedSectionBlurredBackground(
-  featuredPosts: ImmutableList<PostWithMetadata>,
+@OptIn(ExperimentalFoundationApi::class)
+private fun FeaturedSectionBackground(
   pagerState: PagerState,
+  featuredPosts: ImmutableList<PostWithMetadata>,
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  Box(modifier = modifier) {
-    val gradientOverlayModifier =
-      Modifier.drawWithCache {
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
-            center = Offset(x = this.size.width, y = 40f)
-          )
-
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-          )
-
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
-        }
-      }
-
-    if (canBlurImage && featuredItemBlurEnabled) {
-      featuredPosts.fastForEachReversed { post ->
-        val actualIndex = featuredPosts.indexOf(post)
-
-        AsyncImage(
-          url = post.imageUrl!!,
-          modifier =
-            Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
-              .blur(100.dp, BlurredEdgeTreatment.Unbounded)
-              .then(gradientOverlayModifier)
-              .alpha(actualIndex, pagerState),
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          size = IntSize(128, 128),
-          backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+  val gradientOverlayModifier =
+    Modifier.drawWithCache {
+      val radialGradient =
+        Brush.radialGradient(
+          colors =
+            listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+          center = Offset(x = this.size.width, y = 40f)
         )
-      }
-    } else {
-      Box(
-        modifier =
-          Modifier.aspectRatio(featuredGradientBackgroundAspectRatio)
-            .composed {
-              val colorStops =
-                listOf(
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
-                  AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
-                )
 
-              background(Brush.verticalGradient(colorStops))
-            }
-            .then(gradientOverlayModifier)
-      )
+      val linearGradient =
+        Brush.verticalGradient(
+          colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+        )
+
+      onDrawWithContent {
+        drawContent()
+        drawRect(radialGradient)
+        drawRect(linearGradient)
+      }
+    }
+
+  Box(modifier = modifier.then(gradientOverlayModifier)) {
+    if (canBlurImage && featuredItemBlurEnabled) {
+      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+    } else {
+      FeaturedSectionGradientBackground()
     }
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-private fun Modifier.alpha(index: Int, pagerState: PagerState): Modifier {
-  return graphicsLayer {
-    val settledPage = pagerState.settledPage
-    val offsetFraction =
-      if (settledPage in 0..pagerState.pageCount) {
-        pagerState.getOffsetFractionForPage(settledPage)
-      } else {
-        0f
-      }
+@Composable
+private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
+  val colorStops =
+    listOf(
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
+      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+    )
 
-    alpha =
-      when {
-        index == settledPage -> lerp(1f, 0f, offsetFraction)
-        index == settledPage - 1 && offsetFraction < -EPSILON ->
-          lerp(0f, 1f, offsetFraction.absoluteValue)
-        index < settledPage -> 0f
-        else -> 1f
-      }
+  Box(
+    modifier =
+      modifier
+        .aspectRatio(featuredGradientBackgroundAspectRatio)
+        .background(Brush.verticalGradient(colorStops))
+  )
+}
+
+@Composable
+@OptIn(ExperimentalFoundationApi::class)
+private fun FeaturedSectionBlurredBackground(
+  featuredPosts: ImmutableList<PostWithMetadata>,
+  pagerState: PagerState,
+  modifier: Modifier = Modifier
+) {
+  // We are loading all featured posts images at once to avoid blinking issues that can occur
+  // due to state changes when we try to do this lazily. Since the alpha is set to 0 for images that
+  // don't need to be rendered, they are not drawn. If need more featured posts, we can convert this
+  // to a proper lazy layout. But for 6 items, this is the simplest approach to take.
+  featuredPosts.fastForEachIndexed { index, post ->
+    AsyncImage(
+      url = post.imageUrl!!,
+      modifier =
+        modifier.aspectRatio(featuredImageBackgroundAspectRatio).graphicsLayer {
+          val offsetFraction =
+            pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
+          alpha = ((1f - offsetFraction) / 1f)
+
+          val blurRadiusInPx = 100.dp.toPx()
+          // Since blur can be expensive memory wise, there is no point blurring images when not
+          // needed.
+          renderEffect =
+            if (index in pagerState.settledPage - 1..pagerState.settledPage + 1) {
+              BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
+            } else {
+              null
+            }
+          shape = RectangleShape
+          clip = false
+        },
+      contentDescription = null,
+      contentScale = ContentScale.Crop,
+      size = IntSize(128, 128),
+      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+    )
   }
 }
