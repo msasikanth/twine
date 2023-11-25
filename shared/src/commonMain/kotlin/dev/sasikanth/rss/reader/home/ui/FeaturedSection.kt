@@ -263,7 +263,11 @@ private fun FeaturedSectionBlurredBackground(
       modifier =
         modifier.aspectRatio(featuredImageBackgroundAspectRatio).graphicsLayer {
           val offsetFraction =
-            pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
+            if (index in 0..pagerState.pageCount) {
+              pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
+            } else {
+              0f
+            }
           alpha = ((1f - offsetFraction) / 1f)
 
           val blurRadiusInPx = 100.dp.toPx()
