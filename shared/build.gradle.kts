@@ -15,7 +15,6 @@
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -38,13 +37,10 @@ buildkonfig {
   }
 }
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-  targetHierarchy.default()
-
   jvmToolchain(20)
 
-  android()
+  androidTarget()
 
   // spotless:off
   val iOSBinaryFlags =
@@ -52,13 +48,13 @@ kotlin {
       "-linker-option", "-framework", "-linker-option", "Metal",
       "-linker-option", "-framework", "-linker-option", "CoreText",
       "-linker-option", "-framework", "-linker-option", "CoreGraphics",
-    )
+      )
   // spotless:on
 
-  ios()
-  iosX64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
+  iosArm64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
+  iosSimulatorArm64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
 
-  iosSimulatorArm64() { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
+  applyDefaultHierarchyTemplate()
 
   cocoapods {
     version = "1.0.0"
@@ -86,77 +82,63 @@ kotlin {
       languageSettings.optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
     }
 
-    val commonMain by getting {
-      dependencies {
-        implementation(projects.resources.strings)
-        implementation(projects.resources.icons)
+    commonMain.dependencies {
+      implementation(projects.resources.strings)
+      implementation(projects.resources.icons)
 
-        implementation(libs.bundles.compose)
-        implementation(libs.bundles.kotlinx)
-        implementation(libs.ktor.core)
-        implementation(libs.ktor.client.logging)
-        implementation(libs.napier)
-        implementation(libs.sqldelight.extensions.coroutines)
-        implementation(libs.sqldelight.extensions.paging)
-        api(libs.decompose)
-        implementation(libs.decompose.extensions.compose)
-        api(libs.essenty.lifecycle)
-        api(libs.essenty.backhandler)
-        implementation(libs.kotlininject.runtime)
-        implementation(libs.androidx.collection)
-        implementation(libs.material.color.utilities)
-        implementation(libs.ksoup)
-        implementation(libs.sentry)
-        implementation(libs.windowSizeClass)
-        api(libs.androidx.datastore.okio)
-        api(libs.androidx.datastore.preferences)
-        api(libs.okio)
-        implementation(libs.paging.common)
-        implementation(libs.paging.compose)
-        implementation(libs.stately.isolate)
-        implementation(libs.stately.iso.collections)
-        implementation(libs.bundles.xmlutil)
-      }
+      implementation(libs.bundles.compose)
+      implementation(libs.bundles.kotlinx)
+      implementation(libs.ktor.core)
+      implementation(libs.ktor.client.logging)
+      implementation(libs.napier)
+      implementation(libs.sqldelight.extensions.coroutines)
+      implementation(libs.sqldelight.extensions.paging)
+      api(libs.decompose)
+      implementation(libs.decompose.extensions.compose)
+      api(libs.essenty.lifecycle)
+      api(libs.essenty.backhandler)
+      implementation(libs.kotlininject.runtime)
+      implementation(libs.androidx.collection)
+      implementation(libs.material.color.utilities)
+      implementation(libs.ksoup)
+      implementation(libs.sentry)
+      implementation(libs.windowSizeClass)
+      api(libs.androidx.datastore.okio)
+      api(libs.androidx.datastore.preferences)
+      api(libs.okio)
+      implementation(libs.paging.common)
+      implementation(libs.paging.compose)
+      implementation(libs.stately.isolate)
+      implementation(libs.stately.iso.collections)
+      implementation(libs.bundles.xmlutil)
     }
-    val commonTest by getting {
-      dependencies {
-        implementation(libs.kotlin.test)
-        implementation(libs.kotlinx.coroutines.test)
-      }
+    commonTest.dependencies {
+      implementation(libs.kotlin.test)
+      implementation(libs.kotlinx.coroutines.test)
     }
 
-    val androidMain by getting {
-      dependencies {
-        api(libs.androidx.activity.compose)
-        api(libs.androidx.appcompat)
-        api(libs.androidx.core)
-        api(libs.androidx.browser)
-        implementation(libs.ktor.client.okhttp)
-        implementation(libs.sqldelight.driver.android)
-        implementation(libs.coil.compose)
-        api(libs.sqliteAndroid)
-      }
+    androidMain.dependencies {
+      api(libs.androidx.activity.compose)
+      api(libs.androidx.appcompat)
+      api(libs.androidx.core)
+      api(libs.androidx.browser)
+      implementation(libs.ktor.client.okhttp)
+      implementation(libs.sqldelight.driver.android)
+      implementation(libs.coil.compose)
+      api(libs.sqliteAndroid)
     }
     val androidInstrumentedTest by getting {
-      dependsOn(commonTest)
+      dependsOn(commonTest.get())
       dependencies {
         implementation(libs.androidx.test.runner)
         implementation(libs.androidx.test.rules)
       }
     }
 
-    val iosSimulatorArm64Main by getting
-    val iosMain by getting {
-      iosSimulatorArm64Main.dependsOn(this)
-      dependencies {
-        implementation(libs.ktor.client.darwin)
-        implementation(libs.sqldelight.driver.native)
-      }
+    iosMain.dependencies {
+      implementation(libs.ktor.client.darwin)
+      implementation(libs.sqldelight.driver.native)
     }
-    val iosX64Test by getting
-    val iosArm64Test by getting
-    val iosSimulatorArm64Test by getting
-    val iosTest by getting
   }
 }
 
@@ -201,7 +183,6 @@ android {
 dependencies {
   // https://github.com/google/ksp/pull/1021
   add("kspAndroid", libs.kotlininject.compiler)
-  add("kspIosX64", libs.kotlininject.compiler)
   add("kspIosArm64", libs.kotlininject.compiler)
   add("kspIosSimulatorArm64", libs.kotlininject.compiler)
 }

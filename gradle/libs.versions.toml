@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.9.10"
+kotlin = "1.9.21"
 android_gradle_plugin = "8.1.4"
 compose = "1.5.11"
 
