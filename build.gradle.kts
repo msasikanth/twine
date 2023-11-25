@@ -16,6 +16,7 @@
 @file:Suppress("DSL_SCOPE_VIOLATION")
 
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   // this is necessary to avoid the plugins to be loaded multiple times
@@ -56,5 +57,9 @@ allprojects {
       trimTrailingWhitespace()
       endWithNewline()
     }
+  }
+
+  tasks.withType<KotlinCompile>().all {
+    kotlinOptions { freeCompilerArgs += "-Xexpect-actual-classes" }
   }
 }

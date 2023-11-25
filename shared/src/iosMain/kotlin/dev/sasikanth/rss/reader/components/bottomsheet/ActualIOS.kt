@@ -15,11 +15,11 @@
  */
 package dev.sasikanth.rss.reader.components.bottomsheet
 
-import kotlin.native.concurrent.AtomicReference
+import kotlinx.atomicfu.atomic
 
 actual class InternalAtomicReference<V> actual constructor(value: V) {
 
-  private val atomicReference = AtomicReference(value)
+  private val atomicReference = atomic(value)
 
   actual fun get(): V {
     return atomicReference.value
