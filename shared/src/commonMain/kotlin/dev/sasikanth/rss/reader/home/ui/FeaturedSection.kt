@@ -194,6 +194,9 @@ private fun FeaturedSectionBackground(
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
+  // We want the gradient overlay to be displayed above the blur and gradient background, and
+  // also when overscrolling happens. For that reason we are applying the gradient modifier,
+  // directly to the individual composables rather than the parent Box.
   val gradientOverlayModifier =
     Modifier.drawWithCache {
       val radialGradient =
@@ -215,11 +218,15 @@ private fun FeaturedSectionBackground(
       }
     }
 
-  Box(modifier = modifier.then(gradientOverlayModifier)) {
+  Box(modifier = modifier) {
     if (canBlurImage && featuredItemBlurEnabled) {
-      FeaturedSectionBlurredBackground(featuredPosts = featuredPosts, pagerState = pagerState)
+      FeaturedSectionBlurredBackground(
+        featuredPosts = featuredPosts,
+        pagerState = pagerState,
+        modifier = gradientOverlayModifier
+      )
     } else {
-      FeaturedSectionGradientBackground()
+      FeaturedSectionGradientBackground(modifier = gradientOverlayModifier)
     }
   }
 }
@@ -240,9 +247,9 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
 
   Box(
     modifier =
-      modifier
-        .aspectRatio(featuredGradientBackgroundAspectRatio)
+      Modifier.aspectRatio(featuredGradientBackgroundAspectRatio)
         .background(Brush.verticalGradient(colorStops))
+        .then(modifier)
   )
 }
 
@@ -261,23 +268,25 @@ private fun FeaturedSectionBlurredBackground(
     AsyncImage(
       url = post.imageUrl!!,
       modifier =
-        modifier.aspectRatio(featuredImageBackgroundAspectRatio).graphicsLayer {
-          val offsetFraction =
-            pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
-          alpha = ((1f - offsetFraction) / 1f)
+        Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+          .graphicsLayer {
+            val offsetFraction =
+              pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
+            alpha = ((1f - offsetFraction) / 1f)
 
-          val blurRadiusInPx = 100.dp.toPx()
-          // Since blur can be expensive memory wise, there is no point blurring images when not
-          // needed.
-          renderEffect =
-            if (index in pagerState.settledPage - 1..pagerState.settledPage + 1) {
-              BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-            } else {
-              null
-            }
-          shape = RectangleShape
-          clip = false
-        },
+            val blurRadiusInPx = 100.dp.toPx()
+            // Since blur can be expensive memory wise, there is no point blurring images when not
+            // needed.
+            renderEffect =
+              if (index in pagerState.settledPage - 1..pagerState.settledPage + 1) {
+                BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
+              } else {
+                null
+              }
+            shape = RectangleShape
+            clip = false
+          }
+          .then(modifier),
       contentDescription = null,
       contentScale = ContentScale.Crop,
       size = IntSize(128, 128),
