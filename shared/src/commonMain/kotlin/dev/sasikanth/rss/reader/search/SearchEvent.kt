@@ -24,13 +24,13 @@ internal sealed interface SearchEvent {
 
   data class SearchPosts(val query: String, val searchSortOrder: SearchSortOrder) : SearchEvent
 
-  object BackClicked : SearchEvent
+  data object BackClicked : SearchEvent
 
-  object ClearSearchResults : SearchEvent
+  data object ClearSearchResults : SearchEvent
 
   data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
 
-  object ClearSearchQuery : SearchEvent
+  data object ClearSearchQuery : SearchEvent
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : SearchEvent
 }

@@ -21,7 +21,7 @@ import dev.sasikanth.rss.reader.models.local.Feed
 internal sealed interface FeedsListItemType {
   data class FeedListItem(val feed: Feed) : FeedsListItemType
 
-  object FeedSeparator : FeedsListItemType
+  data object FeedSeparator : FeedsListItemType
 
-  object SectionSeparator : FeedsListItemType
+  data object SectionSeparator : FeedsListItemType
 }

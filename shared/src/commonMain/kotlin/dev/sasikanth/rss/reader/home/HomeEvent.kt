@@ -23,9 +23,9 @@ import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 
 sealed interface HomeEvent {
 
-  object Init : HomeEvent
+  data object Init : HomeEvent
 
-  object OnSwipeToRefresh : HomeEvent
+  data object OnSwipeToRefresh : HomeEvent
 
   data class OnPostClicked(val post: PostWithMetadata) : HomeEvent
 
@@ -33,27 +33,27 @@ sealed interface HomeEvent {
 
   data class FeedsSheetStateChanged(val feedsSheetState: BottomSheetValue) : HomeEvent
 
-  object OnHomeSelected : HomeEvent
+  data object OnHomeSelected : HomeEvent
 
-  object OnAddFeedClicked : HomeEvent
+  data object OnAddFeedClicked : HomeEvent
 
-  object OnPrimaryActionClicked : HomeEvent
+  data object OnPrimaryActionClicked : HomeEvent
 
-  object OnCancelAddFeedClicked : HomeEvent
+  data object OnCancelAddFeedClicked : HomeEvent
 
   data class AddFeed(val feedLink: String) : HomeEvent
 
-  object BackClicked : HomeEvent
+  data object BackClicked : HomeEvent
 
-  object SearchClicked : HomeEvent
+  data object SearchClicked : HomeEvent
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
 
-  object BookmarksClicked : HomeEvent
+  data object BookmarksClicked : HomeEvent
 
-  object SettingsClicked : HomeEvent
+  data object SettingsClicked : HomeEvent
 
-  object EditFeedsClicked : HomeEvent
+  data object EditFeedsClicked : HomeEvent
 
-  object ExitFeedsEdit : HomeEvent
+  data object ExitFeedsEdit : HomeEvent
 }

@@ -17,5 +17,5 @@
 package dev.sasikanth.rss.reader.about
 
 sealed interface AboutEvent {
-  object BackClicked : AboutEvent
+  data object BackClicked : AboutEvent
 }

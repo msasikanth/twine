@@ -20,9 +20,9 @@ import dev.sasikanth.rss.reader.models.local.Feed
 
 sealed interface FeedsEvent {
 
-  object Init : FeedsEvent
+  data object Init : FeedsEvent
 
-  object OnGoBackClicked : FeedsEvent
+  data object OnGoBackClicked : FeedsEvent
 
   data class OnDeleteFeed(val feed: Feed) : FeedsEvent
 
@@ -34,5 +34,5 @@ sealed interface FeedsEvent {
 
   data class SearchQueryChanged(val searchQuery: TextFieldValue) : FeedsEvent
 
-  object ClearSearchQuery : FeedsEvent
+  data object ClearSearchQuery : FeedsEvent
 }

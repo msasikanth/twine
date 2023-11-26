@@ -54,13 +54,13 @@ interface ImageLoader {
 }
 
 internal sealed interface ImageLoaderState {
-  object Idle : ImageLoaderState
+  data object Idle : ImageLoaderState
 
-  object Loading : ImageLoaderState
+  data object Loading : ImageLoaderState
 
   data class Loaded(val image: ImageBitmap) : ImageLoaderState
 
-  object Error : ImageLoaderState
+  data object Error : ImageLoaderState
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader?> { null }

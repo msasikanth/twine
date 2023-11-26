@@ -141,7 +141,7 @@ class OpmlManager(
 }
 
 sealed interface OpmlResult {
-  object Idle : OpmlResult
+  data object Idle : OpmlResult
 
   sealed interface InProgress : OpmlResult {
     data class Importing(val progress: Int) : OpmlResult
@@ -150,7 +150,7 @@ sealed interface OpmlResult {
   }
 
   sealed interface Error : OpmlResult {
-    object NoContentInOpmlFile : OpmlResult
+    data object NoContentInOpmlFile : OpmlResult
 
     data class UnknownFailure(val error: Exception) : OpmlResult
   }

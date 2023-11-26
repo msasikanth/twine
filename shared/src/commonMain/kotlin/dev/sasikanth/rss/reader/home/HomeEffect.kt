@@ -21,9 +21,9 @@ sealed interface HomeEffect {
 
   data class OpenPost(val post: PostWithMetadata) : HomeEffect
 
-  object MinimizeSheet : HomeEffect
+  data object MinimizeSheet : HomeEffect
 
   class ShowError(val homeErrorType: HomeErrorType) : HomeEffect
 
-  object ScrollToTop : HomeEffect
+  data object ScrollToTop : HomeEffect
 }

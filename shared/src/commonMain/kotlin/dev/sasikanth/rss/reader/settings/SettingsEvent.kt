@@ -19,17 +19,17 @@ import dev.sasikanth.rss.reader.repository.BrowserType
 
 sealed interface SettingsEvent {
 
-  object BackClicked : SettingsEvent
+  data object BackClicked : SettingsEvent
 
   data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
 
   data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
 
-  object AboutClicked : SettingsEvent
+  data object AboutClicked : SettingsEvent
 
-  object ImportOpmlClicked : SettingsEvent
+  data object ImportOpmlClicked : SettingsEvent
 
-  object ExportOpmlClicked : SettingsEvent
+  data object ExportOpmlClicked : SettingsEvent
 
-  object CancelOpmlImportOrExport : SettingsEvent
+  data object CancelOpmlImportOrExport : SettingsEvent
 }
