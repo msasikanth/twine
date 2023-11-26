@@ -268,14 +268,16 @@ private fun FeaturedSectionBlurredBackground(
     AsyncImage(
       url = post.imageUrl!!,
       modifier =
-        modifier.aspectRatio(featuredImageBackgroundAspectRatio).graphicsLayer {
-          val offsetFraction =
-            if (index in 0..pagerState.pageCount) {
-              pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
-            } else {
-              0f
-            }
-          alpha = ((1f - offsetFraction) / 1f)
+        modifier
+          .aspectRatio(featuredImageBackgroundAspectRatio)
+          .graphicsLayer {
+            val offsetFraction =
+              if (index in 0..pagerState.pageCount) {
+                pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
+              } else {
+                0f
+              }
+            alpha = ((1f - offsetFraction) / 1f)
 
             val blurRadiusInPx = 100.dp.toPx()
             // Since blur can be expensive memory wise, there is no point blurring images when not
