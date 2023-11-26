@@ -19,9 +19,9 @@ import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 
 sealed interface BookmarksEvent {
 
-  object Init : BookmarksEvent
+  data object Init : BookmarksEvent
 
-  object BackClicked : BookmarksEvent
+  data object BackClicked : BookmarksEvent
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : BookmarksEvent
 }

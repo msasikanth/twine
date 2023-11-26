@@ -170,14 +170,14 @@ class AppPresenter(
   }
 
   sealed interface Config : Parcelable {
-    @Parcelize object Home : Config
+    @Parcelize data object Home : Config
 
-    @Parcelize object Search : Config
+    @Parcelize data object Search : Config
 
-    @Parcelize object Bookmarks : Config
+    @Parcelize data object Bookmarks : Config
 
-    @Parcelize object Settings : Config
+    @Parcelize data object Settings : Config
 
-    @Parcelize object About : Config
+    @Parcelize data object About : Config
   }
 }

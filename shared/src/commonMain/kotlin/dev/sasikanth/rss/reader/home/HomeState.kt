@@ -69,9 +69,9 @@ internal data class HomeState(
 }
 
 sealed interface HomeLoadingState {
-  object Idle : HomeLoadingState
+  data object Idle : HomeLoadingState
 
-  object Loading : HomeLoadingState
+  data object Loading : HomeLoadingState
 
   data class Error(val errorMessage: String) : HomeLoadingState
 }

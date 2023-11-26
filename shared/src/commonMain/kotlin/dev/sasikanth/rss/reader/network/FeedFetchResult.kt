@@ -26,5 +26,5 @@ sealed interface FeedFetchResult {
 
   data class Error(val exception: Exception) : FeedFetchResult
 
-  object TooManyRedirects : FeedFetchResult
+  data object TooManyRedirects : FeedFetchResult
 }

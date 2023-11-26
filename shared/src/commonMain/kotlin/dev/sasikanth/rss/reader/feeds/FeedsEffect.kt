@@ -17,5 +17,5 @@ package dev.sasikanth.rss.reader.feeds
 
 sealed interface FeedsEffect {
 
-  object MinimizeSheet : FeedsEffect
+  data object MinimizeSheet : FeedsEffect
 }

@@ -18,13 +18,13 @@ package dev.sasikanth.rss.reader.home
 import io.ktor.http.HttpStatusCode
 
 sealed interface HomeErrorType {
-  object UnknownFeedType : HomeErrorType
+  data object UnknownFeedType : HomeErrorType
 
-  object FailedToParseXML : HomeErrorType
+  data object FailedToParseXML : HomeErrorType
 
-  object Timeout : HomeErrorType
+  data object Timeout : HomeErrorType
 
-  object TooManyRedirects : HomeErrorType
+  data object TooManyRedirects : HomeErrorType
 
   data class UnAuthorized(val statusCode: HttpStatusCode) : HomeErrorType
 
