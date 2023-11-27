@@ -25,7 +25,8 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimator
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.isFront
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveBackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.predictiveBackAnimatable
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.predictiveBackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimator
 import com.arkivanov.essenty.backhandler.BackHandler
@@ -38,8 +39,13 @@ internal actual fun <C : Any, T : Any> backAnimation(
   predictiveBackAnimation(
     backHandler = backHandler,
     animation = stackAnimation(iosLikeSlide()),
-    exitModifier = { progress, _ -> Modifier.slideExitModifier(progress = progress) },
-    enterModifier = { progress, _ -> Modifier.slideEnterModifier(progress = progress) },
+    selector = { initialBackEvent, _, _ ->
+      predictiveBackAnimatable(
+        initialBackEvent = initialBackEvent,
+        exitModifier = { progress, _ -> Modifier.slideExitModifier(progress = progress) },
+        enterModifier = { progress, _ -> Modifier.slideEnterModifier(progress = progress) },
+      )
+    },
     onBack = onBack,
   )
 

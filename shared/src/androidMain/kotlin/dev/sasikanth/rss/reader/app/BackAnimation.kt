@@ -31,7 +31,8 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.Stac
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimator
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.plus
-import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveBackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.predictiveBackAnimatable
+import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.predictiveback.predictiveBackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimator
 import com.arkivanov.essenty.backhandler.BackEvent
@@ -45,8 +46,13 @@ internal actual fun <C : Any, T : Any> backAnimation(
   predictiveBackAnimation(
     backHandler = backHandler,
     animation = stackAnimation(fade() + scale()),
-    enterModifier = { progress, _ -> Modifier.enterModifier(progress) },
-    exitModifier = { progress, edge -> Modifier.exitModifier(progress, edge) },
+    selector = { initialBackEvent, _, _ ->
+      predictiveBackAnimatable(
+        initialBackEvent = initialBackEvent,
+        enterModifier = { progress, _ -> Modifier.enterModifier(progress) },
+        exitModifier = { progress, edge -> Modifier.exitModifier(progress, edge) },
+      )
+    },
     onBack = onBack,
   )
 
