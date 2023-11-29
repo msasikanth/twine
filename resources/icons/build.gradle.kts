@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -21,12 +20,9 @@ plugins {
   alias(libs.plugins.ksp)
 }
 
-@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-  targetHierarchy.default()
-
   jvm()
-  listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+  listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
     val commonMain by getting { dependencies { api(libs.compose.foundation) } }

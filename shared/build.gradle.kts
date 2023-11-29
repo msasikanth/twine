@@ -15,6 +15,8 @@
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -37,10 +39,11 @@ buildkonfig {
   }
 }
 
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
   jvmToolchain(20)
 
-  androidTarget()
+  androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
 
   // spotless:off
   val iOSBinaryFlags =
@@ -128,7 +131,6 @@ kotlin {
       api(libs.sqliteAndroid)
     }
     val androidInstrumentedTest by getting {
-      dependsOn(commonTest.get())
       dependencies {
         implementation(libs.androidx.test.runner)
         implementation(libs.androidx.test.rules)
