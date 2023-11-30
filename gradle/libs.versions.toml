@@ -24,6 +24,7 @@ androidx_test_rules = "1.5.0"
 androidx_work = "2.9.0"
 androidx_datastore = "1.1.0-alpha07"
 androidx_browser = "1.7.0"
+androidx_annotation = "1.7.0"
 coil = "2.5.0"
 spotless = "6.23.2"
 ktfmt = "0.44"
@@ -82,6 +83,7 @@ androidx_work = { module = "androidx.work:work-runtime-ktx", version.ref = "andr
 androidx_datastore_okio = { module = "androidx.datastore:datastore-core-okio", version.ref = "androidx_datastore" }
 androidx_datastore_preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx_datastore" }
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
+androidx_annotation= { module = "androidx.annotation:annotation", version.ref = "androidx_annotation" }
 coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
