@@ -31,7 +31,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.network.FeedFetchResult
 import dev.sasikanth.rss.reader.network.FeedFetcher
 import dev.sasikanth.rss.reader.search.SearchSortOrder
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch

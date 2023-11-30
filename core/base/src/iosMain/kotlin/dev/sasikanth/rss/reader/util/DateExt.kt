@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.util
 
-import android.text.format.DateUtils
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toNSDate
+import platform.Foundation.NSDate
+import platform.Foundation.NSRelativeDateTimeFormatter
+import platform.Foundation.NSRelativeDateTimeFormatterUnitsStyleShort
+import platform.Foundation.now
 
-internal actual fun Instant.relativeDurationString(): String {
-  return DateUtils.getRelativeTimeSpanString(
-      toEpochMilliseconds(),
-      System.currentTimeMillis(),
-      DateUtils.MINUTE_IN_MILLIS,
-      DateUtils.FORMAT_ABBREV_ALL
-    )
-    .toString()
+actual fun Instant.relativeDurationString(): String {
+  val formatter = NSRelativeDateTimeFormatter()
+  formatter.unitsStyle = NSRelativeDateTimeFormatterUnitsStyleShort
+
+  return formatter.localizedStringForDate(date = toNSDate(), relativeToDate = NSDate.now)
 }

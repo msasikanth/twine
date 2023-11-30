@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.util
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -26,11 +26,11 @@ import platform.UIKit.NSDocumentTypeDocumentAttribute
 import platform.UIKit.NSHTMLTextDocumentType
 import platform.UIKit.create
 
-internal actual val canBlurImage: Boolean = true
+actual val canBlurImage: Boolean = true
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 @Suppress("CAST_NEVER_SUCCEEDS")
-internal actual fun String.decodeUrlEncodedString(): String {
+actual fun String.decodeUrlEncodedString(): String {
   try {
     val data = (this as NSString).dataUsingEncoding(NSUTF8StringEncoding)
     if (data != null) {

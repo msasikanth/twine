@@ -49,8 +49,8 @@ import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import dev.sasikanth.rss.reader.utils.relativeDurationString
 import kotlinx.collections.immutable.ImmutableList
 
 private val postListPadding

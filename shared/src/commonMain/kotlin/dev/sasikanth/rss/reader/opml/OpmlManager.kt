@@ -20,8 +20,8 @@ import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.SupervisorJob

@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.network
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
-import dev.sasikanth.rss.reader.utils.decodeUrlEncodedString
+import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set

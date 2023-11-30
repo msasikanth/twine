@@ -39,7 +39,7 @@ import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
 import dev.sasikanth.rss.reader.network.FeedType.ATOM
 import dev.sasikanth.rss.reader.network.FeedType.RSS
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlin.collections.set
 import kotlin.coroutines.resume
