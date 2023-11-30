@@ -20,7 +20,7 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject

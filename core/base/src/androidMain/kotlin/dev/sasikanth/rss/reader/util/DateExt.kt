@@ -13,8 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.util
 
-internal expect val canBlurImage: Boolean
+import android.text.format.DateUtils
+import kotlinx.datetime.Instant
 
-internal expect fun String.decodeUrlEncodedString(): String
+actual fun Instant.relativeDurationString(): String {
+  return DateUtils.getRelativeTimeSpanString(
+      toEpochMilliseconds(),
+      System.currentTimeMillis(),
+      DateUtils.MINUTE_IN_MILLIS,
+      DateUtils.FORMAT_ABBREV_ALL
+    )
+    .toString()
+}

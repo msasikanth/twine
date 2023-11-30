@@ -41,6 +41,8 @@ include(":androidApp")
 
 include(":shared")
 
+include(":core:base")
+
 include(":core:model")
 
 include(":resources:strings")

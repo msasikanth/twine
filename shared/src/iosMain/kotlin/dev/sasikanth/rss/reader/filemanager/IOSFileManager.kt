@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.filemanager
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.utils.DispatchersProvider
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.cinterop.ExperimentalForeignApi
