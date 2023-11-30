@@ -34,39 +34,39 @@ class ReaderApplication : Application(), Configuration.Provider {
 
   private val workManager by lazy(LazyThreadSafetyMode.NONE) { WorkManager.getInstance(this) }
 
+  override val workManagerConfiguration: Configuration
+    get() =
+      Configuration.Builder()
+        .setMinimumLoggingLevel(
+          if (BuildConfig.DEBUG) {
+            Log.DEBUG
+          } else {
+            Log.ERROR
+          }
+        )
+        .setWorkerFactory(
+          object : WorkerFactory() {
+            override fun createWorker(
+              appContext: Context,
+              workerClassName: String,
+              workerParameters: WorkerParameters
+            ): ListenableWorker {
+              return FeedsRefreshWorker(
+                context = appContext,
+                workerParameters = workerParameters,
+                rssRepository = appComponent.rssRepository,
+                lastUpdatedAt = appComponent.lastUpdatedAt
+              )
+            }
+          }
+        )
+        .build()
+
   override fun onCreate() {
     super.onCreate()
     enqueuePeriodicFeedsRefresh()
 
     appComponent.initializers.forEach { it.initialize() }
-  }
-
-  override fun getWorkManagerConfiguration(): Configuration {
-    val loggingLevel =
-      if (BuildConfig.DEBUG) {
-        Log.DEBUG
-      } else {
-        Log.ERROR
-      }
-    return Configuration.Builder()
-      .setMinimumLoggingLevel(loggingLevel)
-      .setWorkerFactory(
-        object : WorkerFactory() {
-          override fun createWorker(
-            appContext: Context,
-            workerClassName: String,
-            workerParameters: WorkerParameters
-          ): ListenableWorker {
-            return FeedsRefreshWorker(
-              context = appContext,
-              workerParameters = workerParameters,
-              rssRepository = appComponent.rssRepository,
-              lastUpdatedAt = appComponent.lastUpdatedAt
-            )
-          }
-        }
-      )
-      .build()
   }
 
   private fun enqueuePeriodicFeedsRefresh() {
