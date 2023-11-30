@@ -19,8 +19,8 @@ import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import app.cash.paging.insertSeparators
 import app.cash.paging.map
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
-import dev.sasikanth.rss.reader.models.local.Feed
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map

@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 
 sealed interface HomeEvent {
 

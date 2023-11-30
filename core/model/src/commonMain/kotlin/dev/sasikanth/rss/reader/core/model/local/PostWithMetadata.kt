@@ -13,15 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package dev.sasikanth.rss.reader.core.model.local
 
-package dev.sasikanth.rss.reader.feeds.ui
+import androidx.compose.runtime.Immutable
+import kotlinx.datetime.Instant
 
-import dev.sasikanth.rss.reader.core.model.local.Feed
-
-internal sealed interface FeedsListItemType {
-  data class FeedListItem(val feed: Feed) : FeedsListItemType
-
-  data object FeedSeparator : FeedsListItemType
-
-  data object SectionSeparator : FeedsListItemType
-}
+@Immutable
+data class PostWithMetadata(
+  val title: String,
+  val description: String,
+  val imageUrl: String?,
+  val date: Instant,
+  val link: String,
+  val bookmarked: Boolean,
+  val feedName: String,
+  val feedIcon: String,
+  val feedLink: String,
+  val commentsLink: String?,
+)

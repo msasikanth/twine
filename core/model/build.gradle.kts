@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.models.local
 
-import androidx.compose.runtime.Immutable
-import kotlinx.datetime.Instant
+plugins { alias(libs.plugins.kotlin.multiplatform) }
 
-@Immutable
-data class Feed(
-  val name: String,
-  val icon: String,
-  val description: String,
-  val homepageLink: String,
-  val createdAt: Instant,
-  val link: String,
-  val pinnedAt: Instant?,
-)
+kotlin {
+  jvm()
+  listOf(iosArm64(), iosSimulatorArm64())
+
+  sourceSets {
+    commonMain.dependencies {
+      implementation(libs.kotlinx.datetime)
+      // Require this for `@Immutable` annotation for models
+      implementation(libs.compose.runtime)
+    }
+  }
+}

@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.opml
 
-import dev.sasikanth.rss.reader.models.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.datetime.Instant

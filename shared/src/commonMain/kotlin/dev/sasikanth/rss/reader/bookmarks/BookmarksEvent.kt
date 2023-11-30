@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 
 sealed interface BookmarksEvent {
 

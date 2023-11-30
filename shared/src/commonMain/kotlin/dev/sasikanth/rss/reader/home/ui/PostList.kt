@@ -47,7 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.relativeDurationString

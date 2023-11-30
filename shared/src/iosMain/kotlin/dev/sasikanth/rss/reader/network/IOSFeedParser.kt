@@ -17,8 +17,8 @@
 
 package dev.sasikanth.rss.reader.network
 
-import dev.sasikanth.rss.reader.models.remote.FeedPayload
-import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL

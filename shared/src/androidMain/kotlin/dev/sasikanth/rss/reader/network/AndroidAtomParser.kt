@@ -18,8 +18,8 @@ package dev.sasikanth.rss.reader.network
 import android.net.Uri
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
-import dev.sasikanth.rss.reader.models.remote.FeedPayload
-import dev.sasikanth.rss.reader.models.remote.PostPayload
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_ALTERNATE

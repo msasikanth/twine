@@ -28,12 +28,12 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository

@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.network
 
 import android.util.Xml
-import dev.sasikanth.rss.reader.models.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
 import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG

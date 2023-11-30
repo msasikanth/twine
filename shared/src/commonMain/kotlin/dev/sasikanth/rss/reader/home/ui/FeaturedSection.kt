@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
