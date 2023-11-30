@@ -15,32 +15,32 @@
  */
 @file:Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 
-package dev.sasikanth.rss.reader.network
+package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_TYPE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_URL
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_ALTERNATE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_ENTRY
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_FEED
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ENCLOSURE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEATURED_IMAGE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_FEED_IMAGE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_IMAGE_URL
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_CHANNEL
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_RSS_ITEM
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.imageTags
-import dev.sasikanth.rss.reader.network.FeedType.ATOM
-import dev.sasikanth.rss.reader.network.FeedType.RSS
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_URL
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VALUE_ALTERNATE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.HTML_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ENCLOSURE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_IMAGE_URL
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.imageTags
+import dev.sasikanth.rss.reader.core.network.parser.FeedType.ATOM
+import dev.sasikanth.rss.reader.core.network.parser.FeedType.RSS
+import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlin.collections.set
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException

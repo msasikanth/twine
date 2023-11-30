@@ -13,23 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
+
+package dev.sasikanth.rss.reader.core.network.parser
 
 import android.net.Uri
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_REL
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATTR_VALUE_ALTERNATE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_ENTRY
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_ATOM_FEED
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_CONTENT
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_PUBLISHED
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_SUBTITLE
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VALUE_ALTERNATE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
 import java.time.ZonedDateTime

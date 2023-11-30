@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
 
-internal data class XmlParsingError(override val message: String?) : RuntimeException(message)
+package dev.sasikanth.rss.reader.exceptions
+
+data class XmlParsingError(override val message: String?) : RuntimeException(message)

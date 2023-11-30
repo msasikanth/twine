@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
+package dev.sasikanth.rss.reader.core.network.fetcher
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import io.ktor.http.HttpStatusCode

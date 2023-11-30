@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
+package dev.sasikanth.rss.reader.core.network.parser
 
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 
-class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
+internal class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
 
   private val contentStringBuilder = StringBuilder()
   private val currentData: MutableMap<String, String> = mutableMapOf()
@@ -78,4 +78,4 @@ class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHan
   }
 }
 
-data class HtmlContent(val imageUrl: String?, val content: String)
+internal data class HtmlContent(val imageUrl: String?, val content: String)
