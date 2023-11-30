@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.feeds
 
 import androidx.compose.ui.text.input.TextFieldValue
-import dev.sasikanth.rss.reader.models.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Feed
 
 sealed interface FeedsEvent {
 

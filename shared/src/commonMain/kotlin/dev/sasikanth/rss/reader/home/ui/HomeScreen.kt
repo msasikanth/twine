@@ -79,6 +79,7 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
@@ -87,7 +88,6 @@ import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings

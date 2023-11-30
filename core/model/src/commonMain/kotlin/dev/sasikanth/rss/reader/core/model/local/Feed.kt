@@ -13,21 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.models.local
+package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
 
 @Immutable
-data class PostWithMetadata(
-  val title: String,
+data class Feed(
+  val name: String,
+  val icon: String,
   val description: String,
-  val imageUrl: String?,
-  val date: Instant,
+  val homepageLink: String,
+  val createdAt: Instant,
   val link: String,
-  val bookmarked: Boolean,
-  val feedName: String,
-  val feedIcon: String,
-  val feedLink: String,
-  val commentsLink: String?,
+  val pinnedAt: Instant?,
 )

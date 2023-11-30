@@ -82,13 +82,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
-import dev.sasikanth.rss.reader.models.local.Feed
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState

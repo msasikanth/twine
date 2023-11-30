@@ -15,8 +15,8 @@
  */
 package dev.sasikanth.rss.reader.opml
 
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.models.local.Feed
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.serialization.serializer
 import me.tatarka.inject.annotations.Inject

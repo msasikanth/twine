@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.bookmarks
 
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
-import dev.sasikanth.rss.reader.models.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
