@@ -19,6 +19,7 @@ import dev.sasikanth.rss.reader.TestDispatchersProvider
 import dev.sasikanth.rss.reader.atomXmlContent
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.IOSFeedParser
 import dev.sasikanth.rss.reader.feedUrl
 import dev.sasikanth.rss.reader.rssXmlContent
 import kotlin.test.Test

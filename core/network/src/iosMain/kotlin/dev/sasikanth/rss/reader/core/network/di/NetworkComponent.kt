@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
 
+package dev.sasikanth.rss.reader.core.network.di
+
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser
+import dev.sasikanth.rss.reader.core.network.parser.IOSFeedParser
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
 import me.tatarka.inject.annotations.Provides
 
-internal actual interface NetworkComponent {
+actual interface NetworkComponent {
 
   val IOSFeedParser.bind: FeedParser
     @Provides @AppScope get() = this

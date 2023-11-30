@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
+
+package dev.sasikanth.rss.reader.core.network.parser
 
 import android.util.Xml
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.ATOM_TAG
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.HTML_TAG
-import dev.sasikanth.rss.reader.network.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.HTML_TAG
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_TAG
+import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.XmlParsingError
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 import org.xmlpull.v1.XmlPullParser

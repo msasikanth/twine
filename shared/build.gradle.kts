@@ -88,6 +88,7 @@ kotlin {
     commonMain.dependencies {
       api(projects.core.base)
       api(projects.core.model)
+      api(projects.core.network)
 
       implementation(projects.resources.strings)
       implementation(projects.resources.icons)
