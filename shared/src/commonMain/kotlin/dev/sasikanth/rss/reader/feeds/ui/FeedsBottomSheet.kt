@@ -19,6 +19,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -46,6 +47,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -82,6 +84,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -171,6 +174,7 @@ internal fun FeedsBottomSheet(
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   selectedFeed: Feed?,
@@ -222,45 +226,71 @@ private fun BottomSheetExpandedContent(
       LazyColumn(
         modifier =
           Modifier.fillMaxSize()
-            .padding(bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp),
+            .padding(
+              bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
+              // doing this so that the dividers in sticky headers can go below the search bar and
+              // not overlap with each other
+              top = padding.calculateTopPadding() - 1.dp
+            ),
         contentPadding =
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection),
-            top = padding.calculateTopPadding(),
             end = padding.calculateEndPadding(layoutDirection),
             bottom = padding.calculateBottomPadding() + 64.dp
           )
       ) {
-        items(feedsListItemTypes.itemCount) { index ->
+        for (index in 0 until feedsListItemTypes.itemCount) {
           when (val feedListItemType = feedsListItemTypes[index]) {
             is FeedsListItemType.FeedListItem -> {
-              val feed = feedListItemType.feed
-              FeedListItem(
-                feed = feed,
-                selected = selectedFeed == feed,
-                canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
-                feedsSheetMode = feedsSheetMode,
-                onDeleteFeed = onDeleteFeed,
-                onFeedSelected = onFeedSelected,
-                onFeedNameChanged = onFeedNameChanged,
-                onFeedPinClick = onFeedPinClick
-              )
+              item {
+                val feed = feedListItemType.feed
+                FeedListItem(
+                  feed = feed,
+                  selected = selectedFeed == feed,
+                  canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
+                  feedsSheetMode = feedsSheetMode,
+                  onDeleteFeed = onDeleteFeed,
+                  onFeedSelected = onFeedSelected,
+                  onFeedNameChanged = onFeedNameChanged,
+                  onFeedPinClick = onFeedPinClick
+                )
+              }
             }
-            FeedsListItemType.FeedSeparator -> {
-              Divider(
-                modifier =
-                  Modifier.requiredHeight(1.dp)
-                    .align(Alignment.BottomStart)
-                    .padding(start = 24.dp, end = 12.dp)
-                    .graphicsLayer { translationY = -1f },
-                color = AppTheme.colorScheme.tintedSurface
-              )
+            FeedsListItemType.AllFeedsHeader -> {
+              stickyHeader(contentType = FeedsListItemType.AllFeedsHeader) {
+                Box(modifier = Modifier.wrapContentHeight()) {
+                  SubHeader(
+                    text = "All Feeds",
+                    modifier =
+                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
+                  )
+
+                  Divider(color = AppTheme.colorScheme.tintedSurface)
+
+                  Divider(
+                    color = AppTheme.colorScheme.tintedSurface,
+                    modifier =
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                  )
+                }
+              }
             }
-            FeedsListItemType.SectionSeparator -> {
-              Divider(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                color = AppTheme.colorScheme.tintedSurface
-              )
+            FeedsListItemType.PinnedFeedsHeader -> {
+              stickyHeader(contentType = FeedsListItemType.PinnedFeedsHeader) {
+                Box(modifier = Modifier.wrapContentHeight()) {
+                  SubHeader(
+                    text = "Pinned",
+                    modifier =
+                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
+                  )
+
+                  Divider(
+                    color = AppTheme.colorScheme.tintedSurface,
+                    modifier =
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                  )
+                }
+              }
             }
             null -> {
               // no-op
