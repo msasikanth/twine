@@ -39,6 +39,14 @@ internal data class FeedsState(
         .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
         .insertSeparators { before, after ->
           when {
+            before?.feed?.pinnedAt == null && after?.feed?.pinnedAt != null -> {
+              FeedsListItemType.PinnedFeedsHeader
+            }
+            (before?.feed?.pinnedAt != null || before == null) &&
+              after != null &&
+              after.feed.pinnedAt == null -> {
+              FeedsListItemType.AllFeedsHeader
+            }
             else -> {
               null
             }
