@@ -246,22 +246,6 @@ private fun BottomSheetExpandedContent(
                 onFeedPinClick = onFeedPinClick
               )
             }
-            FeedsListItemType.FeedSeparator -> {
-              Divider(
-                modifier =
-                  Modifier.requiredHeight(1.dp)
-                    .align(Alignment.BottomStart)
-                    .padding(start = 24.dp, end = 12.dp)
-                    .graphicsLayer { translationY = -1f },
-                color = AppTheme.colorScheme.tintedSurface
-              )
-            }
-            FeedsListItemType.SectionSeparator -> {
-              Divider(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                color = AppTheme.colorScheme.tintedSurface
-              )
-            }
             null -> {
               // no-op
             }

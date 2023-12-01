@@ -39,12 +39,6 @@ internal data class FeedsState(
         .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
         .insertSeparators { before, after ->
           when {
-            before?.feed?.pinnedAt != null && after != null && after.feed.pinnedAt == null -> {
-              FeedsListItemType.SectionSeparator
-            }
-            before?.feed != null && after?.feed != null -> {
-              FeedsListItemType.FeedSeparator
-            }
             else -> {
               null
             }
