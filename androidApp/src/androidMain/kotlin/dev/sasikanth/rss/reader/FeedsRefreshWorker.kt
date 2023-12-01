@@ -29,6 +29,7 @@ import io.sentry.kotlin.multiplatform.SentryLevel
 import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
 import java.lang.Exception
 import java.time.Duration
+import kotlinx.coroutines.CancellationException
 
 class FeedsRefreshWorker(
   context: Context,
@@ -60,6 +61,8 @@ class FeedsRefreshWorker(
         rssRepository.updateFeeds()
         lastUpdatedAt.refresh()
         Result.success()
+      } catch (e: CancellationException) {
+        Result.failure()
       } catch (e: Exception) {
         Sentry.captureException(e) {
           it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
