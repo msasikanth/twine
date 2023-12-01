@@ -31,16 +31,12 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlinx.datetime.Clock
 import org.xmlpull.v1.XmlPullParser
 
 internal class AndroidAtomParser(private val parser: XmlPullParser, private val feedUrl: String) :
   Parser() {
-
-  private val atomDateFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
   override fun parse(): FeedPayload {
     parser.require(XmlPullParser.START_TAG, namespace, TAG_ATOM_FEED)
@@ -129,17 +125,12 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       }
     }
 
-    val dateLong: Long =
-      date?.let {
-        try {
-          ZonedDateTime.parse(date, atomDateFormat).toEpochSecond() * 1000
-        } catch (e: Throwable) {
-          Sentry.captureException(e)
-          Napier.e("Parse date error: ${e.message}")
+    val postPubDateInMillis =
+      date?.let { dateString -> dateString.dateStringToEpochMillis() }
+        ?: run {
+          Sentry.captureMessage("Failed to parse date: $date")
           null
         }
-      }
-        ?: System.currentTimeMillis()
 
     if (title.isNullOrBlank() && content.isNullOrBlank()) {
       return null
@@ -150,7 +141,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       description = FeedParser.cleanTextCompact(content, decodeUrlEncoding = true).orEmpty(),
       link = FeedParser.cleanText(link)!!,
       imageUrl = FeedParser.safeUrl(hostLink, image),
-      date = dateLong,
+      date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = null
     )
   }

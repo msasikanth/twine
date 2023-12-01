@@ -34,26 +34,12 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import io.github.aakira.napier.Napier
 import io.sentry.kotlin.multiplatform.Sentry
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatterBuilder
-import java.util.Locale
+import kotlinx.datetime.Clock
 import org.xmlpull.v1.XmlPullParser
 
 internal class AndroidRssParser(private val parser: XmlPullParser, private val feedUrl: String) :
   Parser() {
-
-  private val rssDateFormat =
-    DateTimeFormatterBuilder()
-      .appendPattern("E, d MMM yyyy HH:mm:ss ")
-      .optionalStart()
-      .appendPattern("z")
-      .optionalEnd()
-      .optionalStart()
-      .appendPattern("Z")
-      .optionalEnd()
-      .toFormatter(Locale.US)
 
   override fun parse(): FeedPayload {
     parser.nextTag()
@@ -140,17 +126,12 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       }
     }
 
-    val dateLong: Long =
-      date?.let {
-        try {
-          ZonedDateTime.parse(date, this.rssDateFormat).toEpochSecond() * 1000
-        } catch (e: Throwable) {
-          Sentry.captureException(e)
-          Napier.e("Parse date error: ${e.message}")
+    val postPubDateInMillis =
+      date?.let { dateString -> dateString.dateStringToEpochMillis() }
+        ?: run {
+          Sentry.captureMessage("Failed to parse date: $date")
           null
         }
-      }
-        ?: System.currentTimeMillis()
 
     KsoupHtmlParser(
         handler =
@@ -171,7 +152,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
       link = FeedParser.cleanText(link)!!,
       imageUrl = FeedParser.safeUrl(hostLink, image),
-      date = dateLong,
+      date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
     )
   }

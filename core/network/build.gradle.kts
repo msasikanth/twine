@@ -44,6 +44,7 @@ kotlin {
       implementation(libs.napier)
       implementation(libs.sentry)
     }
+    commonTest.dependencies { implementation(libs.kotlin.test) }
 
     androidMain.dependencies {
       implementation(libs.androidx.annotation)

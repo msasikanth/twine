@@ -25,18 +25,9 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
-import platform.Foundation.NSDateFormatter
-import platform.Foundation.NSLocale
-import platform.Foundation.timeIntervalSince1970
-
-private val atomDateFormatter =
-  NSDateFormatter().apply {
-    dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
-    locale = NSLocale("en_US_POSIX")
-  }
+import kotlinx.datetime.Clock
 
 internal fun PostPayload.Companion.mapAtomPost(
   atomMap: Map<String, String>,
@@ -63,12 +54,19 @@ internal fun PostPayload.Companion.mapAtomPost(
     return null
   }
 
+  val postPubDateInMillis =
+    pubDate?.let { dateString -> dateString.dateStringToEpochMillis() }
+      ?: run {
+        Sentry.captureMessage("Failed to parse date: $pubDate")
+        null
+      }
+
   return PostPayload(
     title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
     description = FeedParser.cleanTextCompact(content, decodeUrlEncoding = true).orEmpty(),
     link = FeedParser.cleanText(link)!!,
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
-    date = pubDate.atomDateStringToEpochSeconds(),
+    date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
     commentsLink = null
   )
 }
@@ -96,19 +94,4 @@ internal fun FeedPayload.Companion.mapAtomFeed(
     icon = iconUrl,
     posts = posts
   )
-}
-
-private fun String?.atomDateStringToEpochSeconds(): Long {
-  if (this.isNullOrBlank()) return 0L
-
-  val date =
-    try {
-      atomDateFormatter.dateFromString(this.trim())
-    } catch (e: Exception) {
-      Sentry.captureException(e)
-      Napier.e("Parse date error: ${e.message}")
-      null
-    }
-
-  return date?.timeIntervalSince1970?.times(1000)?.toLong() ?: 0L
 }

@@ -27,20 +27,8 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import io.ktor.http.Url
-import platform.Foundation.NSDateFormatter
-import platform.Foundation.NSLocale
-import platform.Foundation.timeIntervalSince1970
-
-private val offsetTimezoneDateFormatter =
-  NSDateFormatter().apply {
-    dateFormat = "E, d MMM yyyy HH:mm:ss Z"
-    locale = NSLocale("en_US_POSIX")
-  }
-private val abbrevTimezoneDateFormatter =
-  NSDateFormatter().apply {
-    dateFormat = "E, d MMM yyyy HH:mm:ss z"
-    locale = NSLocale("en_US_POSIX")
-  }
+import io.sentry.kotlin.multiplatform.Sentry
+import kotlinx.datetime.Clock
 
 internal fun PostPayload.Companion.mapRssPost(
   rssMap: Map<String, String>,
@@ -75,12 +63,19 @@ internal fun PostPayload.Companion.mapRssPost(
     return null
   }
 
+  val postPubDateInMillis =
+    pubDate?.let { dateString -> dateString.dateStringToEpochMillis() }
+      ?: run {
+        Sentry.captureMessage("Failed to parse date: $pubDate")
+        null
+      }
+
   return PostPayload(
     title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
     description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
     link = FeedParser.cleanText(link)!!,
     imageUrl = FeedParser.safeUrl(hostLink, imageUrl),
-    date = pubDate.rssDateStringToEpochSeconds(),
+    date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
     commentsLink = commentsLink?.trim()
   )
 }
@@ -108,19 +103,4 @@ internal fun FeedPayload.Companion.mapRssFeed(
     icon = iconUrl,
     posts = posts
   )
-}
-
-private fun String?.rssDateStringToEpochSeconds(): Long {
-  if (this.isNullOrBlank()) return 0L
-
-  val dateString = this.trim()
-  val date =
-    try {
-      offsetTimezoneDateFormatter.dateFromString(dateString)
-        ?: abbrevTimezoneDateFormatter.dateFromString(dateString)
-    } catch (e: Exception) {
-      null
-    }
-
-  return date?.timeIntervalSince1970?.times(1000)?.toLong() ?: 0L
 }
