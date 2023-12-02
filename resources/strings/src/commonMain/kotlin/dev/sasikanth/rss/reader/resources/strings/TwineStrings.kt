@@ -57,6 +57,8 @@ data class TwineStrings(
   val settingsBrowserTypeSubtitle: String,
   val settingsEnableBlurTitle: String,
   val settingsEnableBlurSubtitle: String,
+  val settingsShowUnreadCountTitle: String,
+  val settingsShowUnreadCountSubtitle: String,
   val settingsReportIssue: String,
   val settingsVersion: (String, Int) -> String,
   val settingsAboutTitle: String,

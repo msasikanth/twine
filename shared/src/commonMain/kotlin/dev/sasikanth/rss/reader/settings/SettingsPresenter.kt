@@ -98,16 +98,23 @@ class SettingsPresenter(
       combine(
           settingsRepository.browserType,
           settingsRepository.enableFeaturedItemBlur,
+          settingsRepository.showUnreadPostsCount,
           rssRepository.numberOfFeeds()
-        ) { browserType, featuredItemBlurEnabled, numberOfFeeds ->
+        ) { browserType, featuredItemBlurEnabled, showUnreadPostsCount, numberOfFeeds ->
           val hasFeeds = numberOfFeeds > 0
-          Triple(browserType, featuredItemBlurEnabled, hasFeeds)
+          Settings(
+            browserType = browserType,
+            enableHomePageBlur = featuredItemBlurEnabled,
+            showUnreadPostsCount = showUnreadPostsCount,
+            hasFeeds = hasFeeds
+          )
         }
-        .onEach { (browserType, featuredItemBlurEnabled, hasFeeds) ->
+        .onEach { (browserType, featuredItemBlurEnabled, showUnreadPostsCount, hasFeeds) ->
           _state.update {
             it.copy(
               browserType = browserType,
               enableHomePageBlur = featuredItemBlurEnabled,
+              showUnreadPostsCount = showUnreadPostsCount,
               hasFeeds = hasFeeds
             )
           }
@@ -126,6 +133,7 @@ class SettingsPresenter(
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
         is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
+        is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
         SettingsEvent.AboutClicked -> {
           // no-op
         }
@@ -133,6 +141,10 @@ class SettingsPresenter(
         SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
       }
+    }
+
+    private fun toggleShowUnreadPostsCount(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleShowUnreadPostsCount(value) }
     }
 
     private fun cancelOpmlImportOrExport() {
@@ -160,3 +172,10 @@ class SettingsPresenter(
     }
   }
 }
+
+private data class Settings(
+  val browserType: BrowserType,
+  val enableHomePageBlur: Boolean,
+  val showUnreadPostsCount: Boolean,
+  val hasFeeds: Boolean,
+)

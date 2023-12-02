@@ -25,6 +25,8 @@ sealed interface SettingsEvent {
 
   data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
 
+  data class ToggleShowUnreadPostsCount(val value: Boolean) : SettingsEvent
+
   data object AboutClicked : SettingsEvent
 
   data object ImportOpmlClicked : SettingsEvent
