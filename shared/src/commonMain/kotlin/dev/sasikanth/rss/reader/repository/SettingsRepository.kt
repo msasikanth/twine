@@ -22,6 +22,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
 
@@ -49,6 +50,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.data.map { preferences ->
       mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
     }
+
+  suspend fun postsDeletionPeriodImmediate(): Period {
+    return postsDeletionPeriod.first()
+  }
 
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }

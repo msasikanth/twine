@@ -29,7 +29,6 @@ import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
 import io.sentry.Sentry
 import java.time.Duration
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.flow.first
 
 class PostsCleanUpWorker(
   context: Context,
@@ -57,7 +56,7 @@ class PostsCleanUpWorker(
 
   override suspend fun doWork(): Result {
     try {
-      val postsDeletionPeriod = settingsRepository.postsDeletionPeriod.first()
+      val postsDeletionPeriod = settingsRepository.postsDeletionPeriodImmediate()
       rssRepository.deletePosts(before = postsDeletionPeriod.calculateInstantBeforePeriod())
       return Result.success()
     } catch (e: CancellationException) {
