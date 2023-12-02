@@ -230,35 +230,7 @@ class RssRepository(
       transacter = bookmarkQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(
-          limit,
-          offset,
-          mapper = {
-            title,
-            description,
-            imageUrl,
-            date,
-            link,
-            bookmarked,
-            feedName,
-            feedIcon,
-            feedLink,
-            commentsLink ->
-            PostWithMetadata(
-              title = title,
-              description = description,
-              imageUrl = imageUrl,
-              date = date,
-              link = link,
-              bookmarked = bookmarked,
-              feedName = feedName,
-              feedIcon = feedIcon,
-              feedLink = feedLink,
-              commentsLink = commentsLink,
-              read = true
-            )
-          }
-        )
+        bookmarkQueries.bookmarks(limit, offset, ::PostWithMetadata)
       }
     )
   }
