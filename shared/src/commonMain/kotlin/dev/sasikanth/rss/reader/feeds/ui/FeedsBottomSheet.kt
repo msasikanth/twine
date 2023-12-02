@@ -398,6 +398,7 @@ private fun BottomSheetCollapsedContent(
         if (feed != null) {
           BottomSheetItem(
             text = feed.name.uppercase(),
+            badgeCount = feed.numberOfUnreadPosts,
             iconUrl = feed.icon,
             selected = selectedFeed == feed,
             onClick = { onFeedSelected(feed) }

@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -97,13 +100,34 @@ internal fun FeedListItem(
             Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
           contentAlignment = Alignment.Center
         ) {
-          AsyncImage(
-            url = feed.icon,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier =
-              Modifier.requiredSize(48.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center),
-          )
+          BadgedBox(
+            badge = {
+              val numberOfUnreadPosts = feed.numberOfUnreadPosts
+              if (numberOfUnreadPosts > 0) {
+                Badge(
+                  containerColor = AppTheme.colorScheme.tintedForeground,
+                  contentColor = AppTheme.colorScheme.tintedBackground,
+                  modifier =
+                    Modifier.graphicsLayer {
+                      translationX = -4.dp.toPx()
+                      translationY = 4.dp.toPx()
+                    }
+                ) {
+                  Text(feed.numberOfUnreadPosts.toString())
+                }
+              }
+            }
+          ) {
+            AsyncImage(
+              url = feed.icon,
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+              modifier =
+                Modifier.requiredSize(48.dp)
+                  .clip(RoundedCornerShape(12.dp))
+                  .align(Alignment.Center),
+            )
+          }
         }
       }
 
