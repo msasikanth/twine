@@ -69,6 +69,9 @@ val EnTwineStrings =
     settingsEnableBlurTitle = "Enable blur in homepage",
     settingsEnableBlurSubtitle =
       "When disabled, displays gradients instead of blurred images. May improve performance.",
+    settingsShowUnreadCountTitle = "Show unread posts count",
+    settingsShowUnreadCountSubtitle =
+      "When disabled, the unread posts count will not be shown in the feeds sheet",
     settingsReportIssue = "Report an issue",
     settingsVersion = { versionName, versionCode -> "$versionName ($versionCode)" },
     settingsAboutTitle = "About Twine",

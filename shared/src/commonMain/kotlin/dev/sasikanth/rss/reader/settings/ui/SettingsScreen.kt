@@ -154,6 +154,17 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            UnreadPostsCountSettingItem(
+              showUnreadCountEnabled = state.showUnreadPostsCount,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             OPMLSettingItem(
               opmlResult = state.opmlResult,
               hasFeeds = state.hasFeeds,
@@ -193,6 +204,56 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun UnreadPostsCountSettingItem(
+  showUnreadCountEnabled: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  var checked by remember(showUnreadCountEnabled) { mutableStateOf(showUnreadCountEnabled) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!showUnreadCountEnabled)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsShowUnreadCountTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsShowUnreadCountSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      MaterialTheme(
+        colorScheme =
+          darkColorScheme(
+            primary = AppTheme.colorScheme.tintedSurface,
+            onPrimary = AppTheme.colorScheme.tintedForeground,
+            outline = AppTheme.colorScheme.outline,
+            surfaceVariant = AppTheme.colorScheme.surfaceContainer
+          )
+      ) {
+        Switch(
+          checked = checked,
+          onCheckedChange = { checked -> onValueChanged(checked) },
+        )
+      }
+    }
+  }
 }
 
 @Composable

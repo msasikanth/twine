@@ -31,7 +31,8 @@ internal data class FeedsState(
   val feeds: Flow<PagingData<Feed>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
   val selectedFeed: Feed?,
-  val numberOfPinnedFeeds: Long
+  val numberOfPinnedFeeds: Long,
+  val canShowUnreadPostsCount: Boolean,
 ) {
 
   val feedsListInExpandedState: Flow<PagingData<FeedsListItemType>> =
@@ -65,7 +66,8 @@ internal data class FeedsState(
         feeds = emptyFlow(),
         feedsSearchResults = emptyFlow(),
         selectedFeed = null,
-        numberOfPinnedFeeds = 0
+        numberOfPinnedFeeds = 0,
+        canShowUnreadPostsCount = false,
       )
   }
 }

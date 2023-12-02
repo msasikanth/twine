@@ -31,6 +31,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
+  private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -40,12 +41,19 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val enableFeaturedItemBlur: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableFeaturedItemBlurKey] ?: true }
 
+  val showUnreadPostsCount: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
+
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }
   }
 
   suspend fun toggleFeaturedItemBlur(value: Boolean) {
     dataStore.edit { preferences -> preferences[enableFeaturedItemBlurKey] = value }
+  }
+
+  suspend fun toggleShowUnreadPostsCount(value: Boolean) {
+    dataStore.edit { preferences -> preferences[showUnreadPostsCountKey] = value }
   }
 
   private fun mapToBrowserType(pref: String?): BrowserType? {
