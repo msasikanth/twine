@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.bookmarks.BookmarksEffect
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -58,6 +60,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,6 +75,16 @@ internal fun BookmarksScreen(
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+
+  LaunchedEffect(Unit) {
+    bookmarksPresenter.effects.collectLatest { effect ->
+      when (effect) {
+        is BookmarksEffect.OpenPost -> {
+          linkHandler.openLink(effect.post.link)
+        }
+      }
+    }
+  }
 
   Scaffold(
     modifier = modifier,
@@ -116,7 +129,7 @@ internal fun BookmarksScreen(
                 PostListItem(
                   item = post,
                   enablePostSource = false,
-                  onClick = { coroutineScope.launch { linkHandler.openLink(post.link) } },
+                  onClick = { bookmarksPresenter.dispatch(BookmarksEvent.OnPostClicked(post)) },
                   onPostBookmarkClick = {
                     bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
                   },

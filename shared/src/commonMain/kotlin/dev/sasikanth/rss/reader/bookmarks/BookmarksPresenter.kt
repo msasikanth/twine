@@ -28,9 +28,11 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -55,6 +57,7 @@ class BookmarksPresenter(
   }
 
   internal val state = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   fun dispatch(event: BookmarksEvent) {
     when (event) {
@@ -73,6 +76,7 @@ class BookmarksPresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    val effects = MutableSharedFlow<BookmarksEffect>()
 
     private val _state = MutableStateFlow(BookmarksState.DEFAULT)
     val state: StateFlow<BookmarksState> =
@@ -89,6 +93,16 @@ class BookmarksPresenter(
           /* no-op */
         }
         is BookmarksEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
+        is BookmarksEvent.OnPostClicked -> onPostClicked(event.post)
+      }
+    }
+
+    private fun onPostClicked(post: PostWithMetadata) {
+      coroutineScope.launch {
+        effects.emit(BookmarksEffect.OpenPost(post))
+        if (!post.read) {
+          rssRepository.updatePostReadStatus(read = true, link = post.link)
+        }
       }
     }
 

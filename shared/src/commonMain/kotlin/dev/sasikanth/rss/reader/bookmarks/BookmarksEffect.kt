@@ -13,17 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.bookmarks
 
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 
-sealed interface BookmarksEvent {
+sealed interface BookmarksEffect {
 
-  data object Init : BookmarksEvent
-
-  data object BackClicked : BookmarksEvent
-
-  data class OnPostBookmarkClick(val post: PostWithMetadata) : BookmarksEvent
-
-  data class OnPostClicked(val post: PostWithMetadata) : BookmarksEvent
+  data class OpenPost(val post: PostWithMetadata) : BookmarksEffect
 }
