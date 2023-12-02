@@ -73,3 +73,6 @@ LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
 UPDATE post SET bookmarked = :bookmarked WHERE link = :link;
+
+updateReadStatus:
+UPDATE post SET read = :read WHERE link = :link;
