@@ -264,7 +264,7 @@ private fun BottomSheetExpandedContent(
               stickyHeader(contentType = FeedsListItemType.AllFeedsHeader) {
                 Box(modifier = Modifier.wrapContentHeight()) {
                   SubHeader(
-                    text = "All Feeds",
+                    text = LocalStrings.current.allFeeds,
                     modifier =
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
@@ -283,7 +283,7 @@ private fun BottomSheetExpandedContent(
               stickyHeader(contentType = FeedsListItemType.PinnedFeedsHeader) {
                 Box(modifier = Modifier.wrapContentHeight()) {
                   SubHeader(
-                    text = "Pinned",
+                    text = LocalStrings.current.pinnedFeeds,
                     modifier =
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
