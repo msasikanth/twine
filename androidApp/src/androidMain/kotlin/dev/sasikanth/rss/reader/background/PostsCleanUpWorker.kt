@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.background
 
 import android.content.Context
@@ -22,25 +23,24 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
-import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
-import io.sentry.kotlin.multiplatform.Sentry
-import io.sentry.kotlin.multiplatform.SentryLevel
-import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
-import java.lang.Exception
+import dev.sasikanth.rss.reader.repository.SettingsRepository
+import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
+import io.sentry.Sentry
 import java.time.Duration
-import kotlinx.coroutines.CancellationException
+import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.flow.first
 
-class FeedsRefreshWorker(
+class PostsCleanUpWorker(
   context: Context,
   workerParameters: WorkerParameters,
   private val rssRepository: RssRepository,
-  private val lastUpdatedAt: LastUpdatedAt
+  private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
 
-    const val TAG = "REFRESH_FEEDS"
+    const val TAG = "POSTS_CLEAN_UP"
 
     fun periodicRequest(): PeriodicWorkRequest {
       val constraints =
@@ -49,28 +49,23 @@ class FeedsRefreshWorker(
           .setRequiresBatteryNotLow(true)
           .build()
 
-      return PeriodicWorkRequestBuilder<FeedsRefreshWorker>(repeatInterval = Duration.ofHours(1))
+      return PeriodicWorkRequestBuilder<PostsCleanUpWorker>(repeatInterval = Duration.ofDays(1))
         .setConstraints(constraints)
         .build()
     }
   }
 
   override suspend fun doWork(): Result {
-    return if (lastUpdatedAt.hasExpired()) {
-      try {
-        rssRepository.updateFeeds()
-        lastUpdatedAt.refresh()
-        Result.success()
-      } catch (e: CancellationException) {
-        Result.failure()
-      } catch (e: Exception) {
-        Sentry.captureException(e) {
-          it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
-        }
-        Result.failure()
-      }
-    } else {
-      Result.failure()
+    try {
+      val postsDeletionPeriod = settingsRepository.postsDeletionPeriod.first()
+      rssRepository.deletePosts(before = postsDeletionPeriod.calculateInstantBeforePeriod())
+      return Result.success()
+    } catch (e: CancellationException) {
+      // no-op
+    } catch (e: Exception) {
+      Sentry.captureException(e)
     }
+
+    return Result.failure()
   }
 }
