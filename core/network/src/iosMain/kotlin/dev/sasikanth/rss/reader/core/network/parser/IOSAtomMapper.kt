@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
 import io.ktor.http.Url
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.datetime.Clock
@@ -34,7 +35,7 @@ internal fun PostPayload.Companion.mapAtomPost(
   hostLink: String
 ): PostPayload? {
   val title = atomMap[TAG_TITLE]
-  val pubDate = atomMap[TAG_PUBLISHED]
+  val pubDate = atomMap[TAG_PUBLISHED] ?: atomMap[TAG_UPDATED]
   val link = atomMap[TAG_LINK]?.trim()
   val data = atomMap[TAG_CONTENT]
   var imageUrl = atomMap[TAG_IMAGE_URL]

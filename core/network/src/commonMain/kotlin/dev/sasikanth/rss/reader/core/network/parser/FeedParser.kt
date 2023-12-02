@@ -50,6 +50,7 @@ interface FeedParser {
     internal const val TAG_SUBTITLE = "subtitle"
     internal const val TAG_PUB_DATE = "pubDate"
     internal const val TAG_PUBLISHED = "published"
+    internal const val TAG_UPDATED = "updated"
     internal const val TAG_FEATURED_IMAGE = "featuredImage"
     internal const val TAG_COMMENTS = "comments"
     internal const val TAG_IMAGE_URL = "imageUrl"
