@@ -30,6 +30,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
@@ -57,6 +58,7 @@ import me.tatarka.inject.annotations.Inject
 class FeedsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val settingsRepository: SettingsRepository,
   private val observableSelectedFeed: ObservableSelectedFeed,
   @Assisted componentContext: ComponentContext
 ) : ComponentContext by componentContext {
@@ -66,6 +68,7 @@ class FeedsPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
+        settingsRepository = settingsRepository,
         observableSelectedFeed = observableSelectedFeed
       )
     }
@@ -84,6 +87,7 @@ class FeedsPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
+    private val settingsRepository: SettingsRepository,
     private val observableSelectedFeed: ObservableSelectedFeed
   ) : InstanceKeeper.Instance {
 
@@ -153,6 +157,10 @@ class FeedsPresenter(
 
     @OptIn(FlowPreview::class)
     private fun init() {
+      settingsRepository.showUnreadPostsCount
+        .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
+        .launchIn(coroutineScope)
+
       val feeds =
         createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allFeeds() }
           .flow
