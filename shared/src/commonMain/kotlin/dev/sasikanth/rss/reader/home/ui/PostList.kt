@@ -168,6 +168,7 @@ fun PostListItem(
       feedName = item.feedName,
       postPublishedAt = item.date.relativeDurationString(),
       postLink = item.link,
+      postRead = item.read,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
       enablePostSource = enablePostSource,
