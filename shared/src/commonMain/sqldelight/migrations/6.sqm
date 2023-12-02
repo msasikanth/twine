@@ -8,7 +8,9 @@ UPDATE post SET read = 1;
 DROP TRIGGER IF EXISTS post_bookmarked;
 DROP TRIGGER IF EXISTS post_content_update;
 
-ALTER TABLE bookmark ADD COLUMN read INTEGER NOT NULL;
+ALTER TABLE bookmark ADD COLUMN read INTEGER NOT NULL DEFAULT 0;
+
+UPDATE bookmark SET read = 1;
 
 CREATE TRIGGER IF NOT EXISTS
 post_bookmarked

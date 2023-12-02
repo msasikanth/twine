@@ -12,7 +12,7 @@ CREATE TABLE bookmark (
   feedIcon TEXT NOT NULL,
   feedLink TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
-  read INTEGER AS Boolean NOT NULL
+  read INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE TRIGGER IF NOT EXISTS
