@@ -26,6 +26,8 @@ struct iOSApp: App {
                     case .background:
                         LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
                         appDelegate.scheduledRefreshFeeds()
+                        // Run 5 minutes after the app goes into the background
+                        appDelegate.scheduleCleanUpPosts(earliest: Date(timeIntervalSinceNow: 5 * 60))
                 
                     case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
                     case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
