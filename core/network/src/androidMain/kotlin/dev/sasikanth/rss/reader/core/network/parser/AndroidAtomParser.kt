@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
 import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.datetime.Clock
 import org.xmlpull.v1.XmlPullParser
@@ -118,8 +119,11 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
             )
             .parseComplete(rawContent)
         }
-        TAG_PUBLISHED -> {
-          date = readTagText(tagName, parser)
+        TAG_PUBLISHED,
+        TAG_UPDATED -> {
+          if (date.isNullOrBlank()) {
+            date = readTagText(tagName, parser)
+          }
         }
         else -> skip(parser)
       }
