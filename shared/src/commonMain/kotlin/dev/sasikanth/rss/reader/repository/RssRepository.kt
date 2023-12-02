@@ -162,6 +162,10 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked, link) }
   }
 
+  suspend fun updatePostReadStatus(read: Boolean, link: String) {
+    withContext(ioDispatcher) { postQueries.updateReadStatus(read, link) }
+  }
+
   suspend fun deleteBookmark(link: String) {
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }

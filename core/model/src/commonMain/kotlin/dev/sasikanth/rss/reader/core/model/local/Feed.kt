@@ -27,4 +27,5 @@ data class Feed(
   val createdAt: Instant,
   val link: String,
   val pinnedAt: Instant?,
+  val numberOfUnreadPosts: Long = 0L,
 )

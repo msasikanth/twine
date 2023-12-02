@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 
 @Immutable
 internal data class FeedsState(
@@ -34,7 +35,7 @@ internal data class FeedsState(
 ) {
 
   val feedsListInExpandedState: Flow<PagingData<FeedsListItemType>> =
-    feedsSearchResults.map { feeds ->
+    feedsSearchResults.mapLatest { feeds ->
       feeds
         .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
         .insertSeparators { before, after ->

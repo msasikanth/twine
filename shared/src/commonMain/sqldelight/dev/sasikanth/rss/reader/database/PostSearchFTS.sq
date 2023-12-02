@@ -37,7 +37,8 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink,
-  post.commentsLink
+  post.commentsLink,
+  post.read
 FROM post_search
 INNER JOIN post ON post.link == post_search.link
 INNER JOIN feed ON post.feedLink == feed.link

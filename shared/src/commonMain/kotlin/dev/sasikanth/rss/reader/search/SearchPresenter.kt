@@ -34,9 +34,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -65,6 +67,7 @@ class SearchPresenter(
     }
 
   internal val state: StateFlow<SearchState> = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   internal val searchQuery
     get() = presenterInstance.searchQuery
@@ -89,6 +92,7 @@ class SearchPresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    val effects = MutableSharedFlow<SearchEffect>()
 
     var searchQuery by mutableStateOf(TextFieldValue())
       private set
@@ -138,6 +142,16 @@ class SearchPresenter(
           searchQuery = TextFieldValue()
         }
         is SearchEvent.OnPostBookmarkClick -> onPostBookmarkClick(event.post)
+        is SearchEvent.OnPostClicked -> onPostClicked(event.post)
+      }
+    }
+
+    private fun onPostClicked(post: PostWithMetadata) {
+      coroutineScope.launch {
+        effects.emit(SearchEffect.OpenPost(post))
+        if (!post.read) {
+          rssRepository.updatePostReadStatus(read = true, link = post.link)
+        }
       }
     }
 

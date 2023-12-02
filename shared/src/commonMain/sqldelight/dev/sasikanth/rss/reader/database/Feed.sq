@@ -30,7 +30,16 @@ SELECT * FROM feed
 ORDER BY pinnedAt DESC, createdAt DESC;
 
 feedsPaginated:
-SELECT * FROM feed
+SELECT
+  name,
+  icon,
+  description,
+  homepageLink,
+  createdAt,
+  link,
+  pinnedAt,
+  (SELECT COUNT(*) FROM post WHERE post.read = 0 AND post.feedLink == feed.link) AS numberOfUnreadPosts
+FROM feed
 ORDER BY pinnedAt DESC , createdAt DESC
 LIMIT :limit OFFSET :offset;
 

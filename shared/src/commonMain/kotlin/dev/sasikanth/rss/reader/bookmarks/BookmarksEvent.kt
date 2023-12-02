@@ -24,4 +24,6 @@ sealed interface BookmarksEvent {
   data object BackClicked : BookmarksEvent
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : BookmarksEvent
+
+  data class OnPostClicked(val post: PostWithMetadata) : BookmarksEvent
 }

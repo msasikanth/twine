@@ -10,6 +10,7 @@ CREATE TABLE post(
   link TEXT NOT NULL PRIMARY KEY,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   commentsLink TEXT DEFAULT NULL,
+  read INTEGER AS Boolean NOT NULL DEFAULT 0,
   FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
 );
 
@@ -40,7 +41,8 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink,
-  post.commentsLink
+  post.commentsLink,
+  post.read
 FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
@@ -57,7 +59,8 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feedLink,
-  post.commentsLink
+  post.commentsLink,
+  post.read
 FROM post
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.link NOT IN (
@@ -70,3 +73,6 @@ LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
 UPDATE post SET bookmarked = :bookmarked WHERE link = :link;
+
+updateReadStatus:
+UPDATE post SET read = :read WHERE link = :link;

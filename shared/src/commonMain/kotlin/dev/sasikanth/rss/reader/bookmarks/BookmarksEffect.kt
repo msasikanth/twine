@@ -13,22 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.core.model.local
 
-import androidx.compose.runtime.Immutable
-import kotlinx.datetime.Instant
+package dev.sasikanth.rss.reader.bookmarks
 
-@Immutable
-data class PostWithMetadata(
-  val title: String,
-  val description: String,
-  val imageUrl: String?,
-  val date: Instant,
-  val link: String,
-  val bookmarked: Boolean,
-  val feedName: String,
-  val feedIcon: String,
-  val feedLink: String,
-  val commentsLink: String?,
-  val read: Boolean,
-)
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+
+sealed interface BookmarksEffect {
+
+  data class OpenPost(val post: PostWithMetadata) : BookmarksEffect
+}

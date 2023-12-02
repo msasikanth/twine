@@ -348,7 +348,12 @@ class HomePresenter(
     }
 
     private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch { effects.emit(HomeEffect.OpenPost(post)) }
+      coroutineScope.launch {
+        effects.emit(HomeEffect.OpenPost(post))
+        if (!post.read) {
+          rssRepository.updatePostReadStatus(read = true, link = post.link)
+        }
+      }
     }
 
     private fun refreshContent() {

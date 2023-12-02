@@ -13,26 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.search
 
-import androidx.compose.ui.text.input.TextFieldValue
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 
-internal sealed interface SearchEvent {
+interface SearchEffect {
 
-  data class SearchQueryChanged(val query: TextFieldValue) : SearchEvent
-
-  data class SearchPosts(val query: String, val searchSortOrder: SearchSortOrder) : SearchEvent
-
-  data object BackClicked : SearchEvent
-
-  data object ClearSearchResults : SearchEvent
-
-  data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
-
-  data object ClearSearchQuery : SearchEvent
-
-  data class OnPostBookmarkClick(val post: PostWithMetadata) : SearchEvent
-
-  data class OnPostClicked(val post: PostWithMetadata) : SearchEvent
+  data class OpenPost(val post: PostWithMetadata) : SearchEffect
 }

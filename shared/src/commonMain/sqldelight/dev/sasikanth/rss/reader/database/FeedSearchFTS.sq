@@ -31,7 +31,16 @@ WHERE (
 );
 
 search:
-SELECT * FROM feed
+SELECT
+  name,
+  icon,
+  description,
+  homepageLink,
+  createdAt,
+  link,
+  pinnedAt,
+  (SELECT COUNT(*) FROM post WHERE post.read = 0 AND post.feedLink == feed.link) AS numberOfUnreadPosts
+FROM feed
 WHERE (
   :searchQuery = '""'
   OR
