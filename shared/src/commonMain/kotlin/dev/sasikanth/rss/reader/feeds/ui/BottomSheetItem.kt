@@ -51,6 +51,7 @@ internal fun BottomSheetItem(
   text: String,
   badgeCount: Long,
   iconUrl: String,
+  canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
@@ -64,7 +65,7 @@ internal fun BottomSheetItem(
       ) {
         BadgedBox(
           badge = {
-            if (badgeCount > 0) {
+            if (badgeCount > 0 && canShowUnreadPostsCount) {
               Badge(
                 containerColor = AppTheme.colorScheme.tintedForeground,
                 contentColor = AppTheme.colorScheme.tintedBackground,

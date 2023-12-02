@@ -133,6 +133,7 @@ internal fun FeedsBottomSheet(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
         feeds = state.feeds.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
+        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
     } else {
@@ -142,6 +143,7 @@ internal fun FeedsBottomSheet(
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
+        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
@@ -180,6 +182,7 @@ private fun BottomSheetExpandedContent(
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
+  canShowUnreadPostsCount: Boolean,
   searchQuery: TextFieldValue,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
@@ -248,6 +251,7 @@ private fun BottomSheetExpandedContent(
                   feed = feed,
                   selected = selectedFeed == feed,
                   canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
+                  canShowUnreadPostsCount = canShowUnreadPostsCount,
                   feedsSheetMode = feedsSheetMode,
                   onDeleteFeed = onDeleteFeed,
                   onFeedSelected = onFeedSelected,
@@ -384,6 +388,7 @@ private fun BoxScope.EditFeeds(onClick: () -> Unit) {
 private fun BottomSheetCollapsedContent(
   feeds: LazyPagingItems<Feed>,
   selectedFeed: Feed?,
+  canShowUnreadPostsCount: Boolean,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -400,6 +405,7 @@ private fun BottomSheetCollapsedContent(
             text = feed.name.uppercase(),
             badgeCount = feed.numberOfUnreadPosts,
             iconUrl = feed.icon,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
             selected = selectedFeed == feed,
             onClick = { onFeedSelected(feed) }
           )

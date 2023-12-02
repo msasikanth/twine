@@ -74,6 +74,7 @@ internal fun FeedListItem(
   feed: Feed,
   selected: Boolean,
   canPinFeeds: Boolean,
+  canShowUnreadPostsCount: Boolean,
   feedsSheetMode: FeedsSheetMode,
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
@@ -103,7 +104,7 @@ internal fun FeedListItem(
           BadgedBox(
             badge = {
               val numberOfUnreadPosts = feed.numberOfUnreadPosts
-              if (numberOfUnreadPosts > 0) {
+              if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
                 Badge(
                   containerColor = AppTheme.colorScheme.tintedForeground,
                   contentColor = AppTheme.colorScheme.tintedBackground,
