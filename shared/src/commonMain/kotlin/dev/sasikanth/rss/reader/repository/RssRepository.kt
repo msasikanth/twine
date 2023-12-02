@@ -261,6 +261,10 @@ class RssRepository(
     return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
+  suspend fun deletePosts(before: Instant) {
+    withContext(ioDispatcher) { postQueries.deleteReadPosts(before = before) }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
