@@ -123,6 +123,8 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
         TAG_UPDATED -> {
           if (date.isNullOrBlank()) {
             date = readTagText(tagName, parser)
+          } else {
+            skip(parser)
           }
         }
         else -> skip(parser)
