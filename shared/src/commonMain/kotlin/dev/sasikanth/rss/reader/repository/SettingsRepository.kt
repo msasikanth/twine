@@ -32,6 +32,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
+  private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -43,6 +44,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val showUnreadPostsCount: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
+
+  val postsDeletionPeriod: Flow<Period> =
+    dataStore.data.map { preferences ->
+      mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
+    }
 
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }
@@ -56,13 +62,30 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[showUnreadPostsCountKey] = value }
   }
 
+  suspend fun updatePostsDeletionPeriod(postsDeletionPeriod: Period) {
+    dataStore.edit { preferences -> preferences[postsDeletionPeriodKey] = postsDeletionPeriod.name }
+  }
+
   private fun mapToBrowserType(pref: String?): BrowserType? {
     if (pref.isNullOrBlank()) return null
     return BrowserType.valueOf(pref)
+  }
+
+  private fun mapToPostsDeletionPeriod(pref: String?): Period? {
+    if (pref.isNullOrBlank()) return null
+    return Period.valueOf(pref)
   }
 }
 
 enum class BrowserType {
   Default,
   InApp
+}
+
+enum class Period {
+  ONE_WEEK,
+  ONE_MONTH,
+  THREE_MONTHS,
+  SIX_MONTHS,
+  YEAR
 }
