@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader
+package dev.sasikanth.rss.reader.background
 
 import android.content.Context
 import androidx.work.Constraints
