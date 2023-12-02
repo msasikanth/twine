@@ -261,7 +261,7 @@ class RssRepository(
     return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
-  suspend fun deletePosts(before: Instant) {
+  suspend fun deleteReadPosts(before: Instant) {
     withContext(ioDispatcher) { postQueries.deleteReadPosts(before = before) }
   }
 

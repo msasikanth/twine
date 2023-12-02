@@ -57,7 +57,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 let postsDeletionPeriod = try await applicationComponent.settingsRepository.postsDeletionPeriodImmediate()
                 let before = postsDeletionPeriod.calculateInstantBeforePeriod()
 
-                try await applicationComponent.rssRepository.deletePosts(before: before)
+                try await applicationComponent.rssRepository.deleteReadPosts(before: before)
                 task.setTaskCompleted(success: true)
             } catch {
                 let breadcrumb = Breadcrumb()

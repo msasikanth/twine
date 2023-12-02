@@ -57,7 +57,7 @@ class PostsCleanUpWorker(
   override suspend fun doWork(): Result {
     try {
       val postsDeletionPeriod = settingsRepository.postsDeletionPeriodImmediate()
-      rssRepository.deletePosts(before = postsDeletionPeriod.calculateInstantBeforePeriod())
+      rssRepository.deleteReadPosts(before = postsDeletionPeriod.calculateInstantBeforePeriod())
       return Result.success()
     } catch (e: CancellationException) {
       // no-op
