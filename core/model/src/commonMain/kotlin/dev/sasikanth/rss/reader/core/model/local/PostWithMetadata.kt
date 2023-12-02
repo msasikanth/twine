@@ -30,4 +30,5 @@ data class PostWithMetadata(
   val feedIcon: String,
   val feedLink: String,
   val commentsLink: String?,
+  val read: Boolean,
 )
