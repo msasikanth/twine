@@ -77,9 +77,9 @@ import dev.sasikanth.rss.reader.repository.BrowserType
 import dev.sasikanth.rss.reader.repository.Period
 import dev.sasikanth.rss.reader.repository.Period.ONE_MONTH
 import dev.sasikanth.rss.reader.repository.Period.ONE_WEEK
+import dev.sasikanth.rss.reader.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.repository.Period.YEAR
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
@@ -261,7 +261,7 @@ private fun PostsDeletionPeriodSettingItem(
             ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
             THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
             SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
-            YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+            ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
             null -> ""
           }
 
@@ -290,7 +290,7 @@ private fun PostsDeletionPeriodSettingItem(
               ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
               THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
               SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
-              YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+              ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
             }
 
           DropdownMenuItem(

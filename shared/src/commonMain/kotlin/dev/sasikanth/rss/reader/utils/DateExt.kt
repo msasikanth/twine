@@ -30,7 +30,7 @@ fun Period.calculateInstantBeforePeriod(): Instant {
       Period.ONE_MONTH -> DateTimePeriod(months = 1)
       Period.THREE_MONTHS -> DateTimePeriod(months = 3)
       Period.SIX_MONTHS -> DateTimePeriod(months = 6)
-      Period.YEAR -> DateTimePeriod(years = 1)
+      Period.ONE_YEAR -> DateTimePeriod(years = 1)
     }
   val currentMoment = Clock.System.now()
 
