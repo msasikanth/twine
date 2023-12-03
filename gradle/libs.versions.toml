@@ -42,7 +42,7 @@ lyricist = "1.6.2"
 atomicfu = "0.23.1"
 okio = "3.6.0"
 paging = "3.3.0-alpha02-0.4.0"
-stately = "2.0.5"
+stately = "2.0.6"
 xmlutil = "0.86.2"
 
 [libraries]
