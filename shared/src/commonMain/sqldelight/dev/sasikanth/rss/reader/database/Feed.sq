@@ -7,7 +7,8 @@ CREATE TABLE feed(
   homepageLink TEXT NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
-  pinnedAt INTEGER AS Instant
+  pinnedAt INTEGER AS Instant,
+  lastCleanUpAt INTEGER AS Instant
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -38,6 +39,7 @@ SELECT
   createdAt,
   link,
   pinnedAt,
+  lastCleanUpAt,
   (SELECT COUNT(*) FROM post WHERE post.read = 0 AND post.feedLink == feed.link) AS numberOfUnreadPosts
 FROM feed
 ORDER BY pinnedAt DESC , createdAt DESC
