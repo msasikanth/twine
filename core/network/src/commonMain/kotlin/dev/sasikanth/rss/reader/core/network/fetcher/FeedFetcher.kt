@@ -123,7 +123,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       URLBuilder()
         .apply {
           protocol = URLProtocol.HTTPS
-          host = url.replace(Regex("^https?://"), "").replace(Regex("^www\\."), "")
+          host = url.replace(Regex("^https?://"), "")
         }
         .build()
     } else {
