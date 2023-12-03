@@ -64,3 +64,6 @@ SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
 
 numberOfFeeds:
 SELECT COUNT(*) FROM feed;
+
+updateLastCleanUpAt:
+UPDATE feed SET lastCleanUpAt = :lastCleanUpAt;

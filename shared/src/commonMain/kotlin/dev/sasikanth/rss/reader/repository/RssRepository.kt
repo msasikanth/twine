@@ -285,6 +285,12 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.deleteReadPosts(before = before) }
   }
 
+  suspend fun updateFeedLastCleanUpAt() {
+    withContext(ioDispatcher) {
+      feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now())
+    }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
