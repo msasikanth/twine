@@ -19,6 +19,7 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.Period
 
 @Immutable
 internal data class SettingsState(
@@ -28,6 +29,7 @@ internal data class SettingsState(
   val hasFeeds: Boolean,
   val appInfo: AppInfo,
   val opmlResult: OpmlResult?,
+  val postsDeletionPeriod: Period?,
 ) {
 
   companion object {
@@ -39,7 +41,8 @@ internal data class SettingsState(
         showUnreadPostsCount = true,
         hasFeeds = false,
         appInfo = appInfo,
-        opmlResult = null
+        opmlResult = null,
+        postsDeletionPeriod = null
       )
   }
 }

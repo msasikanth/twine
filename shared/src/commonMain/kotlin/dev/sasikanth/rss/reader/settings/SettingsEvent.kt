@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.settings
 
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.Period
 
 sealed interface SettingsEvent {
 
@@ -34,4 +35,6 @@ sealed interface SettingsEvent {
   data object ExportOpmlClicked : SettingsEvent
 
   data object CancelOpmlImportOrExport : SettingsEvent
+
+  data class PostsDeletionPeriodChanged(val newPeriod: Period) : SettingsEvent
 }
