@@ -21,6 +21,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.opml.OpmlManager
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.Period
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -99,23 +100,31 @@ class SettingsPresenter(
           settingsRepository.browserType,
           settingsRepository.enableFeaturedItemBlur,
           settingsRepository.showUnreadPostsCount,
+          settingsRepository.postsDeletionPeriod,
           rssRepository.numberOfFeeds()
-        ) { browserType, featuredItemBlurEnabled, showUnreadPostsCount, numberOfFeeds ->
+        ) {
+          browserType,
+          featuredItemBlurEnabled,
+          showUnreadPostsCount,
+          postsDeletionPeriod,
+          numberOfFeeds ->
           val hasFeeds = numberOfFeeds > 0
           Settings(
             browserType = browserType,
             enableHomePageBlur = featuredItemBlurEnabled,
             showUnreadPostsCount = showUnreadPostsCount,
-            hasFeeds = hasFeeds
+            hasFeeds = hasFeeds,
+            postsDeletionPeriod = postsDeletionPeriod
           )
         }
-        .onEach { (browserType, featuredItemBlurEnabled, showUnreadPostsCount, hasFeeds) ->
+        .onEach { settings ->
           _state.update {
             it.copy(
-              browserType = browserType,
-              enableHomePageBlur = featuredItemBlurEnabled,
-              showUnreadPostsCount = showUnreadPostsCount,
-              hasFeeds = hasFeeds
+              browserType = settings.browserType,
+              enableHomePageBlur = settings.enableHomePageBlur,
+              showUnreadPostsCount = settings.showUnreadPostsCount,
+              hasFeeds = settings.hasFeeds,
+              postsDeletionPeriod = settings.postsDeletionPeriod
             )
           }
         }
@@ -140,7 +149,12 @@ class SettingsPresenter(
         SettingsEvent.ImportOpmlClicked -> importOpmlClicked()
         SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
+        is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       }
+    }
+
+    private fun postsDeletionPeriodChanged(newPeriod: Period) {
+      coroutineScope.launch { settingsRepository.updatePostsDeletionPeriod(newPeriod) }
     }
 
     private fun toggleShowUnreadPostsCount(value: Boolean) {
@@ -178,4 +192,5 @@ private data class Settings(
   val enableHomePageBlur: Boolean,
   val showUnreadPostsCount: Boolean,
   val hasFeeds: Boolean,
+  val postsDeletionPeriod: Period,
 )

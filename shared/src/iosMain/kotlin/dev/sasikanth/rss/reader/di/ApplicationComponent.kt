@@ -19,6 +19,7 @@ import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import platform.Foundation.NSBundle
@@ -33,6 +34,8 @@ abstract class ApplicationComponent(
   abstract val fileManager: FileManager
 
   abstract val rssRepository: RssRepository
+
+  abstract val settingsRepository: SettingsRepository
 
   @Provides
   @AppScope

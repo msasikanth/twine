@@ -97,4 +97,5 @@ dependencies {
   implementation(libs.androidx.work)
   implementation(libs.sentry)
   coreLibraryDesugaring(libs.desugarJdk)
+  implementation(libs.kotlinx.datetime)
 }

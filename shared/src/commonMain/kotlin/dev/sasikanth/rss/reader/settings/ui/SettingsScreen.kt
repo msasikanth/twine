@@ -30,9 +30,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -43,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
@@ -60,14 +63,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.repository.BrowserType
+import dev.sasikanth.rss.reader.repository.Period
+import dev.sasikanth.rss.reader.repository.Period.ONE_MONTH
+import dev.sasikanth.rss.reader.repository.Period.ONE_WEEK
+import dev.sasikanth.rss.reader.repository.Period.ONE_YEAR
+import dev.sasikanth.rss.reader.repository.Period.SIX_MONTHS
+import dev.sasikanth.rss.reader.repository.Period.THREE_MONTHS
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
@@ -165,6 +177,17 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            PostsDeletionPeriodSettingItem(
+              postsDeletionPeriod = state.postsDeletionPeriod,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             OPMLSettingItem(
               opmlResult = state.opmlResult,
               hasFeeds = state.hasFeeds,
@@ -204,6 +227,91 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun PostsDeletionPeriodSettingItem(
+  postsDeletionPeriod: Period?,
+  onValueChanged: (Period) -> Unit
+) {
+  var showDropdown by remember { mutableStateOf(false) }
+
+  Row(
+    modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 8.dp, bottom = 20.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        LocalStrings.current.settingsPostsDeletionPeriodTitle,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh
+      )
+      Text(
+        LocalStrings.current.settingsPostsDeletionPeriodSubtitle,
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+    }
+
+    Box {
+      TextButton(modifier = Modifier.widthIn(min = 112.dp), onClick = { showDropdown = true }) {
+        val period =
+          when (postsDeletionPeriod) {
+            ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
+            ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
+            THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
+            SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
+            ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+            null -> ""
+          }
+
+        Text(
+          text = period,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.tintedForeground
+        )
+
+        Icon(
+          imageVector = Icons.Filled.ArrowDropDown,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      }
+
+      DropdownMenu(
+        expanded = showDropdown,
+        onDismissRequest = { showDropdown = false },
+        offset = DpOffset(x = 0.dp, y = (-48).dp)
+      ) {
+        Period.entries.forEach { period ->
+          val periodString =
+            when (period) {
+              ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
+              ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
+              THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
+              SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
+              ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+            }
+
+          DropdownMenuItem(
+            onClick = {
+              onValueChanged(period)
+              showDropdown = false
+            }
+          ) {
+            val textColor =
+              if (period == postsDeletionPeriod) {
+                AppTheme.colorScheme.tintedForeground
+              } else {
+                AppTheme.colorScheme.onSurface
+              }
+
+            Text(text = periodString, style = MaterialTheme.typography.bodyLarge, color = textColor)
+          }
+        }
+      }
+    }
+  }
 }
 
 @Composable

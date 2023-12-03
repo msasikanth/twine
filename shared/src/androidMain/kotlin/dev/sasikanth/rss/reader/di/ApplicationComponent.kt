@@ -20,6 +20,7 @@ import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -29,6 +30,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
+
+  abstract val settingsRepository: SettingsRepository
 
   @Provides
   @AppScope

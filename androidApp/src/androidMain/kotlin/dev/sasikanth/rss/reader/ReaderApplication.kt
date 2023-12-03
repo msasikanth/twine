@@ -24,6 +24,8 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import dev.sasikanth.rss.reader.background.FeedsRefreshWorker
+import dev.sasikanth.rss.reader.background.PostsCleanUpWorker
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 
@@ -51,12 +53,25 @@ class ReaderApplication : Application(), Configuration.Provider {
               workerClassName: String,
               workerParameters: WorkerParameters
             ): ListenableWorker {
-              return FeedsRefreshWorker(
-                context = appContext,
-                workerParameters = workerParameters,
-                rssRepository = appComponent.rssRepository,
-                lastUpdatedAt = appComponent.lastUpdatedAt
-              )
+              return when (workerClassName) {
+                FeedsRefreshWorker::class.qualifiedName -> {
+                  FeedsRefreshWorker(
+                    context = appContext,
+                    workerParameters = workerParameters,
+                    rssRepository = appComponent.rssRepository,
+                    lastUpdatedAt = appComponent.lastUpdatedAt
+                  )
+                }
+                PostsCleanUpWorker::class.qualifiedName -> {
+                  PostsCleanUpWorker(
+                    context = appContext,
+                    workerParameters = workerParameters,
+                    rssRepository = appComponent.rssRepository,
+                    settingsRepository = appComponent.settingsRepository
+                  )
+                }
+                else -> throw IllegalArgumentException("Unknown background worker")
+              }
             }
           }
         )
@@ -65,13 +80,22 @@ class ReaderApplication : Application(), Configuration.Provider {
   override fun onCreate() {
     super.onCreate()
     enqueuePeriodicFeedsRefresh()
+    enqueuePeriodicPostsCleanUp()
 
     appComponent.initializers.forEach { it.initialize() }
   }
 
+  private fun enqueuePeriodicPostsCleanUp() {
+    workManager.enqueueUniquePeriodicWork(
+      PostsCleanUpWorker.TAG,
+      ExistingPeriodicWorkPolicy.KEEP,
+      PostsCleanUpWorker.periodicRequest()
+    )
+  }
+
   private fun enqueuePeriodicFeedsRefresh() {
     workManager.enqueueUniquePeriodicWork(
-      FeedsRefreshWorker.UNIQUE_WORK_NAME,
+      FeedsRefreshWorker.TAG,
       ExistingPeriodicWorkPolicy.KEEP,
       FeedsRefreshWorker.periodicRequest()
     )

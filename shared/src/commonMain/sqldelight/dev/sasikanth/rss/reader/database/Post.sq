@@ -76,3 +76,6 @@ UPDATE post SET bookmarked = :bookmarked WHERE link = :link;
 
 updateReadStatus:
 UPDATE post SET read = :read WHERE link = :link;
+
+deleteReadPosts:
+DELETE FROM post WHERE post.read == 1 AND post.date < :before;

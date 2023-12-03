@@ -26,11 +26,52 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 initializer.initialize()
             }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: DispatchQueue.main) { (task) in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
             self.refreshFeeds(task: task as! BGAppRefreshTask)
         }
         
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
+            self.cleanUpPosts(task: task as! BGProcessingTask)
+        }
+        
         return true
+    }
+    
+    func scheduleCleanUpPosts(earliest: Date) {
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
+        request.earliestBeginDate = earliest
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule posts cleanup \(error)")
+        }
+    }
+    
+    func cleanUpPosts(task: BGProcessingTask) {
+        // Schedule next clean up task 24 hours in future
+        scheduleCleanUpPosts(earliest: Date(timeIntervalSinceNow: 60 * 60 * 24))
+        
+        Task(priority: .background) {
+            do {
+                let postsDeletionPeriod = try await applicationComponent.settingsRepository.postsDeletionPeriodImmediate()
+                let before = postsDeletionPeriod.calculateInstantBeforePeriod()
+
+                try await applicationComponent.rssRepository.deleteReadPosts(before: before)
+                task.setTaskCompleted(success: true)
+            } catch {
+                let breadcrumb = Breadcrumb()
+                breadcrumb.level = .info
+                breadcrumb.category = "Background"
+                
+                let scope = Scope()
+                scope.addBreadcrumb(breadcrumb)
+
+                SentrySDK.capture(error: error, scope: scope)
+                
+                task.setTaskCompleted(success: false)
+            }
+        }
     }
 
     func scheduledRefreshFeeds() {
