@@ -24,8 +24,6 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import dev.sasikanth.rss.reader.background.FeedsRefreshWorker
-import dev.sasikanth.rss.reader.background.PostsCleanUpWorker
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 
@@ -70,7 +68,9 @@ class ReaderApplication : Application(), Configuration.Provider {
                     settingsRepository = appComponent.settingsRepository
                   )
                 }
-                else -> throw IllegalArgumentException("Unknown background worker")
+                else -> {
+                  throw IllegalArgumentException("Unknown background worker: $workerClassName")
+                }
               }
             }
           }
