@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -109,8 +110,8 @@ internal fun FeedListItem(
                   containerColor = AppTheme.colorScheme.tintedForeground,
                   contentColor = AppTheme.colorScheme.tintedBackground,
                   modifier =
-                    Modifier.graphicsLayer {
-                      translationX = -4.dp.toPx()
+                    Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
+                      translationX = -8.dp.toPx()
                       translationY = 4.dp.toPx()
                     }
                 ) {

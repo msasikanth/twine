@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
@@ -70,8 +71,8 @@ internal fun BottomSheetItem(
                 containerColor = AppTheme.colorScheme.tintedForeground,
                 contentColor = AppTheme.colorScheme.tintedBackground,
                 modifier =
-                  Modifier.graphicsLayer {
-                    translationX = -4.dp.toPx()
+                  Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
+                    translationX = -8.dp.toPx()
                     translationY = 4.dp.toPx()
                   },
               ) {
