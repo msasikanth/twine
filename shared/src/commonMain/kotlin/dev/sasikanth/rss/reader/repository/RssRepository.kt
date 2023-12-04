@@ -62,7 +62,8 @@ class RssRepository(
   suspend fun addFeed(
     feedLink: String,
     title: String? = null,
-    transformUrl: Boolean = true
+    feedLastCleanUpAt: Instant? = null,
+    transformUrl: Boolean = true,
   ): FeedAddResult {
     return withContext(ioDispatcher) {
       when (val feedFetchResult = feedFetcher.fetch(url = feedLink, transformUrl = transformUrl)) {
@@ -79,16 +80,22 @@ class RssRepository(
             )
 
             postQueries.transaction {
+              val feedLastCleanUpAtEpochMilli =
+                feedLastCleanUpAt?.toEpochMilliseconds()
+                  ?: Instant.DISTANT_PAST.toEpochMilliseconds()
+
               feedPayload.posts.forEach { post ->
-                postQueries.upsert(
-                  title = post.title,
-                  description = post.description,
-                  imageUrl = post.imageUrl,
-                  date = Instant.fromEpochMilliseconds(post.date),
-                  link = post.link,
-                  commnetsLink = post.commentsLink,
-                  feedLink = feedPayload.link,
-                )
+                if (post.date > feedLastCleanUpAtEpochMilli) {
+                  postQueries.upsert(
+                    title = post.title,
+                    description = post.description,
+                    imageUrl = post.imageUrl,
+                    date = Instant.fromEpochMilliseconds(post.date),
+                    link = post.link,
+                    commnetsLink = post.commentsLink,
+                    feedLink = feedPayload.link,
+                  )
+                }
               }
             }
 
@@ -115,7 +122,15 @@ class RssRepository(
       withContext(ioDispatcher) {
         val feedsChunk = feedQueries.feeds().executeAsList().chunked(UPDATE_CHUNKS)
         feedsChunk.map { feeds ->
-          feeds.map { feed -> launch { addFeed(feedLink = feed.link, transformUrl = false) } }
+          feeds.map { feed ->
+            launch {
+              addFeed(
+                feedLink = feed.link,
+                transformUrl = false,
+                feedLastCleanUpAt = feed.lastCleanUpAt
+              )
+            }
+          }
         }
       }
 
@@ -123,7 +138,12 @@ class RssRepository(
   }
 
   suspend fun updateFeed(selectedFeedLink: String) {
-    withContext(ioDispatcher) { addFeed(feedLink = selectedFeedLink, transformUrl = false) }
+    withContext(ioDispatcher) {
+      val feed = feedQueries.feed(selectedFeedLink).executeAsOneOrNull()
+      if (feed != null) {
+        addFeed(feedLink = feed.link, transformUrl = false, feedLastCleanUpAt = feed.lastCleanUpAt)
+      }
+    }
   }
 
   fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
