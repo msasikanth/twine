@@ -68,7 +68,7 @@ sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", ver
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight_extensions_paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
-sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-24-dialect", version.ref = "sqldelight" }
+sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect", version.ref = "sqldelight" }
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
 essenty_lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }

@@ -39,6 +39,7 @@ SELECT
   createdAt,
   link,
   pinnedAt,
+  lastCleanUpAt,
   (SELECT COUNT(*) FROM post WHERE post.read = 0 AND post.feedLink == feed.link) AS numberOfUnreadPosts
 FROM feed
 WHERE (

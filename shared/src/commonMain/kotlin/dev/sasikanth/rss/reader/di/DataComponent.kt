@@ -36,7 +36,12 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
     return ReaderDatabase(
       driver = driver,
       postAdapter = Post.Adapter(dateAdapter = DateAdapter),
-      feedAdapter = Feed.Adapter(createdAtAdapter = DateAdapter, pinnedAtAdapter = DateAdapter),
+      feedAdapter =
+        Feed.Adapter(
+          createdAtAdapter = DateAdapter,
+          pinnedAtAdapter = DateAdapter,
+          lastCleanUpAtAdapter = DateAdapter
+        ),
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
     )
   }
