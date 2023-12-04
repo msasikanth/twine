@@ -289,9 +289,13 @@ class RssRepository(
       .distinct()
   }
 
-  suspend fun updateFeedLastCleanUpAt() {
+  suspend fun updateFeedsLastCleanUpAt(feeds: List<String>) {
     withContext(ioDispatcher) {
-      feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now())
+      feedQueries.transaction {
+        feeds.forEach { feedLink ->
+          feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now(), link = feedLink)
+        }
+      }
     }
   }
 

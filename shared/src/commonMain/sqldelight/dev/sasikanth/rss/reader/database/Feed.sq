@@ -66,4 +66,4 @@ numberOfFeeds:
 SELECT COUNT(*) FROM feed;
 
 updateLastCleanUpAt:
-UPDATE feed SET lastCleanUpAt = :lastCleanUpAt;
+UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE link = :link;
