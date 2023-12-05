@@ -299,6 +299,10 @@ class RssRepository(
     }
   }
 
+  suspend fun markPostsInFeedAsRead(feedLink: String) {
+    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink) }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
