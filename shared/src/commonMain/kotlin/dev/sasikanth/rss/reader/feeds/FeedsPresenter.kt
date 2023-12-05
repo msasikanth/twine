@@ -116,7 +116,12 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
+        is FeedsEvent.MarkPostsInFeedAsReadClicked -> markPostsInFeedAsReadClicked(event.feedLink)
       }
+    }
+
+    private fun markPostsInFeedAsReadClicked(feedLink: String) {
+      coroutineScope.launch { rssRepository.markPostsInFeedAsRead(feedLink) }
     }
 
     private fun onSearchQueryChanged(searchQuery: TextFieldValue) {

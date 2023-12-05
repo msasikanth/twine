@@ -35,4 +35,6 @@ sealed interface FeedsEvent {
   data class SearchQueryChanged(val searchQuery: TextFieldValue) : FeedsEvent
 
   data object ClearSearchQuery : FeedsEvent
+
+  data class MarkPostsInFeedAsReadClicked(val feedLink: String) : FeedsEvent
 }
