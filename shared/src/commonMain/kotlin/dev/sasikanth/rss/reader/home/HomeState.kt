@@ -40,7 +40,8 @@ internal data class HomeState(
   val selectedFeed: Feed?,
   val feedsSheetMode: FeedsSheetMode,
   val feedFetchingState: FeedFetchingState,
-  val featuredItemBlurEnabled: Boolean
+  val featuredItemBlurEnabled: Boolean,
+  val hasFeeds: Boolean?,
 ) {
 
   companion object {
@@ -54,7 +55,8 @@ internal data class HomeState(
         selectedFeed = null,
         feedsSheetMode = FeedsSheetMode.Default,
         feedFetchingState = FeedFetchingState.Idle,
-        featuredItemBlurEnabled = true
+        featuredItemBlurEnabled = true,
+        hasFeeds = null
       )
   }
 

@@ -225,6 +225,12 @@ class HomePresenter(
         }
         .launchIn(coroutineScope)
 
+      rssRepository
+        .hasFeeds()
+        .distinctUntilChanged()
+        .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
+        .launchIn(coroutineScope)
+
       settingsRepository.enableFeaturedItemBlur
         .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
