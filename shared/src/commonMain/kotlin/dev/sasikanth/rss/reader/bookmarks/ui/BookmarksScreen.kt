@@ -168,7 +168,7 @@ internal fun BookmarksScreen(
             Icon(
               imageVector = TwineIcons.Bookmarks,
               contentDescription = null,
-              modifier = Modifier.size(120.dp),
+              modifier = Modifier.size(80.dp),
               tint = AppTheme.colorScheme.textEmphasisHigh
             )
 
