@@ -276,10 +276,11 @@ private fun HomeScreenContent(
     }
   }
 
-  if (hasContent) {
-    val swipeRefreshState =
-      rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
-    Box(Modifier.fillMaxSize().pullRefresh(swipeRefreshState)) {
+  val swipeRefreshState =
+    rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
+
+  Box(Modifier.fillMaxSize().pullRefresh(state = swipeRefreshState, enabled = hasContent)) {
+    if (hasContent) {
       PostsList(
         paddingValues = paddingValues,
         featuredPosts = featuredPosts,
@@ -292,15 +293,15 @@ private fun HomeScreenContent(
         onPostCommentsClick = onPostCommentsClick,
         onPostSourceClick = onPostSourceClick,
       )
-
-      PullRefreshIndicator(
-        refreshing = state.isRefreshing,
-        state = swipeRefreshState,
-        modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
-      )
+    } else {
+      NoFeeds(onNoFeedsSwipeUp)
     }
-  } else {
-    NoFeeds(onNoFeedsSwipeUp)
+
+    PullRefreshIndicator(
+      refreshing = state.isRefreshing,
+      state = swipeRefreshState,
+      modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
+    )
   }
 }
 
