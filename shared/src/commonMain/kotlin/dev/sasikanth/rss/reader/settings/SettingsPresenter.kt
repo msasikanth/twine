@@ -101,14 +101,13 @@ class SettingsPresenter(
           settingsRepository.enableFeaturedItemBlur,
           settingsRepository.showUnreadPostsCount,
           settingsRepository.postsDeletionPeriod,
-          rssRepository.numberOfFeeds()
+          rssRepository.hasFeeds()
         ) {
           browserType,
           featuredItemBlurEnabled,
           showUnreadPostsCount,
           postsDeletionPeriod,
-          numberOfFeeds ->
-          val hasFeeds = numberOfFeeds > 0
+          hasFeeds ->
           Settings(
             browserType = browserType,
             enableHomePageBlur = featuredItemBlurEnabled,

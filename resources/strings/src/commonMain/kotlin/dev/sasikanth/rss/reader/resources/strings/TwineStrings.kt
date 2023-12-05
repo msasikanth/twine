@@ -94,6 +94,8 @@ data class TwineStrings(
   val pinnedFeeds: String,
   val markAllAsRead: String,
   val openWebsite: String,
+  val noNewPosts: String,
+  val noNewPostsSubtitle: String,
 )
 
 object Locales {
