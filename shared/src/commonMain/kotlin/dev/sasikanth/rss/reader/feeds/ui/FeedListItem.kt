@@ -347,14 +347,3 @@ private fun FeedLabelInput(
     }
   )
 }
-
-@Composable
-internal fun ShareIconButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-  IconButton(modifier = modifier, onClick = onClick) {
-    Icon(
-      imageVector = TwineIcons.Share,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.tintedForeground
-    )
-  }
-}
