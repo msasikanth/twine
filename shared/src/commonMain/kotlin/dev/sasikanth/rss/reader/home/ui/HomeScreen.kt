@@ -142,12 +142,13 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
         is HomeEffect.ShowError -> {
           displayErrorMessage(effect, strings, bottomSheetScaffoldState)
         }
-        is HomeEffect.ScrollToTop -> {
-          listState.scrollToItem(0)
-          featuredPostsPagerState.scrollToPage(0)
-        }
       }
     }
+  }
+
+  LaunchedEffect(state.selectedFeed) {
+    listState.scrollToItem(0)
+    featuredPostsPagerState.scrollToPage(0)
   }
 
   LaunchedEffect(bottomSheetState.targetValue) {

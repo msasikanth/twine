@@ -24,6 +24,4 @@ sealed interface HomeEffect {
   data object MinimizeSheet : HomeEffect
 
   class ShowError(val homeErrorType: HomeErrorType) : HomeEffect
-
-  data object ScrollToTop : HomeEffect
 }
