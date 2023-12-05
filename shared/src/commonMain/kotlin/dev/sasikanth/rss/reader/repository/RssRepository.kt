@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -277,8 +278,8 @@ class RssRepository(
     return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
-  fun numberOfFeeds(): Flow<Long> {
-    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
+  fun hasFeeds(): Flow<Boolean> {
+    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher).map { it > 0 }
   }
 
   /** @return list of feeds from which posts are deleted from */
