@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -55,11 +57,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.DoneAll
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
@@ -80,7 +86,8 @@ internal fun FeedListItem(
   onDeleteFeed: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
-  onFeedPinClick: (Feed) -> Unit
+  onFeedPinClick: (Feed) -> Unit,
+  onMarkFeedAsRead: (Feed) -> Unit,
 ) {
   val clickableModifier =
     if (feedsSheetMode != Edit) {
@@ -150,7 +157,8 @@ internal fun FeedListItem(
           isInEditMode = it,
           canPinFeed = canPinFeeds,
           onDeleteFeed = onDeleteFeed,
-          onFeedPinClick = onFeedPinClick
+          onFeedPinClick = onFeedPinClick,
+          onMarkFeedAsRead = onMarkFeedAsRead
         )
       }
     }
@@ -163,7 +171,8 @@ private fun ActionButtons(
   isInEditMode: Boolean,
   canPinFeed: Boolean,
   onDeleteFeed: (Feed) -> Unit,
-  onFeedPinClick: (Feed) -> Unit
+  onFeedPinClick: (Feed) -> Unit,
+  onMarkFeedAsRead: (Feed) -> Unit,
 ) {
   Row {
     if (isInEditMode) {
@@ -177,8 +186,57 @@ private fun ActionButtons(
         )
       }
     } else {
-      val shareHandler = LocalShareHandler.current
-      ShareIconButton(onClick = { shareHandler.share(feed.link) })
+      FeedListItemMenu(feed = feed, onMarkFeedAsRead = onMarkFeedAsRead)
+    }
+  }
+}
+
+@Composable
+fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Modifier = Modifier) {
+  Box(modifier) {
+    var showDropdownMenu by remember { mutableStateOf(false) }
+    val shareHandler = LocalShareHandler.current
+
+    IconButton(onClick = { showDropdownMenu = true }) {
+      Icon(
+        imageVector = Icons.Rounded.MoreVert,
+        contentDescription = null,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
+    }
+
+    DropdownMenu(
+      expanded = showDropdownMenu,
+      onDismissRequest = { showDropdownMenu = false },
+      offset = DpOffset(x = 0.dp, y = (-24).dp)
+    ) {
+      DropdownMenuItem(
+        text = { Text(text = LocalStrings.current.share) },
+        leadingIcon = {
+          Icon(imageVector = TwineIcons.Share, contentDescription = LocalStrings.current.share)
+        },
+        onClick = {
+          showDropdownMenu = false
+          shareHandler.share(feed.link)
+        }
+      )
+
+      val hasUnreadPostsInFeed = feed.numberOfUnreadPosts > 0
+      if (hasUnreadPostsInFeed) {
+        DropdownMenuItem(
+          text = { Text(text = LocalStrings.current.markAllAsRead) },
+          leadingIcon = {
+            Icon(
+              imageVector = TwineIcons.DoneAll,
+              contentDescription = LocalStrings.current.markAllAsRead
+            )
+          },
+          onClick = {
+            showDropdownMenu = false
+            onMarkFeedAsRead(feed)
+          },
+        )
+      }
     }
   }
 }

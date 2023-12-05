@@ -92,6 +92,7 @@ data class TwineStrings(
   val feedsSearchHint: String,
   val allFeeds: String,
   val pinnedFeeds: String,
+  val markAllAsRead: String
 )
 
 object Locales {
