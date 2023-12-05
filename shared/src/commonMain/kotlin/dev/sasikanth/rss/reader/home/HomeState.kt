@@ -27,14 +27,12 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
 internal data class HomeState(
-  val featuredPosts: ImmutableList<PostWithMetadata>,
-  val posts: Flow<PagingData<PostWithMetadata>>,
+  val featuredPosts: ImmutableList<PostWithMetadata>?,
+  val posts: Flow<PagingData<PostWithMetadata>>?,
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
   val selectedFeed: Feed?,
@@ -48,8 +46,8 @@ internal data class HomeState(
 
     val DEFAULT =
       HomeState(
-        featuredPosts = persistentListOf(),
-        posts = emptyFlow(),
+        featuredPosts = null,
+        posts = null,
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
         selectedFeed = null,

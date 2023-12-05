@@ -205,6 +205,9 @@ class HomePresenter(
 
     private fun init() {
       observableSelectedFeed.selectedFeed
+        .onEach { selectedFeed ->
+          _state.update { it.copy(selectedFeed = selectedFeed, posts = null, featuredPosts = null) }
+        }
         .flatMapLatest { selectedFeed ->
           val posts =
             createPager(config = createPagingConfig(pageSize = 20)) {
@@ -214,14 +217,11 @@ class HomePresenter(
               .cachedIn(coroutineScope)
 
           rssRepository.featuredPosts(selectedFeedLink = selectedFeed?.link).map { featuredPosts ->
-            Triple(selectedFeed, featuredPosts.toImmutableList(), posts)
+            Pair(featuredPosts.toImmutableList(), posts)
           }
         }
-        .distinctUntilChanged()
-        .onEach { (selectedFeed, featuredPosts, posts) ->
-          _state.update {
-            it.copy(selectedFeed = selectedFeed, posts = posts, featuredPosts = featuredPosts)
-          }
+        .onEach { (featuredPosts, posts) ->
+          _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
         }
         .launchIn(coroutineScope)
 

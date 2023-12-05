@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
@@ -44,7 +45,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
@@ -67,9 +70,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
@@ -89,6 +94,8 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.Feed
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -117,7 +124,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
   val listState = rememberLazyListState()
-  val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts.size })
+  val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts?.size ?: 0 })
 
   val bottomSheetSwipeTransition =
     updateTransition(
@@ -266,35 +273,47 @@ private fun HomeScreenContent(
   onNoFeedsSwipeUp: () -> Unit,
 ) {
   val featuredPosts = state.featuredPosts
-  val posts = state.posts.collectAsLazyPagingItems()
-  val hasContent = featuredPosts.isNotEmpty() || posts.itemCount != 0
+  val posts = state.posts?.collectAsLazyPagingItems()
+  val hasFeeds = state.hasFeeds
   val dynamicColorState = LocalDynamicColorState.current
 
   LaunchedEffect(featuredPosts) {
-    if (featuredPosts.isEmpty()) {
+    if (featuredPosts.isNullOrEmpty()) {
       dynamicColorState.reset()
     }
   }
 
   val swipeRefreshState =
     rememberPullRefreshState(refreshing = state.isRefreshing, onRefresh = onSwipeToRefresh)
+  val canSwipeToRefresh = hasFeeds == true
 
-  Box(Modifier.fillMaxSize().pullRefresh(state = swipeRefreshState, enabled = hasContent)) {
-    if (hasContent) {
-      PostsList(
-        paddingValues = paddingValues,
-        featuredPosts = featuredPosts,
-        posts = posts,
-        featuredItemBlurEnabled = state.featuredItemBlurEnabled,
-        listState = listState,
-        featuredPostsPagerState = featuredPostsPagerState,
-        onPostClicked = onPostClicked,
-        onPostBookmarkClick = onPostBookmarkClick,
-        onPostCommentsClick = onPostCommentsClick,
-        onPostSourceClick = onPostSourceClick,
-      )
-    } else {
-      NoFeeds(onNoFeedsSwipeUp)
+  Box(Modifier.fillMaxSize().pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh)) {
+    when {
+      hasFeeds == null ||
+        (posts == null || featuredPosts == null) ||
+        posts.loadState.refresh == LoadState.Loading -> {
+        // no-op
+      }
+      !hasFeeds -> {
+        NoFeeds(onNoFeedsSwipeUp)
+      }
+      featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+        NoNewPosts()
+      }
+      featuredPosts.isNotEmpty() || posts.itemCount > 0 -> {
+        PostsList(
+          paddingValues = paddingValues,
+          featuredPosts = featuredPosts,
+          posts = posts,
+          featuredItemBlurEnabled = state.featuredItemBlurEnabled,
+          listState = listState,
+          featuredPostsPagerState = featuredPostsPagerState,
+          onPostClicked = onPostClicked,
+          onPostBookmarkClick = onPostBookmarkClick,
+          onPostCommentsClick = onPostCommentsClick,
+          onPostSourceClick = onPostSourceClick,
+        )
+      }
     }
 
     PullRefreshIndicator(
@@ -393,7 +412,8 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Text(
       text = LocalStrings.current.noFeeds,
       style = MaterialTheme.typography.headlineMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      textAlign = TextAlign.Center
     )
 
     Spacer(Modifier.requiredHeight(8.dp))
@@ -401,7 +421,8 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Text(
       text = LocalStrings.current.swipeUpGetStarted,
       style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.textEmphasisMed
+      color = AppTheme.colorScheme.textEmphasisMed,
+      textAlign = TextAlign.Center
     )
 
     Spacer(Modifier.requiredHeight(12.dp))
@@ -410,6 +431,40 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
       imageVector = Icons.Rounded.KeyboardArrowUp,
       contentDescription = null,
       tint = AppTheme.colorScheme.tintedForeground
+    )
+  }
+}
+
+@Composable
+private fun NoNewPosts() {
+  Column(
+    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.Center
+  ) {
+    Icon(
+      imageVector = TwineIcons.Feed,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.textEmphasisHigh,
+      modifier = Modifier.requiredSize(80.dp)
+    )
+
+    Spacer(Modifier.requiredHeight(12.dp))
+
+    Text(
+      text = LocalStrings.current.noNewPosts,
+      style = MaterialTheme.typography.headlineMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      textAlign = TextAlign.Center
+    )
+
+    Spacer(Modifier.requiredHeight(8.dp))
+
+    Text(
+      text = LocalStrings.current.noNewPostsSubtitle,
+      style = MaterialTheme.typography.labelLarge,
+      color = AppTheme.colorScheme.textEmphasisMed,
+      textAlign = TextAlign.Center
     )
   }
 }
