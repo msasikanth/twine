@@ -48,6 +48,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,16 +65,19 @@ import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.DoneAll
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun FeedListItem(
@@ -195,7 +199,9 @@ private fun ActionButtons(
 fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Modifier = Modifier) {
   Box(modifier) {
     var showDropdownMenu by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
     val shareHandler = LocalShareHandler.current
+    val linkHandler = LocalLinkHandler.current
 
     IconButton(onClick = { showDropdownMenu = true }) {
       Icon(
@@ -218,6 +224,21 @@ fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Mod
         onClick = {
           showDropdownMenu = false
           shareHandler.share(feed.link)
+        }
+      )
+
+      DropdownMenuItem(
+        text = { Text(text = LocalStrings.current.openWebsite) },
+        leadingIcon = {
+          Icon(
+            modifier = Modifier.requiredSize(24.dp),
+            imageVector = TwineIcons.Website,
+            contentDescription = LocalStrings.current.openWebsite
+          )
+        },
+        onClick = {
+          showDropdownMenu = false
+          coroutineScope.launch { linkHandler.openLink(feed.homepageLink) }
         }
       )
 

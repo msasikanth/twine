@@ -102,5 +102,6 @@ val EnTwineStrings =
     feedsSearchHint = "Search feeds",
     allFeeds = "All Feeds",
     pinnedFeeds = "Pinned",
-    markAllAsRead = "Mark All as Read"
+    markAllAsRead = "Mark All as Read",
+    openWebsite = "Open Website"
   )
