@@ -28,6 +28,7 @@ private val dateFormatters =
   listOf(
     DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss O"),
     DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss Z"),
+    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss z"),
     DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm Z"),
     DateTimeFormatter.ofPattern("E, d MMM yy HH:mm:ss Z"),
     DateTimeFormatter.ofPattern("E, dd MMM yyyy"),

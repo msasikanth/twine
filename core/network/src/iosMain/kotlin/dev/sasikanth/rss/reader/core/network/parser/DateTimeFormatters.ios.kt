@@ -52,6 +52,7 @@ private val dateFormatters =
     createDateFormatter("E, d MMM yy HH:mm:ss Z"),
     createDateFormatter("E, d MMM yyyy HH:mm:ss O"),
     createDateFormatter("E, d MMM yyyy HH:mm:ss Z"),
+    createDateFormatter("E, d MMM yyyy HH:mm:ss z"),
     createDateFormatter("E, d MMM yyyy HH:mm Z"),
     createDateFormatter("E, dd MMM yyyy", TimeZone.UTC),
     createDateFormatter("d MMM yyyy HH:mm:ss z"),
