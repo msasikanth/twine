@@ -289,18 +289,11 @@ private fun HomeScreenContent(
 
   Box(Modifier.fillMaxSize().pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh)) {
     when {
-      hasFeeds == null ||
-        (posts == null || featuredPosts == null) ||
-        posts.loadState.refresh == LoadState.Loading -> {
+      hasFeeds == null || (posts == null || featuredPosts == null) -> {
         // no-op
       }
-      !hasFeeds -> {
-        NoFeeds(onNoFeedsSwipeUp)
-      }
-      featuredPosts.isEmpty() && posts.itemCount == 0 -> {
-        NoNewPosts()
-      }
-      featuredPosts.isNotEmpty() || posts.itemCount > 0 -> {
+      featuredPosts.isNotEmpty() ||
+        (posts.itemCount > 0 || posts.loadState.refresh == LoadState.Loading) -> {
         PostsList(
           paddingValues = paddingValues,
           featuredPosts = featuredPosts,
@@ -313,6 +306,12 @@ private fun HomeScreenContent(
           onPostCommentsClick = onPostCommentsClick,
           onPostSourceClick = onPostSourceClick,
         )
+      }
+      !hasFeeds -> {
+        NoFeeds(onNoFeedsSwipeUp)
+      }
+      featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+        NoNewPosts()
       }
     }
 
