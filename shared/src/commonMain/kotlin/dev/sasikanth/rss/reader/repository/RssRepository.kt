@@ -285,7 +285,9 @@ class RssRepository(
   /** @return list of feeds from which posts are deleted from */
   suspend fun deleteReadPosts(before: Instant): List<String> {
     return withContext(ioDispatcher) {
-        postQueries.deleteReadPosts(before = before).executeAsList()
+        postQueries.transactionWithResult {
+          postQueries.deleteReadPosts(before = before).executeAsList()
+        }
       }
       .distinct()
   }
