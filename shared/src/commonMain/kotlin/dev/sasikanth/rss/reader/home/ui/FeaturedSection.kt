@@ -268,8 +268,7 @@ private fun FeaturedSectionBlurredBackground(
     AsyncImage(
       url = post.imageUrl!!,
       modifier =
-        modifier
-          .aspectRatio(featuredImageBackgroundAspectRatio)
+        Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
           .graphicsLayer {
             val offsetFraction =
               if (index in 0..pagerState.pageCount) {
