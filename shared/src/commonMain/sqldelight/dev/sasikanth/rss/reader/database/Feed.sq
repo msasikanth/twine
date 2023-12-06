@@ -32,17 +32,19 @@ ORDER BY pinnedAt DESC, createdAt DESC;
 
 feedsPaginated:
 SELECT
-  name,
-  icon,
-  description,
-  homepageLink,
-  createdAt,
-  link,
-  pinnedAt,
-  lastCleanUpAt,
-  (SELECT COUNT(*) FROM post WHERE post.read = 0 AND post.feedLink == feed.link) AS numberOfUnreadPosts
-FROM feed
-ORDER BY pinnedAt DESC , createdAt DESC
+  f.name,
+  f.icon,
+  f.description,
+  f.homepageLink,
+  f.createdAt,
+  f.link,
+  f.pinnedAt,
+  f.lastCleanUpAt,
+  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+FROM feed f
+LEFT JOIN post p ON f.link = p.feedLink
+GROUP BY f.link
+ORDER BY f.pinnedAt DESC, f.createdAt DESC
 LIMIT :limit OFFSET :offset;
 
 feed:
