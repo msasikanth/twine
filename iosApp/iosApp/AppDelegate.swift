@@ -27,7 +27,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             }
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
-            self.refreshFeeds(task: task as! BGAppRefreshTask)
+            self.refreshFeeds(task: task as! BGProcessingTask)
         }
         
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
@@ -78,8 +78,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func scheduledRefreshFeeds(earliest: Date) {
-        let request = BGAppRefreshTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
         request.earliestBeginDate = earliest
+        request.requiresNetworkConnectivity = true
         
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -88,7 +89,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
     
-    func refreshFeeds(task: BGAppRefreshTask) {
+    func refreshFeeds(task: BGProcessingTask) {
         scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: 60 * 60)) // 1 hour
         Task(priority: .background) {
             do {

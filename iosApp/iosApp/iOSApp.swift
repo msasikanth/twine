@@ -26,9 +26,9 @@ struct iOSApp: App {
                     case .background:
                         LifecycleRegistryExtKt.stop(rootHolder.lifecycle)
 						// Run 5 minutes after the app goes into the background
-                        let timeInterval = 5.0 * 60
-                        appDelegate.scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: timeInterval))
-                        appDelegate.scheduleCleanUpPosts(earliest: Date(timeIntervalSinceNow: timeInterval))
+                        let timeInterval = Date(timeIntervalSinceNow: 5.0 * 60)
+                        appDelegate.scheduledRefreshFeeds(earliest: timeInterval)
+                        appDelegate.scheduleCleanUpPosts(earliest: timeInterval)
                 
                     case .inactive: LifecycleRegistryExtKt.pause(rootHolder.lifecycle)
                     case .active: LifecycleRegistryExtKt.resume(rootHolder.lifecycle)
