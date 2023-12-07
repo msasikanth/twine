@@ -77,9 +77,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
 
-    func scheduledRefreshFeeds() {
+    func scheduledRefreshFeeds(earliest: Date) {
         let request = BGAppRefreshTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60) // 1 hour
+        request.earliestBeginDate = earliest
         
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -89,7 +89,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func refreshFeeds(task: BGAppRefreshTask) {
-        scheduledRefreshFeeds()
+        scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: 60 * 60)) // 1 hour
         Task(priority: .background) {
             do {
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastUpdatedAt.hasExpired().boolValue
