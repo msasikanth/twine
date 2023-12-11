@@ -411,7 +411,7 @@ private fun BottomSheetCollapsedContent(
             badgeCount = feed.numberOfUnreadPosts,
             iconUrl = feed.icon,
             canShowUnreadPostsCount = canShowUnreadPostsCount,
-            selected = selectedFeed == feed,
+            selected = selectedFeed?.link == feed.link,
             onClick = { onFeedSelected(feed) }
           )
         }
