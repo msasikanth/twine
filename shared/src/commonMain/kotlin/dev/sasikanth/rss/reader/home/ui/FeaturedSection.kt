@@ -282,7 +282,7 @@ private fun FeaturedSectionBlurredBackground(
             // Since blur can be expensive memory wise, there is no point blurring images when not
             // needed.
             renderEffect =
-              if (index in pagerState.settledPage - 1..pagerState.settledPage + 1) {
+              if (index in pagerState.settledPage - 2..pagerState.settledPage + 2) {
                 BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
               } else {
                 null
