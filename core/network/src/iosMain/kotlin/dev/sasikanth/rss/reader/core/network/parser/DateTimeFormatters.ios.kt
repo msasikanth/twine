@@ -64,6 +64,7 @@ private val dateFormatters =
     createDateFormatter("yyyy-MM-dd HH:mm:ss z"),
     createDateFormatter("yyyy-MM-dd", TimeZone.UTC),
     createDateFormatter("E, d MMM yyyy HH:mm:ss zzzz"),
+    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
   )
 
 @Throws(DateTimeFormatException::class)

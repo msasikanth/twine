@@ -41,6 +41,7 @@ private val dateFormatters =
     DateTimeFormatter.ofPattern("yyyy-MM-dd"),
     DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"),
     DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss zzzz"),
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
   )
 
 @Throws(DateTimeFormatException::class)
