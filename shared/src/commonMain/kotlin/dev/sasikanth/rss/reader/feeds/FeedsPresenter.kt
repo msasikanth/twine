@@ -151,7 +151,9 @@ class FeedsPresenter(
 
     private fun onFeedSelected(feed: Feed) {
       coroutineScope.launch {
-        observableSelectedFeed.selectFeed(feed)
+        if (_state.value.selectedFeed?.link != feed.link) {
+          observableSelectedFeed.selectFeed(feed)
+        }
         effects.emit(FeedsEffect.MinimizeSheet)
       }
     }
