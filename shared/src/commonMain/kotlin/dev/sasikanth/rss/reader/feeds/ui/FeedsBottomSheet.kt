@@ -253,7 +253,7 @@ private fun BottomSheetExpandedContent(
                 val feed = feedListItemType.feed
                 FeedListItem(
                   feed = feed,
-                  selected = selectedFeed == feed,
+                  selected = selectedFeed?.link == feed.link,
                   canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
                   canShowUnreadPostsCount = canShowUnreadPostsCount,
                   feedsSheetMode = feedsSheetMode,

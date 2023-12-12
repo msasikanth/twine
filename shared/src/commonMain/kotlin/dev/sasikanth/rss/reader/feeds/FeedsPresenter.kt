@@ -143,7 +143,7 @@ class FeedsPresenter(
     private fun onDeleteFeed(feed: Feed) {
       coroutineScope.launch {
         rssRepository.removeFeed(feed.link)
-        if (_state.value.selectedFeed == feed) {
+        if (_state.value.selectedFeed?.link == feed.link) {
           observableSelectedFeed.clearSelection()
         }
       }
