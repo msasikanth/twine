@@ -34,6 +34,8 @@ private val dateFormatters =
     DateTimeFormatter.ofPattern("E, dd MMM yyyy"),
     DateTimeFormatter.ofPattern("d MMM yyyy HH:mm:ss z"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz"),
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),
+    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"),
     DateTimeFormatter.ofPattern("yyyy-MM-dd"),

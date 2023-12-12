@@ -58,11 +58,12 @@ private val dateFormatters =
     createDateFormatter("d MMM yyyy HH:mm:ss z"),
     createDateFormatter("MM-dd HH:mm:ss", TimeZone.UTC),
     createDateFormatter("yyyy-MM-dd'T'HH:mm:ssz"),
+    createDateFormatter("yyyy-MM-dd'T'HH:mm:ssZ"),
+    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss", TimeZone.UTC),
     createDateFormatter("yyyy-MM-dd HH:mm:ss", TimeZone.UTC),
     createDateFormatter("yyyy-MM-dd HH:mm:ss z"),
     createDateFormatter("yyyy-MM-dd", TimeZone.UTC),
     createDateFormatter("E, d MMM yyyy HH:mm:ss zzzz"),
-    createDateFormatter("yyyy-MM-dd'T'HH:mm:ssZ")
   )
 
 @Throws(DateTimeFormatException::class)

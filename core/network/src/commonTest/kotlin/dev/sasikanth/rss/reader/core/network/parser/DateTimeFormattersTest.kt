@@ -42,6 +42,7 @@ class DateTimeFormattersTest {
         "11-27 18:23:16",
         "Fri, 24 Nov 2023 23:13:00 GMT",
         "Tue, 05 Dec 2023 15:55:50 PST",
+        "2023-12-12T11:20:18"
       )
 
     val expectedEpochMillis =
@@ -61,7 +62,8 @@ class DateTimeFormattersTest {
         1538352000000,
         1701109396000,
         1700867580000,
-        1701820550000
+        1701820550000,
+        1702380018000
       )
 
     // when
