@@ -116,7 +116,7 @@ private fun FloatingActionButton(
       // expands. But since this component receives animation progress
       // within a threshold 0..0.2. We are converting the progress back
       // to original progress to have the smooth transition
-      val progress by derivedStateOf { (1f - animationProgress) / 5f }
+      val progress by derivedStateOf { (1f - animationProgress) * 0.2f }
 
       Icon(
         imageVector = TwineIcons.allToPlus(progress),

@@ -25,7 +25,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -256,7 +255,13 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       sheetGesturesEnabled = state.feedsSheetMode != Edit
     )
 
-    PrimaryActionButtonContainer(bottomSheetSwipeTransition, state, homePresenter, bottomSheetState)
+    PrimaryActionButtonContainer(
+      bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+      state = state,
+      presenter = homePresenter,
+      bottomSheetState = bottomSheetState,
+      modifier = Modifier.align(Alignment.BottomStart)
+    )
   }
 }
 
@@ -336,21 +341,19 @@ private fun HomeScreenContent(
  * track: https://issuetracker.google.com/issues/209825720
  */
 @Composable
-private fun BoxScope.PrimaryActionButtonContainer(
+private fun PrimaryActionButtonContainer(
   bottomSheetSwipeTransition: Transition<Float>,
   state: HomeState,
   presenter: HomePresenter,
-  bottomSheetState: BottomSheetState
+  bottomSheetState: BottomSheetState,
+  modifier: Modifier = Modifier
 ) {
-  // (1/0.2) 0.2 is our threshold in the 0..1 range
-  val bottomSheetContentTransitionThreshold = 5
-  val primaryActionStartPadding =
-    (24.dp -
-        (4 *
-            (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-              .inverse())
-          .dp)
-      .coerceIn(20.dp, 24.dp)
+  // We want to finish the padding animation by the time
+  // bottom sheet is expanded 20% of the way
+  val bottomSheetExpansionThreshold = 0.2f
+  val bottomSheetExpansionProgress =
+    (bottomSheetSwipeTransition.currentState / bottomSheetExpansionThreshold)
+  val primaryActionStartPadding = (20 + (4 * bottomSheetExpansionProgress)).coerceIn(20f, 24f).dp
 
   val safeWindowInsets =
     WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
@@ -359,7 +362,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
     visible = state.feedsSheetMode != Edit,
     enter = slideInVertically { it },
     exit = slideOutVertically { it },
-    modifier = Modifier.padding(start = primaryActionStartPadding).align(Alignment.BottomStart)
+    modifier = Modifier.padding(start = primaryActionStartPadding).then(modifier)
   ) {
     Box {
       when (state.feedsSheetMode) {
@@ -371,9 +374,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
                 translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
               },
             selected = state.isAllFeedsSelected,
-            bottomSheetSwipeProgress =
-              (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-                .inverse(),
+            bottomSheetSwipeProgress = bottomSheetExpansionProgress.inverse(),
             bottomSheetCurrentState = bottomSheetState.currentValue,
             bottomSheetTargetState = bottomSheetState.targetValue
           ) {
