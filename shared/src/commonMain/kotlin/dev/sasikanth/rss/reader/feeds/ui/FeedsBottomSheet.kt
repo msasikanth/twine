@@ -95,7 +95,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.inverseProgress
+import dev.sasikanth.rss.reader.utils.inverse
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 
 @Composable
@@ -124,8 +124,7 @@ internal fun FeedsBottomSheet(
     // Transforming the bottom sheet progress from 0-1 to 1-0,
     // since we want to control the alpha of the content as
     // users swipes the sheet up and down
-    val bottomSheetExpandingProgress =
-      (bottomSheetSwipeTransition.currentState * 5f).inverseProgress()
+    val bottomSheetExpandingProgress = (bottomSheetSwipeTransition.currentState * 5f).inverse()
     val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
 
     if (hasBottomSheetExpandedThreshold) {

@@ -98,7 +98,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.inverseProgress
+import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -131,7 +131,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       label = "Bottom Sheet Swipe Progress"
     )
   val bottomSheetCornerSize by
-    bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverseProgress() }
+    bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
 
   val strings = LocalStrings.current
   val linkHandler = LocalLinkHandler.current
@@ -348,7 +348,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
     (24.dp -
         (4 *
             (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-              .inverseProgress())
+              .inverse())
           .dp)
       .coerceIn(20.dp, 24.dp)
 
@@ -373,7 +373,7 @@ private fun BoxScope.PrimaryActionButtonContainer(
             selected = state.isAllFeedsSelected,
             bottomSheetSwipeProgress =
               (bottomSheetSwipeTransition.currentState * bottomSheetContentTransitionThreshold)
-                .inverseProgress(),
+                .inverse(),
             bottomSheetCurrentState = bottomSheetState.currentValue,
             bottomSheetTargetState = bottomSheetState.targetValue
           ) {

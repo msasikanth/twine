@@ -42,7 +42,7 @@ import dev.sasikanth.material.color.utilities.score.Score
 import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
-import dev.sasikanth.rss.reader.utils.inverseProgress
+import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -544,7 +544,7 @@ internal class DynamicColorState(
 
     val normalizedOffset =
       if (fraction < -EPSILON) {
-        fraction.absoluteValue.inverseProgress()
+        fraction.absoluteValue.inverse()
       } else {
         fraction
       }

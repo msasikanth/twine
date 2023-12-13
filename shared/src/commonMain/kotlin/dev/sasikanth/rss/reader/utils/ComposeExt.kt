@@ -31,7 +31,11 @@ import io.github.aakira.napier.log
 @ReadOnlyComposable
 internal fun Dp.toSp() = with(LocalDensity.current) { this@toSp.toSp() }
 
-internal fun Float.inverseProgress() = 1f - this
+/**
+ * Idea is to take a value of a animation/transition progress, like if progress is going from 0-1,
+ * this function will switch the values to map to 1-0 instead.
+ */
+internal fun Float.inverse() = 1f - this
 
 internal enum class KeyboardState {
   Opened,
