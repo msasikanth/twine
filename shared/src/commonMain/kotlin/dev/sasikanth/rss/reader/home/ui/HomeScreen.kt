@@ -79,7 +79,6 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
@@ -147,7 +146,10 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           bottomSheetState.collapse()
         }
         is HomeEffect.ShowError -> {
-          displayErrorMessage(effect, strings, bottomSheetScaffoldState)
+          val errorMessage = errorMessageForErrorType(effect.homeErrorType, strings)
+          if (errorMessage != null) {
+            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
+          }
         }
       }
     }
@@ -468,26 +470,16 @@ private fun NoNewPosts() {
   }
 }
 
-private suspend fun displayErrorMessage(
-  effect: HomeEffect.ShowError,
-  twineStrings: TwineStrings,
-  bottomSheetScaffoldState: BottomSheetScaffoldState
-) {
-  val message =
-    when (val errorType = effect.homeErrorType) {
-      HomeErrorType.UnknownFeedType -> twineStrings.errorUnsupportedFeed
-      HomeErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
-      HomeErrorType.Timeout -> twineStrings.errorRequestTimeout
-      is HomeErrorType.Unknown -> errorType.e.message
-      is HomeErrorType.FeedNotFound -> twineStrings.errorFeedNotFound(errorType.statusCode.value)
-      is HomeErrorType.ServerError -> twineStrings.errorServer(errorType.statusCode.value)
-      HomeErrorType.TooManyRedirects -> twineStrings.errorTooManyRedirects
-      is HomeErrorType.UnAuthorized -> twineStrings.errorUnAuthorized(errorType.statusCode.value)
-      is HomeErrorType.UnknownHttpStatusError ->
-        twineStrings.errorUnknownHttpStatus(errorType.statusCode.value)
-    }
-
-  if (message != null) {
-    bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = message)
+private fun errorMessageForErrorType(errorType: HomeErrorType, twineStrings: TwineStrings) =
+  when (errorType) {
+    HomeErrorType.UnknownFeedType -> twineStrings.errorUnsupportedFeed
+    HomeErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
+    HomeErrorType.Timeout -> twineStrings.errorRequestTimeout
+    is HomeErrorType.Unknown -> errorType.e.message
+    is HomeErrorType.FeedNotFound -> twineStrings.errorFeedNotFound(errorType.statusCode.value)
+    is HomeErrorType.ServerError -> twineStrings.errorServer(errorType.statusCode.value)
+    HomeErrorType.TooManyRedirects -> twineStrings.errorTooManyRedirects
+    is HomeErrorType.UnAuthorized -> twineStrings.errorUnAuthorized(errorType.statusCode.value)
+    is HomeErrorType.UnknownHttpStatusError ->
+      twineStrings.errorUnknownHttpStatus(errorType.statusCode.value)
   }
-}
