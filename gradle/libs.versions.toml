@@ -43,7 +43,7 @@ atomicfu = "0.23.1"
 okio = "3.6.0"
 paging = "3.3.0-alpha02-0.4.0"
 stately = "2.0.6"
-xmlutil = "0.86.2"
+xmlutil = "0.86.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
