@@ -53,7 +53,7 @@ jobs:
         run: ./gradlew --no-daemon androidApp:bundleRelease
 
       - name: Upload Release Bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release.aab
           path: androidApp/build/outputs/bundle/release/androidApp-release.aab

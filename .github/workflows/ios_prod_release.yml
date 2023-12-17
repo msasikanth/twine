@@ -114,7 +114,7 @@ jobs:
           xcrun altool --upload-app --type ios -f $APP_PATH --apiKey $API_KEY --apiIssuer $API_ISSUER
 
       - name: Upload application
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app
           path: ${{ runner.temp }}/build/twine.ipa
