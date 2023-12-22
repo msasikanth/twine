@@ -203,7 +203,7 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }
 
-  fun allFeeds(postsAfter: Instant? = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
+  fun allFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
     return QueryPagingSource(
       countQuery = feedQueries.count(),
       transacter = feedQueries,
@@ -226,7 +226,7 @@ class RssRepository(
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(
     searchQuery: String,
-    postsAfter: Instant? = Instant.DISTANT_PAST,
+    postsAfter: Instant = Instant.DISTANT_PAST,
   ): PagingSource<Int, Feed> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
