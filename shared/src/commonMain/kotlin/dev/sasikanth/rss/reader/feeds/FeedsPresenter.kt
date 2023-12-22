@@ -28,10 +28,12 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -42,6 +44,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -51,6 +54,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -162,20 +166,61 @@ class FeedsPresenter(
       coroutineScope.launch { effects.emit(FeedsEffect.MinimizeSheet) }
     }
 
-    @OptIn(FlowPreview::class)
     private fun init() {
-      settingsRepository.showUnreadPostsCount
-        .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
+      observeShowUnreadCountPreference()
+      observeFeedsForCollapsedSheet()
+      observeFeedsForExpandedSheet()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeFeedsForExpandedSheet() {
+      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
+      searchQueryFlow
+        .distinctUntilChanged()
+        .combine(settingsRepository.postsType) { searchQuery, postsType ->
+          searchQuery to postsType
+        }
+        .onEach { (searchQuery, postsType) ->
+          val searchQueryText = searchQuery.text
+          val transformedSearchQuery =
+            if (searchQueryText.length >= 3) {
+              searchQueryText
+            } else {
+              ""
+            }
+
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
+          val feedSearchResults =
+            createPager(config = createPagingConfig(pageSize = 20)) {
+                rssRepository.searchFeed(
+                  searchQuery = transformedSearchQuery,
+                  postsAfter = postsAfter
+                )
+              }
+              .flow
+              .cachedIn(coroutineScope)
+
+          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
+        }
         .launchIn(coroutineScope)
+    }
 
-      val feeds =
-        createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.allFeeds() }
-          .flow
-          .cachedIn(coroutineScope)
-
+    private fun observeFeedsForCollapsedSheet() {
       observableSelectedFeed.selectedFeed
-        .flatMapLatest { selectedFeed ->
+        .combine(settingsRepository.postsType) { selectedFeed, postsType ->
+          selectedFeed to postsType
+        }
+        .flatMapLatest { (selectedFeed, postsType) ->
           rssRepository.numberOfPinnedFeeds().map { numberOfPinnedFeeds ->
+            val postsAfter = postsAfterInstantFromPostsType(postsType)
+
+            val feeds =
+              createPager(config = createPagingConfig(pageSize = 20)) {
+                  rssRepository.allFeeds(postsAfter = postsAfter)
+                }
+                .flow
+                .cachedIn(coroutineScope)
+
             Triple(selectedFeed, feeds, numberOfPinnedFeeds)
           }
         }
@@ -190,30 +235,22 @@ class FeedsPresenter(
           }
         }
         .launchIn(coroutineScope)
+    }
 
-      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
-      searchQueryFlow
-        .distinctUntilChanged()
-        .onEach { searchQuery ->
-          val searchQueryText = searchQuery.text
-          val transformedSearchQuery =
-            if (searchQueryText.length >= 3) {
-              searchQueryText
-            } else {
-              ""
-            }
-
-          val feedSearchResults =
-            createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.searchFeed(transformedSearchQuery)
-              }
-              .flow
-              .cachedIn(coroutineScope)
-
-          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
-        }
+    private fun observeShowUnreadCountPreference() {
+      settingsRepository.showUnreadPostsCount
+        .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
         .launchIn(coroutineScope)
     }
+
+    private fun postsAfterInstantFromPostsType(postsType: PostsType) =
+      when (postsType) {
+        PostsType.ALL,
+        PostsType.UNREAD -> Instant.DISTANT_PAST
+        PostsType.TODAY -> {
+          getTodayStartInstant()
+        }
+      }
 
     override fun onDestroy() {
       coroutineScope.cancel()

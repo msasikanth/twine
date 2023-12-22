@@ -203,12 +203,19 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }
 
-  fun allFeeds(): PagingSource<Int, Feed> {
+  fun allFeeds(postsAfter: Instant? = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
     return QueryPagingSource(
       countQuery = feedQueries.count(),
       transacter = feedQueries,
       context = ioDispatcher,
-      queryProvider = { limit, offset -> feedQueries.feedsPaginated(limit, offset, ::Feed) }
+      queryProvider = { limit, offset ->
+        feedQueries.feedsPaginated(
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = ::Feed
+        )
+      }
     )
   }
 
@@ -217,7 +224,10 @@ class RssRepository(
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
-  fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
+  fun searchFeed(
+    searchQuery: String,
+    postsAfter: Instant? = Instant.DISTANT_PAST,
+  ): PagingSource<Int, Feed> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
@@ -225,7 +235,13 @@ class RssRepository(
       transacter = feedSearchFTSQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        feedSearchFTSQueries.search(searchQuery = sanitizedSearchQuery, limit, offset, ::Feed)
+        feedSearchFTSQueries.search(
+          searchQuery = sanitizedSearchQuery,
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = ::Feed
+        )
       }
     )
   }
