@@ -147,10 +147,14 @@ class RssRepository(
     }
   }
 
-  fun featuredPosts(selectedFeedLink: String?): Flow<List<PostWithMetadata>> {
+  fun featuredPosts(
+    selectedFeedLink: String?,
+    unreadOnly: Boolean? = null,
+  ): Flow<List<PostWithMetadata>> {
     return postQueries
       .featuredPosts(
         feedLink = selectedFeedLink,
+        unreadOnly = unreadOnly,
         limit = NUMBER_OF_FEATURED_POSTS,
         mapper = ::PostWithMetadata
       )
@@ -158,7 +162,10 @@ class RssRepository(
       .mapToList(ioDispatcher)
   }
 
-  fun posts(selectedFeedLink: String?): PagingSource<Int, PostWithMetadata> {
+  fun posts(
+    selectedFeedLink: String?,
+    unreadOnly: Boolean? = null,
+  ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
         postQueries.count(
@@ -171,6 +178,7 @@ class RssRepository(
         postQueries.posts(
           feedLink = selectedFeedLink,
           featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          unreadOnly = unreadOnly,
           limit = limit,
           offset = offset,
           mapper = ::PostWithMetadata
