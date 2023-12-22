@@ -177,10 +177,7 @@ class HomePresenter(
     }
 
     private fun onPostsTypeChanged(postsType: PostsType) {
-      coroutineScope.launch {
-        _state.update { it.copy(postsType = postsType) }
-        settingsRepository.updatePostsType(postsType)
-      }
+      coroutineScope.launch { settingsRepository.updatePostsType(postsType) }
     }
 
     private fun postSourceClicked(feedLink: String) {
@@ -224,6 +221,7 @@ class HomePresenter(
           _state.update { it.copy(selectedFeed = selectedFeed, posts = null, featuredPosts = null) }
         }
         .combine(settingsRepository.postsType) { selectedFeed, postsType ->
+          _state.update { it.copy(postsType = postsType) }
           selectedFeed to postsType
         }
         .flatMapLatest { (selectedFeed, postsType) ->
