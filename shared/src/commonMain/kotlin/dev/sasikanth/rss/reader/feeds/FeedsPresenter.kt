@@ -166,16 +166,50 @@ class FeedsPresenter(
       coroutineScope.launch { effects.emit(FeedsEffect.MinimizeSheet) }
     }
 
-    @OptIn(FlowPreview::class)
     private fun init() {
-      settingsRepository.showUnreadPostsCount
-        .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
+      observeShowUnreadCountPreference()
+      observeFeedsForCollapsedSheet()
+      observeFeedsForExpandedSheet()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeFeedsForExpandedSheet() {
+      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
+      searchQueryFlow
+        .distinctUntilChanged()
+        .combine(settingsRepository.postsType) { searchQuery, postsType ->
+          searchQuery to postsType
+        }
+        .onEach { (searchQuery, postsType) ->
+          val searchQueryText = searchQuery.text
+          val transformedSearchQuery =
+            if (searchQueryText.length >= 3) {
+              searchQueryText
+            } else {
+              ""
+            }
+
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
+          val feedSearchResults =
+            createPager(config = createPagingConfig(pageSize = 20)) {
+                rssRepository.searchFeed(
+                  searchQuery = transformedSearchQuery,
+                  postsAfter = postsAfter
+                )
+              }
+              .flow
+              .cachedIn(coroutineScope)
+
+          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
+        }
         .launchIn(coroutineScope)
+    }
 
-      val postsTypeFlow = settingsRepository.postsType
-
+    private fun observeFeedsForCollapsedSheet() {
       observableSelectedFeed.selectedFeed
-        .combine(postsTypeFlow) { selectedFeed, postsType -> selectedFeed to postsType }
+        .combine(settingsRepository.postsType) { selectedFeed, postsType ->
+          selectedFeed to postsType
+        }
         .flatMapLatest { (selectedFeed, postsType) ->
           rssRepository.numberOfPinnedFeeds().map { numberOfPinnedFeeds ->
             val postsAfter = postsAfterInstantFromPostsType(postsType)
@@ -201,33 +235,11 @@ class FeedsPresenter(
           }
         }
         .launchIn(coroutineScope)
+    }
 
-      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
-      searchQueryFlow
-        .distinctUntilChanged()
-        .combine(postsTypeFlow) { searchQuery, postsType -> searchQuery to postsType }
-        .onEach { (searchQuery, postsType) ->
-          val searchQueryText = searchQuery.text
-          val transformedSearchQuery =
-            if (searchQueryText.length >= 3) {
-              searchQueryText
-            } else {
-              ""
-            }
-
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
-          val feedSearchResults =
-            createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.searchFeed(
-                  searchQuery = transformedSearchQuery,
-                  postsAfter = postsAfter
-                )
-              }
-              .flow
-              .cachedIn(coroutineScope)
-
-          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
-        }
+    private fun observeShowUnreadCountPreference() {
+      settingsRepository.showUnreadPostsCount
+        .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
         .launchIn(coroutineScope)
     }
 
