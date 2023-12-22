@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -63,6 +64,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -217,17 +223,44 @@ class HomePresenter(
         .onEach { selectedFeed ->
           _state.update { it.copy(selectedFeed = selectedFeed, posts = null, featuredPosts = null) }
         }
-        .flatMapLatest { selectedFeed ->
+        .combine(settingsRepository.postsType) { selectedFeed, postsType ->
+          selectedFeed to postsType
+        }
+        .flatMapLatest { (selectedFeed, postsType) ->
+          val unreadOnly =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.TODAY -> null
+              PostsType.UNREAD -> true
+            }
+
+          val postsAfter =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.UNREAD -> Instant.DISTANT_PAST
+              PostsType.TODAY -> {
+                getTodayStartInstant()
+              }
+            }
+
           val posts =
             createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.posts(selectedFeedLink = selectedFeed?.link)
+                rssRepository.posts(
+                  selectedFeedLink = selectedFeed?.link,
+                  unreadOnly = unreadOnly,
+                  after = postsAfter
+                )
               }
               .flow
               .cachedIn(coroutineScope)
 
-          rssRepository.featuredPosts(selectedFeedLink = selectedFeed?.link).map { featuredPosts ->
-            Pair(featuredPosts.toImmutableList(), posts)
-          }
+          rssRepository
+            .featuredPosts(
+              selectedFeedLink = selectedFeed?.link,
+              unreadOnly = unreadOnly,
+              after = postsAfter
+            )
+            .map { featuredPosts -> Pair(featuredPosts.toImmutableList(), posts) }
         }
         .onEach { (featuredPosts, posts) ->
           _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
@@ -244,6 +277,12 @@ class HomePresenter(
         .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
     }
+
+    private fun getTodayStartInstant() =
+      Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault())
+        .date
+        .atStartOfDayIn(TimeZone.currentSystemDefault())
 
     private fun onPrimaryActionClicked() {
       if (_state.value.feedsSheetState == BottomSheetValue.Collapsed) {
