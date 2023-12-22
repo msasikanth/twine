@@ -35,6 +35,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
+import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
@@ -165,7 +166,12 @@ class HomePresenter(
         HomeEvent.EditFeedsClicked -> editFeedsClicked()
         HomeEvent.ExitFeedsEdit -> exitFeedsEdit()
         is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
+        is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
       }
+    }
+
+    private fun onPostsTypeChanged(postsType: PostsType) {
+      _state.update { it.copy(postsType = postsType) }
     }
 
     private fun postSourceClicked(feedLink: String) {
