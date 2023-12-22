@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.home.ui.PostsType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
+  private val postsTypeKey = stringPreferencesKey("posts_type")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -50,6 +52,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.data.map { preferences ->
       mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
     }
+
+  val postsType: Flow<PostsType> =
+    dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
 
   suspend fun postsDeletionPeriodImmediate(): Period {
     return postsDeletionPeriod.first()
@@ -71,6 +76,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[postsDeletionPeriodKey] = postsDeletionPeriod.name }
   }
 
+  suspend fun updatePostsType(postsType: PostsType) {
+    dataStore.edit { preferences -> preferences[postsTypeKey] = postsType.name }
+  }
+
   private fun mapToBrowserType(pref: String?): BrowserType? {
     if (pref.isNullOrBlank()) return null
     return BrowserType.valueOf(pref)
@@ -79,6 +88,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private fun mapToPostsDeletionPeriod(pref: String?): Period? {
     if (pref.isNullOrBlank()) return null
     return Period.valueOf(pref)
+  }
+
+  private fun mapToPostsType(pref: String?): PostsType? {
+    if (pref.isNullOrBlank()) return null
+    return PostsType.valueOf(pref)
   }
 }
 
