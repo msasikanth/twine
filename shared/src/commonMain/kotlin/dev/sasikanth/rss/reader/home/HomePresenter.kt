@@ -171,7 +171,10 @@ class HomePresenter(
     }
 
     private fun onPostsTypeChanged(postsType: PostsType) {
-      _state.update { it.copy(postsType = postsType) }
+      coroutineScope.launch {
+        _state.update { it.copy(postsType = postsType) }
+        settingsRepository.updatePostsType(postsType)
+      }
     }
 
     private fun postSourceClicked(feedLink: String) {
