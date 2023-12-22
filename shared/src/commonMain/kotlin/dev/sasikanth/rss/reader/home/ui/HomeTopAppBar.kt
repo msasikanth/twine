@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -93,7 +94,7 @@ internal fun HomeTopAppBar(
         .windowInsetsPadding(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
-        .padding(start = 24.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+        .padding(start = 12.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     if (!hasFeeds) {
@@ -146,7 +147,7 @@ fun PostsTypeSelector(
         modifier = Modifier.align(Alignment.CenterVertically),
         text = title,
         color = Color.White,
-        style = MaterialTheme.typography.headlineSmall
+        style = MaterialTheme.typography.titleLarge
       )
 
       Spacer(Modifier.width(4.dp))
@@ -160,23 +161,34 @@ fun PostsTypeSelector(
     }
 
     DropdownMenu(
+      modifier = Modifier.requiredWidth(120.dp),
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
       offset = DpOffset(x = 0.dp, y = (-48).dp)
     ) {
       PostsType.entries.forEach { type ->
         val label = getPostTypeLabel(type)
+        val color =
+          if (postsType == type) {
+            AppTheme.colorScheme.tintedSurface
+          } else {
+            Color.Unspecified
+          }
+        val labelColor =
+          if (postsType == type) {
+            AppTheme.colorScheme.onSurface
+          } else {
+            AppTheme.colorScheme.textEmphasisHigh
+          }
+
         DropdownMenuItem(
           onClick = {
             onPostTypeChanged(type)
             showDropdown = false
-          }
+          },
+          modifier = Modifier.background(color)
         ) {
-          Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colorScheme.onSurface
-          )
+          Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
         }
       }
     }
@@ -194,11 +206,11 @@ private fun getPostTypeLabel(type: PostsType) =
 
 @Composable
 private fun AppName(modifier: Modifier = Modifier) {
-  Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+  Row(modifier = modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
     Text(
       text = LocalStrings.current.appName,
       color = Color.White,
-      style = MaterialTheme.typography.headlineSmall
+      style = MaterialTheme.typography.titleLarge
     )
 
     Spacer(Modifier.width(4.dp))
