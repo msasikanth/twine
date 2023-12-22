@@ -150,11 +150,13 @@ class RssRepository(
   fun featuredPosts(
     selectedFeedLink: String?,
     unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST
   ): Flow<List<PostWithMetadata>> {
     return postQueries
       .featuredPosts(
         feedLink = selectedFeedLink,
         unreadOnly = unreadOnly,
+        postsAfter = after,
         limit = NUMBER_OF_FEATURED_POSTS,
         mapper = ::PostWithMetadata
       )
@@ -165,6 +167,7 @@ class RssRepository(
   fun posts(
     selectedFeedLink: String?,
     unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
@@ -179,6 +182,7 @@ class RssRepository(
           feedLink = selectedFeedLink,
           featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
           unreadOnly = unreadOnly,
+          postsAfter = after,
           limit = limit,
           offset = offset,
           mapper = ::PostWithMetadata

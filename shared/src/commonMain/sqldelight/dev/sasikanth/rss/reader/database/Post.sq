@@ -48,7 +48,8 @@ INNER JOIN feed ON post.feedLink == feed.link
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (:feedLink IS NULL OR post.feedLink = :feedLink) AND
-  post.imageUrl IS NOT NULL
+  post.imageUrl IS NOT NULL AND
+  post.date > :postsAfter
 ORDER BY post.date DESC LIMIT :limit;
 
 posts:
@@ -74,9 +75,11 @@ WHERE
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     (:feedLink IS NULL OR post.feedLink = :feedLink) AND
-    post.imageUrl IS NOT NULL
+    post.imageUrl IS NOT NULL AND
+    post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
-  )
+  ) AND
+  post.date > :postsAfter
 ORDER BY post.date DESC
 LIMIT :limit OFFSET :offset;
 
