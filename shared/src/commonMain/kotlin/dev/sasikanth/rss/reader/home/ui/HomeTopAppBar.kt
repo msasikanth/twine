@@ -30,13 +30,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -60,11 +64,14 @@ private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
 @Composable
 internal fun HomeTopAppBar(
-  modifier: Modifier = Modifier,
+  hasFeeds: Boolean,
+  postsType: PostsType,
   listState: LazyListState,
+  modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit
+  onSettingsClicked: () -> Unit,
+  onPostTypeChanged: (PostsType) -> Unit
 ) {
   val backgroundAlpha by
     remember(listState) {
@@ -89,16 +96,10 @@ internal fun HomeTopAppBar(
         .padding(start = 24.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      Text(
-        text = LocalStrings.current.appName,
-        color = Color.White,
-        style = MaterialTheme.typography.headlineSmall
-      )
-
-      Spacer(Modifier.width(4.dp))
-
-      Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = Color.White)
+    if (!hasFeeds) {
+      AppName()
+    } else {
+      PostsTypeSelector(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
     }
 
     Spacer(Modifier.weight(1f))
@@ -124,6 +125,85 @@ internal fun HomeTopAppBar(
     }
 
     OverflowMenu(onSettingsClicked)
+  }
+}
+
+@Composable
+fun PostsTypeSelector(
+  modifier: Modifier = Modifier,
+  postsType: PostsType = PostsType.ALL,
+  onPostTypeChanged: (PostsType) -> Unit,
+) {
+  var showDropdown by remember { mutableStateOf(false) }
+  val title = getPostTypeLabel(postsType)
+
+  Box {
+    TextButton(
+      onClick = { showDropdown = true },
+      modifier = modifier,
+    ) {
+      Text(
+        modifier = Modifier.align(Alignment.CenterVertically),
+        text = title,
+        color = Color.White,
+        style = MaterialTheme.typography.headlineSmall
+      )
+
+      Spacer(Modifier.width(4.dp))
+
+      Icon(
+        modifier = Modifier.align(Alignment.CenterVertically),
+        imageVector = Icons.Filled.ArrowDropDown,
+        contentDescription = null,
+        tint = Color.White
+      )
+    }
+
+    DropdownMenu(
+      expanded = showDropdown,
+      onDismissRequest = { showDropdown = false },
+      offset = DpOffset(x = 0.dp, y = (-48).dp)
+    ) {
+      PostsType.entries.forEach { type ->
+        val label = getPostTypeLabel(type)
+        DropdownMenuItem(
+          onClick = {
+            onPostTypeChanged(type)
+            showDropdown = false
+          }
+        ) {
+          Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = AppTheme.colorScheme.onSurface
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+@ReadOnlyComposable
+private fun getPostTypeLabel(type: PostsType) =
+  when (type) {
+    PostsType.ALL -> LocalStrings.current.postsAll
+    PostsType.UNREAD -> LocalStrings.current.postsUnread
+    PostsType.TODAY -> LocalStrings.current.postsToday
+  }
+
+@Composable
+private fun AppName(modifier: Modifier = Modifier) {
+  Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Text(
+      text = LocalStrings.current.appName,
+      color = Color.White,
+      style = MaterialTheme.typography.headlineSmall
+    )
+
+    Spacer(Modifier.width(4.dp))
+
+    Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = Color.White)
   }
 }
 
