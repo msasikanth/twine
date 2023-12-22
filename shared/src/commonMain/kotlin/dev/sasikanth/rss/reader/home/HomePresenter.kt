@@ -41,6 +41,7 @@ import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.http.HttpStatusCode
@@ -64,11 +65,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -275,12 +272,6 @@ class HomePresenter(
         .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
     }
-
-    private fun getTodayStartInstant() =
-      Clock.System.now()
-        .toLocalDateTime(TimeZone.currentSystemDefault())
-        .date
-        .atStartOfDayIn(TimeZone.currentSystemDefault())
 
     private fun onPrimaryActionClicked() {
       if (_state.value.feedsSheetState == BottomSheetValue.Collapsed) {
