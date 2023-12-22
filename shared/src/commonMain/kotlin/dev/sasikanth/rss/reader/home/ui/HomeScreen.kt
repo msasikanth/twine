@@ -400,7 +400,7 @@ private fun PrimaryActionButtonContainer(
 private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
   Column(
     modifier =
-      Modifier.fillMaxSize().pointerInput(Unit) {
+      Modifier.padding(horizontal = 16.dp).fillMaxSize().pointerInput(Unit) {
         detectDragGestures { change, dragAmount ->
           change.consume()
           if (dragAmount.y < 0) {
@@ -440,7 +440,8 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
 @Composable
 private fun NoNewPosts() {
   Column(
-    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    modifier =
+      Modifier.padding(horizontal = 16.dp).fillMaxSize().verticalScroll(rememberScrollState()),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.Center
   ) {
