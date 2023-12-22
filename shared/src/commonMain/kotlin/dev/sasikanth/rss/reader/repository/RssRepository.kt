@@ -224,7 +224,10 @@ class RssRepository(
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
-  fun searchFeed(searchQuery: String): PagingSource<Int, Feed> {
+  fun searchFeed(
+    searchQuery: String,
+    postsAfter: Instant? = Instant.DISTANT_PAST,
+  ): PagingSource<Int, Feed> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
@@ -232,7 +235,13 @@ class RssRepository(
       transacter = feedSearchFTSQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
-        feedSearchFTSQueries.search(searchQuery = sanitizedSearchQuery, limit, offset, ::Feed)
+        feedSearchFTSQueries.search(
+          searchQuery = sanitizedSearchQuery,
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = ::Feed
+        )
       }
     )
   }

@@ -44,6 +44,7 @@ SELECT
 FROM feed f
 LEFT JOIN post p ON f.link = p.feedLink
 LEFT JOIN feed_search fs ON f.link = fs.link AND fs.name MATCH :searchQuery
+WHERE p.date > :postsAfter
 GROUP BY f.link
 ORDER BY pinnedAt DESC , createdAt DESC
 LIMIT :limit OFFSET :offset;
