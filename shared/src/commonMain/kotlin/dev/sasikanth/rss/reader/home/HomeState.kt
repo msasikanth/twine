@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
+import dev.sasikanth.rss.reader.home.ui.PostsType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 
@@ -40,6 +41,7 @@ internal data class HomeState(
   val feedFetchingState: FeedFetchingState,
   val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
+  val postsType: PostsType
 ) {
 
   companion object {
@@ -54,7 +56,8 @@ internal data class HomeState(
         feedsSheetMode = FeedsSheetMode.Default,
         feedFetchingState = FeedFetchingState.Idle,
         featuredItemBlurEnabled = true,
-        hasFeeds = null
+        hasFeeds = null,
+        postsType = PostsType.ALL
       )
   }
 

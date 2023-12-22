@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material.ExperimentalMaterialApi
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.home.ui.PostsType
 
 sealed interface HomeEvent {
 
@@ -48,6 +49,8 @@ sealed interface HomeEvent {
   data object SearchClicked : HomeEvent
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
+
+  data class OnPostsTypeChanged(val postsType: PostsType) : HomeEvent
 
   data object BookmarksClicked : HomeEvent
 

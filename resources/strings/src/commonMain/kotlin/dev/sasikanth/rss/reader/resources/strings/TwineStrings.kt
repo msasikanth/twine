@@ -96,6 +96,9 @@ data class TwineStrings(
   val openWebsite: String,
   val noNewPosts: String,
   val noNewPostsSubtitle: String,
+  val postsAll: String,
+  val postsUnread: String,
+  val postsToday: String,
 )
 
 object Locales {

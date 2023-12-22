@@ -170,10 +170,13 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       scaffoldState = bottomSheetScaffoldState,
       topBar = {
         HomeTopAppBar(
+          hasFeeds = state.hasFeeds ?: false,
+          postsType = state.postsType,
           listState = listState,
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
           onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) }
+          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
+          onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
         )
       },
       content = { paddingValues ->

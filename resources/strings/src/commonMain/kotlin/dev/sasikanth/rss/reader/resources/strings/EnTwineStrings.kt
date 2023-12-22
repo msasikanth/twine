@@ -105,5 +105,8 @@ val EnTwineStrings =
     openWebsite = "Open Website",
     markAllAsRead = "Mark All as Read",
     noNewPosts = "No new content",
-    noNewPostsSubtitle = "Check back later or pull down to check for new content now"
+    noNewPostsSubtitle = "Check back later or pull down to check for new content now",
+    postsAll = "All",
+    postsUnread = "Unread",
+    postsToday = "Today"
   )
