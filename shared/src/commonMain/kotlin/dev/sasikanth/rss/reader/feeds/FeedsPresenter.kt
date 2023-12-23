@@ -211,7 +211,7 @@ class FeedsPresenter(
           selectedFeed to postsType
         }
         .flatMapLatest { (selectedFeed, postsType) ->
-          rssRepository.numberOfPinnedFeeds().map { numberOfPinnedFeeds ->
+          rssRepository.numberOfPinnedFeeds().distinctUntilChanged().map { numberOfPinnedFeeds ->
             val postsAfter = postsAfterInstantFromPostsType(postsType)
 
             val feeds =
