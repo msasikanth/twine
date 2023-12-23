@@ -47,9 +47,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -167,9 +166,16 @@ class FeedsPresenter(
     }
 
     private fun init() {
+      observeNumberOfPinnedFeeds()
       observeShowUnreadCountPreference()
       observeFeedsForCollapsedSheet()
       observeFeedsForExpandedSheet()
+    }
+
+    private fun observeNumberOfPinnedFeeds() {
+      rssRepository.numberOfPinnedFeeds().distinctUntilChanged().onEach { numberOfPinnedFeeds ->
+        _state.update { it.copy(numberOfPinnedFeeds = numberOfPinnedFeeds) }
+      }
     }
 
     @OptIn(FlowPreview::class)
@@ -210,29 +216,21 @@ class FeedsPresenter(
         .combine(settingsRepository.postsType) { selectedFeed, postsType ->
           selectedFeed to postsType
         }
-        .flatMapLatest { (selectedFeed, postsType) ->
-          rssRepository.numberOfPinnedFeeds().distinctUntilChanged().map { numberOfPinnedFeeds ->
-            val postsAfter = postsAfterInstantFromPostsType(postsType)
+        .mapLatest { (selectedFeed, postsType) ->
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-            val feeds =
-              createPager(config = createPagingConfig(pageSize = 20)) {
-                  rssRepository.allFeeds(postsAfter = postsAfter)
-                }
-                .flow
-                .cachedIn(coroutineScope)
+          val feeds =
+            createPager(config = createPagingConfig(pageSize = 20)) {
+                rssRepository.allFeeds(postsAfter = postsAfter)
+              }
+              .flow
+              .cachedIn(coroutineScope)
 
-            Triple(selectedFeed, feeds, numberOfPinnedFeeds)
-          }
+          selectedFeed to feeds
         }
         .distinctUntilChanged()
-        .onEach { (selectedFeed, feeds, numberOfPinnedFeeds) ->
-          _state.update {
-            it.copy(
-              feeds = feeds,
-              numberOfPinnedFeeds = numberOfPinnedFeeds,
-              selectedFeed = selectedFeed
-            )
-          }
+        .onEach { (selectedFeed, feeds) ->
+          _state.update { it.copy(feeds = feeds, selectedFeed = selectedFeed) }
         }
         .launchIn(coroutineScope)
     }
