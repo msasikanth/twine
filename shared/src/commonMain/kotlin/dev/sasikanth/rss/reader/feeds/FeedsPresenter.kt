@@ -47,8 +47,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -212,24 +212,20 @@ class FeedsPresenter(
     }
 
     private fun observeFeedsForCollapsedSheet() {
-      observableSelectedFeed.selectedFeed
-        .combine(settingsRepository.postsType) { selectedFeed, postsType ->
-          selectedFeed to postsType
-        }
-        .mapLatest { (selectedFeed, postsType) ->
+      val feeds =
+        settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          val feeds =
-            createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.allFeeds(postsAfter = postsAfter)
-              }
-              .flow
-              .cachedIn(coroutineScope)
-
-          selectedFeed to feeds
+          createPager(config = createPagingConfig(pageSize = 20)) {
+              rssRepository.allFeeds(postsAfter = postsAfter)
+            }
+            .flow
+            .cachedIn(coroutineScope)
         }
+
+      observableSelectedFeed.selectedFeed
         .distinctUntilChanged()
-        .onEach { (selectedFeed, feeds) ->
+        .onEach { selectedFeed ->
           _state.update { it.copy(feeds = feeds, selectedFeed = selectedFeed) }
         }
         .launchIn(coroutineScope)
