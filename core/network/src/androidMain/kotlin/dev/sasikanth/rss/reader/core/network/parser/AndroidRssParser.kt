@@ -34,7 +34,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.datetime.Clock
 import org.xmlpull.v1.XmlPullParser
 
@@ -126,12 +125,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       }
     }
 
-    val postPubDateInMillis =
-      date?.let { dateString -> dateString.dateStringToEpochMillis() }
-        ?: run {
-          Sentry.captureMessage("Failed to parse date: $date")
-          null
-        }
+    val postPubDateInMillis = date?.let { dateString -> dateString.dateStringToEpochMillis() }
 
     KsoupHtmlParser(
         handler =

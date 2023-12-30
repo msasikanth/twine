@@ -32,7 +32,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.datetime.Clock
 import org.xmlpull.v1.XmlPullParser
 
@@ -131,12 +130,7 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       }
     }
 
-    val postPubDateInMillis =
-      date?.let { dateString -> dateString.dateStringToEpochMillis() }
-        ?: run {
-          Sentry.captureMessage("Failed to parse date: $date")
-          null
-        }
+    val postPubDateInMillis = date?.let { dateString -> dateString.dateStringToEpochMillis() }
 
     if (title.isNullOrBlank() && content.isNullOrBlank()) {
       return null
