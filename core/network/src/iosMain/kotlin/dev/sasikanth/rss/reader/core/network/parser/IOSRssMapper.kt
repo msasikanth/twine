@@ -27,7 +27,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LIN
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import io.ktor.http.Url
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.datetime.Clock
 
 internal fun PostPayload.Companion.mapRssPost(
@@ -63,12 +62,7 @@ internal fun PostPayload.Companion.mapRssPost(
     return null
   }
 
-  val postPubDateInMillis =
-    pubDate?.let { dateString -> dateString.dateStringToEpochMillis() }
-      ?: run {
-        Sentry.captureMessage("Failed to parse date: $pubDate")
-        null
-      }
+  val postPubDateInMillis = pubDate?.let { dateString -> dateString.dateStringToEpochMillis() }
 
   return PostPayload(
     title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
