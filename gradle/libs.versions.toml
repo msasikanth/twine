@@ -9,7 +9,7 @@ android_sdk_min = "26"
 
 sqldelight = "2.0.1"
 ktor = "2.3.7"
-napier = "2.6.1"
+napier = "2.7.1"
 kotlinx_coroutines = "1.7.3"
 kotlinx_date_time = "0.5.0"
 kotlinx_immutable_collections = "0.3.7"
