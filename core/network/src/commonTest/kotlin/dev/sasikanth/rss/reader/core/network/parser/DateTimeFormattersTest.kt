@@ -72,7 +72,7 @@ class DateTimeFormattersTest {
     val epochMillis =
       dates.map {
         try {
-          it.dateStringToEpochMillis()
+          it.dateStringToEpochMillis(clock = TestClock)
         } catch (e: Exception) {
           // no-op
         }
@@ -88,7 +88,7 @@ class DateTimeFormattersTest {
     val invalidDate = "Invalid date"
 
     // when
-    val epochMillis = invalidDate.dateStringToEpochMillis()
+    val epochMillis = invalidDate.dateStringToEpochMillis(clock = TestClock)
 
     // then
     assertEquals(null, epochMillis)

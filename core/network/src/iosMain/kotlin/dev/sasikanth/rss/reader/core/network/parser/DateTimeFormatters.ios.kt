@@ -16,7 +16,9 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toNSDate
 import kotlinx.datetime.toNSTimeZone
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarIdentifierGregorian
@@ -27,7 +29,6 @@ import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.NSCalendarUnitNanosecond
 import platform.Foundation.NSCalendarUnitSecond
 import platform.Foundation.NSCalendarUnitYear
-import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
@@ -68,7 +69,7 @@ private val dateFormatters =
   )
 
 @Throws(DateTimeFormatException::class)
-internal actual fun String?.dateStringToEpochMillis(): Long? {
+internal actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   if (this.isNullOrBlank()) return null
 
   try {
@@ -78,7 +79,7 @@ internal actual fun String?.dateStringToEpochMillis(): Long? {
       }
 
     if (date != null) {
-      val currentDate = NSDate()
+      val currentDate = clock.now().toNSDate()
       val calendar = NSCalendar(NSCalendarIdentifierGregorian)
 
       val currentYear = calendar.component(NSCalendarUnitYear, currentDate)

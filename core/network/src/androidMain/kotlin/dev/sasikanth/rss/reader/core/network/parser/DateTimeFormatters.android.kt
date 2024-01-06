@@ -16,13 +16,15 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.UnsupportedTemporalTypeException
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
+import kotlinx.datetime.toLocalDateTime
 
 private val dateFormatters =
   listOf(
@@ -45,13 +47,15 @@ private val dateFormatters =
   )
 
 @Throws(DateTimeFormatException::class)
-internal actual fun String?.dateStringToEpochMillis(): Long? {
+internal actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   if (this.isNullOrBlank()) return null
+
+  val currentDate =
+    clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
 
   for (dateFormatter in dateFormatters) {
     try {
       val parsedValue = dateFormatter.parse(this)
-      val currentDate = LocalDateTime.now()
 
       val year =
         try {
