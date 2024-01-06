@@ -21,36 +21,35 @@ internal class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : Kso
 
   private val contentStringBuilder = StringBuilder()
   private var imageUrl: String? = null
-  private var currentTag: String? = null
+
+  private var currentTagsStack: ArrayDeque<String> = ArrayDeque()
 
   private val allowedContentTags = setOf("p", "a", "span", "em", "u", "b", "i", "strong")
 
   override fun onText(text: String) {
-    if (currentTag in allowedContentTags) {
+    val tag = currentTagsStack.firstOrNull()
+    if (tag in allowedContentTags || tag.isNullOrBlank()) {
       contentStringBuilder.append(text.cleanWhitespaces())
     }
   }
 
   override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
-    currentTag = name
+    currentTagsStack.addFirst(name)
 
-    if (currentTag == "p" || currentTag == "br") {
+    if (name == "p" || name == "br") {
       contentStringBuilder.appendLine()
     }
 
     val srcAttr = attributes["src"].orEmpty()
     if (
-      currentTag == "img" &&
-        imageUrl.isNullOrBlank() &&
-        srcAttr.isNotBlank() &&
-        !srcAttr.endsWith(".gif")
+      name == "img" && imageUrl.isNullOrBlank() && srcAttr.isNotBlank() && !srcAttr.endsWith(".gif")
     ) {
       this.imageUrl = srcAttr
     }
   }
 
   override fun onCloseTag(name: String, isImplied: Boolean) {
-    currentTag = null
+    currentTagsStack.removeFirst()
   }
 
   override fun onEnd() {
