@@ -20,48 +20,41 @@ import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
 internal class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
 
   private val contentStringBuilder = StringBuilder()
-  private val currentData: MutableMap<String, String> = mutableMapOf()
+  private var imageUrl: String? = null
   private var currentTag: String? = null
 
-  override fun onText(text: String) {
-    when (currentTag) {
-      "p" -> contentStringBuilder.append("\n" + text.cleanWhitespaces())
-      "a",
-      "span",
-      "em",
-      "u",
-      "b",
-      "i",
-      "strong" -> {
-        contentStringBuilder.append(text.cleanWhitespaces())
-      }
-    }
+  private val allowedContentTags = setOf("p", "a", "span", "em", "u", "b", "i", "strong")
 
-    currentData["content"] = contentStringBuilder.toString()
+  override fun onText(text: String) {
+    if (currentTag in allowedContentTags) {
+      contentStringBuilder.append(text.cleanWhitespaces())
+    }
   }
 
   override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
     currentTag = name
-    when {
+
+    if (currentTag == "p" || currentTag == "br") {
+      contentStringBuilder.appendLine()
+    }
+
+    val srcAttr = attributes["src"].orEmpty()
+    if (
       currentTag == "img" &&
-        attributes.containsKey("src") &&
-        !currentData.containsKey("imageUrl") -> {
-        val imageUrl = attributes["src"].toString()
-        if (!imageUrl.endsWith(".gif")) {
-          currentData["imageUrl"] = imageUrl
-        }
-      }
+        imageUrl.isNullOrBlank() &&
+        srcAttr.isNotBlank() &&
+        !srcAttr.endsWith(".gif")
+    ) {
+      this.imageUrl = srcAttr
     }
   }
 
+  override fun onCloseTag(name: String, isImplied: Boolean) {
+    currentTag = null
+  }
+
   override fun onEnd() {
-    onEnd(
-      HtmlContent(
-        imageUrl = currentData["imageUrl"],
-        content = currentData["content"].orEmpty().trim()
-      )
-    )
-    currentData.clear()
+    onEnd(HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString()))
   }
 
   private fun String.cleanWhitespaces(): String {
@@ -76,6 +69,6 @@ internal class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : Kso
     }
     return formattedText
   }
-}
 
-internal data class HtmlContent(val imageUrl: String?, val content: String)
+  data class HtmlContent(val imageUrl: String?, val content: String)
+}
