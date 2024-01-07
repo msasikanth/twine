@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader
 const val feedUrl = "https://example.com"
 const val rssXmlContent =
   """
+  <?xml version="1.0" encoding="UTF-8"?>
   <rss version="2.0">
   <channel>
     <title>Feed title</title>
@@ -79,6 +80,7 @@ const val rssXmlContent =
 
 const val atomXmlContent =
   """
+  <?xml version="1.0" encoding="UTF-8"?>
   <feed xmlns="http://www.w3.org/2005/Atom">
     <title>Feed title</title>
     <subtitle>Feed description</subtitle>

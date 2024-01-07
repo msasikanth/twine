@@ -16,12 +16,49 @@
 package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.exceptions.XmlParsingError
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
+import io.github.aakira.napier.LogLevel
+import io.github.aakira.napier.log
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
+import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
+import org.kobjects.ktxml.api.XmlPullParserException
+import org.kobjects.ktxml.mini.MiniXmlPullParser
 
-interface FeedParser {
+@Inject
+@AppScope
+open class FeedParser(private val dispatchersProvider: DispatchersProvider) {
+
+  open suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
+    return try {
+      withContext(dispatchersProvider.io) {
+        // Currently MiniXmlPullParser fails to parse XML if it contains
+        // the <?xml ?> tag in the first line. So we are removing it until
+        // the issue gets resolved.
+        // https://github.com/kobjects/ktxml/issues/5
+        val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
+        val parser =
+          MiniXmlPullParser(source = xmlDeclarationPattern.replaceFirst(xmlContent, "").iterator())
+
+        parser.nextTag()
+
+        return@withContext when (parser.name) {
+          RSS_TAG -> RssContentParser(parser, feedUrl).parse()
+          ATOM_TAG -> AtomContentParser(parser, feedUrl).parse()
+          HTML_TAG -> throw HtmlContentException()
+          else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
+        }
+      }
+    } catch (e: XmlPullParserException) {
+      log(LogLevel.ERROR, throwable = e) { "Failed to parse the XML" }
+      throw XmlParsingError(e.stackTraceToString())
+    }
+  }
 
   companion object {
     const val RSS_TAG = "rss"
@@ -103,8 +140,6 @@ interface FeedParser {
       return pattern.containsMatchIn(url)
     }
   }
-
-  suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload
 }
 
 internal class HtmlContentException : Exception()

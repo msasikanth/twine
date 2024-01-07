@@ -29,7 +29,8 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
 @Inject
-class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
+class AndroidFeedParser(private val dispatchersProvider: DispatchersProvider) :
+  FeedParser(dispatchersProvider) {
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return try {

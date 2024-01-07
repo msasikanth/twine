@@ -56,7 +56,8 @@ import platform.darwin.NSObject
 
 @Inject
 @Suppress("CAST_NEVER_SUCCEEDS")
-class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) : FeedParser {
+class IOSFeedParser(private val dispatchersProvider: DispatchersProvider) :
+  FeedParser(dispatchersProvider) {
 
   override suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return withContext(dispatchersProvider.io) {
