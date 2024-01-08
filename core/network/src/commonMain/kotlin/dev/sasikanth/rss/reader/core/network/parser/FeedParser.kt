@@ -48,8 +48,8 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
         parser.nextTag()
 
         return@withContext when (parser.name) {
-          RSS_TAG -> RssContentParser(parser, feedUrl).parse()
-          ATOM_TAG -> AtomContentParser(parser, feedUrl).parse()
+          RSS_TAG -> RssContentParser.parse(feedUrl, parser)
+          ATOM_TAG -> AtomContentParser.parse(feedUrl, parser)
           HTML_TAG -> throw HtmlContentException()
           else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
         }

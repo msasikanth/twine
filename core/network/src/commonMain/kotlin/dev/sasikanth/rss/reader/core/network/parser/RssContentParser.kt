@@ -38,10 +38,9 @@ import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal class RssContentParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  ContentParser() {
+internal object RssContentParser : ContentParser() {
 
-  override fun parse(): FeedPayload {
+  override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
     parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_CHANNEL)
 

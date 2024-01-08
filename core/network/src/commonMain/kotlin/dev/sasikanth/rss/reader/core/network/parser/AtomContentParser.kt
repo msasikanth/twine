@@ -36,10 +36,9 @@ import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal class AtomContentParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  ContentParser() {
+internal object AtomContentParser : ContentParser() {
 
-  override fun parse(): FeedPayload {
+  override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
 
     val posts = mutableListOf<PostPayload?>()

@@ -22,7 +22,7 @@ import org.kobjects.ktxml.api.XmlPullParser
 
 abstract class ContentParser {
 
-  abstract fun parse(): FeedPayload
+  abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 
   fun readAttrText(attrName: String, parser: XmlPullParser): String? {
     val url = parser.getAttributeValue(parser.namespace, attrName)
