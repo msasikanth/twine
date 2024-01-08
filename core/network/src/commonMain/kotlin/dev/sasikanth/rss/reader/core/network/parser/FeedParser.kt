@@ -32,9 +32,9 @@ import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
 @AppScope
-open class FeedParser(private val dispatchersProvider: DispatchersProvider) {
+class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
-  open suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
+  suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
         // Currently MiniXmlPullParser fails to parse XML if it contains
