@@ -13,22 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.network
+package dev.sasikanth.rss.reader
 
-import dev.sasikanth.rss.reader.TestDispatchersProvider
-import dev.sasikanth.rss.reader.atomXmlContent
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.IOSFeedParser
-import dev.sasikanth.rss.reader.feedUrl
-import dev.sasikanth.rss.reader.rssXmlContent
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 
-class IOSFeedParserTest {
+class FeedParserTest {
 
-  private val feedParser = IOSFeedParser(dispatchersProvider = TestDispatchersProvider())
+  private val feedParser = FeedParser(dispatchersProvider = TestDispatchersProvider())
 
   @Test
   fun parsingRssFeedShouldWorkCorrectly() = runTest {

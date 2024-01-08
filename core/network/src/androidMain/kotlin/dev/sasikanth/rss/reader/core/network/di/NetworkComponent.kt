@@ -16,17 +16,12 @@
 
 package dev.sasikanth.rss.reader.core.network.di
 
-import dev.sasikanth.rss.reader.core.network.parser.AndroidFeedParser
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import me.tatarka.inject.annotations.Provides
 
 actual interface NetworkComponent {
-
-  val AndroidFeedParser.bind: FeedParser
-    @Provides @AppScope get() = this
 
   @Provides
   @AppScope

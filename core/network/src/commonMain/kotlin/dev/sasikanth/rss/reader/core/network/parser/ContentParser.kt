@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,30 +17,29 @@
 package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
-import org.xmlpull.v1.XmlPullParser
+import org.kobjects.ktxml.api.EventType
+import org.kobjects.ktxml.api.XmlPullParser
 
-abstract class Parser {
+abstract class ContentParser {
 
-  val namespace: String? = null
-
-  abstract fun parse(): FeedPayload
+  abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 
   fun readAttrText(attrName: String, parser: XmlPullParser): String? {
-    val url = parser.getAttributeValue(namespace, attrName)
+    val url = parser.getAttributeValue(parser.namespace, attrName)
     skip(parser)
     return url
   }
 
   fun readTagText(tagName: String, parser: XmlPullParser): String {
-    parser.require(XmlPullParser.START_TAG, namespace, tagName)
+    parser.require(EventType.START_TAG, parser.namespace, tagName)
     val title = readText(parser)
-    parser.require(XmlPullParser.END_TAG, namespace, tagName)
+    parser.require(EventType.END_TAG, parser.namespace, tagName)
     return title
   }
 
   private fun readText(parser: XmlPullParser): String {
     var result = ""
-    if (parser.next() == XmlPullParser.TEXT) {
+    if (parser.next() == EventType.TEXT) {
       result = parser.text
       parser.nextTag()
     }
@@ -48,12 +47,15 @@ abstract class Parser {
   }
 
   fun skip(parser: XmlPullParser) {
-    parser.require(XmlPullParser.START_TAG, namespace, null)
+    parser.require(EventType.START_TAG, parser.namespace, null)
     var depth = 1
     while (depth != 0) {
       when (parser.next()) {
-        XmlPullParser.END_TAG -> depth--
-        XmlPullParser.START_TAG -> depth++
+        EventType.END_TAG -> depth--
+        EventType.START_TAG -> depth++
+        else -> {
+          // no-op
+        }
       }
     }
   }
