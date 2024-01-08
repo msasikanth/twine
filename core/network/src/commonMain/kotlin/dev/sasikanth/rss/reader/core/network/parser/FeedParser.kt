@@ -34,7 +34,7 @@ import org.kobjects.ktxml.mini.MiniXmlPullParser
 @AppScope
 class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
-  suspend fun parse(xmlContent: String, feedUrl: String): FeedPayload {
+  suspend fun parse(feedContent: String, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
         // Currently MiniXmlPullParser fails to parse XML if it contains
@@ -43,7 +43,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
         // https://github.com/kobjects/ktxml/issues/5
         val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
         val parser =
-          MiniXmlPullParser(source = xmlDeclarationPattern.replaceFirst(xmlContent, "").iterator())
+          MiniXmlPullParser(source = xmlDeclarationPattern.replaceFirst(feedContent, "").iterator())
 
         parser.nextTag()
 
