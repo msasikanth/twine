@@ -93,7 +93,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         throw UnsupportedOperationException()
       }
     } else {
-      val feedPayload = feedParser.parse(xmlContent = responseContent, feedUrl = url)
+      val feedPayload = feedParser.parse(feedContent = responseContent, feedUrl = url)
       FeedFetchResult.Success(feedPayload)
     }
   }

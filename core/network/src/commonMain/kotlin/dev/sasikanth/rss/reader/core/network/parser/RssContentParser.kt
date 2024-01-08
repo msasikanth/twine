@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import android.net.Uri
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -34,15 +33,16 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import io.ktor.http.Url
 import kotlinx.datetime.Clock
-import org.xmlpull.v1.XmlPullParser
+import org.kobjects.ktxml.api.EventType
+import org.kobjects.ktxml.api.XmlPullParser
 
-internal class AndroidRssParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  Parser() {
+internal object RssContentParser : ContentParser() {
 
-  override fun parse(): FeedPayload {
+  override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
-    parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_CHANNEL)
+    parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_CHANNEL)
 
     val posts = mutableListOf<PostPayload?>()
 
@@ -50,8 +50,8 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
     var link: String? = null
     var description: String? = null
 
-    while (parser.next() != XmlPullParser.END_TAG) {
-      if (parser.eventType != XmlPullParser.START_TAG) continue
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
       when (val name = parser.name) {
         TAG_TITLE -> {
           title = readTagText(name, parser)
@@ -69,8 +69,14 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
       }
     }
 
-    val domain = Uri.parse(link!!)
-    val iconUrl = FeedParser.feedIcon(domain.host ?: domain.path!!)
+    val domain = Url(link!!)
+    val host =
+      if (domain.host != "localhost") {
+        domain.host
+      } else {
+        throw NullPointerException("Unable to get host domain")
+      }
+    val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link, decodeUrlEncoding = true)!!,
@@ -83,7 +89,7 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
   }
 
   private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload? {
-    parser.require(XmlPullParser.START_TAG, namespace, TAG_RSS_ITEM)
+    parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_ITEM)
 
     var title: String? = null
     var link: String? = null
@@ -92,8 +98,8 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
     var image: String? = null
     var commentsLink: String? = null
 
-    while (parser.next() != XmlPullParser.END_TAG) {
-      if (parser.eventType != XmlPullParser.START_TAG) continue
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
       val name = parser.name
 
       when {
@@ -154,6 +160,6 @@ internal class AndroidRssParser(private val parser: XmlPullParser, private val f
   private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
     (FeedParser.imageTags.contains(name) ||
       (name == TAG_ENCLOSURE &&
-        parser.getAttributeValue(namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
-      !parser.getAttributeValue(namespace, ATTR_URL).isNullOrBlank()
+        parser.getAttributeValue(parser.namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
+      !parser.getAttributeValue(parser.namespace, ATTR_URL).isNullOrBlank()
 }

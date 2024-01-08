@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import android.net.Uri
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
 import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -32,14 +31,15 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
+import io.ktor.http.Url
 import kotlinx.datetime.Clock
-import org.xmlpull.v1.XmlPullParser
+import org.kobjects.ktxml.api.EventType
+import org.kobjects.ktxml.api.XmlPullParser
 
-internal class AndroidAtomParser(private val parser: XmlPullParser, private val feedUrl: String) :
-  Parser() {
+internal object AtomContentParser : ContentParser() {
 
-  override fun parse(): FeedPayload {
-    parser.require(XmlPullParser.START_TAG, namespace, TAG_ATOM_FEED)
+  override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
+    parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
 
     val posts = mutableListOf<PostPayload?>()
 
@@ -47,8 +47,8 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
     var description: String? = null
     var link: String? = null
 
-    while (parser.next() != XmlPullParser.END_TAG) {
-      if (parser.eventType != XmlPullParser.START_TAG) continue
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
       when (val name = parser.name) {
         TAG_TITLE -> {
           title = readTagText(name, parser)
@@ -70,21 +70,27 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
       }
     }
 
-    val domain = Uri.parse(link).host!!
-    val iconUrl = FeedParser.feedIcon(domain)
+    val domain = Url(link!!)
+    val host =
+      if (domain.host != "localhost") {
+        domain.host
+      } else {
+        throw NullPointerException("Unable to get host domain")
+      }
+    val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link, decodeUrlEncoding = true)!!,
       description = FeedParser.cleanText(description, decodeUrlEncoding = true).orEmpty(),
       icon = iconUrl,
-      homepageLink = link!!,
+      homepageLink = link,
       link = feedUrl,
       posts = posts.filterNotNull()
     )
   }
 
   private fun readAtomEntry(parser: XmlPullParser, hostLink: String): PostPayload? {
-    parser.require(XmlPullParser.START_TAG, null, "entry")
+    parser.require(EventType.START_TAG, null, "entry")
 
     var title: String? = null
     var link: String? = null
@@ -92,8 +98,8 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
     var date: String? = null
     var image: String? = null
 
-    while (parser.next() != XmlPullParser.END_TAG) {
-      if (parser.eventType != XmlPullParser.START_TAG) continue
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
 
       when (val tagName = parser.name) {
         TAG_TITLE -> {
@@ -148,13 +154,13 @@ internal class AndroidAtomParser(private val parser: XmlPullParser, private val 
 
   private fun readAtomLink(tagName: String, parser: XmlPullParser): String? {
     var link: String? = null
-    parser.require(XmlPullParser.START_TAG, namespace, tagName)
-    val relType = parser.getAttributeValue(namespace, ATTR_REL)
+    parser.require(EventType.START_TAG, parser.namespace, tagName)
+    val relType = parser.getAttributeValue(parser.namespace, ATTR_REL)
     if (relType == ATTR_VALUE_ALTERNATE || relType.isNullOrBlank()) {
-      link = parser.getAttributeValue(namespace, ATTR_HREF)
+      link = parser.getAttributeValue(parser.namespace, ATTR_HREF)
     }
     parser.nextTag()
-    parser.require(XmlPullParser.END_TAG, namespace, tagName)
+    parser.require(EventType.END_TAG, parser.namespace, tagName)
     return link
   }
 }

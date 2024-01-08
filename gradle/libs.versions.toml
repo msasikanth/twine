@@ -44,6 +44,7 @@ okio = "3.7.0"
 paging = "3.3.0-alpha02-0.4.0"
 stately = "2.0.6"
 xmlutil = "0.86.3"
+ktxml = "0.2.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -102,6 +103,7 @@ stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "state
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
+ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
