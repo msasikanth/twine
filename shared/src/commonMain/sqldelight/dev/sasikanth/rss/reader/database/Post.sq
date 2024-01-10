@@ -11,16 +11,17 @@ CREATE TABLE post(
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   commentsLink TEXT DEFAULT NULL,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
+  rawContent TEXT,
   FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
 );
 
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
 upsert:
-INSERT INTO post(title, description, imageUrl, date, feedLink, link, commentsLink)
-VALUES (:title, :description, :imageUrl, :date, :feedLink, :link, :commnetsLink)
+INSERT INTO post(title, description, rawContent, imageUrl, date, feedLink, link, commentsLink)
+VALUES (:title, :description,  :rawContent, :imageUrl, :date, :feedLink, :link, :commnetsLink)
 ON CONFLICT(link) DO
-UPDATE SET title = excluded.title, description = excluded.description, imageUrl = excluded.imageUrl, date = excluded.date;
+UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl, date = excluded.date;
 
 count:
 SELECT COUNT(*) FROM post
