@@ -136,7 +136,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     }
 
     private fun isAbsoluteUrl(url: String): Boolean {
-      val pattern = """^(?:\w+:)?//""".toRegex()
+      val pattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
       return pattern.containsMatchIn(url)
     }
   }
