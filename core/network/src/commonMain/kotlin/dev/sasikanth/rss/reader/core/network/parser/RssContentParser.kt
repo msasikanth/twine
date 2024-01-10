@@ -149,8 +149,9 @@ internal object RssContentParser : ContentParser() {
 
     return PostPayload(
       title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
-      description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
       link = FeedParser.cleanText(link)!!,
+      description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
+      rawContent = null,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
