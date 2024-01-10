@@ -42,6 +42,7 @@ class FeedParserTest {
               title = "Post with image",
               link = "https://example.com/first-post",
               description = "First post description.",
+              rawContent = "First post description.",
               imageUrl = "https://example.com/first-post-media-url",
               date = 1685005200000,
               commentsLink = null
@@ -50,6 +51,7 @@ class FeedParserTest {
               title = "Post without image",
               link = "https://example.com/second-post",
               description = "Second post description.",
+              rawContent = "Second post description.",
               imageUrl = null,
               date = 1684999800000,
               commentsLink = null
@@ -58,6 +60,7 @@ class FeedParserTest {
               title = "Podcast post",
               link = "https://example.com/third-post",
               description = "Third post description.",
+              rawContent = "Third post description.",
               imageUrl = null,
               date = 1684924200000,
               commentsLink = null
@@ -66,6 +69,7 @@ class FeedParserTest {
               title = "Post with enclosure image",
               link = "https://example.com/fourth-post",
               description = "Fourth post description.",
+              rawContent = "Fourth post description.",
               imageUrl = "https://example.com/enclosure-image",
               date = 1684924200000,
               commentsLink = null
@@ -74,6 +78,12 @@ class FeedParserTest {
               title = "Post with description and encoded content",
               link = "https://example.com/fifth-post",
               description = "Fourth post description in HTML syntax.",
+              rawContent =
+                """
+                  <p>Fourth post description in HTML syntax.</p>
+                  <img src="https://example.com/encoded-image" alt="encoded image" />
+                """
+                  .trimIndent(),
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000,
               commentsLink = null
@@ -82,6 +92,7 @@ class FeedParserTest {
               title = "Post with relative path image",
               link = "https://example.com/post-with-relative-image",
               description = "Relative image post description.",
+              rawContent = "Relative image post description.",
               imageUrl = "https://example.com/relative-media-url",
               date = 1685005200000,
               commentsLink = null
@@ -90,6 +101,7 @@ class FeedParserTest {
               title = "Post with comments",
               link = "https://example.com/post-with-comments",
               description = "Really long post with comments.",
+              rawContent = "Really long post with comments.",
               imageUrl = null,
               date = 1685005200000,
               commentsLink = "https://example/post-with-comments/comments"
@@ -120,6 +132,12 @@ class FeedParserTest {
               title = "Post with image",
               link = "https://example.com/first-post",
               description = "Post summary with an image.",
+              rawContent =
+                """
+                  <img alt="First Image" src="https://example.com/image.jpg" />
+                  <p>Post summary with an image.</p>
+                """
+                  .trimIndent(),
               imageUrl = "https://example.com/image.jpg",
               date = 1685008800000,
               commentsLink = null
@@ -128,6 +146,11 @@ class FeedParserTest {
               title = "Second post",
               link = "https://example.com/second-post",
               description = "Post summary of the second post.",
+              rawContent =
+                """
+                  <p>Post summary of the second post.</p>
+                """
+                  .trimIndent(),
               imageUrl = null,
               date = 1684917000000,
               commentsLink = null
@@ -136,6 +159,11 @@ class FeedParserTest {
               title = "Post without image",
               link = "https://example.com/third-post",
               description = "Post summary of the third post. click here.",
+              rawContent =
+                """
+                  <p>Post summary of the third post. <a href="https://example.com/hyperlink" >click here</a>.</p>
+                """
+                  .trimIndent(),
               imageUrl = null,
               date = 1684936800000,
               commentsLink = null
@@ -144,6 +172,12 @@ class FeedParserTest {
               title = "Post with relative image",
               link = "https://example.com/relative-image-post",
               description = "Post summary with an image.",
+              rawContent =
+                """
+                  <img alt="Relative Image" src="/resources/image.jpg" />
+                  <p>Post summary with an image.</p>
+                """
+                  .trimIndent(),
               imageUrl = "https://example.com/resources/image.jpg",
               date = 1685008800000,
               commentsLink = null

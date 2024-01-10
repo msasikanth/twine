@@ -19,6 +19,7 @@ data class PostPayload(
   val title: String,
   val link: String,
   val description: String,
+  val rawContent: String?,
   val imageUrl: String?,
   val date: Long,
   val commentsLink: String?
