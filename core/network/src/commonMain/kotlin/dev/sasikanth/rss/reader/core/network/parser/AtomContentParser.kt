@@ -95,6 +95,7 @@ internal object AtomContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var content: String? = null
+    var rawContent: String? = null
     var date: String? = null
     var image: String? = null
 
@@ -113,7 +114,7 @@ internal object AtomContentParser : ContentParser() {
           }
         }
         TAG_CONTENT -> {
-          val rawContent = readTagText(tagName, parser)
+          rawContent = readTagText(tagName, parser).trimIndent()
           KsoupHtmlParser(
               handler =
                 HtmlContentParser {
@@ -146,7 +147,7 @@ internal object AtomContentParser : ContentParser() {
       title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
       link = FeedParser.cleanText(link)!!,
       description = FeedParser.cleanTextCompact(content, decodeUrlEncoding = true).orEmpty(),
-      rawContent = null,
+      rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = null

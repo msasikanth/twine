@@ -94,6 +94,7 @@ internal object RssContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var description: String? = null
+    var rawContent: String? = null
     var date: String? = null
     var image: String? = null
     var commentsLink: String? = null
@@ -114,6 +115,7 @@ internal object RssContentParser : ContentParser() {
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           description = readTagText(name, parser)
+          rawContent = description.trimIndent()
         }
         name == TAG_PUB_DATE -> {
           date = readTagText(name, parser)
@@ -151,7 +153,7 @@ internal object RssContentParser : ContentParser() {
       title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
       link = FeedParser.cleanText(link)!!,
       description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
-      rawContent = null,
+      rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()

@@ -95,7 +95,7 @@ class RssRepository(
                     link = post.link,
                     commnetsLink = post.commentsLink,
                     feedLink = feedPayload.link,
-                    rawContent = null
+                    rawContent = post.rawContent
                   )
                 }
               }
