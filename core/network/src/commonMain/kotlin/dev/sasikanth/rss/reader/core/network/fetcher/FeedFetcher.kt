@@ -15,9 +15,13 @@
  */
 package dev.sasikanth.rss.reader.core.network.fetcher
 
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
+import com.fleeksoft.ksoup.Ksoup
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -28,8 +32,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -131,40 +133,18 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     }
   }
 
-  private suspend fun fetchFeedLinkFromHtmlIfExists(
-    htmlContent: String,
-    originalUrl: String
-  ): String? {
-    return suspendCoroutine { continuation ->
-      var link: String? = null
-      KsoupHtmlParser(
-          handler =
-            object : KsoupHtmlHandler {
-              override fun onOpenTag(
-                name: String,
-                attributes: Map<String, String>,
-                isImplied: Boolean
-              ) {
-                if (
-                  link.isNullOrBlank() &&
-                    name == "link" &&
-                    (attributes["type"] == FeedParser.RSS_MEDIA_TYPE ||
-                      attributes["type"] == FeedParser.ATOM_MEDIA_TYPE)
-                ) {
-                  link = attributes["href"]
-                }
-              }
+  private fun fetchFeedLinkFromHtmlIfExists(htmlContent: String, originalUrl: String): String? {
+    val document = Ksoup.parse(htmlContent)
+    val linkElement =
+      document.getElementsByTag(TAG_LINK).firstOrNull {
+        val linkType = it.attr(ATTR_TYPE)
+        linkType == RSS_MEDIA_TYPE || linkType == ATOM_MEDIA_TYPE
+      }
+        ?: return null
+    val link = linkElement.attr(ATTR_HREF)
+    val host = URLBuilder(originalUrl).build().host
+    val rootUrl = "https://$host"
 
-              override fun onEnd() {
-                val host = URLBuilder(originalUrl).build().host
-                val rootUrl = "https://$host"
-                val feedUrl = FeedParser.safeUrl(rootUrl, link)
-
-                continuation.resume(feedUrl)
-              }
-            }
-        )
-        .parseComplete(htmlContent)
-    }
+    return FeedParser.safeUrl(rootUrl, link)
   }
 }
