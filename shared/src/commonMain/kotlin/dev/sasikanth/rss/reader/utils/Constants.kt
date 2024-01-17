@@ -34,4 +34,6 @@ internal object Constants {
   const val ABOUT_SASI_WEBSITE = "https://sasikanth.dev"
   const val ABOUT_ED_THREADS = "https://www.threads.net/@edpratti"
   const val ABOUT_ED_TWITTER = "https://twitter.com/edpratti"
+
+  const val MINIMUM_REQUIRED_SEARCH_CHARACTERS = 3
 }

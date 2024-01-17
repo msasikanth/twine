@@ -17,44 +17,19 @@ package dev.sasikanth.rss.reader.feeds
 
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
-import app.cash.paging.insertSeparators
-import app.cash.paging.map
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 
 @Immutable
 internal data class FeedsState(
   val feeds: Flow<PagingData<Feed>>,
-  val feedsSearchResults: Flow<PagingData<Feed>>,
+  val feedsInExpandedMode: Flow<PagingData<FeedsListItemType>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
 ) {
-
-  val feedsListInExpandedState: Flow<PagingData<FeedsListItemType>> =
-    feedsSearchResults.mapLatest { feeds ->
-      feeds
-        .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
-        .insertSeparators { before, after ->
-          when {
-            before?.feed?.pinnedAt == null && after?.feed?.pinnedAt != null -> {
-              FeedsListItemType.PinnedFeedsHeader
-            }
-            (before?.feed?.pinnedAt != null || before == null) &&
-              after != null &&
-              after.feed.pinnedAt == null -> {
-              FeedsListItemType.AllFeedsHeader
-            }
-            else -> {
-              null
-            }
-          }
-        }
-    }
 
   val canPinFeeds: Boolean
     get() = numberOfPinnedFeeds < 10L
@@ -64,7 +39,7 @@ internal data class FeedsState(
     val DEFAULT =
       FeedsState(
         feeds = emptyFlow(),
-        feedsSearchResults = emptyFlow(),
+        feedsInExpandedMode = emptyFlow(),
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false,
