@@ -19,7 +19,6 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
 import io.github.aakira.napier.LogLevel
 import io.github.aakira.napier.log
 import io.ktor.http.URLBuilder
@@ -101,18 +100,9 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
-    fun cleanText(text: String?, decodeUrlEncoding: Boolean = false): String? {
-      var sanitizedString = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
+    fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
 
-      if (decodeUrlEncoding) {
-        sanitizedString = sanitizedString?.decodeUrlEncodedString()
-      }
-
-      return sanitizedString
-    }
-
-    fun cleanTextCompact(text: String?, decodeUrlEncoding: Boolean = false) =
-      cleanText(text, decodeUrlEncoding)?.take(300)
+    fun cleanTextCompact(text: String?) = cleanText(text)?.take(300)
 
     fun feedIcon(host: String): String {
       return "https://icon.horse/icon/$host"

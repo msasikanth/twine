@@ -20,25 +20,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.paging.PagingData
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import app.cash.paging.insertSeparators
+import app.cash.paging.map
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -47,8 +53,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -182,31 +190,24 @@ class FeedsPresenter(
     private fun observeFeedsForExpandedSheet() {
       val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
       searchQueryFlow
-        .distinctUntilChanged()
+        .distinctUntilChangedBy { it.text }
         .combine(settingsRepository.postsType) { searchQuery, postsType ->
           searchQuery to postsType
         }
         .onEach { (searchQuery, postsType) ->
           val searchQueryText = searchQuery.text
-          val transformedSearchQuery =
-            if (searchQueryText.length >= 3) {
-              searchQueryText
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
+          val feeds =
+            if (searchQueryText.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
+              feedsSearchResultsPager(
+                transformedSearchQuery = searchQueryText,
+                postsAfter = postsAfter
+              )
             } else {
-              ""
+              feedsPager(postsAfter = postsAfter)
             }
 
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
-          val feedSearchResults =
-            createPager(config = createPagingConfig(pageSize = 20)) {
-                rssRepository.searchFeed(
-                  searchQuery = transformedSearchQuery,
-                  postsAfter = postsAfter
-                )
-              }
-              .flow
-              .cachedIn(coroutineScope)
-
-          _state.update { it.copy(feedsSearchResults = feedSearchResults) }
+          _state.update { it.copy(feedsInExpandedMode = addFeedsHeaders(feeds)) }
         }
         .launchIn(coroutineScope)
     }
@@ -216,11 +217,7 @@ class FeedsPresenter(
         settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          createPager(config = createPagingConfig(pageSize = 20)) {
-              rssRepository.allFeeds(postsAfter = postsAfter)
-            }
-            .flow
-            .cachedIn(coroutineScope)
+          feedsPager(postsAfter)
         }
 
       observableSelectedFeed.selectedFeed
@@ -230,6 +227,20 @@ class FeedsPresenter(
         }
         .launchIn(coroutineScope)
     }
+
+    private fun feedsSearchResultsPager(transformedSearchQuery: String, postsAfter: Instant) =
+      createPager(config = createPagingConfig(pageSize = 20)) {
+          rssRepository.searchFeed(searchQuery = transformedSearchQuery, postsAfter = postsAfter)
+        }
+        .flow
+        .cachedIn(coroutineScope)
+
+    private fun feedsPager(postsAfter: Instant) =
+      createPager(config = createPagingConfig(pageSize = 20)) {
+          rssRepository.allFeeds(postsAfter = postsAfter)
+        }
+        .flow
+        .cachedIn(coroutineScope)
 
     private fun observeShowUnreadCountPreference() {
       settingsRepository.showUnreadPostsCount
@@ -245,6 +256,30 @@ class FeedsPresenter(
           getTodayStartInstant()
         }
       }
+
+    private fun addFeedsHeaders(
+      feeds: Flow<PagingData<Feed>>
+    ): Flow<PagingData<FeedsListItemType>> {
+      return feeds.mapLatest {
+        it
+          .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
+          .insertSeparators { before, after ->
+            when {
+              before?.feed?.pinnedAt == null && after?.feed?.pinnedAt != null -> {
+                FeedsListItemType.PinnedFeedsHeader
+              }
+              (before?.feed?.pinnedAt != null || before == null) &&
+                after != null &&
+                after.feed.pinnedAt == null -> {
+                FeedsListItemType.AllFeedsHeader
+              }
+              else -> {
+                null
+              }
+            }
+          }
+      }
+    }
 
     override fun onDestroy() {
       coroutineScope.cancel()
