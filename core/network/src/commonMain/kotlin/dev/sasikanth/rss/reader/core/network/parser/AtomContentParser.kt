@@ -16,8 +16,6 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
@@ -80,8 +78,8 @@ internal object AtomContentParser : ContentParser() {
     val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
-      name = FeedParser.cleanText(title ?: link, decodeUrlEncoding = true)!!,
-      description = FeedParser.cleanText(description, decodeUrlEncoding = true).orEmpty(),
+      name = FeedParser.cleanText(title ?: link)!!,
+      description = FeedParser.cleanText(description).orEmpty(),
       icon = iconUrl,
       homepageLink = link,
       link = feedUrl,
@@ -115,15 +113,13 @@ internal object AtomContentParser : ContentParser() {
         }
         TAG_CONTENT -> {
           rawContent = readTagText(tagName, parser).trimIndent()
-          KsoupHtmlParser(
-              handler =
-                HtmlContentParser {
-                  if (image.isNullOrBlank()) image = it.imageUrl
-                  content = it.content.ifBlank { rawContent.trim() }
-                },
-              options = KsoupHtmlOptions(decodeEntities = false)
-            )
-            .parseComplete(rawContent)
+
+          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          if (image.isNullOrBlank() && htmlContent != null) {
+            image = htmlContent.imageUrl
+          }
+
+          content = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
@@ -144,9 +140,9 @@ internal object AtomContentParser : ContentParser() {
     }
 
     return PostPayload(
-      title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
+      title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link)!!,
-      description = FeedParser.cleanTextCompact(content, decodeUrlEncoding = true).orEmpty(),
+      description = FeedParser.cleanTextCompact(content).orEmpty(),
       rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),

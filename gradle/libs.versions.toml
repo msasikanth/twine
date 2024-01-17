@@ -31,7 +31,7 @@ ktfmt = "0.44"
 kotlininject = "0.6.3"
 ksp = "1.9.21-1.0.16"
 material_color_utilities = "1.0.0-alpha01"
-ksoup = "0.3.1"
+ksoup = "0.1.2"
 sentry = "0.3.0"
 sentry_android = "4.2.0"
 buildKonfig = "0.15.1"
@@ -89,7 +89,7 @@ coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
-ksoup = { module = "com.mohamedrejeb.ksoup:ksoup-html", version.ref = "ksoup" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
