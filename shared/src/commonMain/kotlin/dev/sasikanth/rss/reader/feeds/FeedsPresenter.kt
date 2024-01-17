@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -182,7 +183,7 @@ class FeedsPresenter(
     private fun observeFeedsForExpandedSheet() {
       val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
       searchQueryFlow
-        .distinctUntilChanged()
+        .distinctUntilChangedBy { it.text }
         .combine(settingsRepository.postsType) { searchQuery, postsType ->
           searchQuery to postsType
         }
