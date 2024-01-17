@@ -16,8 +16,6 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
@@ -114,8 +112,14 @@ internal object RssContentParser : ContentParser() {
           link = readAttrText(ATTR_URL, parser)
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          description = readTagText(name, parser)
-          rawContent = description.trimIndent()
+          rawContent = readTagText(name, parser).trimIndent()
+
+          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          if (image.isNullOrBlank() && htmlContent != null) {
+            image = htmlContent.imageUrl
+          }
+
+          description = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
         }
         name == TAG_PUB_DATE -> {
           date = readTagText(name, parser)
@@ -134,16 +138,6 @@ internal object RssContentParser : ContentParser() {
     }
 
     val postPubDateInMillis = date?.let { dateString -> dateString.dateStringToEpochMillis() }
-
-    KsoupHtmlParser(
-        handler =
-          HtmlContentParser {
-            if (image.isNullOrBlank()) image = it.imageUrl
-            description = it.content.ifBlank { description?.trim() }
-          },
-        options = KsoupHtmlOptions(decodeEntities = false)
-      )
-      .parseComplete(description.orEmpty())
 
     if (title.isNullOrBlank() && description.isNullOrBlank()) {
       return null

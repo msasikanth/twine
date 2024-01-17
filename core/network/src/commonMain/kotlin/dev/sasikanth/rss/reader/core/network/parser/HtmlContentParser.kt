@@ -15,45 +15,40 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser
 
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlHandler
+import com.fleeksoft.ksoup.Ksoup
 
-internal class HtmlContentParser(private val onEnd: (HtmlContent) -> Unit) : KsoupHtmlHandler {
+internal object HtmlContentParser {
 
-  private val contentStringBuilder = StringBuilder()
-  private var imageUrl: String? = null
+  private val allowedContentTags = setOf("p", "span", "em", "u", "b", "i", "strong")
 
-  private var currentTagsStack: ArrayDeque<String> = ArrayDeque()
+  fun parse(htmlContent: String): HtmlContent? {
+    if (htmlContent.isBlank()) return null
 
-  private val allowedContentTags = setOf("p", "a", "span", "em", "u", "b", "i", "strong")
+    val document =
+      try {
+        Ksoup.parse(htmlContent)
+      } catch (e: Exception) {
+        return null
+      }
 
-  override fun onText(text: String) {
-    val tag = currentTagsStack.firstOrNull()
-    if (tag in allowedContentTags || tag.isNullOrBlank()) {
-      contentStringBuilder.append(text.cleanWhitespaces())
+    val imageUrl =
+      document
+        .getElementsByTag("img")
+        .firstOrNull { it.hasAttr("src") && !it.attr("src").endsWith(".gif") }
+        ?.attr("src")
+
+    val contentStringBuilder = StringBuilder()
+    document.getAllElements().forEach { element ->
+      if (allowedContentTags.contains(element.tagName())) {
+        contentStringBuilder.append(element.text().cleanWhitespaces())
+      }
+
+      if (element.tagName() == "p" || element.tagName() == "br") {
+        contentStringBuilder.appendLine()
+      }
     }
-  }
 
-  override fun onOpenTag(name: String, attributes: Map<String, String>, isImplied: Boolean) {
-    currentTagsStack.addFirst(name)
-
-    if (name == "p" || name == "br") {
-      contentStringBuilder.appendLine()
-    }
-
-    val srcAttr = attributes["src"].orEmpty()
-    if (
-      name == "img" && imageUrl.isNullOrBlank() && srcAttr.isNotBlank() && !srcAttr.endsWith(".gif")
-    ) {
-      this.imageUrl = srcAttr
-    }
-  }
-
-  override fun onCloseTag(name: String, isImplied: Boolean) {
-    currentTagsStack.removeFirst()
-  }
-
-  override fun onEnd() {
-    onEnd(HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString()))
+    return HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString())
   }
 
   private fun String.cleanWhitespaces(): String {

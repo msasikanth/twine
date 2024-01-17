@@ -16,8 +16,6 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlOptions
-import com.mohamedrejeb.ksoup.html.parser.KsoupHtmlParser
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
@@ -115,15 +113,13 @@ internal object AtomContentParser : ContentParser() {
         }
         TAG_CONTENT -> {
           rawContent = readTagText(tagName, parser).trimIndent()
-          KsoupHtmlParser(
-              handler =
-                HtmlContentParser {
-                  if (image.isNullOrBlank()) image = it.imageUrl
-                  content = it.content.ifBlank { rawContent.trim() }
-                },
-              options = KsoupHtmlOptions(decodeEntities = false)
-            )
-            .parseComplete(rawContent)
+
+          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          if (image.isNullOrBlank() && htmlContent != null) {
+            image = htmlContent.imageUrl
+          }
+
+          content = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
