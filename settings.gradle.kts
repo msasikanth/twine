@@ -50,3 +50,5 @@ include(":core:network")
 include(":resources:strings")
 
 include(":resources:icons")
+
+include(":thirdparty:readability")

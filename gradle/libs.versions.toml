@@ -45,6 +45,7 @@ paging = "3.3.0-alpha02-0.4.0"
 stately = "2.0.6"
 xmlutil = "0.86.3"
 ktxml = "0.2.3"
+uri = "0.0.15"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -104,6 +105,7 @@ stately-iso-collections = { module = "co.touchlab:stately-iso-collections", vers
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
+uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
