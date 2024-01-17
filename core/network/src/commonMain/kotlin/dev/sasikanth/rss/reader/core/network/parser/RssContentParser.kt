@@ -77,8 +77,8 @@ internal object RssContentParser : ContentParser() {
     val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
-      name = FeedParser.cleanText(title ?: link, decodeUrlEncoding = true)!!,
-      description = FeedParser.cleanText(description, decodeUrlEncoding = true).orEmpty(),
+      name = FeedParser.cleanText(title ?: link)!!,
+      description = FeedParser.cleanText(description).orEmpty(),
       icon = iconUrl,
       homepageLink = link,
       link = feedUrl,
@@ -144,9 +144,9 @@ internal object RssContentParser : ContentParser() {
     }
 
     return PostPayload(
-      title = FeedParser.cleanText(title, decodeUrlEncoding = true).orEmpty(),
+      title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link)!!,
-      description = FeedParser.cleanTextCompact(description, decodeUrlEncoding = true).orEmpty(),
+      description = FeedParser.cleanTextCompact(description).orEmpty(),
       rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
