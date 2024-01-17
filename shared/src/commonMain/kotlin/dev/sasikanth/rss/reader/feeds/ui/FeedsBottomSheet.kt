@@ -138,7 +138,7 @@ internal fun FeedsBottomSheet(
     } else {
       BottomSheetExpandedContent(
         searchQuery = feedsPresenter.searchQuery,
-        feedsListItemTypes = state.feedsListInExpandedState.collectAsLazyPagingItems(),
+        feedsListItemTypes = state.feedsInExpandedMode.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
