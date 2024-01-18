@@ -36,13 +36,16 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   suspend fun parse(feedContent: String, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
+        val cleanedUpFeedContent = feedContent.removePrefix("\uFEFF")
         // Currently MiniXmlPullParser fails to parse XML if it contains
         // the <?xml ?> tag in the first line. So we are removing it until
         // the issue gets resolved.
         // https://github.com/kobjects/ktxml/issues/5
         val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
         val parser =
-          MiniXmlPullParser(source = xmlDeclarationPattern.replaceFirst(feedContent, "").iterator())
+          MiniXmlPullParser(
+            source = xmlDeclarationPattern.replaceFirst(cleanedUpFeedContent, "").iterator()
+          )
 
         parser.nextTag()
 
