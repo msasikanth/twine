@@ -111,7 +111,9 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
       return "https://icon.horse/icon/$host"
     }
 
-    fun safeUrl(host: String, url: String?): String? {
+    fun safeUrl(host: String?, url: String?): String? {
+      if (host.isNullOrBlank()) return null
+
       return if (!url.isNullOrBlank()) {
         if (isAbsoluteUrl(url)) {
           URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.buildString()

@@ -62,13 +62,17 @@ internal object AtomContentParser : ContentParser() {
           description = readTagText(name, parser)
         }
         TAG_ATOM_ENTRY -> {
-          posts.add(readAtomEntry(parser, link!!))
+          posts.add(readAtomEntry(parser, link))
         }
         else -> skip(parser)
       }
     }
 
-    val domain = Url(link!!)
+    if (link.isNullOrBlank()) {
+      link = feedUrl
+    }
+
+    val domain = Url(link)
     val host =
       if (domain.host != "localhost") {
         domain.host
@@ -87,7 +91,7 @@ internal object AtomContentParser : ContentParser() {
     )
   }
 
-  private fun readAtomEntry(parser: XmlPullParser, hostLink: String): PostPayload? {
+  private fun readAtomEntry(parser: XmlPullParser, hostLink: String?): PostPayload? {
     parser.require(EventType.START_TAG, null, "entry")
 
     var title: String? = null

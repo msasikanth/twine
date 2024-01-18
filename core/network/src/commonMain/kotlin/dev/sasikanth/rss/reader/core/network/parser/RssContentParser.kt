@@ -55,19 +55,27 @@ internal object RssContentParser : ContentParser() {
           title = readTagText(name, parser)
         }
         TAG_LINK -> {
-          link = readTagText(name, parser)
+          if (link.isNullOrBlank()) {
+            link = readTagText(name, parser)
+          } else {
+            skip(parser)
+          }
         }
         TAG_DESCRIPTION -> {
           description = readTagText(name, parser)
         }
         TAG_RSS_ITEM -> {
-          posts.add(readRssItem(parser, link!!))
+          posts.add(readRssItem(parser, link))
         }
         else -> skip(parser)
       }
     }
 
-    val domain = Url(link!!)
+    if (link.isNullOrBlank()) {
+      link = feedUrl
+    }
+
+    val domain = Url(link)
     val host =
       if (domain.host != "localhost") {
         domain.host
@@ -86,7 +94,7 @@ internal object RssContentParser : ContentParser() {
     )
   }
 
-  private fun readRssItem(parser: XmlPullParser, hostLink: String): PostPayload? {
+  private fun readRssItem(parser: XmlPullParser, hostLink: String?): PostPayload? {
     parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_ITEM)
 
     var title: String? = null
