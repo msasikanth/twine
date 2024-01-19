@@ -46,6 +46,7 @@ stately = "2.0.6"
 xmlutil = "0.86.3"
 ktxml = "0.2.3"
 uri = "0.0.16"
+webview = "1.8.4"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -106,6 +107,7 @@ xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlu
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
+webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

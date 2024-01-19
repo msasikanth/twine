@@ -118,6 +118,7 @@ kotlin {
       implementation(libs.stately.isolate)
       implementation(libs.stately.iso.collections)
       implementation(libs.bundles.xmlutil)
+      api(libs.webview)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
