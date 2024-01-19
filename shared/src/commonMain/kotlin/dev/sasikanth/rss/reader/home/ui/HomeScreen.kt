@@ -204,7 +204,13 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           feedsSheetMode = state.feedsSheetMode,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
           editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
-          exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) }
+          exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) },
+          selectedFeedChanged = {
+            coroutineScope.launch {
+              listState.scrollToItem(0)
+              featuredPostsPagerState.scrollToPage(0)
+            }
+          }
         )
       },
       snackbarHost = {

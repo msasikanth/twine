@@ -165,6 +165,8 @@ class FeedsPresenter(
         if (_state.value.selectedFeed?.link != feed.link) {
           observableSelectedFeed.selectFeed(feed)
         }
+
+        effects.emit(FeedsEffect.SelectedFeedChanged)
         effects.emit(FeedsEffect.MinimizeSheet)
       }
     }
