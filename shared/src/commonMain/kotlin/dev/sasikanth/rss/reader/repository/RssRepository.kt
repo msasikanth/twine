@@ -21,6 +21,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
@@ -333,6 +334,10 @@ class RssRepository(
 
   suspend fun markPostsInFeedAsRead(feedLink: String) {
     withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink) }
+  }
+
+  suspend fun post(link: String): Post {
+    return withContext(ioDispatcher) { postQueries.post(link, ::Post).executeAsOne() }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
