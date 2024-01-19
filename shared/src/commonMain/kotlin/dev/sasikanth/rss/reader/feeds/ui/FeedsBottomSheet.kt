@@ -105,7 +105,8 @@ internal fun FeedsBottomSheet(
   feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
   editFeeds: () -> Unit,
-  exitFeedsEdit: () -> Unit
+  exitFeedsEdit: () -> Unit,
+  selectedFeedChanged: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
   val selectedFeed = state.selectedFeed
@@ -114,6 +115,7 @@ internal fun FeedsBottomSheet(
     feedsPresenter.effects.collect { effect ->
       when (effect) {
         FeedsEffect.MinimizeSheet -> closeSheet()
+        FeedsEffect.SelectedFeedChanged -> selectedFeedChanged()
       }
     }
   }
