@@ -18,4 +18,6 @@ package dev.sasikanth.rss.reader.feeds
 sealed interface FeedsEffect {
 
   data object MinimizeSheet : FeedsEffect
+
+  data object SelectedFeedChanged : FeedsEffect
 }
