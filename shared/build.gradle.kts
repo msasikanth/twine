@@ -92,6 +92,7 @@ kotlin {
 
       implementation(projects.resources.strings)
       implementation(projects.resources.icons)
+      implementation(projects.thirdparty.readability)
 
       implementation(libs.bundles.compose)
       implementation(libs.bundles.kotlinx)
