@@ -35,6 +35,7 @@ import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.resources.strings.ProvideStrings
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
@@ -90,6 +91,9 @@ fun App(
             }
             is Screen.About -> {
               AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Reader -> {
+              ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
             }
           }
         }
