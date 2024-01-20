@@ -150,15 +150,6 @@ class SearchPresenter(
       }
     }
 
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(SearchEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
-        }
-      }
-    }
-
     private fun onPostBookmarkClick(post: PostWithMetadata) {
       coroutineScope.launch {
         rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)

@@ -16,9 +16,4 @@
 
 package dev.sasikanth.rss.reader.bookmarks
 
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-
-sealed interface BookmarksEffect {
-
-  data class OpenPost(val post: PostWithMetadata) : BookmarksEffect
-}
+sealed interface BookmarksEffect

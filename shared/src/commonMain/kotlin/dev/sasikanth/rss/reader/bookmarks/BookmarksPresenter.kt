@@ -101,15 +101,6 @@ class BookmarksPresenter(
       }
     }
 
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(BookmarksEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
-        }
-      }
-    }
-
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
         if (rssRepository.hasFeed(post.feedLink)) {
