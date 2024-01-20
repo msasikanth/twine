@@ -63,6 +63,7 @@ private typealias BookmarkPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPost: (String) -> Unit,
   ) -> BookmarksPresenter
 
 private typealias SettingsPresenterFactory =
@@ -152,7 +153,14 @@ class AppPresenter(
         )
       }
       Config.Bookmarks -> {
-        Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
+        Screen.Bookmarks(
+          presenter =
+            bookmarksPresenter(
+              componentContext,
+              { navigation.pop() },
+              { navigation.push(Config.Reader(it)) }
+            )
+        )
       }
       Config.Settings -> {
         Screen.Settings(
