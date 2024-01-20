@@ -112,6 +112,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         val linkColor = StringUtils.hexFromArgb(AppTheme.colorScheme.tintedForeground.toArgb())
 
         val htmlTemplate = remember {
+          // TODO: Extract out the HTML rendering and customisation to separate class
+          //  with actual templating
           // language=HTML
           """
           <html lang="en">
