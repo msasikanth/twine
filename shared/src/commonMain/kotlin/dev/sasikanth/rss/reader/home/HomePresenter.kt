@@ -391,15 +391,6 @@ class HomePresenter(
       coroutineScope.launch { observableSelectedFeed.clearSelection() }
     }
 
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(HomeEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
-        }
-      }
-    }
-
     private fun refreshContent() {
       coroutineScope.launch {
         _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
