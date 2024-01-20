@@ -56,6 +56,7 @@ private typealias SearchPresentFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPost: (String) -> Unit,
   ) -> SearchPresenter
 
 private typealias BookmarkPresenterFactory =
@@ -141,7 +142,14 @@ class AppPresenter(
         )
       }
       Config.Search -> {
-        Screen.Search(presenter = searchPresenter(componentContext) { navigation.pop() })
+        Screen.Search(
+          presenter =
+            searchPresenter(
+              componentContext,
+              { navigation.pop() },
+              { navigation.push(Config.Reader(it)) }
+            )
+        )
       }
       Config.Bookmarks -> {
         Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
