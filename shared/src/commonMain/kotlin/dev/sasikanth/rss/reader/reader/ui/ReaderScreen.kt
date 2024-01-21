@@ -32,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
@@ -94,6 +96,16 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified
   ) { paddingValues ->
+    val jsBridge = rememberWebViewJsBridge()
+
+    LaunchedEffect(jsBridge) {
+      jsBridge.register(
+        ReaderLinkHandler(
+          openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+        )
+      )
+    }
+
     when {
       state.content == null -> {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -191,10 +203,29 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             margin-bottom: 12px;
           }
           </style>
+          <body>
           <h1>${state.title}</h1>
           <p class="caption">Published: ${state.publishedAt}</p>
           <hr class="top-divider">
           ${state.content!!}
+          
+          <script>
+            function handleLinkClick(event) {
+                event.preventDefault();
+                window.kmpJsBridge.callNative(
+                  "linkHandler", 
+                  event.target.href, 
+                  {}
+                );
+            }
+            
+            var links = document.getElementsByTagName("a")
+            for (var i=0, max=links.length; i<max; i++) {
+              var link = links[i];
+              link.addEventListener("click", handleLinkClick);
+            }
+          </script>
+          </body>
           </html>
         """
             .trimIndent()
@@ -207,6 +238,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
               Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest),
             state = webViewState,
             navigator = navigator,
+            webViewJsBridge = jsBridge
           )
         }
       }
