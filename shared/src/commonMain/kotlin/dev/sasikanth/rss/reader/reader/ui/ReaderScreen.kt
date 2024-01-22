@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -138,8 +137,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           </head>
           <style>
           body {
-            padding-left: 16px;
-            padding-right: 16px;
             padding-top: 16px;
             background-color: $backgroundColor;
             color: $textColor;
@@ -232,10 +229,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         }
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
 
-        Box(Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
           WebView(
-            modifier =
-              Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest),
+            modifier = Modifier.fillMaxSize(),
             state = webViewState,
             navigator = navigator,
             webViewJsBridge = jsBridge
