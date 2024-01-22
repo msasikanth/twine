@@ -114,13 +114,15 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           )
         }
       }
-      state.content!!.isNotBlank() -> {
+      state.hasContent -> {
         val backgroundColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerLowest.toArgb())
         val codeBackgroundColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHighest.toArgb())
         val textColor = StringUtils.hexFromArgb(AppTheme.colorScheme.onSurface.toArgb())
         val linkColor = StringUtils.hexFromArgb(AppTheme.colorScheme.tintedForeground.toArgb())
+        val dividerColor =
+          StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHigh.toArgb())
 
         val htmlTemplate = remember {
           // TODO: Extract out the HTML rendering and customisation to separate class
@@ -132,6 +134,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap" rel="stylesheet">
+            <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
             <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
             <title>${state.title}</title>
           </head>
@@ -151,7 +155,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           	line-height: 1.6em;
           }
           .caption {
-            font-size: 16px;
+            font-size: 12px;
           }
           img, figure, video, div, object {
           	max-width: 100%;
@@ -197,12 +201,22 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           	font-size: 0.9375em;
           }
           .top-divider {
+            margin-top: 12px;
             margin-bottom: 12px;
+            border: 1px solid $dividerColor;
+          }
+          .grid-container {
+            display: grid;
+            row-gap: 16px;
           }
           </style>
           <body>
           <h1>${state.title}</h1>
-          <p class="caption">Published: ${state.publishedAt}</p>
+          <hr class="top-divider">
+          <div class="grid-container">
+              <div><a href='${state.feed!!.link}'>${state.feed!!.name}</a></div>
+              <div class="caption">${state.publishedAt}</div>
+          </div>
           <hr class="top-divider">
           ${state.content!!}
           
