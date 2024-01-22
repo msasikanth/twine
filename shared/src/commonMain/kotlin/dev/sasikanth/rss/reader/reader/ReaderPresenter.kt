@@ -99,6 +99,8 @@ class ReaderPresenter(
     private fun init(postLink: String) {
       coroutineScope.launch {
         val post = rssRepository.post(postLink)
+        val feed = rssRepository.feed(post.feedLink)
+
         if (!post.read) {
           rssRepository.updatePostReadStatus(read = true, link = postLink)
         }
@@ -119,7 +121,8 @@ class ReaderPresenter(
           it.copy(
             title = post.title,
             content = htmlContent,
-            publishedAt = post.date.relativeDurationString()
+            publishedAt = post.date.relativeDurationString(),
+            feed = feed
           )
         }
       }

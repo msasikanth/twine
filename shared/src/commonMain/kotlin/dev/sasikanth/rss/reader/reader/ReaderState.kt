@@ -17,18 +17,27 @@
 package dev.sasikanth.rss.reader.reader
 
 import androidx.compose.runtime.Immutable
+import dev.sasikanth.rss.reader.core.model.local.Feed
 
 @Immutable
 internal data class ReaderState(
   val link: String,
   val title: String? = null,
   val content: String? = null,
-  val publishedAt: String? = null
+  val publishedAt: String? = null,
+  val feed: Feed? = null
 ) {
+
+  val hasContent: Boolean
+    get() =
+      !content.isNullOrBlank() &&
+        feed != null &&
+        !publishedAt.isNullOrBlank() &&
+        !title.isNullOrBlank()
 
   companion object {
 
     fun default(link: String) =
-      ReaderState(link = link, title = null, content = null, publishedAt = null)
+      ReaderState(link = link, title = null, content = null, publishedAt = null, feed = null)
   }
 }
