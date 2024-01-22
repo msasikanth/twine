@@ -248,8 +248,10 @@ class RssRepository(
     )
   }
 
-  fun feed(feedLink: String): Feed {
-    return feedQueries.feed(link = feedLink, mapper = ::Feed).executeAsOne()
+  suspend fun feed(feedLink: String): Feed {
+    return withContext(ioDispatcher) {
+      feedQueries.feed(link = feedLink, mapper = ::Feed).executeAsOne()
+    }
   }
 
   suspend fun removeFeed(feedLink: String) {
