@@ -116,7 +116,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             } else {
               TwineIcons.Bookmark
             }
-          IconButton(onClick = { /* no-op */}) { Icon(bookmarkIcon, contentDescription = null) }
+          IconButton(onClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }) {
+            Icon(bookmarkIcon, contentDescription = null)
+          }
           Spacer(Modifier.weight(1f))
           IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
             Icon(TwineIcons.Website, contentDescription = null)

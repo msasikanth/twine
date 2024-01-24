@@ -21,4 +21,6 @@ sealed interface ReaderEvent {
   data class Init(val postLink: String) : ReaderEvent
 
   data object BackClicked : ReaderEvent
+
+  data object TogglePostBookmark : ReaderEvent
 }

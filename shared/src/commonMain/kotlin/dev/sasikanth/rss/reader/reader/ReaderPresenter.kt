@@ -74,7 +74,7 @@ class ReaderPresenter(
   private class PresenterInstance(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    postLink: String,
+    private val postLink: String,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -93,6 +93,15 @@ class ReaderPresenter(
         ReaderEvent.BackClicked -> {
           /* no-op */
         }
+        ReaderEvent.TogglePostBookmark -> togglePostBookmark(postLink)
+      }
+    }
+
+    private fun togglePostBookmark(postLink: String) {
+      coroutineScope.launch {
+        val isBookmarked = state.value.isBookmarked ?: false
+        rssRepository.updateBookmarkStatus(bookmarked = !isBookmarked, link = postLink)
+        _state.update { it.copy(isBookmarked = !isBookmarked) }
       }
     }
 
@@ -122,6 +131,7 @@ class ReaderPresenter(
             title = post.title,
             content = htmlContent,
             publishedAt = post.date.relativeDurationString(),
+            isBookmarked = post.bookmarked,
             feed = feed
           )
         }
