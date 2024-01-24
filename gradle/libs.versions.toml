@@ -61,7 +61,7 @@ ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor_client_logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
-kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version = { strictly = "[1.9.0, 1.9.21[", prefer="1.9.21" } }
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
