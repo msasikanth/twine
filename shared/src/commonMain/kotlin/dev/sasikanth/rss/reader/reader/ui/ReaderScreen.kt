@@ -17,9 +17,14 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,6 +33,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,8 +55,12 @@ import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.resources.icons.Bookmark
+import dev.sasikanth.rss.reader.resources.icons.Bookmarked
+import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
+import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
 
@@ -59,6 +69,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
   val state by presenter.state.collectAsState()
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
+  val sharedHandler = LocalShareHandler.current
   val navigator = rememberWebViewNavigator()
 
   Scaffold(
@@ -70,11 +81,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           navigationIcon = {
             IconButton(onClick = { presenter.dispatch(ReaderEvent.BackClicked) }) {
               Icon(Icons.Rounded.Close, contentDescription = null)
-            }
-          },
-          actions = {
-            IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
-              Icon(TwineIcons.Website, contentDescription = null)
             }
           },
           colors =
@@ -90,6 +96,37 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
+      }
+    },
+    bottomBar = {
+      Surface(
+        color = AppTheme.colorScheme.surfaceContainerHigh,
+        contentColor = AppTheme.colorScheme.onSurface,
+      ) {
+        Row(
+          modifier =
+            Modifier.fillMaxWidth()
+              .windowInsetsPadding(WindowInsets.navigationBars)
+              .padding(vertical = 16.dp)
+        ) {
+          Spacer(Modifier.weight(1f))
+          val bookmarkIcon =
+            if (state.isBookmarked == true) {
+              TwineIcons.Bookmarked
+            } else {
+              TwineIcons.Bookmark
+            }
+          IconButton(onClick = { /* no-op */}) { Icon(bookmarkIcon, contentDescription = null) }
+          Spacer(Modifier.weight(1f))
+          IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
+            Icon(TwineIcons.Website, contentDescription = null)
+          }
+          Spacer(Modifier.weight(1f))
+          IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link) } }) {
+            Icon(TwineIcons.Share, contentDescription = null)
+          }
+          Spacer(Modifier.weight(1f))
+        }
       }
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
@@ -222,12 +259,16 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           
           <script>
             function handleLinkClick(event) {
-                event.preventDefault();
-                window.kmpJsBridge.callNative(
-                  "linkHandler", 
-                  event.target.href, 
-                  {}
-                );
+                try {
+                  event.preventDefault();
+                  window.kmpJsBridge.callNative(
+                    "linkHandler", 
+                    event.target.href, 
+                    {}
+                  );
+                } catch(err) {
+                  // no-op
+                }
             }
             
             var links = document.getElementsByTagName("a")
