@@ -152,7 +152,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           figcaption {
             margin-top: 8px;
           	font-size: 14px;
-          	line-height: 1.6em;
+          	line-height: 1.6;
           }
           .caption {
             font-size: 12px;
@@ -184,7 +184,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             padding: 8px;
           }
           pre {
-          	line-height: 1.4286em;
+          	line-height: 1.4286;
           }
           code, pre {
             font-family: 'Source Code Pro', monospace;
@@ -197,8 +197,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           	border-radius: 2px;
           }
           pre code {
-          	letter-spacing: -.027em;
-          	font-size: 0.9375em;
+          	letter-spacing: -.027;
+          	font-size: 0.9375;
           }
           .top-divider {
             margin-top: 12px;
