@@ -214,7 +214,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           <h1>${state.title}</h1>
           <hr class="top-divider">
           <div class="grid-container">
-              <div><a href='${state.feed!!.link}'>${state.feed!!.name}</a></div>
+              <div><a href='${state.feed!!.homepageLink}'>${state.feed!!.name}</a></div>
               <div class="caption">${state.publishedAt}</div>
           </div>
           <hr class="top-divider">
