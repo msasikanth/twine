@@ -260,12 +260,29 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           ${state.content!!}
           
           <script>
+            function findHref(node, maxDepth = 4) {
+              let currentDepth = 0;
+
+              while (node && currentDepth < maxDepth) {
+                if (node.tagName && node.tagName.toLowerCase() === 'a' && node.hasAttribute('href')) {
+                  return node.getAttribute("href");
+                }
+
+                node = node.parentNode;
+                currentDepth++;
+              }
+
+              return null;
+            }
+
             function handleLinkClick(event) {
                 try {
                   event.preventDefault();
+                  var href = findHref(event.target);
+          
                   window.kmpJsBridge.callNative(
                     "linkHandler", 
-                    event.target.href, 
+                    href, 
                     {}
                   );
                 } catch(err) {
