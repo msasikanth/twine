@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.bookmarks
+package dev.sasikanth.rss.reader.reader.ui
 
-sealed interface BookmarksEffect
+import com.multiplatform.webview.jsbridge.IJsMessageHandler
+import com.multiplatform.webview.jsbridge.JsMessage
+import com.multiplatform.webview.web.WebViewNavigator
+
+class ReaderLinkHandler(private val openLink: (String) -> Unit) : IJsMessageHandler {
+
+  override fun handle(
+    message: JsMessage,
+    navigator: WebViewNavigator?,
+    callback: (String) -> Unit
+  ) {
+    openLink(message.params)
+  }
+
+  override fun methodName(): String {
+    return "linkHandler"
+  }
+}

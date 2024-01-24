@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
@@ -44,19 +45,25 @@ import me.tatarka.inject.annotations.Inject
 
 private typealias HomePresenterFactory =
   (
-    ComponentContext, openSearch: () -> Unit, openBookmarks: () -> Unit, openSettings: () -> Unit
+    ComponentContext,
+    openSearch: () -> Unit,
+    openBookmarks: () -> Unit,
+    openSettings: () -> Unit,
+    openPost: (String) -> Unit,
   ) -> HomePresenter
 
 private typealias SearchPresentFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPost: (String) -> Unit,
   ) -> SearchPresenter
 
 private typealias BookmarkPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPost: (String) -> Unit,
   ) -> BookmarksPresenter
 
 private typealias SettingsPresenterFactory =
@@ -72,6 +79,13 @@ private typealias AboutPresenterFactory =
     goBack: () -> Unit,
   ) -> AboutPresenter
 
+private typealias ReaderPresenterFactory =
+  (
+    feedLink: String,
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> ReaderPresenter
+
 @Inject
 @ActivityScope
 class AppPresenter(
@@ -82,6 +96,7 @@ class AppPresenter(
   private val bookmarksPresenter: BookmarkPresenterFactory,
   private val settingsPresenter: SettingsPresenterFactory,
   private val aboutPresenter: AboutPresenterFactory,
+  private val readerPresenter: ReaderPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository
 ) : ComponentContext by componentContext {
@@ -122,15 +137,30 @@ class AppPresenter(
               componentContext,
               { navigation.push(Config.Search) },
               { navigation.push(Config.Bookmarks) },
-              { navigation.push(Config.Settings) }
+              { navigation.push(Config.Settings) },
+              { navigation.push(Config.Reader(it)) }
             )
         )
       }
       Config.Search -> {
-        Screen.Search(presenter = searchPresenter(componentContext) { navigation.pop() })
+        Screen.Search(
+          presenter =
+            searchPresenter(
+              componentContext,
+              { navigation.pop() },
+              { navigation.push(Config.Reader(it)) }
+            )
+        )
       }
       Config.Bookmarks -> {
-        Screen.Bookmarks(presenter = bookmarksPresenter(componentContext) { navigation.pop() })
+        Screen.Bookmarks(
+          presenter =
+            bookmarksPresenter(
+              componentContext,
+              { navigation.pop() },
+              { navigation.push(Config.Reader(it)) }
+            )
+        )
       }
       Config.Settings -> {
         Screen.Settings(
@@ -144,6 +174,11 @@ class AppPresenter(
       }
       Config.About -> {
         Screen.About(presenter = aboutPresenter(componentContext) { navigation.pop() })
+      }
+      is Config.Reader -> {
+        Screen.Reader(
+          presenter = readerPresenter(config.feedLink, componentContext) { navigation.pop() }
+        )
       }
     }
 
@@ -179,5 +214,7 @@ class AppPresenter(
     @Parcelize data object Settings : Config
 
     @Parcelize data object About : Config
+
+    @Parcelize data class Reader(val feedLink: String) : Config
   }
 }

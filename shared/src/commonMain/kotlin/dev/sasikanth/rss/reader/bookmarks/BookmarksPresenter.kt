@@ -45,6 +45,7 @@ class BookmarksPresenter(
   private val rssRepository: RssRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
+  @Assisted private val openPost: (postLink: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -62,6 +63,7 @@ class BookmarksPresenter(
   fun dispatch(event: BookmarksEvent) {
     when (event) {
       BookmarksEvent.BackClicked -> goBack()
+      is BookmarksEvent.OnPostClicked -> openPost(event.post.link)
       else -> {
         // no-op
       }
@@ -93,15 +95,8 @@ class BookmarksPresenter(
           /* no-op */
         }
         is BookmarksEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
-        is BookmarksEvent.OnPostClicked -> onPostClicked(event.post)
-      }
-    }
-
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(BookmarksEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
+        is BookmarksEvent.OnPostClicked -> {
+          // no-op
         }
       }
     }

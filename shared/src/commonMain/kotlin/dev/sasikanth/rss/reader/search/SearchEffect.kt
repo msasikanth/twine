@@ -16,9 +16,4 @@
 
 package dev.sasikanth.rss.reader.search
 
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-
-interface SearchEffect {
-
-  data class OpenPost(val post: PostWithMetadata) : SearchEffect
-}
+interface SearchEffect

@@ -81,6 +81,7 @@ class HomePresenter(
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
   @Assisted private val openSettings: () -> Unit,
+  @Assisted private val openPost: (postLink: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
@@ -117,6 +118,7 @@ class HomePresenter(
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
       is HomeEvent.SettingsClicked -> openSettings()
+      is HomeEvent.OnPostClicked -> openPost(event.post.link)
       else -> {
         // no-op
       }
@@ -148,7 +150,9 @@ class HomePresenter(
       when (event) {
         HomeEvent.Init -> init()
         HomeEvent.OnSwipeToRefresh -> refreshContent()
-        is HomeEvent.OnPostClicked -> onPostClicked(event.post)
+        is HomeEvent.OnPostClicked -> {
+          // no-op
+        }
         is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
         HomeEvent.OnHomeSelected -> onHomeSelected()
         HomeEvent.OnAddFeedClicked -> onAddFeedClicked()
@@ -385,15 +389,6 @@ class HomePresenter(
 
     private fun onHomeSelected() {
       coroutineScope.launch { observableSelectedFeed.clearSelection() }
-    }
-
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(HomeEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
-        }
-      }
     }
 
     private fun refreshContent() {

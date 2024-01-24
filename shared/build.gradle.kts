@@ -92,6 +92,7 @@ kotlin {
 
       implementation(projects.resources.strings)
       implementation(projects.resources.icons)
+      implementation(projects.thirdparty.readability)
 
       implementation(libs.bundles.compose)
       implementation(libs.bundles.kotlinx)
@@ -118,6 +119,7 @@ kotlin {
       implementation(libs.stately.isolate)
       implementation(libs.stately.iso.collections)
       implementation(libs.bundles.xmlutil)
+      api(libs.webview)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
