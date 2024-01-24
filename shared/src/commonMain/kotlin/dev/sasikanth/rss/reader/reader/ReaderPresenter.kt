@@ -119,12 +119,13 @@ class ReaderPresenter(
 
         val htmlContent =
           if (content.isNotBlank()) {
-            // If the content parsed by readability is not an HTML, it will return
-            // null. In that scenario we simply pass the original content
-            extractArticleHtmlContent(postLink, content) ?: content
-          } else {
-            null
-          }
+              // If the content parsed by readability is not an HTML, it will return
+              // null. In that scenario we simply pass the original content
+              extractArticleHtmlContent(postLink, content) ?: content
+            } else {
+              null
+            }
+            .orEmpty()
 
         _state.update {
           it.copy(
