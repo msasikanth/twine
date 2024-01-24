@@ -78,7 +78,6 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
-import dev.sasikanth.rss.reader.search.SearchEffect
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.search.SearchSortOrder
@@ -86,7 +85,6 @@ import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -98,16 +96,6 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
   val searchResults = state.searchResults.collectAsLazyPagingItems()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
-
-  LaunchedEffect(Unit) {
-    searchPresenter.effects.collectLatest { effect ->
-      when (effect) {
-        is SearchEffect.OpenPost -> {
-          linkHandler.openLink(effect.post.link)
-        }
-      }
-    }
-  }
 
   Scaffold(
     modifier = modifier,

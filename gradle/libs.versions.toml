@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.9.21"
-android_gradle_plugin = "8.2.1"
+android_gradle_plugin = "8.2.2"
 compose = "1.5.11"
 
 android_sdk_compile = "34"
@@ -39,13 +39,14 @@ sqliteAndroid = "3.45.0"
 windowSizeClass = "0.3.2"
 desugarJdk = "2.0.4"
 lyricist = "1.6.2-1.8.20"
-atomicfu = "0.23.1"
+atomicfu = "0.23.2"
 okio = "3.7.0"
 paging = "3.3.0-alpha02-0.4.0"
 stately = "2.0.6"
 xmlutil = "0.86.3"
 ktxml = "0.2.3"
 uri = "0.0.16"
+webview = "1.8.4"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -60,7 +61,7 @@ ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor_client_logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
-kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version = { strictly = "[1.9.0, 1.9.21[", prefer="1.9.21" } }
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
@@ -106,6 +107,7 @@ xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlu
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
+webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

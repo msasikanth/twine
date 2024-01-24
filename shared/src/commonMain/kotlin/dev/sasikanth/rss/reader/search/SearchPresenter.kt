@@ -56,6 +56,7 @@ class SearchPresenter(
   dispatchersProvider: DispatchersProvider,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
+  @Assisted private val openPost: (postLink: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -77,6 +78,7 @@ class SearchPresenter(
 
   internal fun dispatch(event: SearchEvent) {
     when (event) {
+      is SearchEvent.OnPostClicked -> openPost(event.post.link)
       SearchEvent.BackClicked -> goBack()
       else -> {
         /* no-op */
@@ -142,15 +144,8 @@ class SearchPresenter(
           searchQuery = TextFieldValue()
         }
         is SearchEvent.OnPostBookmarkClick -> onPostBookmarkClick(event.post)
-        is SearchEvent.OnPostClicked -> onPostClicked(event.post)
-      }
-    }
-
-    private fun onPostClicked(post: PostWithMetadata) {
-      coroutineScope.launch {
-        effects.emit(SearchEffect.OpenPost(post))
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = post.link)
+        is SearchEvent.OnPostClicked -> {
+          // no-op
         }
       }
     }

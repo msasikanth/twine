@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.bookmarks
+package dev.sasikanth.rss.reader.core.model.local
 
-sealed interface BookmarksEffect
+import kotlinx.datetime.Instant
+
+data class Post(
+  val title: String,
+  val description: String,
+  val imageUrl: String?,
+  val date: Instant,
+  val feedLink: String,
+  val link: String,
+  val bookmarked: Boolean,
+  val commentsLink: String?,
+  val read: Boolean,
+  val rawContent: String?,
+)

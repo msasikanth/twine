@@ -137,9 +137,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   LaunchedEffect(Unit) {
     homePresenter.effects.collectLatest { effect ->
       when (effect) {
-        is HomeEffect.OpenPost -> {
-          linkHandler.openLink(effect.post.link)
-        }
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
         }
