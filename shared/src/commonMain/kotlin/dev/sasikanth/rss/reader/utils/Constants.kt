@@ -35,5 +35,7 @@ internal object Constants {
   const val ABOUT_ED_THREADS = "https://www.threads.net/@edpratti"
   const val ABOUT_ED_TWITTER = "https://twitter.com/edpratti"
 
+  const val OPEN_SOURCE_LINK = "https://github.com/sponsors/msasikanth"
+
   const val MINIMUM_REQUIRED_SEARCH_CHARACTERS = 3
 }

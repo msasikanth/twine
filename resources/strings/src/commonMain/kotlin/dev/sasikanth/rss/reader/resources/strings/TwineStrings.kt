@@ -99,6 +99,8 @@ data class TwineStrings(
   val postsAll: String,
   val postsUnread: String,
   val postsToday: String,
+  val openSource: String,
+  val openSourceDesc: String,
 )
 
 object Locales {
