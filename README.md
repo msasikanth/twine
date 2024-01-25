@@ -1,6 +1,7 @@
 # Twine - RSS Reader
 
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
 ![banner](./readme_images/banner.png)
 
