@@ -24,6 +24,7 @@ user interface and experience to browse through the feeds, and supports Material
   <img src="readme_images/search.png" width="250" alt="Search Screen"/>
   <img src="readme_images/bookmarks.png" width="250" alt="Bookmarks Screen"/>
   <img src="readme_images/settings.png" width="250" alt="Settings Screen"/>
+  <img src="readme_images/reader_screen.png" width="250" alt="Reader Screen"/>
 </p>
 
 ## Features ✨
