@@ -107,7 +107,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           modifier =
             Modifier.fillMaxWidth()
               .windowInsetsPadding(WindowInsets.navigationBars)
-              .padding(vertical = 16.dp)
+              .padding(vertical = 8.dp)
         ) {
           Spacer(Modifier.weight(1f))
           val bookmarkIcon =
