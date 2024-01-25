@@ -108,5 +108,8 @@ val EnTwineStrings =
     noNewPostsSubtitle = "Check back later or pull down to check for new content now",
     postsAll = "All",
     postsUnread = "Unread",
-    postsToday = "Today"
+    postsToday = "Today",
+    openSource = "Open Source",
+    openSourceDesc =
+      "Twine is built on open source technologies and is completely free to use, you can find the source code of Twine and some of my other popular projects on GitHub. Click here to head over there."
   )

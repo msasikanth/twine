@@ -1,6 +1,7 @@
 # Twine - RSS Reader
 
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
+[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
 ![banner](./readme_images/banner.png)
 
@@ -24,6 +25,7 @@ user interface and experience to browse through the feeds, and supports Material
   <img src="readme_images/search.png" width="250" alt="Search Screen"/>
   <img src="readme_images/bookmarks.png" width="250" alt="Bookmarks Screen"/>
   <img src="readme_images/settings.png" width="250" alt="Settings Screen"/>
+  <img src="readme_images/reader_screen.png" width="250" alt="Reader Screen"/>
 </p>
 
 ## Features ✨
