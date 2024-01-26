@@ -120,6 +120,7 @@ kotlin {
       implementation(libs.stately.iso.collections)
       implementation(libs.bundles.xmlutil)
       api(libs.webview)
+      implementation(libs.uuid)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

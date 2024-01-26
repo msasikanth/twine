@@ -47,6 +47,7 @@ xmlutil = "0.86.3"
 ktxml = "0.2.3"
 uri = "0.0.16"
 webview = "1.8.4"
+uuid = "0.8.2"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -108,6 +109,7 @@ xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", v
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
+uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
