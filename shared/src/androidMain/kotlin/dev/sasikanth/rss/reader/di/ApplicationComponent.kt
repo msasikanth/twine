@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 import android.content.Context
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
@@ -32,6 +33,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   abstract val rssRepository: RssRepository
 
   abstract val settingsRepository: SettingsRepository
+
+  abstract val postSourceFetcher: PostSourceFetcher
 
   @Provides
   @AppScope

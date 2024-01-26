@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.network.fetcher
+package dev.sasikanth.rss.reader.core.network.post
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
