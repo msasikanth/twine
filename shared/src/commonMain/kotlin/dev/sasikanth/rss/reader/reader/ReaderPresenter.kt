@@ -21,6 +21,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.readability.Readability
+import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.relativeDurationString
@@ -40,6 +41,7 @@ import me.tatarka.inject.annotations.Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val postSourceFetcher: PostSourceFetcher,
   @Assisted private val postLink: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
@@ -50,7 +52,8 @@ class ReaderPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        postLink = postLink
+        postLink = postLink,
+        postSourceFetcher = postSourceFetcher
       )
     }
 
@@ -75,6 +78,7 @@ class ReaderPresenter(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val postLink: String,
+    private val postSourceFetcher: PostSourceFetcher,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -94,6 +98,7 @@ class ReaderPresenter(
           /* no-op */
         }
         ReaderEvent.TogglePostBookmark -> togglePostBookmark(postLink)
+        ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
       }
     }
 
@@ -139,7 +144,18 @@ class ReaderPresenter(
       }
     }
 
-    private suspend fun extractArticleHtmlContent(feedLink: String, content: String) =
-      withContext(dispatchersProvider.io) { Readability(feedLink, content) }.parse().content
+    private suspend fun extractArticleHtmlContent(postLink: String, content: String) =
+      withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
+
+    private fun articleShortcutClicked() {
+      coroutineScope.launch {
+        val content = postSourceFetcher.fetch(postLink)
+        if (content != null) {
+          _state.update { it.copy(isFetchingFullArticle = true) }
+          val htmlContent = extractArticleHtmlContent(postLink, content)
+          _state.update { it.copy(content = htmlContent, isFetchingFullArticle = false) }
+        }
+      }
+    }
   }
 }
