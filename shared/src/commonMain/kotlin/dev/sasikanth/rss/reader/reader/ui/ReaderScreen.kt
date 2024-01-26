@@ -18,12 +18,12 @@ package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
@@ -55,6 +55,7 @@ import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Share
@@ -107,27 +108,49 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           modifier =
             Modifier.fillMaxWidth()
               .windowInsetsPadding(WindowInsets.navigationBars)
-              .padding(vertical = 8.dp)
+              .padding(vertical = 8.dp),
+          verticalAlignment = Alignment.CenterVertically
         ) {
-          Spacer(Modifier.weight(1f))
-          val bookmarkIcon =
-            if (state.isBookmarked == true) {
-              TwineIcons.Bookmarked
-            } else {
-              TwineIcons.Bookmark
+          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            val bookmarkIcon =
+              if (state.isBookmarked == true) {
+                TwineIcons.Bookmarked
+              } else {
+                TwineIcons.Bookmark
+              }
+            IconButton(onClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }) {
+              Icon(bookmarkIcon, contentDescription = null)
             }
-          IconButton(onClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }) {
-            Icon(bookmarkIcon, contentDescription = null)
           }
-          Spacer(Modifier.weight(1f))
-          IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
-            Icon(TwineIcons.Website, contentDescription = null)
+
+          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            if (state.isFetchingFullArticle == true) {
+              CircularProgressIndicator(
+                color = AppTheme.colorScheme.tintedForeground,
+                modifier = Modifier.requiredSize(24.dp)
+              )
+            } else {
+              IconButton(
+                onClick = {
+                  coroutineScope.launch { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+                }
+              ) {
+                Icon(TwineIcons.ArticleShortcut, contentDescription = null)
+              }
+            }
           }
-          Spacer(Modifier.weight(1f))
-          IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link) } }) {
-            Icon(TwineIcons.Share, contentDescription = null)
+
+          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
+              Icon(TwineIcons.Website, contentDescription = null)
+            }
           }
-          Spacer(Modifier.weight(1f))
+
+          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link) } }) {
+              Icon(TwineIcons.Share, contentDescription = null)
+            }
+          }
         }
       }
     },
@@ -163,11 +186,12 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         val dividerColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHigh.toArgb())
 
-        val htmlTemplate = remember {
-          // TODO: Extract out the HTML rendering and customisation to separate class
-          //  with actual templating
-          // language=HTML
-          """
+        val htmlTemplate =
+          remember(state.content) {
+            // TODO: Extract out the HTML rendering and customisation to separate class
+            //  with actual templating
+            // language=HTML
+            """
           <html lang="en">
           <head>
             <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -299,8 +323,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           </body>
           </html>
         """
-            .trimIndent()
-        }
+              .trimIndent()
+          }
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
 
         Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
@@ -308,7 +332,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             modifier = Modifier.fillMaxSize(),
             state = webViewState,
             navigator = navigator,
-            webViewJsBridge = jsBridge
+            webViewJsBridge = jsBridge,
+            captureBackPresses = false
           )
         }
       }

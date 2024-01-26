@@ -26,7 +26,8 @@ internal data class ReaderState(
   val content: String?,
   val publishedAt: String?,
   val isBookmarked: Boolean?,
-  val feed: Feed? = null
+  val feed: Feed?,
+  val isFetchingFullArticle: Boolean?
 ) {
 
   val hasContent: Boolean
@@ -42,7 +43,8 @@ internal data class ReaderState(
         content = null,
         publishedAt = null,
         isBookmarked = null,
-        feed = null
+        feed = null,
+        isFetchingFullArticle = null
       )
   }
 }
