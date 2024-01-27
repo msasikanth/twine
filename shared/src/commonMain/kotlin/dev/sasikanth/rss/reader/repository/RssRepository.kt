@@ -292,6 +292,10 @@ class RssRepository(
     )
   }
 
+  suspend fun hasPost(link: String): Boolean {
+    return withContext(ioDispatcher) { postQueries.hasPost(link).executeAsOne() }
+  }
+
   suspend fun hasFeed(link: String): Boolean {
     return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
   }

@@ -103,3 +103,6 @@ WHERE feedLink = :feedLink;
 post:
 SELECT * FROM post
 WHERE post.link = :link;
+
+hasPost:
+SELECT EXISTS(SELECT 1 FROM post WHERE link = :link);
