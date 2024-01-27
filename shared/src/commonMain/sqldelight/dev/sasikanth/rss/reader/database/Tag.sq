@@ -7,3 +7,16 @@ CREATE TABLE tag (
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL
 );
+
+tags:
+SELECT * FROM tag WHERE label LIKE :label OR label IS NULL OR  label = '';
+
+updateTag:
+UPDATE tag SET label = :label WHERE id = :id;
+
+deleteTag:
+DELETE FROM tag WHERE id = :id;
+
+saveTag:
+INSERT OR IGNORE INTO tag(id, label, createdAt, updatedAt)
+VALUES (:id, :label, :createdAt, :updatedAt);

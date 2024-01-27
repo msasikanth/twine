@@ -45,11 +45,12 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
           lastCleanUpAtAdapter = DateAdapter
         ),
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
-      tagAdapter = Tag.Adapter(
-        idAdapter = UuidAdapter,
-        createdAtAdapter = DateAdapter,
-        updatedAtAdapter = DateAdapter
-      )
+      tagAdapter =
+        Tag.Adapter(
+          idAdapter = UuidAdapter,
+          createdAtAdapter = DateAdapter,
+          updatedAtAdapter = DateAdapter
+        )
     )
   }
 
@@ -64,4 +65,6 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
 
   @Provides
   fun providesFeedSearchFTSQueries(database: ReaderDatabase) = database.feedSearchFTSQueries
+
+  @Provides fun providesTagQueries(database: ReaderDatabase) = database.tagQueries
 }
