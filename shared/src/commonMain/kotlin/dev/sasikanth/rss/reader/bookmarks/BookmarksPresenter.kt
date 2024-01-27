@@ -45,7 +45,7 @@ class BookmarksPresenter(
   private val rssRepository: RssRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openPost: (postLink: String) -> Unit,
+  @Assisted private val openReaderView: (postLink: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -63,7 +63,12 @@ class BookmarksPresenter(
   fun dispatch(event: BookmarksEvent) {
     when (event) {
       BookmarksEvent.BackClicked -> goBack()
-      is BookmarksEvent.OnPostClicked -> openPost(event.post.link)
+      is BookmarksEvent.OnPostClicked ->
+        presenterInstance.onPostClicked(
+          post = event.post,
+          openReaderView = { openReaderView(it) },
+          openLink = { presenterInstance.openLink(it) }
+        )
       else -> {
         // no-op
       }
@@ -101,6 +106,23 @@ class BookmarksPresenter(
       }
     }
 
+    fun onPostClicked(
+      post: PostWithMetadata,
+      openReaderView: (postLink: String) -> Unit,
+      openLink: (postLink: String) -> Unit
+    ) {
+      coroutineScope.launch {
+        val hasPost = rssRepository.hasPost(post.link)
+        val hasFeed = rssRepository.hasFeed(post.feedLink)
+
+        if (hasPost && hasFeed) {
+          openReaderView(post.link)
+        } else {
+          openLink(post.link)
+        }
+      }
+    }
+
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
         if (rssRepository.hasFeed(post.feedLink)) {
@@ -122,6 +144,10 @@ class BookmarksPresenter(
 
     override fun onDestroy() {
       coroutineScope.cancel()
+    }
+
+    fun openLink(link: String) {
+      coroutineScope.launch { effects.emit(OpenLink(link)) }
     }
   }
 }

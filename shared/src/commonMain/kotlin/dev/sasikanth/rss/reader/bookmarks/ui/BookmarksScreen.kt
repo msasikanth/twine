@@ -38,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
+import dev.sasikanth.rss.reader.bookmarks.OpenLink
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -58,6 +60,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
@@ -72,6 +75,14 @@ internal fun BookmarksScreen(
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+
+  LaunchedEffect(Unit) {
+    bookmarksPresenter.effects.collectLatest { effect ->
+      when (effect) {
+        is OpenLink -> coroutineScope.launch { linkHandler.openLink(effect.link) }
+      }
+    }
+  }
 
   Scaffold(
     modifier = modifier,
