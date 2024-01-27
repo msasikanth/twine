@@ -17,3 +17,5 @@
 package dev.sasikanth.rss.reader.bookmarks
 
 sealed interface BookmarksEffect
+
+data class OpenLink(val link: String) : BookmarksEffect
