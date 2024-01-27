@@ -63,7 +63,7 @@ private typealias BookmarkPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
-    openPost: (String) -> Unit,
+    openReaderView: (String) -> Unit,
   ) -> BookmarksPresenter
 
 private typealias SettingsPresenterFactory =

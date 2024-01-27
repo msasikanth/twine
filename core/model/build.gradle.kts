@@ -25,6 +25,7 @@ kotlin {
       implementation(libs.kotlinx.datetime)
       // Require this for `@Immutable` annotation for models
       implementation(libs.compose.runtime)
+      implementation(libs.uuid)
     }
   }
 }

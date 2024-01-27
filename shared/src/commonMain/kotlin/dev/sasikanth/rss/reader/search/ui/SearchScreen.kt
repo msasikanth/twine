@@ -136,6 +136,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
               PostListItem(
                 item = post,
                 enablePostSource = false,
+                reduceReadItemAlpha = true,
                 onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(post)) },
                 onPostBookmarkClick = {
                   searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))

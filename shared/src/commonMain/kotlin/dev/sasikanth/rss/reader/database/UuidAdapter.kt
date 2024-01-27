@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.bookmarks
+package dev.sasikanth.rss.reader.database
 
-sealed interface BookmarksEffect
+import app.cash.sqldelight.ColumnAdapter
+import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuidFrom
 
-data class OpenLink(val link: String) : BookmarksEffect
+internal object UuidAdapter : ColumnAdapter<Uuid, String> {
+
+  override fun decode(databaseValue: String): Uuid {
+    return uuidFrom(databaseValue)
+  }
+
+  override fun encode(value: Uuid): String {
+    return value.toString()
+  }
+}
