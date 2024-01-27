@@ -333,7 +333,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             state = webViewState,
             navigator = navigator,
             webViewJsBridge = jsBridge,
-            captureBackPresses = false
+            // TODO: Disable once new webview library (>=1.8.5) is available
+            //  with my contributions
+            captureBackPresses = true
           )
         }
       }
