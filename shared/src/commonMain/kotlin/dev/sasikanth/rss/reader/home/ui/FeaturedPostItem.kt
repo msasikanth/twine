@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -71,7 +72,12 @@ internal fun FeaturedPostItem(
 ) {
   val isLargeScreenLayout =
     LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
-  Box(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick)) {
+  Box(
+    modifier =
+      Modifier.clip(MaterialTheme.shapes.extraLarge)
+        .clickable(onClick = onClick)
+        .alpha(if (item.read) 0.65f else 1f)
+  ) {
     if (isLargeScreenLayout) {
       LargeScreenFeaturedPostItem(
         item = item,

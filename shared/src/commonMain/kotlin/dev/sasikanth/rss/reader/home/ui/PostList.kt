@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -106,6 +107,7 @@ internal fun PostsList(
         PostListItem(
           item = post,
           enablePostSource = true,
+          reduceReadItemAlpha = true,
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
           onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
@@ -130,13 +132,15 @@ fun PostListItem(
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
-  onPostSourceClick: () -> Unit
+  onPostSourceClick: () -> Unit,
+  reduceReadItemAlpha: Boolean = false
 ) {
   Column(
     modifier =
       Modifier.clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
+        .alpha(if (item.read && reduceReadItemAlpha) 0.65f else 1f)
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp),
