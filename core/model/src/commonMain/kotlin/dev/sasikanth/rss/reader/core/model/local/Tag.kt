@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-plugins { alias(libs.plugins.kotlin.multiplatform) }
+package dev.sasikanth.rss.reader.core.model.local
 
-kotlin {
-  jvm()
-  listOf(iosArm64(), iosSimulatorArm64())
+import com.benasher44.uuid.Uuid
+import kotlinx.datetime.Instant
 
-  sourceSets {
-    commonMain.dependencies {
-      implementation(libs.kotlinx.datetime)
-      // Require this for `@Immutable` annotation for models
-      implementation(libs.compose.runtime)
-      implementation(libs.uuid)
-    }
-  }
-}
+data class Tag(
+  val id: Uuid,
+  val label: String,
+  val createdAt: Instant,
+  val updatedAt: Instant,
+)
