@@ -286,7 +286,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           }
           pre code {
           	letter-spacing: -.027;
-          	font-size: 0.9375;
+          	font-size: 1.15em;
           }
           .top-divider {
             margin-top: 12px;
