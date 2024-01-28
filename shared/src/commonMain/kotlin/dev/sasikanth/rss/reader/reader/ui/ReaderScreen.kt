@@ -32,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -55,6 +56,10 @@ import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -124,18 +129,38 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           }
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            if (state.isFetchingFullArticle == true) {
-              CircularProgressIndicator(
-                color = AppTheme.colorScheme.tintedForeground,
-                modifier = Modifier.requiredSize(24.dp)
-              )
-            } else {
-              IconButton(
-                onClick = {
-                  coroutineScope.launch { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+            val iconTint =
+              if (state.postMode == Source) {
+                AppTheme.colorScheme.tintedForeground
+              } else {
+                AppTheme.colorScheme.onSurface
+              }
+
+            val iconBackground =
+              if (state.postMode == Source) {
+                AppTheme.colorScheme.tintedSurface
+              } else {
+                Color.Transparent
+              }
+
+            when (state.postMode) {
+              Idle,
+              RssContent,
+              Source -> {
+                IconButton(
+                  colors = IconButtonDefaults.iconButtonColors(containerColor = iconBackground),
+                  onClick = {
+                    coroutineScope.launch { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+                  }
+                ) {
+                  Icon(TwineIcons.ArticleShortcut, contentDescription = null, tint = iconTint)
                 }
-              ) {
-                Icon(TwineIcons.ArticleShortcut, contentDescription = null)
+              }
+              InProgress -> {
+                CircularProgressIndicator(
+                  color = AppTheme.colorScheme.tintedForeground,
+                  modifier = Modifier.requiredSize(24.dp)
+                )
               }
             }
           }
@@ -261,7 +286,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           }
           pre code {
           	letter-spacing: -.027;
-          	font-size: 0.9375;
+          	font-size: 1.15em;
           }
           .top-divider {
             margin-top: 12px;

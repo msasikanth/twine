@@ -27,7 +27,7 @@ internal data class ReaderState(
   val publishedAt: String?,
   val isBookmarked: Boolean?,
   val feed: Feed?,
-  val isFetchingFullArticle: Boolean?
+  val postMode: PostMode,
 ) {
 
   val hasContent: Boolean
@@ -44,7 +44,14 @@ internal data class ReaderState(
         publishedAt = null,
         isBookmarked = null,
         feed = null,
-        isFetchingFullArticle = null
+        postMode = PostMode.Idle,
       )
+  }
+
+  enum class PostMode {
+    RssContent,
+    Source,
+    InProgress,
+    Idle,
   }
 }
