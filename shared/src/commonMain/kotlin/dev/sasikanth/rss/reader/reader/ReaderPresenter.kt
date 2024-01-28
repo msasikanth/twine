@@ -22,6 +22,10 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.readability.Readability
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
+import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.relativeDurationString
@@ -126,7 +130,7 @@ class ReaderPresenter(
           if (content.isNotBlank()) {
               // If the content parsed by readability is not an HTML, it will return
               // null. In that scenario we simply pass the original content
-              extractArticleHtmlContent(postLink, content) ?: content
+              extractArticleHtmlContent(postLink, content)
             } else {
               null
             }
@@ -138,22 +142,44 @@ class ReaderPresenter(
             content = htmlContent,
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
-            feed = feed
+            feed = feed,
+            postMode = RssContent
           )
         }
       }
     }
 
-    private suspend fun extractArticleHtmlContent(postLink: String, content: String) =
-      withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
+    private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
+      if (content.trim().isBlank()) return content
+
+      val transformedContent =
+        withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
+      return if (!transformedContent.isNullOrBlank()) {
+        transformedContent
+      } else {
+        content
+      }
+    }
 
     private fun articleShortcutClicked() {
       coroutineScope.launch {
-        val content = postSourceFetcher.fetch(postLink)
-        if (content != null) {
-          _state.update { it.copy(isFetchingFullArticle = true) }
-          val htmlContent = extractArticleHtmlContent(postLink, content)
-          _state.update { it.copy(content = htmlContent, isFetchingFullArticle = false) }
+        when (_state.value.postMode) {
+          RssContent -> {
+            _state.update { it.copy(postMode = InProgress) }
+            val content = postSourceFetcher.fetch(postLink).orEmpty()
+            val htmlContent = extractArticleHtmlContent(postLink, content)
+            _state.update { it.copy(content = htmlContent, postMode = Source) }
+          }
+          Source -> {
+            _state.update { it.copy(postMode = InProgress) }
+            val postContent = rssRepository.post(postLink).rawContent.orEmpty()
+            val htmlContent = extractArticleHtmlContent(postLink, postContent)
+            _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+          }
+          InProgress,
+          Idle -> {
+            // no-op
+          }
         }
       }
     }
