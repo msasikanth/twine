@@ -35,6 +35,7 @@ user interface and experience to browse through the feeds, and supports Material
 - Search
 - Background sync
 - Feed management: Add, Edit & Pin feeds
+- Reader view with article fetching
 
 ## Tech Stack 📚
 
