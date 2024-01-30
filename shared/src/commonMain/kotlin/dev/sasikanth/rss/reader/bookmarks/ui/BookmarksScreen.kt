@@ -136,6 +136,11 @@ internal fun BookmarksScreen(
                   },
                   onPostSourceClick = {
                     // no-op
+                  },
+                  togglePostReadClick = {
+                    bookmarksPresenter.dispatch(
+                      BookmarksEvent.TogglePostReadStatus(post.link, post.read)
+                    )
                   }
                 )
                 if (index != bookmarks.itemCount - 1) {

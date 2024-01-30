@@ -75,7 +75,8 @@ internal fun PostsList(
   onPostClicked: (post: PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
-  onPostSourceClick: (String) -> Unit
+  onPostSourceClick: (String) -> Unit,
+  onTogglePostReadClick: (String, Boolean) -> Unit,
 ) {
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
@@ -97,7 +98,8 @@ internal fun PostsList(
         onItemClick = onPostClicked,
         onPostBookmarkClick = onPostBookmarkClick,
         onPostCommentsClick = onPostCommentsClick,
-        onPostSourceClick = onPostSourceClick
+        onPostSourceClick = onPostSourceClick,
+        onTogglePostReadClick = onTogglePostReadClick
       )
     }
 
@@ -111,7 +113,8 @@ internal fun PostsList(
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
           onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
-          onPostSourceClick = { onPostSourceClick(post.feedLink) }
+          onPostSourceClick = { onPostSourceClick(post.feedLink) },
+          togglePostReadClick = { onTogglePostReadClick(post.link, post.read) }
         )
 
         if (index != posts.itemCount - 1) {
@@ -133,6 +136,7 @@ fun PostListItem(
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
+  togglePostReadClick: () -> Unit,
   reduceReadItemAlpha: Boolean = false
 ) {
   Column(
@@ -179,6 +183,7 @@ fun PostListItem(
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
       onSourceClick = onPostSourceClick,
+      onTogglePostReadClick = togglePostReadClick,
       modifier = Modifier.padding(start = 24.dp, end = 12.dp)
     )
   }
