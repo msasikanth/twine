@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
