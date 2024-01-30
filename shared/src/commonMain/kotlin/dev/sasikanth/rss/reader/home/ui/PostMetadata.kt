@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -232,6 +233,8 @@ private fun PostOptionsButtonRow(
             showDropdown = false
           }
         )
+
+        Divider(modifier = Modifier.padding(vertical = 4.dp))
 
         val shareHandler = LocalShareHandler.current
         DropdownMenuItem(
