@@ -147,6 +147,13 @@ class SearchPresenter(
         is SearchEvent.OnPostClicked -> {
           // no-op
         }
+        is SearchEvent.TogglePostReadStatus -> togglePostReadStatus(event.postLink, event.postRead)
+      }
+    }
+
+    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
+      coroutineScope.launch {
+        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
       }
     }
 
