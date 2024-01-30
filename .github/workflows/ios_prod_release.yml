@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: tramline-macos-sonoma-md
     env:
       TERM: dumb
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
