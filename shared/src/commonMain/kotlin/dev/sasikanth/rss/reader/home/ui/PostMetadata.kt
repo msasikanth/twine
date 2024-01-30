@@ -208,11 +208,7 @@ private fun PostOptionsButtonRow(
                 LocalStrings.current.markAsRead
               }
 
-            Text(
-              text = label,
-              color = AppTheme.colorScheme.tintedForeground,
-              textAlign = TextAlign.Start
-            )
+            Text(text = label, color = AppTheme.colorScheme.onSurface, textAlign = TextAlign.Start)
           },
           leadingIcon = {
             val icon =
@@ -225,7 +221,7 @@ private fun PostOptionsButtonRow(
             Icon(
               icon,
               contentDescription = null,
-              tint = AppTheme.colorScheme.tintedForeground,
+              tint = AppTheme.colorScheme.onSurface,
             )
           },
           onClick = {
@@ -242,7 +238,7 @@ private fun PostOptionsButtonRow(
           text = {
             Text(
               text = LocalStrings.current.share,
-              color = AppTheme.colorScheme.tintedForeground,
+              color = AppTheme.colorScheme.onSurface,
               textAlign = TextAlign.Start
             )
           },
@@ -250,7 +246,7 @@ private fun PostOptionsButtonRow(
             Icon(
               Icons.Filled.Share,
               contentDescription = null,
-              tint = AppTheme.colorScheme.tintedForeground,
+              tint = AppTheme.colorScheme.onSurface,
             )
           },
           onClick = {
