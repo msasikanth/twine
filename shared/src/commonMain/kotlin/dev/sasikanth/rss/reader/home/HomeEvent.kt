@@ -59,4 +59,6 @@ sealed interface HomeEvent {
   data object EditFeedsClicked : HomeEvent
 
   data object ExitFeedsEdit : HomeEvent
+
+  data class TogglePostReadStatus(val postLink: String, val postRead: Boolean) : HomeEvent
 }
