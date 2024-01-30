@@ -103,6 +103,14 @@ class BookmarksPresenter(
         is BookmarksEvent.OnPostClicked -> {
           // no-op
         }
+        is BookmarksEvent.TogglePostReadStatus ->
+          togglePostReadStatus(event.postLink, event.postRead)
+      }
+    }
+
+    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
+      coroutineScope.launch {
+        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
       }
     }
 
