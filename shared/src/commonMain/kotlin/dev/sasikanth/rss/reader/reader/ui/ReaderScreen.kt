@@ -202,8 +202,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         }
       }
       state.hasContent -> {
-        val backgroundColor =
-          StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerLowest.toArgb())
         val codeBackgroundColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHighest.toArgb())
         val textColor = StringUtils.hexFromArgb(AppTheme.colorScheme.onSurface.toArgb())
@@ -230,7 +228,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           <style>
           body {
             padding-top: 16px;
-            background-color: $backgroundColor;
             color: $textColor;
             font-family: 'Golos Text', sans-serif;
           }
@@ -351,6 +348,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
               .trimIndent()
           }
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
+        webViewState.webSettings.apply {
+          this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+        }
 
         Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
           WebView(
