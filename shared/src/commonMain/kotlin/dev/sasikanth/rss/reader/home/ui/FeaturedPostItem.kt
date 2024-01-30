@@ -68,7 +68,8 @@ internal fun FeaturedPostItem(
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
-  onSourceClick: () -> Unit
+  onSourceClick: () -> Unit,
+  onTogglePostReadClick: () -> Unit,
 ) {
   val isLargeScreenLayout =
     LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
@@ -85,7 +86,8 @@ internal fun FeaturedPostItem(
         pagerState = pagerState,
         onBookmarkClick = onBookmarkClick,
         onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick
+        onSourceClick = onSourceClick,
+        onTogglePostReadClick = onTogglePostReadClick
       )
     } else {
       DefaultFeaturedPostItem(
@@ -94,7 +96,8 @@ internal fun FeaturedPostItem(
         pagerState = pagerState,
         onBookmarkClick = onBookmarkClick,
         onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick
+        onSourceClick = onSourceClick,
+        onTogglePostReadClick = onTogglePostReadClick
       )
     }
   }
@@ -107,7 +110,8 @@ private fun DefaultFeaturedPostItem(
   pagerState: PagerState,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
-  onSourceClick: () -> Unit
+  onSourceClick: () -> Unit,
+  onTogglePostReadClick: () -> Unit,
 ) {
   Column {
     AsyncImage(
@@ -167,6 +171,7 @@ private fun DefaultFeaturedPostItem(
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       onSourceClick = onSourceClick,
+      onTogglePostReadClick = onTogglePostReadClick,
       modifier = Modifier.padding(start = 16.dp, end = 0.dp)
     )
 
@@ -181,7 +186,8 @@ private fun LargeScreenFeaturedPostItem(
   pagerState: PagerState,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
-  onSourceClick: () -> Unit
+  onSourceClick: () -> Unit,
+  onTogglePostReadClick: () -> Unit,
 ) {
   Row(verticalAlignment = Alignment.CenterVertically) {
     AsyncImage(
@@ -241,7 +247,8 @@ private fun LargeScreenFeaturedPostItem(
         enablePostSource = true,
         onBookmarkClick = onBookmarkClick,
         onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick
+        onSourceClick = onSourceClick,
+        onTogglePostReadClick = onTogglePostReadClick
       )
     }
   }
