@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
     env:
       TERM: dumb
       SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
