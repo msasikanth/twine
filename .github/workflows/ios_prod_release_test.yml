@@ -1,4 +1,4 @@
-name: iOS Prod Release
+name: iOS Prod Release Test
 
 on:
   workflow_dispatch:
