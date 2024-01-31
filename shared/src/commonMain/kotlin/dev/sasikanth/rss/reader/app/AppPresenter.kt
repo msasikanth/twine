@@ -81,7 +81,7 @@ private typealias AboutPresenterFactory =
 
 private typealias ReaderPresenterFactory =
   (
-    feedLink: String,
+    postLink: String,
     ComponentContext,
     goBack: () -> Unit,
   ) -> ReaderPresenter
@@ -177,7 +177,7 @@ class AppPresenter(
       }
       is Config.Reader -> {
         Screen.Reader(
-          presenter = readerPresenter(config.feedLink, componentContext) { navigation.pop() }
+          presenter = readerPresenter(config.postLink, componentContext) { navigation.pop() }
         )
       }
     }
@@ -215,6 +215,6 @@ class AppPresenter(
 
     @Parcelize data object About : Config
 
-    @Parcelize data class Reader(val feedLink: String) : Config
+    @Parcelize data class Reader(val postLink: String) : Config
   }
 }
