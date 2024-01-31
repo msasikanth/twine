@@ -56,6 +56,7 @@ compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
+compose_material_icons_extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
@@ -127,7 +128,7 @@ buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig"
 sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
 
 [bundles]
-compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util" ]
+compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
 xmlutil = [ "xmlutil-core", "xmlutil-serialization" ]
