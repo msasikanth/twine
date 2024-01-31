@@ -97,6 +97,7 @@ internal fun FeaturedSection(
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
+  onTogglePostReadClick: (String, Boolean) -> Unit,
 ) {
   Box(modifier = modifier) {
     if (featuredPosts.isNotEmpty()) {
@@ -179,7 +180,8 @@ internal fun FeaturedSection(
           onClick = { onItemClick(featuredPost) },
           onBookmarkClick = { onPostBookmarkClick(featuredPost) },
           onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-          onSourceClick = { onPostSourceClick(featuredPost.feedLink) }
+          onSourceClick = { onPostSourceClick(featuredPost.feedLink) },
+          onTogglePostReadClick = { onTogglePostReadClick(featuredPost.link, featuredPost.read) }
         )
       }
     }

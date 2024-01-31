@@ -31,11 +31,15 @@ user interface and experience to browse through the feeds, and supports Material
 ## Features ✨
 
 - Supports RSS & Atom feeds
-- Bookmarks
-- Search
+- Gorgeous home feed
+- Pin frequently visited feeds
+- Smart fetching: Twine looks for feeds when given any website homepage
+- Reading view with shortcut to fetch full article
+- Bookmark posts to read later
+- Search posts
 - Background sync
 - Feed management: Add, Edit & Pin feeds
-- Reader view with article fetching
+- Import and exports your feeds with OPML 
 
 ## Tech Stack 📚
 

@@ -174,6 +174,13 @@ class HomePresenter(
         HomeEvent.ExitFeedsEdit -> exitFeedsEdit()
         is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
+        is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postLink, event.postRead)
+      }
+    }
+
+    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
+      coroutineScope.launch {
+        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
       }
     }
 

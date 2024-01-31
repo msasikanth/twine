@@ -147,6 +147,9 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
                 onPostSourceClick = {
                   // no-op
                 },
+                togglePostReadClick = {
+                  searchPresenter.dispatch(SearchEvent.TogglePostReadStatus(post.link, post.read))
+                }
               )
 
               if (index != searchResults.itemCount - 1) {

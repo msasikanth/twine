@@ -186,6 +186,9 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
             homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
           },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
+          onTogglePostReadStatus = { postLink, postRead ->
+            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postLink, postRead))
+          }
         )
       },
       sheetContent = {
@@ -278,6 +281,7 @@ private fun HomeScreenContent(
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
   onNoFeedsSwipeUp: () -> Unit,
+  onTogglePostReadStatus: (String, Boolean) -> Unit,
 ) {
   val featuredPosts = state.featuredPosts
   val posts = state.posts?.collectAsLazyPagingItems()
@@ -312,6 +316,7 @@ private fun HomeScreenContent(
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
           onPostSourceClick = onPostSourceClick,
+          onTogglePostReadClick = onTogglePostReadStatus
         )
       }
       !hasFeeds -> {

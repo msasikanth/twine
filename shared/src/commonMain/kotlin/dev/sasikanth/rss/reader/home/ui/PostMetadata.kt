@@ -18,18 +18,32 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +53,12 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
-import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
@@ -59,6 +74,7 @@ internal fun PostMetadata(
   commentsLink: String?,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
+  onTogglePostReadClick: () -> Unit,
   modifier: Modifier = Modifier,
   enablePostSource: Boolean,
   onSourceClick: () -> Unit,
@@ -122,9 +138,11 @@ internal fun PostMetadata(
     PostOptionsButtonRow(
       postLink = postLink,
       postBookmarked = postBookmarked,
+      postRead = postRead,
       commentsLink = commentsLink,
       onBookmarkClick = onBookmarkClick,
-      onCommentsClick = onCommentsClick
+      onCommentsClick = onCommentsClick,
+      togglePostReadClick = onTogglePostReadClick
     )
   }
 }
@@ -133,9 +151,11 @@ internal fun PostMetadata(
 private fun PostOptionsButtonRow(
   postLink: String,
   postBookmarked: Boolean,
+  postRead: Boolean,
   commentsLink: String?,
   onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit
+  onCommentsClick: () -> Unit,
+  togglePostReadClick: () -> Unit
 ) {
   Row {
     if (!commentsLink.isNullOrBlank()) {
@@ -164,12 +184,78 @@ private fun PostOptionsButtonRow(
       onClick = onBookmarkClick
     )
 
-    val shareHandler = LocalShareHandler.current
-    PostOptionIconButton(
-      icon = TwineIcons.Share,
-      contentDescription = LocalStrings.current.share,
-      onClick = { shareHandler.share(postLink) }
-    )
+    var showDropdown by remember { mutableStateOf(false) }
+    Box {
+      PostOptionIconButton(
+        icon = Icons.Filled.MoreVert,
+        contentDescription = LocalStrings.current.moreMenuOptions,
+        onClick = { showDropdown = true }
+      )
+
+      DropdownMenu(
+        modifier = Modifier.width(IntrinsicSize.Min),
+        expanded = showDropdown,
+        onDismissRequest = { showDropdown = false },
+        offset = DpOffset(x = 0.dp, y = (-48).dp),
+      ) {
+        DropdownMenuItem(
+          modifier = Modifier.fillMaxWidth(),
+          text = {
+            val label =
+              if (postRead) {
+                LocalStrings.current.markAsUnRead
+              } else {
+                LocalStrings.current.markAsRead
+              }
+
+            Text(text = label, color = AppTheme.colorScheme.onSurface, textAlign = TextAlign.Start)
+          },
+          leadingIcon = {
+            val icon =
+              if (postRead) {
+                Icons.Outlined.CheckCircle
+              } else {
+                Icons.Filled.CheckCircle
+              }
+
+            Icon(
+              icon,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurface,
+            )
+          },
+          onClick = {
+            togglePostReadClick()
+            showDropdown = false
+          }
+        )
+
+        Divider(modifier = Modifier.padding(vertical = 4.dp))
+
+        val shareHandler = LocalShareHandler.current
+        DropdownMenuItem(
+          modifier = Modifier.fillMaxWidth(),
+          text = {
+            Text(
+              text = LocalStrings.current.share,
+              color = AppTheme.colorScheme.onSurface,
+              textAlign = TextAlign.Start
+            )
+          },
+          leadingIcon = {
+            Icon(
+              Icons.Filled.Share,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurface,
+            )
+          },
+          onClick = {
+            shareHandler.share(postLink)
+            showDropdown = false
+          }
+        )
+      }
+    }
   }
 }
 
