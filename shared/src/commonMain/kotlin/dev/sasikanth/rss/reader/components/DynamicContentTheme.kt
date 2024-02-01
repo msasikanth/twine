@@ -260,7 +260,7 @@ internal class DynamicColorState(
   }
 
   suspend fun onContentChange(newImages: List<String>) {
-    if (images.isEmpty()) {
+    if (!images.containsAll(newImages)) {
       images = newImages
     }
     images.forEach { imageUrl -> fetchDynamicColors(imageUrl) }
@@ -272,7 +272,6 @@ internal class DynamicColorState(
     nextImageUrl: String?,
     offset: Float
   ) {
-
     val previousDynamicColors = previousImageUrl?.let { cache?.get(it) }
     val currentDynamicColors = cache?.get(currentImageUrl)
     val nextDynamicColors = nextImageUrl?.let { cache?.get(it) }
