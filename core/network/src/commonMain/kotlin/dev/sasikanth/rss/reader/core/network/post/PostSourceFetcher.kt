@@ -22,7 +22,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -38,14 +37,13 @@ class PostSourceFetcher(
       val response = httpClient.get(link)
       if (response.status == HttpStatusCode.OK) {
         try {
-          response.bodyAsText()
+          return@withContext response.bodyAsText()
         } catch (e: Exception) {
-          Sentry.captureException(e)
-          null
+          // no-op
         }
-      } else {
-        null
       }
+
+      return@withContext null
     }
   }
 }
