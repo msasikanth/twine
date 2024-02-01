@@ -50,6 +50,7 @@ import dev.sasikanth.rss.reader.utils.inverse
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 private const val TINTED_BACKGROUND = "tinted_background"
@@ -423,7 +424,10 @@ internal class DynamicColorState(
         .memoryCacheKey("$url.dynamic_colors")
         .build()
 
-    val image = imageLoader.execute(imageRequest).image?.toComposeImageBitmap(platformContext)
+    val image =
+      withContext(Dispatchers.IO) {
+        imageLoader.execute(imageRequest).image?.toComposeImageBitmap(platformContext)
+      }
 
     return if (image != null) {
       extractColorsFromImage(image)
