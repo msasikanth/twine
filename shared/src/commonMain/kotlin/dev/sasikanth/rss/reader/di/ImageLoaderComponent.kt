@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.di
 
-internal expect interface ImageLoaderComponent
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.disk.DiskCache
+import coil3.memory.MemoryCache
+import me.tatarka.inject.annotations.Provides
+import okio.Path
+
+expect interface ImageLoaderPlatformComponent
+
+interface ImageLoaderComponent : ImageLoaderPlatformComponent {
+
+  val imageLoader: ImageLoader
+
+  @Provides
+  fun imageLoader(
+    platformContext: PlatformContext,
+    cachePath: Path,
+  ): ImageLoader {
+    return ImageLoader.Builder(platformContext)
+      .memoryCache { MemoryCache.Builder().maxSizePercent(platformContext, percent = 0.25).build() }
+      .diskCache { DiskCache.Builder().directory(cachePath).build() }
+      .build()
+  }
+}

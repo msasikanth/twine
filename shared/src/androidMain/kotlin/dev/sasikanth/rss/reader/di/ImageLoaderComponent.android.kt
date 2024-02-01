@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.components.AndroidImageLoader
-import dev.sasikanth.rss.reader.components.image.ImageLoader
+import android.content.Context
+import coil3.PlatformContext
 import me.tatarka.inject.annotations.Provides
+import okio.Path
+import okio.Path.Companion.toPath
 
-internal actual interface ImageLoaderComponent {
+actual interface ImageLoaderPlatformComponent {
 
-  @Provides fun AndroidImageLoader.bind(): ImageLoader = this
+  @Provides fun providePlatformContext(context: Context): PlatformContext = context
+
+  @Provides
+  fun diskCache(application: Context): Path =
+    application.cacheDir.absolutePath.toPath().resolve("dev_sasikanth_rss_reader_images_cache")
 }
