@@ -25,7 +25,7 @@ androidx_work = "2.9.0"
 androidx_datastore = "1.1.0-beta01"
 androidx_browser = "1.7.0"
 androidx_annotation = "1.7.1"
-coil = "2.5.0"
+coil = "3.0.0-alpha03"
 spotless = "6.25.0"
 ktfmt = "0.44"
 kotlininject = "0.6.3"
@@ -89,7 +89,9 @@ androidx_datastore_okio = { module = "androidx.datastore:datastore-core-okio", v
 androidx_datastore_preferences = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx_datastore" }
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 androidx_annotation= { module = "androidx.annotation:annotation", version.ref = "androidx_annotation" }
-coil_compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
+coil_compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil_network = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coil" }
+coil_svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }

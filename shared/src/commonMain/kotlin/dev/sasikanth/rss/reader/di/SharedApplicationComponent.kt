@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.core.network.di.NetworkComponent
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManagerComponent
@@ -29,13 +28,11 @@ import me.tatarka.inject.annotations.Provides
 
 abstract class SharedApplicationComponent :
   DataComponent,
-  ImageLoaderComponent,
   SentryComponent,
   NetworkComponent,
   LoggingComponent,
-  FileManagerComponent {
-
-  abstract val imageLoader: ImageLoader
+  FileManagerComponent,
+  ImageLoaderComponent {
 
   abstract val initializers: Set<Initializer>
 
