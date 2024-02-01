@@ -123,6 +123,7 @@ kotlin {
       implementation(libs.uuid)
       api(libs.coil.compose)
       api(libs.coil.network)
+      api(libs.coil.svg)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
