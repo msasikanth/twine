@@ -29,7 +29,12 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.unit.IntSize
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.size.Scale
 import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
 import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
 import dev.sasikanth.material.color.utilities.dynamiccolor.ToneDeltaConstraint
@@ -39,12 +44,13 @@ import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.score.Score
-import dev.sasikanth.rss.reader.components.image.ImageLoader
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.inverse
+import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 private const val TINTED_BACKGROUND = "tinted_background"
@@ -64,7 +70,7 @@ private const val SURFACE_CONTAINER_HIGHEST = "surface_container_highest"
 
 @Composable
 internal fun DynamicContentTheme(
-  dynamicColorState: DynamicColorState = rememberDynamicColorState(),
+  dynamicColorState: DynamicColorState,
   content: @Composable () -> Unit
 ) {
   val colorScheme =
@@ -104,8 +110,9 @@ internal fun rememberDynamicColorState(
   defaultSurfaceContainerLowest: Color = AppTheme.colorScheme.surfaceContainerLowest,
   defaultSurfaceContainerHigh: Color = AppTheme.colorScheme.surfaceContainerHigh,
   defaultSurfaceContainerHighest: Color = AppTheme.colorScheme.surfaceContainerHighest,
-  imageLoader: ImageLoader? = null
+  imageLoader: ImageLoader,
 ): DynamicColorState {
+  val platformContext = LocalPlatformContext.current
   return rememberSaveable(saver = DynamicColorState.Saver) {
       DynamicColorState(
         defaultTintedBackground,
@@ -124,7 +131,7 @@ internal fun rememberDynamicColorState(
         defaultSurfaceContainerHighest,
       )
     }
-    .also { it.setImageLoader(imageLoader) }
+    .apply { setImageLoader(imageLoader, platformContext) }
 }
 
 /**
@@ -199,7 +206,9 @@ internal class DynamicColorState(
       else -> null
     }
   private var images = emptyList<String>()
-  private var imageLoader: ImageLoader? = null
+
+  private lateinit var imageLoader: ImageLoader
+  private lateinit var platformContext: PlatformContext
 
   companion object {
     val Saver: Saver<DynamicColorState, *> =
@@ -245,15 +254,16 @@ internal class DynamicColorState(
       )
   }
 
-  fun setImageLoader(imageLoader: ImageLoader?) {
+  fun setImageLoader(imageLoader: ImageLoader, platformContext: PlatformContext) {
     this.imageLoader = imageLoader
+    this.platformContext = platformContext
   }
 
-  suspend fun onContentChange(images: List<String>) {
-    if (!this.images.containsAll(images)) {
-      this.images = images
-      this.images.forEach { imageUrl -> fetchDynamicColors(imageUrl) }
+  suspend fun onContentChange(newImages: List<String>) {
+    if (images.isEmpty()) {
+      images = newImages
     }
+    images.forEach { imageUrl -> fetchDynamicColors(imageUrl) }
   }
 
   fun updateOffset(
@@ -262,6 +272,7 @@ internal class DynamicColorState(
     nextImageUrl: String?,
     offset: Float
   ) {
+
     val previousDynamicColors = previousImageUrl?.let { cache?.get(it) }
     val currentDynamicColors = cache?.get(currentImageUrl)
     val nextDynamicColors = nextImageUrl?.let { cache?.get(it) }
@@ -397,6 +408,7 @@ internal class DynamicColorState(
     surfaceContainerHighest = defaultSurfaceContainerHighest
   }
 
+  @OptIn(ExperimentalCoilApi::class)
   private suspend fun fetchDynamicColors(url: String): DynamicColors? {
     val cached = cache?.get(url)
     if (cached != null) {
@@ -404,7 +416,19 @@ internal class DynamicColorState(
       return cached
     }
 
-    val image = imageLoader?.getImage(url, size = IntSize(64, 64))
+    val imageRequest =
+      ImageRequest.Builder(platformContext)
+        .data(url)
+        .scale(Scale.FILL)
+        .size(64)
+        .memoryCacheKey("$url.dynamic_colors")
+        .build()
+
+    val image =
+      withContext(Dispatchers.IO) {
+        imageLoader.execute(imageRequest).image?.toComposeImageBitmap(platformContext)
+      }
+
     return if (image != null) {
       extractColorsFromImage(image)
         .let { colorsMap ->

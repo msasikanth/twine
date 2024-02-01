@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.components.image
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -23,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.IntSize
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.size.Size
 
 @Composable
 internal fun AsyncImage(
@@ -31,7 +32,7 @@ internal fun AsyncImage(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: IntSize? = null,
+  size: Size = Size.ORIGINAL,
   backgroundColor: Color? = null
 ) {
   val backgroundColorModifier =
@@ -42,20 +43,14 @@ internal fun AsyncImage(
     }
 
   Box(modifier.then(backgroundColorModifier)) {
-    val imageState by rememberImageLoaderState(url, size)
+    val imageRequest =
+      ImageRequest.Builder(LocalPlatformContext.current).data(url).size(size).build()
 
-    when (imageState) {
-      is ImageLoaderState.Loaded -> {
-        Image(
-          modifier = Modifier.matchParentSize(),
-          bitmap = (imageState as ImageLoaderState.Loaded).image,
-          contentDescription = contentDescription,
-          contentScale = contentScale
-        )
-      }
-      else -> {
-        // TODO: Handle other cases instead of just showing blank space?
-      }
-    }
+    coil3.compose.AsyncImage(
+      model = imageRequest,
+      contentDescription = contentDescription,
+      modifier = Modifier.matchParentSize(),
+      contentScale = contentScale
+    )
   }
 }

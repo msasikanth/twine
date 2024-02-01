@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.di
 
-import dev.sasikanth.rss.reader.components.IOSImageLoader
-import dev.sasikanth.rss.reader.components.image.ImageLoader
-import me.tatarka.inject.annotations.Provides
+package dev.sasikanth.rss.reader.utils
 
-internal actual interface ImageLoaderComponent {
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.graphics.drawable.toBitmap
+import coil3.Image
+import coil3.PlatformContext
+import coil3.annotation.ExperimentalCoilApi
 
-  @Provides fun IOSImageLoader.bind(): ImageLoader = this
+@OptIn(ExperimentalCoilApi::class)
+actual fun Image.toComposeImageBitmap(context: PlatformContext): ImageBitmap {
+  return asDrawable(context.resources).toBitmap().asImageBitmap()
 }

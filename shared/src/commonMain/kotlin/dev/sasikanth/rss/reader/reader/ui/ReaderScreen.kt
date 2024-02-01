@@ -76,7 +76,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
-  val navigator = rememberWebViewNavigator()
 
   Scaffold(
     modifier = modifier,
@@ -182,16 +181,6 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified
   ) { paddingValues ->
-    val jsBridge = rememberWebViewJsBridge()
-
-    LaunchedEffect(jsBridge) {
-      jsBridge.register(
-        ReaderLinkHandler(
-          openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
-        )
-      )
-    }
-
     when {
       state.content == null -> {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -202,6 +191,17 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         }
       }
       state.hasContent -> {
+        val navigator = rememberWebViewNavigator()
+        val jsBridge = rememberWebViewJsBridge()
+
+        LaunchedEffect(jsBridge) {
+          jsBridge.register(
+            ReaderLinkHandler(
+              openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+            )
+          )
+        }
+
         val codeBackgroundColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHighest.toArgb())
         val textColor = StringUtils.hexFromArgb(AppTheme.colorScheme.onSurface.toArgb())

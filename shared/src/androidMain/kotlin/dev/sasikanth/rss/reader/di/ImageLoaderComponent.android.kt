@@ -16,27 +16,17 @@
 
 package dev.sasikanth.rss.reader.di
 
-import coil3.ImageLoader
+import android.content.Context
 import coil3.PlatformContext
-import coil3.disk.DiskCache
-import coil3.memory.MemoryCache
 import me.tatarka.inject.annotations.Provides
 import okio.Path
+import okio.Path.Companion.toPath
 
-expect interface ImageLoaderPlatformComponent
+actual interface ImageLoaderPlatformComponent {
 
-interface ImageLoaderComponent : ImageLoaderPlatformComponent {
-
-  val imageLoader: ImageLoader
+  @Provides fun providePlatformContext(context: Context): PlatformContext = context
 
   @Provides
-  fun imageLoader(
-    platformContext: PlatformContext,
-    cachePath: Path,
-  ): ImageLoader {
-    return ImageLoader.Builder(platformContext)
-      .memoryCache { MemoryCache.Builder().maxSizePercent(platformContext, percent = 0.25).build() }
-      .diskCache { DiskCache.Builder().directory(cachePath).build() }
-      .build()
-  }
+  fun diskCache(application: Context): Path =
+    application.cacheDir.absolutePath.toPath().resolve("dev_sasikanth_rss_reader_images_cache")
 }

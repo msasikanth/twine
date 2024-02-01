@@ -20,8 +20,10 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
 import com.arkivanov.essenty.backhandler.BackHandler
@@ -29,8 +31,6 @@ import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
-import dev.sasikanth.rss.reader.components.image.ImageLoader
-import dev.sasikanth.rss.reader.components.image.LocalImageLoader
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
@@ -48,17 +48,18 @@ typealias App = @Composable () -> Unit
 
 @Inject
 @Composable
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalCoilApi::class)
 fun App(
   appPresenter: AppPresenter,
-  imageLoader: ImageLoader,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
+  imageLoader: ImageLoader,
 ) {
+  setSingletonImageLoaderFactory { imageLoader }
+
   val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
 
   CompositionLocalProvider(
-    LocalImageLoader provides imageLoader,
     LocalWindowSizeClass provides calculateWindowSizeClass(),
     LocalDynamicColorState provides dynamicColorState,
     LocalShareHandler provides shareHandler,

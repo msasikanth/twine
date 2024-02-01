@@ -49,9 +49,9 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachIndexed
+import coil3.size.Size
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -295,7 +295,7 @@ private fun FeaturedSectionBlurredBackground(
           .then(modifier),
       contentDescription = null,
       contentScale = ContentScale.Crop,
-      size = IntSize(128, 128),
+      size = Size(128, 128),
       backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
     )
   }
