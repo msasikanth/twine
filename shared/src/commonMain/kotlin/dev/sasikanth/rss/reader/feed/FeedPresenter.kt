@@ -86,7 +86,12 @@ class FeedPresenter(
           // no-op
         }
         FeedEvent.RemoveFeedClicked -> removeFeed()
+        is FeedEvent.OnFeedNameChanged -> onFeedNameUpdated(event.newFeedName, event.feedLink)
       }
+    }
+
+    private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
+      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
     }
 
     private fun removeFeed() {

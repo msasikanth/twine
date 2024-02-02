@@ -23,4 +23,6 @@ sealed interface FeedEvent {
   data object BackClicked : FeedEvent
 
   data object RemoveFeedClicked : FeedEvent
+
+  data class OnFeedNameChanged(val newFeedName: String, val feedLink: String) : FeedEvent
 }
