@@ -15,23 +15,27 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.StackAnimation
+import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
+import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -67,34 +71,46 @@ fun App(
   ) {
     DynamicContentTheme(dynamicColorState) {
       ProvideStrings {
-        Children(
-          modifier = Modifier.fillMaxSize(),
-          stack = appPresenter.screenStack,
-          animation =
+        Box {
+          Children(
+            modifier = Modifier.fillMaxSize(),
+            stack = appPresenter.screenStack,
+            animation =
             backAnimation(
               backHandler = appPresenter.backHandler,
               onBack = appPresenter::onBackClicked
             )
-        ) { child ->
-          val fillMaxSizeModifier = Modifier.fillMaxSize()
-          when (val screen = child.instance) {
-            is Screen.Home -> {
-              HomeScreen(homePresenter = screen.presenter, modifier = fillMaxSizeModifier)
+          ) { child ->
+            val fillMaxSizeModifier = Modifier.fillMaxSize()
+            when (val screen = child.instance) {
+              is Screen.Home -> {
+                HomeScreen(homePresenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.Search -> {
+                SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.Bookmarks -> {
+                BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.Settings -> {
+                SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.About -> {
+                AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.Reader -> {
+                ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
             }
-            is Screen.Search -> {
-              SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-            is Screen.Bookmarks -> {
-              BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-            is Screen.Settings -> {
-              SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-            is Screen.About -> {
-              AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-            is Screen.Reader -> {
-              ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+          }
+
+          val modals by appPresenter.modalStack.subscribeAsState()
+          modals.child?.instance?.also { modal ->
+            when (modal) {
+              is Modals.FeedInfo ->
+                FeedInfoBottomSheet(
+                  feedPresenter = modal.presenter,
+                )
             }
           }
         }
