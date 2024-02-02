@@ -20,7 +20,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -55,9 +54,7 @@ class FeedPresenter(
   internal val state: StateFlow<FeedState> = presenterInstance.state
 
   init {
-    lifecycle.doOnCreate {
-      dispatch(FeedEvent.Init)
-    }
+    lifecycle.doOnCreate { dispatch(FeedEvent.Init) }
   }
 
   fun dispatch(event: FeedEvent) {

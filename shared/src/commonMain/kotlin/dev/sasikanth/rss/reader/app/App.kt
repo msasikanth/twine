@@ -76,10 +76,10 @@ fun App(
             modifier = Modifier.fillMaxSize(),
             stack = appPresenter.screenStack,
             animation =
-            backAnimation(
-              backHandler = appPresenter.backHandler,
-              onBack = appPresenter::onBackClicked
-            )
+              backAnimation(
+                backHandler = appPresenter.backHandler,
+                onBack = appPresenter::onBackClicked
+              )
           ) { child ->
             val fillMaxSizeModifier = Modifier.fillMaxSize()
             when (val screen = child.instance) {
@@ -90,7 +90,10 @@ fun App(
                 SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
               is Screen.Bookmarks -> {
-                BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+                BookmarksScreen(
+                  bookmarksPresenter = screen.presenter,
+                  modifier = fillMaxSizeModifier
+                )
               }
               is Screen.Settings -> {
                 SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
