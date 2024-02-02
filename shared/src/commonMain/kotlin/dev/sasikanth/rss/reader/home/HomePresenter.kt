@@ -104,7 +104,6 @@ class HomePresenter(
 
   init {
     lifecycle.doOnCreate {
-      presenterInstance.dispatch(HomeEvent.Init)
       backHandler.register(backCallback)
       backCallback.isEnabled = state.value.feedsSheetState == BottomSheetValue.Expanded
     }
@@ -145,6 +144,10 @@ class HomePresenter(
       )
 
     val effects = MutableSharedFlow<HomeEffect>()
+
+    init {
+      dispatch(HomeEvent.Init)
+    }
 
     fun dispatch(event: HomeEvent) {
       when (event) {
