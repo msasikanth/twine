@@ -85,7 +85,12 @@ class FeedPresenter(
         FeedEvent.BackClicked -> {
           // no-op
         }
+        FeedEvent.RemoveFeedClicked -> removeFeed()
       }
+    }
+
+    private fun removeFeed() {
+      coroutineScope.launch { rssRepository.removeFeed(feedLink) }
     }
 
     private fun init() {

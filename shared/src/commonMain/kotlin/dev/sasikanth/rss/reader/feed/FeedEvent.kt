@@ -21,4 +21,6 @@ sealed interface FeedEvent {
   data object Init : FeedEvent
 
   data object BackClicked : FeedEvent
+
+  data object RemoveFeedClicked : FeedEvent
 }
