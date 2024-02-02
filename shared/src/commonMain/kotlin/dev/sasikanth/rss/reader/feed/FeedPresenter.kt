@@ -38,6 +38,7 @@ class FeedPresenter(
   rssRepository: RssRepository,
   @Assisted feedLink: String,
   @Assisted componentContext: ComponentContext,
+  @Assisted private val dismiss: () -> Unit
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -52,6 +53,13 @@ class FeedPresenter(
   internal val state: StateFlow<FeedState> = presenterInstance.state
 
   fun dispatch(event: FeedEvent) {
+    when (event) {
+      FeedEvent.BackClicked -> dismiss()
+      else -> {
+        // no-op
+      }
+    }
+
     presenterInstance.dispatch(event)
   }
 
@@ -74,6 +82,9 @@ class FeedPresenter(
     fun dispatch(event: FeedEvent) {
       when (event) {
         FeedEvent.Init -> init()
+        FeedEvent.BackClicked -> {
+          // no-op
+        }
       }
     }
 

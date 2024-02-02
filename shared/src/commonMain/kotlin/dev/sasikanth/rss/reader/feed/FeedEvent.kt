@@ -19,4 +19,6 @@ package dev.sasikanth.rss.reader.feed
 sealed interface FeedEvent {
 
   data object Init : FeedEvent
+
+  data object BackClicked : FeedEvent
 }
