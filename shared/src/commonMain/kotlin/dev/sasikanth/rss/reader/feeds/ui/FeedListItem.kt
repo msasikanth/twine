@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -56,7 +57,6 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.DoneAll
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
@@ -76,7 +76,7 @@ internal fun FeedListItem(
   canPinFeeds: Boolean,
   canShowUnreadPostsCount: Boolean,
   feedsSheetMode: FeedsSheetMode,
-  onDeleteFeed: (Feed) -> Unit,
+  onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
@@ -149,7 +149,7 @@ internal fun FeedListItem(
           feed = feed,
           isInEditMode = it,
           canPinFeed = canPinFeeds,
-          onDeleteFeed = onDeleteFeed,
+          onFeedInfoClick = onFeedInfoClick,
           onFeedPinClick = onFeedPinClick,
           onMarkFeedAsRead = onMarkFeedAsRead
         )
@@ -163,7 +163,7 @@ private fun ActionButtons(
   feed: Feed,
   isInEditMode: Boolean,
   canPinFeed: Boolean,
-  onDeleteFeed: (Feed) -> Unit,
+  onFeedInfoClick: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onMarkFeedAsRead: (Feed) -> Unit,
 ) {
@@ -171,9 +171,9 @@ private fun ActionButtons(
     if (isInEditMode) {
       PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
 
-      IconButton(onClick = { onDeleteFeed(feed) }) {
+      IconButton(onClick = { onFeedInfoClick(feed) }) {
         Icon(
-          imageVector = TwineIcons.Delete,
+          imageVector = Icons.Rounded.KeyboardArrowDown,
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )
