@@ -16,15 +16,7 @@
 
 package dev.sasikanth.rss.reader.feed
 
-sealed interface FeedEvent {
+sealed interface FeedEffect {
 
-  data object Init : FeedEvent
-
-  data object BackClicked : FeedEvent
-
-  data object RemoveFeedClicked : FeedEvent
-
-  data class OnFeedNameChanged(val newFeedName: String, val feedLink: String) : FeedEvent
-
-  data object DismissSheet : FeedEvent
+  data object DismissSheet : FeedEffect
 }

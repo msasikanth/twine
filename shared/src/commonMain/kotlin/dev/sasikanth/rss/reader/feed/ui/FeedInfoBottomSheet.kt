@@ -36,6 +36,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -46,10 +47,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.FeedLabelInput
 import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedPresenter
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun FeedInfoBottomSheet(
@@ -57,6 +60,14 @@ fun FeedInfoBottomSheet(
   modifier: Modifier = Modifier,
 ) {
   val state by feedPresenter.state.collectAsState()
+
+  LaunchedEffect(Unit) {
+    feedPresenter.effects.collectLatest { effect ->
+      when (effect) {
+        FeedEffect.DismissSheet -> feedPresenter.dispatch(FeedEvent.DismissSheet)
+      }
+    }
+  }
 
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
@@ -111,9 +122,7 @@ fun FeedInfoBottomSheet(
           )
         }
       } else {
-        CircularProgressIndicator(
-          color = AppTheme.colorScheme.tintedForeground
-        )
+        CircularProgressIndicator(color = AppTheme.colorScheme.tintedForeground)
       }
     }
   }

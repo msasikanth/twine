@@ -24,9 +24,11 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -52,6 +54,7 @@ class FeedPresenter(
     }
 
   internal val state: StateFlow<FeedState> = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate { dispatch(FeedEvent.Init) }
@@ -59,7 +62,8 @@ class FeedPresenter(
 
   fun dispatch(event: FeedEvent) {
     when (event) {
-      FeedEvent.BackClicked -> dismiss()
+      FeedEvent.BackClicked,
+      FeedEvent.DismissSheet -> dismiss()
       else -> {
         // no-op
       }
@@ -84,10 +88,13 @@ class FeedPresenter(
         initialValue = FeedState.DEFAULT
       )
 
+    val effects = MutableSharedFlow<FeedEffect>()
+
     fun dispatch(event: FeedEvent) {
       when (event) {
         FeedEvent.Init -> init()
-        FeedEvent.BackClicked -> {
+        FeedEvent.BackClicked,
+        FeedEvent.DismissSheet -> {
           // no-op
         }
         FeedEvent.RemoveFeedClicked -> removeFeed()
@@ -100,7 +107,10 @@ class FeedPresenter(
     }
 
     private fun removeFeed() {
-      coroutineScope.launch { rssRepository.removeFeed(feedLink) }
+      coroutineScope.launch {
+        rssRepository.removeFeed(feedLink)
+        effects.emit(FeedEffect.DismissSheet)
+      }
     }
 
     private fun init() {
