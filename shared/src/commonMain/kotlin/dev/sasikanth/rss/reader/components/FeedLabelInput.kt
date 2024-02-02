@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -48,7 +49,8 @@ internal fun FeedLabelInput(
   value: String,
   onFeedNameChanged: (String) -> Unit,
   modifier: Modifier = Modifier,
-  enabled: Boolean = true
+  enabled: Boolean = true,
+  textAlign: TextAlign = TextAlign.Start
 ) {
   // Maintaining local state so that it updates the text field in the UI
   // instantly and doesn't have any weird UI state issues.
@@ -96,7 +98,7 @@ internal fun FeedLabelInput(
     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
     keyboardActions = KeyboardActions(onDone = { onFeedNameChanged() }),
     singleLine = true,
-    textStyle = MaterialTheme.typography.titleMedium,
+    textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = textAlign),
     shape = RoundedCornerShape(16.dp),
     enabled = enabled,
     interactionSource = interactionSource,
