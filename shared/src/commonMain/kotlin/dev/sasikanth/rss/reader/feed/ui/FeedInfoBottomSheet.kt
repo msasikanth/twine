@@ -26,20 +26,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -64,20 +59,13 @@ fun FeedInfoBottomSheet(
 
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
-    onDismissRequest = {
-      feedPresenter.dispatch(FeedEvent.BackClicked)
-    },
+    onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = AppTheme.colorScheme.tintedForeground,
   ) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier =
-      Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 24.dp)
-        .padding(bottom = 16.dp)
-        .wrapContentHeight()
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
 
@@ -88,7 +76,7 @@ fun FeedInfoBottomSheet(
             url = feed.icon,
             contentDescription = feed.name,
             modifier =
-            Modifier.requiredSize(56.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
+              Modifier.requiredSize(56.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
           )
         }
 
