@@ -39,14 +39,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.FeedLabelInput
 import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedPresenter
@@ -104,26 +109,43 @@ fun FeedInfoBottomSheet(
 
         Spacer(Modifier.requiredHeight(8.dp))
 
-        TextButton(
-          onClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) },
-          contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
-          shape = MaterialTheme.shapes.large
-        ) {
-          Icon(
-            imageVector = Icons.Outlined.Delete,
-            contentDescription = LocalStrings.current.editFeeds,
-            tint = MaterialTheme.colorScheme.error
-          )
-          Spacer(Modifier.width(12.dp))
-          Text(
-            text = LocalStrings.current.removeFeed,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.error
-          )
-        }
+        RemoveFeedButton(feed) { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
       } else {
         CircularProgressIndicator(color = AppTheme.colorScheme.tintedForeground)
       }
+    }
+  }
+}
+
+@Composable
+private fun RemoveFeedButton(feed: Feed, onRemoveFeedClick: () -> Unit) {
+  Box {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    TextButton(
+      onClick = { showConfirmDialog = true },
+      contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
+      shape = MaterialTheme.shapes.large
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.Delete,
+        contentDescription = LocalStrings.current.editFeeds,
+        tint = MaterialTheme.colorScheme.error
+      )
+      Spacer(Modifier.width(12.dp))
+      Text(
+        text = LocalStrings.current.removeFeed,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.error
+      )
+    }
+
+    if (showConfirmDialog) {
+      ConfirmFeedDeleteDialog(
+        feedName = feed.name,
+        onRemoveFeed = onRemoveFeedClick,
+        dismiss = { showConfirmDialog = false },
+      )
     }
   }
 }

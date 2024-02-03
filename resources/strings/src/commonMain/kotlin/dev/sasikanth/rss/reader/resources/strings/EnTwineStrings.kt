@@ -114,5 +114,7 @@ val EnTwineStrings =
       "Twine is built on open source technologies and is completely free to use, you can find the source code of Twine and some of my other popular projects on GitHub. Click here to head over there.",
     markAsRead = "Mark as Read",
     markAsUnRead = "Mark as Unread",
-    removeFeed = "Remove feed"
+    removeFeed = "Remove feed",
+    delete = "Delete",
+    removeFeedDesc = { "Do you want to remove \"${it}\"?" }
   )
