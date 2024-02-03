@@ -148,7 +148,7 @@ internal fun FeedsBottomSheet(
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
-        onDeleteFeed = { feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(it)) },
+        onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
         onFeedNameChanged = { newFeedName, feedLink ->
           feedsPresenter.dispatch(
@@ -191,7 +191,7 @@ private fun BottomSheetExpandedContent(
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
-  onDeleteFeed: (Feed) -> Unit,
+  onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
@@ -258,7 +258,7 @@ private fun BottomSheetExpandedContent(
                   canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
                   canShowUnreadPostsCount = canShowUnreadPostsCount,
                   feedsSheetMode = feedsSheetMode,
-                  onDeleteFeed = onDeleteFeed,
+                  onFeedInfoClick = onFeedInfoClick,
                   onFeedSelected = onFeedSelected,
                   onFeedNameChanged = onFeedNameChanged,
                   onFeedPinClick = onFeedPinClick,
