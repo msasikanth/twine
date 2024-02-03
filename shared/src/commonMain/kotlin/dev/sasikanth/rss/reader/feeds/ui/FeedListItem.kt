@@ -28,8 +28,8 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Divider
@@ -173,7 +173,7 @@ private fun ActionButtons(
 
       IconButton(onClick = { onFeedInfoClick(feed) }) {
         Icon(
-          imageVector = Icons.Rounded.KeyboardArrowDown,
+          imageVector = Icons.TwoTone.Info,
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )
