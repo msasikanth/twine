@@ -71,7 +71,8 @@ class FeedsPresenter(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableSelectedFeed: ObservableSelectedFeed,
-  @Assisted componentContext: ComponentContext
+  @Assisted componentContext: ComponentContext,
+  @Assisted private val openFeedInfo: (String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -93,7 +94,18 @@ class FeedsPresenter(
     lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }
   }
 
-  fun dispatch(event: FeedsEvent) = presenterInstance.dispatch(event)
+  fun dispatch(event: FeedsEvent) {
+    when (event) {
+      is FeedsEvent.OnFeedInfoClick -> {
+        openFeedInfo(event.feedLink)
+      }
+      else -> {
+        // no-op
+      }
+    }
+
+    presenterInstance.dispatch(event)
+  }
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
@@ -128,6 +140,9 @@ class FeedsPresenter(
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
         is FeedsEvent.MarkPostsInFeedAsReadClicked -> markPostsInFeedAsReadClicked(event.feedLink)
+        is FeedsEvent.OnFeedInfoClick -> {
+          // no-op
+        }
       }
     }
 

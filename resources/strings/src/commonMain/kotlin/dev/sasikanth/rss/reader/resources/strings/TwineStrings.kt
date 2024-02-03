@@ -102,7 +102,10 @@ data class TwineStrings(
   val openSource: String,
   val openSourceDesc: String,
   val markAsRead: String,
-  val markAsUnRead: String
+  val markAsUnRead: String,
+  val removeFeed: String,
+  val delete: String,
+  val removeFeedDesc: (String) -> String
 )
 
 object Locales {

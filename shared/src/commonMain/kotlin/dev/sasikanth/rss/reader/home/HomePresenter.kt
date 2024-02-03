@@ -73,7 +73,7 @@ import me.tatarka.inject.annotations.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(
   dispatchersProvider: DispatchersProvider,
-  feedsPresenterFactory: (ComponentContext) -> FeedsPresenter,
+  feedsPresenterFactory: (ComponentContext, openFeedInfo: (String) -> Unit) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableSelectedFeed: ObservableSelectedFeed,
   private val settingsRepository: SettingsRepository,
@@ -82,11 +82,16 @@ class HomePresenter(
   @Assisted private val openBookmarks: () -> Unit,
   @Assisted private val openSettings: () -> Unit,
   @Assisted private val openPost: (postLink: String) -> Unit,
+  @Assisted private val openFeedInfo: (String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
 
-  internal val feedsPresenter = feedsPresenterFactory(childContext("feeds_presenter"))
+  internal val feedsPresenter =
+    feedsPresenterFactory(
+      childContext("feeds_presenter"),
+      openFeedInfo,
+    )
 
   private val presenterInstance =
     instanceKeeper.getOrCreate {

@@ -16,6 +16,11 @@
 package dev.sasikanth.rss.reader.app
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.decompose.router.slot.ChildSlot
+import com.arkivanov.decompose.router.slot.SlotNavigation
+import com.arkivanov.decompose.router.slot.activate
+import com.arkivanov.decompose.router.slot.childSlot
+import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
@@ -30,6 +35,7 @@ import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.feed.FeedPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
@@ -50,6 +56,7 @@ private typealias HomePresenterFactory =
     openBookmarks: () -> Unit,
     openSettings: () -> Unit,
     openPost: (String) -> Unit,
+    openFeedInfo: (String) -> Unit,
   ) -> HomePresenter
 
 private typealias SearchPresentFactory =
@@ -86,6 +93,13 @@ private typealias ReaderPresenterFactory =
     goBack: () -> Unit,
   ) -> ReaderPresenter
 
+private typealias FeedPresenterFactory =
+  (
+    feedLink: String,
+    ComponentContext,
+    dismiss: () -> Unit,
+  ) -> FeedPresenter
+
 @Inject
 @ActivityScope
 class AppPresenter(
@@ -97,6 +111,7 @@ class AppPresenter(
   private val settingsPresenter: SettingsPresenterFactory,
   private val aboutPresenter: AboutPresenterFactory,
   private val readerPresenter: ReaderPresenterFactory,
+  private val feedPresenter: FeedPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository
 ) : ComponentContext by componentContext {
@@ -111,6 +126,7 @@ class AppPresenter(
     }
 
   private val navigation = StackNavigation<Config>()
+  private val modalNavigation = SlotNavigation<ModalConfig>()
 
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
@@ -120,6 +136,13 @@ class AppPresenter(
       childFactory = ::createScreen,
     )
 
+  internal val modalStack: Value<ChildSlot<*, Modals>> =
+    childSlot(
+      source = modalNavigation,
+      handleBackButton = true,
+      childFactory = ::createModal,
+    )
+
   init {
     lifecycle.doOnStart { presenterInstance.refreshFeedsIfExpired() }
   }
@@ -127,6 +150,16 @@ class AppPresenter(
   fun onBackClicked() {
     navigation.pop()
   }
+
+  private fun createModal(modalConfig: ModalConfig, componentContext: ComponentContext): Modals =
+    when (modalConfig) {
+      is ModalConfig.FeedInfo -> {
+        Modals.FeedInfo(
+          presenter =
+            feedPresenter(modalConfig.feedLink, componentContext) { modalNavigation.dismiss() }
+        )
+      }
+    }
 
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
@@ -138,7 +171,8 @@ class AppPresenter(
               { navigation.push(Config.Search) },
               { navigation.push(Config.Bookmarks) },
               { navigation.push(Config.Settings) },
-              { navigation.push(Config.Reader(it)) }
+              { navigation.push(Config.Reader(it)) },
+              { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
             )
         )
       }
@@ -216,5 +250,9 @@ class AppPresenter(
     @Parcelize data object About : Config
 
     @Parcelize data class Reader(val postLink: String) : Config
+  }
+
+  sealed interface ModalConfig : Parcelable {
+    @Parcelize data class FeedInfo(val feedLink: String) : ModalConfig
   }
 }
