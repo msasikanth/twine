@@ -26,6 +26,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -127,16 +128,29 @@ class OpmlManager(
     val totalFeedCount = feedLinks.size
     val processedFeedsCount = AtomicInt(0)
 
-    feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
-      feedsGroup
-        .map { feed -> launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) } }
-        .joinAll()
+    if (totalFeedCount > IMPORT_CHUNKS) {
+      feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
+        feedsGroup
+          .map { feed ->
+            launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) }
+          }
+          .joinAll()
 
-      val size = processedFeedsCount.addAndGet(feedsGroup.size)
-      // We are converting the total feed count to float
-      // so that we can get the precise progress like 0.1, 0.2..etc.,
-      send(((size / totalFeedCount.toFloat()) * 100).roundToInt())
+        val size = processedFeedsCount.addAndGet(feedsGroup.size)
+        sendProgress(size, totalFeedCount)
+      }
+    } else {
+      feedLinks.reversed().forEachIndexed { index, feed ->
+        launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) }
+        sendProgress(index, totalFeedCount)
+      }
     }
+  }
+
+  private suspend fun ProducerScope<Int>.sendProgress(progressIndex: Int, totalFeedCount: Int) {
+    // We are converting the total feed count to float
+    // so that we can get the precise progress like 0.1, 0.2..etc.,
+    send(((progressIndex / totalFeedCount.toFloat()) * 100).roundToInt())
   }
 }
 

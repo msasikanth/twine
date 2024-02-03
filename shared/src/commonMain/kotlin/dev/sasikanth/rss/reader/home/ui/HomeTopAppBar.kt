@@ -50,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -164,7 +163,6 @@ fun PostsTypeSelector(
       modifier = Modifier.requiredWidth(120.dp),
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
-      offset = DpOffset(x = 0.dp, y = (-48).dp)
     ) {
       PostsType.entries.forEach { type ->
         val label = getPostTypeLabel(type)
