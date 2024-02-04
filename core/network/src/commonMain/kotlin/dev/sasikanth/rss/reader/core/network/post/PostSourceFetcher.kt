@@ -37,15 +37,16 @@ class PostSourceFetcher(
 
   suspend fun fetch(link: String): String? {
     return withContext(dispatchersProvider.io) {
-      val response = httpClient.get(transformUrlToHttps(link))
-      if (response.status == HttpStatusCode.OK) {
-        try {
+      try {
+        val response = httpClient.get(transformUrlToHttps(link))
+        if (response.status == HttpStatusCode.OK) {
           return@withContext response.bodyAsText()
-        } catch (e: Exception) {
-          // no-op
         }
+      } catch (e: Exception) {
+        // no-op
       }
 
+      // TODO: Return [Result.failure] object to render different reader view
       return@withContext null
     }
   }
