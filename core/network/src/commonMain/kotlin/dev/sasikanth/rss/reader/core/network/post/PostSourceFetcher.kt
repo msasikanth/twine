@@ -22,6 +22,9 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -34,16 +37,21 @@ class PostSourceFetcher(
 
   suspend fun fetch(link: String): String? {
     return withContext(dispatchersProvider.io) {
-      val response = httpClient.get(link)
-      if (response.status == HttpStatusCode.OK) {
-        try {
+      try {
+        val response = httpClient.get(transformUrlToHttps(link))
+        if (response.status == HttpStatusCode.OK) {
           return@withContext response.bodyAsText()
-        } catch (e: Exception) {
-          // no-op
         }
+      } catch (e: Exception) {
+        // no-op
       }
 
+      // TODO: Return [Result.failure] object to render different reader view
       return@withContext null
     }
+  }
+
+  private fun transformUrlToHttps(url: String): Url {
+    return URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
   }
 }
