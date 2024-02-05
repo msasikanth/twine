@@ -44,9 +44,7 @@ class IOSLinkHandler(
       BrowserType.Default -> {
         val canOpenUrl = UIApplication.sharedApplication().canOpenURL(url)
         if (canOpenUrl) {
-          dispatch_async(dispatch_get_main_queue()) {
-            UIApplication.sharedApplication().openURL(url)
-          }
+          openBrowser(url)
         } else {
           inAppBrowser(url)
         }
@@ -57,10 +55,18 @@ class IOSLinkHandler(
     }
   }
 
-  private fun inAppBrowser(url: NSURL) {
-    val safari = SFSafariViewController(url)
-    safari.modalPresentationStyle = UIModalPresentationPageSheet
+  private fun openBrowser(url: NSURL) {
+    dispatch_async(dispatch_get_main_queue()) { UIApplication.sharedApplication().openURL(url) }
+  }
 
-    uiViewControllerProvider().presentViewController(safari, animated = true, completion = null)
+  private fun inAppBrowser(url: NSURL) {
+    try {
+      val safari = SFSafariViewController(url)
+      safari.modalPresentationStyle = UIModalPresentationPageSheet
+
+      uiViewControllerProvider().presentViewController(safari, animated = true, completion = null)
+    } catch (e: Exception) {
+      openBrowser(url)
+    }
   }
 }
