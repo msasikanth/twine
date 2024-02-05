@@ -43,6 +43,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,13 +57,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PostMetadata(
@@ -186,6 +190,8 @@ private fun PostOptionsButtonRow(
 
     var showDropdown by remember { mutableStateOf(false) }
     Box {
+      val coroutineScope = rememberCoroutineScope()
+
       PostOptionIconButton(
         icon = Icons.Filled.MoreVert,
         contentDescription = LocalStrings.current.moreMenuOptions,
@@ -226,6 +232,29 @@ private fun PostOptionsButtonRow(
           },
           onClick = {
             togglePostReadClick()
+            showDropdown = false
+          }
+        )
+
+        val linkHandler = LocalLinkHandler.current
+        DropdownMenuItem(
+          modifier = Modifier.fillMaxWidth(),
+          text = {
+            Text(
+              text = LocalStrings.current.openWebsite,
+              color = AppTheme.colorScheme.onSurface,
+              textAlign = TextAlign.Start
+            )
+          },
+          leadingIcon = {
+            Icon(
+              TwineIcons.Website,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurface,
+            )
+          },
+          onClick = {
+            coroutineScope.launch { linkHandler.openLink(postLink) }
             showDropdown = false
           }
         )
