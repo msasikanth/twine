@@ -226,6 +226,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             <title>${state.title}</title>
           </head>
           <style>
+          h1 {
+            font-size: 24px;
+          }
           body {
             padding-top: 16px;
             color: $textColor;
