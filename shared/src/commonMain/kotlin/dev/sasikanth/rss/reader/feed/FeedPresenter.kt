@@ -20,6 +20,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ import me.tatarka.inject.annotations.Inject
 class FeedPresenter(
   dispatchersProvider: DispatchersProvider,
   rssRepository: RssRepository,
+  private val observableSelectedFeed: ObservableSelectedFeed,
   @Assisted feedLink: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val dismiss: () -> Unit
@@ -49,7 +51,8 @@ class FeedPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        feedLink = feedLink
+        feedLink = feedLink,
+        observableSelectedFeed = observableSelectedFeed,
       )
     }
 
@@ -75,7 +78,8 @@ class FeedPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val feedLink: String
+    private val feedLink: String,
+    private val observableSelectedFeed: ObservableSelectedFeed,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -109,6 +113,7 @@ class FeedPresenter(
     private fun removeFeed() {
       coroutineScope.launch {
         rssRepository.removeFeed(feedLink)
+        observableSelectedFeed.clearSelection()
         effects.emit(FeedEffect.DismissSheet)
       }
     }

@@ -22,17 +22,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -83,11 +85,16 @@ fun FeedInfoBottomSheet(
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = AppTheme.colorScheme.tintedForeground,
-    windowInsets = BottomSheetDefaults.windowInsets.union(WindowInsets.ime),
+    windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
   ) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)
+      modifier =
+        Modifier.fillMaxWidth()
+          .padding(horizontal = 24.dp)
+          .padding(
+            bottom = 16.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+          )
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
 

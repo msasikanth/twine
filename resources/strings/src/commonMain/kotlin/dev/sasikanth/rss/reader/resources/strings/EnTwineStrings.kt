@@ -109,9 +109,9 @@ val EnTwineStrings =
     postsAll = "All",
     postsUnread = "Unread",
     postsToday = "Today",
-    openSource = "Open Source",
+    openSource = "Support Open Source",
     openSourceDesc =
-      "Twine is built on open source technologies and is completely free to use, you can find the source code of Twine and some of my other popular projects on GitHub. Click here to head over there.",
+      "Twine is built on open-source technologies and is free to use. You can find the source code for Twine and some of my other popular projects on GitHub. Click here to open GitHub and tip for the project.",
     markAsRead = "Mark as Read",
     markAsUnRead = "Mark as Unread",
     removeFeed = "Remove feed",
