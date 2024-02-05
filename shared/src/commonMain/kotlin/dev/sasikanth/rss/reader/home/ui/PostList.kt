@@ -108,7 +108,6 @@ internal fun PostsList(
       if (post != null) {
         PostListItem(
           item = post,
-          enablePostSource = true,
           reduceReadItemAlpha = true,
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
@@ -131,13 +130,13 @@ internal fun PostsList(
 @Composable
 fun PostListItem(
   item: PostWithMetadata,
-  enablePostSource: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
   togglePostReadClick: () -> Unit,
-  reduceReadItemAlpha: Boolean = false
+  reduceReadItemAlpha: Boolean = false,
+  postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   Column(
     modifier =
@@ -175,11 +174,11 @@ fun PostListItem(
     PostMetadata(
       feedName = item.feedName,
       postPublishedAt = item.date.relativeDurationString(),
+      config = postMetadataConfig,
       postLink = item.link,
       postRead = item.read,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
-      enablePostSource = enablePostSource,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
       onSourceClick = onPostSourceClick,

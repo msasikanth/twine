@@ -34,12 +34,12 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,7 +80,7 @@ internal fun PostMetadata(
   onCommentsClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
   modifier: Modifier = Modifier,
-  enablePostSource: Boolean,
+  config: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   onSourceClick: () -> Unit,
 ) {
   Row(
@@ -94,7 +94,7 @@ internal fun PostMetadata(
   ) {
     Box(modifier = Modifier.weight(1f)) {
       val postSourceClickableModifier =
-        if (enablePostSource) {
+        if (config.enablePostSource) {
           Modifier.clip(RoundedCornerShape(50))
             .clickable(onClick = onSourceClick)
             .background(color = Color.White.copy(alpha = 0.12f))
@@ -104,14 +104,14 @@ internal fun PostMetadata(
         }
 
       val postSourceTextColor =
-        if (enablePostSource) {
+        if (config.enablePostSource) {
           Color.White
         } else {
           AppTheme.colorScheme.onSurfaceVariant
         }
 
       Row(modifier = postSourceClickableModifier) {
-        if (!postRead) {
+        if (!postRead && config.showUnreadIndicator) {
           Box(
             Modifier.requiredSize(6.dp)
               .background(AppTheme.colorScheme.tintedForeground, CircleShape)
@@ -143,6 +143,7 @@ internal fun PostMetadata(
       postLink = postLink,
       postBookmarked = postBookmarked,
       postRead = postRead,
+      config = config,
       commentsLink = commentsLink,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
@@ -156,6 +157,7 @@ private fun PostOptionsButtonRow(
   postLink: String,
   postBookmarked: Boolean,
   postRead: Boolean,
+  config: PostMetadataConfig,
   commentsLink: String?,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -204,37 +206,43 @@ private fun PostOptionsButtonRow(
         onDismissRequest = { showDropdown = false },
         offset = DpOffset(x = 0.dp, y = (-48).dp),
       ) {
-        DropdownMenuItem(
-          modifier = Modifier.fillMaxWidth(),
-          text = {
-            val label =
-              if (postRead) {
-                LocalStrings.current.markAsUnRead
-              } else {
-                LocalStrings.current.markAsRead
-              }
+        if (config.showToggleReadUnreadOption) {
+          DropdownMenuItem(
+            modifier = Modifier.fillMaxWidth(),
+            text = {
+              val label =
+                if (postRead) {
+                  LocalStrings.current.markAsUnRead
+                } else {
+                  LocalStrings.current.markAsRead
+                }
 
-            Text(text = label, color = AppTheme.colorScheme.onSurface, textAlign = TextAlign.Start)
-          },
-          leadingIcon = {
-            val icon =
-              if (postRead) {
-                Icons.Outlined.CheckCircle
-              } else {
-                Icons.Filled.CheckCircle
-              }
+              Text(
+                text = label,
+                color = AppTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Start
+              )
+            },
+            leadingIcon = {
+              val icon =
+                if (postRead) {
+                  Icons.Outlined.CheckCircle
+                } else {
+                  Icons.Filled.CheckCircle
+                }
 
-            Icon(
-              icon,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
-          },
-          onClick = {
-            togglePostReadClick()
-            showDropdown = false
-          }
-        )
+              Icon(
+                icon,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.onSurface,
+              )
+            },
+            onClick = {
+              togglePostReadClick()
+              showDropdown = false
+            }
+          )
+        }
 
         val linkHandler = LocalLinkHandler.current
         DropdownMenuItem(
@@ -258,8 +266,6 @@ private fun PostOptionsButtonRow(
             showDropdown = false
           }
         )
-
-        Divider(modifier = Modifier.padding(vertical = 4.dp))
 
         val shareHandler = LocalShareHandler.current
         DropdownMenuItem(
@@ -310,5 +316,23 @@ private fun PostOptionIconButton(
       tint = iconTint,
       modifier = Modifier.size(20.dp)
     )
+  }
+}
+
+@Immutable
+data class PostMetadataConfig(
+  val showUnreadIndicator: Boolean,
+  val showToggleReadUnreadOption: Boolean,
+  val enablePostSource: Boolean
+) {
+
+  companion object {
+
+    val DEFAULT =
+      PostMetadataConfig(
+        showUnreadIndicator = true,
+        showToggleReadUnreadOption = true,
+        enablePostSource = true
+      )
   }
 }

@@ -74,6 +74,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -135,7 +136,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
             if (post != null) {
               PostListItem(
                 item = post,
-                enablePostSource = false,
+                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
                 reduceReadItemAlpha = true,
                 onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(post)) },
                 onPostBookmarkClick = {

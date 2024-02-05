@@ -55,6 +55,7 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.bookmarks.OpenLink
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -126,7 +127,12 @@ internal fun BookmarksScreen(
               if (post != null) {
                 PostListItem(
                   item = post,
-                  enablePostSource = false,
+                  postMetadataConfig =
+                    PostMetadataConfig.DEFAULT.copy(
+                      showUnreadIndicator = false,
+                      showToggleReadUnreadOption = false,
+                      enablePostSource = false
+                    ),
                   onClick = { bookmarksPresenter.dispatch(BookmarksEvent.OnPostClicked(post)) },
                   onPostBookmarkClick = {
                     bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
