@@ -141,7 +141,7 @@ class OpmlManager(
       }
     } else {
       feedLinks.reversed().forEachIndexed { index, feed ->
-        launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) }
+        rssRepository.addFeed(feedLink = feed.link, title = feed.title)
         sendProgress(index, totalFeedCount)
       }
     }
