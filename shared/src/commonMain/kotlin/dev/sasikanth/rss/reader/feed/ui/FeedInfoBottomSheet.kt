@@ -52,6 +52,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
@@ -133,9 +135,13 @@ fun FeedInfoBottomSheet(
 private fun RemoveFeedButton(feed: Feed, onRemoveFeedClick: () -> Unit) {
   Box {
     var showConfirmDialog by remember { mutableStateOf(false) }
+    val hapticFeedback = LocalHapticFeedback.current
 
     TextButton(
-      onClick = { showConfirmDialog = true },
+      onClick = {
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        showConfirmDialog = true
+      },
       contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
       shape = MaterialTheme.shapes.large
     ) {
