@@ -251,15 +251,35 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           a {
             color: $linkColor;
           }
-          ul, ol {
+          ul {
             list-style: none;
             padding-left: 8px;
           }
-          li::before {
+          ul li::before {
             content: "\2022";
             color: $textColor;
             margin-right: 0.25em;
           }
+          ul li p {
+            display: inline;
+          }
+          ol {
+            list-style: none;
+            padding-left: 8px;
+            counter-reset: item;
+          }
+          ol li::before {
+            counter-increment: item;
+            content: counters(item, ".") ".";
+            color: $textColor;
+            margin-right: 0.25em;
+          }
+          ol li p {
+            display: inline;
+          }
+          li:not(:last-of-type) { 
+            margin-bottom: 1em; 
+          } 
           pre {
           	max-width: 100%;
           	margin: 0;
