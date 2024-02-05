@@ -246,7 +246,8 @@ private fun OpenSource(openLink: () -> Unit) {
   Surface(
     color = AppTheme.colorScheme.tintedSurface,
     shape = MaterialTheme.shapes.extraLarge,
-    modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { openLink() }
+    modifier = Modifier.fillMaxWidth().padding(16.dp),
+    onClick = { openLink() }
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
       Icon(
