@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -246,7 +245,7 @@ internal fun SettingsScreen(
 private fun OpenSource(openLink: () -> Unit) {
   Surface(
     color = AppTheme.colorScheme.tintedSurface,
-    shape = RoundedCornerShape(4.dp),
+    shape = MaterialTheme.shapes.extraLarge,
     modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { openLink() }
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
@@ -254,7 +253,7 @@ private fun OpenSource(openLink: () -> Unit) {
         TwineIcons.EditorsChoice,
         contentDescription = null,
         tint = AppTheme.colorScheme.onSurface,
-        modifier = Modifier.size(48.dp)
+        modifier = Modifier.size(64.dp)
       )
       Spacer(Modifier.height(16.dp))
       Text(
@@ -266,7 +265,7 @@ private fun OpenSource(openLink: () -> Unit) {
       Spacer(Modifier.height(12.dp))
       Text(
         LocalStrings.current.openSourceDesc,
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
         color = AppTheme.colorScheme.onSurface
       )
