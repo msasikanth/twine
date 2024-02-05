@@ -219,10 +219,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           <head>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
+            <link rel="preload" as='style' href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&display=swap" rel="stylesheet">
+            <link rel="preload" as='style' href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
             <title>${state.title}</title>
           </head>
           <style>
@@ -242,6 +240,9 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           .caption {
             font-size: 12px;
           }
+          .feedName {
+            margin-bottom: 8px;
+          }
           img, figure, video, div, object {
           	max-width: 100%;
           	height: auto !important;
@@ -250,13 +251,14 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           a {
             color: $linkColor;
           }
-          ul {
+          ul, ol {
             list-style: none;
+            padding-left: 8px;
           }
           li::before {
             content: "\2022";
             color: $textColor;
-            margin-right: 0.5em;
+            margin-right: 0.25em;
           }
           pre {
           	max-width: 100%;
@@ -282,7 +284,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           	border-radius: 2px;
           }
           pre code {
-          	letter-spacing: -.027;
+          	letter-spacing: -.027em;
           	font-size: 1.15em;
           }
           .top-divider {
@@ -290,18 +292,23 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             margin-bottom: 12px;
             border: 1px solid $dividerColor;
           }
-          .grid-container {
-            display: grid;
-            row-gap: 16px;
+          iframe {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 28px;
+            border: 1px solid #fff;
+          }
+          blockquote {
+            margin-left: 8px;
+            padding-left: 8px;
+            border-left: 4px solid $linkColor
           }
           </style>
           <body>
           <h1>${state.title}</h1>
           <hr class="top-divider">
-          <div class="grid-container">
-              <div><a href='${state.feed!!.homepageLink}'>${state.feed!!.name}</a></div>
-              <div class="caption">${state.publishedAt}</div>
-          </div>
+          <div class ="feedName"><a href='${state.feed!!.homepageLink}'>${state.feed!!.name}</a></div>
+          <div class="caption">${state.publishedAt}</div>
           <hr class="top-divider">
           ${state.content!!}
           
@@ -324,7 +331,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             function handleLinkClick(event) {
                 try {
                   event.preventDefault();
-                  var href = findHref(event.target);
+                  let href = findHref(event.target);
           
                   window.kmpJsBridge.callNative(
                     "linkHandler", 
@@ -336,11 +343,36 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
                 }
             }
             
-            var links = document.getElementsByTagName("a")
-            for (var i=0, max=links.length; i<max; i++) {
-              var link = links[i];
-              link.addEventListener("click", handleLinkClick);
+            function processLinks() {
+              let links = document.querySelectorAll("a")
+              for (let i=0, max=links.length; i<max; i++) {
+                let link = links[i];
+                link.addEventListener("click", handleLinkClick);
+              }
             }
+
+            function processImgs() {
+              let imgs = document.querySelectorAll("img")
+              for (let i=0, max=imgs.length; i<max; i++) {
+                let img = imgs[i];
+                if (img.hasAttribute("data-src")) {
+                  img.src = String(img.getAttribute("data-src"));
+                }
+              }
+            }
+            
+            // We already display title which are usually h1 tags,
+            // so no point keeping the duplicate/next title again in the reader view
+            // when we load post source.
+            function removeTitle() {
+              document.querySelectorAll("h1")[1].style.display = 'none';
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+              processLinks();
+              processImgs();
+              removeTitle();
+            });
           </script>
           </body>
           </html>
