@@ -262,7 +262,9 @@ private object ReaderCSS {
       border: 1px solid ${colors.dividerColor};
     }
     iframe {
+      width: 100%;
       max-width: 100%;
+      height: 250px;
       max-height: 250px;
     }
     blockquote {
