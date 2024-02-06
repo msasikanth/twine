@@ -203,7 +203,7 @@ fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Mod
     DropdownMenu(
       expanded = showDropdownMenu,
       onDismissRequest = { showDropdownMenu = false },
-      offset = DpOffset(x = 0.dp, y = (-24).dp)
+      offset = DpOffset(x = 0.dp, y = (-48).dp)
     ) {
       DropdownMenuItem(
         text = { Text(text = LocalStrings.current.share) },

@@ -66,7 +66,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -338,7 +337,6 @@ private fun SortDropdownMenu(
   DropdownMenu(
     expanded = isDropdownExpanded,
     onDismissRequest = onDismiss,
-    offset = DpOffset(0.dp, (-48).dp)
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(
