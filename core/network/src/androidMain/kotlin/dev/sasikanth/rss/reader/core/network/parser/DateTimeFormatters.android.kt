@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
+import java.time.Instant
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
@@ -55,61 +57,83 @@ internal actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
 
   for (dateFormatter in dateFormatters) {
     try {
-      val parsedValue = dateFormatter.parse(this)
-
-      val year =
-        try {
-          parsedValue.get(ChronoField.YEAR)
-        } catch (e: UnsupportedTemporalTypeException) {
-          currentDate.get(ChronoField.YEAR)
-        }
-      val hourOfDay =
-        try {
-          parsedValue.get(ChronoField.HOUR_OF_DAY)
-        } catch (e: UnsupportedTemporalTypeException) {
-          0
-        }
-      val minuteOfHour =
-        try {
-          parsedValue.get(ChronoField.MINUTE_OF_HOUR)
-        } catch (e: UnsupportedTemporalTypeException) {
-          0
-        }
-      val secondOfMinute =
-        try {
-          parsedValue.get(ChronoField.SECOND_OF_MINUTE)
-        } catch (e: UnsupportedTemporalTypeException) {
-          0
-        }
-      val nanoOfSecond =
-        try {
-          parsedValue.get(ChronoField.NANO_OF_SECOND)
-        } catch (e: UnsupportedTemporalTypeException) {
-          0
-        }
-
-      val updatedDate =
-        currentDate
-          .withDayOfMonth(parsedValue.get(ChronoField.DAY_OF_MONTH))
-          .withMonth(parsedValue.get(ChronoField.MONTH_OF_YEAR))
-          .withYear(year)
-          .withHour(hourOfDay)
-          .withMinute(minuteOfHour)
-          .withSecond(secondOfMinute)
-          .withNano(nanoOfSecond)
-
-      val zoneId =
-        try {
-          ZoneId.from(parsedValue)
-        } catch (e: Exception) {
-          TimeZone.UTC.toJavaZoneId()
-        }
-
-      return updatedDate.atZone(zoneId).toInstant().toEpochMilli()
+      val parsedValue = parseToInstant(dateFormatter, this)
+      return parsedValue.toEpochMilli()
     } catch (e: Exception) {
-      // no-op
+      try {
+        val parsedValue = fallbackParseToInstant(currentDate, dateFormatter, this)
+        return parsedValue.toEpochMilli()
+      } catch (e: Exception) {
+        // no-op
+      }
     }
   }
 
   return null
+}
+
+private fun parseToInstant(dateTimeFormatter: DateTimeFormatter, text: String): Instant {
+  return dateTimeFormatter.parse(text, Instant::from)
+}
+
+/**
+ * In case the date string has values missing from it like year, day, hour, etc., we fill those
+ * using [currentDate] and then try to convert it to instant.
+ */
+private fun fallbackParseToInstant(
+  currentDate: LocalDateTime,
+  dateTimeFormatter: DateTimeFormatter,
+  text: String
+): Instant {
+  val parsedValue = dateTimeFormatter.parse(text)
+
+  val year =
+    try {
+      parsedValue.get(ChronoField.YEAR)
+    } catch (e: UnsupportedTemporalTypeException) {
+      currentDate.get(ChronoField.YEAR)
+    }
+  val hourOfDay =
+    try {
+      parsedValue.get(ChronoField.HOUR_OF_DAY)
+    } catch (e: UnsupportedTemporalTypeException) {
+      0
+    }
+  val minuteOfHour =
+    try {
+      parsedValue.get(ChronoField.MINUTE_OF_HOUR)
+    } catch (e: UnsupportedTemporalTypeException) {
+      0
+    }
+  val secondOfMinute =
+    try {
+      parsedValue.get(ChronoField.SECOND_OF_MINUTE)
+    } catch (e: UnsupportedTemporalTypeException) {
+      0
+    }
+  val nanoOfSecond =
+    try {
+      parsedValue.get(ChronoField.NANO_OF_SECOND)
+    } catch (e: UnsupportedTemporalTypeException) {
+      0
+    }
+
+  val updatedDate =
+    currentDate
+      .withDayOfMonth(parsedValue.get(ChronoField.DAY_OF_MONTH))
+      .withMonth(parsedValue.get(ChronoField.MONTH_OF_YEAR))
+      .withYear(year)
+      .withHour(hourOfDay)
+      .withMinute(minuteOfHour)
+      .withSecond(secondOfMinute)
+      .withNano(nanoOfSecond)
+
+  val zoneId =
+    try {
+      ZoneId.from(parsedValue)
+    } catch (e: Exception) {
+      TimeZone.UTC.toJavaZoneId()
+    }
+
+  return updatedDate.atZone(zoneId).toInstant()
 }
