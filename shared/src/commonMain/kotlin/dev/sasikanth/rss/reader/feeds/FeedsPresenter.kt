@@ -223,8 +223,9 @@ class FeedsPresenter(
             } else {
               feedsPager(postsAfter = postsAfter)
             }
+          val feedsWithHeaders = addFeedsHeaders(feeds).cachedIn(coroutineScope)
 
-          _state.update { it.copy(feedsInExpandedMode = addFeedsHeaders(feeds)) }
+          _state.update { it.copy(feedsInExpandedMode = feedsWithHeaders) }
         }
         .launchIn(coroutineScope)
     }
@@ -234,7 +235,7 @@ class FeedsPresenter(
         settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          feedsPager(postsAfter)
+          feedsPager(postsAfter).cachedIn(coroutineScope)
         }
 
       observableSelectedFeed.selectedFeed
@@ -250,14 +251,12 @@ class FeedsPresenter(
           rssRepository.searchFeed(searchQuery = transformedSearchQuery, postsAfter = postsAfter)
         }
         .flow
-        .cachedIn(coroutineScope)
 
     private fun feedsPager(postsAfter: Instant) =
       createPager(config = createPagingConfig(pageSize = 20)) {
           rssRepository.allFeeds(postsAfter = postsAfter)
         }
         .flow
-        .cachedIn(coroutineScope)
 
     private fun observeShowUnreadCountPreference() {
       settingsRepository.showUnreadPostsCount

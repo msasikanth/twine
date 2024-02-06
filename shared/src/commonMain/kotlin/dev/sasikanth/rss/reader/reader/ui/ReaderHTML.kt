@@ -224,8 +224,6 @@ private object ReaderCSS {
     iframe {
       max-width: 100%;
       max-height: 250px;
-      border-radius: 28px;
-      border: 1px solid #fff;
     }
     blockquote {
       margin-left: 8px;
