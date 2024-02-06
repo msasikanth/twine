@@ -21,10 +21,12 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -39,7 +41,10 @@ class PostSourceFetcher(
     return withContext(dispatchersProvider.io) {
       try {
         val response = httpClient.get(transformUrlToHttps(link))
-        if (response.status == HttpStatusCode.OK) {
+        if (
+          response.status == HttpStatusCode.OK &&
+            response.contentType()?.withoutParameters() == ContentType.Text.Html
+        ) {
           return@withContext response.bodyAsText()
         }
       } catch (e: Exception) {
