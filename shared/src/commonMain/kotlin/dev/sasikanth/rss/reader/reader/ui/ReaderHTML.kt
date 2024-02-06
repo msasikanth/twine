@@ -25,7 +25,10 @@ internal fun readerHTML(
   publishedAt: String,
   content: String,
   colors: ReaderHTMLColors,
+  featuredImage: String?,
 ): String {
+  val hasImgTags = content.contains("""<img[^>]*>""".toRegex())
+
   // language=HTML
   return """
     <html lang="en">
@@ -43,11 +46,19 @@ internal fun readerHTML(
     </style>
     <body>
     <h1>$title</h1>
-    <hr class="top-divider">
-    <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
-    <div class="caption">$publishedAt</div>
-    <hr class="top-divider">
+    ${feedSection(
+      feedName = feedName,
+      feedHomePageLink = feedHomePageLink,
+      publishedAt = publishedAt,
+      hasTitle = title.isNotBlank()
+    )}
     $content
+    ${if (!hasImgTags && !featuredImage.isNullOrBlank()) {
+      featuredImage(featuredImage)
+    } else {
+      // no-op  
+      ""
+    }}
     <script>
       ${ReaderJs.content}
     </script>
@@ -55,6 +66,35 @@ internal fun readerHTML(
     </html>
         """
     .trimIndent()
+}
+
+private fun featuredImage(image: String): String {
+  return """
+    <img src='$image'  alt="featured_image"/>
+  """
+    .trimIndent()
+}
+
+private fun feedSection(
+  feedName: String,
+  feedHomePageLink: String,
+  publishedAt: String,
+  hasTitle: Boolean,
+): String {
+  return buildString {
+    if (hasTitle) {
+      appendLine("<hr class=\"top-divider\">")
+    }
+
+    appendLine(
+      """
+      <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
+      <div class="caption">$publishedAt</div>
+      <hr class="top-divider">
+    """
+        .trimIndent()
+    )
+  }
 }
 
 private object ReaderJs {
