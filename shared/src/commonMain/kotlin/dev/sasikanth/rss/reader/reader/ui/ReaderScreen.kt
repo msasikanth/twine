@@ -223,7 +223,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
                   linkColor = linkColor,
                   dividerColor = dividerColor,
                   codeBackgroundColor = codeBackgroundColor
-                )
+                ),
+              featuredImage = state.postImage
             )
           }
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)

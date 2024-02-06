@@ -25,7 +25,10 @@ internal fun readerHTML(
   publishedAt: String,
   content: String,
   colors: ReaderHTMLColors,
+  featuredImage: String?,
 ): String {
+  val hasImgTags = content.contains("""<img[^>]*>""".toRegex())
+
   // language=HTML
   return """
     <html lang="en">
@@ -50,12 +53,25 @@ internal fun readerHTML(
       hasTitle = title.isNotBlank()
     )}
     $content
+    ${if (!hasImgTags && !featuredImage.isNullOrBlank()) {
+      featuredImage(featuredImage)
+    } else {
+      // no-op  
+      ""
+    }}
     <script>
       ${ReaderJs.content}
     </script>
     </body>
     </html>
         """
+    .trimIndent()
+}
+
+private fun featuredImage(image: String): String {
+  return """
+    <img src='$image'  alt="featured_image"/>
+  """
     .trimIndent()
 }
 

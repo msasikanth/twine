@@ -143,7 +143,8 @@ class ReaderPresenter(
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
             feed = feed,
-            postMode = RssContent
+            postMode = RssContent,
+            postImage = post.imageUrl
           )
         }
       }

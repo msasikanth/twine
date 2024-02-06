@@ -28,6 +28,7 @@ internal data class ReaderState(
   val isBookmarked: Boolean?,
   val feed: Feed?,
   val postMode: PostMode,
+  val postImage: String?
 ) {
 
   val hasContent: Boolean
@@ -44,6 +45,7 @@ internal data class ReaderState(
         isBookmarked = null,
         feed = null,
         postMode = PostMode.Idle,
+        postImage = null
       )
   }
 
