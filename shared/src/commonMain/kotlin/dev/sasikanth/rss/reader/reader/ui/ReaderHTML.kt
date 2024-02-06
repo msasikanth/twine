@@ -43,10 +43,12 @@ internal fun readerHTML(
     </style>
     <body>
     <h1>$title</h1>
-    <hr class="top-divider">
-    <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
-    <div class="caption">$publishedAt</div>
-    <hr class="top-divider">
+    ${feedSection(
+      feedName = feedName,
+      feedHomePageLink = feedHomePageLink,
+      publishedAt = publishedAt,
+      hasTitle = title.isNotBlank()
+    )}
     $content
     <script>
       ${ReaderJs.content}
@@ -55,6 +57,28 @@ internal fun readerHTML(
     </html>
         """
     .trimIndent()
+}
+
+private fun feedSection(
+  feedName: String,
+  feedHomePageLink: String,
+  publishedAt: String,
+  hasTitle: Boolean,
+): String {
+  return buildString {
+    if (hasTitle) {
+      appendLine("<hr class=\"top-divider\">")
+    }
+
+    appendLine(
+      """
+      <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
+      <div class="caption">$publishedAt</div>
+      <hr class="top-divider">
+    """
+        .trimIndent()
+    )
+  }
 }
 
 private object ReaderJs {
