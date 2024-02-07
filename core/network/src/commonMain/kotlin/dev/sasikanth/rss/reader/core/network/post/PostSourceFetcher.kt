@@ -37,7 +37,7 @@ class PostSourceFetcher(
   private val dispatchersProvider: DispatchersProvider
 ) {
 
-  suspend fun fetch(link: String): String? {
+  suspend fun fetch(link: String): Result<String> {
     return withContext(dispatchersProvider.io) {
       try {
         val response = httpClient.get(transformUrlToHttps(link))
@@ -45,14 +45,14 @@ class PostSourceFetcher(
           response.status == HttpStatusCode.OK &&
             response.contentType()?.withoutParameters() == ContentType.Text.Html
         ) {
-          return@withContext response.bodyAsText()
+          val content = response.bodyAsText()
+          return@withContext Result.success(content)
         }
       } catch (e: Exception) {
         // no-op
       }
 
-      // TODO: Return [Result.failure] object to render different reader view
-      return@withContext null
+      return@withContext Result.failure(IllegalArgumentException("Failed to fetch the post"))
     }
   }
 

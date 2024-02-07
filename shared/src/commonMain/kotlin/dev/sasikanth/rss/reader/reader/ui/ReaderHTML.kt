@@ -52,13 +52,13 @@ internal fun readerHTML(
       publishedAt = publishedAt,
       hasTitle = title.isNotBlank()
     )}
-    $content
     ${if (!hasImgTags && !featuredImage.isNullOrBlank()) {
       featuredImage(featuredImage)
     } else {
       // no-op  
       ""
     }}
+    $content
     <script>
       ${ReaderJs.content}
     </script>

@@ -26,6 +26,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
@@ -89,8 +90,14 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    val originalCharset = response.charset() ?: Charsets.UTF_8
-    val responseContent = String(response.body<ByteArray>(), charset = originalCharset)
+    val responseContent =
+      try {
+        response.bodyAsText()
+      } catch (e: Exception) {
+        val originalCharset = response.charset() ?: Charsets.UTF_8
+        String(response.body<ByteArray>(), charset = originalCharset)
+      }
+
     return if (response.contentType()?.withoutParameters() == ContentType.Text.Html) {
       val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
       if (feedUrl != url && !feedUrl.isNullOrBlank()) {

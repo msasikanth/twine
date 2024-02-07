@@ -20,6 +20,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.readability.Readability
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
@@ -63,6 +64,7 @@ class ReaderPresenter(
 
   init {
     lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(postLink)) }
+    lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
   }
 
   internal val state = presenterInstance.state
@@ -103,7 +105,12 @@ class ReaderPresenter(
         }
         ReaderEvent.TogglePostBookmark -> togglePostBookmark(postLink)
         ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
+        is ReaderEvent.MarkPostAsRead -> markPostAsRead(postLink)
       }
+    }
+
+    private fun markPostAsRead(postLink: String) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, link = postLink) }
     }
 
     private fun togglePostBookmark(postLink: String) {
@@ -118,10 +125,6 @@ class ReaderPresenter(
       coroutineScope.launch {
         val post = rssRepository.post(postLink)
         val feed = rssRepository.feed(post.feedLink)
-
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = postLink)
-        }
 
         // This is done for backward compatibility
         val content = post.rawContent ?: post.description
@@ -151,38 +154,45 @@ class ReaderPresenter(
     }
 
     private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      if (content.trim().isBlank()) return content
-
-      val transformedContent =
+      val articleContent =
         withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
-      return if (!transformedContent.isNullOrBlank()) {
-        transformedContent
-      } else {
-        content
-      }
+
+      if (articleContent.isNullOrBlank()) return content
+
+      return articleContent
     }
 
     private fun articleShortcutClicked() {
       coroutineScope.launch {
-        when (_state.value.postMode) {
-          RssContent -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val content = postSourceFetcher.fetch(postLink).orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, content)
-            _state.update { it.copy(content = htmlContent, postMode = Source) }
-          }
-          Source -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val postContent = rssRepository.post(postLink).rawContent.orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, postContent)
-            _state.update { it.copy(content = htmlContent, postMode = RssContent) }
-          }
+        val currentPostMode = _state.value.postMode
+        when (currentPostMode) {
+          RssContent -> loadSourceArticle()
+          Source -> loadRssContent()
           InProgress,
           Idle -> {
             // no-op
           }
         }
       }
+    }
+
+    private suspend fun loadRssContent() {
+      _state.update { it.copy(postMode = InProgress) }
+      val postContent = rssRepository.post(postLink).rawContent.orEmpty()
+      val htmlContent = extractArticleHtmlContent(postLink, postContent)
+      _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+    }
+
+    private suspend fun loadSourceArticle() {
+      _state.update { it.copy(postMode = InProgress) }
+      val content = postSourceFetcher.fetch(postLink)
+
+      if (content.isSuccess) {
+        val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
+        _state.update { it.copy(content = htmlContent) }
+      }
+
+      _state.update { it.copy(postMode = Source) }
     }
   }
 }
