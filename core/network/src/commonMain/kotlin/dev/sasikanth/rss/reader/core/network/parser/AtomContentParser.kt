@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CON
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
 import io.ktor.http.Url
@@ -115,7 +116,8 @@ internal object AtomContentParser : ContentParser() {
             skip(parser)
           }
         }
-        TAG_CONTENT -> {
+        TAG_CONTENT,
+        TAG_SUMMARY -> {
           rawContent = readTagText(tagName, parser).trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)

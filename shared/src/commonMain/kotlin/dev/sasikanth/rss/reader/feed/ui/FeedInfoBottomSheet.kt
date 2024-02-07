@@ -80,6 +80,11 @@ fun FeedInfoBottomSheet(
     }
   }
 
+  // Doing this before `ModalBottomSheet` as this value is not available
+  // after `ModalSheetConsumes` insets, I think? It's returning 0 when
+  // I do this inside `ModalBottomSheet`.
+  val systemBarsBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
@@ -92,9 +97,7 @@ fun FeedInfoBottomSheet(
       modifier =
         Modifier.fillMaxWidth()
           .padding(horizontal = 24.dp)
-          .padding(
-            bottom = 16.dp + WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-          )
+          .padding(bottom = 16.dp + systemBarsBottomPadding)
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
 
