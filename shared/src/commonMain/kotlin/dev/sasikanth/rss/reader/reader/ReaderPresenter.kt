@@ -154,15 +154,12 @@ class ReaderPresenter(
     }
 
     private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      if (content.trim().isBlank()) return content
-
-      val transformedContent =
+      val articleContent =
         withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
-      return if (!transformedContent.isNullOrBlank()) {
-        transformedContent
-      } else {
-        content
-      }
+
+      if (articleContent.isNullOrBlank()) return content
+
+      return articleContent
     }
 
     private fun articleShortcutClicked() {
