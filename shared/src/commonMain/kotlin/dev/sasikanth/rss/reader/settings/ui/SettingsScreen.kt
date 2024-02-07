@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -338,17 +339,25 @@ private fun PostsDeletionPeriodSettingItem(
               ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
             }
 
+          val backgroundColor =
+            if (period == postsDeletionPeriod) {
+              AppTheme.colorScheme.tintedSurface
+            } else {
+              Color.Unspecified
+            }
+
           DropdownMenuItem(
             onClick = {
               onValueChanged(period)
               showDropdown = false
-            }
+            },
+            modifier = Modifier.background(backgroundColor)
           ) {
             val textColor =
               if (period == postsDeletionPeriod) {
-                AppTheme.colorScheme.tintedForeground
-              } else {
                 AppTheme.colorScheme.onSurface
+              } else {
+                AppTheme.colorScheme.textEmphasisHigh
               }
 
             Text(text = periodString, style = MaterialTheme.typography.bodyLarge, color = textColor)
