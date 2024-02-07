@@ -86,6 +86,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val TAG_ENCLOSURE = "enclosure"
     internal const val TAG_CONTENT_ENCODED = "content:encoded"
     internal const val TAG_CONTENT = "content"
+    internal const val TAG_SUMMARY = "summary"
     internal const val TAG_SUBTITLE = "subtitle"
     internal const val TAG_PUB_DATE = "pubDate"
     internal const val TAG_PUBLISHED = "published"
