@@ -164,25 +164,35 @@ class ReaderPresenter(
 
     private fun articleShortcutClicked() {
       coroutineScope.launch {
-        when (_state.value.postMode) {
-          RssContent -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val content = postSourceFetcher.fetch(postLink).orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, content)
-            _state.update { it.copy(content = htmlContent, postMode = Source) }
-          }
-          Source -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val postContent = rssRepository.post(postLink).rawContent.orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, postContent)
-            _state.update { it.copy(content = htmlContent, postMode = RssContent) }
-          }
+        val currentPostMode = _state.value.postMode
+        when (currentPostMode) {
+          RssContent -> loadSourceArticle()
+          Source -> loadRssContent()
           InProgress,
           Idle -> {
             // no-op
           }
         }
       }
+    }
+
+    private suspend fun loadRssContent() {
+      _state.update { it.copy(postMode = InProgress) }
+      val postContent = rssRepository.post(postLink).rawContent.orEmpty()
+      val htmlContent = extractArticleHtmlContent(postLink, postContent)
+      _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+    }
+
+    private suspend fun loadSourceArticle() {
+      _state.update { it.copy(postMode = InProgress) }
+      val content = postSourceFetcher.fetch(postLink)
+
+      if (content.isSuccess) {
+        val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
+        _state.update { it.copy(content = htmlContent) }
+      }
+
+      _state.update { it.copy(postMode = Source) }
     }
   }
 }
