@@ -175,7 +175,9 @@ class RssRepository(
       countQuery =
         postQueries.count(
           feedLink = selectedFeedLink,
-          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          unreadOnly = unreadOnly,
+          postsAfter = after,
         ),
       transacter = postQueries,
       context = ioDispatcher,
