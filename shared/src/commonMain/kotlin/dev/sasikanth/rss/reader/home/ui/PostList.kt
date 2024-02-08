@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,7 +25,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -117,15 +115,13 @@ internal fun PostsList(
           onPostSourceClick = { onPostSourceClick(post.feedLink) },
           togglePostReadClick = { onTogglePostReadClick(post.link, post.read) }
         )
-      } else {
-        Box(Modifier.requiredHeight(132.dp))
-      }
 
-      if (index != posts.itemCount - 1) {
-        Divider(
-          modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-          color = AppTheme.colorScheme.surfaceContainer
-        )
+        if (index != posts.itemCount - 1) {
+          Divider(
+            modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+            color = AppTheme.colorScheme.surfaceContainer
+          )
+        }
       }
     }
   }

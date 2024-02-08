@@ -258,7 +258,7 @@ class HomePresenter(
             }
 
           val posts =
-            createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
+            createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = false)) {
                 rssRepository.posts(
                   selectedFeedLink = selectedFeed?.link,
                   unreadOnly = unreadOnly,
