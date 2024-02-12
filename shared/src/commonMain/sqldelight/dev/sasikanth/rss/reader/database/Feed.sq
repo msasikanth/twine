@@ -1,3 +1,4 @@
+import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE feed(
@@ -8,7 +9,8 @@ CREATE TABLE feed(
   createdAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
   pinnedAt INTEGER AS Instant,
-  lastCleanUpAt INTEGER AS Instant
+  lastCleanUpAt INTEGER AS Instant,
+  alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
