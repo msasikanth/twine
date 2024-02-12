@@ -224,7 +224,34 @@ class RssRepository(
   }
 
   suspend fun allFeedsBlocking(): List<Feed> {
-    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::Feed).executeAsList() }
+    return withContext(ioDispatcher) {
+      feedQueries
+        .feeds(
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle
+            )
+          }
+        )
+        .executeAsList()
+    }
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -252,7 +279,33 @@ class RssRepository(
 
   suspend fun feed(feedLink: String): Feed {
     return withContext(ioDispatcher) {
-      feedQueries.feed(link = feedLink, mapper = ::Feed).executeAsOne()
+      feedQueries
+        .feed(
+          link = feedLink,
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle
+            )
+          }
+        )
+        .executeAsOne()
     }
   }
 
