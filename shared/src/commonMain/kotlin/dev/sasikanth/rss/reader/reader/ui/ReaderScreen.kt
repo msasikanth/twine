@@ -190,7 +190,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           )
         }
       }
-      state.hasContent -> {
+      state.canShowReaderView -> {
         val navigator = rememberWebViewNavigator()
         val jsBridge = rememberWebViewJsBridge()
 

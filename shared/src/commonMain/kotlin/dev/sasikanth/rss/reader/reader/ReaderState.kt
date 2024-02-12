@@ -31,7 +31,7 @@ internal data class ReaderState(
   val postImage: String?
 ) {
 
-  val hasContent: Boolean
+  val canShowReaderView: Boolean
     get() = feed != null && !publishedAt.isNullOrBlank()
 
   companion object {
