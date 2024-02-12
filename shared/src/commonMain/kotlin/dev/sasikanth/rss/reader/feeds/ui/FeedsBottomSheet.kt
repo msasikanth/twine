@@ -161,6 +161,7 @@ internal fun FeedsBottomSheet(
         onMarkFeedAsRead = { feed ->
           feedsPresenter.dispatch(FeedsEvent.MarkPostsInFeedAsReadClicked(feed.link))
         },
+        onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -198,6 +199,7 @@ private fun BottomSheetExpandedContent(
   exitFeedsEdit: () -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -262,7 +264,8 @@ private fun BottomSheetExpandedContent(
                   onFeedSelected = onFeedSelected,
                   onFeedNameChanged = onFeedNameChanged,
                   onFeedPinClick = onFeedPinClick,
-                  onMarkFeedAsRead = onMarkFeedAsRead
+                  onMarkFeedAsRead = onMarkFeedAsRead,
+                  onDeleteFeed = onDeleteFeed
                 )
               }
             }

@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.FeedLabelInput
@@ -57,6 +58,7 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.DoneAll
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
@@ -81,6 +83,7 @@ internal fun FeedListItem(
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit
 ) {
   val clickableModifier =
     if (feedsSheetMode != Edit) {
@@ -151,7 +154,8 @@ internal fun FeedListItem(
           canPinFeed = canPinFeeds,
           onFeedInfoClick = onFeedInfoClick,
           onFeedPinClick = onFeedPinClick,
-          onMarkFeedAsRead = onMarkFeedAsRead
+          onMarkFeedAsRead = onMarkFeedAsRead,
+          onDeleteFeed = onDeleteFeed
         )
       }
     }
@@ -166,17 +170,30 @@ private fun ActionButtons(
   onFeedInfoClick: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit,
 ) {
   Row {
     if (isInEditMode) {
       PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
 
-      IconButton(onClick = { onFeedInfoClick(feed) }) {
-        Icon(
-          imageVector = Icons.TwoTone.Info,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
+      Box {
+        var showConfirmDialog by remember { mutableStateOf(false) }
+
+        IconButton(onClick = { showConfirmDialog = true }) {
+          Icon(
+            imageVector = TwineIcons.Delete,
+            contentDescription = LocalStrings.current.removeFeed,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
+
+        if (showConfirmDialog) {
+          ConfirmFeedDeleteDialog(
+            feedName = feed.name,
+            onRemoveFeed = { onDeleteFeed(feed) },
+            dismiss = { showConfirmDialog = false }
+          )
+        }
       }
     } else {
       FeedListItemMenu(
