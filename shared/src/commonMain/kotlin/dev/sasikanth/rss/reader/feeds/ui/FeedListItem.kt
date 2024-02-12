@@ -231,6 +231,25 @@ fun FeedListItemMenu(
       onDismissRequest = { showDropdownMenu = false },
       offset = DpOffset(x = 0.dp, y = (-48).dp)
     ) {
+      val hasUnreadPostsInFeed = feed.numberOfUnreadPosts > 0
+      if (hasUnreadPostsInFeed) {
+        DropdownMenuItem(
+          text = { Text(text = LocalStrings.current.markAllAsRead) },
+          leadingIcon = {
+            Icon(
+              imageVector = TwineIcons.DoneAll,
+              contentDescription = LocalStrings.current.markAllAsRead
+            )
+          },
+          onClick = {
+            showDropdownMenu = false
+            onMarkFeedAsRead(feed)
+          },
+        )
+
+        Divider(modifier = Modifier.padding(vertical = 4.dp))
+      }
+
       DropdownMenuItem(
         text = { Text(text = LocalStrings.current.getFeedInfo) },
         leadingIcon = {
@@ -270,25 +289,6 @@ fun FeedListItemMenu(
           coroutineScope.launch { linkHandler.openLink(feed.homepageLink) }
         }
       )
-
-      val hasUnreadPostsInFeed = feed.numberOfUnreadPosts > 0
-      if (hasUnreadPostsInFeed) {
-        Divider(modifier = Modifier.padding(vertical = 4.dp))
-
-        DropdownMenuItem(
-          text = { Text(text = LocalStrings.current.markAllAsRead) },
-          leadingIcon = {
-            Icon(
-              imageVector = TwineIcons.DoneAll,
-              contentDescription = LocalStrings.current.markAllAsRead
-            )
-          },
-          onClick = {
-            showDropdownMenu = false
-            onMarkFeedAsRead(feed)
-          },
-        )
-      }
     }
   }
 }
