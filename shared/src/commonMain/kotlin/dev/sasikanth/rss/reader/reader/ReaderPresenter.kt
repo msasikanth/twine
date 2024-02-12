@@ -182,6 +182,8 @@ class ReaderPresenter(
       if (content.isSuccess) {
         val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
         _state.update { it.copy(content = htmlContent) }
+      } else {
+        loadRssContent()
       }
 
       _state.update { it.copy(postMode = Source) }
