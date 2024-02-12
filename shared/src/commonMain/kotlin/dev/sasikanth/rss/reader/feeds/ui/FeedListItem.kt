@@ -179,13 +179,22 @@ private fun ActionButtons(
         )
       }
     } else {
-      FeedListItemMenu(feed = feed, onMarkFeedAsRead = onMarkFeedAsRead)
+      FeedListItemMenu(
+        feed = feed,
+        onMarkFeedAsRead = onMarkFeedAsRead,
+        onFeedInfoClick = onFeedInfoClick
+      )
     }
   }
 }
 
 @Composable
-fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Modifier = Modifier) {
+fun FeedListItemMenu(
+  feed: Feed,
+  onMarkFeedAsRead: (Feed) -> Unit,
+  modifier: Modifier = Modifier,
+  onFeedInfoClick: (Feed) -> Unit
+) {
   Box(modifier) {
     var showDropdownMenu by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -205,6 +214,20 @@ fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Mod
       onDismissRequest = { showDropdownMenu = false },
       offset = DpOffset(x = 0.dp, y = (-48).dp)
     ) {
+      DropdownMenuItem(
+        text = { Text(text = LocalStrings.current.getFeedInfo) },
+        leadingIcon = {
+          Icon(
+            imageVector = Icons.TwoTone.Info,
+            contentDescription = LocalStrings.current.getFeedInfo,
+          )
+        },
+        onClick = {
+          showDropdownMenu = false
+          onFeedInfoClick(feed)
+        }
+      )
+
       DropdownMenuItem(
         text = { Text(text = LocalStrings.current.share) },
         leadingIcon = {
