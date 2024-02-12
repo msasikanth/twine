@@ -71,3 +71,6 @@ SELECT COUNT(*) FROM feed;
 
 updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE link = :link;
+
+canFetchSourceArticle:
+SELECT alwaysFetchSourceArticle FROM feed WHERE link = :link;
