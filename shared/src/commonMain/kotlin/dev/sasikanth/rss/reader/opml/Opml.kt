@@ -28,4 +28,4 @@ internal data class Outline(
   @XmlSerialName("outline") val outlines: List<Outline>?
 )
 
-data class OpmlFeed(val title: String, val link: String)
+data class OpmlFeed(val title: String?, val link: String)

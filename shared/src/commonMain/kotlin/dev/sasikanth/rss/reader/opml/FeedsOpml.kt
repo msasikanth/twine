@@ -82,7 +82,6 @@ class FeedsOpml {
     Outline(text = feed.name, title = feed.name, type = "rss", xmlUrl = feed.link, outlines = null)
 
   private fun mapOutlineToOpmlFeed(outline: Outline): OpmlFeed {
-    val title = outline.title ?: outline.text ?: outline.xmlUrl!!
-    return OpmlFeed(title = title, link = outline.xmlUrl!!)
+    return OpmlFeed(title = outline.title, link = outline.xmlUrl!!)
   }
 }
