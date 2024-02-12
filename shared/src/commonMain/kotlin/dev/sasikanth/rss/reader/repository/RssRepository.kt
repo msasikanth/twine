@@ -401,6 +401,12 @@ class RssRepository(
     return withContext(ioDispatcher) { postQueries.post(link, ::Post).executeAsOne() }
   }
 
+  suspend fun updateFeedAlwaysFetchSource(feedLink: String, newValue: Boolean) {
+    return withContext(ioDispatcher) {
+      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedLink)
+    }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
