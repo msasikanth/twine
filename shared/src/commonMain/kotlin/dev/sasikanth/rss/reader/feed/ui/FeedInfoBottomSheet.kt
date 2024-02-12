@@ -34,16 +34,15 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.Divider as Material3Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -60,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.FeedLabelInput
@@ -90,22 +90,21 @@ fun FeedInfoBottomSheet(
   // Doing this before `ModalBottomSheet` as this value is not available
   // after `ModalSheetConsumes` insets, I think? It's returning 0 when
   // I do this inside `ModalBottomSheet`.
-  val systemBarsBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+  val systemBarsBottomPadding =
+    WindowInsets.systemBars
+      .only(WindowInsetsSides.Bottom)
+      .asPaddingValues()
+      .calculateBottomPadding()
 
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
-    contentColor = AppTheme.colorScheme.tintedForeground,
+    contentColor = Color.Unspecified,
     windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
+    sheetState = SheetState(skipPartiallyExpanded = true)
   ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(bottom = 16.dp + systemBarsBottomPadding)
-          .verticalScroll(rememberScrollState())
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp + systemBarsBottomPadding)) {
       Spacer(Modifier.requiredHeight(8.dp))
 
       val feed = state.feed
@@ -114,6 +113,7 @@ fun FeedInfoBottomSheet(
           Modifier.requiredSize(64.dp)
             .background(Color.White, RoundedCornerShape(16.dp))
             .padding(horizontal = 24.dp)
+            .align(Alignment.CenterHorizontally)
         ) {
           AsyncImage(
             url = feed.icon,
@@ -134,18 +134,9 @@ fun FeedInfoBottomSheet(
           textAlign = TextAlign.Center
         )
 
-        Spacer(Modifier.requiredHeight(8.dp))
+        Spacer(Modifier.requiredHeight(16.dp))
 
-        RemoveFeedButton(modifier = Modifier.padding(horizontal = 24.dp), feed = feed) {
-          feedPresenter.dispatch(FeedEvent.RemoveFeedClicked)
-        }
-
-        Spacer(Modifier.requiredHeight(8.dp))
-
-        Divider(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-          color = AppTheme.colorScheme.tintedSurface
-        )
+        Divider()
 
         AlwaysFetchSourceArticleSwitch(
           feed = feed,
@@ -154,12 +145,21 @@ fun FeedInfoBottomSheet(
           }
         )
 
-        Divider(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-          color = AppTheme.colorScheme.tintedSurface
-        )
+        Divider()
+
+        Spacer(Modifier.requiredHeight(8.dp))
+
+        RemoveFeedButton(
+          modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally),
+          feed = feed
+        ) {
+          feedPresenter.dispatch(FeedEvent.RemoveFeedClicked)
+        }
       } else {
-        CircularProgressIndicator(color = AppTheme.colorScheme.tintedForeground)
+        CircularProgressIndicator(
+          modifier = Modifier.align(Alignment.CenterHorizontally),
+          color = AppTheme.colorScheme.tintedForeground
+        )
       }
     }
   }
@@ -194,10 +194,10 @@ private fun AlwaysFetchSourceArticleSwitch(
     MaterialTheme(
       colorScheme =
         darkColorScheme(
-          primary = AppTheme.colorScheme.tintedSurface,
+          primary = AppTheme.colorScheme.tintedHighlight,
           onPrimary = AppTheme.colorScheme.tintedForeground,
           outline = AppTheme.colorScheme.outline,
-          surfaceVariant = AppTheme.colorScheme.surfaceContainer
+          surfaceVariant = AppTheme.colorScheme.surfaceContainerLowest
         )
     ) {
       Switch(
@@ -244,4 +244,12 @@ private fun RemoveFeedButton(
       )
     }
   }
+}
+
+@Composable
+private fun Divider(horizontalInsets: Dp = 0.dp) {
+  Material3Divider(
+    modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
+    color = AppTheme.colorScheme.tintedHighlight
+  )
 }
