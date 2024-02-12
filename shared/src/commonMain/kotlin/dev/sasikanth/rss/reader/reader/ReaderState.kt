@@ -32,7 +32,7 @@ internal data class ReaderState(
 ) {
 
   val hasContent: Boolean
-    get() = content != null && feed != null && !publishedAt.isNullOrBlank()
+    get() = feed != null && !publishedAt.isNullOrBlank()
 
   companion object {
 

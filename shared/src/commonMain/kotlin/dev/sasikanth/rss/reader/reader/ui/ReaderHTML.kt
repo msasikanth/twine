@@ -23,11 +23,11 @@ internal fun readerHTML(
   feedName: String,
   feedHomePageLink: String,
   publishedAt: String,
-  content: String,
+  content: String?,
   colors: ReaderHTMLColors,
   featuredImage: String?,
 ): String {
-  val hasImgTags = content.contains("""<img[^>]*>""".toRegex())
+  val hasImgTags = content?.contains("""<img[^>]*>""".toRegex()) ?: false
 
   // language=HTML
   return """
@@ -58,7 +58,7 @@ internal fun readerHTML(
       // no-op  
       ""
     }}
-    $content
+    ${content ?: ""}
     <script>
       ${ReaderJs.content}
     </script>

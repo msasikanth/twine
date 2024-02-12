@@ -216,7 +216,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
               publishedAt = state.publishedAt!!,
-              content = state.content!!,
+              content = state.content,
               colors =
                 ReaderHTMLColors(
                   textColor = textColor,
