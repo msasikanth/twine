@@ -23,11 +23,11 @@ internal fun readerHTML(
   feedName: String,
   feedHomePageLink: String,
   publishedAt: String,
-  content: String,
+  content: String?,
   colors: ReaderHTMLColors,
   featuredImage: String?,
 ): String {
-  val hasImgTags = content.contains("""<img[^>]*>""".toRegex())
+  val hasImgTags = content?.contains("""<img[^>]*>""".toRegex()) ?: false
 
   // language=HTML
   return """
@@ -58,7 +58,7 @@ internal fun readerHTML(
       // no-op  
       ""
     }}
-    $content
+    ${content ?: ""}
     <script>
       ${ReaderJs.content}
     </script>
@@ -145,6 +145,18 @@ private object ReaderJs {
         let img = imgs[i];
         if (img.hasAttribute("data-src")) {
           img.src = String(img.getAttribute("data-src"));
+        } else if (img.hasAttribute("data-runner-src")) {
+          img.src = String(img.getAttribute("data-runner-src"));
+        }
+      }
+    }
+    
+    function processIFrames() {
+      let iframes = document.querySelectorAll("iframe")
+      for (let i=0, max=iframes.length; i<max; i++) {
+        let iframe = iframes[i];
+        if (iframe.hasAttribute("data-runner-src")) {
+          iframe.src = String(iframe.getAttribute("data-runner-src"));
         }
       }
     }
@@ -159,6 +171,7 @@ private object ReaderJs {
     document.addEventListener("DOMContentLoaded", function () {
       processLinks();
       processImgs();
+      processIFrames();
       removeTitle();
     });
   """

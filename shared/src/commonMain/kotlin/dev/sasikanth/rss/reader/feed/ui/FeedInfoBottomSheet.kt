@@ -17,9 +17,11 @@
 package dev.sasikanth.rss.reader.feed.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -36,11 +38,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider as Material3Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.FeedLabelInput
@@ -83,27 +90,31 @@ fun FeedInfoBottomSheet(
   // Doing this before `ModalBottomSheet` as this value is not available
   // after `ModalSheetConsumes` insets, I think? It's returning 0 when
   // I do this inside `ModalBottomSheet`.
-  val systemBarsBottomPadding = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+  val systemBarsBottomPadding =
+    WindowInsets.systemBars
+      .only(WindowInsetsSides.Bottom)
+      .asPaddingValues()
+      .calculateBottomPadding()
 
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
-    contentColor = AppTheme.colorScheme.tintedForeground,
+    contentColor = Color.Unspecified,
     windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
+    sheetState = SheetState(skipPartiallyExpanded = true)
   ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(horizontal = 24.dp)
-          .padding(bottom = 16.dp + systemBarsBottomPadding)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp + systemBarsBottomPadding)) {
       Spacer(Modifier.requiredHeight(8.dp))
 
       val feed = state.feed
       if (feed != null) {
-        Box(Modifier.requiredSize(64.dp).background(Color.White, RoundedCornerShape(16.dp))) {
+        Box(
+          Modifier.requiredSize(64.dp)
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .padding(horizontal = 24.dp)
+            .align(Alignment.CenterHorizontally)
+        ) {
           AsyncImage(
             url = feed.icon,
             contentDescription = feed.name,
@@ -115,6 +126,7 @@ fun FeedInfoBottomSheet(
         Spacer(Modifier.requiredHeight(24.dp))
 
         FeedLabelInput(
+          modifier = Modifier.padding(horizontal = 24.dp),
           value = feed.name,
           onFeedNameChanged = { newFeedName ->
             feedPresenter.dispatch(FeedEvent.OnFeedNameChanged(newFeedName, feed.link))
@@ -122,19 +134,88 @@ fun FeedInfoBottomSheet(
           textAlign = TextAlign.Center
         )
 
+        Spacer(Modifier.requiredHeight(16.dp))
+
+        Divider()
+
+        AlwaysFetchSourceArticleSwitch(
+          feed = feed,
+          onValueChanged = { newValue, feedLink ->
+            feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedLink))
+          }
+        )
+
+        Divider()
+
         Spacer(Modifier.requiredHeight(8.dp))
 
-        RemoveFeedButton(feed) { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
+        RemoveFeedButton(
+          modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally),
+          feed = feed
+        ) {
+          feedPresenter.dispatch(FeedEvent.RemoveFeedClicked)
+        }
       } else {
-        CircularProgressIndicator(color = AppTheme.colorScheme.tintedForeground)
+        CircularProgressIndicator(
+          modifier = Modifier.align(Alignment.CenterHorizontally),
+          color = AppTheme.colorScheme.tintedForeground
+        )
       }
     }
   }
 }
 
 @Composable
-private fun RemoveFeedButton(feed: Feed, onRemoveFeedClick: () -> Unit) {
-  Box {
+private fun AlwaysFetchSourceArticleSwitch(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onValueChanged: (newValue: Boolean, feedLink: String) -> Unit
+) {
+  var checked by
+    remember(feed.alwaysFetchSourceArticle) { mutableStateOf(feed.alwaysFetchSourceArticle) }
+
+  Row(
+    modifier =
+      Modifier.clickable {
+          checked = !checked
+          onValueChanged(checked, feed.link)
+        }
+        .padding(vertical = 16.dp, horizontal = 24.dp)
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.alwaysFetchSourceArticle,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      style = MaterialTheme.typography.titleMedium
+    )
+
+    Spacer(Modifier.width(16.dp))
+
+    MaterialTheme(
+      colorScheme =
+        darkColorScheme(
+          primary = AppTheme.colorScheme.tintedHighlight,
+          onPrimary = AppTheme.colorScheme.tintedForeground,
+          outline = AppTheme.colorScheme.outline,
+          surfaceVariant = AppTheme.colorScheme.surfaceContainerLowest
+        )
+    ) {
+      Switch(
+        modifier = modifier,
+        checked = checked,
+        onCheckedChange = { newValue -> onValueChanged(newValue, feed.link) }
+      )
+    }
+  }
+}
+
+@Composable
+private fun RemoveFeedButton(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onRemoveFeedClick: () -> Unit
+) {
+  Box(modifier) {
     var showConfirmDialog by remember { mutableStateOf(false) }
 
     TextButton(
@@ -163,4 +244,12 @@ private fun RemoveFeedButton(feed: Feed, onRemoveFeedClick: () -> Unit) {
       )
     }
   }
+}
+
+@Composable
+private fun Divider(horizontalInsets: Dp = 0.dp) {
+  Material3Divider(
+    modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
+    color = AppTheme.colorScheme.tintedHighlight
+  )
 }

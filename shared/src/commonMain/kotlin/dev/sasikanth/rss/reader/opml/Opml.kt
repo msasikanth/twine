@@ -8,7 +8,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @XmlSerialName("opml")
 internal data class Opml(
   @XmlElement(value = false) val version: String?,
-  val head: Head,
+  @XmlElement(value = false) val head: Head?,
   val body: Body
 )
 
@@ -28,4 +28,4 @@ internal data class Outline(
   @XmlSerialName("outline") val outlines: List<Outline>?
 )
 
-data class OpmlFeed(val title: String, val link: String)
+data class OpmlFeed(val title: String?, val link: String)

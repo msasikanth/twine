@@ -116,5 +116,7 @@ val EnTwineStrings =
     markAsUnRead = "Mark as Unread",
     removeFeed = "Remove feed",
     delete = "Delete",
-    removeFeedDesc = { "Do you want to remove \"${it}\"?" }
+    removeFeedDesc = { "Do you want to remove \"${it}\"?" },
+    alwaysFetchSourceArticle = "Always fetch source article in Reading View",
+    getFeedInfo = "Get Info"
   )

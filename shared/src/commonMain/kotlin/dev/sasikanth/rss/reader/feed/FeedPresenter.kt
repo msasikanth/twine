@@ -103,7 +103,13 @@ class FeedPresenter(
         }
         FeedEvent.RemoveFeedClicked -> removeFeed()
         is FeedEvent.OnFeedNameChanged -> onFeedNameUpdated(event.newFeedName, event.feedLink)
+        is FeedEvent.OnAlwaysFetchSourceArticleChanged ->
+          onAlwaysFetchSourceArticleChanged(event.newValue, event.feedLink)
       }
+    }
+
+    private fun onAlwaysFetchSourceArticleChanged(newValue: Boolean, feedLink: String) {
+      coroutineScope.launch { rssRepository.updateFeedAlwaysFetchSource(feedLink, newValue) }
     }
 
     private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {

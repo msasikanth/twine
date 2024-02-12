@@ -126,29 +126,20 @@ class ReaderPresenter(
         val post = rssRepository.post(postLink)
         val feed = rssRepository.feed(post.feedLink)
 
-        // This is done for backward compatibility
-        val content = post.rawContent ?: post.description
-
-        val htmlContent =
-          if (content.isNotBlank()) {
-              // If the content parsed by readability is not an HTML, it will return
-              // null. In that scenario we simply pass the original content
-              extractArticleHtmlContent(postLink, content)
-            } else {
-              null
-            }
-            .orEmpty()
-
         _state.update {
           it.copy(
             title = post.title,
-            content = htmlContent,
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
             feed = feed,
-            postMode = RssContent,
             postImage = post.imageUrl
           )
+        }
+
+        if (feed.alwaysFetchSourceArticle) {
+          loadSourceArticle()
+        } else {
+          loadRssContent()
         }
       }
     }
@@ -178,7 +169,8 @@ class ReaderPresenter(
 
     private suspend fun loadRssContent() {
       _state.update { it.copy(postMode = InProgress) }
-      val postContent = rssRepository.post(postLink).rawContent.orEmpty()
+      val post = rssRepository.post(postLink)
+      val postContent = post.rawContent ?: post.description
       val htmlContent = extractArticleHtmlContent(postLink, postContent)
       _state.update { it.copy(content = htmlContent, postMode = RssContent) }
     }
@@ -190,6 +182,8 @@ class ReaderPresenter(
       if (content.isSuccess) {
         val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
         _state.update { it.copy(content = htmlContent) }
+      } else {
+        loadRssContent()
       }
 
       _state.update { it.copy(postMode = Source) }

@@ -1,0 +1,3 @@
+import kotlin.Boolean;
+
+ALTER TABLE feed ADD COLUMN alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0;

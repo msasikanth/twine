@@ -29,4 +29,5 @@ data class Feed(
   val pinnedAt: Instant?,
   val lastCleanUpAt: Instant? = null,
   val numberOfUnreadPosts: Long = 0L,
+  val alwaysFetchSourceArticle: Boolean = false,
 )
