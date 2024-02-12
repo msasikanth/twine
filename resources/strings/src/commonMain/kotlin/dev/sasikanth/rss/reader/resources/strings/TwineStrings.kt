@@ -105,7 +105,8 @@ data class TwineStrings(
   val markAsUnRead: String,
   val removeFeed: String,
   val delete: String,
-  val removeFeedDesc: (String) -> String
+  val removeFeedDesc: (String) -> String,
+  val alwaysFetchSourceArticle: String
 )
 
 object Locales {
