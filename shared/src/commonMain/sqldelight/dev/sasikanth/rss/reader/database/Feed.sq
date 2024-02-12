@@ -74,3 +74,6 @@ UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE link = :link;
 
 canFetchSourceArticle:
 SELECT alwaysFetchSourceArticle FROM feed WHERE link = :link;
+
+updateAlwaysFetchSourceArticle:
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE link = :link;
