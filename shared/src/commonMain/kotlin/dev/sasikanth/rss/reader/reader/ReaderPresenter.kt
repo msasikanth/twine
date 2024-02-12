@@ -126,29 +126,20 @@ class ReaderPresenter(
         val post = rssRepository.post(postLink)
         val feed = rssRepository.feed(post.feedLink)
 
-        // This is done for backward compatibility
-        val content = post.rawContent ?: post.description
-
-        val htmlContent =
-          if (content.isNotBlank()) {
-              // If the content parsed by readability is not an HTML, it will return
-              // null. In that scenario we simply pass the original content
-              extractArticleHtmlContent(postLink, content)
-            } else {
-              null
-            }
-            .orEmpty()
-
         _state.update {
           it.copy(
             title = post.title,
-            content = htmlContent,
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
             feed = feed,
-            postMode = RssContent,
             postImage = post.imageUrl
           )
+        }
+
+        if (feed.alwaysFetchSourceArticle) {
+          loadSourceArticle()
+        } else {
+          loadRssContent()
         }
       }
     }
