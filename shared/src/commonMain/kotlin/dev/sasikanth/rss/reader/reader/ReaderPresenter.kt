@@ -178,7 +178,8 @@ class ReaderPresenter(
 
     private suspend fun loadRssContent() {
       _state.update { it.copy(postMode = InProgress) }
-      val postContent = rssRepository.post(postLink).rawContent.orEmpty()
+      val post = rssRepository.post(postLink)
+      val postContent = post.rawContent ?: post.description
       val htmlContent = extractArticleHtmlContent(postLink, postContent)
       _state.update { it.copy(content = htmlContent, postMode = RssContent) }
     }
