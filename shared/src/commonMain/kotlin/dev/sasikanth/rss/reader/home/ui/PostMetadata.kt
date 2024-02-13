@@ -256,7 +256,8 @@ private fun PostOptionsButtonRow(
           },
           leadingIcon = {
             Icon(
-              TwineIcons.Website,
+              modifier = Modifier.requiredSize(24.dp),
+              imageVector = TwineIcons.Website,
               contentDescription = null,
               tint = AppTheme.colorScheme.onSurface,
             )
