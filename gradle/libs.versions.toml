@@ -32,9 +32,6 @@ kotlininject = "0.6.3"
 ksp = "1.9.22-1.0.17"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.2"
-sentry = "0.3.0"
-sentry_android = "4.3.0"
-buildKonfig = "0.15.1"
 sqliteAndroid = "3.45.0"
 windowSizeClass = "0.3.2"
 desugarJdk = "2.0.4"
@@ -98,7 +95,6 @@ kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
-sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
@@ -129,8 +125,6 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
-buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
-sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
 bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]

@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.opml
 
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.serialization.serializer
 import me.tatarka.inject.annotations.Inject
 import nl.adaptivity.xmlutil.serialization.XML
@@ -51,7 +50,8 @@ class FeedsOpml {
         .appendLine()
         .toString()
     } catch (e: Exception) {
-      Sentry.captureException(e)
+      // TODO: Report error
+      //      Sentry.captureException(e)
       ""
     }
   }
@@ -73,7 +73,8 @@ class FeedsOpml {
 
       opmlFeeds.distinctBy { it.link }
     } catch (e: Exception) {
-      Sentry.captureException(e)
+      // TODO: Report error
+      //      Sentry.captureException(e)
       emptyList()
     }
   }

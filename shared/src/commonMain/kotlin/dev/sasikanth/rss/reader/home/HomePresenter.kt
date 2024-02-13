@@ -45,7 +45,6 @@ import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.http.HttpStatusCode
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -316,7 +315,8 @@ class HomePresenter(
             }
           }
         } catch (e: Exception) {
-          Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
+          // TODO: Report error
+          //          Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
         } finally {
           _state.update {
@@ -335,9 +335,10 @@ class HomePresenter(
           effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
         }
         is XmlParsingError -> {
-          Sentry.captureException(feedAddResult.exception) { scope ->
-            scope.setContext("feed_url", feedLink)
-          }
+          // TODO: Report error
+          //          Sentry.captureException(feedAddResult.exception) { scope ->
+          //            scope.setContext("feed_url", feedLink)
+          //          }
           effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
         }
         is ConnectTimeoutException,
@@ -345,9 +346,10 @@ class HomePresenter(
           effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
         }
         else -> {
-          Sentry.captureException(feedAddResult.exception) { scope ->
-            scope.setContext("feed_url", feedLink)
-          }
+          // TODO: Report error
+          //          Sentry.captureException(feedAddResult.exception) { scope ->
+          //            scope.setContext("feed_url", feedLink)
+          //          }
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(feedAddResult.exception)))
         }
       }
@@ -378,9 +380,10 @@ class HomePresenter(
     }
 
     private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
-      Sentry.captureException(databaseError.exception) { scope ->
-        scope.setContext("feed_url", feedLink)
-      }
+      // TODO: Report error
+      //      Sentry.captureException(databaseError.exception) { scope ->
+      //        scope.setContext("feed_url", feedLink)
+      //      }
     }
 
     private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
@@ -417,7 +420,8 @@ class HomePresenter(
             rssRepository.updateFeeds()
           }
         } catch (e: Exception) {
-          Sentry.captureException(e)
+          // TODO: Report error
+          //          Sentry.captureException(e)
         } finally {
           _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
         }

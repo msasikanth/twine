@@ -26,7 +26,6 @@ import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
-import io.sentry.Sentry
 import java.time.Duration
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -67,7 +66,8 @@ class PostsCleanUpWorker(
     } catch (e: CancellationException) {
       // no-op
     } catch (e: Exception) {
-      Sentry.captureException(e)
+      // TODO: Report error
+      //      Sentry.captureException(e)
     }
 
     return Result.failure()

@@ -24,9 +24,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
-import io.sentry.kotlin.multiplatform.Sentry
-import io.sentry.kotlin.multiplatform.SentryLevel
-import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
 import java.lang.Exception
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
@@ -64,9 +61,10 @@ class FeedsRefreshWorker(
       } catch (e: CancellationException) {
         Result.failure()
       } catch (e: Exception) {
-        Sentry.captureException(e) {
-          it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
-        }
+        // TODO: Report error
+        //        Sentry.captureException(e) {
+        //          it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
+        //        }
         Result.failure()
       }
     } else {
