@@ -166,7 +166,11 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
-              Icon(TwineIcons.Website, contentDescription = null)
+              Icon(
+                modifier = Modifier.requiredSize(24.dp),
+                imageVector = TwineIcons.Website,
+                contentDescription = null
+              )
             }
           }
 
