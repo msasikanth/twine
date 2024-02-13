@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+  jvmToolchain(20)
+
   androidTarget()
   jvm()
   listOf(iosArm64(), iosSimulatorArm64())
