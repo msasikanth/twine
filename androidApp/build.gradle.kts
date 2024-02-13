@@ -98,4 +98,5 @@ dependencies {
   implementation(libs.sentry)
   coreLibraryDesugaring(libs.desugarJdk)
   implementation(libs.kotlinx.datetime)
+  implementation(libs.bugsnag)
 }

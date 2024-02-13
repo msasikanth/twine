@@ -48,6 +48,8 @@ ktxml = "0.2.3"
 uri = "0.0.16"
 webview = "1.8.8"
 uuid = "0.8.2"
+bugsnag-plugin = "8.1.0"
+bugsnag = "6.2.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -113,6 +115,7 @@ ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
+bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
@@ -128,6 +131,7 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
 sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
+bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
 compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
