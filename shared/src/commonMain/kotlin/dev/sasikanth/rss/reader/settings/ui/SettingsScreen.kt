@@ -81,6 +81,8 @@ import dev.sasikanth.rss.reader.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.repository.Period.THREE_MONTHS
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
@@ -107,7 +109,7 @@ internal fun SettingsScreen(
           title = { Text(LocalStrings.current.settings) },
           navigationIcon = {
             IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =

@@ -27,7 +27,12 @@ kotlin {
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
-    val commonMain by getting { dependencies { api(libs.compose.foundation) } }
+    val commonMain by getting {
+      dependencies {
+        api(libs.compose.foundation)
+        api(libs.compose.material.icons.extended)
+      }
+    }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
   }
 }
