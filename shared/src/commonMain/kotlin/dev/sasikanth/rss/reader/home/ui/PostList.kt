@@ -44,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -157,7 +156,7 @@ fun PostListItem(
         modifier = Modifier.weight(1f).align(Alignment.Top),
         style = MaterialTheme.typography.titleMedium,
         text = item.title.ifBlank { item.description },
-        color = Color.White,
+        color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
       )

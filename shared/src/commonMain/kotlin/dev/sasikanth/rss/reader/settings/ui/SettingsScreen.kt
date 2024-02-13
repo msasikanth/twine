@@ -27,11 +27,9 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,7 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -66,7 +63,6 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -85,7 +81,7 @@ import dev.sasikanth.rss.reader.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.resources.icons.EditorsChoice
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -113,7 +109,7 @@ internal fun SettingsScreen(
           title = { Text(LocalStrings.current.settings) },
           navigationIcon = {
             IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =
@@ -142,12 +138,6 @@ internal fun SettingsScreen(
               bottom = padding.calculateBottomPadding() + 80.dp
             ),
         ) {
-          item {
-            OpenSource {
-              coroutineScope.launch { linkHandler.openLink(Constants.OPEN_SOURCE_LINK) }
-            }
-          }
-
           item {
             SubHeader(
               text = LocalStrings.current.settingsHeaderBehaviour,
@@ -240,39 +230,6 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
-}
-
-@Composable
-private fun OpenSource(openLink: () -> Unit) {
-  Surface(
-    color = AppTheme.colorScheme.tintedSurface,
-    shape = MaterialTheme.shapes.extraLarge,
-    modifier = Modifier.fillMaxWidth().padding(16.dp),
-    onClick = { openLink() }
-  ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
-      Icon(
-        TwineIcons.EditorsChoice,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurface,
-        modifier = Modifier.size(64.dp)
-      )
-      Spacer(Modifier.height(16.dp))
-      Text(
-        LocalStrings.current.openSource,
-        style = MaterialTheme.typography.titleMedium,
-        textAlign = TextAlign.Center,
-        color = AppTheme.colorScheme.onSurface
-      )
-      Spacer(Modifier.height(12.dp))
-      Text(
-        LocalStrings.current.openSourceDesc,
-        style = MaterialTheme.typography.bodyMedium,
-        textAlign = TextAlign.Center,
-        color = AppTheme.colorScheme.onSurface
-      )
-    }
-  }
 }
 
 @Composable

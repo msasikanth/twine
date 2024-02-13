@@ -34,7 +34,9 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
@@ -104,7 +106,12 @@ fun FeedInfoBottomSheet(
     windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
     sheetState = SheetState(skipPartiallyExpanded = true)
   ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp + systemBarsBottomPadding)) {
+    Column(
+      modifier =
+        Modifier.fillMaxWidth()
+          .padding(bottom = 16.dp + systemBarsBottomPadding)
+          .verticalScroll(rememberScrollState())
+    ) {
       Spacer(Modifier.requiredHeight(8.dp))
 
       val feed = state.feed
@@ -180,7 +187,8 @@ private fun AlwaysFetchSourceArticleSwitch(
           checked = !checked
           onValueChanged(checked, feed.link)
         }
-        .padding(vertical = 16.dp, horizontal = 24.dp)
+        .padding(vertical = 16.dp, horizontal = 24.dp),
+    verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
       modifier = Modifier.weight(1f),

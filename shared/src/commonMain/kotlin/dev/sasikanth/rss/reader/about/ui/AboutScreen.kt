@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -62,6 +61,7 @@ import dev.sasikanth.rss.reader.about.Social
 import dev.sasikanth.rss.reader.components.bottomsheet.fastForEach
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.GitHub
 import dev.sasikanth.rss.reader.resources.icons.Threads
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -135,7 +135,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
           title = { Text(strings.about) },
           navigationIcon = {
             IconButton(onClick = { aboutPresenter.dispatch(AboutEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =

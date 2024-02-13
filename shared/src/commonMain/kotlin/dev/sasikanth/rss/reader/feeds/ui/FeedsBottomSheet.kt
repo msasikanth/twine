@@ -92,6 +92,8 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -502,7 +504,7 @@ private fun SearchBar(
               when (feedsSheetMode) {
                 Default,
                 LinkEntry -> Icons.Rounded.KeyboardArrowDown
-                Edit -> Icons.Rounded.ArrowBack
+                Edit -> TwineIcons.ArrowBack
               }
             IconButton(onClick = onNavigationIconClick) {
               Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.tintedForeground)

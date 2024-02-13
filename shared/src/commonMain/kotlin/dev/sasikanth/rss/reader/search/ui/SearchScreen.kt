@@ -75,6 +75,7 @@ import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -239,7 +240,7 @@ private fun SearchBar(
           leadingIcon = {
             IconButton(onClick = onBackClick) {
               Icon(
-                Icons.Rounded.ArrowBack,
+                TwineIcons.ArrowBack,
                 contentDescription = null,
                 tint = AppTheme.colorScheme.onSurface
               )

@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -61,6 +60,7 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -256,7 +256,8 @@ private fun PostOptionsButtonRow(
           },
           leadingIcon = {
             Icon(
-              TwineIcons.Website,
+              modifier = Modifier.requiredSize(24.dp),
+              imageVector = TwineIcons.Website,
               contentDescription = null,
               tint = AppTheme.colorScheme.onSurface,
             )
@@ -279,7 +280,7 @@ private fun PostOptionsButtonRow(
           },
           leadingIcon = {
             Icon(
-              Icons.Filled.Share,
+              TwineIcons.Share,
               contentDescription = null,
               tint = AppTheme.colorScheme.onSurface,
             )

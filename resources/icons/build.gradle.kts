@@ -16,16 +16,32 @@
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.android.library)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
 }
 
 kotlin {
+  jvmToolchain(20)
+
+  androidTarget()
   jvm()
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
-    val commonMain by getting { dependencies { api(libs.compose.foundation) } }
+    val commonMain by getting {
+      dependencies {
+        api(libs.compose.foundation)
+        api(libs.compose.material.icons.extended)
+      }
+    }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
   }
+}
+
+android {
+  compileSdk = libs.versions.android.sdk.compile.get().toInt()
+  namespace = "dev.sasikanth.rss.reader.resources.icons"
+
+  defaultConfig { minSdk = libs.versions.android.sdk.min.get().toInt() }
 }
