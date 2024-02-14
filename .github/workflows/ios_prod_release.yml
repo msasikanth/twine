@@ -12,7 +12,6 @@ jobs:
     runs-on: macos-14
     env:
       TERM: dumb
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
       BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
     steps:
       - name: Configure Tramline
