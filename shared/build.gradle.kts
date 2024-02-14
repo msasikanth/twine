@@ -55,7 +55,6 @@ kotlin {
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "15.0"
     podfile = project.file("../iosApp/Podfile")
-    pod("Bugsnag")
 
     framework {
       baseName = "shared"

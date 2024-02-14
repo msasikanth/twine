@@ -66,6 +66,7 @@ jobs:
 
       - name: Pod Install
         run:  |
+          gem install cocoapods-bugsnag;
           ./gradlew --no-daemon podInstall;
 
       - name: Build Archive
