@@ -38,6 +38,9 @@ android {
     minSdk = libs.versions.android.sdk.min.get().toInt()
     targetSdk = libs.versions.android.sdk.target.get().toInt()
 
+    val keyBugsnagAPIKey = "BUGSNAG_API_KEY"
+    manifestPlaceholders[keyBugsnagAPIKey] = System.getenv(keyBugsnagAPIKey).orEmpty()
+
     versionCode =
       if (project.properties["VERSION_CODE"] != null) {
         (project.properties["VERSION_CODE"] as String).toInt()
