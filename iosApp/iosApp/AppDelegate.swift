@@ -9,7 +9,7 @@
 import UIKit
 import shared
 import BackgroundTasks
-import Sentry
+import Bugsnag
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 	let rootHolder: RootHolder = RootHolder()
@@ -19,6 +19,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     )
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        #if !DEBUG
+        Bugsnag.start()
+        let config = BugsnagConfiguration.loadConfig()
+        BugsnagConfigKt.startBugsnag(config: config)
+        #endif
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
@@ -49,6 +54,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func cleanUpPosts(task: BGProcessingTask) {
+        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
+
         // Schedule next clean up task 24 hours in future
         scheduleCleanUpPosts(earliest: Date(timeIntervalSinceNow: 60 * 60 * 24))
         
@@ -63,15 +70,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 }
                 task.setTaskCompleted(success: true)
             } catch {
-                let breadcrumb = Breadcrumb()
-                breadcrumb.level = .info
-                breadcrumb.category = "Background"
-                
-                let scope = Scope()
-                scope.addBreadcrumb(breadcrumb)
-
-                SentrySDK.capture(error: error, scope: scope)
-                
+                Bugsnag.notifyError(error)
                 task.setTaskCompleted(success: false)
             }
         }
@@ -90,6 +89,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func refreshFeeds(task: BGProcessingTask) {
+        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
+
         scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: 60 * 60)) // 1 hour
         Task(priority: .background) {
             do {
@@ -101,14 +102,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 
                 task.setTaskCompleted(success: true)
             } catch {
-                let breadcrumb = Breadcrumb()
-                breadcrumb.level = .info
-                breadcrumb.category = "Background"
-                
-                let scope = Scope()
-                scope.addBreadcrumb(breadcrumb)
-
-                SentrySDK.capture(error: error, scope: scope)
+                Bugsnag.notifyError(error)
                 task.setTaskCompleted(success: false)
             }
         }
