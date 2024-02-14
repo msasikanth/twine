@@ -63,6 +63,7 @@ kotlin {
       export(libs.decompose)
       export(libs.essenty.lifecycle)
       export(libs.essenty.backhandler)
+      export(libs.crashkios.bugsnag)
     }
   }
 
@@ -112,6 +113,7 @@ kotlin {
       api(libs.coil.compose)
       api(libs.coil.network)
       api(libs.coil.svg)
+      api(libs.crashkios.bugsnag)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
