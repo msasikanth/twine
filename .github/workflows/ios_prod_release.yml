@@ -93,7 +93,7 @@ jobs:
       - name: Upload debug symbols to Bugsnag
         run: |
           cd $RUNNER_TEMP/twine.xcarchive/dSYMs/;
-          curl -http1.1 https://upload.bugsnag.com/ \
+          curl --http1.1 https://upload.bugsnag.com/ \
           -F apiKey=${BUGSNAG_API_KEY} \
           -F dsym=@Twine.app.dSYM/Contents/Resources/DWARF/MyApp \
 
