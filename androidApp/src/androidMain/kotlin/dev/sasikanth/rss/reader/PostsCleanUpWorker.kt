@@ -23,6 +23,8 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
@@ -66,8 +68,8 @@ class PostsCleanUpWorker(
     } catch (e: CancellationException) {
       // no-op
     } catch (e: Exception) {
-      // TODO: Report error
-      //      Sentry.captureException(e)
+      Bugsnag.leaveBreadcrumb("Background Worker")
+      BugsnagKotlin.sendFatalException(e)
     }
 
     return Result.failure()
