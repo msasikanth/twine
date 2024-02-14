@@ -1,10 +1,6 @@
 target 'iosApp' do
   use_frameworks!
   platform :ios, '15.0'
-
-  pod 'Bugsnag'
-  plugin 'cocoapods-bugsnag'
-
   pod 'shared', :path => '../shared'
-
+  plugin 'cocoapods-bugsnag'
 end
