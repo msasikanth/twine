@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
@@ -223,7 +224,14 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     IconButton(
-      onClick = { dropdownExpanded = true },
+      onClick = {
+        try {
+          dropdownExpanded = true
+          throw IllegalStateException("Handled exception from common code")
+        } catch (e: Exception) {
+          BugsnagKotlin.sendHandledException(e)
+        }
+      },
     ) {
       Icon(
         imageVector = Icons.Rounded.MoreVert,
@@ -242,6 +250,7 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
           onClick = {
             dropdownExpanded = false
             onSettingsClicked()
+            BugsnagKotlin.sendFatalException(Exception("Fatal exception from common code"))
           }
         )
       }
