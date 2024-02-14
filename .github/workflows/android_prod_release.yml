@@ -14,6 +14,7 @@ jobs:
       TERM: dumb
       ORG_GRADLE_PROJECT_READER_KEYSTORE_PASSWORD: ${{ secrets.READER_KEYSTORE_PASSWORD }}
       ORG_GRADLE_PROJECT_READER_KEY_PASSWORD: ${{ secrets.READER_KEY_PASSWORD }}
+      BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
     steps:
       - name: Configure Tramline
         id: tramline
