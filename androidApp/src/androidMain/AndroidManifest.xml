@@ -23,6 +23,10 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu">
+
+        <meta-data android:name="com.bugsnag.android.API_KEY"
+            android:value="${BUGSNAG_API_KEY}"/>
+
         <activity
             android:name="dev.sasikanth.rss.reader.MainActivity"
             android:exported="true"

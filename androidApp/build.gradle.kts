@@ -19,10 +19,7 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.sentry.android)
 }
-
-sentry { tracingInstrumentation { enabled = false } }
 
 kotlin {
   jvmToolchain(20)
@@ -40,6 +37,9 @@ android {
     applicationId = "dev.sasikanth.rss.reader"
     minSdk = libs.versions.android.sdk.min.get().toInt()
     targetSdk = libs.versions.android.sdk.target.get().toInt()
+
+    val keyBugsnagAPIKey = "BUGSNAG_API_KEY"
+    manifestPlaceholders[keyBugsnagAPIKey] = System.getenv(keyBugsnagAPIKey).orEmpty()
 
     versionCode =
       if (project.properties["VERSION_CODE"] != null) {
@@ -95,7 +95,7 @@ dependencies {
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
   implementation(libs.androidx.work)
-  implementation(libs.sentry)
   coreLibraryDesugaring(libs.desugarJdk)
   implementation(libs.kotlinx.datetime)
+  implementation(libs.bugsnag)
 }

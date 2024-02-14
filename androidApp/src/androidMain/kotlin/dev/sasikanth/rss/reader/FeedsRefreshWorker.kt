@@ -22,11 +22,10 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
-import io.sentry.kotlin.multiplatform.Sentry
-import io.sentry.kotlin.multiplatform.SentryLevel
-import io.sentry.kotlin.multiplatform.protocol.Breadcrumb
 import java.lang.Exception
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
@@ -64,9 +63,8 @@ class FeedsRefreshWorker(
       } catch (e: CancellationException) {
         Result.failure()
       } catch (e: Exception) {
-        Sentry.captureException(e) {
-          it.addBreadcrumb(Breadcrumb(level = SentryLevel.INFO, category = "Background"))
-        }
+        Bugsnag.leaveBreadcrumb("Background Worker")
+        BugsnagKotlin.sendFatalException(e)
         Result.failure()
       }
     } else {

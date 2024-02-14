@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
@@ -26,17 +25,8 @@ plugins {
   alias(libs.plugins.compose)
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.buildKonfig)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
-}
-
-buildkonfig {
-  packageName = "dev.sasikanth.reader"
-  defaultConfigs {
-    val sentryDsn = System.getenv("SENTRY_DSN")
-    buildConfigField(STRING, "SENTRY_DSN", sentryDsn.orEmpty())
-  }
 }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -65,7 +55,7 @@ kotlin {
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "15.0"
     podfile = project.file("../iosApp/Podfile")
-    pod("Sentry", "~> 8.4.0")
+    pod("Bugsnag")
 
     framework {
       baseName = "shared"
@@ -74,6 +64,7 @@ kotlin {
       export(libs.decompose)
       export(libs.essenty.lifecycle)
       export(libs.essenty.backhandler)
+      export(libs.crashkios.bugsnag)
     }
   }
 
@@ -109,7 +100,6 @@ kotlin {
       implementation(libs.androidx.collection)
       implementation(libs.material.color.utilities)
       implementation(libs.ksoup)
-      implementation(libs.sentry)
       implementation(libs.windowSizeClass)
       api(libs.androidx.datastore.okio)
       api(libs.androidx.datastore.preferences)
@@ -124,6 +114,7 @@ kotlin {
       api(libs.coil.compose)
       api(libs.coil.network)
       api(libs.coil.svg)
+      api(libs.crashkios.bugsnag)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
