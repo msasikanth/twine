@@ -70,8 +70,7 @@ jobs:
 
       - name: Build Archive
         run: |
-          xcodebuild BUGSNAG_API_KEY=${BUGSNAG_API_KEY} 
-          -workspace ./iosApp/iosApp.xcworkspace \
+          xcodebuild -workspace ./iosApp/iosApp.xcworkspace \
           -scheme iosApp \
           -archivePath $RUNNER_TEMP/twine.xcarchive \
           -sdk iphoneos \
@@ -79,6 +78,7 @@ jobs:
           -destination generic/platform=iOS \
           DEVELOPMENT_TEAM=6XCS8KZXDA \
           PROVISIONING_PROFILE=${{ secrets.PROVISION_PROFILE_ID }} \
+          BUGSNAG_API_KEY=${BUGSNAG_API_KEY} \
           clean archive
           CODE_SIGN_IDENTITY="iPhone Distribution: Sasi Kanth (6XCS8KZXDA)"
 
