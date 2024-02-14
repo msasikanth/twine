@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.opml
 
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.serialization.serializer
@@ -50,8 +51,7 @@ class FeedsOpml {
         .appendLine()
         .toString()
     } catch (e: Exception) {
-      // TODO: Report error
-      //      Sentry.captureException(e)
+      BugsnagKotlin.sendHandledException(e)
       ""
     }
   }
@@ -73,8 +73,7 @@ class FeedsOpml {
 
       opmlFeeds.distinctBy { it.link }
     } catch (e: Exception) {
-      // TODO: Report error
-      //      Sentry.captureException(e)
+      BugsnagKotlin.sendHandledException(e)
       emptyList()
     }
   }
