@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.core.network.di
 
+import co.touchlab.kermit.Logger as KermitLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -22,7 +23,6 @@ import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
-import co.touchlab.kermit.Logger as KermitLogger
 
 expect interface NetworkComponent
 

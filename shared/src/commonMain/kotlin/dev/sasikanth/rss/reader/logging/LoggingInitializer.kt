@@ -30,10 +30,7 @@ class LoggingInitializer : Initializer {
 
   @OptIn(ExperimentalKermitApi::class)
   override fun initialize() {
-    Logger.setLogWriters(
-      platformLogWriter(NoTagFormatter),
-      BugsnagLogWriter()
-    )
+    Logger.setLogWriters(platformLogWriter(NoTagFormatter), BugsnagLogWriter())
     Logger.setMinSeverity(Severity.Info)
   }
 }
