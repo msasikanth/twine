@@ -27,7 +27,9 @@ class ReaderLinkHandler(private val openLink: (String) -> Unit) : IJsMessageHand
     navigator: WebViewNavigator?,
     callback: (String) -> Unit
   ) {
-    openLink(message.params)
+    if (message.params.isNotBlank()) {
+      openLink(message.params)
+    }
   }
 
   override fun methodName(): String {
