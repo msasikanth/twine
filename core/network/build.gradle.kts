@@ -40,8 +40,6 @@ kotlin {
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
       implementation(libs.ksoup)
-      // TODO: Extract logging abstraction into separate module
-      implementation(libs.napier)
       implementation(libs.ktxml)
       implementation(libs.kermit)
     }
