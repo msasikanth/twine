@@ -24,31 +24,30 @@ internal object HtmlContentParser {
   fun parse(htmlContent: String): HtmlContent? {
     if (htmlContent.isBlank()) return null
 
-    val document =
-      try {
-        Ksoup.parse(htmlContent)
-      } catch (e: Exception) {
-        return null
+    return try {
+      val document = Ksoup.parse(htmlContent)
+
+      val imageUrl =
+        document
+          .getElementsByTag("img")
+          .firstOrNull { it.hasAttr("src") && !it.attr("src").endsWith(".gif") }
+          ?.attr("src")
+
+      val contentStringBuilder = StringBuilder()
+      document.getAllElements().forEach { element ->
+        if (allowedContentTags.contains(element.tagName())) {
+          contentStringBuilder.append(element.text().cleanWhitespaces())
+        }
+
+        if (element.tagName() == "p" || element.tagName() == "br") {
+          contentStringBuilder.appendLine()
+        }
       }
 
-    val imageUrl =
-      document
-        .getElementsByTag("img")
-        .firstOrNull { it.hasAttr("src") && !it.attr("src").endsWith(".gif") }
-        ?.attr("src")
-
-    val contentStringBuilder = StringBuilder()
-    document.getAllElements().forEach { element ->
-      if (allowedContentTags.contains(element.tagName())) {
-        contentStringBuilder.append(element.text().cleanWhitespaces())
-      }
-
-      if (element.tagName() == "p" || element.tagName() == "br") {
-        contentStringBuilder.appendLine()
-      }
+      HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString())
+    } catch (e: Exception) {
+      null
     }
-
-    return HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString())
   }
 
   private fun String.cleanWhitespaces(): String {
