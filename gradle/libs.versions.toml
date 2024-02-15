@@ -9,7 +9,6 @@ android_sdk_min = "26"
 
 sqldelight = "2.0.1"
 ktor = "2.3.8"
-napier = "2.7.1"
 kotlinx_coroutines = "1.7.3"
 kotlinx_date_time = "0.5.0"
 kotlinx_immutable_collections = "0.3.7"
@@ -48,6 +47,7 @@ uuid = "0.8.2"
 bugsnag-plugin = "8.1.0"
 bugsnag = "6.2.0"
 crashkios-bugsnag = "0.8.6"
+kermit = "2.0.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -62,7 +62,6 @@ ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor_client_logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version = { strictly = "[1.9.0, 1.9.21[", prefer="1.9.21" } }
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
@@ -114,6 +113,8 @@ webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", versio
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

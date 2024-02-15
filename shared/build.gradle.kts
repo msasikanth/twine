@@ -89,7 +89,6 @@ kotlin {
       implementation(libs.bundles.kotlinx)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
-      implementation(libs.napier)
       implementation(libs.sqldelight.extensions.coroutines)
       implementation(libs.sqldelight.extensions.paging)
       api(libs.decompose)
@@ -115,6 +114,8 @@ kotlin {
       api(libs.coil.network)
       api(libs.coil.svg)
       api(libs.crashkios.bugsnag)
+      implementation(libs.kermit)
+      implementation(libs.kermit.bugsnag)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

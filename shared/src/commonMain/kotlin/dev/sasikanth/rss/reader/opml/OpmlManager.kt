@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.opml
 
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
@@ -65,6 +67,7 @@ class OpmlManager(
     try {
       withContext(job) {
         val opmlXmlContent = fileManager.read()
+        Logger.i { opmlXmlContent.orEmpty() }
 
         if (!opmlXmlContent.isNullOrBlank()) {
           _result.emit(OpmlResult.InProgress.Importing(0))
@@ -83,6 +86,7 @@ class OpmlManager(
         return
       }
 
+      BugsnagKotlin.sendHandledException(e)
       _result.emit(OpmlResult.Error.UnknownFailure(e))
     }
   }
@@ -115,6 +119,7 @@ class OpmlManager(
         return
       }
 
+      BugsnagKotlin.sendHandledException(e)
       _result.emit(OpmlResult.Error.UnknownFailure(e))
     }
   }

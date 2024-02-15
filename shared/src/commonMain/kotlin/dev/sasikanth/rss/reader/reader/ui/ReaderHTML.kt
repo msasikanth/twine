@@ -120,7 +120,10 @@ private object ReaderJs {
     function handleLinkClick(event) {
         try {
           event.preventDefault();
-          let href = findHref(event.target);
+          var href = findHref(event.target);
+          if (href == undefined || href == "/") {
+            href = ""
+          }
           window.kmpJsBridge.callNative(
             "linkHandler", 
             href, 

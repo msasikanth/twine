@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.core.network.di
 
-import io.github.aakira.napier.log
+import co.touchlab.kermit.Logger as KermitLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
@@ -42,7 +42,7 @@ fun <T : HttpClientEngineConfig> httpClient(
       logger =
         object : Logger {
           override fun log(message: String) {
-            log(tag = "HttpClient") {
+            KermitLogger.i("HttpClient") {
               """
               |---
               |$message
