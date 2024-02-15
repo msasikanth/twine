@@ -14,25 +14,10 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.network.parser
+package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.Month
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 
-object TestClock : Clock {
+expect fun String?.dateStringToEpochMillis(clock: Clock = Clock.System): Long?
 
-  override fun now(): Instant {
-    return LocalDateTime(
-        year = 2023,
-        month = Month.JANUARY,
-        dayOfMonth = 1,
-        hour = 8,
-        minute = 0,
-      )
-      .toInstant(TimeZone.UTC)
-  }
-}
+data class DateTimeFormatException(val exception: Exception) : Exception()

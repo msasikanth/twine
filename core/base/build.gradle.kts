@@ -32,6 +32,8 @@ kotlin {
       implementation(libs.kotlininject.runtime)
     }
 
+    commonTest.dependencies { implementation(libs.kotlin.test) }
+
     androidMain.dependencies { implementation(libs.androidx.annotation) }
   }
 }

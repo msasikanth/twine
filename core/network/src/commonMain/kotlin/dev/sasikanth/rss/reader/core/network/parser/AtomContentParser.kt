@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType

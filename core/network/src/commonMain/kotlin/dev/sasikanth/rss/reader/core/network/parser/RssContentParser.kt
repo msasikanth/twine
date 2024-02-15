@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
