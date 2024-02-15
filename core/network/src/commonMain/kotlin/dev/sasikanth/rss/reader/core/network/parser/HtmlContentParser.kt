@@ -15,7 +15,9 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser
 
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
+import io.ktor.utils.io.charsets.MalformedInputException
 
 internal object HtmlContentParser {
 
@@ -46,6 +48,9 @@ internal object HtmlContentParser {
 
       HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString())
     } catch (e: Exception) {
+      null
+    } catch (e: MalformedInputException) {
+      BugsnagKotlin.sendHandledException(e)
       null
     }
   }

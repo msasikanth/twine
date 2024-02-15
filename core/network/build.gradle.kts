@@ -42,6 +42,7 @@ kotlin {
       implementation(libs.ksoup)
       implementation(libs.ktxml)
       implementation(libs.kermit)
+      implementation(libs.crashkios.bugsnag)
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
