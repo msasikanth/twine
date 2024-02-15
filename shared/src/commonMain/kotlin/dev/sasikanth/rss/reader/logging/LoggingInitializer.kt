@@ -16,15 +16,21 @@
 
 package dev.sasikanth.rss.reader.logging
 
+import co.touchlab.kermit.ExperimentalKermitApi
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.NoTagFormatter
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.bugsnag.BugsnagLogWriter
+import co.touchlab.kermit.platformLogWriter
 import dev.sasikanth.rss.reader.initializers.Initializer
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class LoggingInitializer : Initializer {
 
+  @OptIn(ExperimentalKermitApi::class)
   override fun initialize() {
-    Napier.base(DebugAntilog())
+    Logger.setLogWriters(platformLogWriter(NoTagFormatter), BugsnagLogWriter())
+    Logger.setMinSeverity(Severity.Info)
   }
 }
