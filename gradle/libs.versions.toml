@@ -48,6 +48,7 @@ uuid = "0.8.2"
 bugsnag-plugin = "8.1.0"
 bugsnag = "6.2.0"
 crashkios-bugsnag = "0.8.6"
+kermit = "2.0.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -114,6 +115,8 @@ webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", versio
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

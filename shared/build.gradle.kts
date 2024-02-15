@@ -115,6 +115,8 @@ kotlin {
       api(libs.coil.network)
       api(libs.coil.svg)
       api(libs.crashkios.bugsnag)
+      implementation(libs.kermit)
+      implementation(libs.kermit.bugsnag)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
