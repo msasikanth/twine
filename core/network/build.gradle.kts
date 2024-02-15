@@ -43,6 +43,7 @@ kotlin {
       // TODO: Extract logging abstraction into separate module
       implementation(libs.napier)
       implementation(libs.ktxml)
+      implementation(libs.kermit)
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
