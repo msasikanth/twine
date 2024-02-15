@@ -25,7 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import io.github.aakira.napier.log
+import co.touchlab.kermit.Logger
 
 @Composable
 @ReadOnlyComposable
@@ -59,5 +59,5 @@ internal class Ref(var value: Int)
 internal fun LogCompositions(tag: String, msg: String) {
   val ref = remember { Ref(0) }
   SideEffect { ref.value++ }
-  log(tag = tag) { "Compositions: $msg ${ref.value}" }
+  Logger.d(tag) { "Compositions: $msg ${ref.value}" }
 }

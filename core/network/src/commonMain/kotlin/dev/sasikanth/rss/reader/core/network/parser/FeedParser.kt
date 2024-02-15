@@ -15,12 +15,11 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.log
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
@@ -57,7 +56,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
         }
       }
     } catch (e: XmlPullParserException) {
-      log(LogLevel.ERROR, throwable = e) { "Failed to parse the XML" }
+      Logger.e(throwable = e) { "Failed to parse the feed" }
       throw XmlParsingError(e.stackTraceToString())
     }
   }
