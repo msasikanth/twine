@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,25 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.network.parser
+package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 
-internal expect fun String?.dateStringToEpochMillis(clock: Clock = Clock.System): Long?
+object TestClock : Clock {
 
-data class DateTimeFormatException(val exception: Exception) : Exception()
+  override fun now(): Instant {
+    return LocalDateTime(
+        year = 2023,
+        month = Month.JANUARY,
+        dayOfMonth = 1,
+        hour = 8,
+        minute = 0,
+      )
+      .toInstant(TimeZone.UTC)
+  }
+}
