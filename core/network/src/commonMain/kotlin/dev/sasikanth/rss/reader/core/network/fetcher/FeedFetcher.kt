@@ -145,7 +145,13 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   private fun fetchFeedLinkFromHtmlIfExists(htmlContent: String, originalUrl: String): String? {
-    val document = Ksoup.parse(htmlContent)
+    val document =
+      try {
+        Ksoup.parse(htmlContent)
+      } catch (t: Throwable) {
+        return null
+      }
+
     val linkElement =
       document.getElementsByTag(TAG_LINK).firstOrNull {
         val linkType = it.attr(ATTR_TYPE)
