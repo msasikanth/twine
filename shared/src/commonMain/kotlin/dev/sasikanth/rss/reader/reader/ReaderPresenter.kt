@@ -145,8 +145,10 @@ class ReaderPresenter(
     }
 
     private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      val articleContent =
-        withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
+      val article =
+        withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse()
+          ?: return content
+      val articleContent = article.content
 
       if (articleContent.isNullOrBlank()) return content
 
