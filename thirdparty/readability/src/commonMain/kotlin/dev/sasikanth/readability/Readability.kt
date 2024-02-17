@@ -96,7 +96,7 @@ open class Readability {
       setArticleMetadata(article, metadata, articleContent)
 
       return article
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       return null
     }
   }
