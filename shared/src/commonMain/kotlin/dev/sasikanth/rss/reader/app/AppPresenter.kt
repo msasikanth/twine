@@ -30,8 +30,6 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnStart
-import com.arkivanov.essenty.parcelable.Parcelable
-import com.arkivanov.essenty.parcelable.Parcelize
 import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -47,6 +45,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Inject
 
 private typealias HomePresenterFactory =
@@ -131,6 +130,7 @@ class AppPresenter(
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
       source = navigation,
+      serializer = Config.serializer(),
       initialConfiguration = Config.Home,
       handleBackButton = true,
       childFactory = ::createScreen,
@@ -139,6 +139,7 @@ class AppPresenter(
   internal val modalStack: Value<ChildSlot<*, Modals>> =
     childSlot(
       source = modalNavigation,
+      serializer = ModalConfig.serializer(),
       handleBackButton = true,
       childFactory = ::createModal,
     )
@@ -238,21 +239,24 @@ class AppPresenter(
     }
   }
 
-  sealed interface Config : Parcelable {
-    @Parcelize data object Home : Config
+  @Serializable
+  sealed interface Config {
 
-    @Parcelize data object Search : Config
+    @Serializable data object Home : Config
 
-    @Parcelize data object Bookmarks : Config
+    @Serializable data object Search : Config
 
-    @Parcelize data object Settings : Config
+    @Serializable data object Bookmarks : Config
 
-    @Parcelize data object About : Config
+    @Serializable data object Settings : Config
 
-    @Parcelize data class Reader(val postLink: String) : Config
+    @Serializable data object About : Config
+
+    @Serializable data class Reader(val postLink: String) : Config
   }
 
-  sealed interface ModalConfig : Parcelable {
-    @Parcelize data class FeedInfo(val feedLink: String) : ModalConfig
+  @Serializable
+  sealed interface ModalConfig {
+    @Serializable data class FeedInfo(val feedLink: String) : ModalConfig
   }
 }
