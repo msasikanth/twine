@@ -25,6 +25,4 @@ sealed interface ReaderEvent {
   data object TogglePostBookmark : ReaderEvent
 
   data object ArticleShortcutClicked : ReaderEvent
-
-  data object MarkPostAsRead : ReaderEvent
 }
