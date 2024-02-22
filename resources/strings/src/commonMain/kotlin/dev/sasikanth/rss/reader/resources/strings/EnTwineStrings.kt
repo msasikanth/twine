@@ -89,6 +89,9 @@ val EnTwineStrings =
     settingsPostsDeletionPeriodThreeMonths = "3 months",
     settingsPostsDeletionPeriodSixMonths = "6 months",
     settingsPostsDeletionPeriodOneYear = "1 year",
+    settingsShowReaderViewTitle = "Show reader view",
+    settingsShowReaderViewSubtitle =
+      "When disabled, the posts are opened in the browser instead of in-app reader view",
     feeds = "Feeds",
     editFeeds = "Edit feeds",
     comments = "Comments",

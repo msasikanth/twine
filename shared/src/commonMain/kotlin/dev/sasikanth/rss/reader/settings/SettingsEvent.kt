@@ -28,6 +28,8 @@ sealed interface SettingsEvent {
 
   data class ToggleShowUnreadPostsCount(val value: Boolean) : SettingsEvent
 
+  data class ToggleShowReaderView(val value: Boolean) : SettingsEvent
+
   data object AboutClicked : SettingsEvent
 
   data object ImportOpmlClicked : SettingsEvent

@@ -30,6 +30,7 @@ internal data class SettingsState(
   val appInfo: AppInfo,
   val opmlResult: OpmlResult?,
   val postsDeletionPeriod: Period?,
+  val showReaderView: Boolean,
 ) {
 
   companion object {
@@ -37,12 +38,13 @@ internal data class SettingsState(
     fun default(appInfo: AppInfo) =
       SettingsState(
         browserType = BrowserType.Default,
-        enableHomePageBlur = true,
-        showUnreadPostsCount = true,
+        enableHomePageBlur = false,
+        showUnreadPostsCount = false,
         hasFeeds = false,
         appInfo = appInfo,
         opmlResult = null,
-        postsDeletionPeriod = null
+        postsDeletionPeriod = null,
+        showReaderView = false,
       )
   }
 }
