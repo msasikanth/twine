@@ -142,6 +142,7 @@ class SettingsPresenter(
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
         is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
         is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
+        is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
         SettingsEvent.AboutClicked -> {
           // no-op
         }
@@ -150,6 +151,10 @@ class SettingsPresenter(
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       }
+    }
+
+    private fun toggleShowReaderView(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleShowReaderView(value) }
     }
 
     private fun postsDeletionPeriodChanged(newPeriod: Period) {

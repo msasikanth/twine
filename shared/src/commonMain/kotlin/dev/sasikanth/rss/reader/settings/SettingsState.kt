@@ -30,6 +30,7 @@ internal data class SettingsState(
   val appInfo: AppInfo,
   val opmlResult: OpmlResult?,
   val postsDeletionPeriod: Period?,
+  val showReaderView: Boolean,
 ) {
 
   companion object {
@@ -42,7 +43,8 @@ internal data class SettingsState(
         hasFeeds = false,
         appInfo = appInfo,
         opmlResult = null,
-        postsDeletionPeriod = null
+        postsDeletionPeriod = null,
+        showReaderView = true,
       )
   }
 }
