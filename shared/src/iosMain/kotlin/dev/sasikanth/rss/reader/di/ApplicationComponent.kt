@@ -24,6 +24,7 @@ import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import platform.Foundation.NSBundle
 import platform.UIKit.UIViewController
+import kotlin.experimental.ExperimentalNativeApi
 
 @AppScope
 @Component
@@ -39,6 +40,7 @@ abstract class ApplicationComponent(
 
   @Provides
   @AppScope
+  @OptIn(ExperimentalNativeApi::class)
   fun providesAppInfo(): AppInfo =
     AppInfo(
       versionCode =
