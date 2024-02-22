@@ -22,15 +22,23 @@ import co.touchlab.kermit.NoTagFormatter
 import co.touchlab.kermit.Severity
 import co.touchlab.kermit.bugsnag.BugsnagLogWriter
 import co.touchlab.kermit.platformLogWriter
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.initializers.Initializer
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class LoggingInitializer : Initializer {
+class LoggingInitializer(private val appInfo: AppInfo) : Initializer {
 
   @OptIn(ExperimentalKermitApi::class)
   override fun initialize() {
-    Logger.setLogWriters(platformLogWriter(NoTagFormatter), BugsnagLogWriter())
+    val loggers =
+      if (appInfo.isDebugBuild) {
+        listOf(platformLogWriter(NoTagFormatter))
+      } else {
+        listOf(platformLogWriter(NoTagFormatter), BugsnagLogWriter())
+      }
+
+    Logger.setLogWriters(loggers)
     Logger.setMinSeverity(Severity.Info)
   }
 }
