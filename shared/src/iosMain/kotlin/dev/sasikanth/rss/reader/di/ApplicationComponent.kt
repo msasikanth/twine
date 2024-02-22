@@ -45,5 +45,6 @@ abstract class ApplicationComponent(
         (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0,
       versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
           ?: "",
+      isDebugBuild = Platform.isDebugBinary,
     )
 }

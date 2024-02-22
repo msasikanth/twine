@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.di
 
 import android.content.Context
+import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
@@ -41,6 +42,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   fun providesAppInfo(context: Context): AppInfo {
     val packageManager = context.packageManager
     val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
+    val applicationInfo = packageManager.getApplicationInfo(context.packageName, 0)
+
     val versionCode =
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         (packageInfo.longVersionCode and 0xffffffffL).toInt()
@@ -51,6 +54,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
     return AppInfo(
       versionName = packageInfo.versionName,
       versionCode = versionCode,
+      isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0
     )
   }
 

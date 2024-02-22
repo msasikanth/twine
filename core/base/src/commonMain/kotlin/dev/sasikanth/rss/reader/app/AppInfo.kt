@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,4 +16,4 @@
 
 package dev.sasikanth.rss.reader.app
 
-data class AppInfo(val versionCode: Int, val versionName: String)
+data class AppInfo(val versionCode: Int, val versionName: String, val isDebugBuild: Boolean)
