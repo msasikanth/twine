@@ -29,22 +29,27 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.essenty.lifecycle.doOnStart
 import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Inject
 
@@ -103,7 +108,7 @@ private typealias FeedPresenterFactory =
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
   private val homePresenter: HomePresenterFactory,
   private val searchPresenter: SearchPresentFactory,
   private val bookmarksPresenter: BookmarkPresenterFactory,
@@ -112,7 +117,9 @@ class AppPresenter(
   private val readerPresenter: ReaderPresenterFactory,
   private val feedPresenter: FeedPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
-  private val rssRepository: RssRepository
+  private val rssRepository: RssRepository,
+  private val settingsRepository: SettingsRepository,
+  private val linkHandler: LinkHandler,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -144,6 +151,8 @@ class AppPresenter(
       childFactory = ::createModal,
     )
 
+  private val scope = coroutineScope(dispatchersProvider.main + SupervisorJob())
+
   init {
     lifecycle.doOnStart { presenterInstance.refreshFeedsIfExpired() }
   }
@@ -172,29 +181,19 @@ class AppPresenter(
               { navigation.push(Config.Search) },
               { navigation.push(Config.Bookmarks) },
               { navigation.push(Config.Settings) },
-              { navigation.push(Config.Reader(it)) },
+              { openPost(it) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
             )
         )
       }
       Config.Search -> {
         Screen.Search(
-          presenter =
-            searchPresenter(
-              componentContext,
-              { navigation.pop() },
-              { navigation.push(Config.Reader(it)) }
-            )
+          presenter = searchPresenter(componentContext, { navigation.pop() }, { openPost(it) })
         )
       }
       Config.Bookmarks -> {
         Screen.Bookmarks(
-          presenter =
-            bookmarksPresenter(
-              componentContext,
-              { navigation.pop() },
-              { navigation.push(Config.Reader(it)) }
-            )
+          presenter = bookmarksPresenter(componentContext, { navigation.pop() }, { openPost(it) })
         )
       }
       Config.Settings -> {
@@ -216,6 +215,21 @@ class AppPresenter(
         )
       }
     }
+
+  private fun openPost(postLink: String) {
+    scope.launch {
+      val showReaderView =
+        withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
+
+      if (showReaderView) {
+        navigation.push(Config.Reader(postLink))
+      } else {
+        linkHandler.openLink(postLink)
+      }
+
+      rssRepository.updatePostReadStatus(read = true, link = postLink)
+    }
+  }
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
