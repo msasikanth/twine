@@ -60,6 +60,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -108,7 +109,7 @@ fun FeedInfoBottomSheet(
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = Color.Unspecified,
     windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
-    sheetState = SheetState(skipPartiallyExpanded = true)
+    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current)
   ) {
     val bottomPadding =
       if (keyboardState == KeyboardState.Closed) {
