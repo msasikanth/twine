@@ -40,7 +40,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider as Material3Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -267,7 +267,7 @@ private fun RemoveFeedButton(
 
 @Composable
 private fun Divider(horizontalInsets: Dp = 0.dp) {
-  Material3Divider(
+  HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
     color = AppTheme.colorScheme.tintedHighlight
   )

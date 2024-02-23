@@ -37,7 +37,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -147,7 +147,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
             ),
         )
 
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -217,9 +217,9 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
       }
     }
 
-    Divider(
-      color = AppTheme.colorScheme.surfaceContainer,
-      modifier = Modifier.align(Alignment.BottomStart)
+    HorizontalDivider(
+      modifier = Modifier.align(Alignment.BottomStart),
+      color = AppTheme.colorScheme.surfaceContainer
     )
   }
 }
