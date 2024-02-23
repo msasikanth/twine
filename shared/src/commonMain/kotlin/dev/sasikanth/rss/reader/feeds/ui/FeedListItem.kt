@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -35,6 +36,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -97,31 +99,38 @@ internal fun FeedListItem(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box(contentAlignment = Alignment.Center) {
-        SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
-
-        Box(
-          modifier =
-            Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
-          contentAlignment = Alignment.Center
-        ) {
-          BadgedBox(
-            badge = {
-              val numberOfUnreadPosts = feed.numberOfUnreadPosts
-              if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
-                Badge(
-                  containerColor = AppTheme.colorScheme.tintedForeground,
-                  contentColor = AppTheme.colorScheme.tintedBackground,
-                  modifier =
-                    Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
-                      translationX = -8.dp.toPx()
-                      translationY = 4.dp.toPx()
-                    }
-                ) {
-                  Text(feed.numberOfUnreadPosts.toString())
+      BadgedBox(
+        badge = {
+          val numberOfUnreadPosts = feed.numberOfUnreadPosts
+          if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
+            Badge(
+              containerColor = AppTheme.colorScheme.tintedForeground,
+              contentColor = AppTheme.colorScheme.tintedBackground,
+              modifier =
+                Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
+                  translationX = -12.dp.toPx()
+                  translationY = 4.dp.toPx()
                 }
-              }
+            ) {
+              Text(
+                text = feed.numberOfUnreadPosts.toString(),
+                style = MaterialTheme.typography.labelSmall,
+                modifier =
+                  Modifier.align(Alignment.CenterVertically).graphicsLayer {
+                    translationY = -2.toDp().toPx()
+                  }
+              )
             }
+          }
+        }
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
+
+          Box(
+            modifier =
+              Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
           ) {
             AsyncImage(
               url = feed.icon,

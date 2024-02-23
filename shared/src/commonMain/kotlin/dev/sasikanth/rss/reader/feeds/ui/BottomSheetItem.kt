@@ -58,35 +58,42 @@ internal fun BottomSheetItem(
   selected: Boolean = false,
 ) {
   Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-    Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected, animationProgress = 1f)
-      Box(
-        modifier = Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
-      ) {
-        BadgedBox(
-          badge = {
-            if (badgeCount > 0 && canShowUnreadPostsCount) {
-              Badge(
-                containerColor = AppTheme.colorScheme.tintedForeground,
-                contentColor = AppTheme.colorScheme.tintedBackground,
-                modifier =
-                  Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
-                    translationX = -8.dp.toPx()
-                    translationY = 4.dp.toPx()
-                  },
-              ) {
-                val badgeText =
-                  if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
-                    "+$BADGE_COUNT_TRIM_LIMIT"
-                  } else {
-                    badgeCount.toString()
-                  }
-
-                Text(badgeText)
+    BadgedBox(
+      badge = {
+        if (badgeCount > 0 && canShowUnreadPostsCount) {
+          Badge(
+            containerColor = AppTheme.colorScheme.tintedForeground,
+            contentColor = AppTheme.colorScheme.tintedBackground,
+            modifier =
+              Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
+                translationX = -12.dp.toPx()
+              },
+          ) {
+            val badgeText =
+              if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
+                "+$BADGE_COUNT_TRIM_LIMIT"
+              } else {
+                badgeCount.toString()
               }
-            }
+
+            Text(
+              text = badgeText,
+              style = MaterialTheme.typography.labelSmall,
+              modifier =
+                Modifier.align(Alignment.CenterVertically).graphicsLayer {
+                  translationY = -2.toDp().toPx()
+                }
+            )
           }
+        }
+      }
+    ) {
+      Box(contentAlignment = Alignment.Center) {
+        SelectionIndicator(selected = selected, animationProgress = 1f)
+        Box(
+          modifier =
+            Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
+          contentAlignment = Alignment.Center
         ) {
           AsyncImage(
             url = iconUrl,
