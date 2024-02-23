@@ -521,15 +521,15 @@ private fun SearchBar(
           enabled = feedsSheetMode != LinkEntry,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Unspecified,
-              unfocusedContainerColor = Color.Unspecified,
-              disabledContainerColor = Color.Unspecified,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
+              disabledContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              disabledTextColor = Color.Unspecified,
-              unfocusedIndicatorColor = Color.Unspecified,
-              focusedIndicatorColor = Color.Unspecified,
-              disabledIndicatorColor = Color.Unspecified,
-              errorIndicatorColor = Color.Unspecified
+              disabledTextColor = Color.Transparent,
+              unfocusedIndicatorColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent
             )
         )
       }
