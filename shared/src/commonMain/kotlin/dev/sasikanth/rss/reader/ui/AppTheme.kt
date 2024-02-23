@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import org.jetbrains.compose.resources.Font
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.golos_medium
+import twine.shared.generated.resources.golos_regular
 
 @Composable
 internal fun AppTheme(
