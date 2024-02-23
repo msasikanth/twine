@@ -72,6 +72,8 @@ import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedPresenter
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -98,6 +100,8 @@ fun FeedInfoBottomSheet(
       .asPaddingValues()
       .calculateBottomPadding()
 
+  val keyboardState by keyboardVisibilityAsState()
+
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
@@ -106,10 +110,17 @@ fun FeedInfoBottomSheet(
     windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
     sheetState = SheetState(skipPartiallyExpanded = true)
   ) {
+    val bottomPadding =
+      if (keyboardState == KeyboardState.Closed) {
+        systemBarsBottomPadding
+      } else {
+        0.dp
+      }
+
     Column(
       modifier =
         Modifier.fillMaxWidth()
-          .padding(bottom = 16.dp + systemBarsBottomPadding)
+          .padding(bottom = 16.dp + bottomPadding)
           .verticalScroll(rememberScrollState())
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
