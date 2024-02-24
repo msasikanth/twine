@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -87,7 +88,12 @@ class TagsPresenter(
         is TagsEvent.TagClicked -> {
           // no-op
         }
+        is TagsEvent.CreateTag -> createTag(event.label)
       }
+    }
+
+    private fun createTag(label: String) {
+      coroutineScope.launch { tagRepository.createTag(label = label) }
     }
 
     private fun init() {
