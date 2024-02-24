@@ -25,4 +25,6 @@ sealed interface TagsEvent {
   data class TagClicked(val tag: Tag) : TagsEvent
 
   data class CreateTag(val label: String) : TagsEvent
+
+  data object BackClicked : TagsEvent
 }
