@@ -16,15 +16,14 @@
 
 package dev.sasikanth.rss.reader.repository
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
+import app.cash.paging.PagingSource
+import app.cash.sqldelight.paging3.QueryPagingSource
 import com.benasher44.uuid.Uuid
 import com.benasher44.uuid.uuid4
 import dev.sasikanth.rss.reader.core.model.local.Tag
 import dev.sasikanth.rss.reader.database.TagQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import me.tatarka.inject.annotations.Inject
@@ -55,7 +54,14 @@ class TagRepository(
     withContext(dispatchersProvider.io) { tagQueries.updateTag(label = label, id = id) }
   }
 
-  fun tags(label: String? = null): Flow<List<Tag>> {
-    return tagQueries.tags(label.orEmpty(), ::Tag).asFlow().mapToList(dispatchersProvider.io)
+  fun tags(): PagingSource<Int, Tag> {
+    return QueryPagingSource(
+      countQuery = tagQueries.countTags(),
+      transacter = tagQueries,
+      context = dispatchersProvider.io,
+      queryProvider = { limit, offset ->
+        tagQueries.tags(limit = limit, offset = offset, mapper = ::Tag)
+      }
+    )
   }
 }
