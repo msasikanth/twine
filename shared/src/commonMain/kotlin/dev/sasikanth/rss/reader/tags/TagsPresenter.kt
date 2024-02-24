@@ -22,7 +22,6 @@ import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.benasher44.uuid.Uuid
 import dev.sasikanth.rss.reader.repository.TagRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -42,7 +41,7 @@ class TagsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val tagRepository: TagRepository,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val onTagSelected: (tagId: Uuid) -> Unit,
+  @Assisted private val onTagSelected: (tagId: String) -> Unit,
   @Assisted private val goBack: () -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -55,7 +54,7 @@ class TagsPresenter(
 
   fun dispatch(event: TagsEvent) {
     when (event) {
-      is TagsEvent.TagClicked -> onTagSelected(event.tag.id)
+      is TagsEvent.TagClicked -> onTagSelected(event.tag.id.toString())
       is TagsEvent.BackClicked -> goBack()
       else -> {
         // no-op
