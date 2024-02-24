@@ -121,5 +121,10 @@ val EnTwineStrings =
     delete = "Delete",
     removeFeedDesc = { "Do you want to remove \"${it}\"?" },
     alwaysFetchSourceArticle = "Always fetch source article in Reading View",
-    getFeedInfo = "Get Info"
+    getFeedInfo = "Get Info",
+    newTag = "New tag",
+    tags = "Tags",
+    addTagTitle = "Add tag",
+    newTagHint = "Name",
+    tagSaveButton = "Save"
   )

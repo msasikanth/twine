@@ -36,6 +36,13 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias TagsPresenterFactory =
+  (
+    ComponentContext,
+    onTagSelected: (id: String) -> Unit,
+    goBack: () -> Unit,
+  ) -> TagsPresenter
+
 @Inject
 class TagsPresenter(
   dispatchersProvider: DispatchersProvider,

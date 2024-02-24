@@ -43,6 +43,7 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.search.SearchPresentFactory
 import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
+import dev.sasikanth.rss.reader.tags.TagsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -65,6 +66,7 @@ class AppPresenter(
   private val aboutPresenter: AboutPresenterFactory,
   private val readerPresenter: ReaderPresenterFactory,
   private val feedPresenter: FeedPresenterFactory,
+  private val tagsPresenter: TagsPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -163,6 +165,23 @@ class AppPresenter(
           presenter = readerPresenter(config.postLink, componentContext) { navigation.pop() }
         )
       }
+      is Config.Tags -> {
+        Screen.Tags(
+          selectedTag = config.selectedTag,
+          presenter =
+            tagsPresenter(
+              componentContext,
+              { navigation.pop() },
+              {
+                navigation.pop(
+                  onComplete = {
+                    // TODO: Handle selected tag
+                  }
+                )
+              }
+            )
+        )
+      }
     }
 
   private fun openPost(postLink: String) {
@@ -216,6 +235,8 @@ class AppPresenter(
     @Serializable data object About : Config
 
     @Serializable data class Reader(val postLink: String) : Config
+
+    @Serializable data class Tags(val selectedTag: String? = null) : Config
   }
 
   @Serializable
