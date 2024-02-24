@@ -42,7 +42,7 @@ class TagsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val tagRepository: TagRepository,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val goBack: (tagId: Uuid) -> Unit,
+  @Assisted private val onTagSelected: (tagId: Uuid) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -54,7 +54,7 @@ class TagsPresenter(
 
   fun dispatch(event: TagsEvent) {
     when (event) {
-      is TagsEvent.TagClicked -> goBack(event.tag.id)
+      is TagsEvent.TagClicked -> onTagSelected(event.tag.id)
       else -> {
         // no-op
       }
