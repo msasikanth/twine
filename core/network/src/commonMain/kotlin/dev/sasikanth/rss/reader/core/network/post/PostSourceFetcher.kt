@@ -48,7 +48,7 @@ class PostSourceFetcher(
           val content = response.bodyAsText()
           return@withContext Result.success(content)
         }
-      } catch (e: Exception) {
+      } catch (t: Throwable) {
         // no-op
       }
 
