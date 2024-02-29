@@ -38,7 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider as MaterialDivider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -120,7 +120,7 @@ internal fun SettingsScreen(
             ),
         )
 
-        MaterialDivider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -735,7 +735,7 @@ private fun AboutProfileImages() {
 
 @Composable
 private fun Divider(horizontalInsets: Dp = 0.dp) {
-  MaterialDivider(
+  HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
     color = AppTheme.colorScheme.surfaceContainer
   )

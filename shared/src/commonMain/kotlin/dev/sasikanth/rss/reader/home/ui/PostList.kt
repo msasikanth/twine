@@ -34,7 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -121,7 +121,7 @@ internal fun PostsList(
       }
 
       if (index != posts.itemCount - 1) {
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
           color = AppTheme.colorScheme.surfaceContainer
         )
