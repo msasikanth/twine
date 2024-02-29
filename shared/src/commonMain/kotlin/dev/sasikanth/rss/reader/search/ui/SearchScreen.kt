@@ -36,9 +36,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -154,7 +153,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
               )
 
               if (index != searchResults.itemCount - 1) {
-                Divider(
+                HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                   color = AppTheme.colorScheme.surfaceContainer
                 )
@@ -265,19 +264,19 @@ private fun SearchBar(
           textStyle = MaterialTheme.typography.bodyLarge,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Unspecified,
-              unfocusedContainerColor = Color.Unspecified,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              unfocusedIndicatorColor = Color.Unspecified,
-              focusedIndicatorColor = Color.Unspecified,
-              disabledIndicatorColor = Color.Unspecified,
-              errorIndicatorColor = Color.Unspecified
+              unfocusedIndicatorColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent,
             )
         )
       }
     }
 
-    Divider(
+    HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
       color = AppTheme.colorScheme.surfaceContainer
     )

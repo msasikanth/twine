@@ -53,10 +53,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -280,12 +279,12 @@ private fun BottomSheetExpandedContent(
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
 
-                  Divider(color = AppTheme.colorScheme.tintedSurface)
+                  HorizontalDivider(color = AppTheme.colorScheme.tintedSurface)
 
-                  Divider(
-                    color = AppTheme.colorScheme.tintedSurface,
+                  HorizontalDivider(
                     modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
+                    color = AppTheme.colorScheme.tintedSurface
                   )
                 }
               }
@@ -299,10 +298,10 @@ private fun BottomSheetExpandedContent(
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
 
-                  Divider(
-                    color = AppTheme.colorScheme.tintedSurface,
+                  HorizontalDivider(
                     modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
+                    color = AppTheme.colorScheme.tintedSurface
                   )
                 }
               }
@@ -354,7 +353,10 @@ private fun FeedsSheetBottomBar(
         }
         .then(modifier)
     ) {
-      Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+      HorizontalDivider(
+        Modifier.align(Alignment.TopStart),
+        color = AppTheme.colorScheme.tintedSurface
+      )
       Box(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 20.dp)) {
         // Placeholder view with similar height of primary action button and input field
         // from the home screen
@@ -521,21 +523,21 @@ private fun SearchBar(
           enabled = feedsSheetMode != LinkEntry,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Unspecified,
-              unfocusedContainerColor = Color.Unspecified,
-              disabledContainerColor = Color.Unspecified,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
+              disabledContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              disabledTextColor = Color.Unspecified,
-              unfocusedIndicatorColor = Color.Unspecified,
-              focusedIndicatorColor = Color.Unspecified,
-              disabledIndicatorColor = Color.Unspecified,
-              errorIndicatorColor = Color.Unspecified
+              disabledTextColor = Color.Transparent,
+              unfocusedIndicatorColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent
             )
         )
       }
     }
 
-    Divider(
+    HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
       color = AppTheme.colorScheme.tintedSurface
     )
