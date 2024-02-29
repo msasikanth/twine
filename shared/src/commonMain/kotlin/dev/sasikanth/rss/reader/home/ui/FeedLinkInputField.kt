@@ -50,6 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun FeedLinkInputField(
@@ -64,7 +65,13 @@ internal fun FeedLinkInputField(
   val focusRequester = remember { FocusRequester() }
   val focusManager = LocalFocusManager.current
 
-  LaunchedEffect(Unit) { focusRequester.requestFocus() }
+  LaunchedEffect(Unit) {
+    // Sync between requesting focus and ime padding is broken for some reason after updating
+    // to Compose v1.6.0. Adding delay resolves the issue for time being. Will check the cause for
+    // this later.
+    delay(50)
+    focusRequester.requestFocus()
+  }
 
   fun onAddFeed() {
     if (!isInputBlank) {
