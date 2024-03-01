@@ -39,6 +39,13 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias BookmarksPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openReaderView: (String) -> Unit,
+  ) -> BookmarksPresenter
+
 @Inject
 class BookmarksPresenter(
   dispatchersProvider: DispatchersProvider,

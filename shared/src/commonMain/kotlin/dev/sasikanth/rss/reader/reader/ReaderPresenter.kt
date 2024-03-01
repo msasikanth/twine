@@ -41,6 +41,13 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias ReaderPresenterFactory =
+  (
+    postLink: String,
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> ReaderPresenter
+
 @Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,

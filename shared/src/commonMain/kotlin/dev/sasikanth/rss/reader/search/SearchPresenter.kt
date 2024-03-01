@@ -50,6 +50,13 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias SearchPresentFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openPost: (String) -> Unit,
+  ) -> SearchPresenter
+
 @Inject
 class SearchPresenter(
   rssRepository: RssRepository,

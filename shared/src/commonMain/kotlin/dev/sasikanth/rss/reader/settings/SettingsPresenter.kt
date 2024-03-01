@@ -40,6 +40,13 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias SettingsPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openAbout: () -> Unit,
+  ) -> SettingsPresenter
+
 @Inject
 class SettingsPresenter(
   dispatchersProvider: DispatchersProvider,
