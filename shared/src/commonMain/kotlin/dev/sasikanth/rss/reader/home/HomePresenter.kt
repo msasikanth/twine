@@ -69,6 +69,16 @@ import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias HomePresenterFactory =
+  (
+    ComponentContext,
+    openSearch: () -> Unit,
+    openBookmarks: () -> Unit,
+    openSettings: () -> Unit,
+    openPost: (String) -> Unit,
+    openFeedInfo: (String) -> Unit,
+  ) -> HomePresenter
+
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(

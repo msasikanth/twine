@@ -31,18 +31,18 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.essenty.lifecycle.doOnStart
-import dev.sasikanth.rss.reader.about.AboutPresenter
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
+import dev.sasikanth.rss.reader.about.AboutPresenterFactory
+import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
+import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
-import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
-import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.search.SearchPresentFactory
+import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -53,57 +53,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Inject
 
-private typealias HomePresenterFactory =
-  (
-    ComponentContext,
-    openSearch: () -> Unit,
-    openBookmarks: () -> Unit,
-    openSettings: () -> Unit,
-    openPost: (String) -> Unit,
-    openFeedInfo: (String) -> Unit,
-  ) -> HomePresenter
-
-private typealias SearchPresentFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openPost: (String) -> Unit,
-  ) -> SearchPresenter
-
-private typealias BookmarkPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openReaderView: (String) -> Unit,
-  ) -> BookmarksPresenter
-
-private typealias SettingsPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openAbout: () -> Unit,
-  ) -> SettingsPresenter
-
-private typealias AboutPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> AboutPresenter
-
-private typealias ReaderPresenterFactory =
-  (
-    postLink: String,
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> ReaderPresenter
-
-private typealias FeedPresenterFactory =
-  (
-    feedLink: String,
-    ComponentContext,
-    dismiss: () -> Unit,
-  ) -> FeedPresenter
-
 @Inject
 @ActivityScope
 class AppPresenter(
@@ -111,7 +60,7 @@ class AppPresenter(
   private val dispatchersProvider: DispatchersProvider,
   private val homePresenter: HomePresenterFactory,
   private val searchPresenter: SearchPresentFactory,
-  private val bookmarksPresenter: BookmarkPresenterFactory,
+  private val bookmarksPresenter: BookmarksPresenterFactory,
   private val settingsPresenter: SettingsPresenterFactory,
   private val aboutPresenter: AboutPresenterFactory,
   private val readerPresenter: ReaderPresenterFactory,
