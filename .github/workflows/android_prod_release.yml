@@ -47,13 +47,19 @@ jobs:
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
       - name: Build release artifacts
-        run: ./gradlew --no-daemon androidApp:bundleRelease
+        run: ./gradlew --no-daemon androidApp:bundleRelease androidApp:assembleRelease
 
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v4
         with:
           name: release.aab
           path: androidApp/build/outputs/bundle/release/androidApp-release.aab
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release.apk
+          path: androidApp/build/outputs/apk/release/androidApp-release.apk
 
       - name: Clean secrets
         run: |
