@@ -32,7 +32,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -99,31 +98,7 @@ internal fun FeedListItem(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      BadgedBox(
-        badge = {
-          val numberOfUnreadPosts = feed.numberOfUnreadPosts
-          if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
-            Badge(
-              containerColor = AppTheme.colorScheme.tintedForeground,
-              contentColor = AppTheme.colorScheme.tintedBackground,
-              modifier =
-                Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
-                  translationX = -12.dp.toPx()
-                  translationY = 4.dp.toPx()
-                }
-            ) {
-              Text(
-                text = feed.numberOfUnreadPosts.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                modifier =
-                  Modifier.align(Alignment.CenterVertically).graphicsLayer {
-                    translationY = -2.toDp().toPx()
-                  }
-              )
-            }
-          }
-        }
-      ) {
+      Box {
         Box(contentAlignment = Alignment.Center) {
           SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
 
@@ -140,6 +115,24 @@ internal fun FeedListItem(
                 Modifier.requiredSize(48.dp)
                   .clip(RoundedCornerShape(12.dp))
                   .align(Alignment.Center),
+            )
+          }
+        }
+
+        val numberOfUnreadPosts = feed.numberOfUnreadPosts
+        if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
+          Badge(
+            containerColor = AppTheme.colorScheme.tintedForeground,
+            contentColor = AppTheme.colorScheme.tintedBackground,
+            modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd)
+          ) {
+            Text(
+              text = feed.numberOfUnreadPosts.toString(),
+              style = MaterialTheme.typography.labelSmall,
+              modifier =
+                Modifier.align(Alignment.CenterVertically).graphicsLayer {
+                  translationY = -2.toDp().toPx()
+                }
             )
           }
         }
