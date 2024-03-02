@@ -59,17 +59,9 @@ fun TagItem(
   onTagNameChanged: (id: Uuid, newName: String) -> Unit
 ) {
   Row(
-    Modifier.fillMaxWidth().padding(horizontal = 16.dp).then(modifier),
+    Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Icon(
-      imageVector = TwineIcons.Tag,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.textEmphasisHigh
-    )
-
-    Spacer(Modifier.width(8.dp))
-
     var input by remember(tag.label) { mutableStateOf(TextFieldValue(text = tag.label)) }
     val focusManager = LocalFocusManager.current
     val keyboardState by keyboardVisibilityAsState()
@@ -81,17 +73,24 @@ fun TagItem(
     }
 
     TextField(
-      modifier = Modifier.requiredHeight(56.dp).fillMaxWidth(),
+      modifier = Modifier.fillMaxWidth(),
       value = input,
       onValueChange = { input = it },
       keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
       keyboardActions = KeyboardActions(onDone = { onTagNameChanged(tag.id, input.text) }),
       singleLine = true,
-      shape = RoundedCornerShape(16.dp),
+      shape = RoundedCornerShape(8.dp),
+      leadingIcon = {
+        Icon(
+          imageVector = TwineIcons.Tag,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.textEmphasisHigh
+        )
+      },
       colors =
         TextFieldDefaults.colors(
           focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-          unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+          unfocusedContainerColor = AppTheme.colorScheme.surfaceContainerLowest,
           focusedIndicatorColor = Color.Transparent,
           unfocusedIndicatorColor = Color.Transparent,
           disabledIndicatorColor = Color.Transparent,
