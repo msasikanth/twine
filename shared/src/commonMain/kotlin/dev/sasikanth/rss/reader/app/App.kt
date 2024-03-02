@@ -106,11 +106,7 @@ fun App(
                 ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
               is Screen.Tags -> {
-                TagsScreen(
-                  tagsPresenter = screen.presenter,
-                  selectedTag = screen.selectedTag,
-                  modifier = fillMaxSizeModifier
-                )
+                TagsScreen(tagsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
           }

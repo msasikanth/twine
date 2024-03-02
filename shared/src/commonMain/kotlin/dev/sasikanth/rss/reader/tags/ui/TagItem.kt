@@ -16,15 +16,12 @@
 
 package dev.sasikanth.rss.reader.tags.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.CheckCircle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,15 +35,10 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 fun TagItem(
   tag: Tag,
-  isSelected: Boolean,
   modifier: Modifier = Modifier,
-  onTagClicked: () -> Unit
 ) {
   Row(
-    Modifier.fillMaxWidth()
-      .clickable(onClick = onTagClicked)
-      .padding(vertical = 16.dp, horizontal = 16.dp)
-      .then(modifier),
+    Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 16.dp).then(modifier),
     horizontalArrangement = Arrangement.spacedBy(24.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
@@ -62,13 +54,5 @@ fun TagItem(
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
-
-    if (isSelected) {
-      Icon(
-        imageVector = Icons.TwoTone.CheckCircle,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
   }
 }

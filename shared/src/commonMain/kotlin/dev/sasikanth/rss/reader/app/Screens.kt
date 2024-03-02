@@ -36,5 +36,5 @@ internal sealed interface Screen {
 
   class Reader(val presenter: ReaderPresenter) : Screen
 
-  class Tags(val selectedTag: String?, val presenter: TagsPresenter) : Screen
+  class Tags(val presenter: TagsPresenter) : Screen
 }

@@ -76,7 +76,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun TagsScreen(tagsPresenter: TagsPresenter, selectedTag: String?, modifier: Modifier = Modifier) {
+fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
 
   val state by tagsPresenter.state.collectAsState()
   val tags = state.tags.collectAsLazyPagingItems()
@@ -134,11 +134,7 @@ fun TagsScreen(tagsPresenter: TagsPresenter, selectedTag: String?, modifier: Mod
             val tag = tags[index]
             if (tag != null) {
               Box {
-                TagItem(
-                  tag = tag,
-                  isSelected = selectedTag == tag.id.toString(),
-                  onTagClicked = { tagsPresenter.dispatch(TagsEvent.TagClicked(tag)) }
-                )
+                TagItem(tag = tag)
 
                 if (index < tags.itemCount) {
                   Divider(color = AppTheme.colorScheme.surfaceContainer)

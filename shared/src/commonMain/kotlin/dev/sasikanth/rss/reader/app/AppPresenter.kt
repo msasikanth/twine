@@ -167,19 +167,12 @@ class AppPresenter(
       }
       is Config.Tags -> {
         Screen.Tags(
-          selectedTag = config.selectedTag,
           presenter =
             tagsPresenter(
               componentContext,
-              { navigation.pop() },
-              {
-                navigation.pop(
-                  onComplete = {
-                    // TODO: Handle selected tag
-                  }
-                )
-              }
-            )
+            ) {
+              navigation.pop()
+            }
         )
       }
     }
@@ -236,7 +229,7 @@ class AppPresenter(
 
     @Serializable data class Reader(val postLink: String) : Config
 
-    @Serializable data class Tags(val selectedTag: String? = null) : Config
+    @Serializable data object Tags : Config
   }
 
   @Serializable

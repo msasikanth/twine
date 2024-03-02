@@ -16,13 +16,9 @@
 
 package dev.sasikanth.rss.reader.tags
 
-import dev.sasikanth.rss.reader.core.model.local.Tag
-
 sealed interface TagsEvent {
 
   data object Init : TagsEvent
-
-  data class TagClicked(val tag: Tag) : TagsEvent
 
   data class CreateTag(val label: String) : TagsEvent
 

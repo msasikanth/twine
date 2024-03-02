@@ -39,7 +39,6 @@ import me.tatarka.inject.annotations.Inject
 internal typealias TagsPresenterFactory =
   (
     ComponentContext,
-    onTagSelected: (id: String) -> Unit,
     goBack: () -> Unit,
   ) -> TagsPresenter
 
@@ -48,7 +47,6 @@ class TagsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val tagRepository: TagRepository,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val onTagSelected: (tagId: String) -> Unit,
   @Assisted private val goBack: () -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -61,7 +59,6 @@ class TagsPresenter(
 
   fun dispatch(event: TagsEvent) {
     when (event) {
-      is TagsEvent.TagClicked -> onTagSelected(event.tag.id.toString())
       is TagsEvent.BackClicked -> goBack()
       else -> {
         // no-op
@@ -93,9 +90,6 @@ class TagsPresenter(
     fun dispatch(event: TagsEvent) {
       when (event) {
         TagsEvent.Init -> init()
-        is TagsEvent.TagClicked -> {
-          // no-op
-        }
         is TagsEvent.CreateTag -> createTag(event.label)
         TagsEvent.BackClicked -> {
           // no-op
