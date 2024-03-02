@@ -113,7 +113,7 @@ data class TwineStrings(
   val newTag: String,
   val tags: String,
   val addTagTitle: String,
-  val newTagHint: String,
+  val tagNameHint: String,
   val tagSaveButton: String
 )
 

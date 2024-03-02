@@ -125,6 +125,6 @@ val EnTwineStrings =
     newTag = "New tag",
     tags = "Tags",
     addTagTitle = "Add tag",
-    newTagHint = "Name",
+    tagNameHint = "Name",
     tagSaveButton = "Save"
   )

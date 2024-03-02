@@ -22,6 +22,7 @@ import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.benasher44.uuid.Uuid
 import dev.sasikanth.rss.reader.repository.TagRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -94,7 +95,12 @@ class TagsPresenter(
         TagsEvent.BackClicked -> {
           // no-op
         }
+        is TagsEvent.OnTagNameChanged -> onTagNameChanged(event.tagId, event.label)
       }
+    }
+
+    private fun onTagNameChanged(tagId: Uuid, label: String) {
+      coroutineScope.launch { tagRepository.updatedTag(label, tagId) }
     }
 
     private fun createTag(label: String) {

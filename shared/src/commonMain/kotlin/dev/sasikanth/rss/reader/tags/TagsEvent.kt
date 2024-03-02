@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.tags
 
+import com.benasher44.uuid.Uuid
+
 sealed interface TagsEvent {
 
   data object Init : TagsEvent
@@ -23,4 +25,6 @@ sealed interface TagsEvent {
   data class CreateTag(val label: String) : TagsEvent
 
   data object BackClicked : TagsEvent
+
+  data class OnTagNameChanged(val tagId: Uuid, val label: String) : TagsEvent
 }

@@ -34,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -109,7 +110,7 @@ fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
             ),
         )
 
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -133,11 +134,16 @@ fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
           items(tags.itemCount) { index ->
             val tag = tags[index]
             if (tag != null) {
-              Box {
-                TagItem(tag = tag)
+              Column {
+                TagItem(
+                  tag = tag,
+                  onTagNameChanged = { id, label ->
+                    tagsPresenter.dispatch(TagsEvent.OnTagNameChanged(id, label))
+                  }
+                )
 
                 if (index < tags.itemCount) {
-                  Divider(color = AppTheme.colorScheme.surfaceContainer)
+                  HorizontalDivider(color = AppTheme.colorScheme.surfaceContainer)
                 }
               }
             }
@@ -196,7 +202,7 @@ fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
             ),
           placeholder = {
             Text(
-              text = LocalStrings.current.newTagHint,
+              text = LocalStrings.current.tagNameHint,
               style = MaterialTheme.typography.bodyLarge,
               color = AppTheme.colorScheme.textEmphasisMed
             )

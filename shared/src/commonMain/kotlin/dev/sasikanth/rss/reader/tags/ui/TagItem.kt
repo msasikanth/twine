@@ -16,30 +16,50 @@
 
 package dev.sasikanth.rss.reader.tags.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.benasher44.uuid.Uuid
 import dev.sasikanth.rss.reader.core.model.local.Tag
 import dev.sasikanth.rss.reader.resources.icons.Tag
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 
 @Composable
 fun TagItem(
   tag: Tag,
   modifier: Modifier = Modifier,
+  onTagNameChanged: (id: Uuid, newName: String) -> Unit
 ) {
   Row(
-    Modifier.fillMaxWidth().padding(vertical = 16.dp, horizontal = 16.dp).then(modifier),
-    horizontalArrangement = Arrangement.spacedBy(24.dp),
+    Modifier.fillMaxWidth().padding(horizontal = 16.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Icon(
@@ -48,11 +68,44 @@ fun TagItem(
       tint = AppTheme.colorScheme.textEmphasisHigh
     )
 
-    Text(
-      modifier = Modifier.weight(1f),
-      text = tag.label,
-      style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.textEmphasisHigh
+    Spacer(Modifier.width(8.dp))
+
+    var input by remember(tag.label) { mutableStateOf(TextFieldValue(text = tag.label)) }
+    val focusManager = LocalFocusManager.current
+    val keyboardState by keyboardVisibilityAsState()
+
+    LaunchedEffect(keyboardState) {
+      if (keyboardState == KeyboardState.Closed) {
+        focusManager.clearFocus()
+      }
+    }
+
+    TextField(
+      modifier = Modifier.requiredHeight(56.dp).fillMaxWidth(),
+      value = input,
+      onValueChange = { input = it },
+      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
+      keyboardActions = KeyboardActions(onDone = { onTagNameChanged(tag.id, input.text) }),
+      singleLine = true,
+      shape = RoundedCornerShape(16.dp),
+      colors =
+        TextFieldDefaults.colors(
+          focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+          unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+          focusedIndicatorColor = Color.Transparent,
+          unfocusedIndicatorColor = Color.Transparent,
+          disabledIndicatorColor = Color.Transparent,
+          errorIndicatorColor = Color.Transparent,
+          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          unfocusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+        ),
+      placeholder = {
+        Text(
+          text = LocalStrings.current.tagNameHint,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      },
     )
   }
 }
