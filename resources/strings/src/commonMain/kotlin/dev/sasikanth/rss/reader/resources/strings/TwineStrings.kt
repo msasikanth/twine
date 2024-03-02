@@ -109,7 +109,14 @@ data class TwineStrings(
   val delete: String,
   val removeFeedDesc: (String) -> String,
   val alwaysFetchSourceArticle: String,
-  val getFeedInfo: String
+  val getFeedInfo: String,
+  val newTag: String,
+  val tags: String,
+  val addTagTitle: String,
+  val tagNameHint: String,
+  val tagSaveButton: String,
+  val deleteTagTitle: String,
+  val deleteTagDesc: String,
 )
 
 object Locales {

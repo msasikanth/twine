@@ -48,6 +48,7 @@ class TagRepository(
     }
   }
 
+  // TODO: Remove assigned tags from feeds as well
   suspend fun deleteTag(id: Uuid) = withContext(dispatchersProvider.io) { tagQueries.deleteTag(id) }
 
   suspend fun updatedTag(label: String, id: Uuid) {
