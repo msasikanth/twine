@@ -27,4 +27,6 @@ sealed interface TagsEvent {
   data object BackClicked : TagsEvent
 
   data class OnTagNameChanged(val tagId: Uuid, val label: String) : TagsEvent
+
+  data class OnDeleteTag(val tagId: Uuid) : TagsEvent
 }

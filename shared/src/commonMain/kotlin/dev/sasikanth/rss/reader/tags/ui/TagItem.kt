@@ -17,17 +17,18 @@
 package dev.sasikanth.rss.reader.tags.ui
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -45,6 +46,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.benasher44.uuid.Uuid
 import dev.sasikanth.rss.reader.core.model.local.Tag
+import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.Tag
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -56,8 +58,19 @@ import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 fun TagItem(
   tag: Tag,
   modifier: Modifier = Modifier,
-  onTagNameChanged: (id: Uuid, newName: String) -> Unit
+  onTagNameChanged: (id: Uuid, newName: String) -> Unit,
+  onDeleteTagClick: (id: Uuid) -> Unit,
 ) {
+  var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
+
+  if (showDeleteConfirmationDialog) {
+    ConfirmTagDeleteDialog(
+      tag = tag,
+      onDeleteTagClick = onDeleteTagClick,
+      onDismiss = { showDeleteConfirmationDialog = false }
+    )
+  }
+
   Row(
     Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
@@ -87,6 +100,15 @@ fun TagItem(
           tint = AppTheme.colorScheme.textEmphasisHigh
         )
       },
+      trailingIcon = {
+        IconButton(onClick = { showDeleteConfirmationDialog = true }) {
+          Icon(
+            imageVector = TwineIcons.Delete,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.textEmphasisHigh
+          )
+        }
+      },
       colors =
         TextFieldDefaults.colors(
           focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
@@ -107,4 +129,50 @@ fun TagItem(
       },
     )
   }
+}
+
+@Composable
+private fun ConfirmTagDeleteDialog(
+  tag: Tag,
+  onDeleteTagClick: (id: Uuid) -> Unit,
+  modifier: Modifier = Modifier,
+  onDismiss: () -> Unit,
+) {
+  AlertDialog(
+    modifier = modifier,
+    onDismissRequest = onDismiss,
+    confirmButton = {
+      TextButton(
+        onClick = {
+          onDeleteTagClick(tag.id)
+          onDismiss()
+        },
+        shape = MaterialTheme.shapes.large
+      ) {
+        Text(
+          text = LocalStrings.current.delete,
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.error
+        )
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onDismiss, shape = MaterialTheme.shapes.large) {
+        Text(
+          text = LocalStrings.current.buttonCancel,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+    },
+    title = {
+      Text(text = LocalStrings.current.deleteTagTitle, color = AppTheme.colorScheme.textEmphasisMed)
+    },
+    text = {
+      Text(text = LocalStrings.current.deleteTagDesc, color = AppTheme.colorScheme.textEmphasisMed)
+    },
+    containerColor = AppTheme.colorScheme.surfaceContainer,
+    titleContentColor = AppTheme.colorScheme.onSurface,
+    textContentColor = AppTheme.colorScheme.onSurface,
+  )
 }

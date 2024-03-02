@@ -33,7 +33,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -139,7 +138,8 @@ fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
                   tag = tag,
                   onTagNameChanged = { id, label ->
                     tagsPresenter.dispatch(TagsEvent.OnTagNameChanged(id, label))
-                  }
+                  },
+                  onDeleteTagClick = { id -> tagsPresenter.dispatch(TagsEvent.OnDeleteTag(id)) }
                 )
 
                 if (index < tags.itemCount) {

@@ -96,7 +96,12 @@ class TagsPresenter(
           // no-op
         }
         is TagsEvent.OnTagNameChanged -> onTagNameChanged(event.tagId, event.label)
+        is TagsEvent.OnDeleteTag -> onDeleteTag(event.tagId)
       }
+    }
+
+    private fun onDeleteTag(tagId: Uuid) {
+      coroutineScope.launch { tagRepository.deleteTag(tagId) }
     }
 
     private fun onTagNameChanged(tagId: Uuid, label: String) {
