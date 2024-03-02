@@ -121,5 +121,13 @@ val EnTwineStrings =
     delete = "Delete",
     removeFeedDesc = { "Do you want to remove \"${it}\"?" },
     alwaysFetchSourceArticle = "Always fetch source article in Reading View",
-    getFeedInfo = "Get Info"
+    getFeedInfo = "Get Info",
+    newTag = "New tag",
+    tags = "Tags",
+    addTagTitle = "Add tag",
+    tagNameHint = "Name",
+    tagSaveButton = "Save",
+    deleteTagTitle = "Delete tag?",
+    deleteTagDesc =
+      "Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted"
   )
