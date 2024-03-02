@@ -213,6 +213,7 @@ fun TagsScreen(tagsPresenter: TagsPresenter, modifier: Modifier = Modifier) {
           modifier = Modifier.requiredHeight(52.dp).fillMaxWidth(),
           onClick = { createTag(coroutineScope, sheetState, tagsPresenter, tagName) },
           shape = RoundedCornerShape(16.dp),
+          enabled = tagName.text.isNotBlank(),
           colors =
             ButtonDefaults.elevatedButtonColors(
               containerColor = AppTheme.colorScheme.tintedSurface,
