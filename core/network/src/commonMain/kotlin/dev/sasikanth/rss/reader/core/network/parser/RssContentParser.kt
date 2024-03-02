@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import io.ktor.http.Url
 import kotlinx.datetime.Clock
@@ -114,7 +115,7 @@ internal object RssContentParser : ContentParser() {
         name == TAG_TITLE -> {
           title = readTagText(name, parser)
         }
-        name == TAG_LINK -> {
+        link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
           link = readTagText(name, parser)
         }
         name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
