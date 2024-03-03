@@ -208,10 +208,9 @@ private fun FeedUnreadCount(
     )
 
     TextButton(
-      modifier = Modifier.requiredHeight(48.dp),
       enabled = hasUnreadPosts,
       onClick = onMarkPostsAsRead,
-      shape = MaterialTheme.shapes.large,
+      shape = MaterialTheme.shapes.medium,
       colors =
         ButtonDefaults.textButtonColors(
           disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
