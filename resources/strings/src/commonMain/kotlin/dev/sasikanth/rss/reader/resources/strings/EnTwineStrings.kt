@@ -132,5 +132,6 @@ val EnTwineStrings =
       "Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted",
     feedOptionShare = "Share",
     feedOptionWebsite = "Website",
-    feedOptionRemove = "Remove"
+    feedOptionRemove = "Remove",
+    feedTitleHint = "Title"
   )

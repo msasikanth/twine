@@ -31,12 +31,18 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +54,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,9 +66,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
@@ -79,6 +88,8 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -112,36 +123,16 @@ fun FeedInfoBottomSheet(
       modifier =
         Modifier.fillMaxWidth().padding(horizontal = 24.dp).verticalScroll(rememberScrollState()),
     ) {
-      Spacer(Modifier.requiredHeight(8.dp))
-
       val feed = state.feed
       if (feed != null) {
-        Box(
-          Modifier.requiredSize(64.dp)
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(horizontal = 24.dp)
-            .align(Alignment.CenterHorizontally)
-        ) {
-          AsyncImage(
-            url = feed.icon,
-            contentDescription = feed.name,
-            modifier =
-              Modifier.requiredSize(56.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
-          )
-        }
-
-        Spacer(Modifier.requiredHeight(24.dp))
-
         FeedLabelInput(
-          modifier = Modifier.padding(horizontal = 24.dp),
-          value = feed.name,
-          onFeedNameChanged = { newFeedName ->
-            feedPresenter.dispatch(FeedEvent.OnFeedNameChanged(newFeedName, feed.link))
-          },
-          textAlign = TextAlign.Center
+          feed = feed,
+          onFeedNameChange = { newFeedName ->
+            feedPresenter.dispatch(
+              FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedLink = feed.link)
+            )
+          }
         )
-
-        Spacer(Modifier.requiredHeight(16.dp))
 
         Divider()
 
@@ -166,6 +157,80 @@ fun FeedInfoBottomSheet(
           color = AppTheme.colorScheme.tintedForeground
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun FeedLabelInput(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onFeedNameChange: (String) -> Unit
+) {
+  Row(
+    Modifier.clip(RoundedCornerShape(24.dp))
+      .background(AppTheme.colorScheme.tintedSurface)
+      .padding(8.dp)
+      .fillMaxWidth()
+      .then(modifier)
+  ) {
+    Box(
+      Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)).padding(8.dp)
+    ) {
+      AsyncImage(
+        url = feed.icon,
+        contentDescription = feed.name,
+        modifier =
+          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
+      )
+    }
+
+    Spacer(Modifier.requiredWidth(16.dp))
+
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Text(
+        text = LocalStrings.current.feedTitleHint,
+        style = MaterialTheme.typography.labelSmall,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+
+      var input by remember(feed.name) { mutableStateOf(feed.name) }
+      val focusManager = LocalFocusManager.current
+      val keyboardState by keyboardVisibilityAsState()
+
+      LaunchedEffect(keyboardState) {
+        if (keyboardState == KeyboardState.Closed) focusManager.clearFocus()
+      }
+
+      val textSelectionColors =
+        TextSelectionColors(
+          handleColor = AppTheme.colorScheme.tintedForeground,
+          backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
+        )
+
+      CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
+        BasicTextField(
+          modifier = Modifier.fillMaxWidth(),
+          value = input,
+          onValueChange = {
+            input = it
+            onFeedNameChange(input)
+          },
+          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
+          keyboardActions = KeyboardActions(onDone = { onFeedNameChange(input) }),
+          singleLine = true,
+          textStyle =
+            MaterialTheme.typography.titleMedium.copy(
+              color = AppTheme.colorScheme.textEmphasisHigh
+            ),
+          cursorBrush = SolidColor(AppTheme.colorScheme.textEmphasisHigh),
+        )
+      }
+
+      HorizontalDivider(
+        color = AppTheme.colorScheme.outlineVariant,
+        modifier = Modifier.padding(end = 32.dp)
+      )
     }
   }
 }

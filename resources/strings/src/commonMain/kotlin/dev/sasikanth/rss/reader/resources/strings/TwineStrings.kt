@@ -120,6 +120,7 @@ data class TwineStrings(
   val feedOptionShare: String,
   val feedOptionWebsite: String,
   val feedOptionRemove: String,
+  val feedTitleHint: String,
 )
 
 object Locales {
