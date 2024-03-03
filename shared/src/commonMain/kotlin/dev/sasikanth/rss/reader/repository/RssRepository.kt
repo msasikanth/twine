@@ -396,8 +396,8 @@ class RssRepository(
     }
   }
 
-  suspend fun markPostsInFeedAsRead(feedLink: String) {
-    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink) }
+  suspend fun markPostsInFeedAsRead(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST) {
+    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink, postsAfter) }
   }
 
   suspend fun post(link: String): Post {
