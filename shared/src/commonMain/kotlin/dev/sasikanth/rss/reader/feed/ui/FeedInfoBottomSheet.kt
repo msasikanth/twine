@@ -57,7 +57,6 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -80,7 +79,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
-import dev.sasikanth.rss.reader.components.FeedLabelInput
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
@@ -378,21 +377,11 @@ private fun AlwaysFetchSourceArticleSwitch(
 
     Spacer(Modifier.width(16.dp))
 
-    MaterialTheme(
-      colorScheme =
-        darkColorScheme(
-          primary = AppTheme.colorScheme.tintedForeground,
-          onPrimary = AppTheme.colorScheme.tintedSurface,
-          outline = AppTheme.colorScheme.outline,
-          surfaceVariant = AppTheme.colorScheme.surfaceContainerHighest
-        )
-    ) {
-      Switch(
-        modifier = modifier,
-        checked = checked,
-        onCheckedChange = { newValue -> onValueChanged(newValue, feed.link) }
-      )
-    }
+    Switch(
+      modifier = modifier,
+      checked = checked,
+      onCheckedChange = { newValue -> onValueChanged(newValue, feed.link) }
+    )
   }
 }
 
