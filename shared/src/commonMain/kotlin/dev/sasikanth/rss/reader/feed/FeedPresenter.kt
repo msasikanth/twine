@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -168,9 +170,11 @@ class FeedPresenter(
               getTodayStartInstant()
             }
           }
-        val feed = rssRepository.feedBlocking(feedLink, postsAfter)
 
-        _state.update { it.copy(feed = feed) }
+        rssRepository
+          .feed(feedLink, postsAfter)
+          .onEach { feed -> _state.update { it.copy(feed = feed) } }
+          .launchIn(coroutineScope)
       }
     }
   }
