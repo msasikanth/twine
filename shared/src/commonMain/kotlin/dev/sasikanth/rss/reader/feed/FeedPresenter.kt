@@ -168,7 +168,7 @@ class FeedPresenter(
               getTodayStartInstant()
             }
           }
-        val feed = rssRepository.feed(feedLink, postsAfter)
+        val feed = rssRepository.feedBlocking(feedLink, postsAfter)
 
         _state.update { it.copy(feed = feed) }
       }

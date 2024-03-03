@@ -277,7 +277,43 @@ class RssRepository(
     )
   }
 
-  suspend fun feed(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
+  suspend fun feed(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Feed> {
+    return withContext(ioDispatcher) {
+      feedQueries
+        .feedWithUnreadPostsCount(
+          link = feedLink,
+          postsAfter = postsAfter,
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean,
+            numberOfUnreadPosts: Long ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+              numberOfUnreadPosts = numberOfUnreadPosts
+            )
+          }
+        )
+        .asFlow()
+        .mapToOne(ioDispatcher)
+    }
+  }
+
+  suspend fun feedBlocking(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
     return withContext(ioDispatcher) {
       feedQueries
         .feedWithUnreadPostsCount(

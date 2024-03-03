@@ -208,7 +208,7 @@ class HomePresenter(
 
     private fun postSourceClicked(feedLink: String) {
       coroutineScope.launch {
-        val feed = rssRepository.feed(feedLink)
+        val feed = rssRepository.feedBlocking(feedLink)
         observableSelectedFeed.selectFeed(feed)
       }
     }
