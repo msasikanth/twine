@@ -121,6 +121,8 @@ data class TwineStrings(
   val feedOptionWebsite: String,
   val feedOptionRemove: String,
   val feedTitleHint: String,
+  val noUnreadPostsInFeed: String,
+  val numberOfUnreadPostsInFeed: (Long) -> String
 )
 
 object Locales {

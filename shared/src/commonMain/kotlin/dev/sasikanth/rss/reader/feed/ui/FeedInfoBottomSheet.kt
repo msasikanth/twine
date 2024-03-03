@@ -44,6 +44,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +56,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -71,6 +76,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
@@ -134,6 +140,14 @@ fun FeedInfoBottomSheet(
           }
         )
 
+        Spacer(Modifier.requiredHeight(8.dp))
+
+        FeedUnreadCount(
+          modifier = Modifier.fillMaxWidth(),
+          numberOfUnreadPosts = feed.numberOfUnreadPosts,
+          onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.link)) }
+        )
+
         Divider()
 
         AlwaysFetchSourceArticleSwitch(
@@ -157,6 +171,59 @@ fun FeedInfoBottomSheet(
           color = AppTheme.colorScheme.tintedForeground
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun FeedUnreadCount(
+  numberOfUnreadPosts: Long,
+  modifier: Modifier = Modifier,
+  onMarkPostsAsRead: () -> Unit
+) {
+  Row(
+    modifier = modifier,
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Spacer(Modifier.requiredWidth(8.dp))
+
+    val hasUnreadPosts = numberOfUnreadPosts > 0
+    val text =
+      if (hasUnreadPosts) {
+        LocalStrings.current.numberOfUnreadPostsInFeed(numberOfUnreadPosts)
+      } else {
+        LocalStrings.current.noUnreadPostsInFeed
+      }
+
+    Text(
+      modifier = Modifier.weight(1f),
+      text = text,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      style = MaterialTheme.typography.labelLarge,
+      textAlign = TextAlign.Start,
+    )
+
+    TextButton(
+      modifier = Modifier.requiredHeight(48.dp),
+      enabled = hasUnreadPosts,
+      onClick = onMarkPostsAsRead,
+      shape = MaterialTheme.shapes.large,
+      colors =
+        ButtonDefaults.textButtonColors(
+          disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          contentColor = AppTheme.colorScheme.tintedForeground
+        )
+    ) {
+      Icon(
+        modifier = Modifier.requiredSize(18.dp),
+        imageVector = Icons.Rounded.Check,
+        contentDescription = null,
+      )
+
+      Spacer(Modifier.requiredWidth(8.dp))
+
+      Text(text = LocalStrings.current.markAsRead, style = MaterialTheme.typography.labelLarge)
     }
   }
 }
