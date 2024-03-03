@@ -373,10 +373,10 @@ private fun AlwaysFetchSourceArticleSwitch(
     MaterialTheme(
       colorScheme =
         darkColorScheme(
-          primary = AppTheme.colorScheme.tintedHighlight,
-          onPrimary = AppTheme.colorScheme.tintedForeground,
+          primary = AppTheme.colorScheme.tintedForeground,
+          onPrimary = AppTheme.colorScheme.tintedSurface,
           outline = AppTheme.colorScheme.outline,
-          surfaceVariant = AppTheme.colorScheme.surfaceContainerLowest
+          surfaceVariant = AppTheme.colorScheme.surfaceContainerHighest
         )
     ) {
       Switch(
