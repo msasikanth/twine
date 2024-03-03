@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
@@ -34,6 +33,7 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,8 +79,6 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -99,38 +97,20 @@ fun FeedInfoBottomSheet(
     }
   }
 
-  // Doing this before `ModalBottomSheet` as this value is not available
-  // after `ModalSheetConsumes` insets, I think? It's returning 0 when
-  // I do this inside `ModalBottomSheet`.
-  val systemBarsBottomPadding =
-    WindowInsets.systemBars
-      .only(WindowInsetsSides.Bottom)
-      .asPaddingValues()
-      .calculateBottomPadding()
-
-  val keyboardState by keyboardVisibilityAsState()
-
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = Color.Unspecified,
-    windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
+    windowInsets =
+      WindowInsets.systemBars
+        .only(WindowInsetsSides.Bottom)
+        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
     sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current)
   ) {
-    val bottomPadding =
-      if (keyboardState == KeyboardState.Closed) {
-        systemBarsBottomPadding
-      } else {
-        0.dp
-      }
-
     Column(
       modifier =
-        Modifier.fillMaxWidth()
-          .padding(bottom = bottomPadding)
-          .padding(horizontal = 24.dp)
-          .verticalScroll(rememberScrollState()),
+        Modifier.fillMaxWidth().padding(horizontal = 24.dp).verticalScroll(rememberScrollState()),
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
 
