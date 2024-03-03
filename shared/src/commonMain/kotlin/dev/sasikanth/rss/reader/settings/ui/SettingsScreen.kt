@@ -43,7 +43,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -69,6 +68,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -270,20 +270,10 @@ private fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: (
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
-      }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
@@ -408,20 +398,10 @@ private fun UnreadPostsCountSettingItem(
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
-      }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
@@ -458,20 +438,10 @@ private fun FeaturedItemBlurSettingItem(
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
-      }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
