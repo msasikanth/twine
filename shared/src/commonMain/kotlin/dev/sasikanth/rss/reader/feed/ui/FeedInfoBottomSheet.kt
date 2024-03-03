@@ -99,6 +99,8 @@ import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+private val HORIZONTAL_PADDING = 24.dp
+
 @Composable
 fun FeedInfoBottomSheet(
   feedPresenter: FeedPresenter,
@@ -126,12 +128,12 @@ fun FeedInfoBottomSheet(
     sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current)
   ) {
     Column(
-      modifier =
-        Modifier.fillMaxWidth().padding(horizontal = 24.dp).verticalScroll(rememberScrollState()),
+      modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
     ) {
       val feed = state.feed
       if (feed != null) {
         FeedLabelInput(
+          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
           feed = feed,
           onFeedNameChange = { newFeedName ->
             feedPresenter.dispatch(
@@ -143,12 +145,12 @@ fun FeedInfoBottomSheet(
         Spacer(Modifier.requiredHeight(8.dp))
 
         FeedUnreadCount(
-          modifier = Modifier.fillMaxWidth(),
+          modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
           numberOfUnreadPosts = feed.numberOfUnreadPosts,
           onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.link)) }
         )
 
-        Divider()
+        Divider(horizontalInsets = HORIZONTAL_PADDING)
 
         AlwaysFetchSourceArticleSwitch(
           feed = feed,
@@ -157,9 +159,10 @@ fun FeedInfoBottomSheet(
           }
         )
 
-        Divider()
+        Divider(horizontalInsets = HORIZONTAL_PADDING)
 
         FeedOptions(
+          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
           feed = feed,
           onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
         )
@@ -235,11 +238,11 @@ private fun FeedLabelInput(
   onFeedNameChange: (String) -> Unit
 ) {
   Row(
-    Modifier.clip(RoundedCornerShape(24.dp))
+    Modifier.then(modifier)
+      .clip(RoundedCornerShape(24.dp))
       .background(AppTheme.colorScheme.tintedSurface)
       .padding(8.dp)
       .fillMaxWidth()
-      .then(modifier)
   ) {
     Box(
       Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)).padding(8.dp)
@@ -356,7 +359,7 @@ private fun AlwaysFetchSourceArticleSwitch(
           checked = !checked
           onValueChanged(checked, feed.link)
         }
-        .padding(vertical = 16.dp),
+        .padding(vertical = 16.dp, horizontal = HORIZONTAL_PADDING),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
