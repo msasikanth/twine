@@ -115,12 +115,12 @@ val EnTwineStrings =
     openSource = "Support Open Source",
     openSourceDesc =
       "Twine is an open source project and is available for free to use. Click here to know more on how to support this project or, view source code of Twine or some of my other popular projects.",
-    markAsRead = "Mark as Read",
-    markAsUnRead = "Mark as Unread",
+    markAsRead = "Mark as read",
+    markAsUnRead = "Mark as unread",
     removeFeed = "Remove feed",
     delete = "Delete",
     removeFeedDesc = { "Do you want to remove \"${it}\"?" },
-    alwaysFetchSourceArticle = "Always fetch source article in Reading View",
+    alwaysFetchSourceArticle = "Always fetch full articles in reader view",
     getFeedInfo = "Get Info",
     newTag = "New tag",
     tags = "Tags",
@@ -129,5 +129,16 @@ val EnTwineStrings =
     tagSaveButton = "Save",
     deleteTagTitle = "Delete tag?",
     deleteTagDesc =
-      "Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted"
+      "Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted",
+    feedOptionShare = "Share",
+    feedOptionWebsite = "Website",
+    feedOptionRemove = "Remove",
+    feedTitleHint = "Title",
+    noUnreadPostsInFeed = "No unread articles",
+    numberOfUnreadPostsInFeed = { numberOfUnreadPosts ->
+      when (numberOfUnreadPosts) {
+        1L -> "$numberOfUnreadPosts unread article"
+        else -> "$numberOfUnreadPosts unread articles"
+      }
+    }
   )
