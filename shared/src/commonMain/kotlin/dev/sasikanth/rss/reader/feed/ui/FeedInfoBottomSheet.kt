@@ -288,7 +288,13 @@ private fun FeedLabelInput(
             onFeedNameChange(input)
           },
           keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
-          keyboardActions = KeyboardActions(onDone = { onFeedNameChange(input) }),
+          keyboardActions =
+            KeyboardActions(
+              onDone = {
+                focusManager.clearFocus()
+                onFeedNameChange(input)
+              }
+            ),
           singleLine = true,
           textStyle =
             MaterialTheme.typography.titleMedium.copy(
