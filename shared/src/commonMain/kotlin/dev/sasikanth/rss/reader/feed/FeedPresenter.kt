@@ -159,7 +159,17 @@ class FeedPresenter(
 
     private fun init() {
       coroutineScope.launch {
-        val feed = rssRepository.feed(feedLink)
+        val postsType = withContext(dispatchersProvider.io) { settingsRepository.postsType.first() }
+        val postsAfter =
+          when (postsType) {
+            PostsType.ALL,
+            PostsType.UNREAD -> Instant.DISTANT_PAST
+            PostsType.TODAY -> {
+              getTodayStartInstant()
+            }
+          }
+        val feed = rssRepository.feed(feedLink, postsAfter)
+
         _state.update { it.copy(feed = feed) }
       }
     }
