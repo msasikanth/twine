@@ -191,7 +191,7 @@ fun FeedInfoBottomSheet(
 }
 
 @Composable
-fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Modifier = Modifier) {
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val shareHandler = LocalShareHandler.current
