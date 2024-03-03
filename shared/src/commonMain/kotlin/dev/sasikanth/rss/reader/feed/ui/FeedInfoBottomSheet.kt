@@ -244,7 +244,7 @@ private fun AlwaysFetchSourceArticleSwitch(
           checked = !checked
           onValueChanged(checked, feed.link)
         }
-        .padding(vertical = 16.dp, horizontal = 24.dp),
+        .padding(vertical = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
