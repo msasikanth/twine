@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -174,6 +175,10 @@ class FeedPresenter(
         rssRepository
           .feed(feedLink, postsAfter)
           .onEach { feed -> _state.update { it.copy(feed = feed) } }
+          .catch {
+            // no-op
+            // When we delete a feed, this flow crashes because, that feed is no longer available
+          }
           .launchIn(coroutineScope)
       }
     }
