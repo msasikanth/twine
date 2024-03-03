@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
@@ -30,9 +29,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Badge
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +38,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,27 +45,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
-import dev.sasikanth.rss.reader.components.DropdownMenu
-import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.FeedLabelInput
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
-import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Delete
-import dev.sasikanth.rss.reader.resources.icons.DoneAll
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
-import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
-import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun FeedListItem(
@@ -83,7 +70,6 @@ internal fun FeedListItem(
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
   onDeleteFeed: (Feed) -> Unit
 ) {
   val clickableModifier =
@@ -156,7 +142,6 @@ internal fun FeedListItem(
           canPinFeed = canPinFeeds,
           onFeedInfoClick = onFeedInfoClick,
           onFeedPinClick = onFeedPinClick,
-          onMarkFeedAsRead = onMarkFeedAsRead,
           onDeleteFeed = onDeleteFeed
         )
       }
@@ -171,7 +156,6 @@ private fun ActionButtons(
   canPinFeed: Boolean,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
   onDeleteFeed: (Feed) -> Unit,
 ) {
   Row {
@@ -198,99 +182,13 @@ private fun ActionButtons(
         }
       }
     } else {
-      FeedListItemMenu(
-        feed = feed,
-        onMarkFeedAsRead = onMarkFeedAsRead,
-        onFeedInfoClick = onFeedInfoClick
-      )
-    }
-  }
-}
-
-@Composable
-fun FeedListItemMenu(
-  feed: Feed,
-  onMarkFeedAsRead: (Feed) -> Unit,
-  modifier: Modifier = Modifier,
-  onFeedInfoClick: (Feed) -> Unit
-) {
-  Box(modifier) {
-    var showDropdownMenu by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    val shareHandler = LocalShareHandler.current
-    val linkHandler = LocalLinkHandler.current
-
-    IconButton(onClick = { showDropdownMenu = true }) {
-      Icon(
-        imageVector = Icons.Rounded.MoreVert,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    DropdownMenu(
-      expanded = showDropdownMenu,
-      onDismissRequest = { showDropdownMenu = false },
-      offset = DpOffset(x = 0.dp, y = (-48).dp)
-    ) {
-      val hasUnreadPostsInFeed = feed.numberOfUnreadPosts > 0
-      if (hasUnreadPostsInFeed) {
-        DropdownMenuItem(
-          text = { Text(text = LocalStrings.current.markAllAsRead) },
-          leadingIcon = {
-            Icon(
-              imageVector = TwineIcons.DoneAll,
-              contentDescription = LocalStrings.current.markAllAsRead
-            )
-          },
-          onClick = {
-            showDropdownMenu = false
-            onMarkFeedAsRead(feed)
-          },
+      IconButton(onClick = { onFeedInfoClick(feed) }) {
+        Icon(
+          imageVector = Icons.Rounded.MoreVert,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
         )
-
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
       }
-
-      DropdownMenuItem(
-        text = { Text(text = LocalStrings.current.getFeedInfo) },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.TwoTone.Info,
-            contentDescription = LocalStrings.current.getFeedInfo,
-          )
-        },
-        onClick = {
-          showDropdownMenu = false
-          onFeedInfoClick(feed)
-        }
-      )
-
-      DropdownMenuItem(
-        text = { Text(text = LocalStrings.current.share) },
-        leadingIcon = {
-          Icon(imageVector = TwineIcons.Share, contentDescription = LocalStrings.current.share)
-        },
-        onClick = {
-          showDropdownMenu = false
-          shareHandler.share(feed.link)
-        }
-      )
-
-      DropdownMenuItem(
-        text = { Text(text = LocalStrings.current.openWebsite) },
-        leadingIcon = {
-          Icon(
-            modifier = Modifier.requiredSize(24.dp),
-            imageVector = TwineIcons.Website,
-            contentDescription = LocalStrings.current.openWebsite
-          )
-        },
-        onClick = {
-          showDropdownMenu = false
-          coroutineScope.launch { linkHandler.openLink(feed.homepageLink) }
-        }
-      )
     }
   }
 }

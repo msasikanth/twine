@@ -140,12 +140,12 @@ internal fun FeedsBottomSheet(
       )
     } else {
       BottomSheetExpandedContent(
-        searchQuery = feedsPresenter.searchQuery,
         feedsListItemTypes = state.feedsInExpandedMode.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+        searchQuery = feedsPresenter.searchQuery,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
@@ -159,9 +159,6 @@ internal fun FeedsBottomSheet(
         editFeeds = editFeeds,
         exitFeedsEdit = exitFeedsEdit,
         onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
-        onMarkFeedAsRead = { feed ->
-          feedsPresenter.dispatch(FeedsEvent.MarkPostsInFeedAsReadClicked(feed.link))
-        },
         onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         modifier =
           Modifier.graphicsLayer {
@@ -199,7 +196,6 @@ private fun BottomSheetExpandedContent(
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -265,7 +261,6 @@ private fun BottomSheetExpandedContent(
                   onFeedSelected = onFeedSelected,
                   onFeedNameChanged = onFeedNameChanged,
                   onFeedPinClick = onFeedPinClick,
-                  onMarkFeedAsRead = onMarkFeedAsRead,
                   onDeleteFeed = onDeleteFeed
                 )
               }
