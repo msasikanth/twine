@@ -249,7 +249,7 @@ fun FeedListItemMenu(
           },
         )
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
       }
 
       DropdownMenuItem(
