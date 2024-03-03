@@ -300,18 +300,12 @@ private fun PostsDeletionPeriodSettingItem(
     modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 8.dp, bottom = 20.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Column(modifier = Modifier.weight(1f)) {
-      Text(
-        LocalStrings.current.settingsPostsDeletionPeriodTitle,
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh
-      )
-      Text(
-        LocalStrings.current.settingsPostsDeletionPeriodSubtitle,
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
-      )
-    }
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.settingsPostsDeletionPeriodTitle,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
+    )
 
     Box {
       TextButton(modifier = Modifier.widthIn(min = 112.dp), onClick = { showDropdown = true }) {
