@@ -70,8 +70,7 @@ val EnTwineStrings =
     settingsEnableBlurSubtitle =
       "When disabled, displays gradients instead of blurred images. May improve performance.",
     settingsShowUnreadCountTitle = "Show unread posts count",
-    settingsShowUnreadCountSubtitle =
-      "When disabled, the unread posts count will not be shown in the feeds sheet",
+    settingsShowUnreadCountSubtitle = "Displays a bubble above feed selections",
     settingsReportIssue = "Report an issue",
     settingsVersion = { versionName, versionCode -> "$versionName ($versionCode)" },
     settingsAboutTitle = "About Twine",
@@ -81,17 +80,14 @@ val EnTwineStrings =
     settingsOpmlImporting = { progress -> "Importing.. $progress%" },
     settingsOpmlExporting = { progress -> "Exporting.. $progress%" },
     settingsOpmlCancel = "Cancel",
-    settingsPostsDeletionPeriodTitle = "Delete read posts",
-    settingsPostsDeletionPeriodSubtitle =
-      "App will automatically delete read posts that are older than the selected period",
+    settingsPostsDeletionPeriodTitle = "Delete read posts older than",
     settingsPostsDeletionPeriodOneWeek = "1 week",
     settingsPostsDeletionPeriodOneMonth = "1 month",
     settingsPostsDeletionPeriodThreeMonths = "3 months",
     settingsPostsDeletionPeriodSixMonths = "6 months",
     settingsPostsDeletionPeriodOneYear = "1 year",
-    settingsShowReaderViewTitle = "Show reader view",
-    settingsShowReaderViewSubtitle =
-      "When disabled, the posts are opened in the browser instead of in-app reader view",
+    settingsShowReaderViewTitle = "Enable reader view",
+    settingsShowReaderViewSubtitle = "Articles will be shown in a simplified, easy-to-read view",
     feeds = "Feeds",
     editFeeds = "Edit feeds",
     comments = "Comments",

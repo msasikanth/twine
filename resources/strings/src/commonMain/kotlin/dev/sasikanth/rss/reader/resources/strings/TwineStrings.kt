@@ -69,7 +69,6 @@ data class TwineStrings(
   val settingsOpmlExporting: (Int) -> String,
   val settingsOpmlCancel: String,
   val settingsPostsDeletionPeriodTitle: String,
-  val settingsPostsDeletionPeriodSubtitle: String,
   val settingsPostsDeletionPeriodOneWeek: String,
   val settingsPostsDeletionPeriodOneMonth: String,
   val settingsPostsDeletionPeriodThreeMonths: String,
