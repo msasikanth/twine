@@ -18,9 +18,9 @@ package dev.sasikanth.rss.reader.feed.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -32,13 +32,12 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,7 +46,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,11 +53,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -71,11 +71,18 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedPresenter
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
+import dev.sasikanth.rss.reader.resources.icons.Share
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun FeedInfoBottomSheet(
@@ -121,8 +128,9 @@ fun FeedInfoBottomSheet(
     Column(
       modifier =
         Modifier.fillMaxWidth()
-          .padding(bottom = 16.dp + bottomPadding)
-          .verticalScroll(rememberScrollState())
+          .padding(bottom = bottomPadding)
+          .padding(horizontal = 24.dp)
+          .verticalScroll(rememberScrollState()),
     ) {
       Spacer(Modifier.requiredHeight(8.dp))
 
@@ -166,14 +174,12 @@ fun FeedInfoBottomSheet(
 
         Divider()
 
-        Spacer(Modifier.requiredHeight(8.dp))
+        FeedOptions(
+          feed = feed,
+          onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
+        )
 
-        RemoveFeedButton(
-          modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally),
-          feed = feed
-        ) {
-          feedPresenter.dispatch(FeedEvent.RemoveFeedClicked)
-        }
+        Spacer(Modifier.requiredHeight(8.dp))
       } else {
         CircularProgressIndicator(
           modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -181,6 +187,45 @@ fun FeedInfoBottomSheet(
         )
       }
     }
+  }
+}
+
+@Composable
+fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Modifier = Modifier) {
+  val coroutineScope = rememberCoroutineScope()
+  val linkHandler = LocalLinkHandler.current
+  val shareHandler = LocalShareHandler.current
+  var showConfirmDialog by remember { mutableStateOf(false) }
+
+  Row(modifier = modifier) {
+    FeedOptionItem(
+      icon = TwineIcons.Share,
+      text = LocalStrings.current.feedOptionShare,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { shareHandler.share(feed.link) }
+    )
+
+    FeedOptionItem(
+      icon = TwineIcons.Website,
+      text = LocalStrings.current.feedOptionWebsite,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
+    )
+
+    FeedOptionItem(
+      icon = TwineIcons.DeleteOutline,
+      text = LocalStrings.current.feedOptionRemove,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { showConfirmDialog = true }
+    )
+  }
+
+  if (showConfirmDialog) {
+    ConfirmFeedDeleteDialog(
+      feedName = feed.name,
+      onRemoveFeed = onRemoveFeedClick,
+      dismiss = { showConfirmDialog = false },
+    )
   }
 }
 
@@ -230,39 +275,33 @@ private fun AlwaysFetchSourceArticleSwitch(
 }
 
 @Composable
-private fun RemoveFeedButton(
-  feed: Feed,
+private fun FeedOptionItem(
+  icon: ImageVector,
+  text: String,
   modifier: Modifier = Modifier,
-  onRemoveFeedClick: () -> Unit
+  onOptionClick: () -> Unit
 ) {
-  Box(modifier) {
-    var showConfirmDialog by remember { mutableStateOf(false) }
+  Column(
+    modifier =
+      Modifier.clip(RoundedCornerShape(8.dp))
+        .clickable { onOptionClick() }
+        .padding(vertical = 12.dp)
+        .then(modifier),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(4.dp)
+  ) {
+    Icon(
+      imageVector = icon,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.tintedForeground,
+      modifier = Modifier.size(24.dp)
+    )
 
-    TextButton(
-      onClick = { showConfirmDialog = true },
-      contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
-      shape = MaterialTheme.shapes.large
-    ) {
-      Icon(
-        imageVector = Icons.Outlined.Delete,
-        contentDescription = LocalStrings.current.editFeeds,
-        tint = MaterialTheme.colorScheme.error
-      )
-      Spacer(Modifier.width(12.dp))
-      Text(
-        text = LocalStrings.current.removeFeed,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.error
-      )
-    }
-
-    if (showConfirmDialog) {
-      ConfirmFeedDeleteDialog(
-        feedName = feed.name,
-        onRemoveFeed = onRemoveFeedClick,
-        dismiss = { showConfirmDialog = false },
-      )
-    }
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelMedium,
+      color = AppTheme.colorScheme.tintedForeground
+    )
   }
 }
 

@@ -117,6 +117,9 @@ data class TwineStrings(
   val tagSaveButton: String,
   val deleteTagTitle: String,
   val deleteTagDesc: String,
+  val feedOptionShare: String,
+  val feedOptionWebsite: String,
+  val feedOptionRemove: String,
 )
 
 object Locales {
