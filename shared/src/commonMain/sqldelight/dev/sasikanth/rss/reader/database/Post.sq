@@ -111,7 +111,7 @@ RETURNING post.feedLink;
 markPostsInFeedAsRead:
 UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE feedLink = :feedLink;
+WHERE feedLink = :feedLink AND date > :after;
 
 post:
 SELECT * FROM post

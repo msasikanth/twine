@@ -18,27 +18,36 @@ package dev.sasikanth.rss.reader.feed.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -50,17 +59,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -71,11 +86,21 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedPresenter
+import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
+import dev.sasikanth.rss.reader.resources.icons.Share
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
+import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+private val HORIZONTAL_PADDING = 24.dp
 
 @Composable
 fun FeedInfoBottomSheet(
@@ -92,70 +117,42 @@ fun FeedInfoBottomSheet(
     }
   }
 
-  // Doing this before `ModalBottomSheet` as this value is not available
-  // after `ModalSheetConsumes` insets, I think? It's returning 0 when
-  // I do this inside `ModalBottomSheet`.
-  val systemBarsBottomPadding =
-    WindowInsets.systemBars
-      .only(WindowInsetsSides.Bottom)
-      .asPaddingValues()
-      .calculateBottomPadding()
-
-  val keyboardState by keyboardVisibilityAsState()
-
   ModalBottomSheet(
     modifier = Modifier.then(modifier),
     onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = Color.Unspecified,
-    windowInsets = WindowInsets.ime.only(WindowInsetsSides.Bottom),
-    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current)
+    windowInsets =
+      WindowInsets.systemBars
+        .only(WindowInsetsSides.Bottom)
+        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
+    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+    scrimColor = SYSTEM_SCRIM
   ) {
-    val bottomPadding =
-      if (keyboardState == KeyboardState.Closed) {
-        systemBarsBottomPadding
-      } else {
-        0.dp
-      }
-
     Column(
-      modifier =
-        Modifier.fillMaxWidth()
-          .padding(bottom = 16.dp + bottomPadding)
-          .verticalScroll(rememberScrollState())
+      modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
     ) {
-      Spacer(Modifier.requiredHeight(8.dp))
-
       val feed = state.feed
       if (feed != null) {
-        Box(
-          Modifier.requiredSize(64.dp)
-            .background(Color.White, RoundedCornerShape(16.dp))
-            .padding(horizontal = 24.dp)
-            .align(Alignment.CenterHorizontally)
-        ) {
-          AsyncImage(
-            url = feed.icon,
-            contentDescription = feed.name,
-            modifier =
-              Modifier.requiredSize(56.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
-          )
-        }
-
-        Spacer(Modifier.requiredHeight(24.dp))
-
         FeedLabelInput(
-          modifier = Modifier.padding(horizontal = 24.dp),
-          value = feed.name,
-          onFeedNameChanged = { newFeedName ->
-            feedPresenter.dispatch(FeedEvent.OnFeedNameChanged(newFeedName, feed.link))
-          },
-          textAlign = TextAlign.Center
+          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
+          feed = feed,
+          onFeedNameChange = { newFeedName ->
+            feedPresenter.dispatch(
+              FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedLink = feed.link)
+            )
+          }
         )
 
-        Spacer(Modifier.requiredHeight(16.dp))
+        Spacer(Modifier.requiredHeight(8.dp))
 
-        Divider()
+        FeedUnreadCount(
+          modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
+          numberOfUnreadPosts = feed.numberOfUnreadPosts,
+          onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.link)) }
+        )
+
+        Divider(horizontalInsets = HORIZONTAL_PADDING)
 
         AlwaysFetchSourceArticleSwitch(
           feed = feed,
@@ -164,16 +161,15 @@ fun FeedInfoBottomSheet(
           }
         )
 
-        Divider()
+        Divider(horizontalInsets = HORIZONTAL_PADDING)
+
+        FeedOptions(
+          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
+          feed = feed,
+          onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
+        )
 
         Spacer(Modifier.requiredHeight(8.dp))
-
-        RemoveFeedButton(
-          modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally),
-          feed = feed
-        ) {
-          feedPresenter.dispatch(FeedEvent.RemoveFeedClicked)
-        }
       } else {
         CircularProgressIndicator(
           modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -181,6 +177,177 @@ fun FeedInfoBottomSheet(
         )
       }
     }
+  }
+}
+
+@Composable
+private fun FeedUnreadCount(
+  numberOfUnreadPosts: Long,
+  modifier: Modifier = Modifier,
+  onMarkPostsAsRead: () -> Unit
+) {
+  Row(
+    modifier = modifier,
+    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Spacer(Modifier.requiredWidth(8.dp))
+
+    val hasUnreadPosts = numberOfUnreadPosts > 0
+    val text =
+      if (hasUnreadPosts) {
+        LocalStrings.current.numberOfUnreadPostsInFeed(numberOfUnreadPosts)
+      } else {
+        LocalStrings.current.noUnreadPostsInFeed
+      }
+
+    Text(
+      modifier = Modifier.weight(1f),
+      text = text,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      style = MaterialTheme.typography.labelLarge,
+      textAlign = TextAlign.Start,
+    )
+
+    TextButton(
+      enabled = hasUnreadPosts,
+      onClick = onMarkPostsAsRead,
+      shape = MaterialTheme.shapes.medium,
+      colors =
+        ButtonDefaults.textButtonColors(
+          disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          contentColor = AppTheme.colorScheme.tintedForeground
+        )
+    ) {
+      Icon(
+        modifier = Modifier.requiredSize(18.dp),
+        imageVector = Icons.Rounded.Check,
+        contentDescription = null,
+      )
+
+      Spacer(Modifier.requiredWidth(8.dp))
+
+      Text(text = LocalStrings.current.markAsRead, style = MaterialTheme.typography.labelLarge)
+    }
+  }
+}
+
+@Composable
+private fun FeedLabelInput(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onFeedNameChange: (String) -> Unit
+) {
+  Row(
+    Modifier.then(modifier)
+      .clip(RoundedCornerShape(24.dp))
+      .background(AppTheme.colorScheme.tintedSurface)
+      .padding(8.dp)
+      .fillMaxWidth()
+  ) {
+    Box(
+      Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)).padding(8.dp)
+    ) {
+      AsyncImage(
+        url = feed.icon,
+        contentDescription = feed.name,
+        modifier =
+          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
+      )
+    }
+
+    Spacer(Modifier.requiredWidth(16.dp))
+
+    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+      Text(
+        text = LocalStrings.current.feedTitleHint,
+        style = MaterialTheme.typography.labelSmall,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+
+      var input by remember(feed.name) { mutableStateOf(feed.name) }
+      val focusManager = LocalFocusManager.current
+      val keyboardState by keyboardVisibilityAsState()
+
+      LaunchedEffect(keyboardState) {
+        if (keyboardState == KeyboardState.Closed) focusManager.clearFocus()
+      }
+
+      val textSelectionColors =
+        TextSelectionColors(
+          handleColor = AppTheme.colorScheme.tintedForeground,
+          backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
+        )
+
+      CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
+        BasicTextField(
+          modifier = Modifier.fillMaxWidth(),
+          value = input,
+          onValueChange = {
+            input = it
+            onFeedNameChange(input)
+          },
+          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
+          keyboardActions =
+            KeyboardActions(
+              onDone = {
+                focusManager.clearFocus()
+                onFeedNameChange(input)
+              }
+            ),
+          singleLine = true,
+          textStyle =
+            MaterialTheme.typography.titleMedium.copy(
+              color = AppTheme.colorScheme.textEmphasisHigh
+            ),
+          cursorBrush = SolidColor(AppTheme.colorScheme.textEmphasisHigh),
+        )
+      }
+
+      HorizontalDivider(
+        color = AppTheme.colorScheme.tintedHighlight,
+        modifier = Modifier.padding(end = 32.dp)
+      )
+    }
+  }
+}
+
+@Composable
+private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Modifier = Modifier) {
+  val coroutineScope = rememberCoroutineScope()
+  val linkHandler = LocalLinkHandler.current
+  val shareHandler = LocalShareHandler.current
+  var showConfirmDialog by remember { mutableStateOf(false) }
+
+  Row(modifier = modifier) {
+    FeedOptionItem(
+      icon = TwineIcons.Share,
+      text = LocalStrings.current.feedOptionShare,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { shareHandler.share(feed.link) }
+    )
+
+    FeedOptionItem(
+      icon = TwineIcons.Website,
+      text = LocalStrings.current.feedOptionWebsite,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
+    )
+
+    FeedOptionItem(
+      icon = TwineIcons.DeleteOutline,
+      text = LocalStrings.current.feedOptionRemove,
+      modifier = Modifier.weight(1f),
+      onOptionClick = { showConfirmDialog = true }
+    )
+  }
+
+  if (showConfirmDialog) {
+    ConfirmFeedDeleteDialog(
+      feedName = feed.name,
+      onRemoveFeed = onRemoveFeedClick,
+      dismiss = { showConfirmDialog = false },
+    )
   }
 }
 
@@ -199,7 +366,7 @@ private fun AlwaysFetchSourceArticleSwitch(
           checked = !checked
           onValueChanged(checked, feed.link)
         }
-        .padding(vertical = 16.dp, horizontal = 24.dp),
+        .padding(vertical = 16.dp, horizontal = HORIZONTAL_PADDING),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
@@ -214,10 +381,10 @@ private fun AlwaysFetchSourceArticleSwitch(
     MaterialTheme(
       colorScheme =
         darkColorScheme(
-          primary = AppTheme.colorScheme.tintedHighlight,
-          onPrimary = AppTheme.colorScheme.tintedForeground,
+          primary = AppTheme.colorScheme.tintedForeground,
+          onPrimary = AppTheme.colorScheme.tintedSurface,
           outline = AppTheme.colorScheme.outline,
-          surfaceVariant = AppTheme.colorScheme.surfaceContainerLowest
+          surfaceVariant = AppTheme.colorScheme.surfaceContainerHighest
         )
     ) {
       Switch(
@@ -230,39 +397,33 @@ private fun AlwaysFetchSourceArticleSwitch(
 }
 
 @Composable
-private fun RemoveFeedButton(
-  feed: Feed,
+private fun FeedOptionItem(
+  icon: ImageVector,
+  text: String,
   modifier: Modifier = Modifier,
-  onRemoveFeedClick: () -> Unit
+  onOptionClick: () -> Unit
 ) {
-  Box(modifier) {
-    var showConfirmDialog by remember { mutableStateOf(false) }
+  Column(
+    modifier =
+      Modifier.clip(RoundedCornerShape(8.dp))
+        .clickable { onOptionClick() }
+        .padding(vertical = 12.dp)
+        .then(modifier),
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(4.dp)
+  ) {
+    Icon(
+      imageVector = icon,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.tintedForeground,
+      modifier = Modifier.size(24.dp)
+    )
 
-    TextButton(
-      onClick = { showConfirmDialog = true },
-      contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
-      shape = MaterialTheme.shapes.large
-    ) {
-      Icon(
-        imageVector = Icons.Outlined.Delete,
-        contentDescription = LocalStrings.current.editFeeds,
-        tint = MaterialTheme.colorScheme.error
-      )
-      Spacer(Modifier.width(12.dp))
-      Text(
-        text = LocalStrings.current.removeFeed,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.error
-      )
-    }
-
-    if (showConfirmDialog) {
-      ConfirmFeedDeleteDialog(
-        feedName = feed.name,
-        onRemoveFeed = onRemoveFeedClick,
-        dismiss = { showConfirmDialog = false },
-      )
-    }
+    Text(
+      text = text,
+      style = MaterialTheme.typography.labelMedium,
+      color = AppTheme.colorScheme.tintedForeground
+    )
   }
 }
 
@@ -270,6 +431,6 @@ private fun RemoveFeedButton(
 private fun Divider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = AppTheme.colorScheme.tintedHighlight
+    color = AppTheme.colorScheme.tintedSurface
   )
 }
