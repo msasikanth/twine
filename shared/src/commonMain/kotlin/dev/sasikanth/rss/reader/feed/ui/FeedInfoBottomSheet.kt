@@ -94,6 +94,7 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.flow.collectLatest
@@ -125,7 +126,8 @@ fun FeedInfoBottomSheet(
       WindowInsets.systemBars
         .only(WindowInsetsSides.Bottom)
         .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
-    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current)
+    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+    scrimColor = SYSTEM_SCRIM
   ) {
     Column(
       modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
