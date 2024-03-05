@@ -98,7 +98,8 @@ internal fun PostMetadata(
           Modifier.clip(RoundedCornerShape(50))
             .clickable(onClick = onSourceClick)
             .background(color = Color.White.copy(alpha = 0.12f))
-            .padding(horizontal = 12.dp, vertical = 4.dp)
+            .padding(vertical = 4.dp)
+            .padding(start = 8.dp, end = 12.dp)
         } else {
           Modifier
         }
@@ -110,13 +111,15 @@ internal fun PostMetadata(
           AppTheme.colorScheme.onSurfaceVariant
         }
 
-      Row(modifier = postSourceClickableModifier) {
+      Row(modifier = postSourceClickableModifier, verticalAlignment = Alignment.CenterVertically) {
         if (!postRead && config.showUnreadIndicator) {
           Box(
             Modifier.requiredSize(6.dp)
               .background(AppTheme.colorScheme.tintedForeground, CircleShape)
               .align(Alignment.CenterVertically)
           )
+          Spacer(Modifier.requiredWidth(8.dp))
+        } else {
           Spacer(Modifier.requiredWidth(4.dp))
         }
 
