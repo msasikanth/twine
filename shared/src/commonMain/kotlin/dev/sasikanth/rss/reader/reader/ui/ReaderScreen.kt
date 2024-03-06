@@ -233,6 +233,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
         webViewState.webSettings.apply {
           this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+          this.supportZoom = false
         }
 
         Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
