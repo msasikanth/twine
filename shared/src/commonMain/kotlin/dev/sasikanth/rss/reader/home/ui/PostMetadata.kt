@@ -111,7 +111,7 @@ internal fun PostMetadata(
           AppTheme.colorScheme.onSurfaceVariant
         }
 
-      Row(modifier = postSourceClickableModifier, verticalAlignment = Alignment.CenterVertically) {
+      Row(modifier = postSourceClickableModifier) {
         if (!postRead && config.showUnreadIndicator) {
           Box(
             Modifier.requiredSize(6.dp)
