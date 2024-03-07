@@ -53,10 +53,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -92,6 +91,8 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -139,12 +140,12 @@ internal fun FeedsBottomSheet(
       )
     } else {
       BottomSheetExpandedContent(
-        searchQuery = feedsPresenter.searchQuery,
         feedsListItemTypes = state.feedsInExpandedMode.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+        searchQuery = feedsPresenter.searchQuery,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
@@ -158,9 +159,7 @@ internal fun FeedsBottomSheet(
         editFeeds = editFeeds,
         exitFeedsEdit = exitFeedsEdit,
         onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
-        onMarkFeedAsRead = { feed ->
-          feedsPresenter.dispatch(FeedsEvent.MarkPostsInFeedAsReadClicked(feed.link))
-        },
+        onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -197,7 +196,7 @@ private fun BottomSheetExpandedContent(
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -262,7 +261,7 @@ private fun BottomSheetExpandedContent(
                   onFeedSelected = onFeedSelected,
                   onFeedNameChanged = onFeedNameChanged,
                   onFeedPinClick = onFeedPinClick,
-                  onMarkFeedAsRead = onMarkFeedAsRead
+                  onDeleteFeed = onDeleteFeed
                 )
               }
             }
@@ -275,12 +274,12 @@ private fun BottomSheetExpandedContent(
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
 
-                  Divider(color = AppTheme.colorScheme.tintedSurface)
+                  HorizontalDivider(color = AppTheme.colorScheme.tintedSurface)
 
-                  Divider(
-                    color = AppTheme.colorScheme.tintedSurface,
+                  HorizontalDivider(
                     modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
+                    color = AppTheme.colorScheme.tintedSurface
                   )
                 }
               }
@@ -294,10 +293,10 @@ private fun BottomSheetExpandedContent(
                       Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
                   )
 
-                  Divider(
-                    color = AppTheme.colorScheme.tintedSurface,
+                  HorizontalDivider(
                     modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f }
+                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
+                    color = AppTheme.colorScheme.tintedSurface
                   )
                 }
               }
@@ -349,7 +348,10 @@ private fun FeedsSheetBottomBar(
         }
         .then(modifier)
     ) {
-      Divider(Modifier.align(Alignment.TopStart), color = AppTheme.colorScheme.tintedSurface)
+      HorizontalDivider(
+        Modifier.align(Alignment.TopStart),
+        color = AppTheme.colorScheme.tintedSurface
+      )
       Box(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 20.dp)) {
         // Placeholder view with similar height of primary action button and input field
         // from the home screen
@@ -499,7 +501,7 @@ private fun SearchBar(
               when (feedsSheetMode) {
                 Default,
                 LinkEntry -> Icons.Rounded.KeyboardArrowDown
-                Edit -> Icons.Rounded.ArrowBack
+                Edit -> TwineIcons.ArrowBack
               }
             IconButton(onClick = onNavigationIconClick) {
               Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.tintedForeground)
@@ -516,21 +518,21 @@ private fun SearchBar(
           enabled = feedsSheetMode != LinkEntry,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Unspecified,
-              unfocusedContainerColor = Color.Unspecified,
-              disabledContainerColor = Color.Unspecified,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
+              disabledContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              disabledTextColor = Color.Unspecified,
-              unfocusedIndicatorColor = Color.Unspecified,
-              focusedIndicatorColor = Color.Unspecified,
-              disabledIndicatorColor = Color.Unspecified,
-              errorIndicatorColor = Color.Unspecified
+              disabledTextColor = Color.Transparent,
+              unfocusedIndicatorColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent
             )
         )
       }
     }
 
-    Divider(
+    HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
       color = AppTheme.colorScheme.tintedSurface
     )

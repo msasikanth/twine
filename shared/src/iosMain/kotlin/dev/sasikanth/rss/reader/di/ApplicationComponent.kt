@@ -20,6 +20,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
+import kotlin.experimental.ExperimentalNativeApi
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import platform.Foundation.NSBundle
@@ -39,11 +40,13 @@ abstract class ApplicationComponent(
 
   @Provides
   @AppScope
+  @OptIn(ExperimentalNativeApi::class)
   fun providesAppInfo(): AppInfo =
     AppInfo(
       versionCode =
         (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0,
       versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
           ?: "",
+      isDebugBuild = Platform.isDebugBinary,
     )
 }

@@ -15,9 +15,9 @@
  */
 package dev.sasikanth.rss.reader.opml
 
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.serialization.serializer
 import me.tatarka.inject.annotations.Inject
 import nl.adaptivity.xmlutil.serialization.XML
@@ -51,7 +51,7 @@ class FeedsOpml {
         .appendLine()
         .toString()
     } catch (e: Exception) {
-      Sentry.captureException(e)
+      BugsnagKotlin.sendHandledException(e)
       ""
     }
   }
@@ -73,7 +73,7 @@ class FeedsOpml {
 
       opmlFeeds.distinctBy { it.link }
     } catch (e: Exception) {
-      Sentry.captureException(e)
+      BugsnagKotlin.sendHandledException(e)
       emptyList()
     }
   }
@@ -82,7 +82,6 @@ class FeedsOpml {
     Outline(text = feed.name, title = feed.name, type = "rss", xmlUrl = feed.link, outlines = null)
 
   private fun mapOutlineToOpmlFeed(outline: Outline): OpmlFeed {
-    val title = outline.title ?: outline.text ?: outline.xmlUrl!!
-    return OpmlFeed(title = title, link = outline.xmlUrl!!)
+    return OpmlFeed(title = outline.title, link = outline.xmlUrl!!)
   }
 }

@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.settings.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,28 +27,22 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider as MaterialDivider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -66,15 +61,14 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -85,7 +79,7 @@ import dev.sasikanth.rss.reader.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.resources.icons.EditorsChoice
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -113,7 +107,7 @@ internal fun SettingsScreen(
           title = { Text(LocalStrings.current.settings) },
           navigationIcon = {
             IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =
@@ -125,7 +119,7 @@ internal fun SettingsScreen(
             ),
         )
 
-        MaterialDivider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -143,16 +137,21 @@ internal fun SettingsScreen(
             ),
         ) {
           item {
-            OpenSource {
-              coroutineScope.launch { linkHandler.openLink(Constants.OPEN_SOURCE_LINK) }
-            }
-          }
-
-          item {
             SubHeader(
               text = LocalStrings.current.settingsHeaderBehaviour,
             )
           }
+
+          item {
+            ShowReaderViewSettingItem(
+              showReaderView = state.showReaderView,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
 
           item {
             BrowserTypeSettingItem(
@@ -243,32 +242,37 @@ internal fun SettingsScreen(
 }
 
 @Composable
-private fun OpenSource(openLink: () -> Unit) {
-  Surface(
-    color = AppTheme.colorScheme.tintedSurface,
-    shape = RoundedCornerShape(4.dp),
-    modifier = Modifier.fillMaxWidth().padding(16.dp).clickable { openLink() }
+private fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(showReaderView) { mutableStateOf(showReaderView) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!showReaderView)
+      }
   ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(16.dp)) {
-      Icon(
-        TwineIcons.EditorsChoice,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurface,
-        modifier = Modifier.size(48.dp)
-      )
-      Spacer(Modifier.height(16.dp))
-      Text(
-        LocalStrings.current.openSource,
-        style = MaterialTheme.typography.titleMedium,
-        textAlign = TextAlign.Center,
-        color = AppTheme.colorScheme.onSurface
-      )
-      Spacer(Modifier.height(12.dp))
-      Text(
-        LocalStrings.current.openSourceDesc,
-        style = MaterialTheme.typography.labelMedium,
-        textAlign = TextAlign.Center,
-        color = AppTheme.colorScheme.onSurface
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.settingsShowReaderViewTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.settingsShowReaderViewSubtitle,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
       )
     }
   }
@@ -282,24 +286,18 @@ private fun PostsDeletionPeriodSettingItem(
   var showDropdown by remember { mutableStateOf(false) }
 
   Row(
-    modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 8.dp, bottom = 20.dp),
+    modifier = Modifier.padding(horizontal = 24.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
-    Column(modifier = Modifier.weight(1f)) {
-      Text(
-        LocalStrings.current.settingsPostsDeletionPeriodTitle,
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh
-      )
-      Text(
-        LocalStrings.current.settingsPostsDeletionPeriodSubtitle,
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
-      )
-    }
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.settingsPostsDeletionPeriodTitle,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
+    )
 
     Box {
-      TextButton(modifier = Modifier.widthIn(min = 112.dp), onClick = { showDropdown = true }) {
+      TextButton(onClick = { showDropdown = true }, shape = MaterialTheme.shapes.medium) {
         val period =
           when (postsDeletionPeriod) {
             ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
@@ -316,8 +314,10 @@ private fun PostsDeletionPeriodSettingItem(
           color = AppTheme.colorScheme.tintedForeground
         )
 
+        Spacer(Modifier.requiredWidth(8.dp))
+
         Icon(
-          imageVector = Icons.Filled.ArrowDropDown,
+          imageVector = Icons.Filled.ExpandMore,
           contentDescription = null,
           tint = AppTheme.colorScheme.tintedForeground
         )
@@ -326,7 +326,6 @@ private fun PostsDeletionPeriodSettingItem(
       DropdownMenu(
         expanded = showDropdown,
         onDismissRequest = { showDropdown = false },
-        offset = DpOffset(x = 0.dp, y = (-48).dp)
       ) {
         Period.entries.forEach { period ->
           val periodString =
@@ -338,17 +337,25 @@ private fun PostsDeletionPeriodSettingItem(
               ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
             }
 
+          val backgroundColor =
+            if (period == postsDeletionPeriod) {
+              AppTheme.colorScheme.tintedSurface
+            } else {
+              Color.Unspecified
+            }
+
           DropdownMenuItem(
             onClick = {
               onValueChanged(period)
               showDropdown = false
-            }
+            },
+            modifier = Modifier.background(backgroundColor)
           ) {
             val textColor =
               if (period == postsDeletionPeriod) {
-                AppTheme.colorScheme.tintedForeground
-              } else {
                 AppTheme.colorScheme.onSurface
+              } else {
+                AppTheme.colorScheme.textEmphasisHigh
               }
 
             Text(text = periodString, style = MaterialTheme.typography.bodyLarge, color = textColor)
@@ -391,20 +398,10 @@ private fun UnreadPostsCountSettingItem(
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
-      }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
@@ -441,20 +438,10 @@ private fun FeaturedItemBlurSettingItem(
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked -> onValueChanged(checked) },
-        )
-      }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
@@ -712,7 +699,7 @@ private fun AboutProfileImages() {
 
 @Composable
 private fun Divider(horizontalInsets: Dp = 0.dp) {
-  MaterialDivider(
+  HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
     color = AppTheme.colorScheme.surfaceContainer
   )

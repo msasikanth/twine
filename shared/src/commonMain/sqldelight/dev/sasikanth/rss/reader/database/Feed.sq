@@ -1,3 +1,4 @@
+import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE feed(
@@ -8,7 +9,8 @@ CREATE TABLE feed(
   createdAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL PRIMARY KEY,
   pinnedAt INTEGER AS Instant,
-  lastCleanUpAt INTEGER AS Instant
+  lastCleanUpAt INTEGER AS Instant,
+  alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -52,6 +54,23 @@ SELECT * FROM feed
 WHERE link = :link
 ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
 
+feedWithUnreadPostsCount:
+SELECT
+  f.name,
+  f.icon,
+  f.description,
+  f.homepageLink,
+  f.createdAt,
+  f.link,
+  f.pinnedAt,
+  f.lastCleanUpAt,
+  f.alwaysFetchSourceArticle,
+  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+FROM feed f
+LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
+WHERE f.link = :link
+ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
+
 updateFeedName:
 UPDATE feed SET name = :newFeedName WHERE link = :link;
 
@@ -69,3 +88,6 @@ SELECT COUNT(*) FROM feed;
 
 updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE link = :link;
+
+updateAlwaysFetchSourceArticle:
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE link = :link;

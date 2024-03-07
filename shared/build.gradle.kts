@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
-import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
@@ -26,17 +25,8 @@ plugins {
   alias(libs.plugins.compose)
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.ksp)
-  alias(libs.plugins.buildKonfig)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
-}
-
-buildkonfig {
-  packageName = "dev.sasikanth.reader"
-  defaultConfigs {
-    val sentryDsn = System.getenv("SENTRY_DSN")
-    buildConfigField(STRING, "SENTRY_DSN", sentryDsn.orEmpty())
-  }
 }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -65,7 +55,7 @@ kotlin {
     homepage = "https://github.com/msasikanth/rss_reader"
     ios.deploymentTarget = "15.0"
     podfile = project.file("../iosApp/Podfile")
-    pod("Sentry", "~> 8.4.0")
+    pod("Bugsnag")
 
     framework {
       baseName = "shared"
@@ -74,8 +64,11 @@ kotlin {
       export(libs.decompose)
       export(libs.essenty.lifecycle)
       export(libs.essenty.backhandler)
+      export(libs.crashkios.bugsnag)
     }
   }
+
+  compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
   sourceSets {
     all {
@@ -98,18 +91,17 @@ kotlin {
       implementation(libs.bundles.kotlinx)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
-      implementation(libs.napier)
       implementation(libs.sqldelight.extensions.coroutines)
       implementation(libs.sqldelight.extensions.paging)
       api(libs.decompose)
       implementation(libs.decompose.extensions.compose)
       api(libs.essenty.lifecycle)
+      implementation(libs.essenty.lifecycle.coroutines)
       api(libs.essenty.backhandler)
       implementation(libs.kotlininject.runtime)
       implementation(libs.androidx.collection)
       implementation(libs.material.color.utilities)
       implementation(libs.ksoup)
-      implementation(libs.sentry)
       implementation(libs.windowSizeClass)
       api(libs.androidx.datastore.okio)
       api(libs.androidx.datastore.preferences)
@@ -124,6 +116,9 @@ kotlin {
       api(libs.coil.compose)
       api(libs.coil.network)
       api(libs.coil.svg)
+      api(libs.crashkios.bugsnag)
+      implementation(libs.kermit)
+      implementation(libs.kermit.bugsnag)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
@@ -169,8 +164,6 @@ android {
   namespace = "dev.sasikanth.rss.reader.common"
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-  sourceSets["main"].res.srcDirs("src/androidMain/res", "src/commonMain/resources")
-  sourceSets["main"].resources.srcDirs("src/commonMain/resources")
 
   defaultConfig {
     minSdk = libs.versions.android.sdk.min.get().toInt()

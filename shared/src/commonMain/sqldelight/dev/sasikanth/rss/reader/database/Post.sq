@@ -25,11 +25,22 @@ UPDATE SET title = excluded.title, description = excluded.description, rawConten
 
 count:
 SELECT COUNT(*) FROM post
-WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.link NOT IN (
-  SELECT post.link FROM post
-  WHERE (:feedLink IS NULL OR post.feedLink = :feedLink) AND post.imageUrl IS NOT NULL
-  ORDER BY post.date DESC LIMIT :featuredPostsLimit
-);
+WHERE
+  (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+  (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+  -- Skip featured posts --
+  post.link NOT IN (
+    SELECT post.link FROM post
+    WHERE
+    (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+    (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+    post.imageUrl IS NOT NULL AND
+    post.date > :postsAfter
+    ORDER BY post.date DESC LIMIT :featuredPostsLimit
+  ) AND
+  -- Skip featured posts --
+  post.date > :postsAfter
+ORDER BY post.date DESC;
 
 featuredPosts:
 SELECT
@@ -71,6 +82,7 @@ INNER JOIN feed ON post.feedLink == feed.link
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+  -- Skip featured posts --
   post.link NOT IN (
     SELECT post.link FROM post
     WHERE
@@ -80,6 +92,7 @@ WHERE
     post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
   ) AND
+  -- Skip featured posts --
   post.date > :postsAfter
 ORDER BY post.date DESC
 LIMIT :limit OFFSET :offset;
@@ -98,7 +111,7 @@ RETURNING post.feedLink;
 markPostsInFeedAsRead:
 UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE feedLink = :feedLink;
+WHERE feedLink = :feedLink AND date > :after;
 
 post:
 SELECT * FROM post

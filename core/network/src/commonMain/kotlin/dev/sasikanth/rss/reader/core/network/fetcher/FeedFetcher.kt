@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -31,7 +32,10 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
+import io.ktor.http.charset
 import io.ktor.http.contentType
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.core.String
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -86,7 +90,14 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    val responseContent = response.bodyAsText()
+    val responseContent =
+      try {
+        response.bodyAsText()
+      } catch (e: Exception) {
+        val originalCharset = response.charset() ?: Charsets.UTF_8
+        String(response.body<ByteArray>(), charset = originalCharset)
+      }
+
     return if (response.contentType()?.withoutParameters() == ContentType.Text.Html) {
       val feedUrl = fetchFeedLinkFromHtmlIfExists(responseContent, url)
       if (feedUrl != url && !feedUrl.isNullOrBlank()) {
@@ -134,7 +145,13 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   private fun fetchFeedLinkFromHtmlIfExists(htmlContent: String, originalUrl: String): String? {
-    val document = Ksoup.parse(htmlContent)
+    val document =
+      try {
+        Ksoup.parse(htmlContent)
+      } catch (t: Throwable) {
+        return null
+      }
+
     val linkElement =
       document.getElementsByTag(TAG_LINK).firstOrNull {
         val linkType = it.attr(ATTR_TYPE)

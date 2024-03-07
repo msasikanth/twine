@@ -25,22 +25,22 @@ import androidx.compose.ui.graphics.Color
 
 @Stable
 class AppColorScheme(
-  tintedBackground: Color = Color(0xFF002117),
-  tintedSurface: Color = Color(0xFF00382A),
-  tintedForeground: Color = Color(0xFF63DBB5),
-  tintedHighlight: Color = Color(0xFF006C53),
-  outline: Color = Color(0xFF89938E),
-  outlineVariant: Color = Color(0xFF3F4944),
-  surface: Color = Color(0xFF111412),
-  onSurface: Color = Color(0xFFE1E3E0),
-  onSurfaceVariant: Color = Color(0xFFBFC9C3),
-  surfaceContainer: Color = Color(0xFF1D201F),
-  surfaceContainerLow: Color = Color(0xFF191C1B),
-  surfaceContainerLowest: Color = Color(0xFF0B0F0D),
-  surfaceContainerHigh: Color = Color(0xFF272B29),
-  surfaceContainerHighest: Color = Color(0xFF323633),
-  textEmphasisHigh: Color = Color.White.copy(alpha = 0.9f),
-  textEmphasisMed: Color = Color.White.copy(alpha = 0.7f)
+  tintedBackground: Color,
+  tintedSurface: Color,
+  tintedForeground: Color,
+  tintedHighlight: Color,
+  outline: Color,
+  outlineVariant: Color,
+  surface: Color,
+  onSurface: Color,
+  onSurfaceVariant: Color,
+  surfaceContainer: Color,
+  surfaceContainerLow: Color,
+  surfaceContainerLowest: Color,
+  surfaceContainerHigh: Color,
+  surfaceContainerHighest: Color,
+  textEmphasisHigh: Color,
+  textEmphasisMed: Color,
 ) {
 
   var tintedBackground by mutableStateOf(tintedBackground, structuralEqualityPolicy())
@@ -129,4 +129,25 @@ class AppColorScheme(
     )
 }
 
-internal val LocalAppColorScheme = compositionLocalOf { AppColorScheme() }
+fun darkAppColorScheme(): AppColorScheme {
+  return AppColorScheme(
+    tintedBackground = Color(0xFF002117),
+    tintedSurface = Color(0xFF00382A),
+    tintedForeground = Color(0xFF63DBB5),
+    tintedHighlight = Color(0xFF006C53),
+    outline = Color(0xFF89938E),
+    outlineVariant = Color(0xFF3F4944),
+    surface = Color(0xFF111412),
+    onSurface = Color(0xFFE1E3E0),
+    onSurfaceVariant = Color(0xFFBFC9C3),
+    surfaceContainer = Color(0xFF1D201F),
+    surfaceContainerLow = Color(0xFF191C1B),
+    surfaceContainerLowest = Color(0xFF0B0F0D),
+    surfaceContainerHigh = Color(0xFF272B29),
+    surfaceContainerHighest = Color(0xFF323633),
+    textEmphasisHigh = Color.White.copy(alpha = 0.9f),
+    textEmphasisMed = Color.White.copy(alpha = 0.7f)
+  )
+}
+
+internal val LocalAppColorScheme = compositionLocalOf { darkAppColorScheme() }

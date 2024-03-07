@@ -28,11 +28,11 @@ internal data class ReaderState(
   val isBookmarked: Boolean?,
   val feed: Feed?,
   val postMode: PostMode,
+  val postImage: String?
 ) {
 
-  val hasContent: Boolean
-    get() =
-      content != null && feed != null && !publishedAt.isNullOrBlank() && !title.isNullOrBlank()
+  val canShowReaderView: Boolean
+    get() = feed != null && !publishedAt.isNullOrBlank()
 
   companion object {
 
@@ -45,6 +45,7 @@ internal data class ReaderState(
         isBookmarked = null,
         feed = null,
         postMode = PostMode.Idle,
+        postImage = null
       )
   }
 

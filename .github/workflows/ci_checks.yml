@@ -27,6 +27,23 @@ jobs:
       - name: Check Spotless
         run: ./gradlew spotlessCheck
 
+  db-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup JDK 20
+        uses: actions/setup-java@v4
+        with:
+          java-version: 20
+          distribution: zulu
+          cache: 'gradle'
+
+      - name: DB Migrations Check
+        run: |
+          ./gradlew generateCommonMainReaderDatabaseSchema;
+          ./gradlew verifySqlDelightMigration
+
   common-tests:
     runs-on: macos-latest
     steps:

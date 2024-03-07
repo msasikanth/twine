@@ -36,6 +36,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
+  private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -52,6 +53,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.data.map { preferences ->
       mapToPostsDeletionPeriod(preferences[postsDeletionPeriodKey]) ?: Period.ONE_MONTH
     }
+
+  val showReaderView: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[showReaderViewKey] ?: true }
 
   val postsType: Flow<PostsType> =
     dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
@@ -78,6 +82,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updatePostsType(postsType: PostsType) {
     dataStore.edit { preferences -> preferences[postsTypeKey] = postsType.name }
+  }
+
+  suspend fun toggleShowReaderView(value: Boolean) {
+    dataStore.edit { preferences -> preferences[showReaderViewKey] = value }
   }
 
   private fun mapToBrowserType(pref: String?): BrowserType? {

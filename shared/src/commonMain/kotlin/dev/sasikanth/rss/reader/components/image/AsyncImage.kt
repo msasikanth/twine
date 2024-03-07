@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import coil3.size.Dimension
 import coil3.size.Size
 
 @Composable
@@ -32,7 +33,7 @@ internal fun AsyncImage(
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size.ORIGINAL,
+  size: Size = Size(Dimension.Undefined, 500),
   backgroundColor: Color? = null
 ) {
   val backgroundColorModifier =

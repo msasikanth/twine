@@ -29,18 +29,15 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,25 +45,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.DropdownMenu
-import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.FeedLabelInput
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
-import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.DoneAll
+import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.PinFilled
-import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
-import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun FeedListItem(
@@ -80,7 +70,7 @@ internal fun FeedListItem(
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit
 ) {
   val clickableModifier =
     if (feedsSheetMode != Edit) {
@@ -94,31 +84,14 @@ internal fun FeedListItem(
       modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box(contentAlignment = Alignment.Center) {
-        SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
+      Box {
+        Box(contentAlignment = Alignment.Center) {
+          SelectionIndicator(selected = selected && feedsSheetMode != Edit, animationProgress = 1f)
 
-        Box(
-          modifier =
-            Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
-          contentAlignment = Alignment.Center
-        ) {
-          BadgedBox(
-            badge = {
-              val numberOfUnreadPosts = feed.numberOfUnreadPosts
-              if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
-                Badge(
-                  containerColor = AppTheme.colorScheme.tintedForeground,
-                  contentColor = AppTheme.colorScheme.tintedBackground,
-                  modifier =
-                    Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
-                      translationX = -8.dp.toPx()
-                      translationY = 4.dp.toPx()
-                    }
-                ) {
-                  Text(feed.numberOfUnreadPosts.toString())
-                }
-              }
-            }
+          Box(
+            modifier =
+              Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
           ) {
             AsyncImage(
               url = feed.icon,
@@ -128,6 +101,24 @@ internal fun FeedListItem(
                 Modifier.requiredSize(48.dp)
                   .clip(RoundedCornerShape(12.dp))
                   .align(Alignment.Center),
+            )
+          }
+        }
+
+        val numberOfUnreadPosts = feed.numberOfUnreadPosts
+        if (numberOfUnreadPosts > 0 && canShowUnreadPostsCount) {
+          Badge(
+            containerColor = AppTheme.colorScheme.tintedForeground,
+            contentColor = AppTheme.colorScheme.tintedBackground,
+            modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd)
+          ) {
+            Text(
+              text = feed.numberOfUnreadPosts.toString(),
+              style = MaterialTheme.typography.labelSmall,
+              modifier =
+                Modifier.align(Alignment.CenterVertically).graphicsLayer {
+                  translationY = -2.toDp().toPx()
+                }
             )
           }
         }
@@ -151,7 +142,7 @@ internal fun FeedListItem(
           canPinFeed = canPinFeeds,
           onFeedInfoClick = onFeedInfoClick,
           onFeedPinClick = onFeedPinClick,
-          onMarkFeedAsRead = onMarkFeedAsRead
+          onDeleteFeed = onDeleteFeed
         )
       }
     }
@@ -165,88 +156,37 @@ private fun ActionButtons(
   canPinFeed: Boolean,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedPinClick: (Feed) -> Unit,
-  onMarkFeedAsRead: (Feed) -> Unit,
+  onDeleteFeed: (Feed) -> Unit,
 ) {
   Row {
     if (isInEditMode) {
       PinFeedIconButton(feed = feed, canPinFeed = canPinFeed, onFeedPinClick = onFeedPinClick)
 
-      IconButton(onClick = { onFeedInfoClick(feed) }) {
-        Icon(
-          imageVector = Icons.TwoTone.Info,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
+      Box {
+        var showConfirmDialog by remember { mutableStateOf(false) }
+
+        IconButton(onClick = { showConfirmDialog = true }) {
+          Icon(
+            imageVector = TwineIcons.Delete,
+            contentDescription = LocalStrings.current.removeFeed,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
+
+        if (showConfirmDialog) {
+          ConfirmFeedDeleteDialog(
+            feedName = feed.name,
+            onRemoveFeed = { onDeleteFeed(feed) },
+            dismiss = { showConfirmDialog = false }
+          )
+        }
       }
     } else {
-      FeedListItemMenu(feed = feed, onMarkFeedAsRead = onMarkFeedAsRead)
-    }
-  }
-}
-
-@Composable
-fun FeedListItemMenu(feed: Feed, onMarkFeedAsRead: (Feed) -> Unit, modifier: Modifier = Modifier) {
-  Box(modifier) {
-    var showDropdownMenu by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-    val shareHandler = LocalShareHandler.current
-    val linkHandler = LocalLinkHandler.current
-
-    IconButton(onClick = { showDropdownMenu = true }) {
-      Icon(
-        imageVector = Icons.Rounded.MoreVert,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    DropdownMenu(
-      expanded = showDropdownMenu,
-      onDismissRequest = { showDropdownMenu = false },
-      offset = DpOffset(x = 0.dp, y = (-24).dp)
-    ) {
-      DropdownMenuItem(
-        text = { Text(text = LocalStrings.current.share) },
-        leadingIcon = {
-          Icon(imageVector = TwineIcons.Share, contentDescription = LocalStrings.current.share)
-        },
-        onClick = {
-          showDropdownMenu = false
-          shareHandler.share(feed.link)
-        }
-      )
-
-      DropdownMenuItem(
-        text = { Text(text = LocalStrings.current.openWebsite) },
-        leadingIcon = {
-          Icon(
-            modifier = Modifier.requiredSize(24.dp),
-            imageVector = TwineIcons.Website,
-            contentDescription = LocalStrings.current.openWebsite
-          )
-        },
-        onClick = {
-          showDropdownMenu = false
-          coroutineScope.launch { linkHandler.openLink(feed.homepageLink) }
-        }
-      )
-
-      val hasUnreadPostsInFeed = feed.numberOfUnreadPosts > 0
-      if (hasUnreadPostsInFeed) {
-        Divider(modifier = Modifier.padding(vertical = 4.dp))
-
-        DropdownMenuItem(
-          text = { Text(text = LocalStrings.current.markAllAsRead) },
-          leadingIcon = {
-            Icon(
-              imageVector = TwineIcons.DoneAll,
-              contentDescription = LocalStrings.current.markAllAsRead
-            )
-          },
-          onClick = {
-            showDropdownMenu = false
-            onMarkFeedAsRead(feed)
-          },
+      IconButton(onClick = { onFeedInfoClick(feed) }) {
+        Icon(
+          imageVector = Icons.Rounded.MoreVert,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
         )
       }
     }

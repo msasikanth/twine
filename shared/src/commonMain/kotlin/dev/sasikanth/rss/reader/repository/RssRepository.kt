@@ -175,7 +175,9 @@ class RssRepository(
       countQuery =
         postQueries.count(
           feedLink = selectedFeedLink,
-          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS
+          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          unreadOnly = unreadOnly,
+          postsAfter = after,
         ),
       transacter = postQueries,
       context = ioDispatcher,
@@ -222,7 +224,34 @@ class RssRepository(
   }
 
   suspend fun allFeedsBlocking(): List<Feed> {
-    return withContext(ioDispatcher) { feedQueries.feeds(mapper = ::Feed).executeAsList() }
+    return withContext(ioDispatcher) {
+      feedQueries
+        .feeds(
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle
+            )
+          }
+        )
+        .executeAsList()
+    }
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -248,9 +277,74 @@ class RssRepository(
     )
   }
 
-  suspend fun feed(feedLink: String): Feed {
+  suspend fun feed(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Feed> {
     return withContext(ioDispatcher) {
-      feedQueries.feed(link = feedLink, mapper = ::Feed).executeAsOne()
+      feedQueries
+        .feedWithUnreadPostsCount(
+          link = feedLink,
+          postsAfter = postsAfter,
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean,
+            numberOfUnreadPosts: Long ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+              numberOfUnreadPosts = numberOfUnreadPosts
+            )
+          }
+        )
+        .asFlow()
+        .mapToOne(ioDispatcher)
+    }
+  }
+
+  suspend fun feedBlocking(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
+    return withContext(ioDispatcher) {
+      feedQueries
+        .feedWithUnreadPostsCount(
+          link = feedLink,
+          postsAfter = postsAfter,
+          mapper = {
+            name: String,
+            icon: String,
+            description: String,
+            homepageLink: String,
+            createdAt: Instant,
+            link: String,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            alwaysFetchSourceArticle: Boolean,
+            numberOfUnreadPosts: Long ->
+            Feed(
+              name = name,
+              icon = icon,
+              description = description,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              link = link,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+              numberOfUnreadPosts = numberOfUnreadPosts
+            )
+          }
+        )
+        .executeAsOne()
     }
   }
 
@@ -338,12 +432,18 @@ class RssRepository(
     }
   }
 
-  suspend fun markPostsInFeedAsRead(feedLink: String) {
-    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink) }
+  suspend fun markPostsInFeedAsRead(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST) {
+    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink, postsAfter) }
   }
 
   suspend fun post(link: String): Post {
     return withContext(ioDispatcher) { postQueries.post(link, ::Post).executeAsOne() }
+  }
+
+  suspend fun updateFeedAlwaysFetchSource(feedLink: String, newValue: Boolean) {
+    return withContext(ioDispatcher) {
+      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedLink)
+    }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

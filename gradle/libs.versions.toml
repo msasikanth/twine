@@ -1,16 +1,15 @@
 [versions]
 kotlin = "1.9.22"
-android_gradle_plugin = "8.2.2"
-compose = "1.5.12"
+android_gradle_plugin = "8.3.0"
+compose = "1.6.0"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
 android_sdk_min = "26"
 
 sqldelight = "2.0.1"
-ktor = "2.3.8"
-napier = "2.7.1"
-kotlinx_coroutines = "1.7.3"
+ktor = "2.3.9"
+kotlinx_coroutines = "1.8.0"
 kotlinx_date_time = "0.5.0"
 kotlinx_immutable_collections = "0.3.7"
 decompose = "2.2.2-compose-experimental"
@@ -22,32 +21,33 @@ androidx_collection = "1.4.0"
 androidx_test_runner = "1.5.2"
 androidx_test_rules = "1.5.0"
 androidx_work = "2.9.0"
-androidx_datastore = "1.1.0-beta01"
-androidx_browser = "1.7.0"
+androidx_datastore = "1.1.0-beta02"
+androidx_browser = "1.8.0"
 androidx_annotation = "1.7.1"
-coil = "3.0.0-alpha03"
+coil = "3.0.0-alpha04"
 spotless = "6.25.0"
 ktfmt = "0.44"
 kotlininject = "0.6.3"
-ksp = "1.9.22-1.0.17"
+ksp = "1.9.22-1.0.18"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.2"
-sentry = "0.3.0"
-sentry_android = "4.2.0"
-buildKonfig = "0.15.1"
 sqliteAndroid = "3.45.0"
-windowSizeClass = "0.3.2"
+windowSizeClass = "0.5.0"
 desugarJdk = "2.0.4"
 lyricist = "1.6.2-1.8.20"
 atomicfu = "0.23.2"
-okio = "3.7.0"
-paging = "3.3.0-alpha02-0.4.0"
+okio = "3.8.0"
+paging = "3.3.0-alpha02-0.6.0-SNAPSHOT"
 stately = "2.0.6"
 xmlutil = "0.86.3"
 ktxml = "0.2.3"
 uri = "0.0.16"
-webview = "1.8.6"
+webview = "1.9.0"
 uuid = "0.8.2"
+bugsnag-plugin = "8.1.0"
+bugsnag = "6.2.0"
+crashkios-bugsnag = "0.8.6"
+kermit = "2.0.3"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -62,7 +62,6 @@ ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor_client_logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version = { strictly = "[1.9.0, 1.9.21[", prefer="1.9.21" } }
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
@@ -77,6 +76,7 @@ sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect"
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose-jetbrains", version.ref = "decompose" }
 essenty_lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
+essenty_lifecycle_coroutines = { module = "com.arkivanov.essenty:lifecycle-coroutines", version.ref = "essenty" }
 essenty_backhandler = { module = "com.arkivanov.essenty:back-handler", version.ref = "essenty" }
 androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "androidx_activity" }
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
@@ -96,7 +96,6 @@ kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
-sentry = { module = "io.sentry:sentry-kotlin-multiplatform", version.ref = "sentry" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
@@ -113,6 +112,10 @@ ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uri = { module = "com.eygraber:uri-kmp", version.ref = "uri" }
 webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
+bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
+crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
@@ -126,8 +129,7 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
-buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }
-sentry_android = { id = "io.sentry.android.gradle", version.ref = "sentry_android" }
+bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
 compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]

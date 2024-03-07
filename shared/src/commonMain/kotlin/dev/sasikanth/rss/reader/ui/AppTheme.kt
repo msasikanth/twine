@@ -23,7 +23,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
-import dev.sasikanth.rss.reader.resources.GolosFontFamily
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import org.jetbrains.compose.resources.Font
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.golos_medium
+import twine.shared.generated.resources.golos_regular
 
 @Composable
 internal fun AppTheme(
@@ -56,6 +62,14 @@ private object AppRippleTheme : RippleTheme {
   @Composable override fun rippleAlpha(): RippleAlpha = DefaultRippleAlpha
 }
 
+private val GolosFontFamily: FontFamily
+  @Composable
+  get() =
+    FontFamily(
+      Font(Res.font.golos_regular, weight = FontWeight.Normal),
+      Font(Res.font.golos_medium, weight = FontWeight.Medium),
+    )
+
 internal val DefaultRippleAlpha =
   RippleAlpha(
     pressedAlpha = 0.16f,
@@ -63,3 +77,5 @@ internal val DefaultRippleAlpha =
     draggedAlpha = 0.24f,
     hoveredAlpha = 0.08f
   )
+
+internal val SYSTEM_SCRIM = Color.Black.copy(alpha = 0.8f)

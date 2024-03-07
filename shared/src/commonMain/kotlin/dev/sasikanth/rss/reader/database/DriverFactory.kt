@@ -19,6 +19,6 @@ import app.cash.sqldelight.db.SqlDriver
 
 internal const val DB_NAME = "rss_reader.db"
 
-internal expect class DriverFactory {
+expect class DriverFactory {
   fun createDriver(): SqlDriver
 }

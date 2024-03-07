@@ -15,12 +15,11 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.github.aakira.napier.LogLevel
-import io.github.aakira.napier.log
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
@@ -57,7 +56,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
         }
       }
     } catch (e: XmlPullParserException) {
-      log(LogLevel.ERROR, throwable = e) { "Failed to parse the XML" }
+      Logger.e(throwable = e) { "Failed to parse the feed" }
       throw XmlParsingError(e.stackTraceToString())
     }
   }
@@ -73,7 +72,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
 
-    internal val imageTags = setOf("media:content", "media:thumbnail")
+    internal val imageTags = setOf("media:content")
 
     internal const val TAG_RSS_CHANNEL = "channel"
     internal const val TAG_ATOM_FEED = "feed"
@@ -82,10 +81,12 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
     internal const val TAG_TITLE = "title"
     internal const val TAG_LINK = "link"
+    internal const val TAG_URL = "url"
     internal const val TAG_DESCRIPTION = "description"
     internal const val TAG_ENCLOSURE = "enclosure"
     internal const val TAG_CONTENT_ENCODED = "content:encoded"
     internal const val TAG_CONTENT = "content"
+    internal const val TAG_SUMMARY = "summary"
     internal const val TAG_SUBTITLE = "subtitle"
     internal const val TAG_PUB_DATE = "pubDate"
     internal const val TAG_PUBLISHED = "published"

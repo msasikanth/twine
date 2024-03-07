@@ -70,8 +70,7 @@ val EnTwineStrings =
     settingsEnableBlurSubtitle =
       "When disabled, displays gradients instead of blurred images. May improve performance.",
     settingsShowUnreadCountTitle = "Show unread posts count",
-    settingsShowUnreadCountSubtitle =
-      "When disabled, the unread posts count will not be shown in the feeds sheet",
+    settingsShowUnreadCountSubtitle = "Displays a bubble above feed selections",
     settingsReportIssue = "Report an issue",
     settingsVersion = { versionName, versionCode -> "$versionName ($versionCode)" },
     settingsAboutTitle = "About Twine",
@@ -81,14 +80,14 @@ val EnTwineStrings =
     settingsOpmlImporting = { progress -> "Importing.. $progress%" },
     settingsOpmlExporting = { progress -> "Exporting.. $progress%" },
     settingsOpmlCancel = "Cancel",
-    settingsPostsDeletionPeriodTitle = "Delete read posts",
-    settingsPostsDeletionPeriodSubtitle =
-      "App will automatically delete read posts that are older than the selected period",
+    settingsPostsDeletionPeriodTitle = "Delete read posts older than",
     settingsPostsDeletionPeriodOneWeek = "1 week",
     settingsPostsDeletionPeriodOneMonth = "1 month",
     settingsPostsDeletionPeriodThreeMonths = "3 months",
     settingsPostsDeletionPeriodSixMonths = "6 months",
     settingsPostsDeletionPeriodOneYear = "1 year",
+    settingsShowReaderViewTitle = "Enable reader view",
+    settingsShowReaderViewSubtitle = "Articles will be shown in a simplified, easy-to-read view",
     feeds = "Feeds",
     editFeeds = "Edit feeds",
     comments = "Comments",
@@ -109,12 +108,33 @@ val EnTwineStrings =
     postsAll = "All",
     postsUnread = "Unread",
     postsToday = "Today",
-    openSource = "Open Source",
+    openSource = "Support Open Source",
     openSourceDesc =
-      "Twine is built on open source technologies and is completely free to use, you can find the source code of Twine and some of my other popular projects on GitHub. Click here to head over there.",
-    markAsRead = "Mark as Read",
-    markAsUnRead = "Mark as Unread",
+      "Twine is an open source project and is available for free to use. Click here to know more on how to support this project or, view source code of Twine or some of my other popular projects.",
+    markAsRead = "Mark as read",
+    markAsUnRead = "Mark as unread",
     removeFeed = "Remove feed",
     delete = "Delete",
-    removeFeedDesc = { "Do you want to remove \"${it}\"?" }
+    removeFeedDesc = { "Do you want to remove \"${it}\"?" },
+    alwaysFetchSourceArticle = "Always fetch full articles in reader view",
+    getFeedInfo = "Get Info",
+    newTag = "New tag",
+    tags = "Tags",
+    addTagTitle = "Add tag",
+    tagNameHint = "Name",
+    tagSaveButton = "Save",
+    deleteTagTitle = "Delete tag?",
+    deleteTagDesc =
+      "Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted",
+    feedOptionShare = "Share",
+    feedOptionWebsite = "Website",
+    feedOptionRemove = "Remove",
+    feedTitleHint = "Title",
+    noUnreadPostsInFeed = "No unread articles",
+    numberOfUnreadPostsInFeed = { numberOfUnreadPosts ->
+      when (numberOfUnreadPosts) {
+        1L -> "$numberOfUnreadPosts unread article"
+        else -> "$numberOfUnreadPosts unread articles"
+      }
+    }
   )

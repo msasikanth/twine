@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,35 +57,13 @@ internal fun BottomSheetItem(
   selected: Boolean = false,
 ) {
   Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-    Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected, animationProgress = 1f)
-      Box(
-        modifier = Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
-      ) {
-        BadgedBox(
-          badge = {
-            if (badgeCount > 0 && canShowUnreadPostsCount) {
-              Badge(
-                containerColor = AppTheme.colorScheme.tintedForeground,
-                contentColor = AppTheme.colorScheme.tintedBackground,
-                modifier =
-                  Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).graphicsLayer {
-                    translationX = -8.dp.toPx()
-                    translationY = 4.dp.toPx()
-                  },
-              ) {
-                val badgeText =
-                  if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
-                    "+$BADGE_COUNT_TRIM_LIMIT"
-                  } else {
-                    badgeCount.toString()
-                  }
-
-                Text(badgeText)
-              }
-            }
-          }
+    Box {
+      Box(contentAlignment = Alignment.Center) {
+        SelectionIndicator(selected = selected, animationProgress = 1f)
+        Box(
+          modifier =
+            Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
+          contentAlignment = Alignment.Center
         ) {
           AsyncImage(
             url = iconUrl,
@@ -95,6 +72,30 @@ internal fun BottomSheetItem(
               Modifier.requiredSize(48.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .clickable(onClick = onClick)
+          )
+        }
+      }
+
+      if (badgeCount > 0 && canShowUnreadPostsCount) {
+        Badge(
+          containerColor = AppTheme.colorScheme.tintedForeground,
+          contentColor = AppTheme.colorScheme.tintedBackground,
+          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd),
+        ) {
+          val badgeText =
+            if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
+              "+$BADGE_COUNT_TRIM_LIMIT"
+            } else {
+              badgeCount.toString()
+            }
+
+          Text(
+            text = badgeText,
+            style = MaterialTheme.typography.labelSmall,
+            modifier =
+              Modifier.align(Alignment.CenterVertically).graphicsLayer {
+                translationY = -2.toDp().toPx()
+              }
           )
         }
       }

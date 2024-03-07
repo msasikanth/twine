@@ -27,10 +27,8 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +53,9 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.bookmarks.OpenLink
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -92,7 +92,7 @@ internal fun BookmarksScreen(
           title = { Text(LocalStrings.current.bookmarks) },
           navigationIcon = {
             IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =
@@ -104,7 +104,7 @@ internal fun BookmarksScreen(
             ),
         )
 
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -126,7 +126,12 @@ internal fun BookmarksScreen(
               if (post != null) {
                 PostListItem(
                   item = post,
-                  enablePostSource = false,
+                  postMetadataConfig =
+                    PostMetadataConfig.DEFAULT.copy(
+                      showUnreadIndicator = false,
+                      showToggleReadUnreadOption = false,
+                      enablePostSource = false
+                    ),
                   onClick = { bookmarksPresenter.dispatch(BookmarksEvent.OnPostClicked(post)) },
                   onPostBookmarkClick = {
                     bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
@@ -144,7 +149,7 @@ internal fun BookmarksScreen(
                   }
                 )
                 if (index != bookmarks.itemCount - 1) {
-                  Divider(
+                  HorizontalDivider(
                     modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                     color = AppTheme.colorScheme.surfaceContainer
                   )

@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -32,7 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -42,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -108,7 +109,6 @@ internal fun PostsList(
       if (post != null) {
         PostListItem(
           item = post,
-          enablePostSource = true,
           reduceReadItemAlpha = true,
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
@@ -116,13 +116,15 @@ internal fun PostsList(
           onPostSourceClick = { onPostSourceClick(post.feedLink) },
           togglePostReadClick = { onTogglePostReadClick(post.link, post.read) }
         )
+      } else {
+        Box(Modifier.requiredHeight(132.dp))
+      }
 
-        if (index != posts.itemCount - 1) {
-          Divider(
-            modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-            color = AppTheme.colorScheme.surfaceContainer
-          )
-        }
+      if (index != posts.itemCount - 1) {
+        HorizontalDivider(
+          modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
+          color = AppTheme.colorScheme.surfaceContainer
+        )
       }
     }
   }
@@ -131,13 +133,13 @@ internal fun PostsList(
 @Composable
 fun PostListItem(
   item: PostWithMetadata,
-  enablePostSource: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
   togglePostReadClick: () -> Unit,
-  reduceReadItemAlpha: Boolean = false
+  reduceReadItemAlpha: Boolean = false,
+  postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   Column(
     modifier =
@@ -154,7 +156,7 @@ fun PostListItem(
         modifier = Modifier.weight(1f).align(Alignment.Top),
         style = MaterialTheme.typography.titleMedium,
         text = item.title.ifBlank { item.description },
-        color = Color.White,
+        color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis
       )
@@ -175,11 +177,11 @@ fun PostListItem(
     PostMetadata(
       feedName = item.feedName,
       postPublishedAt = item.date.relativeDurationString(),
+      config = postMetadataConfig,
       postLink = item.link,
       postRead = item.read,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
-      enablePostSource = enablePostSource,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
       onSourceClick = onPostSourceClick,

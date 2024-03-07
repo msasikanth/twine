@@ -21,7 +21,12 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.URLBuilder
+import io.ktor.http.URLProtocol
+import io.ktor.http.Url
+import io.ktor.http.contentType
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -32,18 +37,26 @@ class PostSourceFetcher(
   private val dispatchersProvider: DispatchersProvider
 ) {
 
-  suspend fun fetch(link: String): String? {
+  suspend fun fetch(link: String): Result<String> {
     return withContext(dispatchersProvider.io) {
-      val response = httpClient.get(link)
-      if (response.status == HttpStatusCode.OK) {
-        try {
-          return@withContext response.bodyAsText()
-        } catch (e: Exception) {
-          // no-op
+      try {
+        val response = httpClient.get(transformUrlToHttps(link))
+        if (
+          response.status == HttpStatusCode.OK &&
+            response.contentType()?.withoutParameters() == ContentType.Text.Html
+        ) {
+          val content = response.bodyAsText()
+          return@withContext Result.success(content)
         }
+      } catch (t: Throwable) {
+        // no-op
       }
 
-      return@withContext null
+      return@withContext Result.failure(IllegalArgumentException("Failed to fetch the post"))
     }
+  }
+
+  private fun transformUrlToHttps(url: String): Url {
+    return URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
   }
 }

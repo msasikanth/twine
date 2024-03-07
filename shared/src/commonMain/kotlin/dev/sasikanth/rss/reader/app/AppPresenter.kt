@@ -29,91 +29,48 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.essenty.lifecycle.doOnStart
-import com.arkivanov.essenty.parcelable.Parcelable
-import com.arkivanov.essenty.parcelable.Parcelize
-import dev.sasikanth.rss.reader.about.AboutPresenter
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
+import dev.sasikanth.rss.reader.about.AboutPresenterFactory
+import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
+import dev.sasikanth.rss.reader.home.HomePresenterFactory
+import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.repository.SettingsRepository
+import dev.sasikanth.rss.reader.search.SearchPresentFactory
+import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
+import dev.sasikanth.rss.reader.tags.TagsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Inject
-
-private typealias HomePresenterFactory =
-  (
-    ComponentContext,
-    openSearch: () -> Unit,
-    openBookmarks: () -> Unit,
-    openSettings: () -> Unit,
-    openPost: (String) -> Unit,
-    openFeedInfo: (String) -> Unit,
-  ) -> HomePresenter
-
-private typealias SearchPresentFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openPost: (String) -> Unit,
-  ) -> SearchPresenter
-
-private typealias BookmarkPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openReaderView: (String) -> Unit,
-  ) -> BookmarksPresenter
-
-private typealias SettingsPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openAbout: () -> Unit,
-  ) -> SettingsPresenter
-
-private typealias AboutPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> AboutPresenter
-
-private typealias ReaderPresenterFactory =
-  (
-    postLink: String,
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> ReaderPresenter
-
-private typealias FeedPresenterFactory =
-  (
-    feedLink: String,
-    ComponentContext,
-    dismiss: () -> Unit,
-  ) -> FeedPresenter
 
 @Inject
 @ActivityScope
 class AppPresenter(
   componentContext: ComponentContext,
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
   private val homePresenter: HomePresenterFactory,
   private val searchPresenter: SearchPresentFactory,
-  private val bookmarksPresenter: BookmarkPresenterFactory,
+  private val bookmarksPresenter: BookmarksPresenterFactory,
   private val settingsPresenter: SettingsPresenterFactory,
   private val aboutPresenter: AboutPresenterFactory,
   private val readerPresenter: ReaderPresenterFactory,
   private val feedPresenter: FeedPresenterFactory,
+  private val tagsPresenter: TagsPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
-  private val rssRepository: RssRepository
+  private val rssRepository: RssRepository,
+  private val settingsRepository: SettingsRepository,
+  private val linkHandler: LinkHandler,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -131,6 +88,7 @@ class AppPresenter(
   internal val screenStack: Value<ChildStack<*, Screen>> =
     childStack(
       source = navigation,
+      serializer = Config.serializer(),
       initialConfiguration = Config.Home,
       handleBackButton = true,
       childFactory = ::createScreen,
@@ -139,9 +97,12 @@ class AppPresenter(
   internal val modalStack: Value<ChildSlot<*, Modals>> =
     childSlot(
       source = modalNavigation,
+      serializer = ModalConfig.serializer(),
       handleBackButton = true,
       childFactory = ::createModal,
     )
+
+  private val scope = coroutineScope(dispatchersProvider.main + SupervisorJob())
 
   init {
     lifecycle.doOnStart { presenterInstance.refreshFeedsIfExpired() }
@@ -171,29 +132,19 @@ class AppPresenter(
               { navigation.push(Config.Search) },
               { navigation.push(Config.Bookmarks) },
               { navigation.push(Config.Settings) },
-              { navigation.push(Config.Reader(it)) },
+              { openPost(it) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
             )
         )
       }
       Config.Search -> {
         Screen.Search(
-          presenter =
-            searchPresenter(
-              componentContext,
-              { navigation.pop() },
-              { navigation.push(Config.Reader(it)) }
-            )
+          presenter = searchPresenter(componentContext, { navigation.pop() }, { openPost(it) })
         )
       }
       Config.Bookmarks -> {
         Screen.Bookmarks(
-          presenter =
-            bookmarksPresenter(
-              componentContext,
-              { navigation.pop() },
-              { navigation.push(Config.Reader(it)) }
-            )
+          presenter = bookmarksPresenter(componentContext, { navigation.pop() }, { openPost(it) })
         )
       }
       Config.Settings -> {
@@ -214,7 +165,32 @@ class AppPresenter(
           presenter = readerPresenter(config.postLink, componentContext) { navigation.pop() }
         )
       }
+      is Config.Tags -> {
+        Screen.Tags(
+          presenter =
+            tagsPresenter(
+              componentContext,
+            ) {
+              navigation.pop()
+            }
+        )
+      }
     }
+
+  private fun openPost(postLink: String) {
+    scope.launch {
+      val showReaderView =
+        withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
+
+      if (showReaderView) {
+        navigation.push(Config.Reader(postLink))
+      } else {
+        linkHandler.openLink(postLink)
+      }
+
+      rssRepository.updatePostReadStatus(read = true, link = postLink)
+    }
+  }
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
@@ -238,21 +214,26 @@ class AppPresenter(
     }
   }
 
-  sealed interface Config : Parcelable {
-    @Parcelize data object Home : Config
+  @Serializable
+  sealed interface Config {
 
-    @Parcelize data object Search : Config
+    @Serializable data object Home : Config
 
-    @Parcelize data object Bookmarks : Config
+    @Serializable data object Search : Config
 
-    @Parcelize data object Settings : Config
+    @Serializable data object Bookmarks : Config
 
-    @Parcelize data object About : Config
+    @Serializable data object Settings : Config
 
-    @Parcelize data class Reader(val postLink: String) : Config
+    @Serializable data object About : Config
+
+    @Serializable data class Reader(val postLink: String) : Config
+
+    @Serializable data object Tags : Config
   }
 
-  sealed interface ModalConfig : Parcelable {
-    @Parcelize data class FeedInfo(val feedLink: String) : ModalConfig
+  @Serializable
+  sealed interface ModalConfig {
+    @Serializable data class FeedInfo(val feedLink: String) : ModalConfig
   }
 }

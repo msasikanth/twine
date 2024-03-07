@@ -35,10 +35,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +60,7 @@ import dev.sasikanth.rss.reader.about.Social
 import dev.sasikanth.rss.reader.components.bottomsheet.fastForEach
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.GitHub
 import dev.sasikanth.rss.reader.resources.icons.Threads
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -135,7 +134,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
           title = { Text(strings.about) },
           navigationIcon = {
             IconButton(onClick = { aboutPresenter.dispatch(AboutEvent.BackClicked) }) {
-              Icon(Icons.Rounded.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =
@@ -147,7 +146,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
             ),
         )
 
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -217,9 +216,9 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
       }
     }
 
-    Divider(
-      color = AppTheme.colorScheme.surfaceContainer,
-      modifier = Modifier.align(Alignment.BottomStart)
+    HorizontalDivider(
+      modifier = Modifier.align(Alignment.BottomStart),
+      color = AppTheme.colorScheme.surfaceContainer
     )
   }
 }

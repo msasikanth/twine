@@ -14,10 +14,7 @@ jobs:
       TERM: dumb
       ORG_GRADLE_PROJECT_READER_KEYSTORE_PASSWORD: ${{ secrets.READER_KEYSTORE_PASSWORD }}
       ORG_GRADLE_PROJECT_READER_KEY_PASSWORD: ${{ secrets.READER_KEY_PASSWORD }}
-      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+      BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
     steps:
       - name: Configure Tramline
         id: tramline
@@ -50,13 +47,19 @@ jobs:
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
       - name: Build release artifacts
-        run: ./gradlew --no-daemon androidApp:bundleRelease
+        run: ./gradlew --no-daemon androidApp:bundleRelease androidApp:assembleRelease
 
       - name: Upload Release Bundle
         uses: actions/upload-artifact@v4
         with:
           name: release.aab
           path: androidApp/build/outputs/bundle/release/androidApp-release.aab
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release.apk
+          path: androidApp/build/outputs/apk/release/androidApp-release.apk
 
       - name: Clean secrets
         run: |

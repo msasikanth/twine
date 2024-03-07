@@ -25,13 +25,13 @@ import dev.sasikanth.rss.reader.repository.Period
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -39,6 +39,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+
+internal typealias SettingsPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openAbout: () -> Unit,
+  ) -> SettingsPresenter
 
 @Inject
 class SettingsPresenter(
@@ -101,19 +108,22 @@ class SettingsPresenter(
           settingsRepository.enableFeaturedItemBlur,
           settingsRepository.showUnreadPostsCount,
           settingsRepository.postsDeletionPeriod,
+          settingsRepository.showReaderView,
           rssRepository.hasFeeds()
         ) {
           browserType,
           featuredItemBlurEnabled,
           showUnreadPostsCount,
           postsDeletionPeriod,
+          showReaderView,
           hasFeeds ->
           Settings(
             browserType = browserType,
             enableHomePageBlur = featuredItemBlurEnabled,
             showUnreadPostsCount = showUnreadPostsCount,
             hasFeeds = hasFeeds,
-            postsDeletionPeriod = postsDeletionPeriod
+            postsDeletionPeriod = postsDeletionPeriod,
+            showReaderView = showReaderView
           )
         }
         .onEach { settings ->
@@ -123,7 +133,8 @@ class SettingsPresenter(
               enableHomePageBlur = settings.enableHomePageBlur,
               showUnreadPostsCount = settings.showUnreadPostsCount,
               hasFeeds = settings.hasFeeds,
-              postsDeletionPeriod = settings.postsDeletionPeriod
+              postsDeletionPeriod = settings.postsDeletionPeriod,
+              showReaderView = settings.showReaderView
             )
           }
         }
@@ -142,6 +153,7 @@ class SettingsPresenter(
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
         is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
         is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
+        is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
         SettingsEvent.AboutClicked -> {
           // no-op
         }
@@ -150,6 +162,10 @@ class SettingsPresenter(
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       }
+    }
+
+    private fun toggleShowReaderView(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleShowReaderView(value) }
     }
 
     private fun postsDeletionPeriodChanged(newPeriod: Period) {
@@ -192,4 +208,5 @@ private data class Settings(
   val showUnreadPostsCount: Boolean,
   val hasFeeds: Boolean,
   val postsDeletionPeriod: Period,
+  val showReaderView: Boolean,
 )

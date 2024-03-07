@@ -69,12 +69,13 @@ data class TwineStrings(
   val settingsOpmlExporting: (Int) -> String,
   val settingsOpmlCancel: String,
   val settingsPostsDeletionPeriodTitle: String,
-  val settingsPostsDeletionPeriodSubtitle: String,
   val settingsPostsDeletionPeriodOneWeek: String,
   val settingsPostsDeletionPeriodOneMonth: String,
   val settingsPostsDeletionPeriodThreeMonths: String,
   val settingsPostsDeletionPeriodSixMonths: String,
   val settingsPostsDeletionPeriodOneYear: String,
+  val settingsShowReaderViewTitle: String,
+  val settingsShowReaderViewSubtitle: String,
   val feeds: String,
   val editFeeds: String,
   val comments: String,
@@ -105,7 +106,22 @@ data class TwineStrings(
   val markAsUnRead: String,
   val removeFeed: String,
   val delete: String,
-  val removeFeedDesc: (String) -> String
+  val removeFeedDesc: (String) -> String,
+  val alwaysFetchSourceArticle: String,
+  val getFeedInfo: String,
+  val newTag: String,
+  val tags: String,
+  val addTagTitle: String,
+  val tagNameHint: String,
+  val tagSaveButton: String,
+  val deleteTagTitle: String,
+  val deleteTagDesc: String,
+  val feedOptionShare: String,
+  val feedOptionWebsite: String,
+  val feedOptionRemove: String,
+  val feedTitleHint: String,
+  val noUnreadPostsInFeed: String,
+  val numberOfUnreadPostsInFeed: (Long) -> String
 )
 
 object Locales {

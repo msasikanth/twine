@@ -27,4 +27,9 @@ sealed interface FeedEvent {
   data class OnFeedNameChanged(val newFeedName: String, val feedLink: String) : FeedEvent
 
   data object DismissSheet : FeedEvent
+
+  data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean, val feedLink: String) :
+    FeedEvent
+
+  data class OnMarkPostsAsRead(val feedLink: String) : FeedEvent
 }

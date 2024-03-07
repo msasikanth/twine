@@ -25,11 +25,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -60,6 +58,7 @@ import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -85,7 +84,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           title = {},
           navigationIcon = {
             IconButton(onClick = { presenter.dispatch(ReaderEvent.BackClicked) }) {
-              Icon(Icons.Rounded.Close, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
           colors =
@@ -97,7 +96,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             ),
         )
 
-        Divider(
+        HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
           color = AppTheme.colorScheme.surfaceContainer
         )
@@ -166,7 +165,11 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
-              Icon(TwineIcons.Website, contentDescription = null)
+              Icon(
+                modifier = Modifier.requiredSize(24.dp),
+                imageVector = TwineIcons.Website,
+                contentDescription = null
+              )
             }
           }
 
@@ -190,7 +193,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           )
         }
       }
-      state.hasContent -> {
+      state.canShowReaderView -> {
         val navigator = rememberWebViewNavigator()
         val jsBridge = rememberWebViewJsBridge()
 
@@ -211,145 +214,26 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
 
         val htmlTemplate =
           remember(state.content) {
-            // TODO: Extract out the HTML rendering and customisation to separate class
-            //  with actual templating
-            // language=HTML
-            """
-          <html lang="en">
-          <head>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;400;500;700&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
-            <title>${state.title}</title>
-          </head>
-          <style>
-          body {
-            padding-top: 16px;
-            color: $textColor;
-            font-family: 'Golos Text', sans-serif;
-          }
-          figure {
-            margin: 0;
-          }
-          figcaption {
-            margin-top: 8px;
-          	font-size: 14px;
-          	line-height: 1.6;
-          }
-          .caption {
-            font-size: 12px;
-          }
-          img, figure, video, div, object {
-          	max-width: 100%;
-          	height: auto !important;
-          	margin: 0 auto;
-          }
-          a {
-            color: $linkColor;
-          }
-          ul {
-            list-style: none;
-          }
-          li::before {
-            content: "\2022";
-            color: $textColor;
-            margin-right: 0.5em;
-          }
-          pre {
-          	max-width: 100%;
-          	margin: 0;
-          	overflow: auto;
-          	overflow-y: hidden;
-          	word-wrap: normal;
-          	word-break: normal;
-          	border-radius: 4px;
-            padding: 8px;
-          }
-          pre {
-          	line-height: 1.4286;
-          }
-          code, pre {
-            font-family: 'Source Code Pro', monospace;
-            font-size: 14px;
-          	-webkit-hyphens: none;
-          	background: $codeBackgroundColor;
-          }
-          code {
-          	padding: 1px 2px;
-          	border-radius: 2px;
-          }
-          pre code {
-          	letter-spacing: -.027;
-          	font-size: 1.15em;
-          }
-          .top-divider {
-            margin-top: 12px;
-            margin-bottom: 12px;
-            border: 1px solid $dividerColor;
-          }
-          .grid-container {
-            display: grid;
-            row-gap: 16px;
-          }
-          </style>
-          <body>
-          <h1>${state.title}</h1>
-          <hr class="top-divider">
-          <div class="grid-container">
-              <div><a href='${state.feed!!.homepageLink}'>${state.feed!!.name}</a></div>
-              <div class="caption">${state.publishedAt}</div>
-          </div>
-          <hr class="top-divider">
-          ${state.content!!}
-          
-          <script>
-            function findHref(node, maxDepth = 4) {
-              let currentDepth = 0;
-
-              while (node && currentDepth < maxDepth) {
-                if (node.tagName && node.tagName.toLowerCase() === 'a' && node.hasAttribute('href')) {
-                  return node.getAttribute("href");
-                }
-
-                node = node.parentNode;
-                currentDepth++;
-              }
-
-              return null;
-            }
-
-            function handleLinkClick(event) {
-                try {
-                  event.preventDefault();
-                  var href = findHref(event.target);
-          
-                  window.kmpJsBridge.callNative(
-                    "linkHandler", 
-                    href, 
-                    {}
-                  );
-                } catch(err) {
-                  // no-op
-                }
-            }
-            
-            var links = document.getElementsByTagName("a")
-            for (var i=0, max=links.length; i<max; i++) {
-              var link = links[i];
-              link.addEventListener("click", handleLinkClick);
-            }
-          </script>
-          </body>
-          </html>
-        """
-              .trimIndent()
+            readerHTML(
+              title = state.title!!,
+              feedName = state.feed!!.name,
+              feedHomePageLink = state.feed!!.homepageLink,
+              publishedAt = state.publishedAt!!,
+              content = state.content,
+              colors =
+                ReaderHTMLColors(
+                  textColor = textColor,
+                  linkColor = linkColor,
+                  dividerColor = dividerColor,
+                  codeBackgroundColor = codeBackgroundColor
+                ),
+              featuredImage = state.postImage
+            )
           }
         val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
         webViewState.webSettings.apply {
           this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+          this.supportZoom = false
         }
 
         Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {

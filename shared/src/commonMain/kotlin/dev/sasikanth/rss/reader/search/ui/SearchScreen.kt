@@ -36,9 +36,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +65,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -74,7 +72,9 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -135,7 +135,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
             if (post != null) {
               PostListItem(
                 item = post,
-                enablePostSource = false,
+                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
                 reduceReadItemAlpha = true,
                 onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(post)) },
                 onPostBookmarkClick = {
@@ -153,7 +153,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
               )
 
               if (index != searchResults.itemCount - 1) {
-                Divider(
+                HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
                   color = AppTheme.colorScheme.surfaceContainer
                 )
@@ -239,7 +239,7 @@ private fun SearchBar(
           leadingIcon = {
             IconButton(onClick = onBackClick) {
               Icon(
-                Icons.Rounded.ArrowBack,
+                TwineIcons.ArrowBack,
                 contentDescription = null,
                 tint = AppTheme.colorScheme.onSurface
               )
@@ -264,19 +264,19 @@ private fun SearchBar(
           textStyle = MaterialTheme.typography.bodyLarge,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Unspecified,
-              unfocusedContainerColor = Color.Unspecified,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              unfocusedIndicatorColor = Color.Unspecified,
-              focusedIndicatorColor = Color.Unspecified,
-              disabledIndicatorColor = Color.Unspecified,
-              errorIndicatorColor = Color.Unspecified
+              unfocusedIndicatorColor = Color.Transparent,
+              focusedIndicatorColor = Color.Transparent,
+              disabledIndicatorColor = Color.Transparent,
+              errorIndicatorColor = Color.Transparent,
             )
         )
       }
     }
 
-    Divider(
+    HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
       color = AppTheme.colorScheme.surfaceContainer
     )
@@ -337,7 +337,6 @@ private fun SortDropdownMenu(
   DropdownMenu(
     expanded = isDropdownExpanded,
     onDismissRequest = onDismiss,
-    offset = DpOffset(0.dp, (-48).dp)
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(

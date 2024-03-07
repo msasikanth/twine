@@ -41,6 +41,13 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
+internal typealias ReaderPresenterFactory =
+  (
+    postLink: String,
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> ReaderPresenter
+
 @Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
@@ -117,71 +124,71 @@ class ReaderPresenter(
     private fun init(postLink: String) {
       coroutineScope.launch {
         val post = rssRepository.post(postLink)
-        val feed = rssRepository.feed(post.feedLink)
-
-        if (!post.read) {
-          rssRepository.updatePostReadStatus(read = true, link = postLink)
-        }
-
-        // This is done for backward compatibility
-        val content = post.rawContent ?: post.description
-
-        val htmlContent =
-          if (content.isNotBlank()) {
-              // If the content parsed by readability is not an HTML, it will return
-              // null. In that scenario we simply pass the original content
-              extractArticleHtmlContent(postLink, content)
-            } else {
-              null
-            }
-            .orEmpty()
+        val feed = rssRepository.feedBlocking(post.feedLink)
 
         _state.update {
           it.copy(
             title = post.title,
-            content = htmlContent,
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
             feed = feed,
-            postMode = RssContent
+            postImage = post.imageUrl
           )
+        }
+
+        if (feed.alwaysFetchSourceArticle) {
+          loadSourceArticle()
+        } else {
+          loadRssContent()
         }
       }
     }
 
     private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      if (content.trim().isBlank()) return content
+      val article =
+        withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse()
+          ?: return content
+      val articleContent = article.content
 
-      val transformedContent =
-        withContext(dispatchersProvider.io) { Readability(postLink, content) }.parse().content
-      return if (!transformedContent.isNullOrBlank()) {
-        transformedContent
-      } else {
-        content
-      }
+      if (articleContent.isNullOrBlank()) return content
+
+      return articleContent
     }
 
     private fun articleShortcutClicked() {
       coroutineScope.launch {
-        when (_state.value.postMode) {
-          RssContent -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val content = postSourceFetcher.fetch(postLink).orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, content)
-            _state.update { it.copy(content = htmlContent, postMode = Source) }
-          }
-          Source -> {
-            _state.update { it.copy(postMode = InProgress) }
-            val postContent = rssRepository.post(postLink).rawContent.orEmpty()
-            val htmlContent = extractArticleHtmlContent(postLink, postContent)
-            _state.update { it.copy(content = htmlContent, postMode = RssContent) }
-          }
+        val currentPostMode = _state.value.postMode
+        when (currentPostMode) {
+          RssContent -> loadSourceArticle()
+          Source -> loadRssContent()
           InProgress,
           Idle -> {
             // no-op
           }
         }
       }
+    }
+
+    private suspend fun loadRssContent() {
+      _state.update { it.copy(postMode = InProgress) }
+      val post = rssRepository.post(postLink)
+      val postContent = post.rawContent ?: post.description
+      val htmlContent = extractArticleHtmlContent(postLink, postContent)
+      _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+    }
+
+    private suspend fun loadSourceArticle() {
+      _state.update { it.copy(postMode = InProgress) }
+      val content = postSourceFetcher.fetch(postLink)
+
+      if (content.isSuccess) {
+        val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
+        _state.update { it.copy(content = htmlContent) }
+      } else {
+        loadRssContent()
+      }
+
+      _state.update { it.copy(postMode = Source) }
     }
   }
 }

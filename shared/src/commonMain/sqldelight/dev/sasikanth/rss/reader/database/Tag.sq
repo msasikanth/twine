@@ -8,8 +8,12 @@ CREATE TABLE tag (
   updatedAt INTEGER AS Instant NOT NULL
 );
 
+countTags:
+SELECT COUNT(*) FROM tag;
+
 tags:
-SELECT * FROM tag WHERE label LIKE :label OR label IS NULL OR  label = '';
+SELECT * FROM tag
+LIMIT :limit OFFSET :offset;
 
 updateTag:
 UPDATE tag SET label = :label WHERE id = :id;

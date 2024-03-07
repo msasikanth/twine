@@ -21,6 +21,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.backhandler.BackCallback
@@ -45,7 +46,6 @@ import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.http.HttpStatusCode
-import io.sentry.kotlin.multiplatform.Sentry
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,6 +68,16 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+
+internal typealias HomePresenterFactory =
+  (
+    ComponentContext,
+    openSearch: () -> Unit,
+    openBookmarks: () -> Unit,
+    openSettings: () -> Unit,
+    openPost: (String) -> Unit,
+    openFeedInfo: (String) -> Unit,
+  ) -> HomePresenter
 
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -198,7 +208,7 @@ class HomePresenter(
 
     private fun postSourceClicked(feedLink: String) {
       coroutineScope.launch {
-        val feed = rssRepository.feed(feedLink)
+        val feed = rssRepository.feedBlocking(feedLink)
         observableSelectedFeed.selectFeed(feed)
       }
     }
@@ -258,7 +268,7 @@ class HomePresenter(
             }
 
           val posts =
-            createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = false)) {
+            createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
                   selectedFeedLink = selectedFeed?.link,
                   unreadOnly = unreadOnly,
@@ -316,7 +326,8 @@ class HomePresenter(
             }
           }
         } catch (e: Exception) {
-          Sentry.captureException(e) { scope -> scope.setContext("feed_url", feedLink) }
+          BugsnagKotlin.setCustomValue(section = "AddingFeed", key = "feed_url", value = feedLink)
+          BugsnagKotlin.sendHandledException(e)
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
         } finally {
           _state.update {
@@ -335,9 +346,8 @@ class HomePresenter(
           effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
         }
         is XmlParsingError -> {
-          Sentry.captureException(feedAddResult.exception) { scope ->
-            scope.setContext("feed_url", feedLink)
-          }
+          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+          BugsnagKotlin.sendHandledException(feedAddResult.exception)
           effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
         }
         is ConnectTimeoutException,
@@ -345,9 +355,8 @@ class HomePresenter(
           effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
         }
         else -> {
-          Sentry.captureException(feedAddResult.exception) { scope ->
-            scope.setContext("feed_url", feedLink)
-          }
+          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+          BugsnagKotlin.sendHandledException(feedAddResult.exception)
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(feedAddResult.exception)))
         }
       }
@@ -378,9 +387,8 @@ class HomePresenter(
     }
 
     private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
-      Sentry.captureException(databaseError.exception) { scope ->
-        scope.setContext("feed_url", feedLink)
-      }
+      BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+      BugsnagKotlin.sendHandledException(databaseError.exception)
     }
 
     private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
@@ -417,7 +425,8 @@ class HomePresenter(
             rssRepository.updateFeeds()
           }
         } catch (e: Exception) {
-          Sentry.captureException(e)
+          BugsnagKotlin.logMessage("RefreshContent")
+          BugsnagKotlin.sendHandledException(e)
         } finally {
           _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
         }
