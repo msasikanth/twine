@@ -21,7 +21,6 @@
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        android:networkSecurityConfig="@xml/network_security_config"
         android:enableOnBackInvokedCallback="true"
         tools:targetApi="tiramisu">
         <activity
