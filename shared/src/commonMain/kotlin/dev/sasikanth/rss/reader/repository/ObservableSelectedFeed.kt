@@ -19,24 +19,21 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
 class ObservableSelectedFeed {
 
-  private val mutex = Mutex()
   private val _selectedFeed = MutableStateFlow<Feed?>(null)
   val selectedFeed: Flow<Feed?>
     get() = _selectedFeed
 
-  suspend fun selectFeed(feed: Feed) {
-    mutex.withLock { _selectedFeed.value = feed }
+  fun selectFeed(feed: Feed) {
+    _selectedFeed.value = feed
   }
 
-  suspend fun clearSelection() {
-    mutex.withLock { _selectedFeed.value = null }
+  fun clearSelection() {
+    _selectedFeed.value = null
   }
 }
