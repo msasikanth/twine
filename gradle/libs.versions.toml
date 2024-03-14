@@ -1,7 +1,7 @@
 [versions]
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 android_gradle_plugin = "8.3.0"
-compose = "1.6.0"
+compose = "1.6.1"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
@@ -28,7 +28,7 @@ coil = "3.0.0-alpha04"
 spotless = "6.25.0"
 ktfmt = "0.44"
 kotlininject = "0.6.3"
-ksp = "1.9.22-1.0.18"
+ksp = "1.9.23-1.0.19"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.2"
 sqliteAndroid = "3.45.0"
