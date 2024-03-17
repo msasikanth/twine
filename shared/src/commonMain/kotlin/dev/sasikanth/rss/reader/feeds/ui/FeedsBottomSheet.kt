@@ -409,7 +409,7 @@ private fun BottomSheetCollapsedContent(
       items(feeds.itemCount) { index ->
         val feed = feeds[index]
         if (feed != null) {
-          BottomSheetItem(
+          FeedBottomBarItem(
             text = feed.name.uppercase(),
             badgeCount = feed.numberOfUnreadPosts,
             iconUrl = feed.icon,
