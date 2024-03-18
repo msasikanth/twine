@@ -145,10 +145,6 @@ internal fun FeedsBottomSheet(
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        searchQuery = feedsPresenter.searchQuery,
-        onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
         onFeedNameChanged = { newFeedName, feedLink ->
@@ -157,7 +153,6 @@ internal fun FeedsBottomSheet(
           )
         },
         editFeeds = editFeeds,
-        exitFeedsEdit = exitFeedsEdit,
         onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
         onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         modifier =
@@ -186,36 +181,16 @@ private fun BottomSheetExpandedContent(
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
   canShowUnreadPostsCount: Boolean,
-  searchQuery: TextFieldValue,
-  onSearchQueryChanged: (TextFieldValue) -> Unit,
-  onClearSearchQuery: () -> Unit,
-  closeSheet: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
-  exitFeedsEdit: () -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onDeleteFeed: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
     modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
-    topBar = {
-      SearchBar(
-        query = searchQuery,
-        feedsSheetMode = feedsSheetMode,
-        onQueryChange = { onSearchQueryChanged(it) },
-        onNavigationIconClick = {
-          when (feedsSheetMode) {
-            Default,
-            LinkEntry -> closeSheet()
-            Edit -> exitFeedsEdit()
-          }
-        },
-        onClearClick = onClearSearchQuery
-      )
-    },
     bottomBar = {
       FeedsSheetBottomBar(
         feedsSheetMode = feedsSheetMode,
@@ -235,9 +210,7 @@ private fun BottomSheetExpandedContent(
           Modifier.fillMaxSize()
             .padding(
               bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
-              // doing this so that the dividers in sticky headers can go below the search bar and
-              // not overlap with each other
-              top = padding.calculateTopPadding() - 1.dp
+              top = 4.dp
             ),
         contentPadding =
           PaddingValues(
