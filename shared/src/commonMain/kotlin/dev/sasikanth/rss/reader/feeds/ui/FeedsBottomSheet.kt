@@ -19,7 +19,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -29,6 +28,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -47,9 +47,10 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -83,7 +84,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -143,18 +143,9 @@ internal fun FeedsBottomSheet(
         feedsListItemTypes = state.feedsInExpandedMode.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
-        canPinFeeds = state.canPinFeeds,
-        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
-        onFeedNameChanged = { newFeedName, feedLink ->
-          feedsPresenter.dispatch(
-            FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
-          )
-        },
         editFeeds = editFeeds,
-        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
-        onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -174,19 +165,13 @@ internal fun FeedsBottomSheet(
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
-  canPinFeeds: Boolean,
-  canShowUnreadPostsCount: Boolean,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
-  onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
-  onFeedPinClick: (Feed) -> Unit,
-  onDeleteFeed: (Feed) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -205,7 +190,8 @@ private fun BottomSheetExpandedContent(
     val keyboardState by keyboardVisibilityAsState()
 
     Box {
-      LazyColumn(
+      LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
         modifier =
           Modifier.fillMaxSize()
             .padding(
@@ -214,10 +200,12 @@ private fun BottomSheetExpandedContent(
             ),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection),
-            end = padding.calculateEndPadding(layoutDirection),
+            start = padding.calculateStartPadding(layoutDirection) + 24.dp,
+            end = padding.calculateEndPadding(layoutDirection) + 24.dp,
             bottom = padding.calculateBottomPadding() + 64.dp
-          )
+          ),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         for (index in 0 until feedsListItemTypes.itemCount) {
           when (val feedListItemType = feedsListItemTypes[index]) {
@@ -227,50 +215,37 @@ private fun BottomSheetExpandedContent(
                 FeedListItem(
                   feed = feed,
                   selected = selectedFeed?.link == feed.link,
-                  canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
-                  canShowUnreadPostsCount = canShowUnreadPostsCount,
-                  feedsSheetMode = feedsSheetMode,
                   onFeedInfoClick = onFeedInfoClick,
                   onFeedSelected = onFeedSelected,
-                  onFeedNameChanged = onFeedNameChanged,
-                  onFeedPinClick = onFeedPinClick,
-                  onDeleteFeed = onDeleteFeed
                 )
               }
             }
             FeedsListItemType.AllFeedsHeader -> {
-              stickyHeader(contentType = FeedsListItemType.AllFeedsHeader) {
-                Box(modifier = Modifier.wrapContentHeight()) {
-                  SubHeader(
-                    text = LocalStrings.current.allFeeds,
-                    modifier =
-                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
+              item(span = { GridItemSpan(2) }) {
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp)
+                ) {
+                  Text(
+                    text = LocalStrings.current.feeds,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppTheme.colorScheme.textEmphasisHigh
                   )
-
-                  HorizontalDivider(color = AppTheme.colorScheme.tintedSurface)
-
-                  HorizontalDivider(
-                    modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
-                    color = AppTheme.colorScheme.tintedSurface
-                  )
+                  // TODO: Add number of feeds
                 }
               }
             }
             FeedsListItemType.PinnedFeedsHeader -> {
-              stickyHeader(contentType = FeedsListItemType.PinnedFeedsHeader) {
-                Box(modifier = Modifier.wrapContentHeight()) {
-                  SubHeader(
+              item(span = { GridItemSpan(2) }) {
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 12.dp)
+                ) {
+                  Text(
+                    modifier = Modifier.weight(1f),
                     text = LocalStrings.current.pinnedFeeds,
-                    modifier =
-                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
+                    style = MaterialTheme.typography.titleMedium,
+                    color = AppTheme.colorScheme.textEmphasisHigh
                   )
-
-                  HorizontalDivider(
-                    modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
-                    color = AppTheme.colorScheme.tintedSurface
-                  )
+                  // TODO: Add sort button
                 }
               }
             }
