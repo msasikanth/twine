@@ -142,7 +142,12 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedInfoClick -> {
           // no-op
         }
+        is FeedsEvent.OnHomeSelected -> onHomeSelected()
       }
+    }
+
+    private fun onHomeSelected() {
+      coroutineScope.launch { observableSelectedFeed.clearSelection() }
     }
 
     private fun onSearchQueryChanged(searchQuery: TextFieldValue) {
