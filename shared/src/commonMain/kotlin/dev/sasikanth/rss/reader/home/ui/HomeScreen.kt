@@ -156,105 +156,108 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     }
   }
 
-  BottomSheetScaffold(
-    modifier = modifier,
-    scaffoldState = bottomSheetScaffoldState,
-    topBar = {
-      HomeTopAppBar(
-        hasFeeds = state.hasFeeds ?: false,
-        postsType = state.postsType,
-        listState = listState,
-        onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-        onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-        onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-        onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
-      )
-    },
-    content = { paddingValues ->
-      HomeScreenContent(
-        paddingValues = paddingValues,
-        state = state,
-        listState = listState,
-        featuredPostsPagerState = featuredPostsPagerState,
-        onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
-        onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
-        onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
-        onPostCommentsClick = { commentsLink ->
-          coroutineScope.launch { linkHandler.openLink(commentsLink) }
-        },
-        onPostSourceClick = { feedLink ->
-          homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
-        },
-        onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
-        onTogglePostReadStatus = { postLink, postRead ->
-          homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postLink, postRead))
-        }
-      )
-    },
-    sheetContent = {
-      FeedsBottomSheet(
-        feedsPresenter = homePresenter.feedsPresenter,
-        bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-        feedsSheetMode = state.feedsSheetMode,
-        closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
-        editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
-        exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) },
-        selectedFeedChanged = {
-          coroutineScope.launch {
-            listState.scrollToItem(0)
-            featuredPostsPagerState.scrollToPage(0)
-          }
-        }
-      )
-    },
-    snackbarHost = {
-      val snackbarModifier =
-        if (bottomSheetState.isExpanded) {
-          Modifier.padding(bottom = BOTTOM_SHEET_PEEK_HEIGHT)
-            .windowInsetsPadding(
-              WindowInsets.systemBars.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
-            )
-        } else {
-          Modifier
-        }
-
-      SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
-        Snackbar(
-          modifier = Modifier.padding(12.dp),
-          content = {
-            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
-          },
-          action = null,
-          actionOnNewLine = false,
-          shape = SnackbarDefaults.shape,
-          backgroundColor = SnackbarDefaults.color,
-          contentColor = SnackbarDefaults.contentColor,
-          elevation = 0.dp
+  Box(modifier = modifier) {
+    BottomSheetScaffold(
+      scaffoldState = bottomSheetScaffoldState,
+      topBar = {
+        HomeTopAppBar(
+          hasFeeds = state.hasFeeds ?: false,
+          postsType = state.postsType,
+          listState = listState,
+          onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
+          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
+          onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
         )
-      }
-    },
-    floatingActionButton = {
-      val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+      },
+      content = { paddingValues ->
+        HomeScreenContent(
+          paddingValues = paddingValues,
+          state = state,
+          listState = listState,
+          featuredPostsPagerState = featuredPostsPagerState,
+          onSwipeToRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+          onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
+          onPostBookmarkClick = { homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it)) },
+          onPostCommentsClick = { commentsLink ->
+            coroutineScope.launch { linkHandler.openLink(commentsLink) }
+          },
+          onPostSourceClick = { feedLink ->
+            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
+          },
+          onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
+          onTogglePostReadStatus = { postLink, postRead ->
+            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postLink, postRead))
+          }
+        )
+      },
+      sheetContent = {
+        FeedsBottomSheet(
+          feedsPresenter = homePresenter.feedsPresenter,
+          bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+          feedsSheetMode = state.feedsSheetMode,
+          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
+          editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
+          exitFeedsEdit = { homePresenter.dispatch(HomeEvent.ExitFeedsEdit) },
+          selectedFeedChanged = {
+            coroutineScope.launch {
+              listState.scrollToItem(0)
+              featuredPostsPagerState.scrollToPage(0)
+            }
+          }
+        )
+      },
+      snackbarHost = {
+        val snackbarModifier =
+          if (bottomSheetState.isExpanded) {
+            Modifier.padding(bottom = BOTTOM_SHEET_PEEK_HEIGHT)
+              .windowInsetsPadding(
+                WindowInsets.systemBars.only(
+                  WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                )
+              )
+          } else {
+            Modifier
+          }
 
-      CompactFloatingActionButton(
-        label = LocalStrings.current.scrollToTop,
-        visible = showScrollToTop,
-        modifier =
-          Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-            .padding(end = 16.dp, bottom = 16.dp),
-      ) {
-        listState.animateScrollToItem(0)
-      }
-    },
-    backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
-    sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
-    sheetContentColor = AppTheme.colorScheme.tintedForeground,
-    sheetElevation = 0.dp,
-    sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
-    sheetShape =
-      RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
-    sheetGesturesEnabled = state.feedsSheetMode != Edit
-  )
+        SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
+          Snackbar(
+            modifier = Modifier.padding(12.dp),
+            content = {
+              Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+            },
+            action = null,
+            actionOnNewLine = false,
+            shape = SnackbarDefaults.shape,
+            backgroundColor = SnackbarDefaults.color,
+            contentColor = SnackbarDefaults.contentColor,
+            elevation = 0.dp
+          )
+        }
+      },
+      floatingActionButton = {
+        val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+        CompactFloatingActionButton(
+          label = LocalStrings.current.scrollToTop,
+          visible = showScrollToTop,
+          modifier =
+            Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
+              .padding(end = 16.dp, bottom = 16.dp),
+        ) {
+          listState.animateScrollToItem(0)
+        }
+      },
+      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
+      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
+      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetElevation = 0.dp,
+      sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
+      sheetShape =
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = state.feedsSheetMode != Edit
+    )
+  }
 }
 
 @Composable
