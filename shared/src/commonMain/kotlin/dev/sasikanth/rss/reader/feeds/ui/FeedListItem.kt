@@ -39,8 +39,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil3.size.Dimension
-import coil3.size.Size
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -73,7 +71,6 @@ internal fun FeedListItem(
           url = feed.icon,
           contentDescription = null,
           modifier = Modifier.requiredSize(28.dp).clip(MaterialTheme.shapes.small),
-          size = Size(28, Dimension.Undefined)
         )
       }
 
