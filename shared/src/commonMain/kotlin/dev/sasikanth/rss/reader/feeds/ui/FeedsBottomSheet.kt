@@ -15,10 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,11 +23,9 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -45,20 +40,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -66,6 +58,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -80,9 +73,9 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
+import dev.sasikanth.rss.reader.resources.icons.Add
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -170,7 +163,6 @@ private fun BottomSheetExpandedContent(
     bottomBar = {
       FeedsSheetBottomBar(
         feedsSheetMode = feedsSheetMode,
-        editFeeds = editFeeds,
       )
     },
     containerColor = AppTheme.colorScheme.tintedBackground
@@ -261,11 +253,7 @@ private fun BottomSheetExpandedContent(
 }
 
 @Composable
-private fun FeedsSheetBottomBar(
-  feedsSheetMode: FeedsSheetMode,
-  modifier: Modifier = Modifier,
-  editFeeds: () -> Unit
-) {
+private fun FeedsSheetBottomBar(feedsSheetMode: FeedsSheetMode, modifier: Modifier = Modifier) {
   val imeModifier =
     if (feedsSheetMode == LinkEntry) {
       Modifier.windowInsetsPadding(WindowInsets.ime)
@@ -273,61 +261,46 @@ private fun FeedsSheetBottomBar(
       Modifier
     }
 
-  AnimatedVisibility(
-    visible = feedsSheetMode != Edit,
-    enter = slideInVertically { it },
-    exit = slideOutVertically { it }
-  ) {
-    Box(
-      imeModifier
-        .background(AppTheme.colorScheme.tintedBackground)
-        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
-        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-          // Only to prevent clicks from passing through. Not sure what's happening
-        }
-        .then(modifier)
-    ) {
-      HorizontalDivider(
-        Modifier.align(Alignment.TopStart),
-        color = AppTheme.colorScheme.tintedSurface
+  Box(
+    imeModifier
+      .requiredHeight(144.dp)
+      .fillMaxWidth()
+      .background(
+        Brush.verticalGradient(
+          0f to Color.Transparent,
+          0.8f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.9f),
+          1f to AppTheme.colorScheme.tintedBackground
+        )
       )
-      Box(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 20.dp)) {
-        // Placeholder view with similar height of primary action button and input field
-        // from the home screen
-        Box(Modifier.requiredHeight(56.dp))
-        when (feedsSheetMode) {
-          Default,
-          Edit -> {
-            EditFeeds(editFeeds)
-          }
-          LinkEntry -> {
-            // no-op
-          }
-        }
+      .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
+      .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+        // Only to prevent clicks from passing through. Not sure what's happening
       }
-    }
+      .then(modifier),
+    contentAlignment = Alignment.Center
+  ) {
+    AddFeedButton(
+      onClick = {
+        // TODO: Navigate to add feed page
+      }
+    )
   }
 }
 
 @Composable
-private fun BoxScope.EditFeeds(onClick: () -> Unit) {
-  TextButton(
-    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
-    onClick = onClick,
-    contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
-    shape = MaterialTheme.shapes.large
+private fun AddFeedButton(
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Box(
+    Modifier.clip(RoundedCornerShape(24.dp))
+      .background(AppTheme.colorScheme.tintedForeground)
+      .clickable { onClick() }
+      .padding(horizontal = 56.dp, vertical = 24.dp)
+      .then(modifier),
+    contentAlignment = Alignment.Center
   ) {
-    Icon(
-      imageVector = Icons.Outlined.Edit,
-      contentDescription = LocalStrings.current.editFeeds,
-      tint = AppTheme.colorScheme.tintedForeground
-    )
-    Spacer(Modifier.width(12.dp))
-    Text(
-      text = LocalStrings.current.editFeeds,
-      style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.tintedForeground
-    )
+    Icon(TwineIcons.Add, contentDescription = null)
   }
 }
 
