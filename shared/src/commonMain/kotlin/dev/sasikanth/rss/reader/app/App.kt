@@ -45,7 +45,6 @@ import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
-import dev.sasikanth.rss.reader.tags.ui.TagsScreen
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Inject
 
@@ -104,9 +103,6 @@ fun App(
               }
               is Screen.Reader -> {
                 ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-              }
-              is Screen.Tags -> {
-                TagsScreen(tagsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
           }
