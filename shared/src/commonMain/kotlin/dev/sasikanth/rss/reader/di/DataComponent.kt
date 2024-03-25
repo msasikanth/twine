@@ -21,8 +21,6 @@ import dev.sasikanth.rss.reader.database.DateAdapter
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.database.ReaderDatabase
-import dev.sasikanth.rss.reader.database.Tag
-import dev.sasikanth.rss.reader.database.UuidAdapter
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
@@ -45,12 +43,6 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
           lastCleanUpAtAdapter = DateAdapter
         ),
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
-      tagAdapter =
-        Tag.Adapter(
-          idAdapter = UuidAdapter,
-          createdAtAdapter = DateAdapter,
-          updatedAtAdapter = DateAdapter
-        )
     )
   }
 
@@ -65,6 +57,4 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
 
   @Provides
   fun providesFeedSearchFTSQueries(database: ReaderDatabase) = database.feedSearchFTSQueries
-
-  @Provides fun providesTagQueries(database: ReaderDatabase) = database.tagQueries
 }

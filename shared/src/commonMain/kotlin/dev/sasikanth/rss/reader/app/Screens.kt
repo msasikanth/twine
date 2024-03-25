@@ -21,7 +21,6 @@ import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
-import dev.sasikanth.rss.reader.tags.TagsPresenter
 
 internal sealed interface Screen {
   class Home(val presenter: HomePresenter) : Screen
@@ -35,6 +34,4 @@ internal sealed interface Screen {
   class About(val presenter: AboutPresenter) : Screen
 
   class Reader(val presenter: ReaderPresenter) : Screen
-
-  class Tags(val presenter: TagsPresenter) : Screen
 }
