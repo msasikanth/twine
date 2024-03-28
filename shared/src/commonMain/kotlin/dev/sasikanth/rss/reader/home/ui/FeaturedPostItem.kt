@@ -139,7 +139,7 @@ private fun DefaultFeaturedPostItem(
     Text(
       modifier = Modifier.padding(horizontal = 16.dp),
       text = item.title.ifBlank { item.description },
-      style = MaterialTheme.typography.headlineSmall,
+      style = MaterialTheme.typography.titleLarge,
       color = AppTheme.colorScheme.textEmphasisHigh,
       minLines = 3,
       maxLines = 3,
@@ -216,7 +216,7 @@ private fun LargeScreenFeaturedPostItem(
       Text(
         modifier = Modifier.padding(top = 16.dp),
         text = item.title,
-        style = MaterialTheme.typography.headlineSmall,
+        style = MaterialTheme.typography.titleLarge,
         color = AppTheme.colorScheme.textEmphasisHigh,
         minLines = 3,
         maxLines = 3,
