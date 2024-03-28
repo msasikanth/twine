@@ -141,8 +141,8 @@ private fun DefaultFeaturedPostItem(
       text = item.title.ifBlank { item.description },
       style = MaterialTheme.typography.headlineSmall,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      minLines = 2,
-      maxLines = 2,
+      minLines = 3,
+      maxLines = 3,
       overflow = TextOverflow.Ellipsis
     )
 
@@ -218,8 +218,8 @@ private fun LargeScreenFeaturedPostItem(
         text = item.title,
         style = MaterialTheme.typography.headlineSmall,
         color = AppTheme.colorScheme.textEmphasisHigh,
-        minLines = 2,
-        maxLines = 2,
+        minLines = 3,
+        maxLines = 3,
         overflow = TextOverflow.Ellipsis
       )
 
