@@ -92,46 +92,13 @@ internal fun PostMetadata(
         .then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    Box(modifier = Modifier.weight(1f)) {
-      val postSourceClickableModifier =
-        if (config.enablePostSource) {
-          Modifier.clip(RoundedCornerShape(50))
-            .clickable(onClick = onSourceClick)
-            .background(color = Color.White.copy(alpha = 0.12f))
-            .padding(vertical = 4.dp)
-            .padding(start = 8.dp, end = 12.dp)
-        } else {
-          Modifier
-        }
-
-      val postSourceTextColor =
-        if (config.enablePostSource) {
-          Color.White
-        } else {
-          AppTheme.colorScheme.onSurfaceVariant
-        }
-
-      Row(modifier = postSourceClickableModifier) {
-        if (!postRead && config.showUnreadIndicator) {
-          Box(
-            Modifier.requiredSize(6.dp)
-              .background(AppTheme.colorScheme.tintedForeground, CircleShape)
-              .align(Alignment.CenterVertically)
-          )
-          Spacer(Modifier.requiredWidth(8.dp))
-        } else {
-          Spacer(Modifier.requiredWidth(4.dp))
-        }
-
-        Text(
-          style = MaterialTheme.typography.bodySmall,
-          maxLines = 1,
-          text = feedName.capitalize(Locale.current),
-          color = postSourceTextColor,
-          overflow = TextOverflow.Ellipsis
-        )
-      }
-    }
+    PostSourcePill(
+      modifier = Modifier.weight(1f),
+      config = config,
+      onSourceClick = onSourceClick,
+      postRead = postRead,
+      feedName = feedName
+    )
 
     Text(
       modifier = Modifier.padding(horizontal = 8.dp),
@@ -152,6 +119,56 @@ internal fun PostMetadata(
       onCommentsClick = onCommentsClick,
       togglePostReadClick = onTogglePostReadClick
     )
+  }
+}
+
+@Composable
+private fun PostSourcePill(
+  config: PostMetadataConfig,
+  onSourceClick: () -> Unit,
+  postRead: Boolean,
+  feedName: String,
+  modifier: Modifier = Modifier
+) {
+  Box(modifier = modifier) {
+    val postSourceClickableModifier =
+      if (config.enablePostSource) {
+        Modifier.clip(RoundedCornerShape(50))
+          .clickable(onClick = onSourceClick)
+          .background(color = Color.White.copy(alpha = 0.12f))
+          .padding(vertical = 4.dp)
+          .padding(start = 8.dp, end = 12.dp)
+      } else {
+        Modifier
+      }
+
+    val postSourceTextColor =
+      if (config.enablePostSource) {
+        Color.White
+      } else {
+        AppTheme.colorScheme.onSurfaceVariant
+      }
+
+    Row(modifier = postSourceClickableModifier, verticalAlignment = Alignment.CenterVertically) {
+      if (!postRead && config.showUnreadIndicator) {
+        Box(
+          Modifier.requiredSize(6.dp)
+            .background(AppTheme.colorScheme.tintedForeground, CircleShape)
+            .align(Alignment.CenterVertically)
+        )
+        Spacer(Modifier.requiredWidth(8.dp))
+      } else {
+        Spacer(Modifier.requiredWidth(4.dp))
+      }
+
+      Text(
+        style = MaterialTheme.typography.bodySmall,
+        maxLines = 1,
+        text = feedName.capitalize(Locale.current),
+        color = postSourceTextColor,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
   }
 }
 
