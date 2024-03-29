@@ -27,7 +27,8 @@ val TrTwineStrings =
     errorServer = {
       "($it): Sunucu hatası. Lütfen daha sonra tekrar deneyin veya web sitesi yöneticisiyle iletişime geçin."
     },
-    errorTooManyRedirects = "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
+    errorTooManyRedirects =
+      "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
     errorUnAuthorized = { "($it): Bu bağlantıdaki içeriğe erişim yetkiniz bulunmamaktadır." },
     errorUnknownHttpStatus = { "HTTP koduna sahip içerik yüklenemedi: ($it)" },
     postsSearchHint = "Gönderileri ara",
@@ -50,7 +51,8 @@ val TrTwineStrings =
     settingsHeaderFeedback = "Geri bildirim & hata raporları",
     settingsHeaderOpml = "OPML",
     settingsBrowserTypeTitle = "Uygulama içi tarayıcıyı kullan",
-    settingsBrowserTypeSubtitle = "Kapatıldığında, bağlantılar varsayılan tarayıcınızda açılacaktır.",
+    settingsBrowserTypeSubtitle =
+      "Kapatıldığında, bağlantılar varsayılan tarayıcınızda açılacaktır.",
     settingsEnableBlurTitle = "Ana sayfada bulanıklaştırmayı etkinleştir",
     settingsEnableBlurSubtitle =
       "Devre dışı bırakıldığında, bulanık görüntüler yerine gradyanları görüntüler. Performansı artırabilir.",
@@ -72,7 +74,8 @@ val TrTwineStrings =
     settingsPostsDeletionPeriodSixMonths = "6 ay",
     settingsPostsDeletionPeriodOneYear = "1 yıl",
     settingsShowReaderViewTitle = "Okuyucu görünümünü etkinleştir",
-    settingsShowReaderViewSubtitle = "Makaleler basitleştirilmiş, okunması kolay bir görünümde gösterilecek",
+    settingsShowReaderViewSubtitle =
+      "Makaleler basitleştirilmiş, okunması kolay bir görünümde gösterilecek",
     feeds = "İçerikler",
     editFeeds = "İçerikleri düzenle",
     comments = "Yorumlar",
@@ -89,7 +92,8 @@ val TrTwineStrings =
     openWebsite = "Web sitesini aç",
     markAllAsRead = "Tümünü okundu olarak işaretle",
     noNewPosts = "Yeni içerik yok",
-    noNewPostsSubtitle = "Daha sonra tekrar kontrol edin veya yeni içeriği şimdi kontrol etmek için aşağı çekin",
+    noNewPostsSubtitle =
+      "Daha sonra tekrar kontrol edin veya yeni içeriği şimdi kontrol etmek için aşağı çekin",
     postsAll = "Tümü",
     postsUnread = "Okunmamış",
     postsToday = "Bugün",
