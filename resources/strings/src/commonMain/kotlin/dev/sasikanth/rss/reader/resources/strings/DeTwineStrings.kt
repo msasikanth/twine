@@ -101,6 +101,7 @@ val DeTwineStrings =
     postsAll = "Alle artikel",
     postsUnread = "Ungelesen",
     postsToday = "Heute",
+    postsLast24Hours = "Letzte 24 Stunden",
     openSource = "Open Source",
     openSourceDesc =
       "Twine basiert auf Open-Source-Technologien und ist völlig kostenlos. Den Quellcode von Twine und einigen meiner anderen beliebten Projekte finden Sie auf GitHub. Klicken Sie hier, um dorthin zu gelangen.",
