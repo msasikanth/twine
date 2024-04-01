@@ -20,22 +20,20 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -71,49 +69,12 @@ internal fun FeaturedPostItem(
   onSourceClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
 ) {
-  val isLargeScreenLayout =
-    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Expanded
-  Box(
+  Column(
     modifier =
       Modifier.clip(MaterialTheme.shapes.extraLarge)
         .clickable(onClick = onClick)
         .alpha(if (item.read) 0.65f else 1f)
   ) {
-    if (isLargeScreenLayout) {
-      LargeScreenFeaturedPostItem(
-        item = item,
-        page = page,
-        pagerState = pagerState,
-        onBookmarkClick = onBookmarkClick,
-        onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick,
-        onTogglePostReadClick = onTogglePostReadClick
-      )
-    } else {
-      DefaultFeaturedPostItem(
-        item = item,
-        page = page,
-        pagerState = pagerState,
-        onBookmarkClick = onBookmarkClick,
-        onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick,
-        onTogglePostReadClick = onTogglePostReadClick
-      )
-    }
-  }
-}
-
-@Composable
-private fun DefaultFeaturedPostItem(
-  item: PostWithMetadata,
-  page: Int,
-  pagerState: PagerState,
-  onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit,
-  onSourceClick: () -> Unit,
-  onTogglePostReadClick: () -> Unit,
-) {
-  Column {
     AsyncImage(
       url = item.imageUrl!!,
       modifier =
@@ -143,7 +104,7 @@ private fun DefaultFeaturedPostItem(
       color = AppTheme.colorScheme.textEmphasisHigh,
       minLines = 3,
       maxLines = 3,
-      overflow = TextOverflow.Ellipsis
+      overflow = TextOverflow.Ellipsis,
     )
 
     if (item.title.isNotBlank() && item.description.isNotBlank()) {
@@ -175,79 +136,5 @@ private fun DefaultFeaturedPostItem(
     )
 
     Spacer(modifier = Modifier.height(8.dp))
-  }
-}
-
-@Composable
-private fun LargeScreenFeaturedPostItem(
-  item: PostWithMetadata,
-  page: Int,
-  pagerState: PagerState,
-  onBookmarkClick: () -> Unit,
-  onCommentsClick: () -> Unit,
-  onSourceClick: () -> Unit,
-  onTogglePostReadClick: () -> Unit,
-) {
-  Row(verticalAlignment = Alignment.CenterVertically) {
-    AsyncImage(
-      url = item.imageUrl!!,
-      modifier =
-        Modifier.clip(MaterialTheme.shapes.extraLarge)
-          .aspectRatio(featuredImageAspectRatio)
-          .weight(0.92f)
-          .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .graphicsLayer {
-            translationX =
-              if (page in 0..pagerState.pageCount) {
-                pagerState.getOffsetFractionForPage(page) * 250f
-              } else {
-                0f
-              }
-            scaleX = 1.08f
-            scaleY = 1.08f
-          },
-      contentDescription = null,
-      contentScale = ContentScale.Crop,
-    )
-
-    Spacer(modifier = Modifier.requiredWidth(8.dp))
-
-    Column(modifier = Modifier.weight(1f).padding(horizontal = 16.dp)) {
-      Text(
-        modifier = Modifier.padding(top = 16.dp),
-        text = item.title,
-        style = MaterialTheme.typography.titleLarge,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        minLines = 3,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis
-      )
-
-      if (item.description.isNotBlank()) {
-        Spacer(modifier = Modifier.requiredHeight(8.dp))
-
-        Text(
-          text = item.description,
-          style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.textEmphasisHigh,
-          minLines = 3,
-          maxLines = 3,
-          overflow = TextOverflow.Ellipsis,
-        )
-      }
-
-      PostMetadata(
-        feedName = item.feedName,
-        postPublishedAt = item.date.relativeDurationString(),
-        postLink = item.link,
-        postRead = item.read,
-        postBookmarked = item.bookmarked,
-        commentsLink = item.commentsLink,
-        onBookmarkClick = onBookmarkClick,
-        onCommentsClick = onCommentsClick,
-        onSourceClick = onSourceClick,
-        onTogglePostReadClick = onTogglePostReadClick
-      )
-    }
   }
 }
