@@ -33,12 +33,15 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -75,6 +78,9 @@ internal fun FeaturedPostItem(
         .clickable(onClick = onClick)
         .alpha(if (item.read) 0.65f else 1f)
   ) {
+    val density = LocalDensity.current
+    var descriptionBottomPadding by remember(item.link) { mutableStateOf(0.dp) }
+
     AsyncImage(
       url = item.imageUrl!!,
       modifier =
@@ -102,9 +108,18 @@ internal fun FeaturedPostItem(
       text = item.title.ifBlank { item.description },
       style = MaterialTheme.typography.titleLarge,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      minLines = 3,
       maxLines = 3,
       overflow = TextOverflow.Ellipsis,
+      onTextLayout = { textLayoutResult ->
+        val numberOfLines = textLayoutResult.lineCount
+        if (numberOfLines < 3) {
+          val lineTop = textLayoutResult.getLineTop(0)
+          val lineBottom = textLayoutResult.getLineBottom(0)
+          val lineHeight = with(density) { (lineTop + lineBottom).toDp() }
+
+          descriptionBottomPadding = lineHeight
+        }
+      }
     )
 
     if (item.title.isNotBlank() && item.description.isNotBlank()) {
@@ -119,6 +134,8 @@ internal fun FeaturedPostItem(
         maxLines = 3,
         overflow = TextOverflow.Ellipsis,
       )
+
+      Spacer(Modifier.requiredHeight(descriptionBottomPadding))
     }
 
     PostMetadata(
