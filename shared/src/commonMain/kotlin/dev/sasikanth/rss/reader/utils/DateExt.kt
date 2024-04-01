@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.utils
 
 import dev.sasikanth.rss.reader.repository.Period
+import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.Instant
@@ -44,3 +45,5 @@ internal fun getTodayStartInstant() =
     .toLocalDateTime(TimeZone.currentSystemDefault())
     .date
     .atStartOfDayIn(TimeZone.currentSystemDefault())
+
+internal fun getLast24HourStart() = Clock.System.now().minus(24.hours)
