@@ -94,7 +94,7 @@ val TrTwineStrings =
     noNewPosts = "Yeni içerik yok",
     noNewPostsSubtitle =
       "Daha sonra tekrar kontrol edin veya yeni içeriği şimdi kontrol etmek için aşağı çekin",
-    postsAll = "Tümü",
+    postsAll = "Tümü makaleler",
     postsUnread = "Okunmamış",
     postsToday = "Bugün",
     openSource = "Açık kaynağı destekleyin",

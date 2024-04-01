@@ -98,7 +98,7 @@ val DeTwineStrings =
     noNewPosts = "Keine neuen Beiträge",
     noNewPostsSubtitle =
       "Schauen Sie später noch einmal vorbei oder ziehen Sie nach unten, um nach neuen Inhalten zu suchen",
-    postsAll = "Alle",
+    postsAll = "Alle artikel",
     postsUnread = "Ungelesen",
     postsToday = "Heute",
     openSource = "Open Source",
