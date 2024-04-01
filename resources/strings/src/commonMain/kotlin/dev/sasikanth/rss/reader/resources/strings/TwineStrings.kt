@@ -100,6 +100,7 @@ data class TwineStrings(
   val postsAll: String,
   val postsUnread: String,
   val postsToday: String,
+  val postsLast24Hours: String,
   val openSource: String,
   val openSourceDesc: String,
   val markAsRead: String,

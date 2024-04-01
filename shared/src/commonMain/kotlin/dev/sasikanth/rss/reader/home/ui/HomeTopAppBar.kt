@@ -160,7 +160,7 @@ fun PostsTypeSelector(
     }
 
     DropdownMenu(
-      modifier = Modifier.requiredWidth(120.dp),
+      modifier = Modifier.requiredWidth(188.dp),
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
     ) {
@@ -200,6 +200,7 @@ private fun getPostTypeLabel(type: PostsType) =
     PostsType.ALL -> LocalStrings.current.postsAll
     PostsType.UNREAD -> LocalStrings.current.postsUnread
     PostsType.TODAY -> LocalStrings.current.postsToday
+    PostsType.LAST_24_HOURS -> LocalStrings.current.postsLast24Hours
   }
 
 @Composable

@@ -97,6 +97,7 @@ val TrTwineStrings =
     postsAll = "Tümü makaleler",
     postsUnread = "Okunmamış",
     postsToday = "Bugün",
+    postsLast24Hours = "Son 24 saat",
     openSource = "Açık kaynağı destekleyin",
     openSourceDesc =
       "Twine açık kaynaklı bir projedir ve ücretsiz olarak kullanılabilir. Bu projeyi nasıl destekleyeceğiniz hakkında daha fazla bilgi edinmek için buraya tıklayın veya Twine'ın veya diğer popüler projelerimden bazılarının kaynak kodunu görüntüleyin.",

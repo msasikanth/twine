@@ -19,5 +19,6 @@ package dev.sasikanth.rss.reader.home.ui
 enum class PostsType {
   ALL,
   TODAY,
+  LAST_24_HOURS,
   UNREAD,
 }
