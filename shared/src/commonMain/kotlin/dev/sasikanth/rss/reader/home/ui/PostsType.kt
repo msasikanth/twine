@@ -18,6 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 
 enum class PostsType {
   ALL,
-  UNREAD,
   TODAY,
+  UNREAD,
 }
