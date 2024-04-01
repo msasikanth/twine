@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -138,6 +139,9 @@ class FeedPresenter(
             PostsType.TODAY -> {
               getTodayStartInstant()
             }
+            PostsType.LAST_24_HOURS -> {
+              getLast24HourStart()
+            }
           }
 
         rssRepository.markPostsInFeedAsRead(feedLink = feedLink, postsAfter = postsAfter)
@@ -169,6 +173,9 @@ class FeedPresenter(
             PostsType.UNREAD -> Instant.DISTANT_PAST
             PostsType.TODAY -> {
               getTodayStartInstant()
+            }
+            PostsType.LAST_24_HOURS -> {
+              getLast24HourStart()
             }
           }
 

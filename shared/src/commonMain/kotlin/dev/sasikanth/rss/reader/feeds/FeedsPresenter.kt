@@ -38,6 +38,7 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
@@ -265,6 +266,9 @@ class FeedsPresenter(
         PostsType.UNREAD -> Instant.DISTANT_PAST
         PostsType.TODAY -> {
           getTodayStartInstant()
+        }
+        PostsType.LAST_24_HOURS -> {
+          getLast24HourStart()
         }
       }
 

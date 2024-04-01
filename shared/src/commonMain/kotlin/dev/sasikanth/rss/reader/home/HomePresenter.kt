@@ -42,6 +42,7 @@ import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
@@ -254,7 +255,8 @@ class HomePresenter(
           val unreadOnly =
             when (postsType) {
               PostsType.ALL,
-              PostsType.TODAY -> null
+              PostsType.TODAY,
+              PostsType.LAST_24_HOURS -> null
               PostsType.UNREAD -> true
             }
 
@@ -264,6 +266,9 @@ class HomePresenter(
               PostsType.UNREAD -> Instant.DISTANT_PAST
               PostsType.TODAY -> {
                 getTodayStartInstant()
+              }
+              PostsType.LAST_24_HOURS -> {
+                getLast24HourStart()
               }
             }
 

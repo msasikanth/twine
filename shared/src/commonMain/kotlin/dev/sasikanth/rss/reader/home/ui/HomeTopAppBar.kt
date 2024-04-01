@@ -200,6 +200,7 @@ private fun getPostTypeLabel(type: PostsType) =
     PostsType.ALL -> LocalStrings.current.postsAll
     PostsType.UNREAD -> LocalStrings.current.postsUnread
     PostsType.TODAY -> LocalStrings.current.postsToday
+    PostsType.LAST_24_HOURS -> LocalStrings.current.postsLast24Hours
   }
 
 @Composable
