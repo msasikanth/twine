@@ -108,7 +108,7 @@ val EnTwineStrings =
     postsAll = "All articles",
     postsUnread = "Unread",
     postsToday = "Today",
-    postsLast24Hours = "Last 24 hours",
+    postsLast24Hours = "24 hours",
     openSource = "Support Open Source",
     openSourceDesc =
       "Twine is an open source project and is available for free to use. Click here to know more on how to support this project or, view source code of Twine or some of my other popular projects.",
