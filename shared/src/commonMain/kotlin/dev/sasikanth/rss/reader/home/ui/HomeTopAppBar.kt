@@ -160,7 +160,7 @@ fun PostsTypeSelector(
     }
 
     DropdownMenu(
-      modifier = Modifier.requiredWidth(188.dp),
+      modifier = Modifier.requiredWidth(158.dp),
       expanded = showDropdown,
       onDismissRequest = { showDropdown = false },
     ) {
