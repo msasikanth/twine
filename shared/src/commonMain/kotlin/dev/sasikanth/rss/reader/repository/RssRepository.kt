@@ -446,6 +446,10 @@ class RssRepository(
     }
   }
 
+  suspend fun feedsCount(): Long {
+    return withContext(ioDispatcher) { feedQueries.count().executeAsOne() }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
