@@ -111,7 +111,7 @@ class FeedsPresenter(
   }
 
   private class PresenterInstance(
-    dispatchersProvider: DispatchersProvider,
+    private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val observableSelectedFeed: ObservableSelectedFeed
@@ -304,7 +304,12 @@ class FeedsPresenter(
                 after != null &&
                 after.feed.pinnedAt == null -> {
                 val showSectionDivider = before?.feed?.pinnedAt != null
-                FeedsListItemType.AllFeedsHeader(showSectionDivider = showSectionDivider)
+                val feedsCount = rssRepository.feedsCount()
+
+                FeedsListItemType.AllFeedsHeader(
+                  showSectionDivider = showSectionDivider,
+                  feedsCount = feedsCount
+                )
               }
               else -> {
                 null

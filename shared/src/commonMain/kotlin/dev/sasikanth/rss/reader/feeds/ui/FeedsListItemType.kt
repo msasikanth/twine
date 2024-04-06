@@ -23,5 +23,6 @@ internal sealed interface FeedsListItemType {
 
   data class PinnedFeedsHeader(val isExpanded: Boolean) : FeedsListItemType
 
-  data class AllFeedsHeader(val showSectionDivider: Boolean) : FeedsListItemType
+  data class AllFeedsHeader(val showSectionDivider: Boolean, val feedsCount: Long) :
+    FeedsListItemType
 }

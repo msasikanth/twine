@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
@@ -267,7 +268,12 @@ private fun BottomSheetExpandedContent(
               }
             }
             is FeedsListItemType.AllFeedsHeader -> {
-              item { AllFeedsHeader(showSectionDivider = feedListItemType.showSectionDivider) }
+              item {
+                AllFeedsHeader(
+                  showSectionDivider = feedListItemType.showSectionDivider,
+                  feedsCount = feedListItemType.feedsCount
+                )
+              }
             }
             is FeedsListItemType.PinnedFeedsHeader -> {
               item {
@@ -298,7 +304,11 @@ private fun BottomSheetExpandedContent(
 }
 
 @Composable
-private fun AllFeedsHeader(showSectionDivider: Boolean, modifier: Modifier = Modifier) {
+private fun AllFeedsHeader(
+  showSectionDivider: Boolean,
+  feedsCount: Long,
+  modifier: Modifier = Modifier
+) {
   val paddingModifier =
     if (showSectionDivider) {
       Modifier.padding(top = 24.dp)
@@ -316,10 +326,18 @@ private fun AllFeedsHeader(showSectionDivider: Boolean, modifier: Modifier = Mod
       verticalAlignment = Alignment.CenterVertically
     ) {
       Text(
-        modifier = Modifier.weight(1f),
         text = LocalStrings.current.allFeeds,
         style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.textEmphasisHigh,
+      )
+
+      Spacer(Modifier.requiredWidth(8.dp))
+
+      Text(
+        modifier = Modifier.weight(1f),
+        text = feedsCount.toString(),
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.tintedForeground,
       )
 
       // TODO: Add feeds sort button
