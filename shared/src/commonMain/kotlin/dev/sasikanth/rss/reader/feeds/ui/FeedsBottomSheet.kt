@@ -270,8 +270,8 @@ private fun BottomSheetExpandedContent(
                 )
               }
             }
-            FeedsListItemType.AllFeedsHeader -> {
-              item { AllFeedsHeader() }
+            is FeedsListItemType.AllFeedsHeader -> {
+              item { AllFeedsHeader(showSectionDivider = feedListItemType.showSectionDivider) }
             }
             FeedsListItemType.PinnedFeedsHeader -> {
               item {
@@ -302,20 +302,32 @@ private fun BottomSheetExpandedContent(
 }
 
 @Composable
-private fun AllFeedsHeader(modifier: Modifier = Modifier) {
-  Row(
-    modifier =
-      Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    Text(
-      modifier = Modifier.weight(1f),
-      text = LocalStrings.current.allFeeds,
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-    )
+private fun AllFeedsHeader(showSectionDivider: Boolean, modifier: Modifier = Modifier) {
+  val paddingModifier =
+    if (showSectionDivider) {
+      Modifier.padding(top = 24.dp)
+    } else {
+      Modifier
+    }
 
-    // TODO: Add feeds sort button
+  Box(paddingModifier.then(modifier)) {
+    if (showSectionDivider) {
+      HorizontalDivider(color = AppTheme.colorScheme.tintedHighlight)
+    }
+
+    Row(
+      modifier = Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Text(
+        modifier = Modifier.weight(1f),
+        text = LocalStrings.current.allFeeds,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+      )
+
+      // TODO: Add feeds sort button
+    }
   }
 }
 

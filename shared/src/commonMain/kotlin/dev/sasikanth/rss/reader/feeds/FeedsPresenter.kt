@@ -307,7 +307,8 @@ class FeedsPresenter(
               (before?.feed?.pinnedAt != null || before == null) &&
                 after != null &&
                 after.feed.pinnedAt == null -> {
-                FeedsListItemType.AllFeedsHeader
+                val showSectionDivider = before?.feed?.pinnedAt != null
+                FeedsListItemType.AllFeedsHeader(showSectionDivider = showSectionDivider)
               }
               else -> {
                 null

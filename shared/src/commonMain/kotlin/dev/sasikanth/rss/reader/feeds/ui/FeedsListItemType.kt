@@ -23,5 +23,5 @@ internal sealed interface FeedsListItemType {
 
   data object PinnedFeedsHeader : FeedsListItemType
 
-  data object AllFeedsHeader : FeedsListItemType
+  data class AllFeedsHeader(val showSectionDivider: Boolean) : FeedsListItemType
 }
