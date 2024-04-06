@@ -19,7 +19,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -147,7 +146,6 @@ internal fun FeedsBottomSheet(
         canPinFeeds = state.canPinFeeds,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         searchQuery = feedsPresenter.searchQuery,
-        isPinnedSectionExpanded = state.pinnedSectionExpanded,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
@@ -182,7 +180,6 @@ internal fun FeedsBottomSheet(
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   selectedFeed: Feed?,
@@ -190,7 +187,6 @@ private fun BottomSheetExpandedContent(
   canPinFeeds: Boolean,
   canShowUnreadPostsCount: Boolean,
   searchQuery: TextFieldValue,
-  isPinnedSectionExpanded: Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
@@ -273,10 +269,10 @@ private fun BottomSheetExpandedContent(
             is FeedsListItemType.AllFeedsHeader -> {
               item { AllFeedsHeader(showSectionDivider = feedListItemType.showSectionDivider) }
             }
-            FeedsListItemType.PinnedFeedsHeader -> {
+            is FeedsListItemType.PinnedFeedsHeader -> {
               item {
                 PinnedFeedsHeader(
-                  isPinnedSectionExpanded = isPinnedSectionExpanded,
+                  isPinnedSectionExpanded = feedListItemType.isExpanded,
                   onToggleSection = onTogglePinnedSection
                 )
               }

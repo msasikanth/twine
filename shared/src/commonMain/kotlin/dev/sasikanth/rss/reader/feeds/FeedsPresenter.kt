@@ -234,14 +234,10 @@ class FeedsPresenter(
               feedsPager(postsAfter = postsAfter)
             }
           val feedsWithHeaders =
-            addFeedsHeaders(feeds, pinnedSectionExpanded).cachedIn(coroutineScope)
+            addFeedsHeaders(feeds = feeds, pinnedSectionExpanded = pinnedSectionExpanded)
+              .cachedIn(coroutineScope)
 
-          _state.update {
-            it.copy(
-              feedsInExpandedMode = feedsWithHeaders,
-              pinnedSectionExpanded = pinnedSectionExpanded
-            )
-          }
+          _state.update { it.copy(feedsInExpandedMode = feedsWithHeaders) }
         }
         .launchIn(coroutineScope)
     }
@@ -302,7 +298,7 @@ class FeedsPresenter(
           .insertSeparators { before, after ->
             when {
               before?.feed?.pinnedAt == null && after?.feed?.pinnedAt != null -> {
-                FeedsListItemType.PinnedFeedsHeader
+                FeedsListItemType.PinnedFeedsHeader(isExpanded = pinnedSectionExpanded)
               }
               (before?.feed?.pinnedAt != null || before == null) &&
                 after != null &&
