@@ -37,4 +37,6 @@ sealed interface FeedsEvent {
   data object ClearSearchQuery : FeedsEvent
 
   data class OnFeedInfoClick(val feedLink: String) : FeedsEvent
+
+  data object TogglePinnedSection : FeedsEvent
 }

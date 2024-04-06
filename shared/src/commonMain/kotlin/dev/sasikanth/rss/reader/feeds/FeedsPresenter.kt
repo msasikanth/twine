@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.PagingData
+import androidx.paging.filter
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -118,6 +120,9 @@ class FeedsPresenter(
     var searchQuery by mutableStateOf(TextFieldValue())
       private set
 
+    var pinnedSectionExpanded by mutableStateOf(true)
+      private set
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
     private val _state = MutableStateFlow(FeedsState.DEFAULT)
@@ -143,7 +148,12 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedInfoClick -> {
           // no-op
         }
+        FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
       }
+    }
+
+    private fun onTogglePinnedSection() {
+      pinnedSectionExpanded = !pinnedSectionExpanded
     }
 
     private fun onSearchQueryChanged(searchQuery: TextFieldValue) {
@@ -201,13 +211,17 @@ class FeedsPresenter(
 
     @OptIn(FlowPreview::class)
     private fun observeFeedsForExpandedSheet() {
-      val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
-      searchQueryFlow
-        .distinctUntilChangedBy { it.text }
-        .combine(settingsRepository.postsType) { searchQuery, postsType ->
-          searchQuery to postsType
+      val searchQueryFlow =
+        snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
+      val pinnedSectionExpandedFlow = snapshotFlow { pinnedSectionExpanded }
+
+      combine(searchQueryFlow, settingsRepository.postsType, pinnedSectionExpandedFlow) {
+          searchQuery,
+          postsType,
+          pinnedSectionExpanded ->
+          Triple(searchQuery, postsType, pinnedSectionExpanded)
         }
-        .onEach { (searchQuery, postsType) ->
+        .onEach { (searchQuery, postsType, pinnedSectionExpanded) ->
           val searchQueryText = searchQuery.text
           val postsAfter = postsAfterInstantFromPostsType(postsType)
           val feeds =
@@ -219,9 +233,15 @@ class FeedsPresenter(
             } else {
               feedsPager(postsAfter = postsAfter)
             }
-          val feedsWithHeaders = addFeedsHeaders(feeds).cachedIn(coroutineScope)
+          val feedsWithHeaders =
+            addFeedsHeaders(feeds, pinnedSectionExpanded).cachedIn(coroutineScope)
 
-          _state.update { it.copy(feedsInExpandedMode = feedsWithHeaders) }
+          _state.update {
+            it.copy(
+              feedsInExpandedMode = feedsWithHeaders,
+              pinnedSectionExpanded = pinnedSectionExpanded
+            )
+          }
         }
         .launchIn(coroutineScope)
     }
@@ -273,7 +293,8 @@ class FeedsPresenter(
       }
 
     private fun addFeedsHeaders(
-      feeds: Flow<PagingData<Feed>>
+      feeds: Flow<PagingData<Feed>>,
+      pinnedSectionExpanded: Boolean
     ): Flow<PagingData<FeedsListItemType>> {
       return feeds.mapLatest {
         it
@@ -291,6 +312,13 @@ class FeedsPresenter(
               else -> {
                 null
               }
+            }
+          }
+          .filter { feedListItemType ->
+            if (!pinnedSectionExpanded && feedListItemType is FeedsListItemType.FeedListItem) {
+              feedListItemType.feed.pinnedAt == null
+            } else {
+              true
             }
           }
       }

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -52,6 +53,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -146,6 +149,7 @@ internal fun FeedsBottomSheet(
         canPinFeeds = state.canPinFeeds,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         searchQuery = feedsPresenter.searchQuery,
+        isPinnedSectionExpanded = state.pinnedSectionExpanded,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
@@ -160,6 +164,7 @@ internal fun FeedsBottomSheet(
         exitFeedsEdit = exitFeedsEdit,
         onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
         onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
+        onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -187,6 +192,7 @@ private fun BottomSheetExpandedContent(
   canPinFeeds: Boolean,
   canShowUnreadPostsCount: Boolean,
   searchQuery: TextFieldValue,
+  isPinnedSectionExpanded: Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
@@ -197,6 +203,7 @@ private fun BottomSheetExpandedContent(
   exitFeedsEdit: () -> Unit,
   onFeedPinClick: (Feed) -> Unit,
   onDeleteFeed: (Feed) -> Unit,
+  onTogglePinnedSection: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -285,20 +292,11 @@ private fun BottomSheetExpandedContent(
               }
             }
             FeedsListItemType.PinnedFeedsHeader -> {
-              stickyHeader(contentType = FeedsListItemType.PinnedFeedsHeader) {
-                Box(modifier = Modifier.wrapContentHeight()) {
-                  SubHeader(
-                    text = LocalStrings.current.pinnedFeeds,
-                    modifier =
-                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
-                  )
-
-                  HorizontalDivider(
-                    modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
-                    color = AppTheme.colorScheme.tintedSurface
-                  )
-                }
+              item {
+                PinnedFeedsHeader(
+                  isPinnedSectionExpanded = isPinnedSectionExpanded,
+                  onToggleSection = onTogglePinnedSection
+                )
               }
             }
             null -> {
@@ -317,6 +315,40 @@ private fun BottomSheetExpandedContent(
             .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun PinnedFeedsHeader(
+  isPinnedSectionExpanded: Boolean,
+  modifier: Modifier = Modifier,
+  onToggleSection: () -> Unit
+) {
+  Row(
+    modifier =
+      Modifier.clickable { onToggleSection() }
+        .padding(vertical = 12.dp)
+        .padding(start = 32.dp, end = 20.dp)
+        .then(modifier),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.pinnedFeeds,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+    )
+
+    val icon =
+      if (isPinnedSectionExpanded) {
+        Icons.Filled.ExpandMore
+      } else {
+        Icons.Filled.ExpandLess
+      }
+
+    IconButton(onClick = onToggleSection) {
+      Icon(imageVector = icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
     }
   }
 }
@@ -531,11 +563,6 @@ private fun SearchBar(
         )
       }
     }
-
-    HorizontalDivider(
-      modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.tintedSurface
-    )
   }
 }
 

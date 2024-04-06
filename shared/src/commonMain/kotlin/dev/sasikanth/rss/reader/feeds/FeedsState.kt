@@ -29,6 +29,7 @@ internal data class FeedsState(
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
+  val pinnedSectionExpanded: Boolean,
 ) {
 
   val canPinFeeds: Boolean
@@ -43,6 +44,7 @@ internal data class FeedsState(
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false,
+        pinnedSectionExpanded = true
       )
   }
 }
