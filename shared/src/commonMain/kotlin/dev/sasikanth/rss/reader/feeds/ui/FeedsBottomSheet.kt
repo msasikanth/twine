@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,7 +85,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -273,23 +271,7 @@ private fun BottomSheetExpandedContent(
               }
             }
             FeedsListItemType.AllFeedsHeader -> {
-              stickyHeader(contentType = FeedsListItemType.AllFeedsHeader) {
-                Box(modifier = Modifier.wrapContentHeight()) {
-                  SubHeader(
-                    text = LocalStrings.current.allFeeds,
-                    modifier =
-                      Modifier.fillMaxWidth().background(AppTheme.colorScheme.tintedBackground)
-                  )
-
-                  HorizontalDivider(color = AppTheme.colorScheme.tintedSurface)
-
-                  HorizontalDivider(
-                    modifier =
-                      Modifier.align(Alignment.BottomStart).graphicsLayer { translationY - 1f },
-                    color = AppTheme.colorScheme.tintedSurface
-                  )
-                }
-              }
+              item { AllFeedsHeader() }
             }
             FeedsListItemType.PinnedFeedsHeader -> {
               item {
@@ -316,6 +298,24 @@ private fun BottomSheetExpandedContent(
         )
       }
     }
+  }
+}
+
+@Composable
+private fun AllFeedsHeader(modifier: Modifier = Modifier) {
+  Row(
+    modifier =
+      Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.allFeeds,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+    )
+
+    // TODO: Add feeds sort button
   }
 }
 
