@@ -48,13 +48,19 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
@@ -87,8 +93,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.compose.itemContentType
-import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -149,6 +153,7 @@ internal fun FeedsBottomSheet(
         pinnedFeedsListItemTypes = state.pinnedFeeds.collectAsLazyPagingItems(),
         feedsSheetMode = feedsSheetMode,
         searchQuery = feedsPresenter.searchQuery,
+        feedsViewMode = state.feedsViewMode,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
@@ -156,6 +161,9 @@ internal fun FeedsBottomSheet(
         editFeeds = editFeeds,
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
+        onChangeFeedsViewModeClick = {
+          feedsPresenter.dispatch(FeedsEvent.OnChangeFeedsViewModeClick)
+        },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -180,6 +188,7 @@ private fun BottomSheetExpandedContent(
   pinnedFeedsListItemTypes: LazyPagingItems<PinnedFeedsListItemType>,
   feedsSheetMode: FeedsSheetMode,
   searchQuery: TextFieldValue,
+  feedsViewMode: FeedsViewMode,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
@@ -187,6 +196,7 @@ private fun BottomSheetExpandedContent(
   editFeeds: () -> Unit,
   onTogglePinnedSection: () -> Unit,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
+  onChangeFeedsViewModeClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -195,8 +205,10 @@ private fun BottomSheetExpandedContent(
       SearchBar(
         query = searchQuery,
         feedsSheetMode = feedsSheetMode,
+        feedsViewMode = feedsViewMode,
         onQueryChange = { onSearchQueryChanged(it) },
-        onClearClick = onClearSearchQuery
+        onClearClick = onClearSearchQuery,
+        onChangeFeedsViewModeClick = onChangeFeedsViewModeClick
       )
     },
     bottomBar = {
@@ -213,7 +225,13 @@ private fun BottomSheetExpandedContent(
     val keyboardState by keyboardVisibilityAsState()
 
     Box {
-      LazyColumn(
+      val gridItemSpan =
+        when (feedsViewMode) {
+          FeedsViewMode.Grid -> GridItemSpan(1)
+          FeedsViewMode.List -> GridItemSpan(2)
+        }
+
+      LazyVerticalGrid(
         modifier =
           Modifier.fillMaxSize()
             .padding(
@@ -222,58 +240,51 @@ private fun BottomSheetExpandedContent(
               // not overlap with each other
               top = padding.calculateTopPadding() - 1.dp
             ),
+        columns = GridCells.Fixed(2),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection),
-            end = padding.calculateEndPadding(layoutDirection),
+            start = padding.calculateStartPadding(layoutDirection) + 20.dp,
+            end = padding.calculateEndPadding(layoutDirection) + 20.dp,
             bottom = padding.calculateBottomPadding() + 64.dp
-          )
+          ),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         // Pinned feeds
         if (pinnedFeedsListItemTypes.itemCount > 0) {
-          items(
-            count = pinnedFeedsListItemTypes.itemCount,
-            key = pinnedFeedsListItemTypes.itemKey { it.key },
-            contentType = pinnedFeedsListItemTypes.itemContentType { it.contentType }
-          ) { index ->
-            when (val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]) {
-              is PinnedFeedsListItemType.PinnedFeedListItem -> {
-                val feed = pinnedFeedsListItemType.feed
-                val listItemTopPadding =
-                  if (index > 1) {
-                    8.dp
-                  } else {
-                    0.dp
-                  }
-
-                val listItemBottomPadding =
-                  if (index != pinnedFeedsListItemTypes.itemCount + 1) {
-                    8.dp
-                  } else {
-                    0.dp
-                  }
-
-                FeedListItem(
-                  modifier =
-                    Modifier.padding(top = listItemTopPadding, bottom = listItemBottomPadding),
-                  feed = feed,
-                  onFeedInfoClick = onFeedInfoClick,
-                  onFeedSelected = onFeedSelected,
-                )
+          for (index in 0 until pinnedFeedsListItemTypes.itemCount) {
+            val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]
+            val itemGridSpan =
+              when (pinnedFeedsListItemType) {
+                is PinnedFeedsListItemType.PinnedFeedsHeader -> GridItemSpan(2)
+                is PinnedFeedsListItemType.PinnedFeedListItem -> gridItemSpan
+                null -> GridItemSpan(2)
               }
-              is PinnedFeedsListItemType.PinnedFeedsHeader -> {
-                PinnedFeedsHeader(
-                  isPinnedSectionExpanded = pinnedFeedsListItemType.isExpanded,
-                  onToggleSection = onTogglePinnedSection
-                )
-              }
-              else -> {
-                // no-op
+
+            item(span = { itemGridSpan }) {
+              when (pinnedFeedsListItemType) {
+                is PinnedFeedsListItemType.PinnedFeedListItem -> {
+                  val feed = pinnedFeedsListItemType.feed
+                  FeedListItem(
+                    feed = feed,
+                    onFeedInfoClick = onFeedInfoClick,
+                    onFeedSelected = onFeedSelected,
+                  )
+                }
+                is PinnedFeedsListItemType.PinnedFeedsHeader -> {
+                  PinnedFeedsHeader(
+                    isPinnedSectionExpanded = pinnedFeedsListItemType.isExpanded,
+                    onToggleSection = onTogglePinnedSection
+                  )
+                }
+                else -> {
+                  // no-op
+                }
               }
             }
           }
 
-          item {
+          item(span = { GridItemSpan(2) }) {
             HorizontalDivider(
               modifier = Modifier.padding(top = 24.dp),
               color = AppTheme.colorScheme.tintedSurface
@@ -282,45 +293,35 @@ private fun BottomSheetExpandedContent(
         }
 
         // All feeds
-        items(
-          count = feedsListItemTypes.itemCount,
-          key = feedsListItemTypes.itemKey { it.key },
-          contentType = feedsListItemTypes.itemContentType { it.contentType }
-        ) { index ->
-          when (val feedListItemType = feedsListItemTypes[index]) {
-            is FeedsListItemType.FeedListItem -> {
-              val feed = feedListItemType.feed
-              val listItemTopPadding =
-                if (index != 0) {
-                  8.dp
-                } else {
-                  0.dp
-                }
-
-              val listItemBottomPadding =
-                if (index != feedsListItemTypes.itemCount) {
-                  8.dp
-                } else {
-                  0.dp
-                }
-
-              FeedListItem(
-                modifier =
-                  Modifier.padding(top = listItemTopPadding, bottom = listItemBottomPadding),
-                feed = feed,
-                onFeedInfoClick = onFeedInfoClick,
-                onFeedSelected = onFeedSelected,
-              )
+        for (index in 0 until feedsListItemTypes.itemCount) {
+          val feedListItemType = feedsListItemTypes[index]
+          val itemGridSpan =
+            when (feedListItemType) {
+              is FeedsListItemType.AllFeedsHeader -> GridItemSpan(2)
+              is FeedsListItemType.FeedListItem -> gridItemSpan
+              null -> GridItemSpan(2)
             }
-            is FeedsListItemType.AllFeedsHeader -> {
-              AllFeedsHeader(
-                feedsCount = feedListItemType.feedsCount,
-                feedsSortOrder = feedListItemType.feedsSortOrder,
-                onFeedsSortChanged = onFeedsSortChanged
-              )
-            }
-            else -> {
-              // no-op
+
+          item(span = { itemGridSpan }) {
+            when (feedListItemType) {
+              is FeedsListItemType.FeedListItem -> {
+                val feed = feedListItemType.feed
+                FeedListItem(
+                  feed = feed,
+                  onFeedInfoClick = onFeedInfoClick,
+                  onFeedSelected = onFeedSelected,
+                )
+              }
+              is FeedsListItemType.AllFeedsHeader -> {
+                AllFeedsHeader(
+                  feedsCount = feedListItemType.feedsCount,
+                  feedsSortOrder = feedListItemType.feedsSortOrder,
+                  onFeedsSortChanged = onFeedsSortChanged
+                )
+              }
+              else -> {
+                // no-op
+              }
             }
           }
         }
@@ -347,8 +348,7 @@ private fun AllFeedsHeader(
   modifier: Modifier = Modifier
 ) {
   Row(
-    modifier =
-      Modifier.padding(vertical = 12.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
+    modifier = Modifier.padding(top = 12.dp).padding(start = 12.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
@@ -443,11 +443,7 @@ private fun PinnedFeedsHeader(
   onToggleSection: () -> Unit
 ) {
   Row(
-    modifier =
-      Modifier.clickable { onToggleSection() }
-        .padding(vertical = 12.dp)
-        .padding(start = 32.dp, end = 20.dp)
-        .then(modifier),
+    modifier = Modifier.padding(top = 12.dp).padding(start = 12.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
@@ -591,8 +587,10 @@ private fun BottomSheetCollapsedContent(
 private fun SearchBar(
   query: TextFieldValue,
   feedsSheetMode: FeedsSheetMode,
+  feedsViewMode: FeedsViewMode,
   onQueryChange: (TextFieldValue) -> Unit,
   onClearClick: () -> Unit,
+  onChangeFeedsViewModeClick: () -> Unit,
 ) {
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
@@ -603,48 +601,68 @@ private fun SearchBar(
     }
   }
 
-  MaterialTheme(colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)) {
-    OutlinedTextField(
-      modifier =
-        Modifier.fillMaxWidth()
-          .windowInsetsPadding(
-            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    MaterialTheme(colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)) {
+      OutlinedTextField(
+        modifier =
+          Modifier.weight(1f)
+            .windowInsetsPadding(
+              WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+            )
+            .padding(vertical = 8.dp)
+            .padding(start = 24.dp, end = 12.dp),
+        value = query.copy(selection = TextRange(query.text.length)),
+        onValueChange = onQueryChange,
+        placeholder = {
+          Text(
+            text = LocalStrings.current.feedsSearchHint,
+            color = AppTheme.colorScheme.tintedForeground,
+            style = MaterialTheme.typography.bodyLarge
           )
-          .padding(horizontal = 24.dp, vertical = 8.dp),
-      value = query.copy(selection = TextRange(query.text.length)),
-      onValueChange = onQueryChange,
-      placeholder = {
-        Text(
-          text = LocalStrings.current.feedsSearchHint,
-          color = AppTheme.colorScheme.tintedForeground,
-          style = MaterialTheme.typography.bodyLarge
-        )
-      },
-      leadingIcon = {
-        Icon(
-          imageVector = Icons.Rounded.Search,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
-      },
-      trailingIcon = {
-        if (query.text.isNotBlank()) {
-          ClearSearchQueryButton { onClearClick() }
+        },
+        leadingIcon = {
+          Icon(
+            imageVector = Icons.Rounded.Search,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        },
+        trailingIcon = {
+          if (query.text.isNotBlank()) {
+            ClearSearchQueryButton { onClearClick() }
+          }
+        },
+        shape = RoundedCornerShape(16.dp),
+        singleLine = true,
+        textStyle = MaterialTheme.typography.bodyLarge,
+        enabled = feedsSheetMode != LinkEntry,
+        colors =
+          OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+            unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+            disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
+            focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+            disabledTextColor = Color.Transparent,
+          )
+      )
+    }
+
+    IconButton(
+      modifier = Modifier.padding(end = 20.dp),
+      onClick = onChangeFeedsViewModeClick,
+    ) {
+      val icon =
+        when (feedsViewMode) {
+          FeedsViewMode.Grid -> Icons.Outlined.ViewAgenda
+          FeedsViewMode.List -> Icons.Filled.GridView
         }
-      },
-      shape = RoundedCornerShape(16.dp),
-      singleLine = true,
-      textStyle = MaterialTheme.typography.bodyLarge,
-      enabled = feedsSheetMode != LinkEntry,
-      colors =
-        OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-          unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-          disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
-          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-          disabledTextColor = Color.Transparent,
-        )
-    )
+
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
+    }
   }
 }
 

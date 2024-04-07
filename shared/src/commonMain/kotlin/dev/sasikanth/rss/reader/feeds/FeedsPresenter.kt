@@ -33,6 +33,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
+import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -156,6 +157,19 @@ class FeedsPresenter(
         }
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
+        FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
+      }
+    }
+
+    private fun onChangeFeedsViewModeClick() {
+      _state.update {
+        val newFeedsViewMode =
+          when (_state.value.feedsViewMode) {
+            FeedsViewMode.Grid -> FeedsViewMode.List
+            FeedsViewMode.List -> FeedsViewMode.Grid
+          }
+
+        it.copy(feedsViewMode = newFeedsViewMode)
       }
     }
 

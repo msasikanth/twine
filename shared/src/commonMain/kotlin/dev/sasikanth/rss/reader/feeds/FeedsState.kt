@@ -19,6 +19,7 @@ import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
+import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -31,6 +32,7 @@ internal data class FeedsState(
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
+  val feedsViewMode: FeedsViewMode,
 ) {
 
   val canPinFeeds: Boolean
@@ -45,7 +47,8 @@ internal data class FeedsState(
         pinnedFeeds = emptyFlow(),
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
-        canShowUnreadPostsCount = false
+        canShowUnreadPostsCount = false,
+        feedsViewMode = FeedsViewMode.List
       )
   }
 }

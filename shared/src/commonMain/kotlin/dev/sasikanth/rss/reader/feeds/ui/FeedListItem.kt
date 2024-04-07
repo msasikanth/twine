@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -54,7 +55,7 @@ internal fun FeedListItem(
   Box(
     modifier =
       Modifier.fillMaxWidth()
-        .padding(horizontal = 24.dp)
+        .padding(horizontal = 4.dp)
         .then(modifier)
         .clip(RoundedCornerShape(16.dp))
         .background(AppTheme.colorScheme.tintedSurface)
@@ -86,7 +87,9 @@ internal fun FeedListItem(
         modifier = Modifier.weight(1f),
         text = feed.name,
         style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        maxLines = 1,
+        overflow = TextOverflow.Clip
       )
 
       Spacer(Modifier.requiredWidth(12.dp))
