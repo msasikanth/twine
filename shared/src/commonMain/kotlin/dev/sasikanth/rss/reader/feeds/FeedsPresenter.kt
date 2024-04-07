@@ -240,7 +240,7 @@ class FeedsPresenter(
             }
 
           val pinnedFeeds =
-            if (searchQueryText.isBlank()) {
+            if (searchQueryText.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
               pinnedFeedsPager(postsAfter = postsAfter)
             } else {
               emptyFlow()
