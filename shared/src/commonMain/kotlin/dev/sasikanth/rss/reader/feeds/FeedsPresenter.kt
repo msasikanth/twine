@@ -35,11 +35,13 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import dev.sasikanth.rss.reader.home.ui.PostsType
+import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlin.time.Duration.Companion.milliseconds
@@ -94,9 +96,6 @@ class FeedsPresenter(
   internal val searchQuery
     get() = presenterInstance.searchQuery
 
-  internal val pinnedSectionExpanded
-    get() = presenterInstance.pinnedSectionExpanded
-
   init {
     lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }
   }
@@ -127,6 +126,9 @@ class FeedsPresenter(
     var pinnedSectionExpanded by mutableStateOf(true)
       private set
 
+    var feedsSortOrder by mutableStateOf(FeedsOrderBy.Latest)
+      private set
+
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
     private val _state = MutableStateFlow(FeedsState.DEFAULT)
@@ -153,7 +155,12 @@ class FeedsPresenter(
           // no-op
         }
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
+        is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
       }
+    }
+
+    private fun onFeedSortOrderChanged(feedsOrderBy: FeedsOrderBy) {
+      feedsSortOrder = feedsOrderBy
     }
 
     private fun onTogglePinnedSection() {
@@ -218,26 +225,19 @@ class FeedsPresenter(
       val searchQueryFlow =
         snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
       val pinnedSectionExpandedFlow = snapshotFlow { pinnedSectionExpanded }
+      val feedsSortOrderFlow = snapshotFlow { feedsSortOrder }
 
-      combine(searchQueryFlow, settingsRepository.postsType, pinnedSectionExpandedFlow) {
-          searchQuery,
-          postsType,
-          pinnedSectionExpanded ->
-          Triple(searchQuery, postsType, pinnedSectionExpanded)
+      combine(
+          searchQueryFlow,
+          settingsRepository.postsType,
+          pinnedSectionExpandedFlow,
+          feedsSortOrderFlow
+        ) { searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder ->
+          NTuple4(searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder)
         }
-        .onEach { (searchQuery, postsType, pinnedSectionExpanded) ->
+        .onEach { (searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder) ->
           val searchQueryText = searchQuery.text
           val postsAfter = postsAfterInstantFromPostsType(postsType)
-
-          val feeds =
-            if (searchQueryText.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
-              feedsSearchResultsPager(
-                transformedSearchQuery = searchQueryText,
-                postsAfter = postsAfter
-              )
-            } else {
-              feedsPager(postsAfter = postsAfter)
-            }
 
           val pinnedFeeds =
             if (searchQueryText.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
@@ -246,13 +246,31 @@ class FeedsPresenter(
               emptyFlow()
             }
 
-          val feedsWithHeader =
-            addFeedsHeader(feeds = feeds, searchQuery = searchQuery).cachedIn(coroutineScope)
+          val feeds =
+            if (searchQueryText.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
+              feedsSearchResultsPager(
+                transformedSearchQuery = searchQueryText,
+                postsAfter = postsAfter
+              )
+            } else {
+              feedsPager(
+                postsAfter = postsAfter,
+                feedsSortOrder = feedsSortOrder,
+              )
+            }
 
           val pinnedFeedsWithHeader =
             addPinnedFeedsHeader(
                 feeds = pinnedFeeds,
                 isPinnedSectionExpanded = pinnedSectionExpanded
+              )
+              .cachedIn(coroutineScope)
+
+          val feedsWithHeader =
+            addFeedsHeader(
+                feeds = feeds,
+                searchQuery = searchQuery,
+                feedsSortOrder = feedsSortOrder
               )
               .cachedIn(coroutineScope)
 
@@ -268,7 +286,7 @@ class FeedsPresenter(
         settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          feedsPager(postsAfter).cachedIn(coroutineScope)
+          feedsPager(postsAfter, FeedsOrderBy.Latest).cachedIn(coroutineScope)
         }
 
       observableSelectedFeed.selectedFeed
@@ -291,9 +309,9 @@ class FeedsPresenter(
         }
         .flow
 
-    private fun feedsPager(postsAfter: Instant) =
+    private fun feedsPager(postsAfter: Instant, feedsSortOrder: FeedsOrderBy) =
       createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.allFeeds(postsAfter = postsAfter)
+          rssRepository.allFeeds(postsAfter = postsAfter, orderBy = feedsSortOrder)
         }
         .flow
 
@@ -339,6 +357,7 @@ class FeedsPresenter(
     private fun addFeedsHeader(
       feeds: Flow<PagingData<Feed>>,
       searchQuery: TextFieldValue,
+      feedsSortOrder: FeedsOrderBy,
     ): Flow<PagingData<FeedsListItemType>> {
       return feeds.mapLatest {
         it
@@ -348,7 +367,10 @@ class FeedsPresenter(
               before == null && searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS -> {
                 val feedsCount = rssRepository.feedsCount()
 
-                FeedsListItemType.AllFeedsHeader(feedsCount = feedsCount)
+                FeedsListItemType.AllFeedsHeader(
+                  feedsCount = feedsCount,
+                  feedsSortOrder = feedsSortOrder
+                )
               }
               else -> {
                 null

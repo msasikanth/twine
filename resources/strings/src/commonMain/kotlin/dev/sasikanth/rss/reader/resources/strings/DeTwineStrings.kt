@@ -130,5 +130,8 @@ val DeTwineStrings =
         1L -> "$numberOfUnreadPosts ungelesener Beitrag"
         else -> "$numberOfUnreadPosts ungelesene Beiträge"
       }
-    }
+    },
+    feedsSortLatest = "Zuletzt hinzugefügt",
+    feedsSortOldest = "Zuerst hinzugefügt",
+    feedsSortAlphabetical = "A-Z"
   )

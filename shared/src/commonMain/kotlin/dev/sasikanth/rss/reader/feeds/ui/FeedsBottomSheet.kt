@@ -71,7 +71,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -87,6 +89,8 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -94,6 +98,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
+import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -150,6 +155,7 @@ internal fun FeedsBottomSheet(
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
         editFeeds = editFeeds,
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
+        onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
@@ -180,6 +186,7 @@ private fun BottomSheetExpandedContent(
   onFeedSelected: (Feed) -> Unit,
   editFeeds: () -> Unit,
   onTogglePinnedSection: () -> Unit,
+  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   modifier: Modifier = Modifier
 ) {
   Scaffold(
@@ -306,7 +313,11 @@ private fun BottomSheetExpandedContent(
               )
             }
             is FeedsListItemType.AllFeedsHeader -> {
-              AllFeedsHeader(feedsCount = feedListItemType.feedsCount)
+              AllFeedsHeader(
+                feedsCount = feedListItemType.feedsCount,
+                feedsSortOrder = feedListItemType.feedsSortOrder,
+                onFeedsSortChanged = onFeedsSortChanged
+              )
             }
             else -> {
               // no-op
@@ -329,12 +340,19 @@ private fun BottomSheetExpandedContent(
 }
 
 @Composable
-private fun AllFeedsHeader(feedsCount: Long, modifier: Modifier = Modifier) {
+private fun AllFeedsHeader(
+  feedsCount: Long,
+  feedsSortOrder: FeedsOrderBy,
+  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
+  modifier: Modifier = Modifier
+) {
   Row(
     modifier =
-      Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
+      Modifier.padding(vertical = 12.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
+    var showSortDropdown by remember { mutableStateOf(false) }
+
     Text(
       text = LocalStrings.current.allFeeds,
       style = MaterialTheme.typography.titleMedium,
@@ -350,7 +368,71 @@ private fun AllFeedsHeader(feedsCount: Long, modifier: Modifier = Modifier) {
       color = AppTheme.colorScheme.tintedForeground,
     )
 
-    // TODO: Add feeds sort button
+    Box {
+      TextButton(
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
+        onClick = { showSortDropdown = true },
+        shape = MaterialTheme.shapes.large
+      ) {
+        val orderText =
+          when (feedsSortOrder) {
+            FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
+            FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
+            FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+          }
+
+        Text(
+          text = orderText,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.tintedForeground
+        )
+
+        Spacer(Modifier.width(8.dp))
+
+        Icon(
+          imageVector = Icons.Filled.ExpandMore,
+          contentDescription = LocalStrings.current.editFeeds,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      }
+
+      DropdownMenu(
+        modifier = Modifier.requiredWidth(132.dp),
+        expanded = showSortDropdown,
+        onDismissRequest = { showSortDropdown = false }
+      ) {
+        FeedsOrderBy.entries.forEach { sortOrder ->
+          val label =
+            when (sortOrder) {
+              FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
+              FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
+              FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+            }
+
+          val color =
+            if (feedsSortOrder == sortOrder) {
+              AppTheme.colorScheme.tintedSurface
+            } else {
+              Color.Unspecified
+            }
+          val labelColor =
+            if (feedsSortOrder == sortOrder) {
+              AppTheme.colorScheme.onSurface
+            } else {
+              AppTheme.colorScheme.textEmphasisHigh
+            }
+
+          DropdownMenuItem(
+            modifier = Modifier.background(color),
+            onClick = {
+              onFeedsSortChanged(sortOrder)
+              showSortDropdown = false
+            },
+            text = { Text(label, color = labelColor) }
+          )
+        }
+      }
+    }
   }
 }
 

@@ -126,5 +126,8 @@ val TrTwineStrings =
         1L -> "$numberOfUnreadPosts okunmamış makale"
         else -> "$numberOfUnreadPosts okunmamış makaleler"
       }
-    }
+    },
+    feedsSortLatest = "En son eklenmiş",
+    feedsSortOldest = "İlk eklenen",
+    feedsSortAlphabetical = "A-Z"
   )

@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 
 internal sealed interface FeedsListItemType {
 
@@ -31,6 +32,7 @@ internal sealed interface FeedsListItemType {
 
   data class AllFeedsHeader(
     val feedsCount: Long,
+    val feedsSortOrder: FeedsOrderBy = FeedsOrderBy.Latest,
     override val key: String = "FeedsHeader",
     override val contentType: String = "FeedsHeader",
   ) : FeedsListItemType

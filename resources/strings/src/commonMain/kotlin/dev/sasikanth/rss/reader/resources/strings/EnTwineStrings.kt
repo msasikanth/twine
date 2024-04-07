@@ -137,5 +137,8 @@ val EnTwineStrings =
         1L -> "$numberOfUnreadPosts unread article"
         else -> "$numberOfUnreadPosts unread articles"
       }
-    }
+    },
+    feedsSortLatest = "Last added",
+    feedsSortOldest = "First added",
+    feedsSortAlphabetical = "A-Z"
   )
