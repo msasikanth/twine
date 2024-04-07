@@ -68,6 +68,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -115,7 +116,7 @@ class FeedsPresenter(
   }
 
   private class PresenterInstance(
-    dispatchersProvider: DispatchersProvider,
+    private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val observableSelectedFeed: ObservableSelectedFeed
@@ -162,14 +163,16 @@ class FeedsPresenter(
     }
 
     private fun onChangeFeedsViewModeClick() {
-      _state.update {
-        val newFeedsViewMode =
-          when (_state.value.feedsViewMode) {
-            FeedsViewMode.Grid -> FeedsViewMode.List
-            FeedsViewMode.List -> FeedsViewMode.Grid
-          }
+      val newFeedsViewMode =
+        when (_state.value.feedsViewMode) {
+          FeedsViewMode.Grid -> FeedsViewMode.List
+          FeedsViewMode.List -> FeedsViewMode.Grid
+        }
 
-        it.copy(feedsViewMode = newFeedsViewMode)
+      coroutineScope.launch {
+        withContext(dispatchersProvider.io) {
+          settingsRepository.updateFeedsViewMode(newFeedsViewMode)
+        }
       }
     }
 
@@ -222,10 +225,17 @@ class FeedsPresenter(
     }
 
     private fun init() {
+      observeFeedsViewMode()
       observeNumberOfPinnedFeeds()
       observeShowUnreadCountPreference()
       observeFeedsForCollapsedSheet()
       observeFeedsForExpandedSheet()
+    }
+
+    private fun observeFeedsViewMode() {
+      settingsRepository.feedsViewMode
+        .onEach { feedsViewMode -> _state.update { it.copy(feedsViewMode = feedsViewMode) } }
+        .launchIn(coroutineScope)
     }
 
     private fun observeNumberOfPinnedFeeds() {

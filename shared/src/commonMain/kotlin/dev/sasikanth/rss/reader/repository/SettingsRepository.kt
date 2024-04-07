@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -37,6 +38,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
+  private val feedsViewModeKey = stringPreferencesKey("pref_feeds_view_mode")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -59,6 +61,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val postsType: Flow<PostsType> =
     dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
+
+  val feedsViewMode: Flow<FeedsViewMode> =
+    dataStore.data.map { preferences ->
+      mapToFeedsViewMode(preferences[feedsViewModeKey]) ?: FeedsViewMode.List
+    }
 
   suspend fun postsDeletionPeriodImmediate(): Period {
     return postsDeletionPeriod.first()
@@ -86,6 +93,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun toggleShowReaderView(value: Boolean) {
     dataStore.edit { preferences -> preferences[showReaderViewKey] = value }
+  }
+
+  suspend fun updateFeedsViewMode(value: FeedsViewMode) {
+    dataStore.edit { preferences -> preferences[feedsViewModeKey] = value.name }
+  }
+
+  private fun mapToFeedsViewMode(pref: String?): FeedsViewMode? {
+    if (pref.isNullOrBlank()) return null
+    return FeedsViewMode.valueOf(pref)
   }
 
   private fun mapToBrowserType(pref: String?): BrowserType? {
