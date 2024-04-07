@@ -93,6 +93,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.compose.itemContentType
+import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -151,6 +153,7 @@ internal fun FeedsBottomSheet(
       BottomSheetExpandedContent(
         feedsListItemTypes = state.feedsInExpandedView.collectAsLazyPagingItems(),
         pinnedFeedsListItemTypes = state.pinnedFeeds.collectAsLazyPagingItems(),
+        feedSearchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
         feedsSheetMode = feedsSheetMode,
         searchQuery = feedsPresenter.searchQuery,
         feedsViewMode = state.feedsViewMode,
@@ -186,6 +189,7 @@ internal fun FeedsBottomSheet(
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   pinnedFeedsListItemTypes: LazyPagingItems<PinnedFeedsListItemType>,
+  feedSearchResults: LazyPagingItems<Feed>,
   feedsSheetMode: FeedsSheetMode,
   searchQuery: TextFieldValue,
   feedsViewMode: FeedsViewMode,
@@ -252,7 +256,7 @@ private fun BottomSheetExpandedContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
       ) {
         // Pinned feeds
-        if (pinnedFeedsListItemTypes.itemCount > 0) {
+        if (pinnedFeedsListItemTypes.itemCount > 0 && feedSearchResults.itemCount == 0) {
           for (index in 0 until pinnedFeedsListItemTypes.itemCount) {
             val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]
             val itemGridSpan =
@@ -262,7 +266,11 @@ private fun BottomSheetExpandedContent(
                 null -> GridItemSpan(2)
               }
 
-            item(span = { itemGridSpan }) {
+            item(
+              span = { itemGridSpan },
+              key = pinnedFeedsListItemType?.key,
+              contentType = pinnedFeedsListItemType?.contentType
+            ) {
               when (pinnedFeedsListItemType) {
                 is PinnedFeedsListItemType.PinnedFeedListItem -> {
                   val feed = pinnedFeedsListItemType.feed
@@ -294,34 +302,57 @@ private fun BottomSheetExpandedContent(
         }
 
         // All feeds
-        for (index in 0 until feedsListItemTypes.itemCount) {
-          val feedListItemType = feedsListItemTypes[index]
-          val itemGridSpan =
-            when (feedListItemType) {
-              is FeedsListItemType.AllFeedsHeader -> GridItemSpan(2)
-              is FeedsListItemType.FeedListItem -> gridItemSpan
-              null -> GridItemSpan(2)
-            }
+        if (feedSearchResults.itemCount == 0) {
+          for (index in 0 until feedsListItemTypes.itemCount) {
+            val feedListItemType = feedsListItemTypes[index]
+            val itemGridSpan =
+              when (feedListItemType) {
+                is FeedsListItemType.AllFeedsHeader -> GridItemSpan(2)
+                is FeedsListItemType.FeedListItem -> gridItemSpan
+                null -> GridItemSpan(2)
+              }
 
-          item(span = { itemGridSpan }) {
-            when (feedListItemType) {
-              is FeedsListItemType.FeedListItem -> {
-                val feed = feedListItemType.feed
+            item(
+              span = { itemGridSpan },
+              key = feedListItemType?.key,
+              contentType = feedListItemType?.contentType
+            ) {
+              when (feedListItemType) {
+                is FeedsListItemType.FeedListItem -> {
+                  val feed = feedListItemType.feed
+                  FeedListItem(
+                    feed = feed,
+                    onFeedInfoClick = onFeedInfoClick,
+                    onFeedSelected = onFeedSelected,
+                  )
+                }
+                is FeedsListItemType.AllFeedsHeader -> {
+                  AllFeedsHeader(
+                    feedsCount = feedListItemType.feedsCount,
+                    feedsSortOrder = feedListItemType.feedsSortOrder,
+                    onFeedsSortChanged = onFeedsSortChanged
+                  )
+                }
+                else -> {
+                  // no-op
+                }
+              }
+            }
+          }
+        }
+
+        // Feed search results
+        if (feedSearchResults.itemCount > 0) {
+          for (index in 0 until feedSearchResults.itemCount) {
+            val feed = feedSearchResults[index]
+
+            item(span = { GridItemSpan(2) }) {
+              if (feed != null) {
                 FeedListItem(
                   feed = feed,
                   onFeedInfoClick = onFeedInfoClick,
                   onFeedSelected = onFeedSelected,
                 )
-              }
-              is FeedsListItemType.AllFeedsHeader -> {
-                AllFeedsHeader(
-                  feedsCount = feedListItemType.feedsCount,
-                  feedsSortOrder = feedListItemType.feedsSortOrder,
-                  onFeedsSortChanged = onFeedsSortChanged
-                )
-              }
-              else -> {
-                // no-op
               }
             }
           }

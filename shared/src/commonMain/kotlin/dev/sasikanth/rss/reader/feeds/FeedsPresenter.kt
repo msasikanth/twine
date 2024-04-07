@@ -42,7 +42,6 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
-import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlin.time.Duration.Companion.milliseconds
@@ -60,8 +59,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -231,6 +231,32 @@ class FeedsPresenter(
       observeShowUnreadCountPreference()
       observeFeedsForCollapsedSheet()
       observeFeedsForExpandedSheet()
+      observeSearchQuery()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun observeSearchQuery() {
+      val searchQueryFlow =
+        snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
+
+      combine(searchQueryFlow, settingsRepository.postsType) { searchQuery, postsType ->
+          Pair(searchQuery, postsType)
+        }
+        .onEach { (searchQuery, postsType) ->
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
+          val searchResults =
+            if (searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
+              feedsSearchResultsPager(
+                transformedSearchQuery = searchQuery.text,
+                postsAfter = postsAfter
+              )
+            } else {
+              flowOf(PagingData.empty())
+            }
+
+          _state.update { it.copy(feedsSearchResults = searchResults) }
+        }
+        .launchIn(coroutineScope)
     }
 
     private fun observePreferences() {
@@ -249,43 +275,19 @@ class FeedsPresenter(
       }
     }
 
-    @OptIn(FlowPreview::class)
     private fun observeFeedsForExpandedSheet() {
-      val searchQueryFlow =
-        snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
       val pinnedSectionExpandedFlow = snapshotFlow { pinnedSectionExpanded }
 
       combine(
-          searchQueryFlow,
           settingsRepository.postsType,
           pinnedSectionExpandedFlow,
           settingsRepository.feedsSortOrder
-        ) { searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder ->
-          NTuple4(searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder)
+        ) { postsType, pinnedSectionExpanded, feedsSortOrder ->
+          Triple(postsType, pinnedSectionExpanded, feedsSortOrder)
         }
-        .onEach { (searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder) ->
-          val searchQueryText = searchQuery.text
+        .onEach { (postsType, pinnedSectionExpanded, feedsSortOrder) ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
-
-          val pinnedFeeds =
-            if (searchQueryText.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
-              pinnedFeedsPager(postsAfter = postsAfter)
-            } else {
-              emptyFlow()
-            }
-
-          val feeds =
-            if (searchQueryText.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
-              feedsSearchResultsPager(
-                transformedSearchQuery = searchQueryText,
-                postsAfter = postsAfter
-              )
-            } else {
-              feedsPager(
-                postsAfter = postsAfter,
-                feedsSortOrder = feedsSortOrder,
-              )
-            }
+          val pinnedFeeds = pinnedFeedsPager(postsAfter = postsAfter)
 
           val pinnedFeedsWithHeader =
             addPinnedFeedsHeader(
@@ -293,6 +295,24 @@ class FeedsPresenter(
                 isPinnedSectionExpanded = pinnedSectionExpanded
               )
               .cachedIn(coroutineScope)
+
+          _state.update { it.copy(pinnedFeeds = pinnedFeedsWithHeader) }
+        }
+        .launchIn(coroutineScope)
+
+      combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
+          postsType,
+          feedsSortOrder ->
+          Pair(postsType, feedsSortOrder)
+        }
+        .onEach { (postsType, feedsSortOrder) ->
+          val postsAfter = postsAfterInstantFromPostsType(postsType)
+
+          val feeds =
+            feedsPager(
+              postsAfter = postsAfter,
+              feedsSortOrder = feedsSortOrder,
+            )
 
           val feedsWithHeader =
             addFeedsHeader(
@@ -302,9 +322,7 @@ class FeedsPresenter(
               )
               .cachedIn(coroutineScope)
 
-          _state.update {
-            it.copy(feedsInExpandedView = feedsWithHeader, pinnedFeeds = pinnedFeedsWithHeader)
-          }
+          _state.update { it.copy(feedsInExpandedView = feedsWithHeader) }
         }
         .launchIn(coroutineScope)
     }

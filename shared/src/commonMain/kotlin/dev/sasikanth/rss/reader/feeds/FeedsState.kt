@@ -30,15 +30,13 @@ internal data class FeedsState(
   val feedsInBottomBar: Flow<PagingData<Feed>>,
   val feedsInExpandedView: Flow<PagingData<FeedsListItemType>>,
   val pinnedFeeds: Flow<PagingData<PinnedFeedsListItemType>>,
+  val feedsSearchResults: Flow<PagingData<Feed>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
   val feedsViewMode: FeedsViewMode,
   val feedsSortOrder: FeedsOrderBy,
 ) {
-
-  val canPinFeeds: Boolean
-    get() = numberOfPinnedFeeds < 10L
 
   companion object {
 
@@ -47,6 +45,7 @@ internal data class FeedsState(
         feedsInBottomBar = emptyFlow(),
         feedsInExpandedView = emptyFlow(),
         pinnedFeeds = emptyFlow(),
+        feedsSearchResults = emptyFlow(),
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false,
