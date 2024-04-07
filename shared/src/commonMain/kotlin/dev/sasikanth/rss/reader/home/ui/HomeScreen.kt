@@ -15,12 +15,8 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -31,14 +27,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -67,7 +61,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,14 +70,12 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-import dev.sasikanth.rss.reader.feeds.ui.BottomSheetPrimaryActionButton
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.*
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -256,14 +247,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
       sheetGesturesEnabled = state.feedsSheetMode != Edit
     )
-
-    PrimaryActionButtonContainer(
-      bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-      state = state,
-      presenter = homePresenter,
-      bottomSheetState = bottomSheetState,
-      modifier = Modifier.align(Alignment.BottomStart)
-    )
   }
 }
 
@@ -331,72 +314,6 @@ private fun HomeScreenContent(
       state = swipeRefreshState,
       modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
     )
-  }
-}
-
-/**
- * Since we want the all button to not move when expanding and collapsing bottom bar and transform
- * to add button. We are not placing it inside the bottom sheet content and instead place it above
- * the home screen and bottom bar content essentially.
- *
- * We might have to replace this once bottom sheet exposes height or offset from bottom which would
- * allow us to modify the offset of this item in the sheet itself instead of using workarounds.
- *
- * track: https://issuetracker.google.com/issues/209825720
- */
-@Composable
-private fun PrimaryActionButtonContainer(
-  bottomSheetSwipeTransition: Transition<Float>,
-  state: HomeState,
-  presenter: HomePresenter,
-  bottomSheetState: BottomSheetState,
-  modifier: Modifier = Modifier
-) {
-  // We want to finish the padding animation by the time
-  // bottom sheet is expanded 20% of the way
-  val bottomSheetExpansionThreshold = 0.2f
-  val bottomSheetExpansionProgress =
-    (bottomSheetSwipeTransition.currentState / bottomSheetExpansionThreshold)
-  val primaryActionStartPadding = (20 + (4 * bottomSheetExpansionProgress)).coerceIn(20f, 24f).dp
-
-  val safeWindowInsets =
-    WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.Horizontal)
-
-  AnimatedVisibility(
-    visible = state.feedsSheetMode != Edit,
-    enter = slideInVertically { it },
-    exit = slideOutVertically { it },
-    modifier = Modifier.padding(start = primaryActionStartPadding).then(modifier)
-  ) {
-    Box {
-      when (state.feedsSheetMode) {
-        Default,
-        Edit -> {
-          BottomSheetPrimaryActionButton(
-            modifier =
-              Modifier.windowInsetsPadding(safeWindowInsets).graphicsLayer {
-                translationY = (4 * bottomSheetSwipeTransition.currentState).dp.toPx()
-              },
-            selected = state.isAllFeedsSelected,
-            bottomSheetSwipeProgress = bottomSheetExpansionProgress.inverse(),
-            bottomSheetCurrentState = bottomSheetState.currentValue,
-            bottomSheetTargetState = bottomSheetState.targetValue
-          ) {
-            presenter.dispatch(HomeEvent.OnPrimaryActionClicked)
-          }
-        }
-        LinkEntry -> {
-          FeedLinkInputField(
-            modifier =
-              Modifier.windowInsetsPadding(safeWindowInsets.union(WindowInsets.ime))
-                .padding(bottom = 20.dp, end = 24.dp),
-            isFetchingFeed = state.isFetchingFeed,
-            onAddFeed = { presenter.dispatch(HomeEvent.AddFeed(it)) },
-            onCancelFeedEntryClicked = { presenter.dispatch(HomeEvent.OnCancelAddFeedClicked) }
-          )
-        }
-      }
-    }
   }
 }
 

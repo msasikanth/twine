@@ -19,6 +19,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -42,7 +43,6 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
@@ -54,11 +54,9 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.ViewAgenda
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
@@ -82,6 +80,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -145,7 +144,8 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInBottomBar.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
+        onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) },
+        onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
       )
     } else {
       BottomSheetExpandedContent(
@@ -567,49 +567,61 @@ private fun BoxScope.EditFeeds(onClick: () -> Unit) {
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomSheetCollapsedContent(
   feeds: LazyPagingItems<Feed>,
   selectedFeed: Feed?,
   canShowUnreadPostsCount: Boolean,
   onFeedSelected: (Feed) -> Unit,
+  onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box {
-    LazyRow(
-      modifier = modifier.fillMaxWidth(),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      contentPadding = PaddingValues(start = 100.dp, end = 24.dp)
-    ) {
-      items(feeds.itemCount) { index ->
-        val feed = feeds[index]
-        if (feed != null) {
-          BottomSheetItem(
-            text = feed.name.uppercase(),
-            badgeCount = feed.numberOfUnreadPosts,
-            iconUrl = feed.icon,
-            canShowUnreadPostsCount = canShowUnreadPostsCount,
-            selected = selectedFeed?.link == feed.link,
-            onClick = { onFeedSelected(feed) }
-          )
-        }
-      }
+  LazyRow(
+    modifier = modifier.fillMaxWidth().padding(start = 20.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    contentPadding = PaddingValues(end = 24.dp)
+  ) {
+    stickyHeader {
+      val shadowColors =
+        arrayOf(
+          0.85f to AppTheme.colorScheme.tintedBackground,
+          0.9f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
+          1f to Color.Transparent
+        )
+
+      HomeBottomBarItem(
+        selected = selectedFeed == null,
+        onClick = onHomeSelected,
+        modifier =
+          Modifier.drawWithCache {
+              onDrawBehind {
+                val brush =
+                  Brush.horizontalGradient(
+                    colorStops = shadowColors,
+                  )
+                drawRect(
+                  brush = brush,
+                )
+              }
+            }
+            .padding(end = 4.dp)
+      )
     }
 
-    Box(
-      modifier =
-        Modifier.requiredSize(100.dp)
-          .background(
-            Brush.horizontalGradient(
-              colorStops =
-                arrayOf(
-                  0.7f to AppTheme.colorScheme.tintedBackground,
-                  0.8f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
-                  1f to Color.Transparent
-                )
-            )
-          )
-    )
+    items(feeds.itemCount) { index ->
+      val feed = feeds[index]
+      if (feed != null) {
+        FeedBottomBarItem(
+          text = feed.name.uppercase(),
+          badgeCount = feed.numberOfUnreadPosts,
+          iconUrl = feed.icon,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
+          selected = selectedFeed?.link == feed.link,
+          onClick = { onFeedSelected(feed) }
+        )
+      }
+    }
   }
 }
 

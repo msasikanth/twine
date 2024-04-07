@@ -47,7 +47,7 @@ import dev.sasikanth.rss.reader.ui.bottomSheetItemLabel
 private const val BADGE_COUNT_TRIM_LIMIT = 99
 
 @Composable
-internal fun BottomSheetItem(
+internal fun FeedBottomBarItem(
   text: String,
   badgeCount: Long,
   iconUrl: String,
