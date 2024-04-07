@@ -107,7 +107,6 @@ internal fun FeedsBottomSheet(
   feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
   editFeeds: () -> Unit,
-  exitFeedsEdit: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
@@ -147,11 +146,9 @@ internal fun FeedsBottomSheet(
         searchQuery = feedsPresenter.searchQuery,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
         editFeeds = editFeeds,
-        exitFeedsEdit = exitFeedsEdit,
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         modifier =
           Modifier.graphicsLayer {
@@ -179,11 +176,9 @@ private fun BottomSheetExpandedContent(
   searchQuery: TextFieldValue,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
-  closeSheet: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   editFeeds: () -> Unit,
-  exitFeedsEdit: () -> Unit,
   onTogglePinnedSection: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -194,13 +189,6 @@ private fun BottomSheetExpandedContent(
         query = searchQuery,
         feedsSheetMode = feedsSheetMode,
         onQueryChange = { onSearchQueryChanged(it) },
-        onNavigationIconClick = {
-          when (feedsSheetMode) {
-            Default,
-            LinkEntry -> closeSheet()
-            Edit -> exitFeedsEdit()
-          }
-        },
         onClearClick = onClearSearchQuery
       )
     },
@@ -522,7 +510,6 @@ private fun SearchBar(
   query: TextFieldValue,
   feedsSheetMode: FeedsSheetMode,
   onQueryChange: (TextFieldValue) -> Unit,
-  onNavigationIconClick: () -> Unit,
   onClearClick: () -> Unit,
 ) {
   val keyboardState by keyboardVisibilityAsState()
@@ -552,13 +539,11 @@ private fun SearchBar(
         )
       },
       leadingIcon = {
-        IconButton(onClick = onNavigationIconClick) {
-          Icon(
-            Icons.Rounded.Search,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
-          )
-        }
+        Icon(
+          imageVector = Icons.Rounded.Search,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
       },
       trailingIcon = {
         if (query.text.isNotBlank()) {
