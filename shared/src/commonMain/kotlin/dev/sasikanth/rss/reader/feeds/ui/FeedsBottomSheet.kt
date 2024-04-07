@@ -19,7 +19,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -55,7 +54,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -145,25 +143,15 @@ internal fun FeedsBottomSheet(
       BottomSheetExpandedContent(
         feedsListItemTypes = state.feedsInExpandedView.collectAsLazyPagingItems(),
         pinnedFeedsListItemTypes = state.pinnedFeeds.collectAsLazyPagingItems(),
-        selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
-        canPinFeeds = state.canPinFeeds,
-        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         searchQuery = feedsPresenter.searchQuery,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         closeSheet = { feedsPresenter.dispatch(FeedsEvent.OnGoBackClicked) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
-        onFeedNameChanged = { newFeedName, feedLink ->
-          feedsPresenter.dispatch(
-            FeedsEvent.OnFeedNameUpdated(newFeedName = newFeedName, feedLink = feedLink)
-          )
-        },
         editFeeds = editFeeds,
         exitFeedsEdit = exitFeedsEdit,
-        onFeedPinClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(feed)) },
-        onDeleteFeed = { feed -> feedsPresenter.dispatch(FeedsEvent.OnDeleteFeed(feed)) },
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         modifier =
           Modifier.graphicsLayer {
@@ -183,26 +171,19 @@ internal fun FeedsBottomSheet(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
   pinnedFeedsListItemTypes: LazyPagingItems<PinnedFeedsListItemType>,
-  selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
-  canPinFeeds: Boolean,
-  canShowUnreadPostsCount: Boolean,
   searchQuery: TextFieldValue,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   closeSheet: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
-  onFeedNameChanged: (newFeedName: String, feedLink: String) -> Unit,
   editFeeds: () -> Unit,
   exitFeedsEdit: () -> Unit,
-  onFeedPinClick: (Feed) -> Unit,
-  onDeleteFeed: (Feed) -> Unit,
   onTogglePinnedSection: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -263,18 +244,26 @@ private fun BottomSheetExpandedContent(
             when (val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]) {
               is PinnedFeedsListItemType.PinnedFeedListItem -> {
                 val feed = pinnedFeedsListItemType.feed
+                val listItemTopPadding =
+                  if (index > 1) {
+                    8.dp
+                  } else {
+                    0.dp
+                  }
+
+                val listItemBottomPadding =
+                  if (index != pinnedFeedsListItemTypes.itemCount + 1) {
+                    8.dp
+                  } else {
+                    0.dp
+                  }
 
                 FeedListItem(
+                  modifier =
+                    Modifier.padding(top = listItemTopPadding, bottom = listItemBottomPadding),
                   feed = feed,
-                  selected = selectedFeed?.link == feed.link,
-                  canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
-                  canShowUnreadPostsCount = canShowUnreadPostsCount,
-                  feedsSheetMode = feedsSheetMode,
                   onFeedInfoClick = onFeedInfoClick,
                   onFeedSelected = onFeedSelected,
-                  onFeedNameChanged = onFeedNameChanged,
-                  onFeedPinClick = onFeedPinClick,
-                  onDeleteFeed = onDeleteFeed
                 )
               }
               is PinnedFeedsListItemType.PinnedFeedsHeader -> {
@@ -306,18 +295,26 @@ private fun BottomSheetExpandedContent(
           when (val feedListItemType = feedsListItemTypes[index]) {
             is FeedsListItemType.FeedListItem -> {
               val feed = feedListItemType.feed
+              val listItemTopPadding =
+                if (index != 0) {
+                  8.dp
+                } else {
+                  0.dp
+                }
+
+              val listItemBottomPadding =
+                if (index != feedsListItemTypes.itemCount) {
+                  8.dp
+                } else {
+                  0.dp
+                }
 
               FeedListItem(
+                modifier =
+                  Modifier.padding(top = listItemTopPadding, bottom = listItemBottomPadding),
                 feed = feed,
-                selected = selectedFeed?.link == feed.link,
-                canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
-                canShowUnreadPostsCount = canShowUnreadPostsCount,
-                feedsSheetMode = feedsSheetMode,
                 onFeedInfoClick = onFeedInfoClick,
                 onFeedSelected = onFeedSelected,
-                onFeedNameChanged = onFeedNameChanged,
-                onFeedPinClick = onFeedPinClick,
-                onDeleteFeed = onDeleteFeed
               )
             }
             is FeedsListItemType.AllFeedsHeader -> {
