@@ -93,8 +93,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.compose.itemContentType
-import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -487,9 +485,9 @@ private fun PinnedFeedsHeader(
 
     val icon =
       if (isPinnedSectionExpanded) {
-        Icons.Filled.ExpandMore
-      } else {
         Icons.Filled.ExpandLess
+      } else {
+        Icons.Filled.ExpandMore
       }
 
     IconButton(onClick = onToggleSection) {
