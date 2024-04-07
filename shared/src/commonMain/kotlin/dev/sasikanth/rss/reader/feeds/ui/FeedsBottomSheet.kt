@@ -15,18 +15,11 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,7 +35,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
@@ -57,7 +49,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -84,7 +75,6 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
@@ -98,8 +88,6 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -114,7 +102,6 @@ internal fun FeedsBottomSheet(
   bottomSheetSwipeTransition: Transition<Float>,
   feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
-  editFeeds: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
@@ -159,7 +146,6 @@ internal fun FeedsBottomSheet(
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
         onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
-        editFeeds = editFeeds,
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
         onChangeFeedsViewModeClick = {
@@ -195,7 +181,6 @@ private fun BottomSheetExpandedContent(
   onClearSearchQuery: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
-  editFeeds: () -> Unit,
   onTogglePinnedSection: () -> Unit,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onChangeFeedsViewModeClick: () -> Unit,
@@ -213,18 +198,10 @@ private fun BottomSheetExpandedContent(
         onChangeFeedsViewModeClick = onChangeFeedsViewModeClick
       )
     },
-    bottomBar = {
-      FeedsSheetBottomBar(
-        feedsSheetMode = feedsSheetMode,
-        editFeeds = editFeeds,
-      )
-    },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
     val layoutDirection = LocalLayoutDirection.current
-    val focusManager = LocalFocusManager.current
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    val keyboardState by keyboardVisibilityAsState()
 
     Box {
       val gridItemSpan =
@@ -356,16 +333,6 @@ private fun BottomSheetExpandedContent(
           }
         }
       }
-
-      if (keyboardState == KeyboardState.Opened && feedsSheetMode == LinkEntry) {
-        // Scrim when keyboard is open
-        Box(
-          Modifier.fillMaxSize()
-            .padding(padding)
-            .background(AppTheme.colorScheme.tintedBackground.copy(alpha = 0.8f))
-            .pointerInput(Unit) { detectTapGestures { focusManager.clearFocus() } }
-        )
-      }
     }
   }
 }
@@ -493,77 +460,6 @@ private fun PinnedFeedsHeader(
     IconButton(onClick = onToggleSection) {
       Icon(imageVector = icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
     }
-  }
-}
-
-@Composable
-private fun FeedsSheetBottomBar(
-  feedsSheetMode: FeedsSheetMode,
-  modifier: Modifier = Modifier,
-  editFeeds: () -> Unit
-) {
-  val imeModifier =
-    if (feedsSheetMode == LinkEntry) {
-      Modifier.windowInsetsPadding(WindowInsets.ime)
-    } else {
-      Modifier
-    }
-
-  AnimatedVisibility(
-    visible = feedsSheetMode != Edit,
-    enter = slideInVertically { it },
-    exit = slideOutVertically { it }
-  ) {
-    Box(
-      imeModifier
-        .background(AppTheme.colorScheme.tintedBackground)
-        .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
-        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
-          // Only to prevent clicks from passing through. Not sure what's happening
-        }
-        .then(modifier)
-    ) {
-      HorizontalDivider(
-        Modifier.align(Alignment.TopStart),
-        color = AppTheme.colorScheme.tintedSurface
-      )
-      Box(Modifier.fillMaxWidth().padding(top = 24.dp, bottom = 20.dp)) {
-        // Placeholder view with similar height of primary action button and input field
-        // from the home screen
-        Box(Modifier.requiredHeight(56.dp))
-        when (feedsSheetMode) {
-          Default,
-          Edit -> {
-            EditFeeds(editFeeds)
-          }
-          LinkEntry -> {
-            // no-op
-          }
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun BoxScope.EditFeeds(onClick: () -> Unit) {
-  TextButton(
-    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 24.dp),
-    onClick = onClick,
-    contentPadding = PaddingValues(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 24.dp),
-    shape = MaterialTheme.shapes.large
-  ) {
-    Icon(
-      imageVector = Icons.Outlined.Edit,
-      contentDescription = LocalStrings.current.editFeeds,
-      tint = AppTheme.colorScheme.tintedForeground
-    )
-    Spacer(Modifier.width(12.dp))
-    Text(
-      text = LocalStrings.current.editFeeds,
-      style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.tintedForeground
-    )
   }
 }
 

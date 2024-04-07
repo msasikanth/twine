@@ -188,7 +188,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
           feedsSheetMode = state.feedsSheetMode,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
-          editFeeds = { homePresenter.dispatch(HomeEvent.EditFeedsClicked) },
           selectedFeedChanged = {
             coroutineScope.launch {
               listState.scrollToItem(0)
