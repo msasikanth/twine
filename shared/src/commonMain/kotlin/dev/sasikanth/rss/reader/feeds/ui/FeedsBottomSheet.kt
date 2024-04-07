@@ -19,6 +19,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -85,6 +86,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.compose.itemContentType
+import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -134,14 +137,15 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        feeds = state.feeds.collectAsLazyPagingItems(),
+        feeds = state.feedsInBottomBar.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) }
       )
     } else {
       BottomSheetExpandedContent(
-        feedsListItemTypes = state.feedsInExpandedMode.collectAsLazyPagingItems(),
+        feedsListItemTypes = state.feedsInExpandedView.collectAsLazyPagingItems(),
+        pinnedFeedsListItemTypes = state.pinnedFeeds.collectAsLazyPagingItems(),
         selectedFeed = state.selectedFeed,
         feedsSheetMode = feedsSheetMode,
         canPinFeeds = state.canPinFeeds,
@@ -180,9 +184,11 @@ internal fun FeedsBottomSheet(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BottomSheetExpandedContent(
   feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
+  pinnedFeedsListItemTypes: LazyPagingItems<PinnedFeedsListItemType>,
   selectedFeed: Feed?,
   feedsSheetMode: FeedsSheetMode,
   canPinFeeds: Boolean,
@@ -248,11 +254,17 @@ private fun BottomSheetExpandedContent(
             bottom = padding.calculateBottomPadding() + 64.dp
           )
       ) {
-        for (index in 0 until feedsListItemTypes.itemCount) {
-          when (val feedListItemType = feedsListItemTypes[index]) {
-            is FeedsListItemType.FeedListItem -> {
-              item {
-                val feed = feedListItemType.feed
+        // Pinned feeds
+        if (pinnedFeedsListItemTypes.itemCount > 0) {
+          items(
+            count = pinnedFeedsListItemTypes.itemCount,
+            key = pinnedFeedsListItemTypes.itemKey { it.key },
+            contentType = pinnedFeedsListItemTypes.itemContentType { it.contentType }
+          ) { index ->
+            when (val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]) {
+              is PinnedFeedsListItemType.PinnedFeedListItem -> {
+                val feed = pinnedFeedsListItemType.feed
+
                 FeedListItem(
                   feed = feed,
                   selected = selectedFeed?.link == feed.link,
@@ -266,24 +278,53 @@ private fun BottomSheetExpandedContent(
                   onDeleteFeed = onDeleteFeed
                 )
               }
-            }
-            is FeedsListItemType.AllFeedsHeader -> {
-              item {
-                AllFeedsHeader(
-                  showSectionDivider = feedListItemType.showSectionDivider,
-                  feedsCount = feedListItemType.feedsCount
-                )
-              }
-            }
-            is FeedsListItemType.PinnedFeedsHeader -> {
-              item {
+              is PinnedFeedsListItemType.PinnedFeedsHeader -> {
                 PinnedFeedsHeader(
-                  isPinnedSectionExpanded = feedListItemType.isExpanded,
+                  isPinnedSectionExpanded = pinnedFeedsListItemType.isExpanded,
                   onToggleSection = onTogglePinnedSection
                 )
               }
+              else -> {
+                // no-op
+              }
             }
-            null -> {
+          }
+
+          item {
+            HorizontalDivider(
+              modifier = Modifier.padding(top = 24.dp),
+              color = AppTheme.colorScheme.tintedHighlight
+            )
+          }
+        }
+
+        // All feeds
+        items(
+          count = feedsListItemTypes.itemCount,
+          key = feedsListItemTypes.itemKey { it.key },
+          contentType = feedsListItemTypes.itemContentType { it.contentType }
+        ) { index ->
+          when (val feedListItemType = feedsListItemTypes[index]) {
+            is FeedsListItemType.FeedListItem -> {
+              val feed = feedListItemType.feed
+
+              FeedListItem(
+                feed = feed,
+                selected = selectedFeed?.link == feed.link,
+                canPinFeeds = (feed.pinnedAt != null || canPinFeeds),
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                feedsSheetMode = feedsSheetMode,
+                onFeedInfoClick = onFeedInfoClick,
+                onFeedSelected = onFeedSelected,
+                onFeedNameChanged = onFeedNameChanged,
+                onFeedPinClick = onFeedPinClick,
+                onDeleteFeed = onDeleteFeed
+              )
+            }
+            is FeedsListItemType.AllFeedsHeader -> {
+              AllFeedsHeader(feedsCount = feedListItemType.feedsCount)
+            }
+            else -> {
               // no-op
             }
           }
@@ -304,44 +345,28 @@ private fun BottomSheetExpandedContent(
 }
 
 @Composable
-private fun AllFeedsHeader(
-  showSectionDivider: Boolean,
-  feedsCount: Long,
-  modifier: Modifier = Modifier
-) {
-  val paddingModifier =
-    if (showSectionDivider) {
-      Modifier.padding(top = 24.dp)
-    } else {
-      Modifier
-    }
+private fun AllFeedsHeader(feedsCount: Long, modifier: Modifier = Modifier) {
+  Row(
+    modifier =
+      Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp).then(modifier),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(
+      text = LocalStrings.current.allFeeds,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+    )
 
-  Box(paddingModifier.then(modifier)) {
-    if (showSectionDivider) {
-      HorizontalDivider(color = AppTheme.colorScheme.tintedHighlight)
-    }
+    Spacer(Modifier.requiredWidth(8.dp))
 
-    Row(
-      modifier = Modifier.padding(vertical = 24.dp).padding(start = 32.dp, end = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Text(
-        text = LocalStrings.current.allFeeds,
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-      )
+    Text(
+      modifier = Modifier.weight(1f),
+      text = feedsCount.toString(),
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.tintedForeground,
+    )
 
-      Spacer(Modifier.requiredWidth(8.dp))
-
-      Text(
-        modifier = Modifier.weight(1f),
-        text = feedsCount.toString(),
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.tintedForeground,
-      )
-
-      // TODO: Add feeds sort button
-    }
+    // TODO: Add feeds sort button
   }
 }
 

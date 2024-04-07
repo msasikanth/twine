@@ -33,6 +33,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
+import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
 import dev.sasikanth.rss.reader.repository.RssRepository
@@ -56,7 +57,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -93,6 +94,9 @@ class FeedsPresenter(
   internal val searchQuery
     get() = presenterInstance.searchQuery
 
+  internal val pinnedSectionExpanded
+    get() = presenterInstance.pinnedSectionExpanded
+
   init {
     lifecycle.doOnCreate { presenterInstance.dispatch(FeedsEvent.Init) }
   }
@@ -111,7 +115,7 @@ class FeedsPresenter(
   }
 
   private class PresenterInstance(
-    private val dispatchersProvider: DispatchersProvider,
+    dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val observableSelectedFeed: ObservableSelectedFeed
@@ -224,6 +228,7 @@ class FeedsPresenter(
         .onEach { (searchQuery, postsType, pinnedSectionExpanded) ->
           val searchQueryText = searchQuery.text
           val postsAfter = postsAfterInstantFromPostsType(postsType)
+
           val feeds =
             if (searchQueryText.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
               feedsSearchResultsPager(
@@ -233,11 +238,27 @@ class FeedsPresenter(
             } else {
               feedsPager(postsAfter = postsAfter)
             }
-          val feedsWithHeaders =
-            addFeedsHeaders(feeds = feeds, pinnedSectionExpanded = pinnedSectionExpanded)
+
+          val pinnedFeeds =
+            if (searchQueryText.isBlank()) {
+              pinnedFeedsPager(postsAfter = postsAfter)
+            } else {
+              emptyFlow()
+            }
+
+          val feedsWithHeader =
+            addFeedsHeader(feeds = feeds, searchQuery = searchQuery).cachedIn(coroutineScope)
+
+          val pinnedFeedsWithHeader =
+            addPinnedFeedsHeader(
+                feeds = pinnedFeeds,
+                isPinnedSectionExpanded = pinnedSectionExpanded
+              )
               .cachedIn(coroutineScope)
 
-          _state.update { it.copy(feedsInExpandedMode = feedsWithHeaders) }
+          _state.update {
+            it.copy(feedsInExpandedView = feedsWithHeader, pinnedFeeds = pinnedFeedsWithHeader)
+          }
         }
         .launchIn(coroutineScope)
     }
@@ -253,10 +274,16 @@ class FeedsPresenter(
       observableSelectedFeed.selectedFeed
         .distinctUntilChanged()
         .onEach { selectedFeed ->
-          _state.update { it.copy(feeds = feeds, selectedFeed = selectedFeed) }
+          _state.update { it.copy(feedsInBottomBar = feeds, selectedFeed = selectedFeed) }
         }
         .launchIn(coroutineScope)
     }
+
+    private fun pinnedFeedsPager(postsAfter: Instant) =
+      createPager(config = createPagingConfig(pageSize = 20)) {
+          rssRepository.pinnedFeeds(postsAfter = postsAfter)
+        }
+        .flow
 
     private fun feedsSearchResultsPager(transformedSearchQuery: String, postsAfter: Instant) =
       createPager(config = createPagingConfig(pageSize = 20)) {
@@ -288,39 +315,44 @@ class FeedsPresenter(
         }
       }
 
-    private fun addFeedsHeaders(
+    private fun addPinnedFeedsHeader(
       feeds: Flow<PagingData<Feed>>,
-      pinnedSectionExpanded: Boolean
-    ): Flow<PagingData<FeedsListItemType>> {
+      isPinnedSectionExpanded: Boolean,
+    ): Flow<PagingData<PinnedFeedsListItemType>> {
       return feeds.mapLatest {
         it
-          .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
-          .insertSeparators { before, after ->
+          .map { feed -> PinnedFeedsListItemType.PinnedFeedListItem(feed = feed) }
+          .filter { isPinnedSectionExpanded }
+          .insertSeparators { before, _ ->
             when {
-              before?.feed?.pinnedAt == null && after?.feed?.pinnedAt != null -> {
-                FeedsListItemType.PinnedFeedsHeader(isExpanded = pinnedSectionExpanded)
-              }
-              (before?.feed?.pinnedAt != null || before == null) &&
-                after != null &&
-                after.feed.pinnedAt == null -> {
-                val showSectionDivider = before?.feed?.pinnedAt != null
-                val feedsCount = rssRepository.feedsCount()
-
-                FeedsListItemType.AllFeedsHeader(
-                  showSectionDivider = showSectionDivider,
-                  feedsCount = feedsCount
-                )
+              before == null -> {
+                PinnedFeedsListItemType.PinnedFeedsHeader(isExpanded = isPinnedSectionExpanded)
               }
               else -> {
                 null
               }
             }
           }
-          .filter { feedListItemType ->
-            if (!pinnedSectionExpanded && feedListItemType is FeedsListItemType.FeedListItem) {
-              feedListItemType.feed.pinnedAt == null
-            } else {
-              true
+      }
+    }
+
+    private fun addFeedsHeader(
+      feeds: Flow<PagingData<Feed>>,
+      searchQuery: TextFieldValue,
+    ): Flow<PagingData<FeedsListItemType>> {
+      return feeds.mapLatest {
+        it
+          .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
+          .insertSeparators { before, _ ->
+            when {
+              before == null && searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS -> {
+                val feedsCount = rssRepository.feedsCount()
+
+                FeedsListItemType.AllFeedsHeader(feedsCount = feedsCount)
+              }
+              else -> {
+                null
+              }
             }
           }
       }

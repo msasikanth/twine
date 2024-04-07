@@ -19,13 +19,15 @@ import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
+import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
 internal data class FeedsState(
-  val feeds: Flow<PagingData<Feed>>,
-  val feedsInExpandedMode: Flow<PagingData<FeedsListItemType>>,
+  val feedsInBottomBar: Flow<PagingData<Feed>>,
+  val feedsInExpandedView: Flow<PagingData<FeedsListItemType>>,
+  val pinnedFeeds: Flow<PagingData<PinnedFeedsListItemType>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
@@ -38,8 +40,9 @@ internal data class FeedsState(
 
     val DEFAULT =
       FeedsState(
-        feeds = emptyFlow(),
-        feedsInExpandedMode = emptyFlow(),
+        feedsInBottomBar = emptyFlow(),
+        feedsInExpandedView = emptyFlow(),
+        pinnedFeeds = emptyFlow(),
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false

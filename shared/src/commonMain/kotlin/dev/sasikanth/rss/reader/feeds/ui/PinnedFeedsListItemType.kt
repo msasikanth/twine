@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,20 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import dev.sasikanth.rss.reader.core.model.local.Feed
 
-internal sealed interface FeedsListItemType {
+sealed interface PinnedFeedsListItemType {
 
   val key: String
   val contentType: String
 
-  data class FeedListItem(
+  data class PinnedFeedListItem(
     val feed: Feed,
-    override val key: String = feed.link,
-    override val contentType: String = "FeedListItem"
-  ) : FeedsListItemType
+    override val key: String = "PinnedFeed:${feed.link}",
+    override val contentType: String = "PinnedFeed"
+  ) : PinnedFeedsListItemType
 
-  data class AllFeedsHeader(
-    val feedsCount: Long,
-    override val key: String = "FeedsHeader",
-    override val contentType: String = "FeedsHeader",
-  ) : FeedsListItemType
+  data class PinnedFeedsHeader(
+    val isExpanded: Boolean,
+    override val key: String = "PinnedFeedsHeader",
+    override val contentType: String = "PinnedFeedsHeader"
+  ) : PinnedFeedsListItemType
 }
