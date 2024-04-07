@@ -223,6 +223,22 @@ class RssRepository(
     )
   }
 
+  fun pinnedFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedQueries.pinnedFeedsCount(),
+      transacter = feedQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedQueries.pinnedFeedsPaginated(
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = ::Feed
+        )
+      }
+    )
+  }
+
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(ioDispatcher) {
       feedQueries

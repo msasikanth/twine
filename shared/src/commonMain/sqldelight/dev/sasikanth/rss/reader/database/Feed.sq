@@ -28,6 +28,9 @@ DELETE FROM feed WHERE link = :link;
 count:
 SELECT COUNT(*) FROM feed;
 
+pinnedFeedsCount:
+SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
+
 feeds:
 SELECT * FROM feed
 ORDER BY pinnedAt DESC, createdAt DESC;
@@ -46,7 +49,25 @@ SELECT
 FROM feed f
 LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
 GROUP BY f.link
-ORDER BY f.pinnedAt DESC, f.createdAt DESC
+ORDER BY f.createdAt DESC
+LIMIT :limit OFFSET :offset;
+
+pinnedFeedsPaginated:
+SELECT
+  f.name,
+  f.icon,
+  f.description,
+  f.homepageLink,
+  f.createdAt,
+  f.link,
+  f.pinnedAt,
+  f.lastCleanUpAt,
+  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+FROM feed f
+LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
+WHERE pinnedAt IS NOT NULL
+GROUP BY f.link
+ORDER BY f.pinnedAt DESC
 LIMIT :limit OFFSET :offset;
 
 feed:
