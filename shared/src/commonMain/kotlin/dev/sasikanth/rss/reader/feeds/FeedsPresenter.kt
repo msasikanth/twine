@@ -156,7 +156,12 @@ class FeedsPresenter(
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
+        is FeedsEvent.OnHomeSelected -> onHomeSelected()
       }
+    }
+
+    private fun onHomeSelected() {
+      coroutineScope.launch { observableSelectedFeed.clearSelection() }
     }
 
     private fun onChangeFeedsViewModeClick() {

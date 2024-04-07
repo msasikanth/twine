@@ -44,4 +44,6 @@ sealed interface FeedsEvent {
   data object OnChangeFeedsViewModeClick : FeedsEvent
 
   data object TogglePinnedSection : FeedsEvent
+
+  data object OnHomeSelected : FeedsEvent
 }
