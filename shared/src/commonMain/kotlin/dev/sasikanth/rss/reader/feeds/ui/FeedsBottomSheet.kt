@@ -245,7 +245,8 @@ private fun BottomSheetExpandedContent(
           PaddingValues(
             start = padding.calculateStartPadding(layoutDirection) + 20.dp,
             end = padding.calculateEndPadding(layoutDirection) + 20.dp,
-            bottom = padding.calculateBottomPadding() + 64.dp
+            bottom = padding.calculateBottomPadding() + 64.dp,
+            top = 12.dp
           ),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -348,7 +349,7 @@ private fun AllFeedsHeader(
   modifier: Modifier = Modifier
 ) {
   Row(
-    modifier = Modifier.padding(top = 12.dp).padding(start = 12.dp).then(modifier),
+    modifier = Modifier.padding(start = 12.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
@@ -443,7 +444,7 @@ private fun PinnedFeedsHeader(
   onToggleSection: () -> Unit
 ) {
   Row(
-    modifier = Modifier.padding(top = 12.dp).padding(start = 12.dp).then(modifier),
+    modifier = Modifier.padding(start = 12.dp).then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
