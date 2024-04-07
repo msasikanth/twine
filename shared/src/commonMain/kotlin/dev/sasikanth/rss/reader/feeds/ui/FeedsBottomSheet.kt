@@ -276,7 +276,7 @@ private fun BottomSheetExpandedContent(
           item {
             HorizontalDivider(
               modifier = Modifier.padding(top = 24.dp),
-              color = AppTheme.colorScheme.tintedHighlight
+              color = AppTheme.colorScheme.tintedSurface
             )
           }
         }
