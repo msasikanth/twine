@@ -55,18 +55,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -95,8 +96,6 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
@@ -538,82 +537,50 @@ private fun SearchBar(
     }
   }
 
-  Box(
-    modifier =
-      Modifier.fillMaxWidth()
-        .background(AppTheme.colorScheme.tintedBackground)
-        .windowInsetsPadding(
-          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-        )
-  ) {
-    val background =
-      when (feedsSheetMode) {
-        Default,
-        Edit -> AppTheme.colorScheme.tintedSurface
-        LinkEntry -> AppTheme.colorScheme.tintedSurface.copy(alpha = 0.6f)
-      }
-
-    Box(
+  MaterialTheme(colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)) {
+    OutlinedTextField(
       modifier =
-        Modifier.padding(all = 16.dp)
-          .background(color = background, shape = RoundedCornerShape(16.dp))
-          .padding(horizontal = 4.dp)
-    ) {
-      MaterialTheme(
-        colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)
-      ) {
-        TextField(
-          modifier = Modifier.fillMaxWidth(),
-          value = query.copy(selection = TextRange(query.text.length)),
-          onValueChange = onQueryChange,
-          placeholder = {
-            val hintColor =
-              when (feedsSheetMode) {
-                Default,
-                Edit -> AppTheme.colorScheme.textEmphasisHigh
-                LinkEntry -> AppTheme.colorScheme.textEmphasisMed
-              }
-            Text(
-              text = LocalStrings.current.feedsSearchHint,
-              color = hintColor,
-              style = MaterialTheme.typography.bodyLarge
-            )
-          },
-          leadingIcon = {
-            val icon =
-              when (feedsSheetMode) {
-                Default,
-                LinkEntry -> Icons.Rounded.KeyboardArrowDown
-                Edit -> TwineIcons.ArrowBack
-              }
-            IconButton(onClick = onNavigationIconClick) {
-              Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.tintedForeground)
-            }
-          },
-          trailingIcon = {
-            if (query.text.isNotBlank()) {
-              ClearSearchQueryButton { onClearClick() }
-            }
-          },
-          shape = RoundedCornerShape(16.dp),
-          singleLine = true,
-          textStyle = MaterialTheme.typography.bodyLarge,
-          enabled = feedsSheetMode != LinkEntry,
-          colors =
-            TextFieldDefaults.colors(
-              focusedContainerColor = Color.Transparent,
-              unfocusedContainerColor = Color.Transparent,
-              disabledContainerColor = Color.Transparent,
-              focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-              disabledTextColor = Color.Transparent,
-              unfocusedIndicatorColor = Color.Transparent,
-              focusedIndicatorColor = Color.Transparent,
-              disabledIndicatorColor = Color.Transparent,
-              errorIndicatorColor = Color.Transparent
-            )
+        Modifier.fillMaxWidth()
+          .windowInsetsPadding(
+            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+          )
+          .padding(horizontal = 24.dp, vertical = 8.dp),
+      value = query.copy(selection = TextRange(query.text.length)),
+      onValueChange = onQueryChange,
+      placeholder = {
+        Text(
+          text = LocalStrings.current.feedsSearchHint,
+          color = AppTheme.colorScheme.tintedForeground,
+          style = MaterialTheme.typography.bodyLarge
         )
-      }
-    }
+      },
+      leadingIcon = {
+        IconButton(onClick = onNavigationIconClick) {
+          Icon(
+            Icons.Rounded.Search,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.tintedForeground
+          )
+        }
+      },
+      trailingIcon = {
+        if (query.text.isNotBlank()) {
+          ClearSearchQueryButton { onClearClick() }
+        }
+      },
+      shape = RoundedCornerShape(16.dp),
+      singleLine = true,
+      textStyle = MaterialTheme.typography.bodyLarge,
+      enabled = feedsSheetMode != LinkEntry,
+      colors =
+        OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
+          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          disabledTextColor = Color.Transparent,
+        )
+    )
   }
 }
 
