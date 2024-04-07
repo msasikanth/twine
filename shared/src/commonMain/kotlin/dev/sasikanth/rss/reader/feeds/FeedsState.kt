@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
+import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -33,6 +34,7 @@ internal data class FeedsState(
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
   val feedsViewMode: FeedsViewMode,
+  val feedsSortOrder: FeedsOrderBy,
 ) {
 
   val canPinFeeds: Boolean
@@ -48,7 +50,8 @@ internal data class FeedsState(
         selectedFeed = null,
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false,
-        feedsViewMode = FeedsViewMode.List
+        feedsViewMode = FeedsViewMode.List,
+        feedsSortOrder = FeedsOrderBy.Latest
       )
   }
 }

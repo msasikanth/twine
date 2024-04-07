@@ -128,9 +128,6 @@ class FeedsPresenter(
     var pinnedSectionExpanded by mutableStateOf(true)
       private set
 
-    var feedsSortOrder by mutableStateOf(FeedsOrderBy.Latest)
-      private set
-
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
     private val _state = MutableStateFlow(FeedsState.DEFAULT)
@@ -177,7 +174,11 @@ class FeedsPresenter(
     }
 
     private fun onFeedSortOrderChanged(feedsOrderBy: FeedsOrderBy) {
-      feedsSortOrder = feedsOrderBy
+      coroutineScope.launch {
+        withContext(dispatchersProvider.io) {
+          settingsRepository.updateFeedsSortOrder(feedsOrderBy)
+        }
+      }
     }
 
     private fun onTogglePinnedSection() {
@@ -225,16 +226,20 @@ class FeedsPresenter(
     }
 
     private fun init() {
-      observeFeedsViewMode()
+      observePreferences()
       observeNumberOfPinnedFeeds()
       observeShowUnreadCountPreference()
       observeFeedsForCollapsedSheet()
       observeFeedsForExpandedSheet()
     }
 
-    private fun observeFeedsViewMode() {
+    private fun observePreferences() {
       settingsRepository.feedsViewMode
         .onEach { feedsViewMode -> _state.update { it.copy(feedsViewMode = feedsViewMode) } }
+        .launchIn(coroutineScope)
+
+      settingsRepository.feedsSortOrder
+        .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
         .launchIn(coroutineScope)
     }
 
@@ -249,13 +254,12 @@ class FeedsPresenter(
       val searchQueryFlow =
         snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
       val pinnedSectionExpandedFlow = snapshotFlow { pinnedSectionExpanded }
-      val feedsSortOrderFlow = snapshotFlow { feedsSortOrder }
 
       combine(
           searchQueryFlow,
           settingsRepository.postsType,
           pinnedSectionExpandedFlow,
-          feedsSortOrderFlow
+          settingsRepository.feedsSortOrder
         ) { searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder ->
           NTuple4(searchQuery, postsType, pinnedSectionExpanded, feedsSortOrder)
         }
