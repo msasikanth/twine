@@ -149,6 +149,7 @@ internal fun FeedsBottomSheet(
         feedsSortOrder = state.feedsSortOrder,
         feedsViewMode = state.feedsViewMode,
         isPinnedSectionExpanded = state.isPinnedSectionExpanded,
+        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
@@ -186,6 +187,7 @@ private fun BottomSheetExpandedContent(
   feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
   isPinnedSectionExpanded: Boolean,
+  canShowUnreadPostsCount: Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
@@ -244,8 +246,9 @@ private fun BottomSheetExpandedContent(
         pinnedFeeds(
           pinnedFeeds = pinnedFeeds,
           isPinnedSectionExpanded = isPinnedSectionExpanded,
-          onTogglePinnedSection = onTogglePinnedSection,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
           gridItemSpan = gridItemSpan,
+          onTogglePinnedSection = onTogglePinnedSection,
           onFeedInfoClick = onFeedInfoClick,
           onFeedSelected = onFeedSelected
         )
@@ -253,14 +256,16 @@ private fun BottomSheetExpandedContent(
         allFeeds(
           feeds = feeds,
           feedsSortOrder = feedsSortOrder,
-          onFeedsSortChanged = onFeedsSortChanged,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
           gridItemSpan = gridItemSpan,
+          onFeedsSortChanged = onFeedsSortChanged,
           onFeedInfoClick = onFeedInfoClick,
           onFeedSelected = onFeedSelected
         )
       } else {
         feedSearchResults(
           searchResults = searchResults,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
           gridItemSpan = gridItemSpan,
           onFeedInfoClick = onFeedInfoClick,
           onFeedSelected = onFeedSelected
@@ -272,6 +277,7 @@ private fun BottomSheetExpandedContent(
 
 private fun LazyGridScope.feedSearchResults(
   searchResults: LazyPagingItems<Feed>,
+  canShowUnreadPostsCount: Boolean,
   gridItemSpan: GridItemSpan,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
@@ -287,6 +293,7 @@ private fun LazyGridScope.feedSearchResults(
     if (feed != null) {
       FeedListItem(
         feed = feed,
+        canShowUnreadPostsCount = canShowUnreadPostsCount,
         onFeedInfoClick = onFeedInfoClick,
         onFeedSelected = onFeedSelected,
       )
@@ -297,8 +304,9 @@ private fun LazyGridScope.feedSearchResults(
 private fun LazyGridScope.allFeeds(
   feeds: LazyPagingItems<Feed>,
   feedsSortOrder: FeedsOrderBy,
-  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
+  canShowUnreadPostsCount: Boolean,
   gridItemSpan: GridItemSpan,
+  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
 ) {
@@ -321,6 +329,7 @@ private fun LazyGridScope.allFeeds(
       if (feed != null) {
         FeedListItem(
           feed = feed,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
           onFeedInfoClick = onFeedInfoClick,
           onFeedSelected = onFeedSelected,
         )
@@ -332,8 +341,9 @@ private fun LazyGridScope.allFeeds(
 private fun LazyGridScope.pinnedFeeds(
   pinnedFeeds: LazyPagingItems<Feed>,
   isPinnedSectionExpanded: Boolean,
-  onTogglePinnedSection: () -> Unit,
+  canShowUnreadPostsCount: Boolean,
   gridItemSpan: GridItemSpan,
+  onTogglePinnedSection: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
 ) {
@@ -356,6 +366,7 @@ private fun LazyGridScope.pinnedFeeds(
         if (feed != null) {
           FeedListItem(
             feed = feed,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
             onFeedInfoClick = onFeedInfoClick,
             onFeedSelected = onFeedSelected,
           )

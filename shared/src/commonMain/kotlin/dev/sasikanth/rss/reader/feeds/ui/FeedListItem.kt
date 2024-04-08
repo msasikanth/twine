@@ -31,8 +31,6 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +46,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun FeedListItem(
   feed: Feed,
+  canShowUnreadPostsCount: Boolean,
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier,
@@ -95,7 +94,7 @@ internal fun FeedListItem(
       Spacer(Modifier.requiredWidth(12.dp))
 
       val numberOfUnreadPosts = feed.numberOfUnreadPosts
-      if (numberOfUnreadPosts > 0) {
+      if (canShowUnreadPostsCount && numberOfUnreadPosts > 0) {
         Badge(
           containerColor = AppTheme.colorScheme.tintedForeground,
           contentColor = AppTheme.colorScheme.tintedBackground,
