@@ -54,7 +54,6 @@ internal fun FeedListItem(
   Box(
     modifier =
       Modifier.fillMaxWidth()
-        .padding(horizontal = 4.dp)
         .then(modifier)
         .clip(RoundedCornerShape(16.dp))
         .background(AppTheme.colorScheme.tintedSurface)
