@@ -98,8 +98,8 @@ val EnTwineStrings =
     aboutSocialThreads = "Threads",
     aboutSocialGitHub = "GitHub",
     aboutSocialWebsite = "Website",
-    feedsSearchHint = "Search feeds",
-    allFeeds = "All Feeds",
+    feedsSearchHint = "Filter",
+    allFeeds = "Feeds",
     pinnedFeeds = "Pinned",
     openWebsite = "Open Website",
     markAllAsRead = "Mark All as Read",
@@ -137,5 +137,10 @@ val EnTwineStrings =
         1L -> "$numberOfUnreadPosts unread article"
         else -> "$numberOfUnreadPosts unread articles"
       }
-    }
+    },
+    feedsSortLatest = "Last added",
+    feedsSortOldest = "First added",
+    feedsSortAlphabetical = "A-Z",
+    feedsBottomBarNewGroup = "New group",
+    feedsBottomBarNewFeed = "New feed"
   )

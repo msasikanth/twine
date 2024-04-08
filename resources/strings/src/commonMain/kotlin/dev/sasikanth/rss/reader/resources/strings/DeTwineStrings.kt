@@ -90,8 +90,8 @@ val DeTwineStrings =
     aboutSocialThreads = "Threads",
     aboutSocialGitHub = "GitHub",
     aboutSocialWebsite = "Webseite",
-    feedsSearchHint = "Suche nach Feeds",
-    allFeeds = "Alle Feeds",
+    feedsSearchHint = "Filter",
+    allFeeds = "Feeds",
     pinnedFeeds = "Angepinnt",
     openWebsite = "Website öffnen",
     markAllAsRead = "Alle als gelesen markieren",
@@ -130,5 +130,10 @@ val DeTwineStrings =
         1L -> "$numberOfUnreadPosts ungelesener Beitrag"
         else -> "$numberOfUnreadPosts ungelesene Beiträge"
       }
-    }
+    },
+    feedsSortLatest = "Zuletzt hinzugefügt",
+    feedsSortOldest = "Zuerst hinzugefügt",
+    feedsSortAlphabetical = "A-Z",
+    feedsBottomBarNewGroup = "Neue Gruppe",
+    feedsBottomBarNewFeed = "Neuer Feed"
   )

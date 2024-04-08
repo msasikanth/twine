@@ -207,13 +207,33 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
   }
 
-  fun allFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
+  fun allFeeds(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+  ): PagingSource<Int, Feed> {
     return QueryPagingSource(
       countQuery = feedQueries.count(),
       transacter = feedQueries,
       context = ioDispatcher,
       queryProvider = { limit, offset ->
         feedQueries.feedsPaginated(
+          postsAfter = postsAfter,
+          limit = limit,
+          orderBy = orderBy.value,
+          offset = offset,
+          mapper = ::Feed
+        )
+      }
+    )
+  }
+
+  fun pinnedFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedQueries.pinnedFeedsCount(),
+      transacter = feedQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedQueries.pinnedFeedsPaginated(
           postsAfter = postsAfter,
           limit = limit,
           offset = offset,
@@ -444,6 +464,10 @@ class RssRepository(
     return withContext(ioDispatcher) {
       feedQueries.updateAlwaysFetchSourceArticle(newValue, feedLink)
     }
+  }
+
+  suspend fun feedsCount(): Long {
+    return withContext(ioDispatcher) { feedQueries.count().executeAsOne() }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

@@ -86,8 +86,8 @@ val TrTwineStrings =
     aboutSocialThreads = "Threads",
     aboutSocialGitHub = "GitHub",
     aboutSocialWebsite = "Web sitesi",
-    feedsSearchHint = "İçerikleri ara",
-    allFeeds = "Tüm içerikler",
+    feedsSearchHint = "Filtre",
+    allFeeds = "Içerikler",
     pinnedFeeds = "Sabitlenmiş",
     openWebsite = "Web sitesini aç",
     markAllAsRead = "Tümünü okundu olarak işaretle",
@@ -126,5 +126,10 @@ val TrTwineStrings =
         1L -> "$numberOfUnreadPosts okunmamış makale"
         else -> "$numberOfUnreadPosts okunmamış makaleler"
       }
-    }
+    },
+    feedsSortLatest = "En son eklenmiş",
+    feedsSortOldest = "İlk eklenen",
+    feedsSortAlphabetical = "A-Z",
+    feedsBottomBarNewGroup = "Yeni Grup",
+    feedsBottomBarNewFeed = "Yeni besleme"
   )

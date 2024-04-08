@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.feeds.ui
 
-enum class FeedsSheetMode {
-  Default,
-  LinkEntry,
-  Edit
+package dev.sasikanth.rss.reader.repository
+
+enum class FeedsOrderBy(val value: String) {
+  Latest("latest"),
+  Oldest("oldest"),
+  Alphabetical("alphabetical")
 }
