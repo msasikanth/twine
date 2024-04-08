@@ -221,7 +221,6 @@ class FeedsPresenter(
 
     private fun init() {
       observePreferences()
-      observeNumberOfPinnedFeeds()
       observeShowUnreadCountPreference()
       observeFeedsForCollapsedSheet()
       observeFeedsForExpandedSheet()
@@ -261,12 +260,6 @@ class FeedsPresenter(
       settingsRepository.feedsSortOrder
         .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
         .launchIn(coroutineScope)
-    }
-
-    private fun observeNumberOfPinnedFeeds() {
-      rssRepository.numberOfPinnedFeeds().distinctUntilChanged().onEach { numberOfPinnedFeeds ->
-        _state.update { it.copy(numberOfPinnedFeeds = numberOfPinnedFeeds) }
-      }
     }
 
     private fun observeFeedsForExpandedSheet() {
