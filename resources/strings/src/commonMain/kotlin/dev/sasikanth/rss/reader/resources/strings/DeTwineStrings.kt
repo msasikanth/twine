@@ -133,5 +133,7 @@ val DeTwineStrings =
     },
     feedsSortLatest = "Zuletzt hinzugefügt",
     feedsSortOldest = "Zuerst hinzugefügt",
-    feedsSortAlphabetical = "A-Z"
+    feedsSortAlphabetical = "A-Z",
+    feedsBottomBarNewGroup = "Neue Gruppe",
+    feedsBottomBarNewFeed = "Neuer Feed"
   )

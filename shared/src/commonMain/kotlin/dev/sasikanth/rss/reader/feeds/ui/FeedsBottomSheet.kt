@@ -204,6 +204,16 @@ private fun BottomSheetExpandedContent(
         onChangeFeedsViewModeClick = onChangeFeedsViewModeClick
       )
     },
+    bottomBar = {
+      BottomBar(
+        onNewGroupClick = {
+          // TODO: Open group creation dialog/sheet/screen
+        },
+        onNewFeedClick = {
+          // TODO: Open feed creation dialog/sheet/screen
+        }
+      )
+    },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
     val layoutDirection = LocalLayoutDirection.current

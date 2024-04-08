@@ -129,5 +129,7 @@ val TrTwineStrings =
     },
     feedsSortLatest = "En son eklenmiş",
     feedsSortOldest = "İlk eklenen",
-    feedsSortAlphabetical = "A-Z"
+    feedsSortAlphabetical = "A-Z",
+    feedsBottomBarNewGroup = "Yeni Grup",
+    feedsBottomBarNewFeed = "Yeni besleme"
   )
