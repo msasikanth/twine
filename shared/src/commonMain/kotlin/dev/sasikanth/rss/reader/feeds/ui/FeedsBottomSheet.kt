@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -80,6 +81,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemContentType
@@ -139,12 +141,14 @@ internal fun FeedsBottomSheet(
       )
     } else {
       BottomSheetExpandedContent(
-        feedsListItemTypes = state.feedsInExpandedView.collectAsLazyPagingItems(),
-        pinnedFeedsListItemTypes = state.pinnedFeeds.collectAsLazyPagingItems(),
-        feedSearchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
+        feeds = state.feedsInExpandedView.collectAsLazyPagingItems(),
+        pinnedFeeds = state.pinnedFeeds.collectAsLazyPagingItems(),
+        searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
         feedsSheetMode = feedsSheetMode,
         searchQuery = feedsPresenter.searchQuery,
+        feedsSortOrder = state.feedsSortOrder,
         feedsViewMode = state.feedsViewMode,
+        isPinnedSectionExpanded = state.isPinnedSectionExpanded,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
@@ -174,12 +178,14 @@ internal fun FeedsBottomSheet(
 
 @Composable
 private fun BottomSheetExpandedContent(
-  feedsListItemTypes: LazyPagingItems<FeedsListItemType>,
-  pinnedFeedsListItemTypes: LazyPagingItems<PinnedFeedsListItemType>,
-  feedSearchResults: LazyPagingItems<Feed>,
+  feeds: LazyPagingItems<Feed>,
+  pinnedFeeds: LazyPagingItems<Feed>,
+  searchResults: LazyPagingItems<Feed>,
   feedsSheetMode: FeedsSheetMode,
   searchQuery: TextFieldValue,
+  feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
+  isPinnedSectionExpanded: Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
   onFeedInfoClick: (Feed) -> Unit,
@@ -232,122 +238,143 @@ private fun BottomSheetExpandedContent(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-      // Pinned feeds
       if (
-        pinnedFeedsListItemTypes.itemCount > 0 &&
-          feedSearchResults.itemCount == 0 &&
-          searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS
+        searchResults.itemCount == 0 && searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS
       ) {
-        items(
-          count = pinnedFeedsListItemTypes.itemCount,
-          key = pinnedFeedsListItemTypes.itemKey { it.key },
-          contentType = pinnedFeedsListItemTypes.itemContentType { it.contentType },
-          span = { index ->
-            val pinnedFeedListItemType = pinnedFeedsListItemTypes[index]
-            when (pinnedFeedListItemType) {
-              is PinnedFeedsListItemType.PinnedFeedListItem -> gridItemSpan
-              else -> GridItemSpan(2)
-            }
-          }
-        ) { index ->
-          when (val pinnedFeedsListItemType = pinnedFeedsListItemTypes[index]) {
-            is PinnedFeedsListItemType.PinnedFeedListItem -> {
-              val feed = pinnedFeedsListItemType.feed
-              FeedListItem(
-                feed = feed,
-                onFeedInfoClick = onFeedInfoClick,
-                onFeedSelected = onFeedSelected,
-              )
-            }
-            is PinnedFeedsListItemType.PinnedFeedsHeader -> {
-              PinnedFeedsHeader(
-                isPinnedSectionExpanded = pinnedFeedsListItemType.isExpanded,
-                onToggleSection = onTogglePinnedSection
-              )
-            }
-            else -> {
-              // no-op
-            }
-          }
-        }
+        pinnedFeeds(
+          pinnedFeeds = pinnedFeeds,
+          isPinnedSectionExpanded = isPinnedSectionExpanded,
+          onTogglePinnedSection = onTogglePinnedSection,
+          gridItemSpan = gridItemSpan,
+          onFeedInfoClick = onFeedInfoClick,
+          onFeedSelected = onFeedSelected
+        )
 
-        item(span = { GridItemSpan(2) }) {
-          HorizontalDivider(
-            modifier = Modifier.padding(top = 24.dp),
-            color = AppTheme.colorScheme.tintedSurface
+        allFeeds(
+          feeds = feeds,
+          feedsSortOrder = feedsSortOrder,
+          onFeedsSortChanged = onFeedsSortChanged,
+          gridItemSpan = gridItemSpan,
+          onFeedInfoClick = onFeedInfoClick,
+          onFeedSelected = onFeedSelected
+        )
+      } else {
+        feedSearchResults(
+          searchResults = searchResults,
+          gridItemSpan = gridItemSpan,
+          onFeedInfoClick = onFeedInfoClick,
+          onFeedSelected = onFeedSelected
+        )
+      }
+    }
+  }
+}
+
+private fun LazyGridScope.feedSearchResults(
+  searchResults: LazyPagingItems<Feed>,
+  gridItemSpan: GridItemSpan,
+  onFeedInfoClick: (Feed) -> Unit,
+  onFeedSelected: (Feed) -> Unit
+) {
+  items(
+    count = searchResults.itemCount,
+    key = searchResults.itemKey { it.link },
+    contentType = searchResults.itemContentType { it.link },
+    span = { gridItemSpan }
+  ) { index ->
+    val feed = searchResults[index]
+
+    if (feed != null) {
+      FeedListItem(
+        feed = feed,
+        onFeedInfoClick = onFeedInfoClick,
+        onFeedSelected = onFeedSelected,
+      )
+    }
+  }
+}
+
+private fun LazyGridScope.allFeeds(
+  feeds: LazyPagingItems<Feed>,
+  feedsSortOrder: FeedsOrderBy,
+  onFeedsSortChanged: (FeedsOrderBy) -> Unit,
+  gridItemSpan: GridItemSpan,
+  onFeedInfoClick: (Feed) -> Unit,
+  onFeedSelected: (Feed) -> Unit
+) {
+  if (feeds.itemCount > 0 && feeds.loadState.refresh != LoadState.Loading) {
+    item(key = "AllFeedsHeader", span = { GridItemSpan(2) }) {
+      AllFeedsHeader(
+        feedsCount = feeds.itemCount,
+        feedsSortOrder = feedsSortOrder,
+        onFeedsSortChanged = onFeedsSortChanged
+      )
+    }
+
+    items(
+      count = feeds.itemCount,
+      key = feeds.itemKey { it.link },
+      contentType = { "FeedListItem" },
+      span = { gridItemSpan }
+    ) { index ->
+      val feed = feeds[index]
+      if (feed != null) {
+        FeedListItem(
+          feed = feed,
+          onFeedInfoClick = onFeedInfoClick,
+          onFeedSelected = onFeedSelected,
+        )
+      }
+    }
+  }
+}
+
+private fun LazyGridScope.pinnedFeeds(
+  pinnedFeeds: LazyPagingItems<Feed>,
+  isPinnedSectionExpanded: Boolean,
+  onTogglePinnedSection: () -> Unit,
+  gridItemSpan: GridItemSpan,
+  onFeedInfoClick: (Feed) -> Unit,
+  onFeedSelected: (Feed) -> Unit
+) {
+  if (pinnedFeeds.itemCount > 0 && pinnedFeeds.loadState.refresh != LoadState.Loading) {
+    item(key = "PinnedFeedsHeader", span = { GridItemSpan(2) }) {
+      PinnedFeedsHeader(
+        isPinnedSectionExpanded = isPinnedSectionExpanded,
+        onToggleSection = onTogglePinnedSection
+      )
+    }
+
+    if (isPinnedSectionExpanded) {
+      items(
+        count = pinnedFeeds.itemCount,
+        key = pinnedFeeds.itemKey { "PinnedFeed:${it.link}" },
+        contentType = { "FeedListItem" },
+        span = { gridItemSpan }
+      ) { index ->
+        val feed = pinnedFeeds[index]
+        if (feed != null) {
+          FeedListItem(
+            feed = feed,
+            onFeedInfoClick = onFeedInfoClick,
+            onFeedSelected = onFeedSelected,
           )
         }
       }
+    }
 
-      // All feeds
-      if (
-        feedSearchResults.itemCount == 0 &&
-          searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS
-      ) {
-        items(
-          count = feedsListItemTypes.itemCount,
-          key = feedsListItemTypes.itemKey { it.key },
-          contentType = feedsListItemTypes.itemContentType { it.contentType },
-          span = { index ->
-            val feedListItemType = feedsListItemTypes[index]
-            when (feedListItemType) {
-              is FeedsListItemType.FeedListItem -> gridItemSpan
-              else -> GridItemSpan(2)
-            }
-          }
-        ) { index ->
-          when (val feedListItemType = feedsListItemTypes[index]) {
-            is FeedsListItemType.FeedListItem -> {
-              val feed = feedListItemType.feed
-              FeedListItem(
-                feed = feed,
-                onFeedInfoClick = onFeedInfoClick,
-                onFeedSelected = onFeedSelected,
-              )
-            }
-            is FeedsListItemType.AllFeedsHeader -> {
-              AllFeedsHeader(
-                feedsCount = feedListItemType.feedsCount,
-                feedsSortOrder = feedListItemType.feedsSortOrder,
-                onFeedsSortChanged = onFeedsSortChanged
-              )
-            }
-            else -> {
-              // no-op
-            }
-          }
-        }
-      }
-
-      // Feed search results
-      if (
-        feedSearchResults.itemCount > 0 &&
-          searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS
-      ) {
-        items(
-          count = feedSearchResults.itemCount,
-          key = feedSearchResults.itemKey { it.link },
-          contentType = feedSearchResults.itemContentType { it.link },
-          span = { gridItemSpan }
-        ) { index ->
-          val feed = feedSearchResults[index]
-
-          if (feed != null) {
-            FeedListItem(
-              feed = feed,
-              onFeedInfoClick = onFeedInfoClick,
-              onFeedSelected = onFeedSelected,
-            )
-          }
-        }
-      }
+    item(span = { GridItemSpan(2) }) {
+      HorizontalDivider(
+        modifier = Modifier.padding(top = 24.dp),
+        color = AppTheme.colorScheme.tintedSurface
+      )
     }
   }
 }
 
 @Composable
 private fun AllFeedsHeader(
-  feedsCount: Long,
+  feedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   modifier: Modifier = Modifier

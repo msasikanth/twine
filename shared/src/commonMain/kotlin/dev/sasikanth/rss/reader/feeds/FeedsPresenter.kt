@@ -21,20 +21,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.PagingData
-import androidx.paging.filter
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import app.cash.paging.insertSeparators
-import app.cash.paging.map
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
-import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
@@ -49,7 +44,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,11 +53,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -125,9 +117,6 @@ class FeedsPresenter(
     var searchQuery by mutableStateOf(TextFieldValue())
       private set
 
-    var pinnedSectionExpanded by mutableStateOf(true)
-      private set
-
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
     private val _state = MutableStateFlow(FeedsState.DEFAULT)
@@ -187,7 +176,7 @@ class FeedsPresenter(
     }
 
     private fun onTogglePinnedSection() {
-      pinnedSectionExpanded = !pinnedSectionExpanded
+      _state.update { it.copy(isPinnedSectionExpanded = !_state.value.isPinnedSectionExpanded) }
     }
 
     private fun onSearchQueryChanged(searchQuery: TextFieldValue) {
@@ -281,27 +270,12 @@ class FeedsPresenter(
     }
 
     private fun observeFeedsForExpandedSheet() {
-      val pinnedSectionExpandedFlow = snapshotFlow { pinnedSectionExpanded }
-
-      combine(
-          settingsRepository.postsType,
-          pinnedSectionExpandedFlow,
-          settingsRepository.feedsSortOrder
-        ) { postsType, pinnedSectionExpanded, feedsSortOrder ->
-          Triple(postsType, pinnedSectionExpanded, feedsSortOrder)
-        }
-        .onEach { (postsType, pinnedSectionExpanded, feedsSortOrder) ->
+      settingsRepository.postsType
+        .onEach { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
-          val pinnedFeeds = pinnedFeedsPager(postsAfter = postsAfter)
+          val pinnedFeeds = pinnedFeedsPager(postsAfter = postsAfter).cachedIn(coroutineScope)
 
-          val pinnedFeedsWithHeader =
-            addPinnedFeedsHeader(
-                feeds = pinnedFeeds,
-                isPinnedSectionExpanded = pinnedSectionExpanded
-              )
-              .cachedIn(coroutineScope)
-
-          _state.update { it.copy(pinnedFeeds = pinnedFeedsWithHeader) }
+          _state.update { it.copy(pinnedFeeds = pinnedFeeds) }
         }
         .launchIn(coroutineScope)
 
@@ -315,19 +289,12 @@ class FeedsPresenter(
 
           val feeds =
             feedsPager(
-              postsAfter = postsAfter,
-              feedsSortOrder = feedsSortOrder,
-            )
-
-          val feedsWithHeader =
-            addFeedsHeader(
-                feeds = feeds,
-                searchQuery = searchQuery,
-                feedsSortOrder = feedsSortOrder
+                postsAfter = postsAfter,
+                feedsSortOrder = feedsSortOrder,
               )
               .cachedIn(coroutineScope)
 
-          _state.update { it.copy(feedsInExpandedView = feedsWithHeader) }
+          _state.update { it.copy(feedsInExpandedView = feeds) }
         }
         .launchIn(coroutineScope)
     }
@@ -383,53 +350,6 @@ class FeedsPresenter(
           getLast24HourStart()
         }
       }
-
-    private fun addPinnedFeedsHeader(
-      feeds: Flow<PagingData<Feed>>,
-      isPinnedSectionExpanded: Boolean,
-    ): Flow<PagingData<PinnedFeedsListItemType>> {
-      return feeds.mapLatest {
-        it
-          .map { feed -> PinnedFeedsListItemType.PinnedFeedListItem(feed = feed) }
-          .filter { isPinnedSectionExpanded }
-          .insertSeparators { before, _ ->
-            when {
-              before == null -> {
-                PinnedFeedsListItemType.PinnedFeedsHeader(isExpanded = isPinnedSectionExpanded)
-              }
-              else -> {
-                null
-              }
-            }
-          }
-      }
-    }
-
-    private fun addFeedsHeader(
-      feeds: Flow<PagingData<Feed>>,
-      searchQuery: TextFieldValue,
-      feedsSortOrder: FeedsOrderBy,
-    ): Flow<PagingData<FeedsListItemType>> {
-      return feeds.mapLatest {
-        it
-          .map { feed -> FeedsListItemType.FeedListItem(feed = feed) }
-          .insertSeparators { before, _ ->
-            when {
-              before == null && searchQuery.text.length < MINIMUM_REQUIRED_SEARCH_CHARACTERS -> {
-                val feedsCount = rssRepository.feedsCount()
-
-                FeedsListItemType.AllFeedsHeader(
-                  feedsCount = feedsCount,
-                  feedsSortOrder = feedsSortOrder
-                )
-              }
-              else -> {
-                null
-              }
-            }
-          }
-      }
-    }
 
     override fun onDestroy() {
       coroutineScope.cancel()

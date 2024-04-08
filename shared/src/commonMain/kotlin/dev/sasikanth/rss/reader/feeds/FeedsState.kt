@@ -18,9 +18,7 @@ package dev.sasikanth.rss.reader.feeds
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.feeds.ui.FeedsListItemType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
-import dev.sasikanth.rss.reader.feeds.ui.PinnedFeedsListItemType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -28,14 +26,15 @@ import kotlinx.coroutines.flow.emptyFlow
 @Immutable
 internal data class FeedsState(
   val feedsInBottomBar: Flow<PagingData<Feed>>,
-  val feedsInExpandedView: Flow<PagingData<FeedsListItemType>>,
-  val pinnedFeeds: Flow<PagingData<PinnedFeedsListItemType>>,
+  val feedsInExpandedView: Flow<PagingData<Feed>>,
+  val pinnedFeeds: Flow<PagingData<Feed>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
   val selectedFeed: Feed?,
   val numberOfPinnedFeeds: Long,
   val canShowUnreadPostsCount: Boolean,
   val feedsViewMode: FeedsViewMode,
   val feedsSortOrder: FeedsOrderBy,
+  val isPinnedSectionExpanded: Boolean,
 ) {
 
   companion object {
@@ -50,7 +49,8 @@ internal data class FeedsState(
         numberOfPinnedFeeds = 0,
         canShowUnreadPostsCount = false,
         feedsViewMode = FeedsViewMode.List,
-        feedsSortOrder = FeedsOrderBy.Latest
+        feedsSortOrder = FeedsOrderBy.Latest,
+        isPinnedSectionExpanded = true,
       )
   }
 }
