@@ -7,7 +7,7 @@ android_sdk_compile = "34"
 android_sdk_target = "34"
 android_sdk_min = "26"
 
-sqldelight = "2.0.1"
+sqldelight = "2.0.2"
 ktor = "2.3.9"
 kotlinx_coroutines = "1.8.0"
 kotlinx_date_time = "0.5.0"
