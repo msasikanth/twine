@@ -36,12 +36,6 @@ sealed interface HomeEvent {
 
   data object OnHomeSelected : HomeEvent
 
-  data object OnAddFeedClicked : HomeEvent
-
-  data object OnPrimaryActionClicked : HomeEvent
-
-  data object OnCancelAddFeedClicked : HomeEvent
-
   data class AddFeed(val feedLink: String) : HomeEvent
 
   data object BackClicked : HomeEvent
@@ -55,10 +49,6 @@ sealed interface HomeEvent {
   data object BookmarksClicked : HomeEvent
 
   data object SettingsClicked : HomeEvent
-
-  data object EditFeedsClicked : HomeEvent
-
-  data object ExitFeedsEdit : HomeEvent
 
   data class TogglePostReadStatus(val postLink: String, val postRead: Boolean) : HomeEvent
 }

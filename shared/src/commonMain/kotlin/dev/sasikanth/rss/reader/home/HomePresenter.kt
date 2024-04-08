@@ -33,9 +33,6 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Default
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
@@ -174,10 +171,7 @@ class HomePresenter(
         }
         is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
         HomeEvent.OnHomeSelected -> onHomeSelected()
-        HomeEvent.OnAddFeedClicked -> onAddFeedClicked()
-        HomeEvent.OnCancelAddFeedClicked -> onCancelAddFeedClicked()
         is HomeEvent.AddFeed -> addFeed(event.feedLink)
-        HomeEvent.OnPrimaryActionClicked -> onPrimaryActionClicked()
         HomeEvent.BackClicked -> backClicked()
         HomeEvent.SearchClicked -> {
           /* no-op */
@@ -189,8 +183,6 @@ class HomePresenter(
         HomeEvent.SettingsClicked -> {
           /* no-op */
         }
-        HomeEvent.EditFeedsClicked -> editFeedsClicked()
-        HomeEvent.ExitFeedsEdit -> exitFeedsEdit()
         is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
         is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postLink, event.postRead)
@@ -214,14 +206,6 @@ class HomePresenter(
       }
     }
 
-    private fun exitFeedsEdit() {
-      _state.update { it.copy(feedsSheetMode = Default) }
-    }
-
-    private fun editFeedsClicked() {
-      _state.update { it.copy(feedsSheetMode = Edit) }
-    }
-
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
         rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
@@ -229,17 +213,7 @@ class HomePresenter(
     }
 
     private fun backClicked() {
-      coroutineScope.launch {
-        when (state.value.feedsSheetMode) {
-          Default,
-          LinkEntry -> {
-            effects.emit(HomeEffect.MinimizeSheet)
-          }
-          Edit -> {
-            _state.update { it.copy(feedsSheetMode = Default) }
-          }
-        }
-      }
+      coroutineScope.launch { effects.emit(HomeEffect.MinimizeSheet) }
     }
 
     private fun init() {
@@ -307,14 +281,6 @@ class HomePresenter(
         .launchIn(coroutineScope)
     }
 
-    private fun onPrimaryActionClicked() {
-      if (_state.value.feedsSheetState == BottomSheetValue.Collapsed) {
-        dispatch(HomeEvent.OnHomeSelected)
-      } else {
-        dispatch(HomeEvent.OnAddFeedClicked)
-      }
-    }
-
     private fun addFeed(feedLink: String) {
       coroutineScope.launch {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
@@ -335,9 +301,7 @@ class HomePresenter(
           BugsnagKotlin.sendHandledException(e)
           effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
         } finally {
-          _state.update {
-            it.copy(feedFetchingState = FeedFetchingState.Idle, feedsSheetMode = Default)
-          }
+          _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
         }
       }
     }
@@ -405,14 +369,6 @@ class HomePresenter(
 
         it.copy(feedsSheetState = feedsSheetState)
       }
-    }
-
-    private fun onCancelAddFeedClicked() {
-      _state.update { it.copy(feedsSheetMode = Default) }
-    }
-
-    private fun onAddFeedClicked() {
-      _state.update { it.copy(feedsSheetMode = LinkEntry) }
     }
 
     private fun onHomeSelected() {

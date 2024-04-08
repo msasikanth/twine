@@ -70,12 +70,10 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
 import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.Edit
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
@@ -141,12 +139,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     }
   }
 
-  LaunchedEffect(bottomSheetState.targetValue) {
-    if (bottomSheetState.targetValue == BottomSheetValue.Collapsed) {
-      homePresenter.dispatch(HomeEvent.OnCancelAddFeedClicked)
-    }
-  }
-
   Box(modifier = modifier) {
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
@@ -186,7 +178,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
         FeedsBottomSheet(
           feedsPresenter = homePresenter.feedsPresenter,
           bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-          feedsSheetMode = state.feedsSheetMode,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
           selectedFeedChanged = {
             coroutineScope.launch {
@@ -244,7 +235,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
       sheetShape =
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
-      sheetGesturesEnabled = state.feedsSheetMode != Edit
     )
   }
 }

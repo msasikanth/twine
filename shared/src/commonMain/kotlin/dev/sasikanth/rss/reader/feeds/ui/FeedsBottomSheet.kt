@@ -92,7 +92,6 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetMode.LinkEntry
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -105,7 +104,6 @@ import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
   bottomSheetSwipeTransition: Transition<Float>,
-  feedsSheetMode: FeedsSheetMode,
   closeSheet: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
@@ -144,7 +142,6 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInExpandedView.collectAsLazyPagingItems(),
         pinnedFeeds = state.pinnedFeeds.collectAsLazyPagingItems(),
         searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
-        feedsSheetMode = feedsSheetMode,
         searchQuery = feedsPresenter.searchQuery,
         feedsSortOrder = state.feedsSortOrder,
         feedsViewMode = state.feedsViewMode,
@@ -182,7 +179,6 @@ private fun BottomSheetExpandedContent(
   feeds: LazyPagingItems<Feed>,
   pinnedFeeds: LazyPagingItems<Feed>,
   searchResults: LazyPagingItems<Feed>,
-  feedsSheetMode: FeedsSheetMode,
   searchQuery: TextFieldValue,
   feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
@@ -202,7 +198,6 @@ private fun BottomSheetExpandedContent(
     topBar = {
       SearchBar(
         query = searchQuery,
-        feedsSheetMode = feedsSheetMode,
         feedsViewMode = feedsViewMode,
         onQueryChange = { onSearchQueryChanged(it) },
         onClearClick = onClearSearchQuery,
@@ -570,7 +565,6 @@ private fun BottomSheetCollapsedContent(
 @Composable
 private fun SearchBar(
   query: TextFieldValue,
-  feedsSheetMode: FeedsSheetMode,
   feedsViewMode: FeedsViewMode,
   onQueryChange: (TextFieldValue) -> Unit,
   onClearClick: () -> Unit,
@@ -619,7 +613,6 @@ private fun SearchBar(
         shape = RoundedCornerShape(16.dp),
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge,
-        enabled = feedsSheetMode != LinkEntry,
         colors =
           OutlinedTextFieldDefaults.colors(
             focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
