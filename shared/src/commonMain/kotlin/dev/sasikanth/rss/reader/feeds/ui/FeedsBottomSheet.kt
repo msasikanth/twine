@@ -432,32 +432,10 @@ private fun LazyGridScope.feedSearchResults(
     span = { gridItemSpan }
   ) { index ->
     val feed = searchResults[index]
-    val startPadding =
-      when {
-        gridItemSpan.currentLineSpan == 2 ||
-          (gridItemSpan.currentLineSpan == 1 && index % 2 == 0) -> 24.dp
-        else -> 8.dp
-      }
-
-    val endPadding =
-      when {
-        gridItemSpan.currentLineSpan == 2 ||
-          (gridItemSpan.currentLineSpan == 1 && index % 2 == 1) -> 24.dp
-        else -> 8.dp
-      }
-
-    val topPadding =
-      when {
-        gridItemSpan.currentLineSpan == 2 && index > 0 -> 8.dp
-        gridItemSpan.currentLineSpan == 1 && index > 1 -> 8.dp
-        else -> 0.dp
-      }
-
-    val bottomPadding =
-      when {
-        index < searchResults.itemCount -> 8.dp
-        else -> 0.dp
-      }
+    val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
+    val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
+    val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
+    val bottomPadding = bottomPAddingOfFeedListItem(index, searchResults.itemCount)
 
     if (feed != null) {
       FeedListItem(
@@ -502,32 +480,10 @@ private fun LazyGridScope.allFeeds(
       span = { gridItemSpan }
     ) { index ->
       val feed = feeds[index]
-      val startPadding =
-        when {
-          gridItemSpan.currentLineSpan == 2 ||
-            (gridItemSpan.currentLineSpan == 1 && index % 2 == 0) -> 24.dp
-          else -> 8.dp
-        }
-
-      val endPadding =
-        when {
-          gridItemSpan.currentLineSpan == 2 ||
-            (gridItemSpan.currentLineSpan == 1 && index % 2 == 1) -> 24.dp
-          else -> 8.dp
-        }
-
-      val topPadding =
-        when {
-          gridItemSpan.currentLineSpan == 2 && index > 0 -> 8.dp
-          gridItemSpan.currentLineSpan == 1 && index > 1 -> 8.dp
-          else -> 0.dp
-        }
-
-      val bottomPadding =
-        when {
-          index < feeds.itemCount -> 8.dp
-          else -> 0.dp
-        }
+      val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
+      val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
+      val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
+      val bottomPadding = bottomPAddingOfFeedListItem(index, feeds.itemCount)
 
       if (feed != null) {
         FeedListItem(
@@ -573,32 +529,10 @@ private fun LazyGridScope.pinnedFeeds(
         span = { gridItemSpan }
       ) { index ->
         val feed = pinnedFeeds[index]
-        val startPadding =
-          when {
-            gridItemSpan.currentLineSpan == 2 ||
-              (gridItemSpan.currentLineSpan == 1 && index % 2 == 0) -> 24.dp
-            else -> 8.dp
-          }
-
-        val endPadding =
-          when {
-            gridItemSpan.currentLineSpan == 2 ||
-              (gridItemSpan.currentLineSpan == 1 && index % 2 == 1) -> 24.dp
-            else -> 8.dp
-          }
-
-        val topPadding =
-          when {
-            gridItemSpan.currentLineSpan == 2 && index > 0 -> 8.dp
-            gridItemSpan.currentLineSpan == 1 && index > 1 -> 8.dp
-            else -> 0.dp
-          }
-
-        val bottomPadding =
-          when {
-            index < pinnedFeeds.itemCount -> 8.dp
-            else -> 0.dp
-          }
+        val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
+        val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
+        val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
+        val bottomPadding = bottomPAddingOfFeedListItem(index, pinnedFeeds.itemCount)
 
         if (feed != null) {
           FeedListItem(
@@ -626,6 +560,33 @@ private fun LazyGridScope.pinnedFeeds(
     }
   }
 }
+
+private fun bottomPAddingOfFeedListItem(index: Int, itemCount: Int) =
+  when {
+    index < itemCount -> 8.dp
+    else -> 0.dp
+  }
+
+private fun topPaddingOfFeedListItem(gridItemSpan: GridItemSpan, index: Int) =
+  when {
+    gridItemSpan.currentLineSpan == 2 && index > 0 -> 8.dp
+    gridItemSpan.currentLineSpan == 1 && index > 1 -> 8.dp
+    else -> 0.dp
+  }
+
+private fun endPaddingOfFeedListItem(gridItemSpan: GridItemSpan, index: Int) =
+  when {
+    gridItemSpan.currentLineSpan == 2 || (gridItemSpan.currentLineSpan == 1 && index % 2 == 1) ->
+      24.dp
+    else -> 8.dp
+  }
+
+private fun startPaddingOfFeedListItem(gridItemSpan: GridItemSpan, index: Int) =
+  when {
+    gridItemSpan.currentLineSpan == 2 || (gridItemSpan.currentLineSpan == 1 && index % 2 == 0) ->
+      24.dp
+    else -> 8.dp
+  }
 
 @Composable
 private fun AllFeedsHeader(
