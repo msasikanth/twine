@@ -131,5 +131,8 @@ val TrTwineStrings =
     feedsSortOldest = "İlk eklenen",
     feedsSortAlphabetical = "A-Z",
     feedsBottomBarNewGroup = "Yeni Grup",
-    feedsBottomBarNewFeed = "Yeni besleme"
+    feedsBottomBarNewFeed = "Yeni besleme",
+    actionPin = "Sabitle",
+    actionUnpin = "Sabitlemeyi Kaldır",
+    actionDelete = "Sil"
   )
