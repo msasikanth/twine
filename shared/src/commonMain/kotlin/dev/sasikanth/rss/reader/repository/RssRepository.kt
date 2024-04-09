@@ -430,6 +430,23 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
   }
 
+  suspend fun pinFeeds(feeds: Set<Feed>) {
+    val now = Clock.System.now()
+    withContext(ioDispatcher) {
+      feedQueries.transaction {
+        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
+      }
+    }
+  }
+
+  suspend fun unPinFeeds(feeds: Set<Feed>) {
+    withContext(ioDispatcher) {
+      feedQueries.transaction {
+        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, link = feed.link) }
+      }
+    }
+  }
+
   fun numberOfPinnedFeeds(): Flow<Long> {
     return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
