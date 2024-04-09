@@ -665,6 +665,11 @@ private fun AllFeedsHeader(
             FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
             FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
             FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+            FeedsOrderBy.Pinned -> {
+              throw IllegalStateException(
+                "Cannot use the following feed sort order here: $feedsSortOrder"
+              )
+            }
           }
 
         Text(
@@ -687,36 +692,43 @@ private fun AllFeedsHeader(
         expanded = showSortDropdown,
         onDismissRequest = { showSortDropdown = false }
       ) {
-        FeedsOrderBy.entries.forEach { sortOrder ->
-          val label =
-            when (sortOrder) {
-              FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
-              FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
-              FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
-            }
+        FeedsOrderBy.entries
+          .filter { it != FeedsOrderBy.Pinned }
+          .forEach { sortOrder ->
+            val label =
+              when (sortOrder) {
+                FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
+                FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
+                FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+                FeedsOrderBy.Pinned -> {
+                  throw IllegalStateException(
+                    "Cannot use the following feed sort order here: $feedsSortOrder"
+                  )
+                }
+              }
 
-          val color =
-            if (feedsSortOrder == sortOrder) {
-              AppTheme.colorScheme.tintedSurface
-            } else {
-              Color.Unspecified
-            }
-          val labelColor =
-            if (feedsSortOrder == sortOrder) {
-              AppTheme.colorScheme.onSurface
-            } else {
-              AppTheme.colorScheme.textEmphasisHigh
-            }
+            val color =
+              if (feedsSortOrder == sortOrder) {
+                AppTheme.colorScheme.tintedSurface
+              } else {
+                Color.Unspecified
+              }
+            val labelColor =
+              if (feedsSortOrder == sortOrder) {
+                AppTheme.colorScheme.onSurface
+              } else {
+                AppTheme.colorScheme.textEmphasisHigh
+              }
 
-          DropdownMenuItem(
-            modifier = Modifier.background(color),
-            onClick = {
-              onFeedsSortChanged(sortOrder)
-              showSortDropdown = false
-            },
-            text = { Text(label, color = labelColor) }
-          )
-        }
+            DropdownMenuItem(
+              modifier = Modifier.background(color),
+              onClick = {
+                onFeedsSortChanged(sortOrder)
+                showSortDropdown = false
+              },
+              text = { Text(label, color = labelColor) }
+            )
+          }
       }
     }
   }

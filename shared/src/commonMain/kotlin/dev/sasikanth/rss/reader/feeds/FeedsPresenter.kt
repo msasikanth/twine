@@ -297,7 +297,7 @@ class FeedsPresenter(
         settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          feedsPager(postsAfter, FeedsOrderBy.Latest).cachedIn(coroutineScope)
+          feedsPager(postsAfter, FeedsOrderBy.Pinned).cachedIn(coroutineScope)
         }
 
       observableSelectedFeed.selectedFeed

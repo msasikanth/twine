@@ -19,5 +19,6 @@ package dev.sasikanth.rss.reader.repository
 enum class FeedsOrderBy(val value: String) {
   Latest("latest"),
   Oldest("oldest"),
-  Alphabetical("alphabetical")
+  Alphabetical("alphabetical"),
+  Pinned("pinned")
 }
