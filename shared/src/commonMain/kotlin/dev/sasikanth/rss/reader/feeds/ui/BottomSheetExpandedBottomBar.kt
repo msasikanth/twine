@@ -50,7 +50,7 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun BottomBar(
+internal fun BottomSheetExpandedBottomBar(
   modifier: Modifier = Modifier,
   onNewGroupClick: () -> Unit,
   onNewFeedClick: () -> Unit,

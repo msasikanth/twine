@@ -118,7 +118,7 @@ internal fun BottomSheetExpandedContent(
       )
     },
     bottomBar = {
-      BottomBar(
+      BottomSheetExpandedBottomBar(
         onNewGroupClick = {
           // TODO: Open group creation dialog/sheet/screen
         },
