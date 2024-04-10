@@ -174,9 +174,8 @@ class AppPresenter(
         navigation.push(Config.Reader(postLink))
       } else {
         linkHandler.openLink(postLink)
+        rssRepository.updatePostReadStatus(read = true, link = postLink)
       }
-
-      rssRepository.updatePostReadStatus(read = true, link = postLink)
     }
   }
 
