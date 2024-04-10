@@ -16,20 +16,15 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,11 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.BottomBarWithGradientShadow
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -55,56 +48,31 @@ internal fun BottomSheetExpandedBottomBar(
   onNewGroupClick: () -> Unit,
   onNewFeedClick: () -> Unit,
 ) {
-  Box {
-    Box(
-      Modifier.fillMaxWidth()
-        .requiredHeight(184.dp)
-        .windowInsetsPadding(WindowInsets.navigationBars)
-        .background(
-          Brush.verticalGradient(listOf(Color.Transparent, AppTheme.colorScheme.tintedBackground))
-        )
-    )
+  BottomBarWithGradientShadow(modifier) {
+    Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+      BottomBarItem(
+        icon = TwineIcons.NewGroup,
+        label = LocalStrings.current.feedsBottomBarNewGroup,
+        modifier = Modifier.weight(1f),
+        onClick = onNewGroupClick
+      )
 
-    Box(
-      modifier =
-        modifier
-          .fillMaxWidth()
-          .background(
-            color = AppTheme.colorScheme.tintedSurface,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-          )
-          .pointerInput(Unit) {
-            // Consume bottom bar taps
-          }
-          .windowInsetsPadding(WindowInsets.navigationBars)
-          .padding(horizontal = 8.dp, vertical = 8.dp)
-          .align(Alignment.BottomCenter)
-    ) {
-      Row {
-        BottomBarItem(
-          icon = TwineIcons.NewGroup,
-          label = LocalStrings.current.feedsBottomBarNewGroup,
-          modifier = Modifier.weight(1f),
-          onClick = onNewGroupClick
-        )
+      Spacer(Modifier.requiredWidth(8.dp))
 
-        Spacer(Modifier.requiredWidth(8.dp))
+      VerticalDivider(
+        modifier = Modifier.requiredHeight(32.dp).align(Alignment.CenterVertically),
+        color = AppTheme.colorScheme.tintedHighlight,
+        thickness = 2.dp
+      )
 
-        VerticalDivider(
-          modifier = Modifier.requiredHeight(32.dp).align(Alignment.CenterVertically),
-          color = AppTheme.colorScheme.tintedHighlight,
-          thickness = 2.dp
-        )
+      Spacer(Modifier.requiredWidth(8.dp))
 
-        Spacer(Modifier.requiredWidth(8.dp))
-
-        BottomBarItem(
-          icon = TwineIcons.RSS,
-          label = LocalStrings.current.feedsBottomBarNewFeed,
-          modifier = Modifier.weight(1f),
-          onClick = onNewFeedClick
-        )
-      }
+      BottomBarItem(
+        icon = TwineIcons.RSS,
+        label = LocalStrings.current.feedsBottomBarNewFeed,
+        modifier = Modifier.weight(1f),
+        onClick = onNewFeedClick
+      )
     }
   }
 }
