@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -65,7 +64,7 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInBottomBar.collectAsLazyPagingItems(),
         selectedFeed = selectedFeed,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        onFeedSelected = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(feed)) },
+        onFeedClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedClick(feed)) },
         onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
       )
     } else {
@@ -73,20 +72,26 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInExpandedView.collectAsLazyPagingItems(),
         pinnedFeeds = state.pinnedFeeds.collectAsLazyPagingItems(),
         searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
+        selectedFeeds = state.selectedFeeds,
         searchQuery = feedsPresenter.searchQuery,
         feedsSortOrder = state.feedsSortOrder,
         feedsViewMode = state.feedsViewMode,
         isPinnedSectionExpanded = state.isPinnedSectionExpanded,
+        isInMultiSelectMode = state.isInMultiSelectMode,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        onFeedInfoClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedInfoClick(it.link)) },
-        onFeedSelected = { feedsPresenter.dispatch(FeedsEvent.OnFeedSelected(it)) },
+        onFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedClick(it)) },
+        onToggleFeedSelection = { feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
         onChangeFeedsViewModeClick = {
           feedsPresenter.dispatch(FeedsEvent.OnChangeFeedsViewModeClick)
         },
+        onCancelFeedsSelection = { feedsPresenter.dispatch(FeedsEvent.CancelFeedsSelection) },
+        onPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.PinSelectedFeeds) },
+        onUnPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.UnPinSelectedFeeds) },
+        onDeleteSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedFeeds) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3

@@ -96,8 +96,8 @@ class FeedsPresenter(
 
   fun dispatch(event: FeedsEvent) {
     when (event) {
-      is FeedsEvent.OnFeedInfoClick -> {
-        openFeedInfo(event.feedLink)
+      is FeedsEvent.OnFeedClick -> {
+        // TODO: Open source screen with posts
       }
       else -> {
         // no-op
@@ -134,19 +134,57 @@ class FeedsPresenter(
         FeedsEvent.Init -> init()
         FeedsEvent.OnGoBackClicked -> onGoBackClicked()
         is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
-        is FeedsEvent.OnFeedSelected -> onFeedSelected(event.feed)
+        is FeedsEvent.OnToggleFeedSelection -> onToggleFeedSelection(event.feed)
         is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
-        is FeedsEvent.OnFeedInfoClick -> {
-          // no-op
+        is FeedsEvent.OnFeedClick -> {
+          // TODO: Remove once source page with posts is implemented
+          onFeedClicked(event.feed)
         }
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
+        FeedsEvent.CancelFeedsSelection -> onCancelFeedsSelection()
+        FeedsEvent.DeleteSelectedFeeds -> onDeleteSelectedFeeds()
+        FeedsEvent.PinSelectedFeeds -> onPinSelectedFeeds()
+        FeedsEvent.UnPinSelectedFeeds -> onUnpinSelectedFeeds()
       }
+    }
+
+    private fun onFeedClicked(feed: Feed) {
+      coroutineScope.launch {
+        if (_state.value.selectedFeed?.link != feed.link) {
+          observableSelectedFeed.selectFeed(feed)
+        }
+
+        effects.emit(FeedsEffect.SelectedFeedChanged)
+        effects.emit(FeedsEffect.MinimizeSheet)
+      }
+    }
+
+    private fun onUnpinSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.unPinFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onPinSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.pinFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onDeleteSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.removeFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onCancelFeedsSelection() {
+      _state.update { it.copy(selectedFeeds = emptySet()) }
     }
 
     private fun onHomeSelected() {
@@ -204,14 +242,14 @@ class FeedsPresenter(
       }
     }
 
-    private fun onFeedSelected(feed: Feed) {
-      coroutineScope.launch {
-        if (_state.value.selectedFeed?.link != feed.link) {
-          observableSelectedFeed.selectFeed(feed)
+    private fun onToggleFeedSelection(feed: Feed) {
+      _state.update {
+        val selectedFeeds = _state.value.selectedFeeds
+        if (selectedFeeds.contains(feed)) {
+          it.copy(selectedFeeds = selectedFeeds - setOf(feed))
+        } else {
+          it.copy(selectedFeeds = selectedFeeds + setOf(feed))
         }
-
-        effects.emit(FeedsEffect.SelectedFeedChanged)
-        effects.emit(FeedsEffect.MinimizeSheet)
       }
     }
 

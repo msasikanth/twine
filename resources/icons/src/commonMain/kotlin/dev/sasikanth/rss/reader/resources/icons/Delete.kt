@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
@@ -35,8 +36,8 @@ val TwineIcons.Delete: ImageVector
           name = "Delete",
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
-          viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportWidth = 960.0f,
+          viewportHeight = 960.0f
         )
         .apply {
           path(
@@ -48,41 +49,45 @@ val TwineIcons.Delete: ImageVector
             strokeLineMiter = 4.0f,
             pathFillType = NonZero
           ) {
-            moveTo(7.0f, 12.0f)
-            curveTo(7.0f, 12.552f, 7.448f, 13.0f, 8.0f, 13.0f)
-            horizontalLineTo(16.0f)
-            curveTo(16.552f, 13.0f, 17.0f, 12.552f, 17.0f, 12.0f)
-            curveTo(17.0f, 11.448f, 16.552f, 11.0f, 16.0f, 11.0f)
-            horizontalLineTo(8.0f)
-            curveTo(7.448f, 11.0f, 7.0f, 11.448f, 7.0f, 12.0f)
+            moveTo(280.0f, 840.0f)
+            quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)
+            reflectiveQuadTo(200.0f, 760.0f)
+            verticalLineToRelative(-520.0f)
+            horizontalLineToRelative(-40.0f)
+            verticalLineToRelative(-80.0f)
+            horizontalLineToRelative(200.0f)
+            verticalLineToRelative(-40.0f)
+            horizontalLineToRelative(240.0f)
+            verticalLineToRelative(40.0f)
+            horizontalLineToRelative(200.0f)
+            verticalLineToRelative(80.0f)
+            horizontalLineToRelative(-40.0f)
+            verticalLineToRelative(520.0f)
+            quadToRelative(0.0f, 33.0f, -23.5f, 56.5f)
+            reflectiveQuadTo(680.0f, 840.0f)
+            lineTo(280.0f, 840.0f)
             close()
-            moveTo(12.0f, 22.0f)
-            curveTo(10.617f, 22.0f, 9.317f, 21.737f, 8.1f, 21.212f)
-            curveTo(6.883f, 20.688f, 5.825f, 19.975f, 4.925f, 19.075f)
-            curveTo(4.025f, 18.175f, 3.313f, 17.117f, 2.787f, 15.9f)
-            curveTo(2.263f, 14.683f, 2.0f, 13.383f, 2.0f, 12.0f)
-            curveTo(2.0f, 10.617f, 2.263f, 9.317f, 2.787f, 8.1f)
-            curveTo(3.313f, 6.883f, 4.025f, 5.825f, 4.925f, 4.925f)
-            curveTo(5.825f, 4.025f, 6.883f, 3.313f, 8.1f, 2.788f)
-            curveTo(9.317f, 2.263f, 10.617f, 2.0f, 12.0f, 2.0f)
-            curveTo(13.383f, 2.0f, 14.683f, 2.263f, 15.9f, 2.788f)
-            curveTo(17.117f, 3.313f, 18.175f, 4.025f, 19.075f, 4.925f)
-            curveTo(19.975f, 5.825f, 20.688f, 6.883f, 21.212f, 8.1f)
-            curveTo(21.737f, 9.317f, 22.0f, 10.617f, 22.0f, 12.0f)
-            curveTo(22.0f, 13.383f, 21.737f, 14.683f, 21.212f, 15.9f)
-            curveTo(20.688f, 17.117f, 19.975f, 18.175f, 19.075f, 19.075f)
-            curveTo(18.175f, 19.975f, 17.117f, 20.688f, 15.9f, 21.212f)
-            curveTo(14.683f, 21.737f, 13.383f, 22.0f, 12.0f, 22.0f)
+            moveTo(680.0f, 240.0f)
+            lineTo(280.0f, 240.0f)
+            verticalLineToRelative(520.0f)
+            horizontalLineToRelative(400.0f)
+            verticalLineToRelative(-520.0f)
             close()
-            moveTo(12.0f, 20.0f)
-            curveTo(14.233f, 20.0f, 16.125f, 19.225f, 17.675f, 17.675f)
-            curveTo(19.225f, 16.125f, 20.0f, 14.233f, 20.0f, 12.0f)
-            curveTo(20.0f, 9.767f, 19.225f, 7.875f, 17.675f, 6.325f)
-            curveTo(16.125f, 4.775f, 14.233f, 4.0f, 12.0f, 4.0f)
-            curveTo(9.767f, 4.0f, 7.875f, 4.775f, 6.325f, 6.325f)
-            curveTo(4.775f, 7.875f, 4.0f, 9.767f, 4.0f, 12.0f)
-            curveTo(4.0f, 14.233f, 4.775f, 16.125f, 6.325f, 17.675f)
-            curveTo(7.875f, 19.225f, 9.767f, 20.0f, 12.0f, 20.0f)
+            moveTo(360.0f, 680.0f)
+            horizontalLineToRelative(80.0f)
+            verticalLineToRelative(-360.0f)
+            horizontalLineToRelative(-80.0f)
+            verticalLineToRelative(360.0f)
+            close()
+            moveTo(520.0f, 680.0f)
+            horizontalLineToRelative(80.0f)
+            verticalLineToRelative(-360.0f)
+            horizontalLineToRelative(-80.0f)
+            verticalLineToRelative(360.0f)
+            close()
+            moveTo(280.0f, 240.0f)
+            verticalLineToRelative(520.0f)
+            verticalLineToRelative(-520.0f)
             close()
           }
         }

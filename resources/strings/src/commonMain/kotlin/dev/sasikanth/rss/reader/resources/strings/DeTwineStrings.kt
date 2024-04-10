@@ -135,5 +135,8 @@ val DeTwineStrings =
     feedsSortOldest = "Zuerst hinzugefügt",
     feedsSortAlphabetical = "A-Z",
     feedsBottomBarNewGroup = "Neue Gruppe",
-    feedsBottomBarNewFeed = "Neuer Feed"
+    feedsBottomBarNewFeed = "Neuer Feed",
+    actionPin = "Anpinnen",
+    actionUnpin = "Loslösen",
+    actionDelete = "Löschen"
   )

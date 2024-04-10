@@ -128,6 +128,9 @@ data class TwineStrings(
   val feedsSortAlphabetical: String,
   val feedsBottomBarNewGroup: String,
   val feedsBottomBarNewFeed: String,
+  val actionPin: String,
+  val actionUnpin: String,
+  val actionDelete: String,
 )
 
 object Locales {

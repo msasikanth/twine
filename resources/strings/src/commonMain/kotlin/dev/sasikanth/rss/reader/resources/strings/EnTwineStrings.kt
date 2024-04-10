@@ -142,5 +142,8 @@ val EnTwineStrings =
     feedsSortOldest = "First added",
     feedsSortAlphabetical = "A-Z",
     feedsBottomBarNewGroup = "New group",
-    feedsBottomBarNewFeed = "New feed"
+    feedsBottomBarNewFeed = "New feed",
+    actionPin = "Pin",
+    actionUnpin = "Unpin",
+    actionDelete = "Delete"
   )
