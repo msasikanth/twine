@@ -151,9 +151,9 @@ internal fun FeedListItem(
           tint = tint,
           modifier = Modifier.requiredSize(24.dp),
         )
-
-        Spacer(Modifier.requiredWidth(4.dp))
       }
+
+      Spacer(Modifier.requiredWidth(4.dp))
     }
   }
 }
