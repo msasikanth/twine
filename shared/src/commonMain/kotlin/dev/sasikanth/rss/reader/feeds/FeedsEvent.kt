@@ -27,7 +27,7 @@ sealed interface FeedsEvent {
 
   data class OnDeleteFeed(val feed: Feed) : FeedsEvent
 
-  data class OnFeedSelected(val feed: Feed) : FeedsEvent
+  data class OnToggleFeedSelection(val feed: Feed) : FeedsEvent
 
   data class OnFeedNameUpdated(val newFeedName: String, val feedLink: String) : FeedsEvent
 
@@ -37,7 +37,7 @@ sealed interface FeedsEvent {
 
   data object ClearSearchQuery : FeedsEvent
 
-  data class OnFeedInfoClick(val feedLink: String) : FeedsEvent
+  data class OnFeedClick(val feed: Feed) : FeedsEvent
 
   data class OnFeedSortOrderChanged(val feedsOrderBy: FeedsOrderBy) : FeedsEvent
 

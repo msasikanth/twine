@@ -34,7 +34,11 @@ internal data class FeedsState(
   val feedsViewMode: FeedsViewMode,
   val feedsSortOrder: FeedsOrderBy,
   val isPinnedSectionExpanded: Boolean,
+  val selectedFeeds: Set<Feed>,
 ) {
+
+  val isInMultiSelectMode: Boolean
+    get() = selectedFeeds.isNotEmpty()
 
   companion object {
 
@@ -49,6 +53,7 @@ internal data class FeedsState(
         feedsViewMode = FeedsViewMode.List,
         feedsSortOrder = FeedsOrderBy.Latest,
         isPinnedSectionExpanded = true,
+        selectedFeeds = emptySet()
       )
   }
 }

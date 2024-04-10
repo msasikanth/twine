@@ -97,6 +97,7 @@ private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modifier) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
+  val feedsState by homePresenter.feedsPresenter.state.collectAsState()
 
   val bottomSheetState =
     rememberBottomSheetState(
@@ -235,6 +236,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
       sheetShape =
         RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = !feedsState.isInMultiSelectMode
     )
   }
 }

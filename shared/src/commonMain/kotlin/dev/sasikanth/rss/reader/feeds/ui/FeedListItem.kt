@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,11 +36,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.resources.icons.RadioSelected
+import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -47,21 +53,38 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 internal fun FeedListItem(
   feed: Feed,
   canShowUnreadPostsCount: Boolean,
-  onFeedInfoClick: (Feed) -> Unit,
+  isInMultiSelectMode: Boolean,
+  isFeedSelected: Boolean,
+  onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val haptic = LocalHapticFeedback.current
+  val backgroundColor =
+    if (isFeedSelected) {
+      AppTheme.colorScheme.tintedHighlight
+    } else {
+      AppTheme.colorScheme.tintedSurface
+    }
+
   Box(
     modifier =
       Modifier.fillMaxWidth()
         .then(modifier)
         .clip(RoundedCornerShape(16.dp))
-        .background(AppTheme.colorScheme.tintedSurface)
+        .background(backgroundColor)
         .combinedClickable(
-          onClick = { onFeedSelected(feed) },
+          onClick = {
+            if (isInMultiSelectMode) {
+              haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+              onFeedSelected(feed)
+            } else {
+              onFeedClick(feed)
+            }
+          },
           onLongClick = {
-            // TODO: Add support for feeds multi selection
-            onFeedInfoClick(feed)
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            onFeedSelected(feed)
           }
         )
   ) {
@@ -93,7 +116,7 @@ internal fun FeedListItem(
       Spacer(Modifier.requiredWidth(12.dp))
 
       val numberOfUnreadPosts = feed.numberOfUnreadPosts
-      if (canShowUnreadPostsCount && numberOfUnreadPosts > 0) {
+      if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
           containerColor = AppTheme.colorScheme.tintedForeground,
           contentColor = AppTheme.colorScheme.tintedBackground,
@@ -105,6 +128,31 @@ internal fun FeedListItem(
             modifier = Modifier.align(Alignment.CenterVertically)
           )
         }
+      }
+
+      if (isInMultiSelectMode) {
+        val icon =
+          if (isFeedSelected) {
+            TwineIcons.RadioSelected
+          } else {
+            TwineIcons.RadioUnselected
+          }
+
+        val tint =
+          if (isFeedSelected) {
+            AppTheme.colorScheme.tintedForeground
+          } else {
+            AppTheme.colorScheme.onSurface
+          }
+
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+          tint = tint,
+          modifier = Modifier.requiredSize(24.dp),
+        )
+
+        Spacer(Modifier.requiredWidth(4.dp))
       }
     }
   }
