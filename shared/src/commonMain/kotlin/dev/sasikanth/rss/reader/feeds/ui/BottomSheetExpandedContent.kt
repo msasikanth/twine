@@ -73,7 +73,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
@@ -326,7 +325,7 @@ private fun LazyGridScope.allFeeds(
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
 ) {
-  if (feeds.itemCount > 0 && feeds.loadState.refresh != LoadState.Loading) {
+  if (feeds.itemCount > 0) {
     item(key = "AllFeedsHeader", span = { GridItemSpan(2) }) {
       AllFeedsHeader(
         feedsCount = feeds.itemCount,
@@ -375,7 +374,7 @@ private fun LazyGridScope.pinnedFeeds(
   onFeedInfoClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit
 ) {
-  if (pinnedFeeds.itemCount > 0 && pinnedFeeds.loadState.refresh != LoadState.Loading) {
+  if (pinnedFeeds.itemCount > 0) {
     item(key = "PinnedFeedsHeader", span = { GridItemSpan(2) }) {
       PinnedFeedsHeader(
         isPinnedSectionExpanded = isPinnedSectionExpanded,
