@@ -46,4 +46,12 @@ sealed interface FeedsEvent {
   data object TogglePinnedSection : FeedsEvent
 
   data object OnHomeSelected : FeedsEvent
+
+  data object CancelFeedsSelection : FeedsEvent
+
+  data object PinSelectedFeeds : FeedsEvent
+
+  data object UnPinSelectedFeeds : FeedsEvent
+
+  data object DeleteSelectedFeeds : FeedsEvent
 }

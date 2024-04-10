@@ -146,7 +146,33 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
+        FeedsEvent.CancelFeedsSelection -> onCancelFeedsSelection()
+        FeedsEvent.DeleteSelectedFeeds -> onDeleteSelectedFeeds()
+        FeedsEvent.PinSelectedFeeds -> onPinSelectedFeeds()
+        FeedsEvent.UnPinSelectedFeeds -> onUnpinSelectedFeeds()
       }
+    }
+
+    private fun onUnpinSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.unPinFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onPinSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.pinFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onDeleteSelectedFeeds() {
+      coroutineScope
+        .launch { rssRepository.removeFeeds(_state.value.selectedFeeds) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+    }
+
+    private fun onCancelFeedsSelection() {
+      _state.update { it.copy(selectedFeeds = emptySet()) }
     }
 
     private fun onHomeSelected() {
