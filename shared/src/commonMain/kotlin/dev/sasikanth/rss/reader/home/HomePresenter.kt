@@ -93,13 +93,23 @@ class HomePresenter(
   @Assisted private val openFeedInfo: (String) -> Unit,
 ) : ComponentContext by componentContext {
 
-  private val backCallback = BackCallback { dispatch(HomeEvent.BackClicked) }
-
   internal val feedsPresenter =
     feedsPresenterFactory(
       childContext("feeds_presenter"),
       openFeedInfo,
     )
+
+  private val backCallback = BackCallback {
+    if (feedsPresenter.state.value.isInMultiSelectMode) {
+      feedsPresenter.dispatch(FeedsEvent.CancelFeedsSelection)
+      return@BackCallback
+    }
+
+    if (state.value.feedsSheetState == BottomSheetValue.Expanded) {
+      dispatch(HomeEvent.BackClicked)
+      return@BackCallback
+    }
+  }
 
   private val presenterInstance =
     instanceKeeper.getOrCreate {
@@ -116,10 +126,7 @@ class HomePresenter(
   internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
-    lifecycle.doOnCreate {
-      backHandler.register(backCallback)
-      backCallback.isEnabled = state.value.feedsSheetState == BottomSheetValue.Expanded
-    }
+    lifecycle.doOnCreate { backHandler.register(backCallback) }
   }
 
   fun dispatch(event: HomeEvent) {
