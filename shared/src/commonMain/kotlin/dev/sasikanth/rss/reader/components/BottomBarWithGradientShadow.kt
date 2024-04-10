@@ -50,7 +50,7 @@ internal fun BottomBarWithGradientShadow(
               arrayOf(
                 0f to Color.Transparent,
                 0.5f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.5f),
-                1f to AppTheme.colorScheme.tintedBackground
+                0.8f to AppTheme.colorScheme.tintedBackground
               )
           )
         )
