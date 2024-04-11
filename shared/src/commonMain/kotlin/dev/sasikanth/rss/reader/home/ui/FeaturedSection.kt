@@ -171,18 +171,19 @@ internal fun FeaturedSection(
             snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
           )
       ) { page ->
-        val featuredPost = featuredPosts[page]
-
-        FeaturedPostItem(
-          item = featuredPost,
-          page = page,
-          pagerState = pagerState,
-          onClick = { onItemClick(featuredPost) },
-          onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-          onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-          onSourceClick = { onPostSourceClick(featuredPost.feedLink) },
-          onTogglePostReadClick = { onTogglePostReadClick(featuredPost.link, featuredPost.read) }
-        )
+        val featuredPost = featuredPosts.getOrNull(page)
+        if (featuredPost != null) {
+          FeaturedPostItem(
+            item = featuredPost,
+            page = page,
+            pagerState = pagerState,
+            onClick = { onItemClick(featuredPost) },
+            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
+            onSourceClick = { onPostSourceClick(featuredPost.feedLink) },
+            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.link, featuredPost.read) }
+          )
+        }
       }
     }
   }
