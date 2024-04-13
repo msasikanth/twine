@@ -20,12 +20,15 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
+import com.benasher44.uuid.uuid4
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.database.BookmarkQueries
+import dev.sasikanth.rss.reader.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostQueries
@@ -52,6 +55,7 @@ class RssRepository(
   private val postSearchFTSQueries: PostSearchFTSQueries,
   private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
+  private val feedGroupQueries: FeedGroupQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -494,6 +498,60 @@ class RssRepository(
     return withContext(ioDispatcher) {
       feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
     }
+  }
+
+  fun feedGroups(): PagingSource<Int, FeedGroup> {
+    return QueryPagingSource(
+      countQuery = feedGroupQueries.count(),
+      transacter = feedGroupQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedGroupQueries.groups(
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.toSet(),
+              feedIcons = feedIcons.split(",").toSet(),
+              createdAt = createdAt,
+              updatedAt = updatedAt
+            )
+          }
+        )
+      }
+    )
+  }
+
+  suspend fun createGroup(name: String) {
+    withContext(ioDispatcher) {
+      feedGroupQueries.createGroup(
+        id = uuid4().toString(),
+        name = name,
+        feedIds = emptyList(),
+        createdAt = Clock.System.now(),
+        updatedAt = Clock.System.now()
+      )
+    }
+  }
+
+  suspend fun updateGroupName(groupId: String, name: String) {
+    withContext(ioDispatcher) { feedGroupQueries.updateGroupName(name, groupId) }
+  }
+
+  suspend fun updateFeedIds(groupId: String, feedIds: Set<String>) {
+    withContext(ioDispatcher) { feedGroupQueries.updateFeedIds(feedIds.toList(), groupId) }
+  }
+
+  suspend fun deleteGroup(groupId: String) {
+    withContext(ioDispatcher) { feedGroupQueries.deleteGroup(groupId) }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

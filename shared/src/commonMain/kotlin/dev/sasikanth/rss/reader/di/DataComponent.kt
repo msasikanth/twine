@@ -20,6 +20,8 @@ import app.cash.sqldelight.db.SqlDriver
 import dev.sasikanth.rss.reader.database.Bookmark
 import dev.sasikanth.rss.reader.database.DateAdapter
 import dev.sasikanth.rss.reader.database.Feed
+import dev.sasikanth.rss.reader.database.FeedGroup
+import dev.sasikanth.rss.reader.database.ListToStringAdapter
 import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.database.ReaderDatabase
 import dev.sasikanth.rss.reader.database.migrations.SQLCodeMigrations
@@ -45,6 +47,12 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
           lastCleanUpAtAdapter = DateAdapter
         ),
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
+      feedGroupAdapter =
+        FeedGroup.Adapter(
+          feedIdsAdapter = ListToStringAdapter,
+          createdAtAdapter = DateAdapter,
+          updatedAtAdapter = DateAdapter
+        )
     )
   }
 
@@ -61,4 +69,6 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
 
   @Provides
   fun providesFeedSearchFTSQueries(database: ReaderDatabase) = database.feedSearchFTSQueries
+
+  @Provides fun providesFeedGroupQueries(database: ReaderDatabase) = database.feedGroupQueries
 }
