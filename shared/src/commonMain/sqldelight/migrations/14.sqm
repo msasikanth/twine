@@ -2,7 +2,7 @@ import kotlin.String;
 import kotlin.collections.List;
 import kotlinx.datetime.Instant;
 
-CREATE TABLE IF NOT EXISTS feed_group(
+CREATE TABLE IF NOT EXISTS feedGroup(
   id TEXT NOT NULL PRIMARY KEY,
   name TEXT NOT NULL,
   feedIds TEXT AS List<String> NOT NULL,
