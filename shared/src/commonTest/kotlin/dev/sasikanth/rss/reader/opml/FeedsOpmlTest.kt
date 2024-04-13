@@ -31,6 +31,7 @@ class FeedsOpmlTest {
     val feeds =
       listOf(
         Feed(
+          id = "e8d31cec-2893-54d0-bcae-7f134713e532",
           name = "The Verge",
           icon = "https://icon.horse/icon/theverge.com",
           description = "The Verge",
@@ -40,6 +41,7 @@ class FeedsOpmlTest {
           pinnedAt = null
         ),
         Feed(
+          id = "c90003bd-b1e6-5545-ba59-3d2128d658a7",
           name = "Hacker News",
           icon = "https://icon.horse/icon/news.ycombinator.com",
           description = "Hacker News",
