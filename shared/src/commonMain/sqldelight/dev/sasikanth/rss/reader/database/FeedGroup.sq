@@ -1,0 +1,28 @@
+import kotlin.String;
+import kotlin.collections.List;
+import kotlinx.datetime.Instant;
+
+CREATE TABLE IF NOT EXISTS feed_group(
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  feedIds TEXT AS List<String> NOT NULL,
+  createdAt INTEGER AS Instant NOT NULL,
+  updatedAt INTEGER AS Instant NOT NULL
+);
+
+groups:
+SELECT * FROM feed_group;
+
+createGroup:
+INSERT INTO feed_group(id, name, feedIds, createdAt, updatedAt)
+VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt)
+ON CONFLICT(name) DO NOTHING;
+
+updateGroupName:
+UPDATE feed_group SET name = :name WHERE id = :id;
+
+updateFeedIds:
+UPDATE feed_group SET feedIds = :feedIds WHERE id = :id;
+
+deleteGroup:
+DELETE FROM feed_group WHERE id = :id;
