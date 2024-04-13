@@ -122,9 +122,3 @@ WHERE post.id = :id;
 
 hasPost:
 SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
-
-allPostsBlocking:
-SELECT * FROM post;
-
-updatePostId:
-UPDATE post SET id = :newId WHERE id = :oldId;
