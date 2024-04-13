@@ -19,10 +19,11 @@ package dev.sasikanth.rss.reader.core.model.local
 import kotlinx.datetime.Instant
 
 data class FeedGroup(
-  val id: String,
+  override val id: String,
   val name: String,
   val feedIds: Set<String>,
   val feedIcons: Set<String>,
   val createdAt: Instant,
   val updatedAt: Instant,
-)
+  override val sourceType: SourceType = SourceType.FeedGroup
+) : Source

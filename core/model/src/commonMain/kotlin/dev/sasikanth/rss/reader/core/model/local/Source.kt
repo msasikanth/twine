@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.core.model.local
 
-import androidx.compose.runtime.Immutable
-import kotlinx.datetime.Instant
+interface Source {
+  val id: String
+  val sourceType: SourceType
+}
 
-@Immutable
-data class Feed(
-  override val id: String,
-  val name: String,
-  val icon: String,
-  val description: String,
-  val link: String,
-  val homepageLink: String,
-  val createdAt: Instant,
-  val pinnedAt: Instant?,
-  val lastCleanUpAt: Instant? = null,
-  val numberOfUnreadPosts: Long = 0L,
-  val alwaysFetchSourceArticle: Boolean = false,
-  override val sourceType: SourceType = SourceType.Feed
-) : Source
+enum class SourceType {
+  Feed,
+  FeedGroup
+}
