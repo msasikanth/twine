@@ -11,7 +11,17 @@ CREATE TABLE IF NOT EXISTS feed_group(
 );
 
 groups:
-SELECT * FROM feed_group;
+SELECT
+  id,
+  name,
+  feedIds,
+  (SELECT GROUP_CONCAT(feed.icon)
+   FROM feed
+   WHERE feed.id IN (feed_group.feedIds)
+   LIMIT 4) AS feedIcons,
+  createdAt,
+  updatedAt
+FROM feed_group;
 
 createGroup:
 INSERT INTO feed_group(id, name, feedIds, createdAt, updatedAt)
