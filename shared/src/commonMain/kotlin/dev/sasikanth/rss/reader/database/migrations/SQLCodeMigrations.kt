@@ -26,7 +26,14 @@ import dev.sasikanth.rss.reader.utils.nameBasedUuidOf
 object SQLCodeMigrations {
 
   fun migrations(): Array<AfterVersion> {
-    return arrayOf(afterVersion12())
+    return arrayOf(afterVersion12(), afterVersion13())
+  }
+
+  private fun afterVersion13(): AfterVersion {
+    return AfterVersion(13) { driver ->
+      val feedIds = FeedsIdsQuery(driver).executeAsList()
+      feedIds.forEach { feedId -> migrateFeedsLinkIdsToUuid(feedId, driver) }
+    }
   }
 
   private fun afterVersion12(): AfterVersion {
@@ -34,6 +41,37 @@ object SQLCodeMigrations {
       val ids = PostsIdsQuery(driver).executeAsList()
       ids.forEach { id -> migratePostLinkIdsToUuid(driver, id) }
     }
+  }
+
+  private fun migrateFeedsLinkIdsToUuid(oldFeedId: String, driver: SqlDriver) {
+    val newFeedId = nameBasedUuidOf(oldFeedId).toString()
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE feed SET id = '$newFeedId' WHERE id = '$oldFeedId'",
+      parameters = 0,
+      binders = null
+    )
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE feed_search SET id = '$newFeedId' WHERE id = '$oldFeedId'",
+      parameters = 0,
+      binders = null
+    )
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE post SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
+      parameters = 0,
+      binders = null
+    )
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE bookmark SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
+      parameters = 0,
+      binders = null
+    )
   }
 
   private fun migratePostLinkIdsToUuid(driver: SqlDriver, oldPostId: String) {
@@ -60,6 +98,23 @@ object SQLCodeMigrations {
       binders = null
     )
   }
+}
+
+private class FeedsIdsQuery(
+  private val driver: SqlDriver,
+) : Query<String>(mapper = { cursor -> cursor.getString(0)!! }) {
+  override fun addListener(listener: Listener) {
+    driver.addListener("feed", listener = listener)
+  }
+
+  override fun removeListener(listener: Listener) {
+    driver.removeListener("feed", listener = listener)
+  }
+
+  override fun <R> execute(mapper: (SqlCursor) -> QueryResult<R>): QueryResult<R> =
+    driver.executeQuery(null, "SELECT id FROM feed", mapper, 0, null)
+
+  override fun toString(): String = "Feed.sq:feedIds"
 }
 
 private class PostsIdsQuery(

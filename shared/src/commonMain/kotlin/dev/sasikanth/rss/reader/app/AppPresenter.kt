@@ -116,7 +116,7 @@ class AppPresenter(
       is ModalConfig.FeedInfo -> {
         Modals.FeedInfo(
           presenter =
-            feedPresenter(modalConfig.feedLink, componentContext) { modalNavigation.dismiss() }
+            feedPresenter(modalConfig.feedId, componentContext) { modalNavigation.dismiss() }
         )
       }
     }
@@ -220,6 +220,6 @@ class AppPresenter(
 
   @Serializable
   sealed interface ModalConfig {
-    @Serializable data class FeedInfo(val feedLink: String) : ModalConfig
+    @Serializable data class FeedInfo(val feedId: String) : ModalConfig
   }
 }

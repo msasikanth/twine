@@ -30,20 +30,20 @@ SELECT COUNT(*) FROM post_search WHERE post_search MATCH :searchQuery;
 search:
 SELECT
   post.id,
+  sourceId,
   post_search.title,
   post_search.description,
   post.imageUrl,
   post.date,
   post.link,
-  post.bookmarked,
-  feed.name AS feedName,
-  feed.icon AS feedIcon,
-  feedLink,
   post.commentsLink,
-  post.read
+  post.bookmarked,
+  post.read,
+  feed.name AS feedName,
+  feed.icon AS feedIcon
 FROM post_search
 INNER JOIN post ON post.id == post_search.id
-INNER JOIN feed ON post.feedLink == feed.link
+INNER JOIN feed ON post.sourceId == feed.id
 WHERE post_search MATCH :searchQuery
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.date END ASC,

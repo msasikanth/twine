@@ -2,12 +2,13 @@ import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE feed(
+  id TEXT NOT NULL PRIMARY KEY,
   name TEXT NOT NULL,
   icon TEXT NOT NULL,
   description TEXT NOT NULL,
+  link TEXT NOT NULL,
   homepageLink TEXT NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
-  link TEXT NOT NULL PRIMARY KEY,
   pinnedAt INTEGER AS Instant,
   lastCleanUpAt INTEGER AS Instant,
   alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0
@@ -16,14 +17,14 @@ CREATE TABLE feed(
 CREATE INDEX feed_link_index ON feed(link);
 
 upsert:
-INSERT INTO feed(name, icon, description, homepageLink, createdAt, link)
-VALUES (?, ?, ?, ?, ?, ?)
-ON CONFLICT(link) DO
+INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+ON CONFLICT(id) DO
 UPDATE SET icon = excluded.icon, description = excluded.description,
 homepageLink = excluded.homepageLink;
 
 remove:
-DELETE FROM feed WHERE link = :link;
+DELETE FROM feed WHERE id = :id;
 
 count:
 SELECT COUNT(*) FROM feed;
@@ -37,18 +38,19 @@ ORDER BY pinnedAt DESC, createdAt DESC;
 
 feedsPaginated:
 SELECT
+  f.id,
   f.name,
   f.icon,
   f.description,
+  f.link,
   f.homepageLink,
   f.createdAt,
-  f.link,
   f.pinnedAt,
   f.lastCleanUpAt,
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed f
-LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
-GROUP BY f.link
+LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+GROUP BY f.id
 ORDER BY
   CASE WHEN :orderBy = 'latest' THEN f.createdAt END DESC,
   CASE WHEN :orderBy = 'oldest' THEN f.createdAt END ASC,
@@ -59,52 +61,54 @@ LIMIT :limit OFFSET :offset;
 
 pinnedFeedsPaginated:
 SELECT
+  f.id,
   f.name,
   f.icon,
   f.description,
+  f.link,
   f.homepageLink,
   f.createdAt,
-  f.link,
   f.pinnedAt,
   f.lastCleanUpAt,
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed f
-LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
+LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
 WHERE pinnedAt IS NOT NULL
-GROUP BY f.link
+GROUP BY f.id
 ORDER BY f.pinnedAt DESC
 LIMIT :limit OFFSET :offset;
 
 feed:
 SELECT * FROM feed
-WHERE link = :link
+WHERE id = :id
 ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
 
 feedWithUnreadPostsCount:
 SELECT
+  f.id,
   f.name,
   f.icon,
   f.description,
+  f.link,
   f.homepageLink,
   f.createdAt,
-  f.link,
   f.pinnedAt,
   f.lastCleanUpAt,
   f.alwaysFetchSourceArticle,
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed f
-LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
-WHERE f.link = :link
+LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+WHERE f.id = :id
 ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
 
 updateFeedName:
-UPDATE feed SET name = :newFeedName WHERE link = :link;
+UPDATE feed SET name = :newFeedName WHERE id = :id;
 
 hasFeed:
-SELECT EXISTS(SELECT 1 FROM feed WHERE link = :link);
+SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id);
 
 updatePinnedAt:
-UPDATE feed SET pinnedAt = :pinnedAt WHERE link = :link;
+UPDATE feed SET pinnedAt = :pinnedAt WHERE id = :id;
 
 numberOfPinnedFeeds:
 SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
@@ -113,7 +117,7 @@ numberOfFeeds:
 SELECT COUNT(*) FROM feed;
 
 updateLastCleanUpAt:
-UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE link = :link;
+UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 
 updateAlwaysFetchSourceArticle:
-UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE link = :link;
+UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = :id;

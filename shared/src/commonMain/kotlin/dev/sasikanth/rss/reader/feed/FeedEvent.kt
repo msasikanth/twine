@@ -24,12 +24,12 @@ sealed interface FeedEvent {
 
   data object RemoveFeedClicked : FeedEvent
 
-  data class OnFeedNameChanged(val newFeedName: String, val feedLink: String) : FeedEvent
+  data class OnFeedNameChanged(val newFeedName: String, val feedId: String) : FeedEvent
 
   data object DismissSheet : FeedEvent
 
-  data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean, val feedLink: String) :
+  data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean, val feedId: String) :
     FeedEvent
 
-  data class OnMarkPostsAsRead(val feedLink: String) : FeedEvent
+  data class OnMarkPostsAsRead(val feedId: String) : FeedEvent
 }

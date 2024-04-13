@@ -48,7 +48,7 @@ import me.tatarka.inject.annotations.Inject
 
 internal typealias FeedPresenterFactory =
   (
-    feedLink: String,
+    feedId: String,
     ComponentContext,
     dismiss: () -> Unit,
   ) -> FeedPresenter
@@ -59,7 +59,7 @@ class FeedPresenter(
   rssRepository: RssRepository,
   settingsRepository: SettingsRepository,
   private val observableSelectedFeed: ObservableSelectedFeed,
-  @Assisted feedLink: String,
+  @Assisted feedId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val dismiss: () -> Unit
 ) : ComponentContext by componentContext {
@@ -70,7 +70,7 @@ class FeedPresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
-        feedLink = feedLink,
+        feedId = feedId,
         observableSelectedFeed = observableSelectedFeed,
       )
     }
@@ -98,7 +98,7 @@ class FeedPresenter(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
-    private val feedLink: String,
+    private val feedId: String,
     private val observableSelectedFeed: ObservableSelectedFeed,
   ) : InstanceKeeper.Instance {
 
@@ -122,14 +122,14 @@ class FeedPresenter(
           // no-op
         }
         FeedEvent.RemoveFeedClicked -> removeFeed()
-        is FeedEvent.OnFeedNameChanged -> onFeedNameUpdated(event.newFeedName, event.feedLink)
+        is FeedEvent.OnFeedNameChanged -> onFeedNameUpdated(event.newFeedName, event.feedId)
         is FeedEvent.OnAlwaysFetchSourceArticleChanged ->
-          onAlwaysFetchSourceArticleChanged(event.newValue, event.feedLink)
-        is FeedEvent.OnMarkPostsAsRead -> onMarkPostsAsRead(event.feedLink)
+          onAlwaysFetchSourceArticleChanged(event.newValue, event.feedId)
+        is FeedEvent.OnMarkPostsAsRead -> onMarkPostsAsRead(event.feedId)
       }
     }
 
-    private fun onMarkPostsAsRead(feedLink: String) {
+    private fun onMarkPostsAsRead(feedId: String) {
       coroutineScope.launch {
         val postsType = withContext(dispatchersProvider.io) { settingsRepository.postsType.first() }
         val postsAfter =
@@ -144,21 +144,21 @@ class FeedPresenter(
             }
           }
 
-        rssRepository.markPostsInFeedAsRead(feedLink = feedLink, postsAfter = postsAfter)
+        rssRepository.markPostsInFeedAsRead(feedId = feedId, postsAfter = postsAfter)
       }
     }
 
-    private fun onAlwaysFetchSourceArticleChanged(newValue: Boolean, feedLink: String) {
-      coroutineScope.launch { rssRepository.updateFeedAlwaysFetchSource(feedLink, newValue) }
+    private fun onAlwaysFetchSourceArticleChanged(newValue: Boolean, feedId: String) {
+      coroutineScope.launch { rssRepository.updateFeedAlwaysFetchSource(feedId, newValue) }
     }
 
-    private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
-      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
+    private fun onFeedNameUpdated(newFeedName: String, feedId: String) {
+      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedId) }
     }
 
     private fun removeFeed() {
       coroutineScope.launch {
-        rssRepository.removeFeed(feedLink)
+        rssRepository.removeFeed(feedId)
         observableSelectedFeed.clearSelection()
         effects.emit(FeedEffect.DismissSheet)
       }
@@ -180,7 +180,7 @@ class FeedPresenter(
           }
 
         rssRepository
-          .feed(feedLink, postsAfter)
+          .feed(feedId, postsAfter)
           .onEach { feed -> _state.update { it.copy(feed = feed) } }
           .catch {
             // no-op
