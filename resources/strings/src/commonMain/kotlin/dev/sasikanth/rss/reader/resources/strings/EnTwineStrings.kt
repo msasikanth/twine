@@ -145,5 +145,7 @@ val EnTwineStrings =
     feedsBottomBarNewFeed = "New feed",
     actionPin = "Pin",
     actionUnpin = "Unpin",
-    actionDelete = "Delete"
+    actionDelete = "Delete",
+    createGroup = "Create group",
+    groupNameHint = "Name"
   )

@@ -151,7 +151,12 @@ class FeedsPresenter(
         FeedsEvent.DeleteSelectedFeeds -> onDeleteSelectedFeeds()
         FeedsEvent.PinSelectedFeeds -> onPinSelectedFeeds()
         FeedsEvent.UnPinSelectedFeeds -> onUnpinSelectedFeeds()
+        is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
       }
+    }
+
+    private fun onCreateGroup(name: String) {
+      coroutineScope.launch { rssRepository.createGroup(name) }
     }
 
     private fun onFeedClicked(feed: Feed) {

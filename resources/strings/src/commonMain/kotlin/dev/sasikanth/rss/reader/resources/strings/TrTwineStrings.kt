@@ -134,5 +134,7 @@ val TrTwineStrings =
     feedsBottomBarNewFeed = "Yeni besleme",
     actionPin = "Sabitle",
     actionUnpin = "Sabitlemeyi Kaldır",
-    actionDelete = "Sil"
+    actionDelete = "Sil",
+    createGroup = "Grup oluştur",
+    groupNameHint = "İsim"
   )

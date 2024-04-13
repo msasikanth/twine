@@ -116,8 +116,11 @@ internal fun BottomSheetExpandedContent(
   onPinSelectedFeeds: () -> Unit,
   onUnPinSelectedFeeds: () -> Unit,
   onDeleteSelectedFeeds: () -> Unit,
+  onCreateGroup: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
+  var showNewGroupDialog by remember { mutableStateOf(false) }
+
   Scaffold(
     modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
@@ -137,9 +140,7 @@ internal fun BottomSheetExpandedContent(
           exit = slideOutVertically { it }
         ) {
           BottomSheetExpandedBottomBar(
-            onNewGroupClick = {
-              // TODO: Open group creation dialog/sheet/screen
-            },
+            onNewGroupClick = { showNewGroupDialog = true },
             onNewFeedClick = {
               // TODO: Open feed creation dialog/sheet/screen
             }
@@ -248,6 +249,10 @@ internal fun BottomSheetExpandedContent(
         )
       }
     }
+  }
+
+  if (showNewGroupDialog) {
+    CreateGroupDialog(onCreateGroup = onCreateGroup, onDismiss = { showNewGroupDialog = false })
   }
 }
 
