@@ -18,10 +18,10 @@ SELECT
   id,
   name,
   feedIds,
-  (SELECT GROUP_CONCAT(feed.icon)
-   FROM feed
-   WHERE feed.id IN (feedGroup.feedIds)
-   LIMIT 4) AS feedIcons,
+  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+              FROM feed
+              WHERE feed.id IN (feedGroup.feedIds)
+              LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt
 FROM feedGroup
