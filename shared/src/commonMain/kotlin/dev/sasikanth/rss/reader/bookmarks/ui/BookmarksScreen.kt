@@ -144,7 +144,7 @@ internal fun BookmarksScreen(
                   },
                   togglePostReadClick = {
                     bookmarksPresenter.dispatch(
-                      BookmarksEvent.TogglePostReadStatus(post.link, post.read)
+                      BookmarksEvent.TogglePostReadStatus(post.id, post.read)
                     )
                   }
                 )

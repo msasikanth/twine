@@ -15,12 +15,14 @@
  */
 package dev.sasikanth.rss.reader.di
 
+import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import dev.sasikanth.rss.reader.database.Bookmark
 import dev.sasikanth.rss.reader.database.DateAdapter
 import dev.sasikanth.rss.reader.database.Feed
 import dev.sasikanth.rss.reader.database.Post
 import dev.sasikanth.rss.reader.database.ReaderDatabase
+import dev.sasikanth.rss.reader.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
@@ -45,6 +47,8 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
     )
   }
+
+  @Provides @AppScope fun providesMigrations(): Array<AfterVersion> = SQLCodeMigrations.migrations()
 
   @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries
 

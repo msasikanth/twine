@@ -1,0 +1,140 @@
+import kotlin.Boolean;
+import kotlinx.datetime.Instant;
+
+-- Start: Migrate post table to include id column --
+DROP INDEX post_feed_link_index;
+
+ALTER TABLE post ADD COLUMN id TEXT NOT NULL DEFAULT '';
+UPDATE post SET id = link;
+
+CREATE TABLE post_temp(
+  id TEXT NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  imageUrl TEXT,
+  date INTEGER AS Instant NOT NULL,
+  feedLink TEXT NOT NULL,
+  link TEXT NOT NULL,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  commentsLink TEXT DEFAULT NULL,
+  read INTEGER AS Boolean NOT NULL DEFAULT 0,
+  rawContent TEXT,
+  FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
+);
+
+INSERT INTO post_temp
+SELECT
+  id,
+  title,
+  description,
+  imageUrl,
+  date,
+  feedLink,
+  link,
+  bookmarked,
+  commentsLink,
+  read,
+  rawContent
+FROM post;
+
+DROP TABLE post;
+
+ALTER TABLE post_temp RENAME TO post;
+
+CREATE INDEX post_feed_link_index ON post(feedLink);
+-- End: Migrate post table to include id column --
+
+-- Start: Migrate post search table to include id column --
+DROP TABLE post_search;
+
+CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
+  id TEXT NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  link TEXT NOT NULL,
+  tokenize="trigram"
+);
+
+INSERT INTO post_search SELECT id, title, description, link FROM post;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+BEGIN DELETE FROM post_search WHERE id = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (new.id, new.title, new.description, new.link);
+END;
+-- End: Migrate post search table to include id column --
+
+-- Start: Migrate bookmark table to include id column --
+ALTER TABLE bookmark ADD COLUMN id TEXT NOT NULL DEFAULT '';
+UPDATE bookmark SET id = link;
+
+CREATE TABLE bookmark_temp(
+  id TEXT NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  imageUrl TEXT,
+  date INTEGER AS Instant NOT NULL,
+  link TEXT NOT NULL,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL,
+  feedLink TEXT NOT NULL,
+  commentsLink TEXT DEFAULT NULL,
+  read INTEGER AS Boolean NOT NULL DEFAULT 0
+);
+
+INSERT INTO bookmark_temp
+SELECT
+  id,
+  title,
+  description,
+  imageUrl,
+  date,
+  link,
+  bookmarked,
+  feedName,
+  feedIcon,
+  feedLink,
+  commentsLink,
+  read
+FROM bookmark;
+
+DROP TABLE bookmark;
+
+ALTER TABLE bookmark_temp RENAME TO bookmark;
+
+CREATE TRIGGER IF NOT EXISTS
+post_bookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
+BEGIN
+  INSERT OR REPLACE INTO bookmark(id, title, description, imageUrl, date, link, bookmarked, commentsLink, feedName, feedIcon, feedLink, read)
+  SELECT new.id, new.title, new.description, new.imageUrl, new.date, new.link, new.bookmarked, new.commentsLink, feed.name, feed.icon, feed.link, new.read
+  FROM feed WHERE link == new.feedLink;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_unbookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 0
+BEGIN DELETE FROM bookmark WHERE id = new.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_content_update
+AFTER UPDATE OF title, description, imageUrl, date, read ON post WHEN new.bookmarked == 1
+BEGIN
+  UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date, commentsLink = new.commentsLink, read = new.read
+  WHERE id = new.id;
+END;
+-- End: Migrate bookmark table to include id column --

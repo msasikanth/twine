@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.core.model.local
 import kotlinx.datetime.Instant
 
 data class Post(
+  val id: String,
   val title: String,
   val description: String,
   val imageUrl: String?,

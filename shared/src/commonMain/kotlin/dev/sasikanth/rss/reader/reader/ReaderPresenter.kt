@@ -44,7 +44,7 @@ import me.tatarka.inject.annotations.Inject
 
 internal typealias ReaderPresenterFactory =
   (
-    postLink: String,
+    postId: String,
     ComponentContext,
     goBack: () -> Unit,
   ) -> ReaderPresenter
@@ -54,7 +54,7 @@ class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
   private val postSourceFetcher: PostSourceFetcher,
-  @Assisted private val postLink: String,
+  @Assisted private val postId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
 ) : ComponentContext by componentContext {
@@ -64,13 +64,13 @@ class ReaderPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        postLink = postLink,
+        postId = postId,
         postSourceFetcher = postSourceFetcher
       )
     }
 
   init {
-    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(postLink)) }
+    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(postId)) }
     lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
   }
 
@@ -90,47 +90,47 @@ class ReaderPresenter(
   private class PresenterInstance(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val postLink: String,
+    private val postId: String,
     private val postSourceFetcher: PostSourceFetcher,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
-    private val _state = MutableStateFlow(ReaderState.default(postLink))
+    private val _state = MutableStateFlow(ReaderState.default(postId))
     val state: StateFlow<ReaderState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReaderState.default(postLink)
+        initialValue = ReaderState.default(postId)
       )
 
     fun dispatch(event: ReaderEvent) {
       when (event) {
-        is ReaderEvent.Init -> init(event.postLink)
+        is ReaderEvent.Init -> init(event.postId)
         ReaderEvent.BackClicked -> {
           /* no-op */
         }
-        ReaderEvent.TogglePostBookmark -> togglePostBookmark(postLink)
+        ReaderEvent.TogglePostBookmark -> togglePostBookmark(postId)
         ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
-        ReaderEvent.MarkPostAsRead -> markPostAsRead(postLink)
+        ReaderEvent.MarkPostAsRead -> markPostAsRead(postId)
       }
     }
 
-    private fun markPostAsRead(postLink: String) {
-      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, link = postLink) }
+    private fun markPostAsRead(postId: String) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, id = postId) }
     }
 
-    private fun togglePostBookmark(postLink: String) {
+    private fun togglePostBookmark(postId: String) {
       coroutineScope.launch {
         val isBookmarked = state.value.isBookmarked ?: false
-        rssRepository.updateBookmarkStatus(bookmarked = !isBookmarked, link = postLink)
+        rssRepository.updateBookmarkStatus(bookmarked = !isBookmarked, id = postId)
         _state.update { it.copy(isBookmarked = !isBookmarked) }
       }
     }
 
-    private fun init(postLink: String) {
+    private fun init(postId: String) {
       coroutineScope.launch {
-        val post = rssRepository.post(postLink)
+        val post = rssRepository.post(postId)
         val feed = rssRepository.feedBlocking(post.feedLink)
 
         _state.update {
@@ -151,9 +151,10 @@ class ReaderPresenter(
       }
     }
 
-    private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
+    private suspend fun extractArticleHtmlContent(postId: String, content: String): String {
+      val post = rssRepository.post(postId)
       val article =
-        withContext(dispatchersProvider.io) { Readability(postLink, content).parse() }
+        withContext(dispatchersProvider.io) { Readability(post.id, content).parse() }
           ?: return content
       val articleContent = article.content
 
@@ -178,18 +179,18 @@ class ReaderPresenter(
 
     private suspend fun loadRssContent() {
       _state.update { it.copy(postMode = InProgress) }
-      val post = rssRepository.post(postLink)
+      val post = rssRepository.post(postId)
       val postContent = post.rawContent ?: post.description
-      val htmlContent = extractArticleHtmlContent(postLink, postContent)
+      val htmlContent = extractArticleHtmlContent(postId, postContent)
       _state.update { it.copy(content = htmlContent, postMode = RssContent) }
     }
 
     private suspend fun loadSourceArticle() {
       _state.update { it.copy(postMode = InProgress) }
-      val content = postSourceFetcher.fetch(postLink)
+      val content = postSourceFetcher.fetch(postId)
 
       if (content.isSuccess) {
-        val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
+        val htmlContent = extractArticleHtmlContent(postId, content.getOrThrow())
         _state.update { it.copy(content = htmlContent) }
       } else {
         loadRssContent()

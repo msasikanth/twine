@@ -54,7 +54,7 @@ internal typealias SearchPresentFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
-    openPost: (String) -> Unit,
+    openPost: (PostWithMetadata) -> Unit,
   ) -> SearchPresenter
 
 @Inject
@@ -63,7 +63,7 @@ class SearchPresenter(
   dispatchersProvider: DispatchersProvider,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openPost: (postLink: String) -> Unit,
+  @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -85,7 +85,7 @@ class SearchPresenter(
 
   internal fun dispatch(event: SearchEvent) {
     when (event) {
-      is SearchEvent.OnPostClicked -> openPost(event.post.link)
+      is SearchEvent.OnPostClicked -> openPost(event.post)
       SearchEvent.BackClicked -> goBack()
       else -> {
         /* no-op */
@@ -154,19 +154,17 @@ class SearchPresenter(
         is SearchEvent.OnPostClicked -> {
           // no-op
         }
-        is SearchEvent.TogglePostReadStatus -> togglePostReadStatus(event.postLink, event.postRead)
+        is SearchEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
       }
     }
 
-    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
-      coroutineScope.launch {
-        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
-      }
+    private fun togglePostReadStatus(postId: String, postRead: Boolean) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
     }
 
     private fun onPostBookmarkClick(post: PostWithMetadata) {
       coroutineScope.launch {
-        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
+        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
       }
     }
 

@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.reader
 
 sealed interface ReaderEvent {
 
-  data class Init(val postLink: String) : ReaderEvent
+  data class Init(val postId: String) : ReaderEvent
 
   data object BackClicked : ReaderEvent
 

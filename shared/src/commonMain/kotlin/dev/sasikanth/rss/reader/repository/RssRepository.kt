@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.nameBasedUuidOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
@@ -89,6 +90,7 @@ class RssRepository(
               feedPayload.posts.forEach { post ->
                 if (post.date > feedLastCleanUpAtEpochMilli) {
                   postQueries.upsert(
+                    id = nameBasedUuidOf(post.link).toString(),
                     title = post.title,
                     description = post.description,
                     imageUrl = post.imageUrl,
@@ -195,16 +197,16 @@ class RssRepository(
     )
   }
 
-  suspend fun updateBookmarkStatus(bookmarked: Boolean, link: String) {
-    withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked, link) }
+  suspend fun updateBookmarkStatus(bookmarked: Boolean, id: String) {
+    withContext(ioDispatcher) { postQueries.updateBookmarkStatus(bookmarked = bookmarked, id = id) }
   }
 
-  suspend fun updatePostReadStatus(read: Boolean, link: String) {
-    withContext(ioDispatcher) { postQueries.updateReadStatus(read, link) }
+  suspend fun updatePostReadStatus(read: Boolean, id: String) {
+    withContext(ioDispatcher) { postQueries.updateReadStatus(read, id) }
   }
 
-  suspend fun deleteBookmark(link: String) {
-    withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(link) }
+  suspend fun deleteBookmark(id: String) {
+    withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(id) }
   }
 
   fun allFeeds(
@@ -479,18 +481,14 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink, postsAfter) }
   }
 
-  suspend fun post(link: String): Post {
-    return withContext(ioDispatcher) { postQueries.post(link, ::Post).executeAsOne() }
+  suspend fun post(postId: String): Post {
+    return withContext(ioDispatcher) { postQueries.post(postId, ::Post).executeAsOne() }
   }
 
   suspend fun updateFeedAlwaysFetchSource(feedLink: String, newValue: Boolean) {
     return withContext(ioDispatcher) {
       feedQueries.updateAlwaysFetchSourceArticle(newValue, feedLink)
     }
-  }
-
-  suspend fun feedsCount(): Long {
-    return withContext(ioDispatcher) { feedQueries.count().executeAsOne() }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

@@ -73,7 +73,7 @@ internal typealias HomePresenterFactory =
     openSearch: () -> Unit,
     openBookmarks: () -> Unit,
     openSettings: () -> Unit,
-    openPost: (String) -> Unit,
+    openPost: (PostWithMetadata) -> Unit,
     openFeedInfo: (String) -> Unit,
   ) -> HomePresenter
 
@@ -89,7 +89,7 @@ class HomePresenter(
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
   @Assisted private val openSettings: () -> Unit,
-  @Assisted private val openPost: (postLink: String) -> Unit,
+  @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
   @Assisted private val openFeedInfo: (String) -> Unit,
 ) : ComponentContext by componentContext {
 
@@ -137,7 +137,7 @@ class HomePresenter(
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
       is HomeEvent.SettingsClicked -> openSettings()
-      is HomeEvent.OnPostClicked -> openPost(event.post.link)
+      is HomeEvent.OnPostClicked -> openPost(event.post)
       else -> {
         // no-op
       }
@@ -192,14 +192,12 @@ class HomePresenter(
         }
         is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
-        is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postLink, event.postRead)
+        is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
       }
     }
 
-    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
-      coroutineScope.launch {
-        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
-      }
+    private fun togglePostReadStatus(postId: String, postRead: Boolean) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
     }
 
     private fun onPostsTypeChanged(postsType: PostsType) {
@@ -215,7 +213,7 @@ class HomePresenter(
 
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
-        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
+        rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
       }
     }
 

@@ -181,7 +181,7 @@ internal fun FeaturedSection(
             onBookmarkClick = { onPostBookmarkClick(featuredPost) },
             onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
             onSourceClick = { onPostSourceClick(featuredPost.feedLink) },
-            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.link, featuredPost.read) }
+            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
           )
         }
       }

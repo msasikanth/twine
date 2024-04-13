@@ -170,8 +170,8 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
             homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
           },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
-          onTogglePostReadStatus = { postLink, postRead ->
-            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postLink, postRead))
+          onTogglePostReadStatus = { postId, postRead ->
+            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
           }
         )
       },

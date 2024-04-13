@@ -114,7 +114,7 @@ internal fun PostsList(
           onPostBookmarkClick = { onPostBookmarkClick(post) },
           onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
           onPostSourceClick = { onPostSourceClick(post.feedLink) },
-          togglePostReadClick = { onTogglePostReadClick(post.link, post.read) }
+          togglePostReadClick = { onTogglePostReadClick(post.id, post.read) }
         )
       } else {
         Box(Modifier.requiredHeight(132.dp))

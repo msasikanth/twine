@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.database
 
 import android.content.Context
 import androidx.sqlite.db.SupportSQLiteDatabase
+import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -25,7 +26,10 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class DriverFactory(private val context: Context) {
+actual class DriverFactory(
+  private val context: Context,
+  private val codeMigrations: Array<AfterVersion>,
+) {
 
   actual fun createDriver(): SqlDriver {
     return AndroidSqliteDriver(
@@ -33,7 +37,7 @@ actual class DriverFactory(private val context: Context) {
       context = context,
       name = DB_NAME,
       callback =
-        object : AndroidSqliteDriver.Callback(ReaderDatabase.Schema) {
+        object : AndroidSqliteDriver.Callback(ReaderDatabase.Schema, callbacks = codeMigrations) {
           override fun onOpen(db: SupportSQLiteDatabase) {
             db.setForeignKeyConstraintsEnabled(true)
           }

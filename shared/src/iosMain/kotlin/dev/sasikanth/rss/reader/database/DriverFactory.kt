@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.database
 
+import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import app.cash.sqldelight.driver.native.wrapConnection
@@ -24,7 +25,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class DriverFactory {
+actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
 
   actual fun createDriver(): SqlDriver {
     return NativeSqliteDriver(
@@ -34,10 +35,15 @@ actual class DriverFactory {
         create = { connection -> wrapConnection(connection) { ReaderDatabase.Schema.create(it) } },
         upgrade = { connection, oldVersion, newVersion ->
           wrapConnection(connection) {
-            ReaderDatabase.Schema.migrate(it, oldVersion.toLong(), newVersion.toLong())
+            ReaderDatabase.Schema.migrate(
+              driver = it,
+              oldVersion = oldVersion.toLong(),
+              newVersion = newVersion.toLong(),
+              callbacks = codeMigrations
+            )
           }
         },
-        extendedConfig = DatabaseConfiguration.Extended(foreignKeyConstraints = true)
+        extendedConfig = DatabaseConfiguration.Extended(foreignKeyConstraints = true),
       )
     )
   }
