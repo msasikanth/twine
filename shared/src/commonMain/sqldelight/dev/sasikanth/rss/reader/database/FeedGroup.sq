@@ -29,8 +29,7 @@ LIMIT :limit OFFSET :offset;
 
 createGroup:
 INSERT INTO feedGroup(id, name, feedIds, createdAt, updatedAt)
-VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt)
-ON CONFLICT(name) DO NOTHING;
+VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt);
 
 updateGroupName:
 UPDATE feedGroup SET name = :name WHERE id = :id;
