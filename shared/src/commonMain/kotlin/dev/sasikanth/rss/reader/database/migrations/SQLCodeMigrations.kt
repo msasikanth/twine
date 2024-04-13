@@ -32,17 +32,33 @@ object SQLCodeMigrations {
   private fun afterVersion12(): AfterVersion {
     return AfterVersion(12) { driver ->
       val ids = PostsIdsQuery(driver).executeAsList()
-      ids.forEach { id ->
-        driver.execute(
-          identifier = null,
-          sql = "UPDATE post SET id = ? WHERE id = ?",
-          parameters = 2,
-        ) {
-          bindString(0, nameBasedUuidOf(id).toString())
-          bindString(1, id)
-        }
-      }
+      ids.forEach { id -> migratePostLinkIdsToUuid(driver, id) }
     }
+  }
+
+  private fun migratePostLinkIdsToUuid(driver: SqlDriver, oldPostId: String) {
+    val newPostId = nameBasedUuidOf(oldPostId).toString()
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE post SET id = '$newPostId' WHERE id = '$oldPostId'",
+      parameters = 0,
+      binders = null
+    )
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE post_search SET id = '$newPostId' WHERE id = '$oldPostId'",
+      parameters = 0,
+      binders = null
+    )
+
+    driver.execute(
+      identifier = null,
+      sql = "UPDATE bookmark SET id = '$newPostId' WHERE id = '$oldPostId'",
+      parameters = 0,
+      binders = null
+    )
   }
 }
 
@@ -58,7 +74,7 @@ private class PostsIdsQuery(
   }
 
   override fun <R> execute(mapper: (SqlCursor) -> QueryResult<R>): QueryResult<R> =
-    driver.executeQuery(null, "SELECT id FROM POST", mapper, 0, null)
+    driver.executeQuery(null, "SELECT id FROM post", mapper, 0, null)
 
   override fun toString(): String = "Post.sq:posts"
 }
