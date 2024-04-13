@@ -24,7 +24,8 @@ SELECT
    LIMIT 4) AS feedIcons,
   createdAt,
   updatedAt
-FROM feed_group;
+FROM feed_group
+LIMIT :limit OFFSET :offset;
 
 createGroup:
 INSERT INTO feed_group(id, name, feedIds, createdAt, updatedAt)
