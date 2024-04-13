@@ -29,7 +29,7 @@ sealed interface FeedsEvent {
 
   data class OnToggleFeedSelection(val feed: Feed) : FeedsEvent
 
-  data class OnFeedNameUpdated(val newFeedName: String, val feedLink: String) : FeedsEvent
+  data class OnFeedNameUpdated(val newFeedName: String, val feedId: String) : FeedsEvent
 
   data class OnFeedPinClicked(val feed: Feed) : FeedsEvent
 

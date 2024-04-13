@@ -135,7 +135,7 @@ class FeedsPresenter(
         FeedsEvent.OnGoBackClicked -> onGoBackClicked()
         is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
         is FeedsEvent.OnToggleFeedSelection -> onToggleFeedSelection(event.feed)
-        is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedLink)
+        is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedId)
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
@@ -156,7 +156,7 @@ class FeedsPresenter(
 
     private fun onFeedClicked(feed: Feed) {
       coroutineScope.launch {
-        if (_state.value.selectedFeed?.link != feed.link) {
+        if (_state.value.selectedFeed?.id != feed.id) {
           observableSelectedFeed.selectFeed(feed)
         }
 
@@ -229,14 +229,14 @@ class FeedsPresenter(
       coroutineScope.launch { rssRepository.toggleFeedPinStatus(feed) }
     }
 
-    private fun onFeedNameUpdated(newFeedName: String, feedLink: String) {
-      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedLink) }
+    private fun onFeedNameUpdated(newFeedName: String, feedId: String) {
+      coroutineScope.launch { rssRepository.updateFeedName(newFeedName, feedId) }
     }
 
     private fun onDeleteFeed(feed: Feed) {
       coroutineScope.launch {
-        rssRepository.removeFeed(feed.link)
-        if (_state.value.selectedFeed?.link == feed.link) {
+        rssRepository.removeFeed(feed.id)
+        if (_state.value.selectedFeed?.id == feed.id) {
           observableSelectedFeed.clearSelection()
         }
       }

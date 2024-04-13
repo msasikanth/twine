@@ -131,7 +131,7 @@ class ReaderPresenter(
     private fun init(postId: String) {
       coroutineScope.launch {
         val post = rssRepository.post(postId)
-        val feed = rssRepository.feedBlocking(post.feedLink)
+        val feed = rssRepository.feedBlocking(post.sourceId)
 
         _state.update {
           it.copy(

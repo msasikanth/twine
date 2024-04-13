@@ -20,14 +20,14 @@ import kotlinx.datetime.Instant
 
 data class Post(
   val id: String,
+  val sourceId: String,
   val title: String,
   val description: String,
+  val rawContent: String?,
   val imageUrl: String?,
   val date: Instant,
-  val feedLink: String,
   val link: String,
-  val bookmarked: Boolean,
   val commentsLink: String?,
+  val bookmarked: Boolean,
   val read: Boolean,
-  val rawContent: String?,
 )

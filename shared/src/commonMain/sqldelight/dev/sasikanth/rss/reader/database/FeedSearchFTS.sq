@@ -1,25 +1,26 @@
 CREATE VIRTUAL TABLE IF NOT EXISTS feed_search USING FTS5(
-    name TEXT NOT NULL,
-    link TEXT NOT NULL PRIMARY KEY UNINDEXED,
-    tokenize="trigram"
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  link TEXT NOT NULL,
+  tokenize="trigram"
 );
 
 CREATE TRIGGER IF NOT EXISTS
 feed_search_fts_BEFORE_DELETE
 BEFORE DELETE ON feed
-BEGIN DELETE FROM feed_search WHERE link = old.link;
+BEGIN DELETE FROM feed_search WHERE id = old.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 feed_search_fts_AFTER_UPDATE
 AFTER UPDATE ON feed
-BEGIN UPDATE OR IGNORE feed_search SET name = new.name WHERE link = new.link;
+BEGIN UPDATE OR IGNORE feed_search SET name = new.name WHERE id = new.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 feed_search_fts_AFTER_INSERT
 AFTER INSERT ON feed
-BEGIN INSERT OR IGNORE INTO feed_search(name, link) VALUES (new.name, new.link);
+BEGIN INSERT OR IGNORE INTO feed_search(id, name, link) VALUES (new.id, new.name, new.link);
 END;
 
 countSearchResults:
@@ -27,24 +28,25 @@ SELECT COUNT(*) FROM feed_search
 WHERE (
   :searchQuery = '""'
   OR
-  link IN (SELECT link FROM feed_search WHERE feed_search MATCH :searchQuery)
+  id IN (SELECT id FROM feed_search WHERE feed_search MATCH :searchQuery)
 );
 
 search:
 SELECT
+  f.id,
   f.name,
   f.icon,
   f.description,
+  f.link,
   f.homepageLink,
   f.createdAt,
-  f.link,
   f.pinnedAt,
   f.lastCleanUpAt,
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed_search fs
-INNER JOIN feed f ON f.link = fs.link
-LEFT JOIN post p ON f.link = p.feedLink AND p.date > :postsAfter
+INNER JOIN feed f ON f.id = fs.id
+LEFT JOIN post p ON p.sourceId = f.id AND p.date > :postsAfter
 WHERE fs.name MATCH :searchQuery
-GROUP BY f.link
+GROUP BY f.id
 ORDER BY pinnedAt DESC , createdAt DESC
 LIMIT :limit OFFSET :offset;

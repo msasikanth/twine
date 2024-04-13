@@ -190,7 +190,7 @@ class HomePresenter(
         HomeEvent.SettingsClicked -> {
           /* no-op */
         }
-        is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedLink)
+        is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedId)
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
         is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
       }
@@ -204,9 +204,9 @@ class HomePresenter(
       coroutineScope.launch { settingsRepository.updatePostsType(postsType) }
     }
 
-    private fun postSourceClicked(feedLink: String) {
+    private fun postSourceClicked(feedId: String) {
       coroutineScope.launch {
-        val feed = rssRepository.feedBlocking(feedLink)
+        val feed = rssRepository.feedBlocking(feedId)
         observableSelectedFeed.selectFeed(feed)
       }
     }
@@ -254,7 +254,7 @@ class HomePresenter(
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
-                  selectedFeedLink = selectedFeed?.link,
+                  selectedFeedId = selectedFeed?.id,
                   unreadOnly = unreadOnly,
                   after = postsAfter
                 )
@@ -264,7 +264,7 @@ class HomePresenter(
 
           rssRepository
             .featuredPosts(
-              selectedFeedLink = selectedFeed?.link,
+              selectedFeedId = selectedFeed?.id,
               unreadOnly = unreadOnly,
               after = postsAfter
             )
@@ -386,7 +386,7 @@ class HomePresenter(
         try {
           val selectedFeed = _state.value.selectedFeed
           if (selectedFeed != null) {
-            rssRepository.updateFeed(selectedFeed.link)
+            rssRepository.updateFeed(selectedFeed.id)
           } else {
             rssRepository.updateFeeds()
           }

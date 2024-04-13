@@ -113,7 +113,7 @@ internal fun PostsList(
           onClick = { onPostClicked(post) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
           onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
-          onPostSourceClick = { onPostSourceClick(post.feedLink) },
+          onPostSourceClick = { onPostSourceClick(post.sourceId) },
           togglePostReadClick = { onTogglePostReadClick(post.id, post.read) }
         )
       } else {

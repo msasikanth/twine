@@ -3,26 +3,26 @@ import kotlinx.datetime.Instant;
 
 CREATE TABLE bookmark (
   id TEXT NOT NULL PRIMARY KEY,
+  sourceId TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL,
-  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
-  feedName TEXT NOT NULL,
-  feedIcon TEXT NOT NULL,
-  feedLink TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
-  read INTEGER AS Boolean NOT NULL DEFAULT 0
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  read INTEGER AS Boolean NOT NULL DEFAULT 0,
+  feedName TEXT NOT NULL,
+  feedIcon TEXT NOT NULL
 );
 
 CREATE TRIGGER IF NOT EXISTS
 post_bookmarked
 AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
 BEGIN
-  INSERT OR REPLACE INTO bookmark(id, title, description, imageUrl, date, link, bookmarked, commentsLink, feedName, feedIcon, feedLink, read)
-  SELECT new.id, new.title, new.description, new.imageUrl, new.date, new.link, new.bookmarked, new.commentsLink, feed.name, feed.icon, feed.link, new.read
-  FROM feed WHERE link == new.feedLink;
+  INSERT OR REPLACE INTO bookmark(id, sourceId, title, description, imageUrl, date, link, commentsLink, bookmarked, read, feedName, feedIcon)
+  SELECT new.id, new.sourceId, new.title, new.description, new.imageUrl, new.date, new.link, new.commentsLink, new.bookmarked, new.read, feed.name, feed.icon
+  FROM feed WHERE feed.id == new.sourceId;
 END;
 
 CREATE TRIGGER IF NOT EXISTS

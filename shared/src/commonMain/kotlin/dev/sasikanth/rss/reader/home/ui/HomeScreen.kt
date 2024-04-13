@@ -166,8 +166,8 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           onPostCommentsClick = { commentsLink ->
             coroutineScope.launch { linkHandler.openLink(commentsLink) }
           },
-          onPostSourceClick = { feedLink ->
-            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedLink))
+          onPostSourceClick = { feedId ->
+            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
           },
           onNoFeedsSwipeUp = { coroutineScope.launch { bottomSheetState.expand() } },
           onTogglePostReadStatus = { postId, postRead ->

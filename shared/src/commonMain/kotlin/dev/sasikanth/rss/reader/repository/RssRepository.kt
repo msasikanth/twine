@@ -73,13 +73,16 @@ class RssRepository(
         is FeedFetchResult.Success -> {
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
+            val feedId = nameBasedUuidOf(feedPayload.link).toString()
+
             feedQueries.upsert(
               name = title ?: feedPayload.name,
               icon = feedPayload.icon,
               description = feedPayload.description,
               homepageLink = feedPayload.homepageLink,
               createdAt = Clock.System.now(),
-              link = feedPayload.link
+              link = feedPayload.link,
+              id = feedId
             )
 
             postQueries.transaction {
@@ -91,13 +94,13 @@ class RssRepository(
                 if (post.date > feedLastCleanUpAtEpochMilli) {
                   postQueries.upsert(
                     id = nameBasedUuidOf(post.link).toString(),
+                    sourceId = feedId,
                     title = post.title,
                     description = post.description,
                     imageUrl = post.imageUrl,
                     date = Instant.fromEpochMilliseconds(post.date),
                     link = post.link,
                     commnetsLink = post.commentsLink,
-                    feedLink = feedPayload.link,
                     rawContent = post.rawContent
                   )
                 }
@@ -142,9 +145,9 @@ class RssRepository(
     results.flatten().joinAll()
   }
 
-  suspend fun updateFeed(selectedFeedLink: String) {
+  suspend fun updateFeed(selectedFeedId: String) {
     withContext(ioDispatcher) {
-      val feed = feedQueries.feed(selectedFeedLink).executeAsOneOrNull()
+      val feed = feedQueries.feed(selectedFeedId).executeAsOneOrNull()
       if (feed != null) {
         addFeed(feedLink = feed.link, transformUrl = false, feedLastCleanUpAt = feed.lastCleanUpAt)
       }
@@ -152,13 +155,13 @@ class RssRepository(
   }
 
   fun featuredPosts(
-    selectedFeedLink: String?,
+    selectedFeedId: String?,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST
   ): Flow<List<PostWithMetadata>> {
     return postQueries
       .featuredPosts(
-        feedLink = selectedFeedLink,
+        sourceId = selectedFeedId,
         unreadOnly = unreadOnly,
         postsAfter = after,
         limit = NUMBER_OF_FEATURED_POSTS,
@@ -169,14 +172,14 @@ class RssRepository(
   }
 
   fun posts(
-    selectedFeedLink: String?,
+    selectedFeedId: String?,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
         postQueries.count(
-          feedLink = selectedFeedLink,
+          sourceId = selectedFeedId,
           featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
           unreadOnly = unreadOnly,
           postsAfter = after,
@@ -185,7 +188,7 @@ class RssRepository(
       context = ioDispatcher,
       queryProvider = { limit, offset ->
         postQueries.posts(
-          feedLink = selectedFeedLink,
+          sourceId = selectedFeedId,
           featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
           unreadOnly = unreadOnly,
           postsAfter = after,
@@ -250,16 +253,18 @@ class RssRepository(
       feedQueries
         .feeds(
           mapper = {
+            id: String,
             name: String,
             icon: String,
             description: String,
+            link: String,
             homepageLink: String,
             createdAt: Instant,
-            link: String,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean ->
             Feed(
+              id = id,
               name = name,
               icon = icon,
               description = description,
@@ -299,24 +304,26 @@ class RssRepository(
     )
   }
 
-  suspend fun feed(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Feed> {
+  suspend fun feed(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Feed> {
     return withContext(ioDispatcher) {
       feedQueries
         .feedWithUnreadPostsCount(
-          link = feedLink,
+          id = feedId,
           postsAfter = postsAfter,
           mapper = {
+            id: String,
             name: String,
             icon: String,
             description: String,
+            link: String,
             homepageLink: String,
             createdAt: Instant,
-            link: String,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
             numberOfUnreadPosts: Long ->
             Feed(
+              id = id,
               name = name,
               icon = icon,
               description = description,
@@ -335,24 +342,26 @@ class RssRepository(
     }
   }
 
-  suspend fun feedBlocking(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
+  suspend fun feedBlocking(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
     return withContext(ioDispatcher) {
       feedQueries
         .feedWithUnreadPostsCount(
-          link = feedLink,
+          id = feedId,
           postsAfter = postsAfter,
           mapper = {
+            id: String,
             name: String,
             icon: String,
             description: String,
+            link: String,
             homepageLink: String,
             createdAt: Instant,
-            link: String,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
             numberOfUnreadPosts: Long ->
             Feed(
+              id = id,
               name = name,
               icon = icon,
               description = description,
@@ -370,18 +379,18 @@ class RssRepository(
     }
   }
 
-  suspend fun removeFeed(feedLink: String) {
-    withContext(ioDispatcher) { feedQueries.remove(feedLink) }
+  suspend fun removeFeed(feedId: String) {
+    withContext(ioDispatcher) { feedQueries.remove(feedId) }
   }
 
   suspend fun removeFeeds(feeds: Set<Feed>) {
     withContext(ioDispatcher) {
-      feedQueries.transaction { feeds.forEach { feed -> feedQueries.remove(feed.link) } }
+      feedQueries.transaction { feeds.forEach { feed -> feedQueries.remove(feed.id) } }
     }
   }
 
-  suspend fun updateFeedName(newFeedName: String, feedLink: String) {
-    withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedLink) }
+  suspend fun updateFeedName(newFeedName: String, feedId: String) {
+    withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedId) }
   }
 
   fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
@@ -414,12 +423,12 @@ class RssRepository(
     )
   }
 
-  suspend fun hasPost(link: String): Boolean {
-    return withContext(ioDispatcher) { postQueries.hasPost(link).executeAsOne() }
+  suspend fun hasPost(id: String): Boolean {
+    return withContext(ioDispatcher) { postQueries.hasPost(id).executeAsOne() }
   }
 
-  suspend fun hasFeed(link: String): Boolean {
-    return withContext(ioDispatcher) { feedQueries.hasFeed(link).executeAsOne() }
+  suspend fun hasFeed(id: String): Boolean {
+    return withContext(ioDispatcher) { feedQueries.hasFeed(id).executeAsOne() }
   }
 
   suspend fun toggleFeedPinStatus(feed: Feed) {
@@ -429,14 +438,14 @@ class RssRepository(
       } else {
         null
       }
-    withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
+    withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
   }
 
   suspend fun pinFeeds(feeds: Set<Feed>) {
     val now = Clock.System.now()
     withContext(ioDispatcher) {
       feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = now, link = feed.link) }
+        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
       }
     }
   }
@@ -444,13 +453,9 @@ class RssRepository(
   suspend fun unPinFeeds(feeds: Set<Feed>) {
     withContext(ioDispatcher) {
       feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, link = feed.link) }
+        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, id = feed.id) }
       }
     }
-  }
-
-  fun numberOfPinnedFeeds(): Flow<Long> {
-    return feedQueries.numberOfPinnedFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
   fun hasFeeds(): Flow<Boolean> {
@@ -467,27 +472,27 @@ class RssRepository(
       .distinct()
   }
 
-  suspend fun updateFeedsLastCleanUpAt(feeds: List<String>) {
+  suspend fun updateFeedsLastCleanUpAt(feedIds: List<String>) {
     withContext(ioDispatcher) {
       feedQueries.transaction {
-        feeds.forEach { feedLink ->
-          feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now(), link = feedLink)
+        feedIds.forEach { feedId ->
+          feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now(), id = feedId)
         }
       }
     }
   }
 
-  suspend fun markPostsInFeedAsRead(feedLink: String, postsAfter: Instant = Instant.DISTANT_PAST) {
-    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedLink, postsAfter) }
+  suspend fun markPostsInFeedAsRead(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST) {
+    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedId, postsAfter) }
   }
 
   suspend fun post(postId: String): Post {
     return withContext(ioDispatcher) { postQueries.post(postId, ::Post).executeAsOne() }
   }
 
-  suspend fun updateFeedAlwaysFetchSource(feedLink: String, newValue: Boolean) {
+  suspend fun updateFeedAlwaysFetchSource(feedId: String, newValue: Boolean) {
     return withContext(ioDispatcher) {
-      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedLink)
+      feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
     }
   }
 

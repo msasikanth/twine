@@ -3,24 +3,24 @@ import kotlinx.datetime.Instant;
 
 CREATE TABLE post(
   id TEXT NOT NULL PRIMARY KEY,
+  sourceId TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
+  rawContent TEXT,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
-  feedLink TEXT NOT NULL,
   link TEXT NOT NULL,
-  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   commentsLink TEXT DEFAULT NULL,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
-  rawContent TEXT,
-  FOREIGN KEY(feedLink) REFERENCES feed(link) ON DELETE CASCADE
+  FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
 );
 
-CREATE INDEX post_feed_link_index ON post(feedLink);
+CREATE INDEX post_source_id_index ON post(sourceId);
 
 upsert:
-INSERT INTO post(id, title, description, rawContent, imageUrl, date, feedLink, link, commentsLink)
-VALUES (:id, :title, :description,  :rawContent, :imageUrl, :date, :feedLink, :link, :commnetsLink)
+INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
+VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
 ON CONFLICT(id) DO
 UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl, date = excluded.date;
 
@@ -28,13 +28,13 @@ count:
 SELECT COUNT(*) FROM post
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
   -- Skip featured posts --
   post.id NOT IN (
     SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-    (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+    (:sourceId IS NULL OR post.sourceId = :sourceId) AND
     post.imageUrl IS NOT NULL AND
     post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
@@ -46,22 +46,22 @@ ORDER BY post.date DESC;
 featuredPosts:
 SELECT
   post.id,
+  sourceId,
   post.title,
   post.description,
   post.imageUrl,
   post.date,
   post.link,
-  post.bookmarked,
-  feed.name AS feedName,
-  feed.icon AS feedIcon,
-  feedLink,
   post.commentsLink,
-  post.read
+  post.bookmarked,
+  post.read,
+  feed.name AS feedName,
+  feed.icon AS feedIcon
 FROM post
-INNER JOIN feed ON post.feedLink == feed.link
+INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
   post.imageUrl IS NOT NULL AND
   post.date > :postsAfter
 ORDER BY post.date DESC LIMIT :limit;
@@ -69,28 +69,28 @@ ORDER BY post.date DESC LIMIT :limit;
 posts:
 SELECT
   post.id,
+  sourceId,
   post.title,
   post.description,
   post.imageUrl,
   post.date,
   post.link,
-  post.bookmarked,
-  feed.name AS feedName,
-  feed.icon AS feedIcon,
-  feedLink,
   post.commentsLink,
-  post.read
+  post.bookmarked,
+  post.read,
+  feed.name AS feedName,
+  feed.icon AS feedIcon
 FROM post
-INNER JOIN feed ON post.feedLink == feed.link
+INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
   -- Skip featured posts --
   post.id NOT IN (
     SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-    (:feedLink IS NULL OR post.feedLink = :feedLink) AND
+    (:sourceId IS NULL OR post.sourceId = :sourceId) AND
     post.imageUrl IS NOT NULL AND
     post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
@@ -109,12 +109,12 @@ UPDATE post SET read = :read WHERE id = :id;
 deleteReadPosts:
 DELETE FROM post
 WHERE post.read == 1 AND post.date < :before
-RETURNING post.feedLink;
+RETURNING post.sourceId;
 
 markPostsInFeedAsRead:
 UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE feedLink = :feedLink AND date > :after;
+WHERE sourceId = :sourceId AND date > :after;
 
 post:
 SELECT * FROM post

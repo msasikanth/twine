@@ -125,7 +125,7 @@ class BookmarksPresenter(
     ) {
       coroutineScope.launch {
         val hasPost = rssRepository.hasPost(post.id)
-        val hasFeed = rssRepository.hasFeed(post.feedLink)
+        val hasFeed = rssRepository.hasFeed(post.sourceId)
 
         if (hasPost && hasFeed) {
           openReaderView(post)
@@ -137,7 +137,7 @@ class BookmarksPresenter(
 
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
-        if (rssRepository.hasFeed(post.feedLink)) {
+        if (rssRepository.hasFeed(post.sourceId)) {
           rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
         } else {
           rssRepository.deleteBookmark(id = post.id)

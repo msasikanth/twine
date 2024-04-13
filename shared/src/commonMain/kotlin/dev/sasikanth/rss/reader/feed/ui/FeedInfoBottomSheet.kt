@@ -45,7 +45,6 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -54,7 +53,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -138,7 +136,7 @@ fun FeedInfoBottomSheet(
           feed = feed,
           onFeedNameChange = { newFeedName ->
             feedPresenter.dispatch(
-              FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedLink = feed.link)
+              FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedId = feed.id)
             )
           }
         )
@@ -148,15 +146,15 @@ fun FeedInfoBottomSheet(
         FeedUnreadCount(
           modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
           numberOfUnreadPosts = feed.numberOfUnreadPosts,
-          onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.link)) }
+          onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
         )
 
         Divider(horizontalInsets = HORIZONTAL_PADDING)
 
         AlwaysFetchSourceArticleSwitch(
           feed = feed,
-          onValueChanged = { newValue, feedLink ->
-            feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedLink))
+          onValueChanged = { newValue, feedId ->
+            feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
           }
         )
 
@@ -354,7 +352,7 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
 private fun AlwaysFetchSourceArticleSwitch(
   feed: Feed,
   modifier: Modifier = Modifier,
-  onValueChanged: (newValue: Boolean, feedLink: String) -> Unit
+  onValueChanged: (newValue: Boolean, feedId: String) -> Unit
 ) {
   var checked by
     remember(feed.alwaysFetchSourceArticle) { mutableStateOf(feed.alwaysFetchSourceArticle) }
@@ -363,7 +361,7 @@ private fun AlwaysFetchSourceArticleSwitch(
     modifier =
       Modifier.clickable {
           checked = !checked
-          onValueChanged(checked, feed.link)
+          onValueChanged(checked, feed.id)
         }
         .padding(vertical = 16.dp, horizontal = HORIZONTAL_PADDING),
     verticalAlignment = Alignment.CenterVertically
@@ -380,7 +378,7 @@ private fun AlwaysFetchSourceArticleSwitch(
     Switch(
       modifier = modifier,
       checked = checked,
-      onCheckedChange = { newValue -> onValueChanged(newValue, feed.link) }
+      onCheckedChange = { newValue -> onValueChanged(newValue, feed.id) }
     )
   }
 }

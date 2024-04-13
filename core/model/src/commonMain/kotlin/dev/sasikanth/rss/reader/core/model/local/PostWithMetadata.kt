@@ -21,15 +21,15 @@ import kotlinx.datetime.Instant
 @Immutable
 data class PostWithMetadata(
   val id: String,
+  val sourceId: String,
   val title: String,
   val description: String,
   val imageUrl: String?,
   val date: Instant,
   val link: String,
+  val commentsLink: String?,
   val bookmarked: Boolean,
+  val read: Boolean,
   val feedName: String,
   val feedIcon: String,
-  val feedLink: String,
-  val commentsLink: String?,
-  val read: Boolean,
 )

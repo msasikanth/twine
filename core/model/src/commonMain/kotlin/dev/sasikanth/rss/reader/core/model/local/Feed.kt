@@ -20,12 +20,13 @@ import kotlinx.datetime.Instant
 
 @Immutable
 data class Feed(
+  val id: String,
   val name: String,
   val icon: String,
   val description: String,
+  val link: String,
   val homepageLink: String,
   val createdAt: Instant,
-  val link: String,
   val pinnedAt: Instant?,
   val lastCleanUpAt: Instant? = null,
   val numberOfUnreadPosts: Long = 0L,

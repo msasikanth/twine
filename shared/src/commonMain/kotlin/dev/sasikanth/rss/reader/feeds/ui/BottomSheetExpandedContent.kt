@@ -77,7 +77,6 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
-import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
@@ -351,8 +350,8 @@ private fun LazyGridScope.feedSearchResults(
 ) {
   items(
     count = searchResults.itemCount,
-    key = searchResults.itemKey { it.link },
-    contentType = searchResults.itemContentType { it.link },
+    key = searchResults.itemKey { "SearchResult:${it.id}" },
+    contentType = { "FeedListItem" },
     span = { gridItemSpan }
   ) { index ->
     val feed = searchResults[index]
@@ -403,7 +402,7 @@ private fun LazyGridScope.allFeeds(
 
     items(
       count = feeds.itemCount,
-      key = feeds.itemKey { it.link },
+      key = feeds.itemKey { it.id },
       contentType = { "FeedListItem" },
       span = { gridItemSpan }
     ) { index ->
@@ -456,7 +455,7 @@ private fun LazyGridScope.pinnedFeeds(
     if (isPinnedSectionExpanded) {
       items(
         count = pinnedFeeds.itemCount,
-        key = pinnedFeeds.itemKey { "PinnedFeed:${it.link}" },
+        key = pinnedFeeds.itemKey { "PinnedFeed:${it.id}" },
         contentType = { "FeedListItem" },
         span = { gridItemSpan }
       ) { index ->
