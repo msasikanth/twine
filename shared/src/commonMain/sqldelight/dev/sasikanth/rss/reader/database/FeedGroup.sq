@@ -10,6 +10,9 @@ CREATE TABLE IF NOT EXISTS feed_group(
   updatedAt INTEGER AS Instant NOT NULL
 );
 
+count:
+SELECT COUNT(*) FROM feed_group;
+
 groups:
 SELECT
   id,
