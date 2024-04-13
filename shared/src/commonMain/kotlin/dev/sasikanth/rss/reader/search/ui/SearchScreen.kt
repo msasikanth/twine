@@ -148,7 +148,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
                   // no-op
                 },
                 togglePostReadClick = {
-                  searchPresenter.dispatch(SearchEvent.TogglePostReadStatus(post.link, post.read))
+                  searchPresenter.dispatch(SearchEvent.TogglePostReadStatus(post.id, post.read))
                 }
               )
 

@@ -2,11 +2,12 @@ import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE bookmark (
+  id TEXT NOT NULL PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
-  link TEXT NOT NULL PRIMARY KEY,
+  link TEXT NOT NULL,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   feedName TEXT NOT NULL,
   feedIcon TEXT NOT NULL,
@@ -19,15 +20,15 @@ CREATE TRIGGER IF NOT EXISTS
 post_bookmarked
 AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
 BEGIN
-  INSERT OR REPLACE INTO bookmark(title, description, imageUrl, date, link, bookmarked, commentsLink, feedName, feedIcon, feedLink, read)
-  SELECT new.title, new.description, new.imageUrl, new.date, new.link, new.bookmarked, new.commentsLink, feed.name, feed.icon, feed.link, new.read
+  INSERT OR REPLACE INTO bookmark(id, title, description, imageUrl, date, link, bookmarked, commentsLink, feedName, feedIcon, feedLink, read)
+  SELECT new.id, new.title, new.description, new.imageUrl, new.date, new.link, new.bookmarked, new.commentsLink, feed.name, feed.icon, feed.link, new.read
   FROM feed WHERE link == new.feedLink;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_unbookmarked
 AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 0
-BEGIN DELETE FROM bookmark WHERE link = new.link;
+BEGIN DELETE FROM bookmark WHERE id = new.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
@@ -35,13 +36,8 @@ post_content_update
 AFTER UPDATE OF title, description, imageUrl, date, read ON post WHEN new.bookmarked == 1
 BEGIN
   UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date, commentsLink = new.commentsLink, read = new.read
-  WHERE link = new.link;
+  WHERE id = new.id;
 END;
-
-/**
-TODO: Create trigger for updating post read status when bookmark read status is updated
-When created we didn't had UI for that feature
-*/
 
 countBookmarks:
 SELECT COUNT(*) FROM bookmark;
@@ -51,4 +47,4 @@ SELECT * FROM bookmark ORDER BY date DESC
 LIMIT :limit OFFSET :offset;
 
 deleteBookmark:
-DELETE FROM bookmark WHERE link = :link;
+DELETE FROM bookmark WHERE id = :id;

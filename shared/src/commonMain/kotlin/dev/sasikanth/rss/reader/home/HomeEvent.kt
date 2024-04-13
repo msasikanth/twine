@@ -50,5 +50,5 @@ sealed interface HomeEvent {
 
   data object SettingsClicked : HomeEvent
 
-  data class TogglePostReadStatus(val postLink: String, val postRead: Boolean) : HomeEvent
+  data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : HomeEvent
 }

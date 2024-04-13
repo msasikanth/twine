@@ -2,12 +2,13 @@ import kotlin.Boolean;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE post(
+  id TEXT NOT NULL PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
   feedLink TEXT NOT NULL,
-  link TEXT NOT NULL PRIMARY KEY,
+  link TEXT NOT NULL,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   commentsLink TEXT DEFAULT NULL,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
@@ -18,9 +19,9 @@ CREATE TABLE post(
 CREATE INDEX post_feed_link_index ON post(feedLink);
 
 upsert:
-INSERT INTO post(title, description, rawContent, imageUrl, date, feedLink, link, commentsLink)
-VALUES (:title, :description,  :rawContent, :imageUrl, :date, :feedLink, :link, :commnetsLink)
-ON CONFLICT(link) DO
+INSERT INTO post(id, title, description, rawContent, imageUrl, date, feedLink, link, commentsLink)
+VALUES (:id, :title, :description,  :rawContent, :imageUrl, :date, :feedLink, :link, :commnetsLink)
+ON CONFLICT(id) DO
 UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl, date = excluded.date;
 
 count:
@@ -29,8 +30,8 @@ WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (:feedLink IS NULL OR post.feedLink = :feedLink) AND
   -- Skip featured posts --
-  post.link NOT IN (
-    SELECT post.link FROM post
+  post.id NOT IN (
+    SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     (:feedLink IS NULL OR post.feedLink = :feedLink) AND
@@ -44,6 +45,7 @@ ORDER BY post.date DESC;
 
 featuredPosts:
 SELECT
+  post.id,
   post.title,
   post.description,
   post.imageUrl,
@@ -66,6 +68,7 @@ ORDER BY post.date DESC LIMIT :limit;
 
 posts:
 SELECT
+  post.id,
   post.title,
   post.description,
   post.imageUrl,
@@ -83,8 +86,8 @@ WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (:feedLink IS NULL OR post.feedLink = :feedLink) AND
   -- Skip featured posts --
-  post.link NOT IN (
-    SELECT post.link FROM post
+  post.id NOT IN (
+    SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     (:feedLink IS NULL OR post.feedLink = :feedLink) AND
@@ -98,10 +101,10 @@ ORDER BY post.date DESC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
-UPDATE post SET bookmarked = :bookmarked WHERE link = :link;
+UPDATE post SET bookmarked = :bookmarked WHERE id = :id;
 
 updateReadStatus:
-UPDATE post SET read = :read WHERE link = :link;
+UPDATE post SET read = :read WHERE id = :id;
 
 deleteReadPosts:
 DELETE FROM post
@@ -115,7 +118,13 @@ WHERE feedLink = :feedLink AND date > :after;
 
 post:
 SELECT * FROM post
-WHERE post.link = :link;
+WHERE post.id = :id;
 
 hasPost:
-SELECT EXISTS(SELECT 1 FROM post WHERE link = :link);
+SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
+
+allPostsBlocking:
+SELECT * FROM post;
+
+updatePostId:
+UPDATE post SET id = :newId WHERE id = :oldId;

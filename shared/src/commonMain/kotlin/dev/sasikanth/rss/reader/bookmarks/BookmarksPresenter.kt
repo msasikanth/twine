@@ -43,7 +43,7 @@ internal typealias BookmarksPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
-    openReaderView: (String) -> Unit,
+    openReaderView: (PostWithMetadata) -> Unit,
   ) -> BookmarksPresenter
 
 @Inject
@@ -52,7 +52,7 @@ class BookmarksPresenter(
   private val rssRepository: RssRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openReaderView: (postLink: String) -> Unit,
+  @Assisted private val openReaderView: (post: PostWithMetadata) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -110,28 +110,25 @@ class BookmarksPresenter(
         is BookmarksEvent.OnPostClicked -> {
           // no-op
         }
-        is BookmarksEvent.TogglePostReadStatus ->
-          togglePostReadStatus(event.postLink, event.postRead)
+        is BookmarksEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
       }
     }
 
-    private fun togglePostReadStatus(postLink: String, postRead: Boolean) {
-      coroutineScope.launch {
-        rssRepository.updatePostReadStatus(read = !postRead, link = postLink)
-      }
+    private fun togglePostReadStatus(postId: String, postRead: Boolean) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
     }
 
     fun onPostClicked(
       post: PostWithMetadata,
-      openReaderView: (postLink: String) -> Unit,
+      openReaderView: (post: PostWithMetadata) -> Unit,
       openLink: (postLink: String) -> Unit
     ) {
       coroutineScope.launch {
-        val hasPost = rssRepository.hasPost(post.link)
+        val hasPost = rssRepository.hasPost(post.id)
         val hasFeed = rssRepository.hasFeed(post.feedLink)
 
         if (hasPost && hasFeed) {
-          openReaderView(post.link)
+          openReaderView(post)
         } else {
           openLink(post.link)
         }
@@ -141,9 +138,9 @@ class BookmarksPresenter(
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
         if (rssRepository.hasFeed(post.feedLink)) {
-          rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, link = post.link)
+          rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
         } else {
-          rssRepository.deleteBookmark(link = post.link)
+          rssRepository.deleteBookmark(id = post.id)
         }
       }
     }

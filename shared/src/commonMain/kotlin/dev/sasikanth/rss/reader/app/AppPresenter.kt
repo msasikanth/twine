@@ -33,6 +33,7 @@ import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.essenty.lifecycle.doOnStart
 import dev.sasikanth.rss.reader.about.AboutPresenterFactory
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
@@ -160,21 +161,21 @@ class AppPresenter(
       }
       is Config.Reader -> {
         Screen.Reader(
-          presenter = readerPresenter(config.postLink, componentContext) { navigation.pop() }
+          presenter = readerPresenter(config.postId, componentContext) { navigation.pop() }
         )
       }
     }
 
-  private fun openPost(postLink: String) {
+  private fun openPost(post: PostWithMetadata) {
     scope.launch {
       val showReaderView =
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        navigation.push(Config.Reader(postLink))
+        navigation.push(Config.Reader(post.id))
       } else {
-        linkHandler.openLink(postLink)
-        rssRepository.updatePostReadStatus(read = true, link = postLink)
+        linkHandler.openLink(post.link)
+        rssRepository.updatePostReadStatus(read = true, id = post.id)
       }
     }
   }
@@ -214,7 +215,7 @@ class AppPresenter(
 
     @Serializable data object About : Config
 
-    @Serializable data class Reader(val postLink: String) : Config
+    @Serializable data class Reader(val postId: String) : Config
   }
 
   @Serializable

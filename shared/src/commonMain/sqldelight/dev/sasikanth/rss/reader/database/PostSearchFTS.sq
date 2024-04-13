@@ -1,26 +1,27 @@
 CREATE VIRTUAL TABLE IF NOT EXISTS post_search USING FTS5(
-    title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    link TEXT NOT NULL PRIMARY KEY UNINDEXED,
-    tokenize="trigram"
+  id TEXT NOT NULL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  link TEXT NOT NULL,
+  tokenize="trigram"
 );
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_BEFORE_DELETE
 BEFORE DELETE ON post
-BEGIN DELETE FROM post_search WHERE link = old.link;
+BEGIN DELETE FROM post_search WHERE id = old.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_UPDATE
 AFTER UPDATE ON post
-BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE link = new.link;
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
 END;
 
 CREATE TRIGGER IF NOT EXISTS
 post_search_fts_AFTER_INSERT
 AFTER INSERT ON post
-BEGIN INSERT OR IGNORE INTO post_search(title, description, link) VALUES (new.title, new.description, new.link);
+BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (new.id, new.title, new.description, new.link);
 END;
 
 countSearchResults:
@@ -28,6 +29,7 @@ SELECT COUNT(*) FROM post_search WHERE post_search MATCH :searchQuery;
 
 search:
 SELECT
+  post.id,
   post_search.title,
   post_search.description,
   post.imageUrl,
@@ -40,7 +42,7 @@ SELECT
   post.commentsLink,
   post.read
 FROM post_search
-INNER JOIN post ON post.link == post_search.link
+INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.feedLink == feed.link
 WHERE post_search MATCH :searchQuery
 ORDER BY

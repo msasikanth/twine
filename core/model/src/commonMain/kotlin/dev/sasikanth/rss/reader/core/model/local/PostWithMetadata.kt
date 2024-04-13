@@ -20,6 +20,7 @@ import kotlinx.datetime.Instant
 
 @Immutable
 data class PostWithMetadata(
+  val id: String,
   val title: String,
   val description: String,
   val imageUrl: String?,
