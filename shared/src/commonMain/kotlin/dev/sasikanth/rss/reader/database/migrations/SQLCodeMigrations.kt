@@ -61,14 +61,14 @@ object SQLCodeMigrations {
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE post SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
+      sql = "UPDATE bookmark SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
       parameters = 0,
       binders = null
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE bookmark SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
+      sql = "UPDATE post SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
       parameters = 0,
       binders = null
     )
@@ -76,10 +76,9 @@ object SQLCodeMigrations {
 
   private fun migratePostLinkIdsToUuid(driver: SqlDriver, oldPostId: String) {
     val newPostId = nameBasedUuidOf(oldPostId).toString()
-
     driver.execute(
       identifier = null,
-      sql = "UPDATE post SET id = '$newPostId' WHERE id = '$oldPostId'",
+      sql = "UPDATE bookmark SET id = '$newPostId' WHERE id = '$oldPostId'",
       parameters = 0,
       binders = null
     )
@@ -93,7 +92,7 @@ object SQLCodeMigrations {
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE bookmark SET id = '$newPostId' WHERE id = '$oldPostId'",
+      sql = "UPDATE post SET id = '$newPostId' WHERE id = '$oldPostId'",
       parameters = 0,
       binders = null
     )
