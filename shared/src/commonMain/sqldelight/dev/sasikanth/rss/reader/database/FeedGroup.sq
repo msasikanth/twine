@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS feedGroup(
   name TEXT NOT NULL,
   feedIds TEXT AS List<String> NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
-  updatedAt INTEGER AS Instant NOT NULL
+  updatedAt INTEGER AS Instant NOT NULL,
+  pinnedAt INTEGER AS Instant
 );
 
 count:
