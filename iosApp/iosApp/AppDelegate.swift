@@ -66,7 +66,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
                 let feedsDeletedFrom = try await applicationComponent.rssRepository.deleteReadPosts(before: before)
                 if !feedsDeletedFrom.isEmpty {
-                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feeds: feedsDeletedFrom)
+                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom)
                 }
                 task.setTaskCompleted(success: true)
             } catch {
