@@ -515,14 +515,48 @@ class RssRepository(
             feedIds: List<String>,
             feedIcons: String,
             createdAt: Instant,
-            updatedAt: Instant ->
+            updatedAt: Instant,
+            pinnedAt: Instant? ->
             FeedGroup(
               id = id,
               name = name,
               feedIds = feedIds.toSet(),
               feedIcons = feedIcons.split(",").toSet(),
               createdAt = createdAt,
-              updatedAt = updatedAt
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt
+            )
+          }
+        )
+      }
+    )
+  }
+
+  fun pinnedFeedGroups(): PagingSource<Int, FeedGroup> {
+    return QueryPagingSource(
+      countQuery = feedGroupQueries.pinnedGroupsCount(),
+      transacter = feedGroupQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedGroupQueries.pinnedGroups(
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.toSet(),
+              feedIcons = feedIcons.split(",").toSet(),
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt
             )
           }
         )

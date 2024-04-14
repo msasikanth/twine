@@ -25,5 +25,6 @@ data class FeedGroup(
   val feedIcons: Set<String>,
   val createdAt: Instant,
   val updatedAt: Instant,
+  val pinnedAt: Instant?,
   override val sourceType: SourceType = SourceType.FeedGroup
 ) : Source
