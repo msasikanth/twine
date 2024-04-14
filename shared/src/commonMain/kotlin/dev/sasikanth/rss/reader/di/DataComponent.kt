@@ -51,7 +51,8 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
         FeedGroup.Adapter(
           feedIdsAdapter = ListToStringAdapter,
           createdAtAdapter = DateAdapter,
-          updatedAtAdapter = DateAdapter
+          updatedAtAdapter = DateAdapter,
+          pinnedAtAdapter = DateAdapter
         )
     )
   }
