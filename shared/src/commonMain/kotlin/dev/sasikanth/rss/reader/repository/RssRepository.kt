@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.database.BookmarkQueries
@@ -33,6 +34,7 @@ import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
+import dev.sasikanth.rss.reader.database.TransactionRunner
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -50,6 +52,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class RssRepository(
   private val feedFetcher: FeedFetcher,
+  private val transactionRunner: TransactionRunner,
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
@@ -387,12 +390,6 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.remove(feedId) }
   }
 
-  suspend fun removeFeeds(feeds: List<Feed>) {
-    withContext(ioDispatcher) {
-      feedQueries.transaction { feeds.forEach { feed -> feedQueries.remove(feed.id) } }
-    }
-  }
-
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
     withContext(ioDispatcher) { feedQueries.updateFeedName(newFeedName, feedId) }
   }
@@ -443,23 +440,6 @@ class RssRepository(
         null
       }
     withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
-  }
-
-  suspend fun pinFeeds(feeds: List<Feed>) {
-    val now = Clock.System.now()
-    withContext(ioDispatcher) {
-      feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
-      }
-    }
-  }
-
-  suspend fun unPinFeeds(feeds: List<Feed>) {
-    withContext(ioDispatcher) {
-      feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, id = feed.id) }
-      }
-    }
   }
 
   fun hasFeeds(): Flow<Boolean> {
@@ -588,28 +568,36 @@ class RssRepository(
     withContext(ioDispatcher) { feedGroupQueries.deleteGroup(groupId) }
   }
 
-  suspend fun unpinFeedGroups(groups: List<FeedGroup>) {
+  suspend fun pinSources(sources: Set<Source>) {
     withContext(ioDispatcher) {
-      feedGroupQueries.transaction {
-        groups.forEach { group -> feedGroupQueries.updatePinnedAt(pinnedAt = null, id = group.id) }
-      }
-    }
-  }
-
-  suspend fun pinFeedGroups(groups: List<FeedGroup>) {
-    withContext(ioDispatcher) {
-      feedGroupQueries.transaction {
-        groups.forEach { group ->
-          feedGroupQueries.updatePinnedAt(pinnedAt = Clock.System.now(), id = group.id)
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          val pinnedAt = Clock.System.now()
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
         }
       }
     }
   }
 
-  suspend fun removeFeedGroups(groups: List<FeedGroup>) {
+  suspend fun unpinSources(sources: Set<Source>) {
     withContext(ioDispatcher) {
-      feedGroupQueries.transaction {
-        groups.forEach { group -> feedGroupQueries.deleteGroup(id = group.id) }
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = null)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = null)
+        }
+      }
+    }
+  }
+
+  suspend fun deleteSources(sources: Set<Source>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          feedQueries.remove(id = source.id)
+          feedGroupQueries.deleteGroup(id = source.id)
+        }
       }
     }
   }

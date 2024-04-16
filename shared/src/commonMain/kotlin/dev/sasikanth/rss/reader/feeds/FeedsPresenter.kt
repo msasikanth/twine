@@ -172,26 +172,20 @@ class FeedsPresenter(
 
     private fun onUnpinSelectedFeeds() {
       coroutineScope
-        .launch {
-          rssRepository.unPinFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
-        }
-        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+        .launch { rssRepository.unpinSources(_state.value.selectedSources) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
     private fun onPinSelectedFeeds() {
       coroutineScope
-        .launch {
-          rssRepository.pinFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
-        }
-        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+        .launch { rssRepository.pinSources(_state.value.selectedSources) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
     private fun onDeleteSelectedFeeds() {
       coroutineScope
-        .launch {
-          rssRepository.removeFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
-        }
-        .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
+        .launch { rssRepository.deleteSources(_state.value.selectedSources) }
+        .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
     private fun onCancelFeedsSelection() {
