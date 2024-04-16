@@ -36,7 +36,9 @@ class IOSLinkHandler(
   private val settingsRepository: SettingsRepository,
 ) : LinkHandler {
 
-  override suspend fun openLink(link: String) {
+  override suspend fun openLink(link: String?) {
+    if (link.isNullOrBlank()) return
+
     val browserType = settingsRepository.browserType.first()
     val url = NSURL(string = link)
 
