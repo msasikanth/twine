@@ -147,5 +147,12 @@ val EnTwineStrings =
     actionUnpin = "Unpin",
     actionDelete = "Delete",
     createGroup = "Create group",
-    groupNameHint = "Name"
+    groupNameHint = "Name",
+    feedGroupNoFeeds = "No feeds",
+    feedGroupFeeds = { numberOfFeeds ->
+      when (numberOfFeeds) {
+        1 -> "$numberOfFeeds feed"
+        else -> "$numberOfFeeds feeds"
+      }
+    },
   )

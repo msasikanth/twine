@@ -140,5 +140,12 @@ val DeTwineStrings =
     actionUnpin = "Loslösen",
     actionDelete = "Löschen",
     createGroup = "Gruppe erstellen",
-    groupNameHint = "Name"
+    groupNameHint = "Name",
+    feedGroupNoFeeds = "Keine Feeds",
+    feedGroupFeeds = { numberOfFeeds ->
+      when (numberOfFeeds) {
+        1 -> "$numberOfFeeds feed"
+        else -> "$numberOfFeeds feeds"
+      }
+    },
   )

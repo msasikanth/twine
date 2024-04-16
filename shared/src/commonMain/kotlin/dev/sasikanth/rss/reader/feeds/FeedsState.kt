@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.feeds
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -30,6 +31,8 @@ internal data class FeedsState(
   val feedsInExpandedView: Flow<PagingData<Feed>>,
   val pinnedFeeds: Flow<PagingData<Feed>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
+  val feedGroups: Flow<PagingData<FeedGroup>>,
+  val pinnedFeedGroups: Flow<PagingData<FeedGroup>>,
   val activeSource: Source?,
   val canShowUnreadPostsCount: Boolean,
   val feedsViewMode: FeedsViewMode,
@@ -49,6 +52,8 @@ internal data class FeedsState(
         feedsInExpandedView = emptyFlow(),
         pinnedFeeds = emptyFlow(),
         feedsSearchResults = emptyFlow(),
+        feedGroups = emptyFlow(),
+        pinnedFeedGroups = emptyFlow(),
         activeSource = null,
         canShowUnreadPostsCount = false,
         feedsViewMode = FeedsViewMode.List,

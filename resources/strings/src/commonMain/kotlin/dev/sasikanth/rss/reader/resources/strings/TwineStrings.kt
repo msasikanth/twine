@@ -133,6 +133,8 @@ data class TwineStrings(
   val actionDelete: String,
   val createGroup: String,
   val groupNameHint: String,
+  val feedGroupNoFeeds: String,
+  val feedGroupFeeds: (Int) -> String,
 )
 
 object Locales {

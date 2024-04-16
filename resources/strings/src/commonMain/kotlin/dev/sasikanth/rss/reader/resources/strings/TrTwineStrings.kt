@@ -136,5 +136,12 @@ val TrTwineStrings =
     actionUnpin = "Sabitlemeyi Kaldır",
     actionDelete = "Sil",
     createGroup = "Grup oluştur",
-    groupNameHint = "İsim"
+    groupNameHint = "İsim",
+    feedGroupNoFeeds = "Besleme yok",
+    feedGroupFeeds = { numberOfFeeds ->
+      when (numberOfFeeds) {
+        1 -> "$numberOfFeeds feed"
+        else -> "$numberOfFeeds feeds"
+      }
+    },
   )

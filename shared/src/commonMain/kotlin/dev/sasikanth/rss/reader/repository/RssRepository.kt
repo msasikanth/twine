@@ -500,8 +500,8 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.toSet(),
-              feedIcons = feedIcons.split(",").toSet(),
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt
@@ -532,8 +532,8 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.toSet(),
-              feedIcons = feedIcons.split(",").toSet(),
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt

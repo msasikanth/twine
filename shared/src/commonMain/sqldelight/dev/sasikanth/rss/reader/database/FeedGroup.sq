@@ -24,7 +24,7 @@ SELECT
   feedIds,
   COALESCE((SELECT GROUP_CONCAT(feed.icon)
               FROM feed
-              WHERE feed.id IN (feedGroup.feedIds)
+              WHERE INSTR(feedGroup.feedIds, feed.id)
               LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt,
@@ -39,7 +39,7 @@ SELECT
   feedIds,
   COALESCE((SELECT GROUP_CONCAT(feed.icon)
               FROM feed
-              WHERE feed.id IN (feedGroup.feedIds)
+              WHERE INSTR(feedGroup.feedIds, feed.id)
               LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt,

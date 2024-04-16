@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
@@ -83,6 +84,7 @@ import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.icons.Delete
@@ -100,6 +102,8 @@ internal fun BottomSheetExpandedContent(
   pinnedFeeds: LazyPagingItems<Feed>,
   searchResults: LazyPagingItems<Feed>,
   selectedSources: Set<Source>,
+  feedGroups: LazyPagingItems<FeedGroup>,
+  pinnedFeedGroups: LazyPagingItems<FeedGroup>,
   searchQuery: TextFieldValue,
   feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
@@ -218,6 +222,7 @@ internal fun BottomSheetExpandedContent(
       ) {
         pinnedFeeds(
           pinnedFeeds = pinnedFeeds,
+          pinnedFeedGroups = pinnedFeedGroups,
           selectedSources = selectedSources,
           isPinnedSectionExpanded = isPinnedSectionExpanded,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
@@ -230,6 +235,7 @@ internal fun BottomSheetExpandedContent(
 
         allFeeds(
           feeds = feeds,
+          feedGroups = feedGroups,
           selectedSources = selectedSources,
           feedsSortOrder = feedsSortOrder,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
@@ -389,6 +395,7 @@ private fun LazyGridScope.feedSearchResults(
 
 private fun LazyGridScope.allFeeds(
   feeds: LazyPagingItems<Feed>,
+  feedGroups: LazyPagingItems<FeedGroup>,
   selectedSources: Set<Source>,
   feedsSortOrder: FeedsOrderBy,
   canShowUnreadPostsCount: Boolean,
@@ -405,6 +412,42 @@ private fun LazyGridScope.allFeeds(
         feedsSortOrder = feedsSortOrder,
         onFeedsSortChanged = onFeedsSortChanged
       )
+    }
+
+    if (feedGroups.itemCount > 0) {
+      val feedGroupGridItemSpan = GridItemSpan(1)
+
+      items(
+        count = feedGroups.itemCount,
+        key = feedGroups.itemKey { it.id },
+        contentType = { "FeedGroupItem" },
+        span = { feedGroupGridItemSpan }
+      ) { index ->
+        val feedGroup = feedGroups[index]
+        if (feedGroup != null) {
+          val startPadding = startPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+          val endPadding = endPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+          val topPadding = topPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+          val bottomPadding = bottomPaddingOfFeedListItem(index, feedGroups.itemCount)
+
+          FeedGroupItem(
+            modifier =
+              Modifier.padding(
+                start = startPadding,
+                top = topPadding,
+                end = endPadding,
+                bottom = bottomPadding
+              ),
+            feedGroup = feedGroup,
+            isInMultiSelectMode = isInMultiSelectMode,
+            selected = selectedSources.contains(feedGroup),
+            onFeedGroupSelected = onToggleSourceSelection,
+            onFeedGroupClick = onSourceClick
+          )
+        }
+      }
+
+      item(span = { GridItemSpan(2) }) { Spacer(Modifier.requiredHeight(40.dp)) }
     }
 
     items(
@@ -442,6 +485,7 @@ private fun LazyGridScope.allFeeds(
 
 private fun LazyGridScope.pinnedFeeds(
   pinnedFeeds: LazyPagingItems<Feed>,
+  pinnedFeedGroups: LazyPagingItems<FeedGroup>,
   selectedSources: Set<Source>,
   isPinnedSectionExpanded: Boolean,
   canShowUnreadPostsCount: Boolean,
@@ -460,6 +504,39 @@ private fun LazyGridScope.pinnedFeeds(
     }
 
     if (isPinnedSectionExpanded) {
+
+      items(
+        count = pinnedFeedGroups.itemCount,
+        key = pinnedFeedGroups.itemKey { "PinnedFeedGroup:${it.id}" },
+        contentType = { "FeedGroupItem" },
+        span = { gridItemSpan }
+      ) { index ->
+        val feedGroup = pinnedFeedGroups[index]
+        if (feedGroup != null) {
+          val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
+          val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
+          val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
+          val bottomPadding = bottomPaddingOfFeedListItem(index, pinnedFeedGroups.itemCount)
+
+          FeedGroupItem(
+            modifier =
+              Modifier.padding(
+                start = startPadding,
+                top = topPadding,
+                end = endPadding,
+                bottom = bottomPadding
+              ),
+            feedGroup = feedGroup,
+            isInMultiSelectMode = isInMultiSelectMode,
+            selected = selectedSources.contains(feedGroup),
+            onFeedGroupSelected = onToggleSourceSelection,
+            onFeedGroupClick = onSourceClick
+          )
+        }
+      }
+
+      item(span = { GridItemSpan(2) }) { Box(Modifier.fillMaxWidth().requiredHeight(8.dp)) }
+
       items(
         count = pinnedFeeds.itemCount,
         key = pinnedFeeds.itemKey { "PinnedFeed:${it.id}" },

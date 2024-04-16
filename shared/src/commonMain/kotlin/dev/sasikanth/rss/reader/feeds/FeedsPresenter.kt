@@ -334,6 +334,18 @@ class FeedsPresenter(
           _state.update { it.copy(feedsInExpandedView = feeds) }
         }
         .launchIn(coroutineScope)
+
+      val feedGroups =
+        createPager(config = createPagingConfig(20)) { rssRepository.feedGroups() }
+          .flow
+          .cachedIn(coroutineScope)
+
+      val pinnedFeedGroups =
+        createPager(config = createPagingConfig(20)) { rssRepository.pinnedFeedGroups() }
+          .flow
+          .cachedIn(coroutineScope)
+
+      _state.update { it.copy(feedGroups = feedGroups, pinnedFeedGroups = pinnedFeedGroups) }
     }
 
     private fun observeFeedsForCollapsedSheet() {

@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
 
@@ -37,6 +38,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun BottomSheetCollapsedContent(
   feeds: LazyPagingItems<Feed>,
+  feedGroups: LazyPagingItems<FeedGroup>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -73,6 +75,17 @@ internal fun BottomSheetCollapsedContent(
             }
             .padding(end = 4.dp)
       )
+    }
+
+    items(feedGroups.itemCount) { index ->
+      val feedGroup = feedGroups[index]
+      if (feedGroup != null) {
+        FeedGroupBottomBarItem(
+          feedGroup = feedGroup,
+          selected = activeSource?.id == feedGroup.id,
+          onClick = { onSourceClick(feedGroup) }
+        )
+      }
     }
 
     items(feeds.itemCount) { index ->

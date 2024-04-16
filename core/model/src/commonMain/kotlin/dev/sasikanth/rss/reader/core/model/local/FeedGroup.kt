@@ -21,8 +21,8 @@ import kotlinx.datetime.Instant
 data class FeedGroup(
   override val id: String,
   val name: String,
-  val feedIds: Set<String>,
-  val feedIcons: Set<String>,
+  val feedIds: List<String>,
+  val feedIcons: List<String>,
   val createdAt: Instant,
   val updatedAt: Instant,
   override val pinnedAt: Instant?,
