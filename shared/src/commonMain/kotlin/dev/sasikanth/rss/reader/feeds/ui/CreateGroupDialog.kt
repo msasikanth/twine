@@ -86,6 +86,7 @@ internal fun CreateGroupDialog(
         modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
         value = groupName,
         onValueChange = { groupName = it },
+        maxLines = 1,
         placeholder = {
           Text(
             text = LocalStrings.current.groupNameHint,
