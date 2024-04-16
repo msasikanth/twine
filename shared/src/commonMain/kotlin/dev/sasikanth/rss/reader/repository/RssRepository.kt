@@ -387,7 +387,7 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.remove(feedId) }
   }
 
-  suspend fun removeFeeds(feeds: Set<Feed>) {
+  suspend fun removeFeeds(feeds: List<Feed>) {
     withContext(ioDispatcher) {
       feedQueries.transaction { feeds.forEach { feed -> feedQueries.remove(feed.id) } }
     }
@@ -445,7 +445,7 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
   }
 
-  suspend fun pinFeeds(feeds: Set<Feed>) {
+  suspend fun pinFeeds(feeds: List<Feed>) {
     val now = Clock.System.now()
     withContext(ioDispatcher) {
       feedQueries.transaction {
@@ -454,7 +454,7 @@ class RssRepository(
     }
   }
 
-  suspend fun unPinFeeds(feeds: Set<Feed>) {
+  suspend fun unPinFeeds(feeds: List<Feed>) {
     withContext(ioDispatcher) {
       feedQueries.transaction {
         feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, id = feed.id) }
