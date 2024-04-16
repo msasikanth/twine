@@ -31,7 +31,9 @@ import platform.UIKit.popoverPresentationController
 class IOSShareHandler(private val viewControllerProvider: () -> UIViewController) : ShareHandler {
 
   @OptIn(ExperimentalForeignApi::class)
-  override fun share(content: String) {
+  override fun share(content: String?) {
+    if (content.isNullOrBlank()) return
+
     val viewController = viewControllerProvider()
     val items = listOf(content)
     val activityController = UIActivityViewController(items, null)

@@ -25,7 +25,9 @@ import me.tatarka.inject.annotations.Inject
 @ActivityScope
 class AndroidShareHandler(private val activity: ComponentActivity) : ShareHandler {
 
-  override fun share(content: String) {
+  override fun share(content: String?) {
+    if (content.isNullOrBlank()) return
+
     val sendIntent =
       Intent().apply {
         action = Intent.ACTION_SEND

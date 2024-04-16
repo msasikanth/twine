@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.share
 import androidx.compose.runtime.staticCompositionLocalOf
 
 interface ShareHandler {
-  fun share(content: String)
+  fun share(content: String?)
 }
 
 val LocalShareHandler =
