@@ -402,7 +402,17 @@ class RssRepository(
   }
 
   suspend fun removeFeed(feedId: String) {
-    withContext(ioDispatcher) { feedQueries.remove(feedId) }
+    withContext(ioDispatcher) {
+      feedQueries.remove(feedId)
+      val feedGroup = feedGroupQueries.groupByFeedId(feedId).executeAsOneOrNull()
+
+      if (feedGroup != null) {
+        feedGroupQueries.updateFeedIds(
+          feedIds = feedGroup.feedIds - setOf(feedId),
+          id = feedGroup.id
+        )
+      }
+    }
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
@@ -612,6 +622,17 @@ class RssRepository(
         sources.forEach { source ->
           feedQueries.remove(id = source.id)
           feedGroupQueries.deleteGroup(id = source.id)
+
+          if (source is Feed) {
+            val feedGroup = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsOneOrNull()
+
+            if (feedGroup != null) {
+              feedGroupQueries.updateFeedIds(
+                feedIds = feedGroup.feedIds - setOf(source.id),
+                id = feedGroup.id
+              )
+            }
+          }
         }
       }
     }
