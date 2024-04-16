@@ -174,7 +174,7 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
           }
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link) } }) {
+            IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link!!) } }) {
               Icon(TwineIcons.Share, contentDescription = null)
             }
           }

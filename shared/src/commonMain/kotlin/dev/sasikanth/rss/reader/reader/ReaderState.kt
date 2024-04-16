@@ -21,7 +21,8 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 
 @Immutable
 internal data class ReaderState(
-  val link: String,
+  val postId: String,
+  val link: String?,
   val title: String?,
   val content: String?,
   val publishedAt: String?,
@@ -36,9 +37,10 @@ internal data class ReaderState(
 
   companion object {
 
-    fun default(link: String) =
+    fun default(postId: String) =
       ReaderState(
-        link = link,
+        postId = postId,
+        link = null,
         title = null,
         content = null,
         publishedAt = null,

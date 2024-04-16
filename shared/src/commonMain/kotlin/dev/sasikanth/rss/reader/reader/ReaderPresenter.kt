@@ -135,6 +135,7 @@ class ReaderPresenter(
 
         _state.update {
           it.copy(
+            link = post.link,
             title = post.title,
             publishedAt = post.date.relativeDurationString(),
             isBookmarked = post.bookmarked,
@@ -151,10 +152,9 @@ class ReaderPresenter(
       }
     }
 
-    private suspend fun extractArticleHtmlContent(postId: String, content: String): String {
-      val post = rssRepository.post(postId)
+    private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
       val article =
-        withContext(dispatchersProvider.io) { Readability(post.id, content).parse() }
+        withContext(dispatchersProvider.io) { Readability(postLink, content).parse() }
           ?: return content
       val articleContent = article.content
 
@@ -181,22 +181,25 @@ class ReaderPresenter(
       _state.update { it.copy(postMode = InProgress) }
       val post = rssRepository.post(postId)
       val postContent = post.rawContent ?: post.description
-      val htmlContent = extractArticleHtmlContent(postId, postContent)
+      val htmlContent = extractArticleHtmlContent(post.link, postContent)
       _state.update { it.copy(content = htmlContent, postMode = RssContent) }
     }
 
     private suspend fun loadSourceArticle() {
-      _state.update { it.copy(postMode = InProgress) }
-      val content = postSourceFetcher.fetch(postId)
+      val postLink = _state.value.link
+      if (!postLink.isNullOrBlank()) {
+        _state.update { it.copy(postMode = InProgress) }
+        val content = postSourceFetcher.fetch(postLink)
 
-      if (content.isSuccess) {
-        val htmlContent = extractArticleHtmlContent(postId, content.getOrThrow())
-        _state.update { it.copy(content = htmlContent) }
-      } else {
-        loadRssContent()
+        if (content.isSuccess) {
+          val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
+          _state.update { it.copy(content = htmlContent) }
+        } else {
+          loadRssContent()
+        }
+
+        _state.update { it.copy(postMode = Source) }
       }
-
-      _state.update { it.copy(postMode = Source) }
     }
   }
 }
