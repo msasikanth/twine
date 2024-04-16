@@ -29,6 +29,8 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
+import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -386,12 +388,10 @@ class HomePresenter(
       coroutineScope.launch {
         _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
         try {
-          val selectedSource = _state.value.activeSource
-          if (selectedSource != null) {
-            // TODO: Handle updating feed groups
-            rssRepository.updateFeed(selectedSource.id)
-          } else {
-            rssRepository.updateFeeds()
+          when (val selectedSource = _state.value.activeSource) {
+            is FeedGroup -> rssRepository.updateGroup(selectedSource.feedIds)
+            is Feed -> rssRepository.updateFeed(selectedSource.id)
+            else -> rssRepository.updateFeeds()
           }
         } catch (e: Exception) {
           BugsnagKotlin.logMessage("RefreshContent")

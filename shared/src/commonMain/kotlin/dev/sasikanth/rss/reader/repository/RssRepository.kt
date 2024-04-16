@@ -161,6 +161,21 @@ class RssRepository(
     }
   }
 
+  suspend fun updateGroup(feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      feedIds.forEach { feedId ->
+        val feed = feedQueries.feed(feedId).executeAsOneOrNull()
+        if (feed != null) {
+          addFeed(
+            feedLink = feed.link,
+            transformUrl = false,
+            feedLastCleanUpAt = feed.lastCleanUpAt
+          )
+        }
+      }
+    }
+  }
+
   fun featuredPosts(
     selectedFeedId: String?,
     unreadOnly: Boolean? = null,
