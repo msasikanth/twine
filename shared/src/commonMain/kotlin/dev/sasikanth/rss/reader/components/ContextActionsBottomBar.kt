@@ -104,7 +104,7 @@ internal fun ContextActionItem(
         if (enabled) {
           AppTheme.colorScheme.tintedForeground
         } else {
-          AppTheme.colorScheme.onSurface
+          AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         }
 
       Icon(
