@@ -75,26 +75,33 @@ internal fun ContextActionItem(
   icon: ImageVector,
   label: String,
   modifier: Modifier = Modifier,
+  enabled: Boolean = true,
   onClick: () -> Unit,
 ) {
   Box(
-    Modifier.clip(MaterialTheme.shapes.large).clickable { onClick() }.padding(12.dp).then(modifier)
+    Modifier.clip(MaterialTheme.shapes.large)
+      .clickable(enabled = enabled) { onClick() }
+      .padding(12.dp)
+      .then(modifier)
   ) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+      val color =
+        if (enabled) {
+          AppTheme.colorScheme.tintedForeground
+        } else {
+          AppTheme.colorScheme.onSurface
+        }
+
       Icon(
         imageVector = icon,
         contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground,
+        tint = color,
         modifier = Modifier.requiredSize(20.dp)
       )
 
       Spacer(Modifier.requiredHeight(4.dp))
 
-      Text(
-        text = label,
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground
-      )
+      Text(text = label, style = MaterialTheme.typography.labelLarge, color = color)
     }
   }
 }
