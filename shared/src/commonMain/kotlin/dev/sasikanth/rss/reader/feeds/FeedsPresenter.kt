@@ -172,24 +172,30 @@ class FeedsPresenter(
 
     private fun onUnpinSelectedFeeds() {
       coroutineScope
-        .launch { rssRepository.unPinFeeds(_state.value.selectedFeeds) }
+        .launch {
+          rssRepository.unPinFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
+        }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
     }
 
     private fun onPinSelectedFeeds() {
       coroutineScope
-        .launch { rssRepository.pinFeeds(_state.value.selectedFeeds) }
+        .launch {
+          rssRepository.pinFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
+        }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
     }
 
     private fun onDeleteSelectedFeeds() {
       coroutineScope
-        .launch { rssRepository.removeFeeds(_state.value.selectedFeeds) }
+        .launch {
+          rssRepository.removeFeeds(_state.value.selectedSources.filterIsInstance<Feed>().toSet())
+        }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelFeedsSelection) }
     }
 
     private fun onCancelFeedsSelection() {
-      _state.update { it.copy(selectedFeeds = emptySet()) }
+      _state.update { it.copy(selectedSources = emptySet()) }
     }
 
     private fun onHomeSelected() {
@@ -249,11 +255,11 @@ class FeedsPresenter(
 
     private fun onToggleFeedSelection(feed: Feed) {
       _state.update {
-        val selectedFeeds = _state.value.selectedFeeds
+        val selectedFeeds = _state.value.selectedSources
         if (selectedFeeds.contains(feed)) {
-          it.copy(selectedFeeds = selectedFeeds - setOf(feed))
+          it.copy(selectedSources = selectedFeeds - setOf(feed))
         } else {
-          it.copy(selectedFeeds = selectedFeeds + setOf(feed))
+          it.copy(selectedSources = selectedFeeds + setOf(feed))
         }
       }
     }

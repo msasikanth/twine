@@ -72,7 +72,7 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInExpandedView.collectAsLazyPagingItems(),
         pinnedFeeds = state.pinnedFeeds.collectAsLazyPagingItems(),
         searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
-        selectedFeeds = state.selectedFeeds,
+        selectedSources = state.selectedSources,
         searchQuery = feedsPresenter.searchQuery,
         feedsSortOrder = state.feedsSortOrder,
         feedsViewMode = state.feedsViewMode,

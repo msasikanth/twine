@@ -83,6 +83,7 @@ import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.Pin
@@ -98,7 +99,7 @@ internal fun BottomSheetExpandedContent(
   feeds: LazyPagingItems<Feed>,
   pinnedFeeds: LazyPagingItems<Feed>,
   searchResults: LazyPagingItems<Feed>,
-  selectedFeeds: Set<Feed>,
+  selectedSources: Set<Source>,
   searchQuery: TextFieldValue,
   feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
@@ -153,7 +154,7 @@ internal fun BottomSheetExpandedContent(
           exit = slideOutVertically { it }
         ) {
           ContextActionsBottomBar(onCancel = onCancelFeedsSelection) {
-            val areSelectedFeedsPinned = selectedFeeds.all { it.pinnedAt != null }
+            val areSelectedFeedsPinned = selectedSources.all { it.pinnedAt != null }
             val label =
               if (areSelectedFeedsPinned) LocalStrings.current.actionUnpin
               else LocalStrings.current.actionPin
@@ -216,7 +217,7 @@ internal fun BottomSheetExpandedContent(
       ) {
         pinnedFeeds(
           pinnedFeeds = pinnedFeeds,
-          selectedFeeds = selectedFeeds,
+          selectedSources = selectedSources,
           isPinnedSectionExpanded = isPinnedSectionExpanded,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
@@ -228,7 +229,7 @@ internal fun BottomSheetExpandedContent(
 
         allFeeds(
           feeds = feeds,
-          selectedFeeds = selectedFeeds,
+          selectedSources = selectedSources,
           feedsSortOrder = feedsSortOrder,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
@@ -240,7 +241,7 @@ internal fun BottomSheetExpandedContent(
       } else {
         feedSearchResults(
           searchResults = searchResults,
-          selectedFeeds = selectedFeeds,
+          selectedSources = selectedSources,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
           gridItemSpan = gridItemSpan,
@@ -346,7 +347,7 @@ private fun SearchBar(
 
 private fun LazyGridScope.feedSearchResults(
   searchResults: LazyPagingItems<Feed>,
-  selectedFeeds: Set<Feed>,
+  selectedSources: Set<Source>,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
   gridItemSpan: GridItemSpan,
@@ -370,7 +371,7 @@ private fun LazyGridScope.feedSearchResults(
         feed = feed,
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         isInMultiSelectMode = isInMultiSelectMode,
-        isFeedSelected = selectedFeeds.contains(feed),
+        isFeedSelected = selectedSources.contains(feed),
         onFeedClick = onFeedClick,
         onFeedSelected = onToggleFeedSelection,
         modifier =
@@ -387,7 +388,7 @@ private fun LazyGridScope.feedSearchResults(
 
 private fun LazyGridScope.allFeeds(
   feeds: LazyPagingItems<Feed>,
-  selectedFeeds: Set<Feed>,
+  selectedSources: Set<Source>,
   feedsSortOrder: FeedsOrderBy,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
@@ -422,7 +423,7 @@ private fun LazyGridScope.allFeeds(
           feed = feed,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
-          isFeedSelected = selectedFeeds.contains(feed),
+          isFeedSelected = selectedSources.contains(feed),
           onFeedClick = onFeedClick,
           onFeedSelected = onToggleFeedSelection,
           modifier =
@@ -440,7 +441,7 @@ private fun LazyGridScope.allFeeds(
 
 private fun LazyGridScope.pinnedFeeds(
   pinnedFeeds: LazyPagingItems<Feed>,
-  selectedFeeds: Set<Feed>,
+  selectedSources: Set<Source>,
   isPinnedSectionExpanded: Boolean,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
@@ -475,7 +476,7 @@ private fun LazyGridScope.pinnedFeeds(
             feed = feed,
             canShowUnreadPostsCount = canShowUnreadPostsCount,
             isInMultiSelectMode = isInMultiSelectMode,
-            isFeedSelected = selectedFeeds.contains(feed),
+            isFeedSelected = selectedSources.contains(feed),
             onFeedClick = onFeedClick,
             onFeedSelected = onToggleFeedSelection,
             modifier =

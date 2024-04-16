@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.feeds
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import kotlinx.coroutines.flow.Flow
@@ -34,11 +35,11 @@ internal data class FeedsState(
   val feedsViewMode: FeedsViewMode,
   val feedsSortOrder: FeedsOrderBy,
   val isPinnedSectionExpanded: Boolean,
-  val selectedFeeds: Set<Feed>,
+  val selectedSources: Set<Source>,
 ) {
 
   val isInMultiSelectMode: Boolean
-    get() = selectedFeeds.isNotEmpty()
+    get() = selectedSources.isNotEmpty()
 
   companion object {
 
@@ -53,7 +54,7 @@ internal data class FeedsState(
         feedsViewMode = FeedsViewMode.List,
         feedsSortOrder = FeedsOrderBy.Latest,
         isPinnedSectionExpanded = true,
-        selectedFeeds = emptySet()
+        selectedSources = emptySet()
       )
   }
 }
