@@ -56,7 +56,7 @@ internal fun FeedGroupBottomBarItem(
         contentAlignment = Alignment.Center
       ) {
         val icons = feedGroup.feedIcons
-        FeedGroupIconGrid(icons)
+        FeedGroupIconGrid(modifier = Modifier.matchParentSize(), icons = icons)
       }
     }
 
