@@ -60,3 +60,6 @@ UPDATE feedGroup SET feedIds = :feedIds WHERE id = :id;
 
 deleteGroup:
 DELETE FROM feedGroup WHERE id = :id;
+
+updatePinnedAt:
+UPDATE feedGroup SET pinnedAt = :pinnedAt WHERE id = :id;
