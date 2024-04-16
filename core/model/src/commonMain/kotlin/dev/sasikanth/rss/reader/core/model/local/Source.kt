@@ -16,9 +16,12 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
+import kotlinx.datetime.Instant
+
 interface Source {
   val id: String
   val sourceType: SourceType
+  val pinnedAt: Instant?
 }
 
 enum class SourceType {
