@@ -17,6 +17,8 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -35,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 
@@ -87,6 +91,12 @@ internal fun CreateGroupDialog(
         value = groupName,
         onValueChange = { groupName = it },
         maxLines = 1,
+        keyboardOptions =
+          KeyboardOptions(
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Done,
+          ),
+        keyboardActions = KeyboardActions(onDone = { onCreateGroup(groupName) }),
         placeholder = {
           Text(
             text = LocalStrings.current.groupNameHint,
