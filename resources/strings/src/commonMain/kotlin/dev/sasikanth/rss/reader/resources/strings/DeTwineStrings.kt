@@ -139,6 +139,8 @@ val DeTwineStrings =
     actionPin = "Anpinnen",
     actionUnpin = "Loslösen",
     actionDelete = "Löschen",
+    actionAddTo = "Hinzufügen zu",
+    actionMoveTo = "Ziehen nach",
     createGroup = "Gruppe erstellen",
     groupNameHint = "Name",
     feedGroupNoFeeds = "Keine Feeds",
@@ -148,4 +150,5 @@ val DeTwineStrings =
         else -> "$numberOfFeeds feeds"
       }
     },
+    actionGroupsTooltip = "Gruppen können nicht innerhalb anderer Gruppen sein.",
   )

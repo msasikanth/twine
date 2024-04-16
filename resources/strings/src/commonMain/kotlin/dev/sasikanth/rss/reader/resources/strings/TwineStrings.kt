@@ -131,10 +131,13 @@ data class TwineStrings(
   val actionPin: String,
   val actionUnpin: String,
   val actionDelete: String,
+  val actionAddTo: String,
+  val actionMoveTo: String,
   val createGroup: String,
   val groupNameHint: String,
   val feedGroupNoFeeds: String,
   val feedGroupFeeds: (Int) -> String,
+  val actionGroupsTooltip: String,
 )
 
 object Locales {

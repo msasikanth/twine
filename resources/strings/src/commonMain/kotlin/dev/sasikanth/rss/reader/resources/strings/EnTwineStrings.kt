@@ -146,6 +146,8 @@ val EnTwineStrings =
     actionPin = "Pin",
     actionUnpin = "Unpin",
     actionDelete = "Delete",
+    actionAddTo = "Add to",
+    actionMoveTo = "Move to",
     createGroup = "Create group",
     groupNameHint = "Name",
     feedGroupNoFeeds = "No feeds",
@@ -155,4 +157,5 @@ val EnTwineStrings =
         else -> "$numberOfFeeds feeds"
       }
     },
+    actionGroupsTooltip = "Groups cannot be inside other groups.",
   )

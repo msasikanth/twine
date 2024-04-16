@@ -88,6 +88,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.icons.Delete
+import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -157,7 +158,15 @@ internal fun BottomSheetExpandedContent(
           enter = slideInVertically { it },
           exit = slideOutVertically { it }
         ) {
-          ContextActionsBottomBar(onCancel = onCancelFeedsSelection) {
+          val areGroupsSelected = selectedSources.any { it is FeedGroup }
+          val tooltip: @Composable (() -> Unit)? =
+            if (areGroupsSelected) {
+              { Text(text = LocalStrings.current.actionGroupsTooltip) }
+            } else {
+              null
+            }
+
+          ContextActionsBottomBar(tooltip = tooltip, onCancel = onCancelFeedsSelection) {
             val areSelectedFeedsPinned = selectedSources.all { it.pinnedAt != null }
 
             val label =
@@ -174,6 +183,16 @@ internal fun BottomSheetExpandedContent(
                 } else {
                   onPinSelectedFeeds()
                 }
+              }
+            )
+
+            ContextActionItem(
+              modifier = Modifier.weight(1f),
+              icon = TwineIcons.NewGroup,
+              label = LocalStrings.current.actionAddTo,
+              enabled = !areGroupsSelected,
+              onClick = {
+                // TODO: Show group selection dialog
               }
             )
 

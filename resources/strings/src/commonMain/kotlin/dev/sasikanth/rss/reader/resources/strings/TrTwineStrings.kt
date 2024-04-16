@@ -134,6 +134,8 @@ val TrTwineStrings =
     feedsBottomBarNewFeed = "Yeni besleme",
     actionPin = "Sabitle",
     actionUnpin = "Sabitlemeyi Kaldır",
+    actionAddTo = "a ekle",
+    actionMoveTo = "Taşınmak",
     actionDelete = "Sil",
     createGroup = "Grup oluştur",
     groupNameHint = "İsim",
@@ -144,4 +146,5 @@ val TrTwineStrings =
         else -> "$numberOfFeeds feeds"
       }
     },
+    actionGroupsTooltip = "Gruplar başka grupların içinde olamaz.",
   )
