@@ -38,7 +38,6 @@ internal fun FeedsBottomSheet(
   selectedFeedChanged: () -> Unit
 ) {
   val state by feedsPresenter.state.collectAsState()
-  val selectedFeed = state.selectedFeed
 
   LaunchedEffect(Unit) {
     feedsPresenter.effects.collect { effect ->
@@ -62,7 +61,7 @@ internal fun FeedsBottomSheet(
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
         feeds = state.feedsInBottomBar.collectAsLazyPagingItems(),
-        selectedFeed = selectedFeed,
+        activeSource = state.activeSource,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onFeedClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedClick(feed)) },
         onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }

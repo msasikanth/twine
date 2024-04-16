@@ -32,7 +32,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
-import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
+import dev.sasikanth.rss.reader.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -70,7 +70,7 @@ class FeedsPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
-  private val observableSelectedFeed: ObservableSelectedFeed,
+  private val observableActiveSource: ObservableActiveSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openFeedInfo: (String) -> Unit,
 ) : ComponentContext by componentContext {
@@ -81,7 +81,7 @@ class FeedsPresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
-        observableSelectedFeed = observableSelectedFeed
+        observableActiveSource = observableActiveSource
       )
     }
 
@@ -111,7 +111,7 @@ class FeedsPresenter(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
-    private val observableSelectedFeed: ObservableSelectedFeed
+    private val observableActiveSource: ObservableActiveSource
   ) : InstanceKeeper.Instance {
 
     var searchQuery by mutableStateOf(TextFieldValue())
@@ -161,8 +161,8 @@ class FeedsPresenter(
 
     private fun onFeedClicked(feed: Feed) {
       coroutineScope.launch {
-        if (_state.value.selectedFeed?.id != feed.id) {
-          observableSelectedFeed.selectFeed(feed)
+        if (_state.value.activeSource?.id != feed.id) {
+          observableActiveSource.changeActiveSource(feed)
         }
 
         effects.emit(FeedsEffect.SelectedFeedChanged)
@@ -199,7 +199,7 @@ class FeedsPresenter(
     }
 
     private fun onHomeSelected() {
-      coroutineScope.launch { observableSelectedFeed.clearSelection() }
+      coroutineScope.launch { observableActiveSource.clearSelection() }
     }
 
     private fun onChangeFeedsViewModeClick() {
@@ -247,8 +247,8 @@ class FeedsPresenter(
     private fun onDeleteFeed(feed: Feed) {
       coroutineScope.launch {
         rssRepository.removeFeed(feed.id)
-        if (_state.value.selectedFeed?.id == feed.id) {
-          observableSelectedFeed.clearSelection()
+        if (_state.value.activeSource?.id == feed.id) {
+          observableActiveSource.clearSelection()
         }
       }
     }
@@ -349,10 +349,10 @@ class FeedsPresenter(
           feedsPager(postsAfter, FeedsOrderBy.Pinned).cachedIn(coroutineScope)
         }
 
-      observableSelectedFeed.selectedFeed
+      observableActiveSource.activeSource
         .distinctUntilChanged()
         .onEach { selectedFeed ->
-          _state.update { it.copy(feedsInBottomBar = feeds, selectedFeed = selectedFeed) }
+          _state.update { it.copy(feedsInBottomBar = feeds, activeSource = selectedFeed) }
         }
         .launchIn(coroutineScope)
     }

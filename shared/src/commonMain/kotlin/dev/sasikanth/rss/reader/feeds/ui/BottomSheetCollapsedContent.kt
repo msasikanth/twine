@@ -30,13 +30,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun BottomSheetCollapsedContent(
   feeds: LazyPagingItems<Feed>,
-  selectedFeed: Feed?,
+  activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onFeedClick: (Feed) -> Unit,
   onHomeSelected: () -> Unit,
@@ -56,7 +57,7 @@ internal fun BottomSheetCollapsedContent(
         )
 
       HomeBottomBarItem(
-        selected = selectedFeed == null,
+        selected = activeSource == null,
         onClick = onHomeSelected,
         modifier =
           Modifier.drawWithCache {
@@ -82,7 +83,7 @@ internal fun BottomSheetCollapsedContent(
           badgeCount = feed.numberOfUnreadPosts,
           iconUrl = feed.icon,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
-          selected = selectedFeed?.id == feed.id,
+          selected = activeSource?.id == feed.id,
           onClick = { onFeedClick(feed) }
         )
       }

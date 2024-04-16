@@ -22,8 +22,8 @@ import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
-import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import kotlinx.collections.immutable.ImmutableList
@@ -35,7 +35,7 @@ internal data class HomeState(
   val posts: Flow<PagingData<PostWithMetadata>>?,
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
-  val selectedFeed: Feed?,
+  val activeSource: Source?,
   val feedFetchingState: FeedFetchingState,
   val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
@@ -50,7 +50,7 @@ internal data class HomeState(
         posts = null,
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
-        selectedFeed = null,
+        activeSource = null,
         feedFetchingState = FeedFetchingState.Idle,
         featuredItemBlurEnabled = true,
         hasFeeds = null,
@@ -58,14 +58,8 @@ internal data class HomeState(
       )
   }
 
-  val isAllFeedsSelected: Boolean
-    get() = selectedFeed == null
-
   val isRefreshing: Boolean
     get() = loadingState == Loading
-
-  val isFetchingFeed: Boolean
-    get() = feedFetchingState == FeedFetchingState.Loading
 }
 
 sealed interface HomeLoadingState {

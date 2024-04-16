@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.repository
 
-import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,17 +23,17 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class ObservableSelectedFeed {
+class ObservableActiveSource {
 
-  private val _selectedFeed = MutableStateFlow<Feed?>(null)
-  val selectedFeed: Flow<Feed?>
-    get() = _selectedFeed
+  private val _activeSources = MutableStateFlow<Source?>(null)
+  val activeSource: Flow<Source?>
+    get() = _activeSources
 
-  fun selectFeed(feed: Feed) {
-    _selectedFeed.value = feed
+  fun changeActiveSource(source: Source) {
+    _activeSources.value = source
   }
 
   fun clearSelection() {
-    _selectedFeed.value = null
+    _activeSources.value = null
   }
 }
