@@ -30,9 +30,12 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,10 +49,22 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 internal fun ContextActionsBottomBar(
   onCancel: () -> Unit,
   modifier: Modifier = Modifier,
+  tooltip: (@Composable () -> Unit)? = null,
   content: @Composable RowScope.() -> Unit,
 ) {
   BottomBarWithGradientShadow(modifier) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)) {
+      tooltip?.let { tooltip ->
+        Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+          CompositionLocalProvider(
+            LocalContentColor provides AppTheme.colorScheme.onSurfaceVariant,
+            LocalTextStyle provides MaterialTheme.typography.bodySmall
+          ) {
+            tooltip.invoke()
+          }
+        }
+      }
+
       Row(horizontalArrangement = Arrangement.spacedBy(8.dp), content = content)
 
       Spacer(Modifier.requiredHeight(4.dp))
