@@ -138,5 +138,7 @@ val DeTwineStrings =
     feedsBottomBarNewFeed = "Neuer Feed",
     actionPin = "Anpinnen",
     actionUnpin = "Loslösen",
-    actionDelete = "Löschen"
+    actionDelete = "Löschen",
+    createGroup = "Gruppe erstellen",
+    groupNameHint = "Name"
   )

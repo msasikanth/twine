@@ -54,4 +54,6 @@ sealed interface FeedsEvent {
   data object UnPinSelectedFeeds : FeedsEvent
 
   data object DeleteSelectedFeeds : FeedsEvent
+
+  data class OnCreateGroup(val name: String) : FeedsEvent
 }

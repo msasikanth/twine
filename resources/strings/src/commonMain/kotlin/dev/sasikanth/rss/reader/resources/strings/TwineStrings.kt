@@ -131,6 +131,8 @@ data class TwineStrings(
   val actionPin: String,
   val actionUnpin: String,
   val actionDelete: String,
+  val createGroup: String,
+  val groupNameHint: String,
 )
 
 object Locales {
