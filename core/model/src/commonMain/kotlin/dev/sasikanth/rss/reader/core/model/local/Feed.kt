@@ -27,7 +27,7 @@ data class Feed(
   val link: String,
   val homepageLink: String,
   val createdAt: Instant,
-  val pinnedAt: Instant?,
+  override val pinnedAt: Instant?,
   val lastCleanUpAt: Instant? = null,
   val numberOfUnreadPosts: Long = 0L,
   val alwaysFetchSourceArticle: Boolean = false,
