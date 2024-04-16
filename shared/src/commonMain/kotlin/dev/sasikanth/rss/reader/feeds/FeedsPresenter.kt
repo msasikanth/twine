@@ -29,6 +29,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -134,23 +135,23 @@ class FeedsPresenter(
         FeedsEvent.Init -> init()
         FeedsEvent.OnGoBackClicked -> onGoBackClicked()
         is FeedsEvent.OnDeleteFeed -> onDeleteFeed(event.feed)
-        is FeedsEvent.OnToggleFeedSelection -> onToggleFeedSelection(event.feed)
+        is FeedsEvent.OnToggleFeedSelection -> onToggleSourceSelection(event.source)
         is FeedsEvent.OnFeedNameUpdated -> onFeedNameUpdated(event.newFeedName, event.feedId)
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
         is FeedsEvent.OnFeedClick -> {
           // TODO: Remove once source page with posts is implemented
-          onFeedClicked(event.feed)
+          onSourceClicked(event.source)
         }
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
-        FeedsEvent.CancelFeedsSelection -> onCancelFeedsSelection()
-        FeedsEvent.DeleteSelectedFeeds -> onDeleteSelectedFeeds()
-        FeedsEvent.PinSelectedFeeds -> onPinSelectedFeeds()
-        FeedsEvent.UnPinSelectedFeeds -> onUnpinSelectedFeeds()
+        FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
+        FeedsEvent.DeleteSelectedSources -> onDeleteSelectedSources()
+        FeedsEvent.PinSelectedSources -> onPinSelectedSources()
+        FeedsEvent.UnPinSelectedSources -> onUnpinSelectedSources()
         is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
       }
     }
@@ -159,10 +160,10 @@ class FeedsPresenter(
       coroutineScope.launch { rssRepository.createGroup(name) }
     }
 
-    private fun onFeedClicked(feed: Feed) {
+    private fun onSourceClicked(source: Source) {
       coroutineScope.launch {
-        if (_state.value.activeSource?.id != feed.id) {
-          observableActiveSource.changeActiveSource(feed)
+        if (_state.value.activeSource?.id != source.id) {
+          observableActiveSource.changeActiveSource(source)
         }
 
         effects.emit(FeedsEffect.SelectedFeedChanged)
@@ -170,25 +171,25 @@ class FeedsPresenter(
       }
     }
 
-    private fun onUnpinSelectedFeeds() {
+    private fun onUnpinSelectedSources() {
       coroutineScope
         .launch { rssRepository.unpinSources(_state.value.selectedSources) }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
-    private fun onPinSelectedFeeds() {
+    private fun onPinSelectedSources() {
       coroutineScope
         .launch { rssRepository.pinSources(_state.value.selectedSources) }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
-    private fun onDeleteSelectedFeeds() {
+    private fun onDeleteSelectedSources() {
       coroutineScope
         .launch { rssRepository.deleteSources(_state.value.selectedSources) }
         .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
-    private fun onCancelFeedsSelection() {
+    private fun onCancelSourcesSelection() {
       _state.update { it.copy(selectedSources = emptySet()) }
     }
 
@@ -247,13 +248,13 @@ class FeedsPresenter(
       }
     }
 
-    private fun onToggleFeedSelection(feed: Feed) {
+    private fun onToggleSourceSelection(source: Source) {
       _state.update {
         val selectedFeeds = _state.value.selectedSources
-        if (selectedFeeds.contains(feed)) {
-          it.copy(selectedSources = selectedFeeds - setOf(feed))
+        if (selectedFeeds.contains(source)) {
+          it.copy(selectedSources = selectedFeeds - setOf(source))
         } else {
-          it.copy(selectedSources = selectedFeeds + setOf(feed))
+          it.copy(selectedSources = selectedFeeds + setOf(source))
         }
       }
     }

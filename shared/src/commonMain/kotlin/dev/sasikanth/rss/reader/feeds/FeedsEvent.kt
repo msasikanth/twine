@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.feeds
 
 import androidx.compose.ui.text.input.TextFieldValue
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 
 sealed interface FeedsEvent {
@@ -27,7 +28,7 @@ sealed interface FeedsEvent {
 
   data class OnDeleteFeed(val feed: Feed) : FeedsEvent
 
-  data class OnToggleFeedSelection(val feed: Feed) : FeedsEvent
+  data class OnToggleFeedSelection(val source: Source) : FeedsEvent
 
   data class OnFeedNameUpdated(val newFeedName: String, val feedId: String) : FeedsEvent
 
@@ -37,7 +38,7 @@ sealed interface FeedsEvent {
 
   data object ClearSearchQuery : FeedsEvent
 
-  data class OnFeedClick(val feed: Feed) : FeedsEvent
+  data class OnFeedClick(val source: Source) : FeedsEvent
 
   data class OnFeedSortOrderChanged(val feedsOrderBy: FeedsOrderBy) : FeedsEvent
 
@@ -47,13 +48,13 @@ sealed interface FeedsEvent {
 
   data object OnHomeSelected : FeedsEvent
 
-  data object CancelFeedsSelection : FeedsEvent
+  data object CancelSourcesSelection : FeedsEvent
 
-  data object PinSelectedFeeds : FeedsEvent
+  data object PinSelectedSources : FeedsEvent
 
-  data object UnPinSelectedFeeds : FeedsEvent
+  data object UnPinSelectedSources : FeedsEvent
 
-  data object DeleteSelectedFeeds : FeedsEvent
+  data object DeleteSelectedSources : FeedsEvent
 
   data class OnCreateGroup(val name: String) : FeedsEvent
 }

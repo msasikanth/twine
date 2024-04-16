@@ -101,7 +101,7 @@ class HomePresenter(
 
   private val backCallback = BackCallback {
     if (feedsPresenter.state.value.isInMultiSelectMode) {
-      feedsPresenter.dispatch(FeedsEvent.CancelFeedsSelection)
+      feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
       return@BackCallback
     }
 

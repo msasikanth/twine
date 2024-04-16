@@ -63,7 +63,7 @@ internal fun FeedsBottomSheet(
         feeds = state.feedsInBottomBar.collectAsLazyPagingItems(),
         activeSource = state.activeSource,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        onFeedClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedClick(feed)) },
+        onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedClick(feed)) },
         onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
       )
     } else {
@@ -81,16 +81,16 @@ internal fun FeedsBottomSheet(
         onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
         onFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedClick(it)) },
-        onToggleFeedSelection = { feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+        onToggleSourceSelection = { feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
         onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
         onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
         onChangeFeedsViewModeClick = {
           feedsPresenter.dispatch(FeedsEvent.OnChangeFeedsViewModeClick)
         },
-        onCancelFeedsSelection = { feedsPresenter.dispatch(FeedsEvent.CancelFeedsSelection) },
-        onPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.PinSelectedFeeds) },
-        onUnPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.UnPinSelectedFeeds) },
-        onDeleteSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedFeeds) },
+        onCancelFeedsSelection = { feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection) },
+        onPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.PinSelectedSources) },
+        onUnPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources) },
+        onDeleteSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) },
         onCreateGroup = { feedsPresenter.dispatch(FeedsEvent.OnCreateGroup(it)) },
         modifier =
           Modifier.graphicsLayer {

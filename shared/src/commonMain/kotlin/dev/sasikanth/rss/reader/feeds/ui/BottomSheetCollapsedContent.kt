@@ -39,7 +39,7 @@ internal fun BottomSheetCollapsedContent(
   feeds: LazyPagingItems<Feed>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
-  onFeedClick: (Feed) -> Unit,
+  onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -84,7 +84,7 @@ internal fun BottomSheetCollapsedContent(
           iconUrl = feed.icon,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           selected = activeSource?.id == feed.id,
-          onClick = { onFeedClick(feed) }
+          onClick = { onSourceClick(feed) }
         )
       }
     }

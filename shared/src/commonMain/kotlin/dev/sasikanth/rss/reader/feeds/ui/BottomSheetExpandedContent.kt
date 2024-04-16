@@ -108,8 +108,8 @@ internal fun BottomSheetExpandedContent(
   isInMultiSelectMode: Boolean,
   onSearchQueryChanged: (TextFieldValue) -> Unit,
   onClearSearchQuery: () -> Unit,
-  onFeedClick: (Feed) -> Unit,
-  onToggleFeedSelection: (Feed) -> Unit,
+  onFeedClick: (Source) -> Unit,
+  onToggleSourceSelection: (Source) -> Unit,
   onTogglePinnedSection: () -> Unit,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onChangeFeedsViewModeClick: () -> Unit,
@@ -155,6 +155,7 @@ internal fun BottomSheetExpandedContent(
         ) {
           ContextActionsBottomBar(onCancel = onCancelFeedsSelection) {
             val areSelectedFeedsPinned = selectedSources.all { it.pinnedAt != null }
+
             val label =
               if (areSelectedFeedsPinned) LocalStrings.current.actionUnpin
               else LocalStrings.current.actionPin
@@ -223,8 +224,8 @@ internal fun BottomSheetExpandedContent(
           isInMultiSelectMode = isInMultiSelectMode,
           gridItemSpan = gridItemSpan,
           onTogglePinnedSection = onTogglePinnedSection,
-          onFeedClick = onFeedClick,
-          onToggleFeedSelection = onToggleFeedSelection,
+          onSourceClick = onFeedClick,
+          onToggleSourceSelection = onToggleSourceSelection,
         )
 
         allFeeds(
@@ -235,8 +236,8 @@ internal fun BottomSheetExpandedContent(
           isInMultiSelectMode = isInMultiSelectMode,
           gridItemSpan = gridItemSpan,
           onFeedsSortChanged = onFeedsSortChanged,
-          onFeedClick = onFeedClick,
-          onToggleFeedSelection = onToggleFeedSelection
+          onSourceClick = onFeedClick,
+          onToggleSourceSelection = onToggleSourceSelection
         )
       } else {
         feedSearchResults(
@@ -245,8 +246,8 @@ internal fun BottomSheetExpandedContent(
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
           gridItemSpan = gridItemSpan,
-          onFeedClick = onFeedClick,
-          onToggleFeedSelection = onToggleFeedSelection
+          onSourceClick = onFeedClick,
+          onToggleSourceSelection = onToggleSourceSelection
         )
       }
     }
@@ -351,8 +352,8 @@ private fun LazyGridScope.feedSearchResults(
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
   gridItemSpan: GridItemSpan,
-  onFeedClick: (Feed) -> Unit,
-  onToggleFeedSelection: (Feed) -> Unit,
+  onSourceClick: (Source) -> Unit,
+  onToggleSourceSelection: (Source) -> Unit,
 ) {
   items(
     count = searchResults.itemCount,
@@ -372,8 +373,8 @@ private fun LazyGridScope.feedSearchResults(
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         isInMultiSelectMode = isInMultiSelectMode,
         isFeedSelected = selectedSources.contains(feed),
-        onFeedClick = onFeedClick,
-        onFeedSelected = onToggleFeedSelection,
+        onFeedClick = onSourceClick,
+        onFeedSelected = onToggleSourceSelection,
         modifier =
           Modifier.padding(
             start = startPadding,
@@ -394,8 +395,8 @@ private fun LazyGridScope.allFeeds(
   isInMultiSelectMode: Boolean,
   gridItemSpan: GridItemSpan,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
-  onFeedClick: (Feed) -> Unit,
-  onToggleFeedSelection: (Feed) -> Unit
+  onSourceClick: (Source) -> Unit,
+  onToggleSourceSelection: (Source) -> Unit
 ) {
   if (feeds.itemCount > 0) {
     item(key = "AllFeedsHeader", span = { GridItemSpan(2) }) {
@@ -424,8 +425,8 @@ private fun LazyGridScope.allFeeds(
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           isInMultiSelectMode = isInMultiSelectMode,
           isFeedSelected = selectedSources.contains(feed),
-          onFeedClick = onFeedClick,
-          onFeedSelected = onToggleFeedSelection,
+          onFeedClick = onSourceClick,
+          onFeedSelected = onToggleSourceSelection,
           modifier =
             Modifier.padding(
               start = startPadding,
@@ -447,8 +448,8 @@ private fun LazyGridScope.pinnedFeeds(
   isInMultiSelectMode: Boolean,
   gridItemSpan: GridItemSpan,
   onTogglePinnedSection: () -> Unit,
-  onFeedClick: (Feed) -> Unit,
-  onToggleFeedSelection: (Feed) -> Unit,
+  onSourceClick: (Source) -> Unit,
+  onToggleSourceSelection: (Source) -> Unit,
 ) {
   if (pinnedFeeds.itemCount > 0) {
     item(key = "PinnedFeedsHeader", span = { GridItemSpan(2) }) {
@@ -477,8 +478,8 @@ private fun LazyGridScope.pinnedFeeds(
             canShowUnreadPostsCount = canShowUnreadPostsCount,
             isInMultiSelectMode = isInMultiSelectMode,
             isFeedSelected = selectedSources.contains(feed),
-            onFeedClick = onFeedClick,
-            onFeedSelected = onToggleFeedSelection,
+            onFeedClick = onSourceClick,
+            onFeedSelected = onToggleSourceSelection,
             modifier =
               Modifier.padding(
                 start = startPadding,
