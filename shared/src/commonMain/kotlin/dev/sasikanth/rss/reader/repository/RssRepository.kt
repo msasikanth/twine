@@ -588,6 +588,32 @@ class RssRepository(
     withContext(ioDispatcher) { feedGroupQueries.deleteGroup(groupId) }
   }
 
+  suspend fun unpinFeedGroups(groups: List<FeedGroup>) {
+    withContext(ioDispatcher) {
+      feedGroupQueries.transaction {
+        groups.forEach { group -> feedGroupQueries.updatePinnedAt(pinnedAt = null, id = group.id) }
+      }
+    }
+  }
+
+  suspend fun pinFeedGroups(groups: List<FeedGroup>) {
+    withContext(ioDispatcher) {
+      feedGroupQueries.transaction {
+        groups.forEach { group ->
+          feedGroupQueries.updatePinnedAt(pinnedAt = Clock.System.now(), id = group.id)
+        }
+      }
+    }
+  }
+
+  suspend fun removeFeedGroups(groups: List<FeedGroup>) {
+    withContext(ioDispatcher) {
+      feedGroupQueries.transaction {
+        groups.forEach { group -> feedGroupQueries.deleteGroup(id = group.id) }
+      }
+    }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
