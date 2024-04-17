@@ -31,34 +31,47 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-internal fun FeedGroupIconGrid(icons: List<String>, modifier: Modifier = Modifier) {
+internal fun FeedGroupIconGrid(
+  icons: List<String>,
+  iconSize: Dp = 18.dp,
+  iconShape: Shape = CircleShape,
+  horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(4.dp),
+  verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(4.dp),
+  modifier: Modifier = Modifier,
+) {
   if (icons.isNotEmpty()) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        val icon1 = icons.elementAtOrNull(0)
-        if (icon1 != null) {
-          FeedIcon(icon = icon1)
-        }
-        val icon2 = icons.elementAtOrNull(1)
-        if (icon2 != null) {
-          FeedIcon(icon = icon2)
-        }
+    Column(modifier = modifier, verticalArrangement = verticalArrangement) {
+      Row(horizontalArrangement = horizontalArrangement) {
+        FeedIcon(
+          icon = icons.elementAtOrNull(0),
+          iconSize = iconSize,
+          iconShape = iconShape,
+        )
+        FeedIcon(
+          icon = icons.elementAtOrNull(3),
+          iconSize = iconSize,
+          iconShape = iconShape,
+        )
       }
 
-      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        val icon3 = icons.elementAtOrNull(2)
-        if (icon3 != null) {
-          FeedIcon(icon = icon3)
-        }
-        val icon4 = icons.elementAtOrNull(3)
-        if (icon4 != null) {
-          FeedIcon(icon = icon4)
-        }
+      Row(horizontalArrangement = horizontalArrangement) {
+        FeedIcon(
+          icon = icons.elementAtOrNull(2),
+          iconSize = iconSize,
+          iconShape = iconShape,
+        )
+        FeedIcon(
+          icon = icons.elementAtOrNull(1),
+          iconSize = iconSize,
+          iconShape = iconShape,
+        )
       }
     }
   } else {
@@ -74,10 +87,15 @@ internal fun FeedGroupIconGrid(icons: List<String>, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun FeedIcon(icon: String, modifier: Modifier = Modifier) {
-  AsyncImage(
-    url = icon,
-    contentDescription = null,
-    modifier = Modifier.requiredSize(18.dp).clip(CircleShape).background(Color.White).then(modifier)
-  )
+private fun FeedIcon(icon: String?, iconSize: Dp, iconShape: Shape, modifier: Modifier = Modifier) {
+  if (!icon.isNullOrBlank()) {
+    AsyncImage(
+      url = icon,
+      contentDescription = null,
+      modifier =
+        Modifier.requiredSize(iconSize).clip(iconShape).background(Color.White).then(modifier)
+    )
+  } else {
+    Box(Modifier.requiredSize(iconSize))
+  }
 }

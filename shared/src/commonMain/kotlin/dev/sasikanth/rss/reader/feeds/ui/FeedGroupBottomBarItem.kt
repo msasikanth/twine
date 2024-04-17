@@ -17,9 +17,11 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,8 +49,27 @@ internal fun FeedGroupBottomBarItem(
           .padding(8.dp),
       contentAlignment = Alignment.Center
     ) {
-      val icons = feedGroup.feedIcons
-      FeedGroupIconGrid(modifier = Modifier.matchParentSize(), icons = icons)
+      val iconSize =
+        if (feedGroup.feedIcons.size > 2) {
+          18.dp
+        } else {
+          20.dp
+        }
+
+      val iconSpacing =
+        if (feedGroup.feedIcons.size > 2) {
+          4.dp
+        } else {
+          0.dp
+        }
+
+      FeedGroupIconGrid(
+        icons = feedGroup.feedIcons,
+        iconSize = iconSize,
+        iconShape = CircleShape,
+        verticalArrangement = Arrangement.spacedBy(iconSpacing),
+        horizontalArrangement = Arrangement.spacedBy(iconSpacing),
+      )
     }
   }
 }
