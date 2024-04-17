@@ -96,7 +96,13 @@ internal fun CreateGroupDialog(
             capitalization = KeyboardCapitalization.Words,
             imeAction = ImeAction.Done,
           ),
-        keyboardActions = KeyboardActions(onDone = { onCreateGroup(groupName) }),
+        keyboardActions =
+          KeyboardActions(
+            onDone = {
+              onCreateGroup(groupName)
+              onDismiss()
+            }
+          ),
         placeholder = {
           Text(
             text = LocalStrings.current.groupNameHint,
