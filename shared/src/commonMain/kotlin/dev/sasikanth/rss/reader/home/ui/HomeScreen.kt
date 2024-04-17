@@ -145,7 +145,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       scaffoldState = bottomSheetScaffoldState,
       topBar = {
         HomeTopAppBar(
-          hasFeeds = state.hasFeeds ?: false,
+          source = state.activeSource,
           postsType = state.postsType,
           listState = listState,
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
