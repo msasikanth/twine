@@ -48,6 +48,20 @@ internal fun FeedGroupIconGrid(
 ) {
   if (icons.isNotEmpty()) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
+      val icon2 =
+        if (icons.size > 2) {
+          icons.elementAtOrNull(1)
+        } else {
+          null
+        }
+
+      val icon4 =
+        if (icons.size > 2) {
+          icons.elementAtOrNull(3)
+        } else {
+          icons.elementAtOrNull(1)
+        }
+
       Row(horizontalArrangement = horizontalArrangement) {
         FeedIcon(
           icon = icons.elementAtOrNull(0),
@@ -55,7 +69,7 @@ internal fun FeedGroupIconGrid(
           iconShape = iconShape,
         )
         FeedIcon(
-          icon = icons.elementAtOrNull(3),
+          icon = icon2,
           iconSize = iconSize,
           iconShape = iconShape,
         )
@@ -68,7 +82,7 @@ internal fun FeedGroupIconGrid(
           iconShape = iconShape,
         )
         FeedIcon(
-          icon = icons.elementAtOrNull(1),
+          icon = icon4,
           iconSize = iconSize,
           iconShape = iconShape,
         )
