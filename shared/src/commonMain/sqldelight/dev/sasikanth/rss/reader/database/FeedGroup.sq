@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS feedGroup(
   pinnedAt INTEGER AS Instant
 );
 
+CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
+
 count:
 SELECT COUNT(*) FROM feedGroup;
 
