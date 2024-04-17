@@ -13,6 +13,7 @@ val DeTwineStrings =
     buttonCancel = "Abbrechen",
     buttonAdd = "Hinzufügen",
     buttonChange = "Fertig",
+    buttonConfirm = "Confirm",
     feedEntryHint = "Feed-Link eingeben",
     share = "Teilen",
     scrollToTop = "Hochscrollen",
@@ -151,4 +152,5 @@ val DeTwineStrings =
       }
     },
     actionGroupsTooltip = "Gruppen können nicht innerhalb anderer Gruppen sein.",
+    groupAddNew = "Add new",
   )

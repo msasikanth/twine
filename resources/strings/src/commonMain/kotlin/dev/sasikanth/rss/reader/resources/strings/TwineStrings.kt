@@ -24,6 +24,7 @@ data class TwineStrings(
   val buttonCancel: String,
   val buttonAdd: String,
   val buttonChange: String,
+  val buttonConfirm: String,
   val feedEntryHint: String,
   val share: String,
   val scrollToTop: String,
@@ -138,6 +139,7 @@ data class TwineStrings(
   val feedGroupNoFeeds: String,
   val feedGroupFeeds: (Int) -> String,
   val actionGroupsTooltip: String,
+  val groupAddNew: String,
 )
 
 object Locales {

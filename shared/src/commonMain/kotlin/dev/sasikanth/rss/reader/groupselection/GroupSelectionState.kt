@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.groupselection
 
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
+import androidx.paging.PagingData
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
-internal sealed interface Modals {
-  class FeedInfo(val presenter: FeedPresenter) : Modals
+data class GroupSelectionState(
+  val groups: Flow<PagingData<FeedGroup>>,
+  val selectedGroups: Set<String>
+) {
 
-  class GroupSelection(val presenter: GroupSelectionPresenter) : Modals
+  val areGroupsSelected: Boolean
+    get() = selectedGroups.isNotEmpty()
+
+  companion object {
+
+    val DEFAULT = GroupSelectionState(groups = emptyFlow(), selectedGroups = emptySet())
+  }
 }

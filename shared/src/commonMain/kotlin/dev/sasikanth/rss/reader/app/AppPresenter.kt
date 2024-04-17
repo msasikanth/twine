@@ -23,6 +23,7 @@ import com.arkivanov.decompose.router.slot.childSlot
 import com.arkivanov.decompose.router.slot.dismiss
 import com.arkivanov.decompose.router.stack.ChildStack
 import com.arkivanov.decompose.router.stack.StackNavigation
+import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
@@ -36,6 +37,8 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
+import dev.sasikanth.rss.reader.feeds.FeedsEvent
+import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
@@ -66,6 +69,7 @@ class AppPresenter(
   private val aboutPresenter: AboutPresenterFactory,
   private val readerPresenter: ReaderPresenterFactory,
   private val feedPresenter: FeedPresenterFactory,
+  private val groupSelectionPresenter: GroupSelectionPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -119,6 +123,23 @@ class AppPresenter(
             feedPresenter(modalConfig.feedId, componentContext) { modalNavigation.dismiss() }
         )
       }
+      ModalConfig.GroupSelection -> {
+        Modals.GroupSelection(
+          presenter =
+            groupSelectionPresenter(
+              componentContext,
+              { selectedGroupIds ->
+                modalNavigation.dismiss {
+                  (screenStack.active.instance as? Screen.Home)
+                    ?.presenter
+                    ?.feedsPresenter
+                    ?.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                }
+              },
+              { modalNavigation.dismiss() }
+            )
+        )
+      }
     }
 
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
@@ -132,7 +153,7 @@ class AppPresenter(
               { navigation.push(Config.Bookmarks) },
               { navigation.push(Config.Settings) },
               { openPost(it) },
-              { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
+              { modalNavigation.activate(ModalConfig.GroupSelection) }
             )
         )
       }
@@ -221,5 +242,7 @@ class AppPresenter(
   @Serializable
   sealed interface ModalConfig {
     @Serializable data class FeedInfo(val feedId: String) : ModalConfig
+
+    @Serializable data object GroupSelection : ModalConfig
   }
 }

@@ -14,13 +14,6 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.groupselection
 
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
-
-internal sealed interface Modals {
-  class FeedInfo(val presenter: FeedPresenter) : Modals
-
-  class GroupSelection(val presenter: GroupSelectionPresenter) : Modals
-}
+sealed interface GroupSelectionEffect {}

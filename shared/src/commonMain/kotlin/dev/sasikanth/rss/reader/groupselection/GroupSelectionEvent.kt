@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.app
+package dev.sasikanth.rss.reader.groupselection
 
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 
-internal sealed interface Modals {
-  class FeedInfo(val presenter: FeedPresenter) : Modals
+sealed interface GroupSelectionEvent {
 
-  class GroupSelection(val presenter: GroupSelectionPresenter) : Modals
+  data class OnToggleGroupSelection(val feedGroup: FeedGroup) : GroupSelectionEvent
+
+  data object OnConfirmGroupSelectionClicked : GroupSelectionEvent
+
+  data object BackClicked : GroupSelectionEvent
+
+  data class OnCreateGroup(val name: String) : GroupSelectionEvent
 }

@@ -491,8 +491,16 @@ class RssRepository(
     withContext(ioDispatcher) { feedGroupQueries.updateGroupName(name, groupId) }
   }
 
-  suspend fun updateFeedIds(groupId: String, feedIds: Set<String>) {
-    withContext(ioDispatcher) { feedGroupQueries.updateFeedIds(feedIds.toList(), groupId) }
+  suspend fun addFeedIdsToGroups(groupIds: Set<String>, feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        groupIds.forEach { groupId ->
+          val group = feedGroupQueries.group(groupId).executeAsOne()
+
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds + feedIds)
+        }
+      }
+    }
   }
 
   suspend fun pinSources(sources: Set<Source>) {
@@ -648,6 +656,38 @@ class RssRepository(
                 numberOfUnreadPosts = numberOfUnreadPosts,
               )
             }
+          }
+        )
+      }
+    )
+  }
+
+  fun allGroups(): PagingSource<Int, FeedGroup> {
+    return QueryPagingSource(
+      countQuery = feedGroupQueries.count(),
+      transacter = feedGroupQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedGroupQueries.groups(
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant? ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+            )
           }
         )
       }

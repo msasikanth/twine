@@ -13,6 +13,7 @@ val TrTwineStrings =
     buttonCancel = "İptal",
     buttonAdd = "Ekle",
     buttonChange = "Bitti",
+    buttonConfirm = "Confirm",
     feedEntryHint = "İçerik bağlantısını gir",
     share = "Paylaş",
     scrollToTop = "Yukarı kaydır",
@@ -147,4 +148,5 @@ val TrTwineStrings =
       }
     },
     actionGroupsTooltip = "Gruplar başka grupların içinde olamaz.",
+    groupAddNew = "Add new",
   )

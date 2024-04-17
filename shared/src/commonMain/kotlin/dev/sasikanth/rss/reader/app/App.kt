@@ -36,6 +36,7 @@ import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
+import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -114,6 +115,7 @@ fun App(
                 FeedInfoBottomSheet(
                   feedPresenter = modal.presenter,
                 )
+              is Modals.GroupSelection -> GroupSelectionSheet(presenter = modal.presenter)
             }
           }
         }
