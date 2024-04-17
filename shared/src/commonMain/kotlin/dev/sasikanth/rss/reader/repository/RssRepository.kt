@@ -34,6 +34,7 @@ import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
+import dev.sasikanth.rss.reader.database.SourceQueries
 import dev.sasikanth.rss.reader.database.TransactionRunner
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.search.SearchSortOrder
@@ -59,6 +60,7 @@ class RssRepository(
   private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
   private val feedGroupQueries: FeedGroupQueries,
+  private val sourceQueries: SourceQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -640,6 +642,120 @@ class RssRepository(
         }
       }
     }
+  }
+
+  fun pinnedSources(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Source> {
+    return QueryPagingSource(
+      countQuery = sourceQueries.pinnedSourcesCount(),
+      transacter = sourceQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        sourceQueries.pinnedSources(
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            type: String,
+            id: String,
+            name: String,
+            icon: String?,
+            description: String?,
+            link: String?,
+            homepageLink: String?,
+            createdAt: Instant?,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long,
+            feedIds: List<String>?,
+            feedIcons: String?,
+            updatedAt: Instant? ->
+            if (type == "group") {
+              FeedGroup(
+                id = id,
+                name = name,
+                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+                feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                createdAt = createdAt!!,
+                updatedAt = updatedAt!!,
+                pinnedAt = pinnedAt,
+              )
+            } else {
+              Feed(
+                id = id,
+                name = name,
+                icon = icon!!,
+                description = description!!,
+                link = link!!,
+                homepageLink = homepageLink!!,
+                createdAt = createdAt!!,
+                pinnedAt = pinnedAt,
+                lastCleanUpAt = lastCleanUpAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
+              )
+            }
+          }
+        )
+      }
+    )
+  }
+
+  fun sources(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+  ): PagingSource<Int, Source> {
+    return QueryPagingSource(
+      countQuery = sourceQueries.sourcesCount(),
+      transacter = sourceQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        sourceQueries.sources(
+          postsAfter = postsAfter,
+          orderBy = orderBy.value,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            type: String,
+            id: String,
+            name: String,
+            icon: String?,
+            description: String?,
+            link: String?,
+            homepageLink: String?,
+            createdAt: Instant,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long,
+            feedIds: List<String>?,
+            feedIcons: String?,
+            updatedAt: Instant? ->
+            if (type == "group") {
+              FeedGroup(
+                id = id,
+                name = name,
+                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+                feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                createdAt = createdAt,
+                updatedAt = updatedAt!!,
+                pinnedAt = pinnedAt,
+              )
+            } else {
+              Feed(
+                id = id,
+                name = name,
+                icon = icon!!,
+                description = description!!,
+                link = link!!,
+                homepageLink = homepageLink!!,
+                createdAt = createdAt,
+                pinnedAt = pinnedAt,
+                lastCleanUpAt = lastCleanUpAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
+              )
+            }
+          }
+        )
+      }
+    )
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

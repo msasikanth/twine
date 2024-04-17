@@ -72,4 +72,6 @@ internal interface DataComponent : SqlDriverPlatformComponent, DataStorePlatform
   fun providesFeedSearchFTSQueries(database: ReaderDatabase) = database.feedSearchFTSQueries
 
   @Provides fun providesFeedGroupQueries(database: ReaderDatabase) = database.feedGroupQueries
+
+  @Provides fun providesSourceQueries(database: ReaderDatabase) = database.sourceQueries
 }
