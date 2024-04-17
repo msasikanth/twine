@@ -17,7 +17,9 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -25,20 +27,19 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
@@ -48,13 +49,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.resources.icons.Bookmarks
-import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -64,7 +70,7 @@ private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
 @Composable
 internal fun HomeTopAppBar(
-  hasFeeds: Boolean,
+  source: Source?,
   postsType: PostsType,
   listState: LazyListState,
   modifier: Modifier = Modifier,
@@ -93,16 +99,17 @@ internal fun HomeTopAppBar(
         .windowInsetsPadding(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
-        .padding(start = 12.dp, end = 12.dp, top = 16.dp, bottom = 16.dp),
+        .padding(horizontal = 8.dp, vertical = 16.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
-    if (!hasFeeds) {
-      AppName()
-    } else {
-      PostsTypeSelector(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
-    }
+    PostsFilter(
+      modifier = Modifier.weight(1f),
+      source = source,
+      postsType = postsType,
+      onPostTypeChanged = onPostTypeChanged
+    )
 
-    Spacer(Modifier.weight(1f))
+    Spacer(Modifier.requiredWidth(16.dp))
 
     IconButton(
       onClick = onSearchClicked,
@@ -114,80 +121,114 @@ internal fun HomeTopAppBar(
       )
     }
 
-    IconButton(
-      onClick = onBookmarksClicked,
-    ) {
-      Icon(
-        imageVector = TwineIcons.Bookmarks,
-        contentDescription = LocalStrings.current.bookmarks,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    OverflowMenu(onSettingsClicked)
+    OverflowMenu(
+      onSettingsClicked = onSettingsClicked,
+      onBookmarksClicked = onBookmarksClicked,
+    )
   }
 }
 
 @Composable
-fun PostsTypeSelector(
+fun PostsFilter(
   modifier: Modifier = Modifier,
+  source: Source?,
   postsType: PostsType = PostsType.ALL,
   onPostTypeChanged: (PostsType) -> Unit,
 ) {
   var showDropdown by remember { mutableStateOf(false) }
-  val title = getPostTypeLabel(postsType)
+  val postsTypeLabel = getPostTypeLabel(postsType)
 
-  Box {
-    TextButton(
-      onClick = { showDropdown = true },
-      modifier = modifier,
-    ) {
+  Row(
+    modifier = modifier.clip(MaterialTheme.shapes.large).clickable { showDropdown = true },
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    SourceIcon(source)
+
+    Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp)) {
+      val sourceLabel =
+        when (source) {
+          is FeedGroup -> source.name
+          is Feed -> source.name
+          else -> LocalStrings.current.appBarAllFeeds
+        }
+
       Text(
-        modifier = Modifier.align(Alignment.CenterVertically),
-        text = title,
-        color = Color.White,
-        style = MaterialTheme.typography.titleLarge
+        text = sourceLabel,
+        style = MaterialTheme.typography.titleLarge,
+        color = AppTheme.colorScheme.textEmphasisHigh,
       )
 
-      Spacer(Modifier.width(4.dp))
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+          text = postsTypeLabel,
+          style = MaterialTheme.typography.bodyMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh,
+        )
 
-      Icon(
-        modifier = Modifier.align(Alignment.CenterVertically),
-        imageVector = Icons.Filled.ArrowDropDown,
-        contentDescription = null,
-        tint = Color.White
-      )
+        Icon(
+          imageVector = Icons.Filled.ExpandMore,
+          contentDescription = null,
+          modifier = Modifier.requiredSize(20.dp),
+          tint = AppTheme.colorScheme.tintedForeground,
+        )
+      }
+    }
+  }
+
+  DropdownMenu(
+    modifier = Modifier.requiredWidth(158.dp),
+    expanded = showDropdown,
+    onDismissRequest = { showDropdown = false },
+  ) {
+    PostsType.entries.forEach { type ->
+      val label = getPostTypeLabel(type)
+      val color =
+        if (postsType == type) {
+          AppTheme.colorScheme.tintedSurface
+        } else {
+          Color.Unspecified
+        }
+      val labelColor =
+        if (postsType == type) {
+          AppTheme.colorScheme.onSurface
+        } else {
+          AppTheme.colorScheme.textEmphasisHigh
+        }
+
+      DropdownMenuItem(
+        onClick = {
+          onPostTypeChanged(type)
+          showDropdown = false
+        },
+        modifier = Modifier.background(color)
+      ) {
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
+      }
+    }
+  }
+}
+
+@Composable
+private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
+  Row(modifier) {
+    if (source != null) {
+      Spacer(Modifier.requiredWidth(16.dp))
     }
 
-    DropdownMenu(
-      modifier = Modifier.requiredWidth(158.dp),
-      expanded = showDropdown,
-      onDismissRequest = { showDropdown = false },
-    ) {
-      PostsType.entries.forEach { type ->
-        val label = getPostTypeLabel(type)
-        val color =
-          if (postsType == type) {
-            AppTheme.colorScheme.tintedSurface
-          } else {
-            Color.Unspecified
-          }
-        val labelColor =
-          if (postsType == type) {
-            AppTheme.colorScheme.onSurface
-          } else {
-            AppTheme.colorScheme.textEmphasisHigh
-          }
-
-        DropdownMenuItem(
-          onClick = {
-            onPostTypeChanged(type)
-            showDropdown = false
-          },
-          modifier = Modifier.background(color)
-        ) {
-          Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
-        }
+    when (source) {
+      is FeedGroup -> {
+        FeedGroupIconGrid(icons = source.feedIcons, modifier = Modifier.requiredSize(40.dp))
+      }
+      is Feed -> {
+        AsyncImage(
+          url = source.icon,
+          contentDescription = null,
+          backgroundColor = Color.White,
+          modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
+        )
+      }
+      else -> {
+        // no-op
       }
     }
   }
@@ -204,22 +245,7 @@ private fun getPostTypeLabel(type: PostsType) =
   }
 
 @Composable
-private fun AppName(modifier: Modifier = Modifier) {
-  Row(modifier = modifier.padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-    Text(
-      text = LocalStrings.current.appName,
-      color = Color.White,
-      style = MaterialTheme.typography.titleLarge
-    )
-
-    Spacer(Modifier.width(4.dp))
-
-    Icon(imageVector = TwineIcons.RSS, contentDescription = null, tint = Color.White)
-  }
-}
-
-@Composable
-private fun OverflowMenu(onSettingsClicked: () -> Unit) {
+private fun OverflowMenu(onBookmarksClicked: () -> Unit, onSettingsClicked: () -> Unit) {
   Box {
     var dropdownExpanded by remember { mutableStateOf(false) }
 
@@ -235,6 +261,20 @@ private fun OverflowMenu(onSettingsClicked: () -> Unit) {
 
     if (dropdownExpanded) {
       DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
+        DropdownMenuItem(
+          text = { Text(text = LocalStrings.current.bookmarks) },
+          leadingIcon = {
+            Icon(
+              imageVector = TwineIcons.Bookmarks,
+              contentDescription = LocalStrings.current.bookmarks
+            )
+          },
+          onClick = {
+            dropdownExpanded = false
+            onBookmarksClicked()
+          }
+        )
+
         DropdownMenuItem(
           text = { Text(text = LocalStrings.current.settings) },
           leadingIcon = {
