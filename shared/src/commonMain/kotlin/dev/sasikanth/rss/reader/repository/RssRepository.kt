@@ -236,42 +236,6 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(id) }
   }
 
-  fun allFeeds(
-    postsAfter: Instant = Instant.DISTANT_PAST,
-    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
-  ): PagingSource<Int, Feed> {
-    return QueryPagingSource(
-      countQuery = feedQueries.count(),
-      transacter = feedQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedQueries.feedsPaginated(
-          postsAfter = postsAfter,
-          limit = limit,
-          orderBy = orderBy.value,
-          offset = offset,
-          mapper = ::Feed
-        )
-      }
-    )
-  }
-
-  fun pinnedFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
-    return QueryPagingSource(
-      countQuery = feedQueries.pinnedFeedsCount(),
-      transacter = feedQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedQueries.pinnedFeedsPaginated(
-          postsAfter = postsAfter,
-          limit = limit,
-          offset = offset,
-          mapper = ::Feed
-        )
-      }
-    )
-  }
-
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(ioDispatcher) {
       feedQueries
@@ -511,70 +475,6 @@ class RssRepository(
     }
   }
 
-  fun feedGroups(): PagingSource<Int, FeedGroup> {
-    return QueryPagingSource(
-      countQuery = feedGroupQueries.count(),
-      transacter = feedGroupQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedGroupQueries.groups(
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: List<String>,
-            feedIcons: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.filterNot { it.isBlank() },
-              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt
-            )
-          }
-        )
-      }
-    )
-  }
-
-  fun pinnedFeedGroups(): PagingSource<Int, FeedGroup> {
-    return QueryPagingSource(
-      countQuery = feedGroupQueries.pinnedGroupsCount(),
-      transacter = feedGroupQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedGroupQueries.pinnedGroups(
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: List<String>,
-            feedIcons: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.filterNot { it.isBlank() },
-              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt
-            )
-          }
-        )
-      }
-    )
-  }
-
   suspend fun createGroup(name: String) {
     withContext(ioDispatcher) {
       feedGroupQueries.createGroup(
@@ -593,10 +493,6 @@ class RssRepository(
 
   suspend fun updateFeedIds(groupId: String, feedIds: Set<String>) {
     withContext(ioDispatcher) { feedGroupQueries.updateFeedIds(feedIds.toList(), groupId) }
-  }
-
-  suspend fun deleteGroup(groupId: String) {
-    withContext(ioDispatcher) { feedGroupQueries.deleteGroup(groupId) }
   }
 
   suspend fun pinSources(sources: Set<Source>) {
