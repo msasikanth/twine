@@ -28,6 +28,7 @@ val EnTwineStrings =
     buttonCancel = "Cancel",
     buttonAdd = "Add",
     buttonChange = "Done",
+    buttonConfirm = "Confirm",
     feedEntryHint = "Enter feed link",
     share = "Share",
     scrollToTop = "Scroll to top",
@@ -158,4 +159,5 @@ val EnTwineStrings =
       }
     },
     actionGroupsTooltip = "Groups cannot be inside other groups.",
+    groupAddNew = "Add new",
   )
