@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.FolderOpen
 import androidx.compose.material3.Icon
@@ -78,6 +78,10 @@ private fun FeedIcon(icon: String, modifier: Modifier = Modifier) {
   AsyncImage(
     url = icon,
     contentDescription = null,
-    modifier = Modifier.requiredSize(18.dp).clip(CircleShape).background(Color.White).then(modifier)
+    modifier =
+      Modifier.requiredSize(18.dp)
+        .clip(RoundedCornerShape(6.dp))
+        .background(Color.White)
+        .then(modifier)
   )
 }
