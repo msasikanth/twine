@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -40,38 +42,22 @@ internal fun FeedGroupIconGrid(icons: List<String>, modifier: Modifier = Modifie
       Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         val icon1 = icons.elementAtOrNull(0)
         if (icon1 != null) {
-          AsyncImage(
-            url = icon1,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(18.dp).clip(CircleShape)
-          )
+          FeedIcon(icon = icon1)
         }
         val icon2 = icons.elementAtOrNull(1)
         if (icon2 != null) {
-          AsyncImage(
-            url = icon2,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(18.dp).clip(CircleShape)
-          )
+          FeedIcon(icon = icon2)
         }
       }
 
       Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
         val icon3 = icons.elementAtOrNull(2)
         if (icon3 != null) {
-          AsyncImage(
-            url = icon3,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(18.dp).clip(CircleShape)
-          )
+          FeedIcon(icon = icon3)
         }
         val icon4 = icons.elementAtOrNull(3)
         if (icon4 != null) {
-          AsyncImage(
-            url = icon4,
-            contentDescription = null,
-            modifier = Modifier.requiredSize(18.dp).clip(CircleShape)
-          )
+          FeedIcon(icon = icon4)
         }
       }
     }
@@ -85,4 +71,13 @@ internal fun FeedGroupIconGrid(icons: List<String>, modifier: Modifier = Modifie
       )
     }
   }
+}
+
+@Composable
+private fun FeedIcon(icon: String, modifier: Modifier = Modifier) {
+  AsyncImage(
+    url = icon,
+    contentDescription = null,
+    modifier = Modifier.requiredSize(18.dp).clip(CircleShape).background(Color.White).then(modifier)
+  )
 }
