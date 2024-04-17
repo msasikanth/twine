@@ -491,8 +491,16 @@ class RssRepository(
     withContext(ioDispatcher) { feedGroupQueries.updateGroupName(name, groupId) }
   }
 
-  suspend fun updateFeedIds(groupId: String, feedIds: Set<String>) {
-    withContext(ioDispatcher) { feedGroupQueries.updateFeedIds(feedIds.toList(), groupId) }
+  suspend fun addFeedIdsToGroups(groupIds: Set<String>, feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        groupIds.forEach { groupId ->
+          val group = feedGroupQueries.group(groupId).executeAsOne()
+
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds + feedIds)
+        }
+      }
+    }
   }
 
   suspend fun pinSources(sources: Set<Source>) {

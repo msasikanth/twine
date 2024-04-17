@@ -68,3 +68,7 @@ UPDATE feedGroup SET pinnedAt = :pinnedAt WHERE id = :id;
 
 groupByFeedId:
 SELECT * FROM feedGroup WHERE INSTR(feedIds, :feedId);
+
+group:
+SELECT * FROM feedGroup WHERE id = :id;
+
