@@ -21,15 +21,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.PagingData
+import androidx.paging.insertSeparators
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import app.cash.paging.map
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -45,6 +48,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,11 +56,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -264,10 +267,9 @@ class FeedsPresenter(
     }
 
     private fun init() {
+      observeSources()
       observePreferences()
       observeShowUnreadCountPreference()
-      observeFeedsForCollapsedSheet()
-      observeFeedsForExpandedSheet()
       observeSearchQuery()
     }
 
@@ -306,13 +308,15 @@ class FeedsPresenter(
         .launchIn(coroutineScope)
     }
 
-    private fun observeFeedsForExpandedSheet() {
-      settingsRepository.postsType
-        .onEach { postsType ->
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
-          val pinnedFeeds = pinnedFeedsPager(postsAfter = postsAfter).cachedIn(coroutineScope)
+    private fun observeSources() {
+      observableActiveSource.activeSource
+        .onEach { activeSource -> _state.update { it.copy(activeSource = activeSource) } }
+        .launchIn(coroutineScope)
 
-          _state.update { it.copy(pinnedFeeds = pinnedFeeds) }
+      rssRepository
+        .numberOfFeeds()
+        .onEach { numberOfFeeds ->
+          _state.update { it.copy(numberOfFeeds = numberOfFeeds.toInt()) }
         }
         .launchIn(coroutineScope)
 
@@ -324,49 +328,22 @@ class FeedsPresenter(
         .onEach { (postsType, feedsSortOrder) ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
 
-          val feeds =
-            feedsPager(
-                postsAfter = postsAfter,
-                feedsSortOrder = feedsSortOrder,
-              )
-              .cachedIn(coroutineScope)
+          val pinnedSources = pinnedSources(postsAfter = postsAfter).cachedIn(coroutineScope)
+          val sources =
+            sources(
+              postsAfter = postsAfter,
+              feedsSortOrder = feedsSortOrder,
+            )
+          val sourcesWithSeparator = addSourcesSeparator(sources)
 
-          _state.update { it.copy(feedsInExpandedView = feeds) }
-        }
-        .launchIn(coroutineScope)
-
-      val feedGroups =
-        createPager(config = createPagingConfig(20)) { rssRepository.feedGroups() }
-          .flow
-          .cachedIn(coroutineScope)
-
-      val pinnedFeedGroups =
-        createPager(config = createPagingConfig(20)) { rssRepository.pinnedFeedGroups() }
-          .flow
-          .cachedIn(coroutineScope)
-
-      _state.update { it.copy(feedGroups = feedGroups, pinnedFeedGroups = pinnedFeedGroups) }
-    }
-
-    private fun observeFeedsForCollapsedSheet() {
-      val feeds =
-        settingsRepository.postsType.distinctUntilChanged().flatMapLatest { postsType ->
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
-
-          feedsPager(postsAfter, FeedsOrderBy.Pinned).cachedIn(coroutineScope)
-        }
-
-      observableActiveSource.activeSource
-        .distinctUntilChanged()
-        .onEach { selectedFeed ->
-          _state.update { it.copy(feedsInBottomBar = feeds, activeSource = selectedFeed) }
+          _state.update { it.copy(pinnedSources = pinnedSources, sources = sourcesWithSeparator) }
         }
         .launchIn(coroutineScope)
     }
 
-    private fun pinnedFeedsPager(postsAfter: Instant) =
+    private fun pinnedSources(postsAfter: Instant) =
       createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.pinnedFeeds(postsAfter = postsAfter)
+          rssRepository.pinnedSources(postsAfter = postsAfter)
         }
         .flow
 
@@ -376,9 +353,9 @@ class FeedsPresenter(
         }
         .flow
 
-    private fun feedsPager(postsAfter: Instant, feedsSortOrder: FeedsOrderBy) =
+    private fun sources(postsAfter: Instant, feedsSortOrder: FeedsOrderBy) =
       createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.allFeeds(postsAfter = postsAfter, orderBy = feedsSortOrder)
+          rssRepository.sources(postsAfter = postsAfter, orderBy = feedsSortOrder)
         }
         .flow
 
@@ -386,6 +363,26 @@ class FeedsPresenter(
       settingsRepository.showUnreadPostsCount
         .onEach { value -> _state.update { it.copy(canShowUnreadPostsCount = value) } }
         .launchIn(coroutineScope)
+    }
+
+    private fun addSourcesSeparator(
+      sources: Flow<PagingData<Source>>
+    ): Flow<PagingData<SourceListItem>> {
+      return sources.mapLatest {
+        it
+          .map { source -> SourceListItem.SourceItem(source) }
+          .insertSeparators { before, after ->
+            when {
+              before?.source?.sourceType == SourceType.FeedGroup &&
+                after?.source?.sourceType == SourceType.Feed -> {
+                SourceListItem.Separator
+              }
+              else -> {
+                null
+              }
+            }
+          }
+      }
     }
 
     private fun postsAfterInstantFromPostsType(postsType: PostsType) =

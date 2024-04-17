@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.feeds
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -27,18 +26,16 @@ import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
 internal data class FeedsState(
-  val feedsInBottomBar: Flow<PagingData<Feed>>,
-  val feedsInExpandedView: Flow<PagingData<Feed>>,
-  val pinnedFeeds: Flow<PagingData<Feed>>,
+  val pinnedSources: Flow<PagingData<Source>>,
+  val sources: Flow<PagingData<SourceListItem>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
-  val feedGroups: Flow<PagingData<FeedGroup>>,
-  val pinnedFeedGroups: Flow<PagingData<FeedGroup>>,
   val activeSource: Source?,
   val canShowUnreadPostsCount: Boolean,
   val feedsViewMode: FeedsViewMode,
   val feedsSortOrder: FeedsOrderBy,
   val isPinnedSectionExpanded: Boolean,
   val selectedSources: Set<Source>,
+  val numberOfFeeds: Int,
 ) {
 
   val isInMultiSelectMode: Boolean
@@ -48,18 +45,16 @@ internal data class FeedsState(
 
     val DEFAULT =
       FeedsState(
-        feedsInBottomBar = emptyFlow(),
-        feedsInExpandedView = emptyFlow(),
-        pinnedFeeds = emptyFlow(),
         feedsSearchResults = emptyFlow(),
-        feedGroups = emptyFlow(),
-        pinnedFeedGroups = emptyFlow(),
+        pinnedSources = emptyFlow(),
+        sources = emptyFlow(),
         activeSource = null,
         canShowUnreadPostsCount = false,
         feedsViewMode = FeedsViewMode.List,
         feedsSortOrder = FeedsOrderBy.Latest,
         isPinnedSectionExpanded = true,
-        selectedSources = emptySet()
+        selectedSources = emptySet(),
+        numberOfFeeds = 0
       )
   }
 }

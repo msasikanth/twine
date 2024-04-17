@@ -86,6 +86,8 @@ import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.SourceType
+import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
@@ -99,12 +101,11 @@ import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 
 @Composable
 internal fun BottomSheetExpandedContent(
-  feeds: LazyPagingItems<Feed>,
-  pinnedFeeds: LazyPagingItems<Feed>,
+  numberOfFeeds: Int,
+  pinnedSources: LazyPagingItems<Source>,
+  sources: LazyPagingItems<SourceListItem>,
   searchResults: LazyPagingItems<Feed>,
   selectedSources: Set<Source>,
-  feedGroups: LazyPagingItems<FeedGroup>,
-  pinnedFeedGroups: LazyPagingItems<FeedGroup>,
   searchQuery: TextFieldValue,
   feedsSortOrder: FeedsOrderBy,
   feedsViewMode: FeedsViewMode,
@@ -239,9 +240,8 @@ internal fun BottomSheetExpandedContent(
         searchResults.itemCount == 0 &&
           searchQuery.text.length < Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
       ) {
-        pinnedFeeds(
-          pinnedFeeds = pinnedFeeds,
-          pinnedFeedGroups = pinnedFeedGroups,
+        pinnedSources(
+          pinnedSources = pinnedSources,
           selectedSources = selectedSources,
           isPinnedSectionExpanded = isPinnedSectionExpanded,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
@@ -252,9 +252,9 @@ internal fun BottomSheetExpandedContent(
           onToggleSourceSelection = onToggleSourceSelection,
         )
 
-        allFeeds(
-          feeds = feeds,
-          feedGroups = feedGroups,
+        allSources(
+          numberOfFeeds = numberOfFeeds,
+          sources = sources,
           selectedSources = selectedSources,
           feedsSortOrder = feedsSortOrder,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
@@ -412,9 +412,9 @@ private fun LazyGridScope.feedSearchResults(
   }
 }
 
-private fun LazyGridScope.allFeeds(
-  feeds: LazyPagingItems<Feed>,
-  feedGroups: LazyPagingItems<FeedGroup>,
+private fun LazyGridScope.allSources(
+  numberOfFeeds: Int,
+  sources: LazyPagingItems<SourceListItem>,
   selectedSources: Set<Source>,
   feedsSortOrder: FeedsOrderBy,
   canShowUnreadPostsCount: Boolean,
@@ -424,87 +424,124 @@ private fun LazyGridScope.allFeeds(
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit
 ) {
-  if (feeds.itemCount > 0) {
+  if (sources.itemCount > 0) {
     item(key = "AllFeedsHeader", span = { GridItemSpan(2) }) {
       AllFeedsHeader(
-        feedsCount = feeds.itemCount,
+        feedsCount = numberOfFeeds,
         feedsSortOrder = feedsSortOrder,
         onFeedsSortChanged = onFeedsSortChanged
       )
     }
 
-    if (feedGroups.itemCount > 0) {
-      val feedGroupGridItemSpan = GridItemSpan(1)
-
-      items(
-        count = feedGroups.itemCount,
-        key = feedGroups.itemKey { it.id },
-        contentType = { "FeedGroupItem" },
-        span = { feedGroupGridItemSpan }
-      ) { index ->
-        val feedGroup = feedGroups[index]
-        if (feedGroup != null) {
-          val startPadding = startPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-          val endPadding = endPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-          val topPadding = topPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-          val bottomPadding = bottomPaddingOfFeedListItem(index, feedGroups.itemCount)
-
-          FeedGroupItem(
-            modifier =
-              Modifier.padding(
-                start = startPadding,
-                top = topPadding,
-                end = endPadding,
-                bottom = bottomPadding
-              ),
-            feedGroup = feedGroup,
-            isInMultiSelectMode = isInMultiSelectMode,
-            selected = selectedSources.contains(feedGroup),
-            onFeedGroupSelected = onToggleSourceSelection,
-            onFeedGroupClick = onSourceClick
-          )
+    val feedGroupGridItemSpan = GridItemSpan(1)
+    items(
+      count = sources.itemCount,
+      key =
+        sources.itemKey {
+          when (it) {
+            SourceListItem.Separator -> "Separator"
+            is SourceListItem.SourceItem -> it.source.id
+          }
+        },
+      contentType = {
+        when (val sourceItem = sources[it]) {
+          SourceListItem.Separator -> "Separator"
+          is SourceListItem.SourceItem -> {
+            if (sourceItem.source.sourceType == SourceType.FeedGroup) {
+              "FeedGroupItem"
+            } else {
+              "FeedListItem"
+            }
+          }
+          null -> null
+        }
+      },
+      span = {
+        when (val sourceItem = sources[it]) {
+          SourceListItem.Separator -> GridItemSpan(2)
+          is SourceListItem.SourceItem -> {
+            when (sourceItem.source) {
+              is FeedGroup -> feedGroupGridItemSpan
+              is Feed -> gridItemSpan
+              else -> GridItemSpan(2)
+            }
+          }
+          null -> GridItemSpan(2)
         }
       }
-
-      item(span = { GridItemSpan(2) }) { Spacer(Modifier.requiredHeight(40.dp)) }
-    }
-
-    items(
-      count = feeds.itemCount,
-      key = feeds.itemKey { it.id },
-      contentType = { "FeedListItem" },
-      span = { gridItemSpan }
     ) { index ->
-      val feed = feeds[index]
-      val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
-      val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
-      val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
-      val bottomPadding = bottomPaddingOfFeedListItem(index, feeds.itemCount)
+      when (val sourceItem = sources[index]) {
+        SourceListItem.Separator -> {
+          Spacer(Modifier.requiredHeight(40.dp))
+        }
+        is SourceListItem.SourceItem -> {
+          val source = sourceItem.source
+          val startPadding =
+            if (source.sourceType == SourceType.FeedGroup) {
+              startPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+            } else {
+              startPaddingOfFeedListItem(gridItemSpan, index)
+            }
+          val endPadding =
+            if (source.sourceType == SourceType.FeedGroup) {
+              endPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+            } else {
+              endPaddingOfFeedListItem(gridItemSpan, index)
+            }
+          val topPadding =
+            if (source.sourceType == SourceType.FeedGroup) {
+              topPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+            } else {
+              topPaddingOfFeedListItem(gridItemSpan, index)
+            }
+          val bottomPadding = bottomPaddingOfFeedListItem(index, sources.itemCount)
 
-      if (feed != null) {
-        FeedListItem(
-          feed = feed,
-          canShowUnreadPostsCount = canShowUnreadPostsCount,
-          isInMultiSelectMode = isInMultiSelectMode,
-          isFeedSelected = selectedSources.contains(feed),
-          onFeedClick = onSourceClick,
-          onFeedSelected = onToggleSourceSelection,
-          modifier =
-            Modifier.padding(
-              start = startPadding,
-              top = topPadding,
-              end = endPadding,
-              bottom = bottomPadding
-            )
-        )
+          when (source) {
+            is FeedGroup -> {
+              FeedGroupItem(
+                modifier =
+                  Modifier.padding(
+                    start = startPadding,
+                    top = topPadding,
+                    end = endPadding,
+                    bottom = bottomPadding
+                  ),
+                feedGroup = source,
+                isInMultiSelectMode = isInMultiSelectMode,
+                selected = selectedSources.contains(source),
+                onFeedGroupSelected = onToggleSourceSelection,
+                onFeedGroupClick = onSourceClick
+              )
+            }
+            is Feed -> {
+              FeedListItem(
+                feed = source,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                isInMultiSelectMode = isInMultiSelectMode,
+                isFeedSelected = selectedSources.contains(source),
+                onFeedClick = onSourceClick,
+                onFeedSelected = onToggleSourceSelection,
+                modifier =
+                  Modifier.padding(
+                    start = startPadding,
+                    top = topPadding,
+                    end = endPadding,
+                    bottom = bottomPadding
+                  )
+              )
+            }
+          }
+        }
+        null -> {
+          // no-op
+        }
       }
     }
   }
 }
 
-private fun LazyGridScope.pinnedFeeds(
-  pinnedFeeds: LazyPagingItems<Feed>,
-  pinnedFeedGroups: LazyPagingItems<FeedGroup>,
+private fun LazyGridScope.pinnedSources(
+  pinnedSources: LazyPagingItems<Source>,
   selectedSources: Set<Source>,
   isPinnedSectionExpanded: Boolean,
   canShowUnreadPostsCount: Boolean,
@@ -514,7 +551,7 @@ private fun LazyGridScope.pinnedFeeds(
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
 ) {
-  if (pinnedFeeds.itemCount > 0) {
+  if (pinnedSources.itemCount > 0) {
     item(key = "PinnedFeedsHeader", span = { GridItemSpan(2) }) {
       PinnedFeedsHeader(
         isPinnedSectionExpanded = isPinnedSectionExpanded,
@@ -525,65 +562,59 @@ private fun LazyGridScope.pinnedFeeds(
     if (isPinnedSectionExpanded) {
 
       items(
-        count = pinnedFeedGroups.itemCount,
-        key = pinnedFeedGroups.itemKey { "PinnedFeedGroup:${it.id}" },
-        contentType = { "FeedGroupItem" },
+        count = pinnedSources.itemCount,
+        key = pinnedSources.itemKey { "PinnedSource:${it.id}" },
+        contentType = {
+          if (pinnedSources[it]?.sourceType == SourceType.FeedGroup) {
+            "FeedGroupItem"
+          } else {
+            "FeedListItem"
+          }
+        },
         span = { gridItemSpan }
       ) { index ->
-        val feedGroup = pinnedFeedGroups[index]
-        if (feedGroup != null) {
+        val source = pinnedSources[index]
+        if (source != null) {
           val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
           val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
           val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
-          val bottomPadding = bottomPaddingOfFeedListItem(index, pinnedFeedGroups.itemCount)
+          val bottomPadding = bottomPaddingOfFeedListItem(index, pinnedSources.itemCount)
 
-          FeedGroupItem(
-            modifier =
-              Modifier.padding(
-                start = startPadding,
-                top = topPadding,
-                end = endPadding,
-                bottom = bottomPadding
-              ),
-            feedGroup = feedGroup,
-            isInMultiSelectMode = isInMultiSelectMode,
-            selected = selectedSources.contains(feedGroup),
-            onFeedGroupSelected = onToggleSourceSelection,
-            onFeedGroupClick = onSourceClick
-          )
-        }
-      }
-
-      item(span = { GridItemSpan(2) }) { Box(Modifier.fillMaxWidth().requiredHeight(8.dp)) }
-
-      items(
-        count = pinnedFeeds.itemCount,
-        key = pinnedFeeds.itemKey { "PinnedFeed:${it.id}" },
-        contentType = { "FeedListItem" },
-        span = { gridItemSpan }
-      ) { index ->
-        val feed = pinnedFeeds[index]
-        val startPadding = startPaddingOfFeedListItem(gridItemSpan, index)
-        val endPadding = endPaddingOfFeedListItem(gridItemSpan, index)
-        val topPadding = topPaddingOfFeedListItem(gridItemSpan, index)
-        val bottomPadding = bottomPaddingOfFeedListItem(index, pinnedFeeds.itemCount)
-
-        if (feed != null) {
-          FeedListItem(
-            feed = feed,
-            canShowUnreadPostsCount = canShowUnreadPostsCount,
-            isInMultiSelectMode = isInMultiSelectMode,
-            isFeedSelected = selectedSources.contains(feed),
-            onFeedClick = onSourceClick,
-            onFeedSelected = onToggleSourceSelection,
-            modifier =
-              Modifier.padding(
-                start = startPadding,
-                top = topPadding,
-                end = endPadding,
-                bottom = bottomPadding
-              ),
-          )
+          when (source) {
+            is FeedGroup -> {
+              FeedGroupItem(
+                modifier =
+                  Modifier.padding(
+                    start = startPadding,
+                    top = topPadding,
+                    end = endPadding,
+                    bottom = bottomPadding
+                  ),
+                feedGroup = source,
+                isInMultiSelectMode = isInMultiSelectMode,
+                selected = selectedSources.contains(source),
+                onFeedGroupSelected = onToggleSourceSelection,
+                onFeedGroupClick = onSourceClick
+              )
+            }
+            is Feed -> {
+              FeedListItem(
+                feed = source,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                isInMultiSelectMode = isInMultiSelectMode,
+                isFeedSelected = selectedSources.contains(source),
+                onFeedClick = onSourceClick,
+                onFeedSelected = onToggleSourceSelection,
+                modifier =
+                  Modifier.padding(
+                    start = startPadding,
+                    top = topPadding,
+                    end = endPadding,
+                    bottom = bottomPadding
+                  ),
+              )
+            }
+          }
         }
       }
     }

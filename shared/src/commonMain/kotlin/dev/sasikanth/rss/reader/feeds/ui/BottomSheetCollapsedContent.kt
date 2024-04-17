@@ -37,8 +37,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun BottomSheetCollapsedContent(
-  feeds: LazyPagingItems<Feed>,
-  feedGroups: LazyPagingItems<FeedGroup>,
+  pinnedSources: LazyPagingItems<Source>,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -77,28 +76,28 @@ internal fun BottomSheetCollapsedContent(
       )
     }
 
-    items(feedGroups.itemCount) { index ->
-      val feedGroup = feedGroups[index]
-      if (feedGroup != null) {
-        FeedGroupBottomBarItem(
-          feedGroup = feedGroup,
-          selected = activeSource?.id == feedGroup.id,
-          onClick = { onSourceClick(feedGroup) }
-        )
-      }
-    }
-
-    items(feeds.itemCount) { index ->
-      val feed = feeds[index]
-      if (feed != null) {
-        FeedBottomBarItem(
-          text = feed.name.uppercase(),
-          badgeCount = feed.numberOfUnreadPosts,
-          iconUrl = feed.icon,
-          canShowUnreadPostsCount = canShowUnreadPostsCount,
-          selected = activeSource?.id == feed.id,
-          onClick = { onSourceClick(feed) }
-        )
+    items(pinnedSources.itemCount) { index ->
+      val source = pinnedSources[index]
+      if (source != null) {
+        when (source) {
+          is FeedGroup -> {
+            FeedGroupBottomBarItem(
+              feedGroup = source,
+              selected = activeSource?.id == source.id,
+              onClick = { onSourceClick(source) }
+            )
+          }
+          is Feed -> {
+            FeedBottomBarItem(
+              text = source.name.uppercase(),
+              badgeCount = source.numberOfUnreadPosts,
+              iconUrl = source.icon,
+              canShowUnreadPostsCount = canShowUnreadPostsCount,
+              selected = activeSource?.id == source.id,
+              onClick = { onSourceClick(source) }
+            )
+          }
+        }
       }
     }
   }
