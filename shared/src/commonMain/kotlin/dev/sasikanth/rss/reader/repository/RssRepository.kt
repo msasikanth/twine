@@ -654,6 +654,38 @@ class RssRepository(
     )
   }
 
+  fun allGroups(): PagingSource<Int, FeedGroup> {
+    return QueryPagingSource(
+      countQuery = feedGroupQueries.count(),
+      transacter = feedGroupQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedGroupQueries.groups(
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant? ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+            )
+          }
+        )
+      }
+    )
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
