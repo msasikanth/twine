@@ -76,7 +76,7 @@ class FeedsPresenter(
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val openFeedInfo: (String) -> Unit,
+  @Assisted private val openGroupSelectionSheet: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -102,6 +102,9 @@ class FeedsPresenter(
     when (event) {
       is FeedsEvent.OnFeedClick -> {
         // TODO: Open source screen with posts
+      }
+      is FeedsEvent.OnAddToGroupClicked -> {
+        openGroupSelectionSheet()
       }
       else -> {
         // no-op
@@ -156,6 +159,20 @@ class FeedsPresenter(
         FeedsEvent.PinSelectedSources -> onPinSelectedSources()
         FeedsEvent.UnPinSelectedSources -> onUnpinSelectedSources()
         is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
+        is FeedsEvent.OnGroupsSelected -> onGroupsSelected(event.groupIds)
+        FeedsEvent.OnAddToGroupClicked -> {
+          // no-op
+        }
+      }
+    }
+
+    private fun onGroupsSelected(groupIds: Set<String>) {
+      coroutineScope.launch {
+        rssRepository.addFeedIdsToGroups(
+          groupIds = groupIds,
+          feedIds = _state.value.selectedSources.map { it.id }
+        )
+        dispatch(FeedsEvent.CancelSourcesSelection)
       }
     }
 

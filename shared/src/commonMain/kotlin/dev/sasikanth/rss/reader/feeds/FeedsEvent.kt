@@ -57,4 +57,8 @@ sealed interface FeedsEvent {
   data object DeleteSelectedSources : FeedsEvent
 
   data class OnCreateGroup(val name: String) : FeedsEvent
+
+  data class OnGroupsSelected(val groupIds: Set<String>) : FeedsEvent
+
+  data object OnAddToGroupClicked : FeedsEvent
 }

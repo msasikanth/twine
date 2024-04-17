@@ -93,6 +93,7 @@ internal fun FeedsBottomSheet(
         onUnPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources) },
         onDeleteSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) },
         onCreateGroup = { feedsPresenter.dispatch(FeedsEvent.OnCreateGroup(it)) },
+        onAddToGroupClicked = { feedsPresenter.dispatch(FeedsEvent.OnAddToGroupClicked) },
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3

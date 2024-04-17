@@ -124,6 +124,7 @@ internal fun BottomSheetExpandedContent(
   onUnPinSelectedFeeds: () -> Unit,
   onDeleteSelectedFeeds: () -> Unit,
   onCreateGroup: (String) -> Unit,
+  onAddToGroupClicked: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   var showNewGroupDialog by remember { mutableStateOf(false) }
@@ -192,9 +193,7 @@ internal fun BottomSheetExpandedContent(
               icon = TwineIcons.NewGroup,
               label = LocalStrings.current.actionAddTo,
               enabled = !areGroupsSelected,
-              onClick = {
-                // TODO: Show group selection dialog
-              }
+              onClick = { onAddToGroupClicked() }
             )
 
             ContextActionItem(
