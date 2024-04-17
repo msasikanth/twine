@@ -303,6 +303,10 @@ class RssRepository(
     }
   }
 
+  fun numberOfFeeds(): Flow<Long> {
+    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
+  }
+
   /** Search feeds, returns all feeds if [searchQuery] is empty */
   fun searchFeed(
     searchQuery: String,
