@@ -29,13 +29,15 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
+import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedAddResult
-import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
+import dev.sasikanth.rss.reader.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -83,7 +85,7 @@ class HomePresenter(
   dispatchersProvider: DispatchersProvider,
   feedsPresenterFactory: (ComponentContext, openFeedInfo: (String) -> Unit) -> FeedsPresenter,
   private val rssRepository: RssRepository,
-  private val observableSelectedFeed: ObservableSelectedFeed,
+  private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
@@ -101,7 +103,7 @@ class HomePresenter(
 
   private val backCallback = BackCallback {
     if (feedsPresenter.state.value.isInMultiSelectMode) {
-      feedsPresenter.dispatch(FeedsEvent.CancelFeedsSelection)
+      feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
       return@BackCallback
     }
 
@@ -116,7 +118,7 @@ class HomePresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        observableSelectedFeed = observableSelectedFeed,
+        observableActiveSource = observableActiveSource,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter
       )
@@ -148,7 +150,7 @@ class HomePresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val observableSelectedFeed: ObservableSelectedFeed,
+    private val observableActiveSource: ObservableActiveSource,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
   ) : InstanceKeeper.Instance {
@@ -207,7 +209,7 @@ class HomePresenter(
     private fun postSourceClicked(feedId: String) {
       coroutineScope.launch {
         val feed = rssRepository.feedBlocking(feedId)
-        observableSelectedFeed.selectFeed(feed)
+        observableActiveSource.changeActiveSource(feed)
       }
     }
 
@@ -222,15 +224,17 @@ class HomePresenter(
     }
 
     private fun init() {
-      observableSelectedFeed.selectedFeed
-        .onEach { selectedFeed ->
-          _state.update { it.copy(selectedFeed = selectedFeed, posts = null, featuredPosts = null) }
+      observableActiveSource.activeSource
+        .onEach { selectedSource ->
+          _state.update {
+            it.copy(activeSource = selectedSource, posts = null, featuredPosts = null)
+          }
         }
-        .combine(settingsRepository.postsType) { selectedFeed, postsType ->
+        .combine(settingsRepository.postsType) { selectedSource, postsType ->
           _state.update { it.copy(postsType = postsType) }
-          selectedFeed to postsType
+          selectedSource to postsType
         }
-        .flatMapLatest { (selectedFeed, postsType) ->
+        .flatMapLatest { (selectedSource, postsType) ->
           val unreadOnly =
             when (postsType) {
               PostsType.ALL,
@@ -254,7 +258,7 @@ class HomePresenter(
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
-                  selectedFeedId = selectedFeed?.id,
+                  selectedFeedId = selectedSource?.id,
                   unreadOnly = unreadOnly,
                   after = postsAfter
                 )
@@ -264,7 +268,7 @@ class HomePresenter(
 
           rssRepository
             .featuredPosts(
-              selectedFeedId = selectedFeed?.id,
+              selectedFeedId = selectedSource?.id,
               unreadOnly = unreadOnly,
               after = postsAfter
             )
@@ -377,18 +381,17 @@ class HomePresenter(
     }
 
     private fun onHomeSelected() {
-      coroutineScope.launch { observableSelectedFeed.clearSelection() }
+      coroutineScope.launch { observableActiveSource.clearSelection() }
     }
 
     private fun refreshContent() {
       coroutineScope.launch {
         _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
         try {
-          val selectedFeed = _state.value.selectedFeed
-          if (selectedFeed != null) {
-            rssRepository.updateFeed(selectedFeed.id)
-          } else {
-            rssRepository.updateFeeds()
+          when (val selectedSource = _state.value.activeSource) {
+            is FeedGroup -> rssRepository.updateGroup(selectedSource.feedIds)
+            is Feed -> rssRepository.updateFeed(selectedSource.id)
+            else -> rssRepository.updateFeeds()
           }
         } catch (e: Exception) {
           BugsnagKotlin.logMessage("RefreshContent")

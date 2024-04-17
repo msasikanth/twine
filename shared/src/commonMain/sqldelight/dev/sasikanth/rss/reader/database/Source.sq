@@ -1,0 +1,147 @@
+pinnedSourcesCount:
+WITH pinnedFeeds AS (
+  SELECT COUNT(*) AS count FROM feed WHERE pinnedAt IS NOT NULL
+),
+pinnedFeedGroups AS (
+  SELECT COUNT(*) AS count FROM feedGroup WHERE pinnedAt IS NOT NULL
+)
+SELECT pinnedFeeds.count + pinnedFeedGroups.count
+FROM pinnedFeeds, pinnedFeedGroups;
+
+sourcesCount:
+WITH feeds AS (
+  SELECT COUNT(*) AS count FROM feed
+),
+feedGroups AS (
+  SELECT COUNT(*) AS count FROM feedGroup
+)
+SELECT feeds.count + feedGroups.count
+FROM feeds, feedGroups;
+
+pinnedSources:
+SELECT
+  type,
+  id,
+  name,
+  icon,
+  description,
+  link,
+  homepageLink,
+  createdAt,
+  pinnedAt,
+  lastCleanUpAt ,
+  numberOfUnreadPosts,
+  feedIds,
+  feedIcons,
+  updatedAt
+FROM (
+  SELECT
+    'feed' AS type,
+    f.id,
+    f.name,
+    f.icon,
+    f.description,
+    f.link,
+    f.homepageLink,
+    f.lastCleanUpAt,
+    COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    NULL AS feedIds,
+    NULL AS feedIcons,
+    f.createdAt,
+    f.pinnedAt,
+    NULL AS updatedAt
+  FROM feed f
+  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  GROUP BY f.id
+
+  UNION ALL
+
+  SELECT
+    'group' AS type,
+    fg.id,
+    fg.name,
+    NULL AS icon,
+    NULL AS description,
+    NULL AS link,
+    NULL AS homepageLink,
+    NULL AS lastCleanUpAt,
+    0 AS numberOfUnreadPosts,
+    fg.feedIds,
+    COALESCE((SELECT GROUP_CONCAT(feed.icon)
+                FROM feed
+                WHERE INSTR(fg.feedIds, feed.id)
+                LIMIT 4), '') AS feedIcons,
+    fg.createdAt,
+    fg.pinnedAt,
+    fg.updatedAt
+  FROM feedGroup fg
+)
+WHERE pinnedAt IS NOT NULL
+ORDER BY pinnedAt DESC
+LIMIT :limit OFFSET :offset;
+
+sources:
+SELECT
+  type,
+  id,
+  name,
+  icon,
+  description,
+  link,
+  homepageLink,
+  createdAt,
+  pinnedAt,
+  lastCleanUpAt ,
+  numberOfUnreadPosts,
+  feedIds,
+  feedIcons,
+  updatedAt
+FROM (
+  SELECT
+    'feed' AS type,
+    f.id,
+    f.name,
+    f.icon,
+    f.description,
+    f.link,
+    f.homepageLink,
+    f.lastCleanUpAt,
+    COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    NULL AS feedIds,
+    NULL AS feedIcons,
+    f.createdAt,
+    f.pinnedAt,
+    NULL AS updatedAt
+  FROM feed f
+  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  GROUP BY f.id
+
+  UNION ALL
+
+  SELECT
+    'group' AS type,
+    fg.id,
+    fg.name,
+    NULL AS icon,
+    NULL AS description,
+    NULL AS link,
+    NULL AS homepageLink,
+    NULL AS lastCleanUpAt,
+    0 AS numberOfUnreadPosts,
+    fg.feedIds,
+    COALESCE((SELECT GROUP_CONCAT(feed.icon)
+                FROM feed
+                WHERE INSTR(fg.feedIds, feed.id)
+                LIMIT 4), '') AS feedIcons,
+    fg.createdAt,
+    fg.pinnedAt,
+    fg.updatedAt
+  FROM feedGroup fg
+)
+ORDER BY type DESC,
+  CASE WHEN :orderBy = 'latest' THEN createdAt END DESC,
+  CASE WHEN :orderBy = 'oldest' THEN createdAt END ASC,
+  CASE WHEN :orderBy = 'alphabetical' THEN name END ASC,
+  CASE WHEN :orderBy = 'pinned' THEN pinnedAt END DESC,
+  createdAt DESC
+LIMIT :limit OFFSET :offset;

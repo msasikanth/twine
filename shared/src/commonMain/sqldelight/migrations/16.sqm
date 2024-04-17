@@ -1,0 +1,2 @@
+CREATE INDEX feed_pinned_at ON feed(pinnedAt);
+CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);

@@ -21,7 +21,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.home.ui.PostsType
-import dev.sasikanth.rss.reader.repository.ObservableSelectedFeed
+import dev.sasikanth.rss.reader.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -58,7 +58,7 @@ class FeedPresenter(
   dispatchersProvider: DispatchersProvider,
   rssRepository: RssRepository,
   settingsRepository: SettingsRepository,
-  private val observableSelectedFeed: ObservableSelectedFeed,
+  private val observableActiveSource: ObservableActiveSource,
   @Assisted feedId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val dismiss: () -> Unit
@@ -71,7 +71,7 @@ class FeedPresenter(
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
         feedId = feedId,
-        observableSelectedFeed = observableSelectedFeed,
+        observableActiveSource = observableActiveSource,
       )
     }
 
@@ -99,7 +99,7 @@ class FeedPresenter(
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val feedId: String,
-    private val observableSelectedFeed: ObservableSelectedFeed,
+    private val observableActiveSource: ObservableActiveSource,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -159,7 +159,7 @@ class FeedPresenter(
     private fun removeFeed() {
       coroutineScope.launch {
         rssRepository.removeFeed(feedId)
-        observableSelectedFeed.clearSelection()
+        observableActiveSource.clearSelection()
         effects.emit(FeedEffect.DismissSheet)
       }
     }

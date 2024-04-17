@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.model.local
+package dev.sasikanth.rss.reader.feeds
 
-import kotlinx.datetime.Instant
+import dev.sasikanth.rss.reader.core.model.local.Source
 
-data class FeedGroup(
-  override val id: String,
-  val name: String,
-  val feedIds: List<String>,
-  val feedIcons: List<String>,
-  val createdAt: Instant,
-  val updatedAt: Instant,
-  override val pinnedAt: Instant?,
-  override val sourceType: SourceType = SourceType.FeedGroup
-) : Source
+sealed interface SourceListItem {
+
+  data class SourceItem(val source: Source) : SourceListItem
+
+  data object Separator : SourceListItem
+}

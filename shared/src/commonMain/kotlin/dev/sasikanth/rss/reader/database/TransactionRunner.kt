@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.model.local
+package dev.sasikanth.rss.reader.database
 
-import kotlinx.datetime.Instant
+import me.tatarka.inject.annotations.Inject
 
-data class FeedGroup(
-  override val id: String,
-  val name: String,
-  val feedIds: List<String>,
-  val feedIcons: List<String>,
-  val createdAt: Instant,
-  val updatedAt: Instant,
-  override val pinnedAt: Instant?,
-  override val sourceType: SourceType = SourceType.FeedGroup
-) : Source
+@Inject
+class TransactionRunner(private val database: ReaderDatabase) {
+
+  fun <T> invoke(block: () -> T): T {
+    return database.transactionWithResult { block() }
+  }
+}

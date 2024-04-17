@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.database.BookmarkQueries
@@ -33,6 +34,8 @@ import dev.sasikanth.rss.reader.database.FeedQueries
 import dev.sasikanth.rss.reader.database.FeedSearchFTSQueries
 import dev.sasikanth.rss.reader.database.PostQueries
 import dev.sasikanth.rss.reader.database.PostSearchFTSQueries
+import dev.sasikanth.rss.reader.database.SourceQueries
+import dev.sasikanth.rss.reader.database.TransactionRunner
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.search.SearchSortOrder
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -50,12 +53,14 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class RssRepository(
   private val feedFetcher: FeedFetcher,
+  private val transactionRunner: TransactionRunner,
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
   private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
   private val feedGroupQueries: FeedGroupQueries,
+  private val sourceQueries: SourceQueries,
   dispatchersProvider: DispatchersProvider
 ) {
 
@@ -158,6 +163,21 @@ class RssRepository(
     }
   }
 
+  suspend fun updateGroup(feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      feedIds.forEach { feedId ->
+        val feed = feedQueries.feed(feedId).executeAsOneOrNull()
+        if (feed != null) {
+          addFeed(
+            feedLink = feed.link,
+            transformUrl = false,
+            feedLastCleanUpAt = feed.lastCleanUpAt
+          )
+        }
+      }
+    }
+  }
+
   fun featuredPosts(
     selectedFeedId: String?,
     unreadOnly: Boolean? = null,
@@ -216,42 +236,6 @@ class RssRepository(
     withContext(ioDispatcher) { bookmarkQueries.deleteBookmark(id) }
   }
 
-  fun allFeeds(
-    postsAfter: Instant = Instant.DISTANT_PAST,
-    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
-  ): PagingSource<Int, Feed> {
-    return QueryPagingSource(
-      countQuery = feedQueries.count(),
-      transacter = feedQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedQueries.feedsPaginated(
-          postsAfter = postsAfter,
-          limit = limit,
-          orderBy = orderBy.value,
-          offset = offset,
-          mapper = ::Feed
-        )
-      }
-    )
-  }
-
-  fun pinnedFeeds(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Feed> {
-    return QueryPagingSource(
-      countQuery = feedQueries.pinnedFeedsCount(),
-      transacter = feedQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedQueries.pinnedFeedsPaginated(
-          postsAfter = postsAfter,
-          limit = limit,
-          offset = offset,
-          mapper = ::Feed
-        )
-      }
-    )
-  }
-
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(ioDispatcher) {
       feedQueries
@@ -283,6 +267,10 @@ class RssRepository(
         )
         .executeAsList()
     }
+  }
+
+  fun numberOfFeeds(): Flow<Long> {
+    return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
   }
 
   /** Search feeds, returns all feeds if [searchQuery] is empty */
@@ -384,12 +372,16 @@ class RssRepository(
   }
 
   suspend fun removeFeed(feedId: String) {
-    withContext(ioDispatcher) { feedQueries.remove(feedId) }
-  }
-
-  suspend fun removeFeeds(feeds: Set<Feed>) {
     withContext(ioDispatcher) {
-      feedQueries.transaction { feeds.forEach { feed -> feedQueries.remove(feed.id) } }
+      feedQueries.remove(feedId)
+      val feedGroup = feedGroupQueries.groupByFeedId(feedId).executeAsOneOrNull()
+
+      if (feedGroup != null) {
+        feedGroupQueries.updateFeedIds(
+          feedIds = feedGroup.feedIds - setOf(feedId),
+          id = feedGroup.id
+        )
+      }
     }
   }
 
@@ -445,23 +437,6 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
   }
 
-  suspend fun pinFeeds(feeds: Set<Feed>) {
-    val now = Clock.System.now()
-    withContext(ioDispatcher) {
-      feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id) }
-      }
-    }
-  }
-
-  suspend fun unPinFeeds(feeds: Set<Feed>) {
-    withContext(ioDispatcher) {
-      feedQueries.transaction {
-        feeds.forEach { feed -> feedQueries.updatePinnedAt(pinnedAt = null, id = feed.id) }
-      }
-    }
-  }
-
   fun hasFeeds(): Flow<Boolean> {
     return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher).map { it > 0 }
   }
@@ -500,70 +475,6 @@ class RssRepository(
     }
   }
 
-  fun feedGroups(): PagingSource<Int, FeedGroup> {
-    return QueryPagingSource(
-      countQuery = feedGroupQueries.count(),
-      transacter = feedGroupQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedGroupQueries.groups(
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: List<String>,
-            feedIcons: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.toSet(),
-              feedIcons = feedIcons.split(",").toSet(),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt
-            )
-          }
-        )
-      }
-    )
-  }
-
-  fun pinnedFeedGroups(): PagingSource<Int, FeedGroup> {
-    return QueryPagingSource(
-      countQuery = feedGroupQueries.pinnedGroupsCount(),
-      transacter = feedGroupQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        feedGroupQueries.pinnedGroups(
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: List<String>,
-            feedIcons: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.toSet(),
-              feedIcons = feedIcons.split(",").toSet(),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt
-            )
-          }
-        )
-      }
-    )
-  }
-
   suspend fun createGroup(name: String) {
     withContext(ioDispatcher) {
       feedGroupQueries.createGroup(
@@ -584,8 +495,163 @@ class RssRepository(
     withContext(ioDispatcher) { feedGroupQueries.updateFeedIds(feedIds.toList(), groupId) }
   }
 
-  suspend fun deleteGroup(groupId: String) {
-    withContext(ioDispatcher) { feedGroupQueries.deleteGroup(groupId) }
+  suspend fun pinSources(sources: Set<Source>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          val pinnedAt = Clock.System.now()
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
+        }
+      }
+    }
+  }
+
+  suspend fun unpinSources(sources: Set<Source>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = null)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = null)
+        }
+      }
+    }
+  }
+
+  suspend fun deleteSources(sources: Set<Source>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        sources.forEach { source ->
+          feedQueries.remove(id = source.id)
+          feedGroupQueries.deleteGroup(id = source.id)
+
+          if (source is Feed) {
+            val feedGroup = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsOneOrNull()
+
+            if (feedGroup != null) {
+              feedGroupQueries.updateFeedIds(
+                feedIds = feedGroup.feedIds - setOf(source.id),
+                id = feedGroup.id
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+
+  fun pinnedSources(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Source> {
+    return QueryPagingSource(
+      countQuery = sourceQueries.pinnedSourcesCount(),
+      transacter = sourceQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        sourceQueries.pinnedSources(
+          postsAfter = postsAfter,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            type: String,
+            id: String,
+            name: String,
+            icon: String?,
+            description: String?,
+            link: String?,
+            homepageLink: String?,
+            createdAt: Instant?,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long,
+            feedIds: List<String>?,
+            feedIcons: String?,
+            updatedAt: Instant? ->
+            if (type == "group") {
+              FeedGroup(
+                id = id,
+                name = name,
+                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+                feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                createdAt = createdAt!!,
+                updatedAt = updatedAt!!,
+                pinnedAt = pinnedAt,
+              )
+            } else {
+              Feed(
+                id = id,
+                name = name,
+                icon = icon!!,
+                description = description!!,
+                link = link!!,
+                homepageLink = homepageLink!!,
+                createdAt = createdAt!!,
+                pinnedAt = pinnedAt,
+                lastCleanUpAt = lastCleanUpAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
+              )
+            }
+          }
+        )
+      }
+    )
+  }
+
+  fun sources(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+  ): PagingSource<Int, Source> {
+    return QueryPagingSource(
+      countQuery = sourceQueries.sourcesCount(),
+      transacter = sourceQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        sourceQueries.sources(
+          postsAfter = postsAfter,
+          orderBy = orderBy.value,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            type: String,
+            id: String,
+            name: String,
+            icon: String?,
+            description: String?,
+            link: String?,
+            homepageLink: String?,
+            createdAt: Instant,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long,
+            feedIds: List<String>?,
+            feedIcons: String?,
+            updatedAt: Instant? ->
+            if (type == "group") {
+              FeedGroup(
+                id = id,
+                name = name,
+                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+                feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                createdAt = createdAt,
+                updatedAt = updatedAt!!,
+                pinnedAt = pinnedAt,
+              )
+            } else {
+              Feed(
+                id = id,
+                name = name,
+                icon = icon!!,
+                description = description!!,
+                link = link!!,
+                homepageLink = homepageLink!!,
+                createdAt = createdAt,
+                pinnedAt = pinnedAt,
+                lastCleanUpAt = lastCleanUpAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
+              )
+            }
+          }
+        )
+      }
+    )
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

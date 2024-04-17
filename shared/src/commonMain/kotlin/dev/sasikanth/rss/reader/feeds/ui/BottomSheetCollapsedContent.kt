@@ -30,15 +30,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun BottomSheetCollapsedContent(
-  feeds: LazyPagingItems<Feed>,
-  selectedFeed: Feed?,
+  pinnedSources: LazyPagingItems<Source>,
+  activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
-  onFeedClick: (Feed) -> Unit,
+  onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -56,7 +58,7 @@ internal fun BottomSheetCollapsedContent(
         )
 
       HomeBottomBarItem(
-        selected = selectedFeed == null,
+        selected = activeSource == null,
         onClick = onHomeSelected,
         modifier =
           Modifier.drawWithCache {
@@ -74,17 +76,28 @@ internal fun BottomSheetCollapsedContent(
       )
     }
 
-    items(feeds.itemCount) { index ->
-      val feed = feeds[index]
-      if (feed != null) {
-        FeedBottomBarItem(
-          text = feed.name.uppercase(),
-          badgeCount = feed.numberOfUnreadPosts,
-          iconUrl = feed.icon,
-          canShowUnreadPostsCount = canShowUnreadPostsCount,
-          selected = selectedFeed?.id == feed.id,
-          onClick = { onFeedClick(feed) }
-        )
+    items(pinnedSources.itemCount) { index ->
+      val source = pinnedSources[index]
+      if (source != null) {
+        when (source) {
+          is FeedGroup -> {
+            FeedGroupBottomBarItem(
+              feedGroup = source,
+              selected = activeSource?.id == source.id,
+              onClick = { onSourceClick(source) }
+            )
+          }
+          is Feed -> {
+            FeedBottomBarItem(
+              text = source.name.uppercase(),
+              badgeCount = source.numberOfUnreadPosts,
+              iconUrl = source.icon,
+              canShowUnreadPostsCount = canShowUnreadPostsCount,
+              selected = activeSource?.id == source.id,
+              onClick = { onSourceClick(source) }
+            )
+          }
+        }
       }
     }
   }

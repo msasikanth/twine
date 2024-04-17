@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS feedGroup(
   pinnedAt INTEGER AS Instant
 );
 
+CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
+
 count:
 SELECT COUNT(*) FROM feedGroup;
 
@@ -24,7 +26,7 @@ SELECT
   feedIds,
   COALESCE((SELECT GROUP_CONCAT(feed.icon)
               FROM feed
-              WHERE feed.id IN (feedGroup.feedIds)
+              WHERE INSTR(feedGroup.feedIds, feed.id)
               LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt,
@@ -39,7 +41,7 @@ SELECT
   feedIds,
   COALESCE((SELECT GROUP_CONCAT(feed.icon)
               FROM feed
-              WHERE feed.id IN (feedGroup.feedIds)
+              WHERE INSTR(feedGroup.feedIds, feed.id)
               LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt,
@@ -60,3 +62,9 @@ UPDATE feedGroup SET feedIds = :feedIds WHERE id = :id;
 
 deleteGroup:
 DELETE FROM feedGroup WHERE id = :id;
+
+updatePinnedAt:
+UPDATE feedGroup SET pinnedAt = :pinnedAt WHERE id = :id;
+
+groupByFeedId:
+SELECT * FROM feedGroup WHERE INSTR(feedIds, :feedId);

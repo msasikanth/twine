@@ -26,15 +26,24 @@ UPDATE SET title = excluded.title, description = excluded.description, rawConten
 
 count:
 SELECT COUNT(*) FROM post
+LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
+  (
+    :sourceId IS NULL OR
+    post.sourceId = :sourceId OR
+    feedGroup.id = :sourceId
+  ) AND
   -- Skip featured posts --
   post.id NOT IN (
     SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-    (:sourceId IS NULL OR post.sourceId = :sourceId) AND
+    (
+      :sourceId IS NULL OR
+      post.sourceId = :sourceId OR
+      feedGroup.id = :sourceId
+    ) AND
     post.imageUrl IS NOT NULL AND
     post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
@@ -59,9 +68,14 @@ SELECT
   feed.icon AS feedIcon
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
+LEFT JOIN  feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
+  (
+    :sourceId IS NULL OR
+    post.sourceId = :sourceId OR
+    feedGroup.id = :sourceId
+  ) AND
   post.imageUrl IS NOT NULL AND
   post.date > :postsAfter
 ORDER BY post.date DESC LIMIT :limit;
@@ -82,15 +96,24 @@ SELECT
   feed.icon AS feedIcon
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
+LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (:sourceId IS NULL OR post.sourceId = :sourceId) AND
+  (
+    :sourceId IS NULL OR
+    post.sourceId = :sourceId OR
+    feedGroup.id = :sourceId
+  ) AND
   -- Skip featured posts --
   post.id NOT IN (
     SELECT post.id FROM post
     WHERE
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-    (:sourceId IS NULL OR post.sourceId = :sourceId) AND
+    (
+      :sourceId IS NULL OR
+      post.sourceId = :sourceId OR
+      feedGroup.id = :sourceId
+    ) AND
     post.imageUrl IS NOT NULL AND
     post.date > :postsAfter
     ORDER BY post.date DESC LIMIT :featuredPostsLimit
