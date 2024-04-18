@@ -47,30 +47,42 @@ object SQLCodeMigrations {
     val newFeedId = nameBasedUuidOf(oldFeedId).toString()
     driver.execute(
       identifier = null,
-      sql = "UPDATE feed SET id = '$newFeedId' WHERE id = '$oldFeedId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE feed SET id = ? WHERE id = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newFeedId)
+        bindString(1, oldFeedId)
+      }
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE feed_search SET id = '$newFeedId' WHERE id = '$oldFeedId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE feed_search SET id = ? WHERE id = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newFeedId)
+        bindString(1, oldFeedId)
+      }
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE bookmark SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE bookmark SET sourceId = ? WHERE sourceId = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newFeedId)
+        bindString(1, oldFeedId)
+      }
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE post SET sourceId = '$newFeedId' WHERE sourceId = '$oldFeedId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE post SET sourceId = ? WHERE sourceId = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newFeedId)
+        bindString(1, oldFeedId)
+      }
     )
   }
 
@@ -78,23 +90,32 @@ object SQLCodeMigrations {
     val newPostId = nameBasedUuidOf(oldPostId).toString()
     driver.execute(
       identifier = null,
-      sql = "UPDATE bookmark SET id = '$newPostId' WHERE id = '$oldPostId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE bookmark SET id = ? WHERE id = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newPostId)
+        bindString(1, oldPostId)
+      }
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE post_search SET id = '$newPostId' WHERE id = '$oldPostId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE post_search SET id = ? WHERE id = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newPostId)
+        bindString(1, oldPostId)
+      }
     )
 
     driver.execute(
       identifier = null,
-      sql = "UPDATE post SET id = '$newPostId' WHERE id = '$oldPostId'",
-      parameters = 0,
-      binders = null
+      sql = "UPDATE post SET id = ? WHERE id = ?",
+      parameters = 2,
+      binders = {
+        bindString(0, newPostId)
+        bindString(1, oldPostId)
+      }
     )
   }
 }
