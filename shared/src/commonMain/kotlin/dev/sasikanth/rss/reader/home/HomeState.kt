@@ -17,11 +17,10 @@
 
 package dev.sasikanth.rss.reader.home
 
+import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
@@ -49,7 +48,7 @@ internal data class HomeState(
         featuredPosts = null,
         posts = null,
         loadingState = HomeLoadingState.Idle,
-        feedsSheetState = Collapsed,
+        feedsSheetState = BottomSheetValue.Collapsed,
         activeSource = null,
         feedFetchingState = FeedFetchingState.Idle,
         featuredItemBlurEnabled = true,
