@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -263,17 +264,17 @@ class HomePresenter(
               }
             }
 
-          rssRepository.featuredPosts(
-            selectedFeedId = activeSource?.id,
-            unreadOnly = unreadOnly,
-            after = postsAfter
-          )
+          rssRepository
+            .featuredPosts(
+              selectedFeedId = activeSource?.id,
+              unreadOnly = unreadOnly,
+              after = postsAfter
+            )
+            .map { Triple(it, postsType, activeSource) }
         }
-        .distinctUntilChanged()
-        .onEach { featuredPosts ->
+        .distinctUntilChangedBy { (featuredPosts, _, _) -> featuredPosts }
+        .onEach { (featuredPosts, postsType, activeSource) ->
           val featuredPostIds = featuredPosts.map { it.id }
-          val postsType = _state.value.postsType
-          val activeSource = _state.value.activeSource
 
           val unreadOnly =
             when (postsType) {
