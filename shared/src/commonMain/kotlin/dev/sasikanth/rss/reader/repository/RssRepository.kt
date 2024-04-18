@@ -116,7 +116,7 @@ class RssRepository(
               }
             }
 
-            FeedAddResult.Success
+            FeedAddResult.Success(feedId)
           } catch (e: Exception) {
             FeedAddResult.DatabaseError(e)
           }
