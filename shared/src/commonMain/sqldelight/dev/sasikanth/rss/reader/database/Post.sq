@@ -17,6 +17,7 @@ CREATE TABLE post(
 );
 
 CREATE INDEX post_source_id_index ON post(sourceId);
+CREATE INDEX post_date_desc_index ON post (date DESC);
 
 upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
