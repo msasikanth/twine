@@ -65,7 +65,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    0 AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
     COALESCE((SELECT GROUP_CONCAT(feed.icon)
                 FROM feed
@@ -75,6 +75,8 @@ FROM (
     fg.pinnedAt,
     fg.updatedAt
   FROM feedGroup fg
+  LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
 ORDER BY pinnedAt DESC
@@ -127,7 +129,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    0 AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
     COALESCE((SELECT GROUP_CONCAT(feed.icon)
                 FROM feed
@@ -137,6 +139,8 @@ FROM (
     fg.pinnedAt,
     fg.updatedAt
   FROM feedGroup fg
+  LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  GROUP BY fg.id
 )
 ORDER BY type DESC,
   CASE WHEN :orderBy = 'latest' THEN createdAt END DESC,

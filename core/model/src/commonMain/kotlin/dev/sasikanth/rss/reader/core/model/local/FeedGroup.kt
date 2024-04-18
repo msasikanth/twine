@@ -23,6 +23,7 @@ data class FeedGroup(
   val name: String,
   val feedIds: List<String>,
   val feedIcons: List<String>,
+  val numberOfUnreadPosts: Long = 0,
   val createdAt: Instant,
   val updatedAt: Instant,
   override val pinnedAt: Instant?,

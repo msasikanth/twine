@@ -21,55 +21,89 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
 @Composable
 internal fun FeedGroupBottomBarItem(
   feedGroup: FeedGroup,
+  canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
 ) {
-  Box(modifier = modifier, contentAlignment = Alignment.Center) {
-    SelectionIndicator(selected = selected, animationProgress = 1f)
-    Box(
-      modifier =
-        Modifier.requiredSize(56.dp)
-          .clip(RoundedCornerShape(16.dp))
-          .clickable { onClick() }
-          .background(AppTheme.colorScheme.tintedSurface)
-          .padding(8.dp),
-      contentAlignment = Alignment.Center
-    ) {
-      val iconSize =
-        if (feedGroup.feedIcons.size > 2) {
-          18.dp
-        } else {
-          20.dp
-        }
+  Box(modifier = modifier) {
+    Box(contentAlignment = Alignment.Center) {
+      SelectionIndicator(selected = selected, animationProgress = 1f)
+      Box(
+        modifier =
+          Modifier.requiredSize(56.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
+            .background(AppTheme.colorScheme.tintedSurface)
+            .padding(8.dp),
+        contentAlignment = Alignment.Center
+      ) {
+        val iconSize =
+          if (feedGroup.feedIcons.size > 2) {
+            18.dp
+          } else {
+            20.dp
+          }
 
-      val iconSpacing =
-        if (feedGroup.feedIcons.size > 2) {
-          4.dp
-        } else {
-          0.dp
-        }
+        val iconSpacing =
+          if (feedGroup.feedIcons.size > 2) {
+            4.dp
+          } else {
+            0.dp
+          }
 
-      FeedGroupIconGrid(
-        icons = feedGroup.feedIcons,
-        iconSize = iconSize,
-        iconShape = CircleShape,
-        verticalArrangement = Arrangement.spacedBy(iconSpacing),
-        horizontalArrangement = Arrangement.spacedBy(iconSpacing),
-      )
+        FeedGroupIconGrid(
+          icons = feedGroup.feedIcons,
+          iconSize = iconSize,
+          iconShape = CircleShape,
+          verticalArrangement = Arrangement.spacedBy(iconSpacing),
+          horizontalArrangement = Arrangement.spacedBy(iconSpacing),
+        )
+      }
+    }
+
+    val badgeCount = feedGroup.numberOfUnreadPosts
+    if (badgeCount > 0 && canShowUnreadPostsCount) {
+      Badge(
+        containerColor = AppTheme.colorScheme.tintedForeground,
+        contentColor = AppTheme.colorScheme.tintedBackground,
+        modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd),
+      ) {
+        val badgeText =
+          if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
+            "+$BADGE_COUNT_TRIM_LIMIT"
+          } else {
+            badgeCount.toString()
+          }
+
+        Text(
+          text = badgeText,
+          style = MaterialTheme.typography.labelSmall,
+          modifier =
+            Modifier.align(Alignment.CenterVertically).graphicsLayer {
+              translationY = -2.toDp().toPx()
+            }
+        )
+      }
     }
   }
 }
