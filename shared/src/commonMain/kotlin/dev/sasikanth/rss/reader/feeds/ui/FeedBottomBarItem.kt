@@ -38,8 +38,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
-
-private const val BADGE_COUNT_TRIM_LIMIT = 99
+import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
 @Composable
 internal fun FeedBottomBarItem(

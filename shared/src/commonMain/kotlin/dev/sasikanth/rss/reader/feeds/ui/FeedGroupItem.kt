@@ -28,7 +28,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,6 +53,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun FeedGroupItem(
   feedGroup: FeedGroup,
+  canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
   selected: Boolean,
   onFeedGroupSelected: (FeedGroup) -> Unit,
@@ -139,6 +142,21 @@ internal fun FeedGroupItem(
       }
 
       Spacer(Modifier.requiredWidth(4.dp))
+
+      val numberOfUnreadPosts = feedGroup.numberOfUnreadPosts
+      if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
+        Badge(
+          containerColor = AppTheme.colorScheme.tintedForeground,
+          contentColor = AppTheme.colorScheme.tintedBackground,
+          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp)
+        ) {
+          Text(
+            text = feedGroup.numberOfUnreadPosts.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.align(Alignment.CenterVertically)
+          )
+        }
+      }
 
       if (isInMultiSelectMode) {
         val icon =

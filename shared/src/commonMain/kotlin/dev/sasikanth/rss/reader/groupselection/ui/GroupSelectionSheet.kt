@@ -132,6 +132,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
         if (group != null) {
           FeedGroupItem(
             feedGroup = group,
+            canShowUnreadPostsCount = false,
             isInMultiSelectMode = true,
             selected = state.selectedGroups.contains(group.id),
             onFeedGroupSelected = {

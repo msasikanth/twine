@@ -83,6 +83,7 @@ internal fun BottomSheetCollapsedContent(
           is FeedGroup -> {
             FeedGroupBottomBarItem(
               feedGroup = source,
+              canShowUnreadPostsCount = canShowUnreadPostsCount,
               selected = activeSource?.id == source.id,
               onClick = { onSourceClick(source) }
             )

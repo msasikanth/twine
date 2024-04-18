@@ -38,4 +38,6 @@ internal object Constants {
   const val OPEN_SOURCE_LINK = "https://github.com/sponsors/msasikanth"
 
   const val MINIMUM_REQUIRED_SEARCH_CHARACTERS = 3
+
+  const val BADGE_COUNT_TRIM_LIMIT = 99
 }

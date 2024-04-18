@@ -498,6 +498,12 @@ private fun LazyGridScope.allSources(
           when (source) {
             is FeedGroup -> {
               FeedGroupItem(
+                feedGroup = source,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                isInMultiSelectMode = isInMultiSelectMode,
+                selected = selectedSources.contains(source),
+                onFeedGroupSelected = onToggleSourceSelection,
+                onFeedGroupClick = onSourceClick,
                 modifier =
                   Modifier.padding(
                     start = startPadding,
@@ -505,11 +511,6 @@ private fun LazyGridScope.allSources(
                     end = endPadding,
                     bottom = bottomPadding
                   ),
-                feedGroup = source,
-                isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
-                onFeedGroupSelected = onToggleSourceSelection,
-                onFeedGroupClick = onSourceClick
               )
             }
             is Feed -> {
@@ -582,6 +583,12 @@ private fun LazyGridScope.pinnedSources(
           when (source) {
             is FeedGroup -> {
               FeedGroupItem(
+                feedGroup = source,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                isInMultiSelectMode = isInMultiSelectMode,
+                selected = selectedSources.contains(source),
+                onFeedGroupSelected = onToggleSourceSelection,
+                onFeedGroupClick = onSourceClick,
                 modifier =
                   Modifier.padding(
                     start = startPadding,
@@ -589,11 +596,6 @@ private fun LazyGridScope.pinnedSources(
                     end = endPadding,
                     bottom = bottomPadding
                   ),
-                feedGroup = source,
-                isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
-                onFeedGroupSelected = onToggleSourceSelection,
-                onFeedGroupClick = onSourceClick
               )
             }
             is Feed -> {
