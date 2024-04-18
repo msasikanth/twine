@@ -269,6 +269,7 @@ class HomePresenter(
             after = postsAfter
           )
         }
+        .distinctUntilChanged()
         .onEach { featuredPosts ->
           val featuredPostIds = featuredPosts.map { it.id }
           val postsType = _state.value.postsType
