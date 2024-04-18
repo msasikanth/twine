@@ -90,18 +90,20 @@ internal fun PostsList(
     state = listState,
     contentPadding = PaddingValues(top = topContentPadding, bottom = 128.dp)
   ) {
-    item {
-      FeaturedSection(
-        paddingValues = paddingValues,
-        pagerState = featuredPostsPagerState,
-        featuredPosts = featuredPosts,
-        featuredItemBlurEnabled = featuredItemBlurEnabled,
-        onItemClick = onPostClicked,
-        onPostBookmarkClick = onPostBookmarkClick,
-        onPostCommentsClick = onPostCommentsClick,
-        onPostSourceClick = onPostSourceClick,
-        onTogglePostReadClick = onTogglePostReadClick
-      )
+    if (featuredPosts.isNotEmpty()) {
+      item {
+        FeaturedSection(
+          paddingValues = paddingValues,
+          pagerState = featuredPostsPagerState,
+          featuredPosts = featuredPosts,
+          featuredItemBlurEnabled = featuredItemBlurEnabled,
+          onItemClick = onPostClicked,
+          onPostBookmarkClick = onPostBookmarkClick,
+          onPostCommentsClick = onPostCommentsClick,
+          onPostSourceClick = onPostSourceClick,
+          onTogglePostReadClick = onTogglePostReadClick
+        )
+      }
     }
 
     items(posts.itemCount) { index ->
