@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -131,6 +132,10 @@ class GroupSelectionPresenter(
           it.copy(selectedGroups = selectedGroups + setOf(feedGroup.id))
         }
       }
+    }
+
+    override fun onDestroy() {
+      coroutineScope.cancel()
     }
   }
 }
