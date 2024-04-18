@@ -224,17 +224,56 @@ class HomePresenter(
     }
 
     private fun init() {
-      observableActiveSource.activeSource
-        .onEach { selectedSource ->
+      combine(observableActiveSource.activeSource, settingsRepository.postsType) {
+          activeSource,
+          postsType ->
+          Pair(activeSource, postsType)
+        }
+        .onEach { (activeSource, postsType) ->
           _state.update {
-            it.copy(activeSource = selectedSource, posts = null, featuredPosts = null)
+            it.copy(
+              activeSource = activeSource,
+              postsType = postsType,
+              featuredPosts = null,
+              posts = null
+            )
           }
         }
-        .combine(settingsRepository.postsType) { selectedSource, postsType ->
-          _state.update { it.copy(postsType = postsType) }
-          selectedSource to postsType
+        .flatMapLatest {
+          val postsType = _state.value.postsType
+          val activeSource = _state.value.activeSource
+
+          val unreadOnly =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.TODAY,
+              PostsType.LAST_24_HOURS -> null
+              PostsType.UNREAD -> true
+            }
+
+          val postsAfter =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.UNREAD -> Instant.DISTANT_PAST
+              PostsType.TODAY -> {
+                getTodayStartInstant()
+              }
+              PostsType.LAST_24_HOURS -> {
+                getLast24HourStart()
+              }
+            }
+
+          rssRepository.featuredPosts(
+            selectedFeedId = activeSource?.id,
+            unreadOnly = unreadOnly,
+            after = postsAfter
+          )
         }
-        .flatMapLatest { (selectedSource, postsType) ->
+        .onEach { featuredPosts ->
+          val featuredPostIds = featuredPosts.map { it.id }
+          val postsType = _state.value.postsType
+          val activeSource = _state.value.activeSource
+
           val unreadOnly =
             when (postsType) {
               PostsType.ALL,
@@ -258,24 +297,16 @@ class HomePresenter(
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
-                  selectedFeedId = selectedSource?.id,
+                  selectedFeedId = activeSource?.id,
+                  featuredPostsIds = featuredPostIds,
                   unreadOnly = unreadOnly,
-                  after = postsAfter
+                  after = postsAfter,
                 )
               }
               .flow
               .cachedIn(coroutineScope)
 
-          rssRepository
-            .featuredPosts(
-              selectedFeedId = selectedSource?.id,
-              unreadOnly = unreadOnly,
-              after = postsAfter
-            )
-            .map { featuredPosts -> Pair(featuredPosts.toImmutableList(), posts) }
-        }
-        .onEach { (featuredPosts, posts) ->
-          _state.update { it.copy(featuredPosts = featuredPosts, posts = posts) }
+          _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList(), posts = posts) }
         }
         .launchIn(coroutineScope)
 

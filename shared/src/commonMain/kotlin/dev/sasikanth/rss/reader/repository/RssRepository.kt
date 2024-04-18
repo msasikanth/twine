@@ -197,14 +197,15 @@ class RssRepository(
 
   fun posts(
     selectedFeedId: String?,
+    featuredPostsIds: List<String>,
     unreadOnly: Boolean? = null,
-    after: Instant = Instant.DISTANT_PAST
+    after: Instant = Instant.DISTANT_PAST,
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
         postQueries.count(
           sourceId = selectedFeedId,
-          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
         ),
@@ -213,7 +214,7 @@ class RssRepository(
       queryProvider = { limit, offset ->
         postQueries.posts(
           sourceId = selectedFeedId,
-          featuredPostsLimit = NUMBER_OF_FEATURED_POSTS,
+          featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
           limit = limit,
