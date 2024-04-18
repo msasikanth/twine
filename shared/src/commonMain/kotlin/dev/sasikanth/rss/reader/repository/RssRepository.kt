@@ -582,6 +582,7 @@ class RssRepository(
                 createdAt = createdAt!!,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
               )
             } else {
               Feed(
@@ -641,6 +642,7 @@ class RssRepository(
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
+                numberOfUnreadPosts = numberOfUnreadPosts,
               )
             } else {
               Feed(
