@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
+import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
@@ -137,7 +138,12 @@ class OpmlManager(
       feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
         feedsGroup
           .map { feed ->
-            launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) }
+            launch {
+              val result = rssRepository.addFeed(feedLink = feed.link, title = feed.title)
+              if (result !is FeedAddResult.Success) {
+                Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
+              }
+            }
           }
           .joinAll()
 
