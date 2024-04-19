@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import kotlin.math.roundToInt
+import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -65,31 +66,35 @@ class OpmlManager(
   }
 
   suspend fun import() {
-    try {
-      withContext(job) {
-        val opmlXmlContent = fileManager.read()
-        Logger.i { opmlXmlContent.orEmpty() }
+    val duration = measureTime {
+      try {
+        withContext(job) {
+          val opmlXmlContent = fileManager.read()
+          Logger.i { opmlXmlContent.orEmpty() }
 
-        if (!opmlXmlContent.isNullOrBlank()) {
-          _result.emit(OpmlResult.InProgress.Importing(0))
-          val opmlFeeds = feedsOpml.decode(opmlXmlContent)
+          if (!opmlXmlContent.isNullOrBlank()) {
+            _result.emit(OpmlResult.InProgress.Importing(0))
+            val opmlFeeds = feedsOpml.decode(opmlXmlContent)
 
-          addOpmlFeeds(opmlFeeds)
-            .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-            .onCompletion { _result.emit(OpmlResult.Idle) }
-            .collect()
-        } else {
-          _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+            addOpmlFeeds(opmlFeeds)
+              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+              .onCompletion { _result.emit(OpmlResult.Idle) }
+              .collect()
+          } else {
+            _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+          }
         }
-      }
-    } catch (e: Exception) {
-      if (e is CancellationException) {
-        return
-      }
+      } catch (e: Exception) {
+        if (e is CancellationException) {
+          return
+        }
 
-      BugsnagKotlin.sendHandledException(e)
-      _result.emit(OpmlResult.Error.UnknownFailure(e))
+        BugsnagKotlin.sendHandledException(e)
+        _result.emit(OpmlResult.Error.UnknownFailure(e))
+      }
     }
+
+    Logger.i("OPMLImport") { "Took: ${duration.inWholeMinutes} minutes" }
   }
 
   suspend fun export() {
@@ -133,6 +138,8 @@ class OpmlManager(
   private fun addOpmlFeeds(feedLinks: List<OpmlFeed>): Flow<Int> = channelFlow {
     val totalFeedCount = feedLinks.size
     val processedFeedsCount = AtomicInt(0)
+
+    Logger.i("OPMLImport") { "Importing: $totalFeedCount feeds" }
 
     if (totalFeedCount > IMPORT_CHUNKS) {
       feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
