@@ -57,7 +57,7 @@ class OpmlManager(
   val result: SharedFlow<OpmlResult> = _result
 
   companion object {
-    private const val IMPORT_CHUNKS = 10
+    private const val IMPORT_CHUNKS = 20
   }
 
   init {
