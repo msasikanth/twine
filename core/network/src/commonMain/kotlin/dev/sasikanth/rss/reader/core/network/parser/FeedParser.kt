@@ -160,8 +160,7 @@ private fun ByteReadChannel.toCharIterator(
         val bytesRead = channel.readAvailable(byteArray)
 
         if (bytesRead != -1) {
-          currentBuffer =
-            byteArray.commonToUtf8String().replace("\n", "").replace(xmlDeclarationPattern, "")
+          currentBuffer = byteArray.commonToUtf8String().replace(xmlDeclarationPattern, "")
           currentIndex = 0
         }
 
