@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -272,7 +271,7 @@ class HomePresenter(
             )
             .map { Triple(it, postsType, activeSource) }
         }
-        .distinctUntilChangedBy { (featuredPosts, _, _) -> featuredPosts }
+        .distinctUntilChanged()
         .onEach { (featuredPosts, postsType, activeSource) ->
           val featuredPostIds = featuredPosts.map { it.id }
 
