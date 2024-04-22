@@ -53,11 +53,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachIndexed
 import dev.sasikanth.rss.reader.about.AboutEvent
 import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.about.Person
 import dev.sasikanth.rss.reader.about.Social
+import dev.sasikanth.rss.reader.components.bottomsheet.fastForEach
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -206,7 +206,7 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
 
         FlowRow {
           val linkHandler = LocalLinkHandler.current
-          person.socials.fastForEachIndexed { _, social ->
+          person.socials.fastForEach { social ->
             SocialButton(
               social = social,
               onClick = { coroutineScope.launch { linkHandler.openLink(social.link) } }
