@@ -114,7 +114,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
 
   val listState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts?.size ?: 0 })
-  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 1 } }
 
   val strings = LocalStrings.current
   val linkHandler = LocalLinkHandler.current
@@ -145,6 +144,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   val sheetPeekHeight =
     BOTTOM_SHEET_PEEK_HEIGHT +
       WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
   BottomSheetScaffold(
     modifier =
