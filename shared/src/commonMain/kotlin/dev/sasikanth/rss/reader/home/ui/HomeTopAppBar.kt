@@ -158,6 +158,7 @@ fun PostsFilter(
         text = sourceLabel,
         style = MaterialTheme.typography.titleLarge,
         color = AppTheme.colorScheme.textEmphasisHigh,
+        maxLines = 1,
       )
 
       Row(verticalAlignment = Alignment.CenterVertically) {
