@@ -22,7 +22,8 @@
         android:fullBackupContent="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="tiramisu">
+        tools:targetApi="tiramisu"
+        android:largeHeap="true">
 
         <meta-data android:name="com.bugsnag.android.API_KEY"
             android:value="${BUGSNAG_API_KEY}"/>

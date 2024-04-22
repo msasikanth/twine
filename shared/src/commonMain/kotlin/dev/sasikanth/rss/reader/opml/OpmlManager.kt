@@ -21,10 +21,12 @@ import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManager
+import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import kotlin.math.roundToInt
+import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
@@ -56,7 +58,7 @@ class OpmlManager(
   val result: SharedFlow<OpmlResult> = _result
 
   companion object {
-    private const val IMPORT_CHUNKS = 10
+    private const val IMPORT_CHUNKS = 20
   }
 
   init {
@@ -64,31 +66,35 @@ class OpmlManager(
   }
 
   suspend fun import() {
-    try {
-      withContext(job) {
-        val opmlXmlContent = fileManager.read()
-        Logger.i { opmlXmlContent.orEmpty() }
+    val duration = measureTime {
+      try {
+        withContext(job) {
+          val opmlXmlContent = fileManager.read()
+          Logger.i { opmlXmlContent.orEmpty() }
 
-        if (!opmlXmlContent.isNullOrBlank()) {
-          _result.emit(OpmlResult.InProgress.Importing(0))
-          val opmlFeeds = feedsOpml.decode(opmlXmlContent)
+          if (!opmlXmlContent.isNullOrBlank()) {
+            _result.emit(OpmlResult.InProgress.Importing(0))
+            val opmlFeeds = feedsOpml.decode(opmlXmlContent)
 
-          addOpmlFeeds(opmlFeeds)
-            .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-            .onCompletion { _result.emit(OpmlResult.Idle) }
-            .collect()
-        } else {
-          _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+            addOpmlFeeds(opmlFeeds)
+              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+              .onCompletion { _result.emit(OpmlResult.Idle) }
+              .collect()
+          } else {
+            _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+          }
         }
-      }
-    } catch (e: Exception) {
-      if (e is CancellationException) {
-        return
-      }
+      } catch (e: Exception) {
+        if (e is CancellationException) {
+          return
+        }
 
-      BugsnagKotlin.sendHandledException(e)
-      _result.emit(OpmlResult.Error.UnknownFailure(e))
+        BugsnagKotlin.sendHandledException(e)
+        _result.emit(OpmlResult.Error.UnknownFailure(e))
+      }
     }
+
+    Logger.i("OPMLImport") { "Took: ${duration.inWholeMinutes} minutes" }
   }
 
   suspend fun export() {
@@ -133,11 +139,18 @@ class OpmlManager(
     val totalFeedCount = feedLinks.size
     val processedFeedsCount = AtomicInt(0)
 
+    Logger.i("OPMLImport") { "Importing: $totalFeedCount feeds" }
+
     if (totalFeedCount > IMPORT_CHUNKS) {
       feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
         feedsGroup
           .map { feed ->
-            launch { rssRepository.addFeed(feedLink = feed.link, title = feed.title) }
+            launch {
+              val result = rssRepository.addFeed(feedLink = feed.link, title = feed.title)
+              if (result !is FeedAddResult.Success) {
+                Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
+              }
+            }
           }
           .joinAll()
 

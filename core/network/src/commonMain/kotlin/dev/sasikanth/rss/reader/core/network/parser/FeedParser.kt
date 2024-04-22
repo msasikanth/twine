@@ -23,8 +23,16 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.pool.DefaultPool
+import io.ktor.utils.io.pool.ObjectPool
+import io.ktor.utils.io.readAvailable
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
+import okio.internal.commonToUtf8String
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
@@ -32,19 +40,10 @@ import org.kobjects.ktxml.mini.MiniXmlPullParser
 @AppScope
 class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
-  suspend fun parse(feedContent: String, feedUrl: String): FeedPayload {
+  suspend fun parse(content: ByteReadChannel, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val cleanedUpFeedContent = feedContent.removePrefix("\uFEFF")
-        // Currently MiniXmlPullParser fails to parse XML if it contains
-        // the <?xml ?> tag in the first line. So we are removing it until
-        // the issue gets resolved.
-        // https://github.com/kobjects/ktxml/issues/5
-        val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
-        val parser =
-          MiniXmlPullParser(
-            source = xmlDeclarationPattern.replaceFirst(cleanedUpFeedContent, "").iterator()
-          )
+        val parser = MiniXmlPullParser(source = content.toCharIterator())
 
         parser.nextTag()
 
@@ -137,5 +136,57 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     }
   }
 }
+
+private fun ByteReadChannel.toCharIterator(
+  context: CoroutineContext = EmptyCoroutineContext
+): CharIterator {
+  val channel = this
+  return object : CharIterator() {
+
+    private val byteArrayPool = ByteArrayPool
+    private var currentIndex = 0
+    private var currentBuffer = ""
+
+    // Currently MiniXmlPullParser fails to parse XML if it contains
+    // the <?xml ?> tag in the first line. So we are removing it until
+    // the issue gets resolved.
+    // https://github.com/kobjects/ktxml/issues/5
+    private val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
+
+    private fun refillBuffer() {
+      val byteArray = byteArrayPool.borrow()
+
+      runBlocking(context) {
+        val bytesRead = channel.readAvailable(byteArray)
+
+        if (bytesRead != -1) {
+          currentBuffer = byteArray.commonToUtf8String().replace(xmlDeclarationPattern, "")
+          currentIndex = 0
+        }
+
+        byteArrayPool.recycle(byteArray)
+      }
+    }
+
+    override fun hasNext(): Boolean {
+      return if (currentIndex == currentBuffer.length) {
+        refillBuffer()
+        currentIndex < currentBuffer.length
+      } else {
+        true
+      }
+    }
+
+    override fun nextChar(): Char {
+      if (!hasNext()) throw NoSuchElementException()
+      return currentBuffer[currentIndex++]
+    }
+  }
+}
+
+val ByteArrayPool: ObjectPool<ByteArray> =
+  object : DefaultPool<ByteArray>(128) {
+    override fun produceInstance() = ByteArray(1024)
+  }
 
 internal class HtmlContentException : Exception()
