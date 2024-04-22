@@ -229,6 +229,7 @@ class HomePresenter(
           postsType ->
           Pair(activeSource, postsType)
         }
+        .distinctUntilChanged()
         .onEach { (activeSource, postsType) ->
           _state.update {
             it.copy(
@@ -263,16 +264,15 @@ class HomePresenter(
               }
             }
 
-          rssRepository
-            .featuredPosts(
-              selectedFeedId = activeSource?.id,
-              unreadOnly = unreadOnly,
-              after = postsAfter
-            )
-            .map { Triple(it, postsType, activeSource) }
+          rssRepository.featuredPosts(
+            selectedFeedId = activeSource?.id,
+            unreadOnly = unreadOnly,
+            after = postsAfter
+          )
         }
-        .distinctUntilChanged()
-        .onEach { (featuredPosts, postsType, activeSource) ->
+        .onEach { featuredPosts ->
+          val postsType = _state.value.postsType
+          val activeSource = _state.value.activeSource
           val featuredPostIds = featuredPosts.map { it.id }
 
           val unreadOnly =
