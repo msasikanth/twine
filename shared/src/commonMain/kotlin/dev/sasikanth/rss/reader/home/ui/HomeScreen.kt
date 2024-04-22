@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
@@ -304,7 +305,7 @@ private fun HomeScreenContent(
     PullRefreshIndicator(
       refreshing = state.isRefreshing,
       state = swipeRefreshState,
-      modifier = Modifier.align(Alignment.TopCenter)
+      modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
     )
   }
 }
