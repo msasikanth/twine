@@ -135,43 +135,41 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     }
   }
 
-  val bottomSheetSwipeTransition =
-    updateTransition(
-      targetState = bottomSheetScaffoldState.currentFraction,
-      label = "Bottom Sheet Swipe Progress"
-    )
-  val bottomSheetCornerSize by
-    bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
-  val sheetPeekHeight =
-    BOTTOM_SHEET_PEEK_HEIGHT +
-      WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-
-  BottomSheetScaffold(
-    modifier =
-      modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
-    scaffoldState = bottomSheetScaffoldState,
-    backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
-    sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
-    sheetContentColor = AppTheme.colorScheme.tintedForeground,
-    sheetElevation = 0.dp,
-    sheetPeekHeight = sheetPeekHeight,
-    sheetShape =
-      RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
-    sheetGesturesEnabled = !feedsState.isInMultiSelectMode,
-    topBar = {
-      HomeTopAppBar(
-        source = state.activeSource,
-        postsType = state.postsType,
-        listState = listState,
-        onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-        onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-        onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-        onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
+  Box(modifier = modifier) {
+    val bottomSheetSwipeTransition =
+      updateTransition(
+        targetState = bottomSheetScaffoldState.currentFraction,
+        label = "Bottom Sheet Swipe Progress"
       )
-    },
-    content = { paddingValues ->
-      Box(modifier = Modifier.fillMaxSize()) {
+    val bottomSheetCornerSize by
+      bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
+
+    BottomSheetScaffold(
+      modifier =
+        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
+      scaffoldState = bottomSheetScaffoldState,
+      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
+      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
+      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetElevation = 0.dp,
+      sheetPeekHeight =
+        BOTTOM_SHEET_PEEK_HEIGHT +
+          WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+      sheetShape =
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = !feedsState.isInMultiSelectMode,
+      topBar = {
+        HomeTopAppBar(
+          source = state.activeSource,
+          postsType = state.postsType,
+          listState = listState,
+          onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
+          onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+          onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
+          onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
+        )
+      },
+      content = { paddingValues ->
         HomeScreenContent(
           paddingValues = paddingValues,
           state = state,
@@ -191,56 +189,63 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
             homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
           }
         )
+      },
+      sheetContent = {
+        FeedsBottomSheet(
+          feedsPresenter = homePresenter.feedsPresenter,
+          bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+          closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
+          selectedFeedChanged = {
+            coroutineScope.launch {
+              listState.scrollToItem(0)
+              featuredPostsPagerState.scrollToPage(0)
+            }
+          }
+        )
+      },
+      snackbarHost = {
+        val snackbarModifier =
+          if (bottomSheetState.isExpanded) {
+            Modifier.padding(bottom = BOTTOM_SHEET_PEEK_HEIGHT)
+              .windowInsetsPadding(
+                WindowInsets.systemBars.only(
+                  WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                )
+              )
+          } else {
+            Modifier
+          }
+
+        SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
+          Snackbar(
+            modifier = Modifier.padding(12.dp),
+            content = {
+              Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+            },
+            action = null,
+            actionOnNewLine = false,
+            shape = SnackbarDefaults.shape,
+            backgroundColor = SnackbarDefaults.color,
+            contentColor = SnackbarDefaults.contentColor,
+            elevation = 0.dp
+          )
+        }
+      },
+      floatingActionButton = {
+        val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
         CompactFloatingActionButton(
           label = LocalStrings.current.scrollToTop,
           visible = showScrollToTop,
           modifier =
             Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-              .padding(end = 16.dp, bottom = sheetPeekHeight + 16.dp),
+              .padding(end = 16.dp, bottom = 16.dp),
         ) {
           listState.animateScrollToItem(0)
         }
-      }
-    },
-    sheetContent = {
-      FeedsBottomSheet(
-        feedsPresenter = homePresenter.feedsPresenter,
-        bottomSheetSwipeTransition = bottomSheetSwipeTransition,
-        closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
-        selectedFeedChanged = {
-          coroutineScope.launch {
-            listState.scrollToItem(0)
-            featuredPostsPagerState.scrollToPage(0)
-          }
-        }
-      )
-    },
-    snackbarHost = {
-      val snackbarModifier =
-        if (bottomSheetState.isExpanded) {
-          Modifier.padding(bottom = sheetPeekHeight)
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-        } else {
-          Modifier
-        }
-
-      SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
-        Snackbar(
-          modifier = Modifier.padding(12.dp),
-          content = {
-            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
-          },
-          action = null,
-          actionOnNewLine = false,
-          shape = SnackbarDefaults.shape,
-          backgroundColor = SnackbarDefaults.color,
-          contentColor = SnackbarDefaults.contentColor,
-          elevation = 0.dp
-        )
-      }
-    },
-  )
+      },
+    )
+  }
 }
 
 @Composable
