@@ -17,9 +17,6 @@ package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -64,19 +61,3 @@ internal fun LogCompositions(tag: String, msg: String) {
   SideEffect { ref.value++ }
   Logger.d(tag) { "Compositions: $msg ${ref.value}" }
 }
-
-@OptIn(ExperimentalMaterialApi::class)
-val BottomSheetScaffoldState.currentFraction: Float
-  get() {
-    val fraction = bottomSheetState.progress
-    val targetValue = bottomSheetState.targetValue
-    val currentValue = bottomSheetState.currentValue
-
-    return when {
-      currentValue == BottomSheetValue.Collapsed && targetValue == BottomSheetValue.Collapsed -> 0f
-      currentValue == BottomSheetValue.Expanded && targetValue == BottomSheetValue.Expanded -> 1f
-      currentValue == BottomSheetValue.Collapsed && targetValue == BottomSheetValue.Expanded ->
-        fraction
-      else -> 1f - fraction
-    }
-  }

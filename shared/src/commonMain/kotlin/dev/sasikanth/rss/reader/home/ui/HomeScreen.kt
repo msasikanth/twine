@@ -26,9 +26,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -43,7 +41,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
@@ -52,8 +49,6 @@ import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material.rememberBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDefaults
@@ -74,6 +69,9 @@ import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetScaffold
+import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetScaffoldState
+import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
@@ -87,7 +85,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.currentFraction
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -116,6 +113,14 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   val listState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts?.size ?: 0 })
 
+  val bottomSheetSwipeTransition =
+    updateTransition(
+      targetState = bottomSheetState.offsetProgress,
+      label = "Bottom Sheet Swipe Progress"
+    )
+  val bottomSheetCornerSize by
+    bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
+
   val strings = LocalStrings.current
   val linkHandler = LocalLinkHandler.current
 
@@ -136,28 +141,8 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   }
 
   Box(modifier = modifier) {
-    val bottomSheetSwipeTransition =
-      updateTransition(
-        targetState = bottomSheetScaffoldState.currentFraction,
-        label = "Bottom Sheet Swipe Progress"
-      )
-    val bottomSheetCornerSize by
-      bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
-
     BottomSheetScaffold(
-      modifier =
-        Modifier.windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal)),
       scaffoldState = bottomSheetScaffoldState,
-      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
-      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
-      sheetContentColor = AppTheme.colorScheme.tintedForeground,
-      sheetElevation = 0.dp,
-      sheetPeekHeight =
-        BOTTOM_SHEET_PEEK_HEIGHT +
-          WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
-      sheetShape =
-        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
-      sheetGesturesEnabled = !feedsState.isInMultiSelectMode,
       topBar = {
         HomeTopAppBar(
           source = state.activeSource,
@@ -244,6 +229,14 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
           listState.animateScrollToItem(0)
         }
       },
+      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest,
+      sheetBackgroundColor = AppTheme.colorScheme.tintedBackground,
+      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetElevation = 0.dp,
+      sheetPeekHeight = BOTTOM_SHEET_PEEK_HEIGHT,
+      sheetShape =
+        RoundedCornerShape(topStart = bottomSheetCornerSize, topEnd = bottomSheetCornerSize),
+      sheetGesturesEnabled = !feedsState.isInMultiSelectMode
     )
   }
 }
