@@ -264,16 +264,16 @@ class HomePresenter(
               }
             }
 
-          rssRepository.featuredPosts(
-            selectedFeedId = activeSource?.id,
-            unreadOnly = unreadOnly,
-            after = postsAfter
-          )
+          rssRepository
+            .featuredPosts(
+              selectedFeedId = activeSource?.id,
+              unreadOnly = unreadOnly,
+              after = postsAfter
+            )
+            .map { featuredPosts -> Triple(activeSource, postsType, featuredPosts) }
         }
         .distinctUntilChanged()
-        .onEach { featuredPosts ->
-          val postsType = _state.value.postsType
-          val activeSource = _state.value.activeSource
+        .onEach { (activeSource, postsType, featuredPosts) ->
           val featuredPostIds = featuredPosts.map { it.id }
 
           val unreadOnly =
