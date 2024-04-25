@@ -229,6 +229,7 @@ class HomePresenter(
           postsType ->
           Pair(activeSource, postsType)
         }
+        .distinctUntilChanged()
         .onEach { (activeSource, postsType) ->
           _state.update {
             it.copy(
@@ -269,10 +270,14 @@ class HomePresenter(
               unreadOnly = unreadOnly,
               after = postsAfter
             )
-            .map { Triple(it, postsType, activeSource) }
+            .map { featuredPosts -> Triple(activeSource, postsType, featuredPosts) }
         }
-        .distinctUntilChanged()
-        .onEach { (featuredPosts, postsType, activeSource) ->
+        .distinctUntilChanged { old, new ->
+          old.third.map { it.id } == new.third.map { it.id } ||
+            old.first == new.first ||
+            old.second == new.second
+        }
+        .onEach { (activeSource, postsType, featuredPosts) ->
           val featuredPostIds = featuredPosts.map { it.id }
 
           val unreadOnly =
