@@ -272,7 +272,11 @@ class HomePresenter(
             )
             .map { featuredPosts -> Triple(activeSource, postsType, featuredPosts) }
         }
-        .distinctUntilChanged()
+        .distinctUntilChanged { old, new ->
+          old.third.map { it.id } == new.third.map { it.id } ||
+            old.first == new.first ||
+            old.second == new.second
+        }
         .onEach { (activeSource, postsType, featuredPosts) ->
           val featuredPostIds = featuredPosts.map { it.id }
 
