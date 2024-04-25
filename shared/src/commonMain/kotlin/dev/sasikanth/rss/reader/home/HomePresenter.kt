@@ -41,6 +41,7 @@ import dev.sasikanth.rss.reader.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import io.ktor.client.network.sockets.ConnectTimeoutException
@@ -270,41 +271,21 @@ class HomePresenter(
               unreadOnly = unreadOnly,
               after = postsAfter
             )
-            .map { featuredPosts -> Triple(activeSource, postsType, featuredPosts) }
-        }
-        .distinctUntilChanged { old, new ->
-          old.third.map { it.id } == new.third.map { it.id } ||
-            old.first == new.first ||
-            old.second == new.second
-        }
-        .onEach { (activeSource, postsType, featuredPosts) ->
-          val featuredPostIds = featuredPosts.map { it.id }
-
-          val unreadOnly =
-            when (postsType) {
-              PostsType.ALL,
-              PostsType.TODAY,
-              PostsType.LAST_24_HOURS -> null
-              PostsType.UNREAD -> true
+            .onEach { featuredPosts ->
+              _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
             }
-
-          val postsAfter =
-            when (postsType) {
-              PostsType.ALL,
-              PostsType.UNREAD -> Instant.DISTANT_PAST
-              PostsType.TODAY -> {
-                getTodayStartInstant()
-              }
-              PostsType.LAST_24_HOURS -> {
-                getLast24HourStart()
-              }
+            .map { featuredPosts ->
+              val featuredPostsIds = featuredPosts.map { it.id }
+              NTuple4(activeSource, postsAfter, unreadOnly, featuredPostsIds)
             }
-
+        }
+        .distinctUntilChanged()
+        .onEach { (activeSource, postsAfter, unreadOnly, featuredPostsIds) ->
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
                   selectedFeedId = activeSource?.id,
-                  featuredPostsIds = featuredPostIds,
+                  featuredPostsIds = featuredPostsIds,
                   unreadOnly = unreadOnly,
                   after = postsAfter,
                 )
@@ -312,7 +293,7 @@ class HomePresenter(
               .flow
               .cachedIn(coroutineScope)
 
-          _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList(), posts = posts) }
+          _state.update { it.copy(posts = posts) }
         }
         .launchIn(coroutineScope)
 
