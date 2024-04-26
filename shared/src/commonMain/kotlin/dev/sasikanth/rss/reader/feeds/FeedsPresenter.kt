@@ -330,10 +330,18 @@ class FeedsPresenter(
         .onEach { activeSource -> _state.update { it.copy(activeSource = activeSource) } }
         .launchIn(coroutineScope)
 
-      rssRepository
-        .numberOfFeeds()
-        .onEach { numberOfFeeds ->
-          _state.update { it.copy(numberOfFeeds = numberOfFeeds.toInt()) }
+      combine(rssRepository.numberOfFeeds(), rssRepository.numberOfFeedGroups()) {
+          numberOfFeeds,
+          numberOfFeedGroups ->
+          numberOfFeeds to numberOfFeedGroups
+        }
+        .onEach { (numberOfFeeds, numberOfFeedGroups) ->
+          _state.update {
+            it.copy(
+              numberOfFeeds = numberOfFeeds.toInt(),
+              numberOfFeedGroups = numberOfFeedGroups.toInt()
+            )
+          }
         }
         .launchIn(coroutineScope)
 
