@@ -697,6 +697,10 @@ class RssRepository(
     )
   }
 
+  fun numberOfFeedGroups(): Flow<Long> {
+    return feedGroupQueries.count().asFlow().mapToOne(ioDispatcher)
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }

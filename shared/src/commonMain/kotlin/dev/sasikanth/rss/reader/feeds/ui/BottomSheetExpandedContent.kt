@@ -102,6 +102,7 @@ import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 @Composable
 internal fun BottomSheetExpandedContent(
   numberOfFeeds: Int,
+  numberOfFeedGroups: Int,
   pinnedSources: LazyPagingItems<Source>,
   sources: LazyPagingItems<SourceListItem>,
   searchResults: LazyPagingItems<Feed>,
@@ -253,6 +254,7 @@ internal fun BottomSheetExpandedContent(
 
         allSources(
           numberOfFeeds = numberOfFeeds,
+          numberOfFeedGroups = numberOfFeedGroups,
           sources = sources,
           selectedSources = selectedSources,
           feedsSortOrder = feedsSortOrder,
@@ -396,7 +398,7 @@ private fun LazyGridScope.feedSearchResults(
         feed = feed,
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         isInMultiSelectMode = isInMultiSelectMode,
-        isFeedSelected = selectedSources.contains(feed),
+        isFeedSelected = selectedSources.any { it.id == feed.id },
         onFeedClick = onSourceClick,
         onFeedSelected = onToggleSourceSelection,
         modifier =
@@ -413,6 +415,7 @@ private fun LazyGridScope.feedSearchResults(
 
 private fun LazyGridScope.allSources(
   numberOfFeeds: Int,
+  numberOfFeedGroups: Int,
   sources: LazyPagingItems<SourceListItem>,
   selectedSources: Set<Source>,
   feedsSortOrder: FeedsOrderBy,
@@ -474,34 +477,18 @@ private fun LazyGridScope.allSources(
           Spacer(Modifier.requiredHeight(40.dp))
         }
         is SourceListItem.SourceItem -> {
-          val source = sourceItem.source
-          val startPadding =
-            if (source.sourceType == SourceType.FeedGroup) {
-              startPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-            } else {
-              startPaddingOfFeedListItem(gridItemSpan, index)
-            }
-          val endPadding =
-            if (source.sourceType == SourceType.FeedGroup) {
-              endPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-            } else {
-              endPaddingOfFeedListItem(gridItemSpan, index)
-            }
-          val topPadding =
-            if (source.sourceType == SourceType.FeedGroup) {
-              topPaddingOfFeedListItem(feedGroupGridItemSpan, index)
-            } else {
-              topPaddingOfFeedListItem(gridItemSpan, index)
-            }
-          val bottomPadding = bottomPaddingOfFeedListItem(index, sources.itemCount)
-
-          when (source) {
+          when (val source = sourceItem.source) {
             is FeedGroup -> {
+              val startPadding = startPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+              val endPadding = endPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+              val topPadding = topPaddingOfFeedListItem(feedGroupGridItemSpan, index)
+              val bottomPadding = bottomPaddingOfFeedListItem(index, sources.itemCount)
+
               FeedGroupItem(
                 feedGroup = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
+                selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 modifier =
@@ -514,11 +501,25 @@ private fun LazyGridScope.allSources(
               )
             }
             is Feed -> {
+              // When there are even number of feed groups, we are offsetting the index
+              // to make sure the spacing is properly applied to feed list items after the
+              // separator.
+              val transformedIndex =
+                if (numberOfFeedGroups % 2 == 0) {
+                  index - 1
+                } else {
+                  index
+                }
+              val startPadding = startPaddingOfFeedListItem(gridItemSpan, transformedIndex)
+              val endPadding = endPaddingOfFeedListItem(gridItemSpan, transformedIndex)
+              val topPadding = topPaddingOfFeedListItem(gridItemSpan, transformedIndex)
+              val bottomPadding = bottomPaddingOfFeedListItem(transformedIndex, sources.itemCount)
+
               FeedListItem(
                 feed = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                isFeedSelected = selectedSources.contains(source),
+                isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 modifier =
@@ -586,7 +587,7 @@ private fun LazyGridScope.pinnedSources(
                 feedGroup = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
+                selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 modifier =
@@ -603,7 +604,7 @@ private fun LazyGridScope.pinnedSources(
                 feed = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                isFeedSelected = selectedSources.contains(source),
+                isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 modifier =

@@ -69,6 +69,7 @@ internal fun FeedsBottomSheet(
     } else {
       BottomSheetExpandedContent(
         numberOfFeeds = state.numberOfFeeds,
+        numberOfFeedGroups = state.numberOfFeedGroups,
         pinnedSources = state.pinnedSources.collectAsLazyPagingItems(),
         sources = state.sources.collectAsLazyPagingItems(),
         searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),

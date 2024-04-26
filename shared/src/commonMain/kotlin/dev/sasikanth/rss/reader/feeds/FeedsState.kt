@@ -36,6 +36,7 @@ internal data class FeedsState(
   val isPinnedSectionExpanded: Boolean,
   val selectedSources: Set<Source>,
   val numberOfFeeds: Int,
+  val numberOfFeedGroups: Int,
 ) {
 
   val isInMultiSelectMode: Boolean
@@ -54,7 +55,8 @@ internal data class FeedsState(
         feedsSortOrder = FeedsOrderBy.Latest,
         isPinnedSectionExpanded = true,
         selectedSources = emptySet(),
-        numberOfFeeds = 0
+        numberOfFeeds = 0,
+        numberOfFeedGroups = 0
       )
   }
 }
