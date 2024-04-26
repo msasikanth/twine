@@ -150,4 +150,5 @@ val TrTwineStrings =
     actionGroupsTooltip = "Gruplar başka grupların içinde olamaz.",
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
+    edit = "Edit",
   )

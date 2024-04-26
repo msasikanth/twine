@@ -47,6 +47,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.GridView
@@ -126,6 +127,7 @@ internal fun BottomSheetExpandedContent(
   onDeleteSelectedFeeds: () -> Unit,
   onCreateGroup: (String) -> Unit,
   onAddToGroupClicked: () -> Unit,
+  onEditSource: (source: Source) -> Unit,
   modifier: Modifier = Modifier
 ) {
   var showNewGroupDialog by remember { mutableStateOf(false) }
@@ -203,6 +205,15 @@ internal fun BottomSheetExpandedContent(
               label = LocalStrings.current.actionDelete,
               onClick = onDeleteSelectedFeeds
             )
+
+            if (selectedSources.size == 1) {
+              ContextActionItem(
+                modifier = Modifier.weight(1f),
+                icon = Icons.Filled.Edit,
+                label = LocalStrings.current.edit,
+                onClick = { onEditSource(selectedSources.first()) }
+              )
+            }
           }
         }
       }
