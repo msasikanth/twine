@@ -78,6 +78,7 @@ class FeedsPresenter(
   private val observableActiveSource: ObservableActiveSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
+  @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =

@@ -153,7 +153,8 @@ class AppPresenter(
               { navigation.push(Config.Bookmarks) },
               { navigation.push(Config.Settings) },
               { openPost(it) },
-              { modalNavigation.activate(ModalConfig.GroupSelection) }
+              { modalNavigation.activate(ModalConfig.GroupSelection) },
+              { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
             )
         )
       }
