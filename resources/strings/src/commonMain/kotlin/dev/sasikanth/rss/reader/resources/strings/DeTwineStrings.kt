@@ -154,4 +154,5 @@ val DeTwineStrings =
     actionGroupsTooltip = "Gruppen können nicht innerhalb anderer Gruppen sein.",
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
+    edit = "Edit",
   )

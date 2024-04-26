@@ -31,6 +31,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
@@ -100,11 +101,21 @@ class FeedsPresenter(
 
   fun dispatch(event: FeedsEvent) {
     when (event) {
-      is FeedsEvent.OnFeedClick -> {
-        // TODO: Open source screen with posts
-      }
       is FeedsEvent.OnAddToGroupClicked -> {
         openGroupSelectionSheet()
+      }
+      is FeedsEvent.OnEditSourceClicked -> {
+        when (val source = event.source) {
+          is Feed -> {
+            // TODO: Open feed info sheet
+          }
+          is FeedGroup -> {
+            // TODO: Open edit feed group screen
+          }
+          else -> {
+            throw IllegalArgumentException("Unknown source: $source")
+          }
+        }
       }
       else -> {
         // no-op
@@ -161,6 +172,9 @@ class FeedsPresenter(
         is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
         is FeedsEvent.OnGroupsSelected -> onGroupsSelected(event.groupIds)
         FeedsEvent.OnAddToGroupClicked -> {
+          // no-op
+        }
+        is FeedsEvent.OnEditSourceClicked -> {
           // no-op
         }
       }

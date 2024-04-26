@@ -141,6 +141,7 @@ data class TwineStrings(
   val actionGroupsTooltip: String,
   val groupAddNew: String,
   val appBarAllFeeds: String,
+  val edit: String
 )
 
 object Locales {
