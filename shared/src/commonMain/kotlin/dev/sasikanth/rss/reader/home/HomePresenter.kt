@@ -32,11 +32,9 @@ import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.home.ui.PostsType
-import dev.sasikanth.rss.reader.repository.FeedAddResult
 import dev.sasikanth.rss.reader.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.repository.SettingsRepository
@@ -44,9 +42,6 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
-import io.ktor.client.network.sockets.ConnectTimeoutException
-import io.ktor.client.network.sockets.SocketTimeoutException
-import io.ktor.http.HttpStatusCode
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -189,7 +184,6 @@ class HomePresenter(
         }
         is HomeEvent.FeedsSheetStateChanged -> feedsSheetStateChanged(event.feedsSheetState)
         HomeEvent.OnHomeSelected -> onHomeSelected()
-        is HomeEvent.AddFeed -> addFeed(event.feedLink)
         HomeEvent.BackClicked -> backClicked()
         HomeEvent.SearchClicked -> {
           /* no-op */
@@ -314,85 +308,6 @@ class HomePresenter(
       settingsRepository.enableFeaturedItemBlur
         .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
-    }
-
-    private fun addFeed(feedLink: String) {
-      coroutineScope.launch {
-        _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
-        try {
-          when (val feedAddResult = rssRepository.addFeed(feedLink)) {
-            is FeedAddResult.DatabaseError -> handleDatabaseErrors(feedAddResult, feedLink)
-            is FeedAddResult.HttpStatusError -> handleHttpStatusErrors(feedAddResult)
-            is FeedAddResult.NetworkError -> handleNetworkErrors(feedAddResult, feedLink)
-            FeedAddResult.TooManyRedirects -> {
-              effects.emit(HomeEffect.ShowError(HomeErrorType.TooManyRedirects))
-            }
-            FeedAddResult.Success -> {
-              // no-op
-            }
-          }
-        } catch (e: Exception) {
-          BugsnagKotlin.setCustomValue(section = "AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(e)
-          effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(e)))
-        } finally {
-          _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
-        }
-      }
-    }
-
-    private suspend fun handleNetworkErrors(
-      feedAddResult: FeedAddResult.NetworkError,
-      feedLink: String
-    ) {
-      when (feedAddResult.exception) {
-        is UnsupportedOperationException -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownFeedType))
-        }
-        is XmlParsingError -> {
-          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(feedAddResult.exception)
-          effects.emit(HomeEffect.ShowError(HomeErrorType.FailedToParseXML))
-        }
-        is ConnectTimeoutException,
-        is SocketTimeoutException -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.Timeout))
-        }
-        else -> {
-          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(feedAddResult.exception)
-          effects.emit(HomeEffect.ShowError(HomeErrorType.Unknown(feedAddResult.exception)))
-        }
-      }
-    }
-
-    private suspend fun handleHttpStatusErrors(httpStatusError: FeedAddResult.HttpStatusError) {
-      when (val statusCode = httpStatusError.statusCode) {
-        HttpStatusCode.BadRequest,
-        HttpStatusCode.Unauthorized,
-        HttpStatusCode.PaymentRequired,
-        HttpStatusCode.Forbidden -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.UnAuthorized(statusCode)))
-        }
-        HttpStatusCode.NotFound -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.FeedNotFound(statusCode)))
-        }
-        HttpStatusCode.InternalServerError,
-        HttpStatusCode.NotImplemented,
-        HttpStatusCode.BadGateway,
-        HttpStatusCode.ServiceUnavailable,
-        HttpStatusCode.GatewayTimeout -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.ServerError(statusCode)))
-        }
-        else -> {
-          effects.emit(HomeEffect.ShowError(HomeErrorType.UnknownHttpStatusError(statusCode)))
-        }
-      }
-    }
-
-    private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
-      BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-      BugsnagKotlin.sendHandledException(databaseError.exception)
     }
 
     private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {

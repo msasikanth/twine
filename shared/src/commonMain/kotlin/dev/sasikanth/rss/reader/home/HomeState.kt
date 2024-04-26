@@ -36,7 +36,6 @@ internal data class HomeState(
   val loadingState: HomeLoadingState,
   val feedsSheetState: BottomSheetValue,
   val activeSource: Source?,
-  val feedFetchingState: FeedFetchingState,
   val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
   val postsType: PostsType
@@ -51,7 +50,6 @@ internal data class HomeState(
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = Collapsed,
         activeSource = null,
-        feedFetchingState = FeedFetchingState.Idle,
         featuredItemBlurEnabled = true,
         hasFeeds = null,
         postsType = PostsType.ALL
@@ -68,9 +66,4 @@ sealed interface HomeLoadingState {
   data object Loading : HomeLoadingState
 
   data class Error(val errorMessage: String) : HomeLoadingState
-}
-
-enum class FeedFetchingState {
-  Idle,
-  Loading
 }

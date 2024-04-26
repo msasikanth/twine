@@ -41,8 +41,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -51,7 +49,6 @@ import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -63,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -75,7 +71,6 @@ import dev.sasikanth.rss.reader.components.bottomsheet.rememberBottomSheetState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
-import dev.sasikanth.rss.reader.home.HomeErrorType
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
@@ -83,7 +78,6 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
-import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.coroutines.flow.collectLatest
@@ -121,7 +115,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   val bottomSheetCornerSize by
     bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
 
-  val strings = LocalStrings.current
   val linkHandler = LocalLinkHandler.current
 
   LaunchedEffect(Unit) {
@@ -129,12 +122,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       when (effect) {
         HomeEffect.MinimizeSheet -> {
           bottomSheetState.collapse()
-        }
-        is HomeEffect.ShowError -> {
-          val errorMessage = errorMessageForErrorType(effect.homeErrorType, strings)
-          if (errorMessage != null) {
-            bottomSheetScaffoldState.snackbarHostState.showSnackbar(message = errorMessage)
-          }
         }
       }
     }
@@ -187,34 +174,6 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
             }
           }
         )
-      },
-      snackbarHost = {
-        val snackbarModifier =
-          if (bottomSheetState.isExpanded) {
-            Modifier.padding(bottom = BOTTOM_SHEET_PEEK_HEIGHT)
-              .windowInsetsPadding(
-                WindowInsets.systemBars.only(
-                  WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                )
-              )
-          } else {
-            Modifier
-          }
-
-        SnackbarHost(hostState = it, modifier = snackbarModifier) { snackbarData ->
-          Snackbar(
-            modifier = Modifier.padding(12.dp),
-            content = {
-              Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
-            },
-            action = null,
-            actionOnNewLine = false,
-            shape = SnackbarDefaults.shape,
-            backgroundColor = SnackbarDefaults.color,
-            contentColor = SnackbarDefaults.contentColor,
-            elevation = 0.dp
-          )
-        }
       },
       floatingActionButton = {
         val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
@@ -383,17 +342,3 @@ private fun NoNewPosts() {
     )
   }
 }
-
-private fun errorMessageForErrorType(errorType: HomeErrorType, twineStrings: TwineStrings) =
-  when (errorType) {
-    HomeErrorType.UnknownFeedType -> twineStrings.errorUnsupportedFeed
-    HomeErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
-    HomeErrorType.Timeout -> twineStrings.errorRequestTimeout
-    is HomeErrorType.Unknown -> errorType.e.message
-    is HomeErrorType.FeedNotFound -> twineStrings.errorFeedNotFound(errorType.statusCode.value)
-    is HomeErrorType.ServerError -> twineStrings.errorServer(errorType.statusCode.value)
-    HomeErrorType.TooManyRedirects -> twineStrings.errorTooManyRedirects
-    is HomeErrorType.UnAuthorized -> twineStrings.errorUnAuthorized(errorType.statusCode.value)
-    is HomeErrorType.UnknownHttpStatusError ->
-      twineStrings.errorUnknownHttpStatus(errorType.statusCode.value)
-  }
