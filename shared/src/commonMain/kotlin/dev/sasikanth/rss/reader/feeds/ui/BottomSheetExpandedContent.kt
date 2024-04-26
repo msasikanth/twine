@@ -398,7 +398,7 @@ private fun LazyGridScope.feedSearchResults(
         feed = feed,
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         isInMultiSelectMode = isInMultiSelectMode,
-        isFeedSelected = selectedSources.contains(feed),
+        isFeedSelected = selectedSources.any { it.id == feed.id },
         onFeedClick = onSourceClick,
         onFeedSelected = onToggleSourceSelection,
         modifier =
@@ -488,7 +488,7 @@ private fun LazyGridScope.allSources(
                 feedGroup = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
+                selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 modifier =
@@ -519,7 +519,7 @@ private fun LazyGridScope.allSources(
                 feed = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                isFeedSelected = selectedSources.contains(source),
+                isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 modifier =
@@ -587,7 +587,7 @@ private fun LazyGridScope.pinnedSources(
                 feedGroup = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                selected = selectedSources.contains(source),
+                selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
                 modifier =
@@ -604,7 +604,7 @@ private fun LazyGridScope.pinnedSources(
                 feed = source,
                 canShowUnreadPostsCount = canShowUnreadPostsCount,
                 isInMultiSelectMode = isInMultiSelectMode,
-                isFeedSelected = selectedSources.contains(source),
+                isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
                 modifier =
