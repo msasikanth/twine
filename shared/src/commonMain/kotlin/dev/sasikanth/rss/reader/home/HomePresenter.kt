@@ -78,13 +78,19 @@ internal typealias HomePresenterFactory =
     openSettings: () -> Unit,
     openPost: (PostWithMetadata) -> Unit,
     openGroupSelectionSheet: () -> Unit,
+    openFeedInfoSheet: (feedId: String) -> Unit,
   ) -> HomePresenter
 
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(
   dispatchersProvider: DispatchersProvider,
-  feedsPresenterFactory: (ComponentContext, openGroupSelectionSheet: () -> Unit) -> FeedsPresenter,
+  feedsPresenterFactory:
+    (
+      ComponentContext,
+      openGroupSelectionSheet: () -> Unit,
+      openFeedInfoSheet: (feedId: String) -> Unit
+    ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
@@ -94,12 +100,14 @@ class HomePresenter(
   @Assisted private val openSettings: () -> Unit,
   @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
+  @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   internal val feedsPresenter =
     feedsPresenterFactory(
       childContext("feeds_presenter"),
       openGroupSelectionSheet,
+      openFeedInfoSheet
     )
 
   private val backCallback = BackCallback {

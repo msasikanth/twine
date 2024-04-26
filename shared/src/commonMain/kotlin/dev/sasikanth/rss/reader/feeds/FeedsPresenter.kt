@@ -78,6 +78,7 @@ class FeedsPresenter(
   private val observableActiveSource: ObservableActiveSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
+  @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -106,9 +107,7 @@ class FeedsPresenter(
       }
       is FeedsEvent.OnEditSourceClicked -> {
         when (val source = event.source) {
-          is Feed -> {
-            // TODO: Open feed info sheet
-          }
+          is Feed -> openFeedInfoSheet(source.id)
           is FeedGroup -> {
             // TODO: Open edit feed group screen
           }
@@ -157,10 +156,7 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
-        is FeedsEvent.OnFeedClick -> {
-          // TODO: Remove once source page with posts is implemented
-          onSourceClicked(event.source)
-        }
+        is FeedsEvent.OnFeedClick -> onSourceClicked(event.source)
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
