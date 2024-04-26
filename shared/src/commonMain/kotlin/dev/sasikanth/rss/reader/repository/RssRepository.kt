@@ -701,6 +701,34 @@ class RssRepository(
     return feedGroupQueries.count().asFlow().mapToOne(ioDispatcher)
   }
 
+  suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
+    return withContext(ioDispatcher) {
+      feedGroupQueries
+        .groupsByIds(
+          ids = ids,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant? ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+            )
+          }
+        )
+        .executeAsList()
+    }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
