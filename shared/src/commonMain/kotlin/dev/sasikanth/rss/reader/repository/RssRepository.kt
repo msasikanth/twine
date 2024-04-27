@@ -83,9 +83,10 @@ class RssRepository(
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
             val feedId = nameBasedUuidOf(feedPayload.link).toString()
+            val name = if (title.isNullOrBlank()) feedPayload.name else title
 
             feedQueries.upsert(
-              name = title ?: feedPayload.name,
+              name = name,
               icon = feedPayload.icon,
               description = feedPayload.description,
               homepageLink = feedPayload.homepageLink,
