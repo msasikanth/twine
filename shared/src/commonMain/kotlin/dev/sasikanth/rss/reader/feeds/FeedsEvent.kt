@@ -38,7 +38,7 @@ sealed interface FeedsEvent {
 
   data object ClearSearchQuery : FeedsEvent
 
-  data class OnFeedClick(val source: Source) : FeedsEvent
+  data class OnSourceClick(val source: Source) : FeedsEvent
 
   data class OnFeedSortOrderChanged(val feedsOrderBy: FeedsOrderBy) : FeedsEvent
 

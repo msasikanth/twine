@@ -28,6 +28,8 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
+import dev.sasikanth.rss.reader.feeds.ui.expanded.pinnedSources
 import dev.sasikanth.rss.reader.utils.inverse
 
 @Composable
@@ -63,39 +65,12 @@ internal fun FeedsBottomSheet(
         pinnedSources = state.pinnedSources.collectAsLazyPagingItems(),
         activeSource = state.activeSource,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnFeedClick(feed)) },
+        onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnSourceClick(feed)) },
         onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
       )
     } else {
       BottomSheetExpandedContent(
-        numberOfFeeds = state.numberOfFeeds,
-        numberOfFeedGroups = state.numberOfFeedGroups,
-        pinnedSources = state.pinnedSources.collectAsLazyPagingItems(),
-        sources = state.sources.collectAsLazyPagingItems(),
-        searchResults = state.feedsSearchResults.collectAsLazyPagingItems(),
-        selectedSources = state.selectedSources,
-        searchQuery = feedsPresenter.searchQuery,
-        feedsSortOrder = state.feedsSortOrder,
-        feedsViewMode = state.feedsViewMode,
-        isPinnedSectionExpanded = state.isPinnedSectionExpanded,
-        isInMultiSelectMode = state.isInMultiSelectMode,
-        canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-        onSearchQueryChanged = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearSearchQuery = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        onFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnFeedClick(it)) },
-        onToggleSourceSelection = { feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
-        onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
-        onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
-        onChangeFeedsViewModeClick = {
-          feedsPresenter.dispatch(FeedsEvent.OnChangeFeedsViewModeClick)
-        },
-        onCancelFeedsSelection = { feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection) },
-        onPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.PinSelectedSources) },
-        onUnPinSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources) },
-        onDeleteSelectedFeeds = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) },
-        onCreateGroup = { feedsPresenter.dispatch(FeedsEvent.OnCreateGroup(it)) },
-        onAddToGroupClicked = { feedsPresenter.dispatch(FeedsEvent.OnAddToGroupClicked) },
-        onEditSource = { feedsPresenter.dispatch(FeedsEvent.OnEditSourceClicked(it)) },
+        feedsPresenter = feedsPresenter,
         modifier =
           Modifier.graphicsLayer {
             val threshold = 0.3
