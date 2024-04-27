@@ -31,6 +31,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
@@ -77,6 +78,7 @@ class FeedsPresenter(
   private val observableActiveSource: ObservableActiveSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
+  @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -100,11 +102,19 @@ class FeedsPresenter(
 
   fun dispatch(event: FeedsEvent) {
     when (event) {
-      is FeedsEvent.OnFeedClick -> {
-        // TODO: Open source screen with posts
-      }
       is FeedsEvent.OnAddToGroupClicked -> {
         openGroupSelectionSheet()
+      }
+      is FeedsEvent.OnEditSourceClicked -> {
+        when (val source = event.source) {
+          is Feed -> openFeedInfoSheet(source.id)
+          is FeedGroup -> {
+            // TODO: Open edit feed group screen
+          }
+          else -> {
+            throw IllegalArgumentException("Unknown source: $source")
+          }
+        }
       }
       else -> {
         // no-op
@@ -146,10 +156,7 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
-        is FeedsEvent.OnFeedClick -> {
-          // TODO: Remove once source page with posts is implemented
-          onSourceClicked(event.source)
-        }
+        is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
@@ -161,6 +168,9 @@ class FeedsPresenter(
         is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
         is FeedsEvent.OnGroupsSelected -> onGroupsSelected(event.groupIds)
         FeedsEvent.OnAddToGroupClicked -> {
+          // no-op
+        }
+        is FeedsEvent.OnEditSourceClicked -> {
           // no-op
         }
       }
@@ -206,7 +216,12 @@ class FeedsPresenter(
     private fun onDeleteSelectedSources() {
       coroutineScope
         .launch { rssRepository.deleteSources(_state.value.selectedSources) }
-        .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
+        .invokeOnCompletion {
+          if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
+            _state.update { it.copy(activeSource = null) }
+          }
+          dispatch(FeedsEvent.CancelSourcesSelection)
+        }
     }
 
     private fun onCancelSourcesSelection() {

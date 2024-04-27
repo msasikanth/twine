@@ -161,4 +161,5 @@ val EnTwineStrings =
     actionGroupsTooltip = "Groups cannot be inside other groups.",
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
+    edit = "Edit",
   )

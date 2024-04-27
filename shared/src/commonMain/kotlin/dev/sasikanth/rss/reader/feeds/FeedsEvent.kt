@@ -38,7 +38,7 @@ sealed interface FeedsEvent {
 
   data object ClearSearchQuery : FeedsEvent
 
-  data class OnFeedClick(val source: Source) : FeedsEvent
+  data class OnSourceClick(val source: Source) : FeedsEvent
 
   data class OnFeedSortOrderChanged(val feedsOrderBy: FeedsOrderBy) : FeedsEvent
 
@@ -59,6 +59,8 @@ sealed interface FeedsEvent {
   data class OnCreateGroup(val name: String) : FeedsEvent
 
   data class OnGroupsSelected(val groupIds: Set<String>) : FeedsEvent
+
+  data class OnEditSourceClicked(val source: Source) : FeedsEvent
 
   data object OnAddToGroupClicked : FeedsEvent
 }
