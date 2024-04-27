@@ -216,7 +216,12 @@ class FeedsPresenter(
     private fun onDeleteSelectedSources() {
       coroutineScope
         .launch { rssRepository.deleteSources(_state.value.selectedSources) }
-        .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
+        .invokeOnCompletion {
+          if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
+            _state.update { it.copy(activeSource = null) }
+          }
+          dispatch(FeedsEvent.CancelSourcesSelection)
+        }
     }
 
     private fun onCancelSourcesSelection() {
