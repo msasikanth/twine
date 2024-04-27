@@ -156,7 +156,7 @@ class FeedsPresenter(
         is FeedsEvent.OnFeedPinClicked -> onFeedPinClicked(event.feed)
         FeedsEvent.ClearSearchQuery -> clearSearchQuery()
         is FeedsEvent.SearchQueryChanged -> onSearchQueryChanged(event.searchQuery)
-        is FeedsEvent.OnFeedClick -> onSourceClicked(event.source)
+        is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
