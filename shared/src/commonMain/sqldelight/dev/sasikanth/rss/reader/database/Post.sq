@@ -26,7 +26,7 @@ ON CONFLICT(id) DO
 UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl, date = excluded.date;
 
 count:
-SELECT COUNT(*) FROM post
+SELECT COUNT(DISTINCT post.id) FROM post
 LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
@@ -40,7 +40,7 @@ WHERE
 ORDER BY post.date DESC;
 
 featuredPosts:
-SELECT
+SELECT DISTINCT
   post.id,
   sourceId,
   post.title,
@@ -68,7 +68,7 @@ WHERE
 ORDER BY post.date DESC LIMIT :limit;
 
 posts:
-SELECT
+SELECT DISTINCT
   post.id,
   sourceId,
   post.title,

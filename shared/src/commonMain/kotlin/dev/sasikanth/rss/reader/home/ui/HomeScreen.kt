@@ -15,8 +15,6 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -107,13 +105,9 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
   val listState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts?.size ?: 0 })
 
-  val bottomSheetSwipeTransition =
-    updateTransition(
-      targetState = bottomSheetState.offsetProgress,
-      label = "Bottom Sheet Swipe Progress"
-    )
-  val bottomSheetCornerSize by
-    bottomSheetSwipeTransition.animateDp { BOTTOM_SHEET_CORNER_SIZE * it.inverse() }
+  val bottomSheetCornerSize = remember {
+    BOTTOM_SHEET_CORNER_SIZE * bottomSheetState.offsetProgress.inverse()
+  }
 
   val linkHandler = LocalLinkHandler.current
 
@@ -165,7 +159,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
       sheetContent = {
         FeedsBottomSheet(
           feedsPresenter = homePresenter.feedsPresenter,
-          bottomSheetSwipeTransition = bottomSheetSwipeTransition,
+          bottomSheetState = bottomSheetState,
           closeSheet = { coroutineScope.launch { bottomSheetState.collapse() } },
           selectedFeedChanged = {
             coroutineScope.launch {
