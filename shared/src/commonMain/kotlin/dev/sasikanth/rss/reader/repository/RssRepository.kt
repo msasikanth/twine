@@ -83,9 +83,10 @@ class RssRepository(
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
             val feedId = nameBasedUuidOf(feedPayload.link).toString()
+            val name = if (title.isNullOrBlank()) feedPayload.name else title
 
             feedQueries.upsert(
-              name = title ?: feedPayload.name,
+              name = name,
               icon = feedPayload.icon,
               description = feedPayload.description,
               homepageLink = feedPayload.homepageLink,
@@ -116,7 +117,7 @@ class RssRepository(
               }
             }
 
-            FeedAddResult.Success
+            FeedAddResult.Success(feedId)
           } catch (e: Exception) {
             FeedAddResult.DatabaseError(e)
           }
@@ -374,14 +375,15 @@ class RssRepository(
 
   suspend fun removeFeed(feedId: String) {
     withContext(ioDispatcher) {
-      feedQueries.remove(feedId)
-      val feedGroup = feedGroupQueries.groupByFeedId(feedId).executeAsOneOrNull()
-
-      if (feedGroup != null) {
-        feedGroupQueries.updateFeedIds(
-          feedIds = feedGroup.feedIds - setOf(feedId),
-          id = feedGroup.id
-        )
+      transactionRunner.invoke {
+        feedQueries.remove(feedId)
+        val feedGroups = feedGroupQueries.groupByFeedId(feedId).executeAsList()
+        feedGroups.forEach { feedGroup ->
+          feedGroupQueries.updateFeedIds(
+            feedIds = feedGroup.feedIds - setOf(feedId),
+            id = feedGroup.id
+          )
+        }
       }
     }
   }
@@ -535,9 +537,8 @@ class RssRepository(
           feedGroupQueries.deleteGroup(id = source.id)
 
           if (source is Feed) {
-            val feedGroup = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsOneOrNull()
-
-            if (feedGroup != null) {
+            val feedGroups = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsList()
+            feedGroups.forEach { feedGroup ->
               feedGroupQueries.updateFeedIds(
                 feedIds = feedGroup.feedIds - setOf(source.id),
                 id = feedGroup.id
@@ -699,6 +700,34 @@ class RssRepository(
 
   fun numberOfFeedGroups(): Flow<Long> {
     return feedGroupQueries.count().asFlow().mapToOne(ioDispatcher)
+  }
+
+  suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
+    return withContext(ioDispatcher) {
+      feedGroupQueries
+        .groupsByIds(
+          ids = ids,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant? ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+            )
+          }
+        )
+        .executeAsList()
+    }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

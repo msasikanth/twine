@@ -31,6 +31,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.Stac
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
+import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
@@ -104,6 +105,9 @@ fun App(
               }
               is Screen.Reader -> {
                 ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.AddFeed -> {
+                AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
           }

@@ -117,9 +117,7 @@ internal fun BottomSheetExpandedContent(
         ) {
           BottomSheetExpandedBottomBar(
             onNewGroupClick = { showNewGroupDialog = true },
-            onNewFeedClick = {
-              // TODO: Open feed creation dialog/sheet/screen
-            }
+            onNewFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnNewFeedClicked) }
           )
         }
 
