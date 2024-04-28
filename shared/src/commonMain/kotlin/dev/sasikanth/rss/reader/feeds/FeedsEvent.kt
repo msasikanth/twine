@@ -63,4 +63,6 @@ sealed interface FeedsEvent {
   data class OnEditSourceClicked(val source: Source) : FeedsEvent
 
   data object OnAddToGroupClicked : FeedsEvent
+
+  data object OnNewFeedClicked : FeedsEvent
 }

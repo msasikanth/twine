@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.about.AboutPresenter
+import dev.sasikanth.rss.reader.addfeed.AddFeedPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
@@ -34,4 +35,6 @@ internal sealed interface Screen {
   class About(val presenter: AboutPresenter) : Screen
 
   class Reader(val presenter: ReaderPresenter) : Screen
+
+  class AddFeed(val presenter: AddFeedPresenter) : Screen
 }

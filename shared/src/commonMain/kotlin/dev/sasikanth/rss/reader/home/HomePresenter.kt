@@ -74,6 +74,7 @@ internal typealias HomePresenterFactory =
     openPost: (PostWithMetadata) -> Unit,
     openGroupSelectionSheet: () -> Unit,
     openFeedInfoSheet: (feedId: String) -> Unit,
+    openAddFeedScreen: () -> Unit,
   ) -> HomePresenter
 
 @Inject
@@ -84,7 +85,8 @@ class HomePresenter(
     (
       ComponentContext,
       openGroupSelectionSheet: () -> Unit,
-      openFeedInfoSheet: (feedId: String) -> Unit
+      openFeedInfoSheet: (feedId: String) -> Unit,
+      openAddFeedScreen: () -> Unit,
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
@@ -96,13 +98,15 @@ class HomePresenter(
   @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
+  @Assisted private val openAddFeedScreen: () -> Unit,
 ) : ComponentContext by componentContext {
 
   internal val feedsPresenter =
     feedsPresenterFactory(
       childContext("feeds_presenter"),
       openGroupSelectionSheet,
-      openFeedInfoSheet
+      openFeedInfoSheet,
+      openAddFeedScreen
     )
 
   private val backCallback = BackCallback {
