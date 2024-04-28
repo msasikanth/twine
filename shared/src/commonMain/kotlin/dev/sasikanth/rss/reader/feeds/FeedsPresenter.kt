@@ -223,7 +223,7 @@ class FeedsPresenter(
         .launch { rssRepository.deleteSources(_state.value.selectedSources) }
         .invokeOnCompletion {
           if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
-            _state.update { it.copy(activeSource = null) }
+            observableActiveSource.clearSelection()
           }
           dispatch(FeedsEvent.CancelSourcesSelection)
         }
