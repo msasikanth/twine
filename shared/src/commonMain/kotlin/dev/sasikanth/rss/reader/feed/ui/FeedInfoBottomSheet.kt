@@ -94,6 +94,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -276,14 +278,18 @@ private fun FeedLabelInput(
           backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
         )
 
+      // Debounce input changes
+      LaunchedEffect(input) {
+        if (input.isBlank()) return@LaunchedEffect
+        delay(500.milliseconds)
+        onFeedNameChange(input)
+      }
+
       CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
         BasicTextField(
           modifier = Modifier.fillMaxWidth(),
           value = input,
-          onValueChange = {
-            input = it
-            onFeedNameChange(input)
-          },
+          onValueChange = { input = it },
           keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
           keyboardActions =
             KeyboardActions(
