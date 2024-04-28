@@ -15,8 +15,6 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.core.Transition
-import androidx.compose.animation.core.animateDp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,18 +38,14 @@ private val COLLAPSED_HANDLE_SIZE = 32.dp
 private val EXPANDED_HANDLE_SIZE = 64.dp
 
 @Composable
-internal fun BottomSheetHandle(bottomSheetSwipeTransition: Transition<Float>) {
+internal fun BottomSheetHandle(progress: Float) {
   val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-  val targetHandleSize by
-    bottomSheetSwipeTransition.animateDp {
-      min(COLLAPSED_HANDLE_SIZE * it + COLLAPSED_HANDLE_SIZE, EXPANDED_HANDLE_SIZE)
-    }
+  val targetHandleSize =
+    min(COLLAPSED_HANDLE_SIZE * progress + COLLAPSED_HANDLE_SIZE, EXPANDED_HANDLE_SIZE)
 
   val collapsedTopPadding = 8.dp
-  val targetTopPadding by
-    bottomSheetSwipeTransition.animateDp { progress ->
-      (collapsedTopPadding * (progress * 2) + collapsedTopPadding) + (statusBarPadding * progress)
-    }
+  val targetTopPadding =
+    (collapsedTopPadding * (progress * 2) + collapsedTopPadding) + (statusBarPadding * progress)
 
   Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
     Spacer(Modifier.requiredHeight(targetTopPadding))

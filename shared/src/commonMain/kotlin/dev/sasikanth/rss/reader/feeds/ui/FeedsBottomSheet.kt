@@ -15,16 +15,17 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.animation.core.Transition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
@@ -35,7 +36,7 @@ import dev.sasikanth.rss.reader.utils.inverse
 @Composable
 internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
-  bottomSheetSwipeTransition: Transition<Float>,
+  bottomSheetState: BottomSheetState,
   closeSheet: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
@@ -50,13 +51,16 @@ internal fun FeedsBottomSheet(
     }
   }
 
+  val bottomSheetProgress =
+    remember(bottomSheetState.offsetProgress) { bottomSheetState.offsetProgress }
+
   Column(modifier = Modifier.fillMaxSize()) {
-    BottomSheetHandle(bottomSheetSwipeTransition)
+    BottomSheetHandle(bottomSheetProgress)
 
     // Transforming the bottom sheet progress from 0-1 to 1-0,
     // since we want to control the alpha of the content as
     // users swipes the sheet up and down
-    val bottomSheetExpandingProgress = (bottomSheetSwipeTransition.currentState * 5f).inverse()
+    val bottomSheetExpandingProgress = (bottomSheetProgress * 5f).inverse()
     val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
 
     if (hasBottomSheetExpandedThreshold) {
@@ -76,8 +80,8 @@ internal fun FeedsBottomSheet(
             val threshold = 0.3
             val scaleFactor = 1 / (1 - threshold)
             val targetAlpha =
-              if (bottomSheetSwipeTransition.currentState > threshold) {
-                  (bottomSheetSwipeTransition.currentState - threshold) * scaleFactor
+              if (bottomSheetProgress > threshold) {
+                  (bottomSheetProgress - threshold) * scaleFactor
                 } else {
                   0f
                 }
