@@ -678,7 +678,7 @@ private fun BottomSheetScaffoldLayout(
       }
     val topBarHeight = topBarPlaceables?.fastMaxBy { it.height }?.height ?: 0
 
-    val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight - topBarHeight)
+    val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight)
     val bodyPlaceables =
       subcompose(BottomSheetScaffoldLayoutSlot.Body) {
           body(PaddingValues(top = topBarHeight.toDp(), bottom = sheetPeekHeight))
