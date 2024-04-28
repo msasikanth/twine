@@ -79,6 +79,7 @@ class FeedsPresenter(
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
+  @Assisted private val openAddFeedScreen: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -116,6 +117,7 @@ class FeedsPresenter(
           }
         }
       }
+      is FeedsEvent.OnNewFeedClicked -> openAddFeedScreen()
       else -> {
         // no-op
       }
@@ -171,6 +173,9 @@ class FeedsPresenter(
           // no-op
         }
         is FeedsEvent.OnEditSourceClicked -> {
+          // no-op
+        }
+        FeedsEvent.OnNewFeedClicked -> {
           // no-op
         }
       }

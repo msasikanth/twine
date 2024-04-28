@@ -72,3 +72,17 @@ SELECT * FROM feedGroup WHERE INSTR(feedIds, :feedId);
 group:
 SELECT * FROM feedGroup WHERE id = :id;
 
+groupsByIds:
+SELECT
+  id,
+  name,
+  feedIds,
+  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+              FROM feed
+              WHERE INSTR(feedGroup.feedIds, feed.id)
+              LIMIT 4), '') AS feedIcons,
+  createdAt,
+  updatedAt,
+  pinnedAt
+FROM feedGroup
+WHERE id IN :ids;

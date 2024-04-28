@@ -19,7 +19,7 @@ import io.ktor.http.HttpStatusCode
 
 sealed interface FeedAddResult {
 
-  data object Success : FeedAddResult
+  data class Success(val feedId: String) : FeedAddResult
 
   data class HttpStatusError(val statusCode: HttpStatusCode) : FeedAddResult
 

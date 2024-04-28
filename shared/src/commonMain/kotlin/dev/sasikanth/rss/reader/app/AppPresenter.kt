@@ -33,6 +33,8 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.coroutines.coroutineScope
 import com.arkivanov.essenty.lifecycle.doOnStart
 import dev.sasikanth.rss.reader.about.AboutPresenterFactory
+import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
+import dev.sasikanth.rss.reader.addfeed.AddFeedPresenterFactory
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -70,6 +72,7 @@ class AppPresenter(
   private val readerPresenter: ReaderPresenterFactory,
   private val feedPresenter: FeedPresenterFactory,
   private val groupSelectionPresenter: GroupSelectionPresenterFactory,
+  private val addFeedPresenter: AddFeedPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -130,10 +133,21 @@ class AppPresenter(
               componentContext,
               { selectedGroupIds ->
                 modalNavigation.dismiss {
-                  (screenStack.active.instance as? Screen.Home)
-                    ?.presenter
-                    ?.feedsPresenter
-                    ?.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                  when (val activeInstance = screenStack.active.instance) {
+                    is Screen.Home -> {
+                      activeInstance.presenter.feedsPresenter.dispatch(
+                        FeedsEvent.OnGroupsSelected(selectedGroupIds)
+                      )
+                    }
+                    is Screen.AddFeed -> {
+                      activeInstance.presenter.dispatch(
+                        AddFeedEvent.OnGroupsSelected(selectedGroupIds)
+                      )
+                    }
+                    else -> {
+                      throw IllegalArgumentException("Unhandled active instance: $activeInstance")
+                    }
+                  }
                 }
               },
               { modalNavigation.dismiss() }
@@ -154,7 +168,8 @@ class AppPresenter(
               { navigation.push(Config.Settings) },
               { openPost(it) },
               { modalNavigation.activate(ModalConfig.GroupSelection) },
-              { modalNavigation.activate(ModalConfig.FeedInfo(it)) }
+              { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
+              { navigation.push(Config.AddFeed) }
             )
         )
       }
@@ -184,6 +199,16 @@ class AppPresenter(
       is Config.Reader -> {
         Screen.Reader(
           presenter = readerPresenter(config.postId, componentContext) { navigation.pop() }
+        )
+      }
+      is Config.AddFeed -> {
+        Screen.AddFeed(
+          presenter =
+            addFeedPresenter(
+              componentContext,
+              { navigation.pop() },
+              { modalNavigation.activate(ModalConfig.GroupSelection) }
+            )
         )
       }
     }
@@ -238,6 +263,8 @@ class AppPresenter(
     @Serializable data object About : Config
 
     @Serializable data class Reader(val postId: String) : Config
+
+    @Serializable data object AddFeed : Config
   }
 
   @Serializable

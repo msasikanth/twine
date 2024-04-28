@@ -13,9 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.home
 
-sealed interface HomeEffect {
+package dev.sasikanth.rss.reader.addfeed
 
-  data object MinimizeSheet : HomeEffect
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+
+sealed interface AddFeedEvent {
+
+  data class AddFeedClicked(val feedLink: String, val name: String?) : AddFeedEvent
+
+  data object BackClicked : AddFeedEvent
+
+  data object OnGroupDropdownClicked : AddFeedEvent
+
+  data class OnGroupsSelected(val selectedGroupIds: Set<String>) : AddFeedEvent
+
+  data class OnRemoveGroupClicked(val group: FeedGroup) : AddFeedEvent
 }
