@@ -375,14 +375,15 @@ class RssRepository(
 
   suspend fun removeFeed(feedId: String) {
     withContext(ioDispatcher) {
-      feedQueries.remove(feedId)
-      val feedGroup = feedGroupQueries.groupByFeedId(feedId).executeAsOneOrNull()
-
-      if (feedGroup != null) {
-        feedGroupQueries.updateFeedIds(
-          feedIds = feedGroup.feedIds - setOf(feedId),
-          id = feedGroup.id
-        )
+      transactionRunner.invoke {
+        feedQueries.remove(feedId)
+        val feedGroups = feedGroupQueries.groupByFeedId(feedId).executeAsList()
+        feedGroups.forEach { feedGroup ->
+          feedGroupQueries.updateFeedIds(
+            feedIds = feedGroup.feedIds - setOf(feedId),
+            id = feedGroup.id
+          )
+        }
       }
     }
   }
@@ -536,9 +537,8 @@ class RssRepository(
           feedGroupQueries.deleteGroup(id = source.id)
 
           if (source is Feed) {
-            val feedGroup = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsOneOrNull()
-
-            if (feedGroup != null) {
+            val feedGroups = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsList()
+            feedGroups.forEach { feedGroup ->
               feedGroupQueries.updateFeedIds(
                 feedIds = feedGroup.feedIds - setOf(source.id),
                 id = feedGroup.id
