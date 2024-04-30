@@ -88,7 +88,8 @@ internal fun PostsList(
 
   LazyColumn(
     state = listState,
-    contentPadding = PaddingValues(top = topContentPadding, bottom = 128.dp)
+    contentPadding =
+      PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
   ) {
     item {
       FeaturedSection(

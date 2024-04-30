@@ -81,7 +81,7 @@ import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-private val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @OptIn(ExperimentalFoundationApi::class)
