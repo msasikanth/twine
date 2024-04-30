@@ -291,8 +291,10 @@ class FeedsPresenter(
     private fun onToggleSourceSelection(source: Source) {
       _state.update {
         val selectedFeeds = _state.value.selectedSources
-        if (selectedFeeds.contains(source)) {
-          it.copy(selectedSources = selectedFeeds - setOf(source))
+        if (selectedFeeds.any { selectedFeed -> selectedFeed.id == source.id }) {
+          it.copy(
+            selectedSources = selectedFeeds.filterNot { feed -> feed.id == source.id }.toSet()
+          )
         } else {
           it.copy(selectedSources = selectedFeeds + setOf(source))
         }
