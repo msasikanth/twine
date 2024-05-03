@@ -23,6 +23,7 @@ plugins {
   alias(libs.plugins.kotlin.cocoapods)
   alias(libs.plugins.android.library)
   alias(libs.plugins.compose)
+  alias(libs.plugins.compose.compiler)
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.ksp)
   alias(libs.plugins.kotlin.parcelize)
