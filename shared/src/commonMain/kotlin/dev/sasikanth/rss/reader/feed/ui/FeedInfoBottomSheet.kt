@@ -339,7 +339,7 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
 
     FeedOptionItem(
       icon = TwineIcons.DeleteOutline,
-      text = LocalStrings.current.feedOptionRemove,
+      text = LocalStrings.current.actionDelete,
       modifier = Modifier.weight(1f),
       onOptionClick = { showConfirmDialog = true }
     )
