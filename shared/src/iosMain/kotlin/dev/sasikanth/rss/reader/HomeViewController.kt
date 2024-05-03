@@ -20,10 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.jetbrains.PredictiveBackGestureOverlay
+import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.app.App
-import dev.sasikanth.rss.reader.repository.BrowserType.*
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 import platform.UIKit.UIViewController
