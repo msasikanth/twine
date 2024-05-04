@@ -499,8 +499,21 @@ class RssRepository(
       transactionRunner.invoke {
         groupIds.forEach { groupId ->
           val group = feedGroupQueries.group(groupId).executeAsOne()
+          val updatedFeedIds = (group.feedIds + feedIds).distinct()
 
-          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds + feedIds)
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = updatedFeedIds)
+        }
+      }
+    }
+  }
+
+  suspend fun removeFeedIdsFromGroups(groupIds: Set<String>, feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        groupIds.forEach { groupId ->
+          val group = feedGroupQueries.group(groupId).executeAsOne()
+
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds - feedIds.toSet())
         }
       }
     }
