@@ -168,4 +168,5 @@ val EnTwineStrings =
     buttonAddToGroup = "Add to group...",
     removeSources = "Delete sources",
     removeSourcesDesc = "Do you want to delete selected sources?",
+    noPinnedSources = "No pinned feeds/groups",
   )
