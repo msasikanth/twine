@@ -37,6 +37,7 @@ import dev.sasikanth.rss.reader.components.DynamicContentTheme
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.rememberDynamicColorState
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
+import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
@@ -108,6 +109,9 @@ fun App(
               }
               is Screen.AddFeed -> {
                 AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+              }
+              is Screen.GroupDetails -> {
+                GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
           }

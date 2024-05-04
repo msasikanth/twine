@@ -80,6 +80,7 @@ class FeedsPresenter(
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
+  @Assisted private val openGroupScreen: (groupId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -109,9 +110,7 @@ class FeedsPresenter(
       is FeedsEvent.OnEditSourceClicked -> {
         when (val source = event.source) {
           is Feed -> openFeedInfoSheet(source.id)
-          is FeedGroup -> {
-            // TODO: Open edit feed group screen
-          }
+          is FeedGroup -> openGroupScreen(source.id)
           else -> {
             throw IllegalArgumentException("Unknown source: $source")
           }
