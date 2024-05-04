@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +51,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -94,6 +96,13 @@ internal fun BottomSheetExpandedContent(
   val feedsViewMode = state.feedsViewMode
 
   var showNewGroupDialog by remember { mutableStateOf(false) }
+
+  if (state.showDeleteConfirmation) {
+    DeleteConfirmationDialog(
+      onDelete = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) },
+      dismiss = { feedsPresenter.dispatch(FeedsEvent.DismissDeleteConfirmation) }
+    )
+  }
 
   Scaffold(
     modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
@@ -169,7 +178,7 @@ internal fun BottomSheetExpandedContent(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Delete,
               label = LocalStrings.current.actionDelete,
-              onClick = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) }
+              onClick = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
             )
 
             if (state.selectedSources.size == 1) {
@@ -357,4 +366,52 @@ private fun SearchBar(
 
     Spacer(Modifier.requiredWidth(20.dp))
   }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
+  onDelete: () -> Unit,
+  dismiss: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  AlertDialog(
+    modifier = modifier,
+    onDismissRequest = dismiss,
+    confirmButton = {
+      TextButton(
+        onClick = {
+          onDelete()
+          dismiss()
+        },
+        shape = MaterialTheme.shapes.large
+      ) {
+        Text(
+          text = LocalStrings.current.delete,
+          style = MaterialTheme.typography.labelLarge,
+          color = MaterialTheme.colorScheme.error
+        )
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = dismiss, shape = MaterialTheme.shapes.large) {
+        Text(
+          text = LocalStrings.current.buttonCancel,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+    },
+    title = {
+      Text(text = LocalStrings.current.removeSources, color = AppTheme.colorScheme.textEmphasisMed)
+    },
+    text = {
+      Text(
+        text = LocalStrings.current.removeSourcesDesc,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+    },
+    containerColor = AppTheme.colorScheme.tintedSurface,
+    titleContentColor = AppTheme.colorScheme.onSurface,
+    textContentColor = AppTheme.colorScheme.onSurface,
+  )
 }

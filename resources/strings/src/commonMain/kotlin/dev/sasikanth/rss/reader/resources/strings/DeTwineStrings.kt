@@ -158,5 +158,7 @@ val DeTwineStrings =
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
     edit = "Edit",
-    buttonAddToGroup = "Add to group..."
+    buttonAddToGroup = "Add to group...",
+    removeSources = "Delete sources",
+    removeSourcesDesc = "Do you want to delete selected sources?",
   )

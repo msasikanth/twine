@@ -146,6 +146,8 @@ data class TwineStrings(
   val appBarAllFeeds: String,
   val edit: String,
   val buttonAddToGroup: String,
+  val removeSources: String,
+  val removeSourcesDesc: String,
 )
 
 object Locales {

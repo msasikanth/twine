@@ -37,6 +37,7 @@ internal data class FeedsState(
   val selectedSources: Set<Source>,
   val numberOfFeeds: Int,
   val numberOfFeedGroups: Int,
+  val showDeleteConfirmation: Boolean,
 ) {
 
   val isInMultiSelectMode: Boolean
@@ -56,7 +57,8 @@ internal data class FeedsState(
         isPinnedSectionExpanded = true,
         selectedSources = emptySet(),
         numberOfFeeds = 0,
-        numberOfFeedGroups = 0
+        numberOfFeedGroups = 0,
+        showDeleteConfirmation = false
       )
   }
 }
