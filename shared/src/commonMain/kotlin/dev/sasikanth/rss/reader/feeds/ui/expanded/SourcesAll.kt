@@ -148,7 +148,7 @@ internal fun LazyGridScope.allSources(
               // to make sure the spacing is properly applied to feed list items after the
               // separator.
               val transformedIndex =
-                if (numberOfFeedGroups % 2 == 0) {
+                if (numberOfFeedGroups % 2 == 0 && numberOfFeedGroups > 0) {
                   index - 1
                 } else {
                   index
