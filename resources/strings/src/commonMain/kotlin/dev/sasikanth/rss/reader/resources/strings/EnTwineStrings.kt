@@ -150,6 +150,7 @@ val EnTwineStrings =
     actionDelete = "Delete",
     actionAddTo = "Add to",
     actionMoveTo = "Move to",
+    actionUngroup = "Ungroup",
     createGroup = "Create group",
     createFeed = "Add feed",
     groupNameHint = "Name",
