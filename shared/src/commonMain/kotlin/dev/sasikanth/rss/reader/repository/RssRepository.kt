@@ -730,6 +730,33 @@ class RssRepository(
     }
   }
 
+  fun groupById(groupId: String): Flow<FeedGroup> {
+    return feedGroupQueries
+      .groupsByIds(
+        ids = setOf(groupId),
+        mapper = {
+          id: String,
+          name: String,
+          feedIds: List<String>,
+          feedIcons: String,
+          createdAt: Instant,
+          updatedAt: Instant,
+          pinnedAt: Instant? ->
+          FeedGroup(
+            id = id,
+            name = name,
+            feedIds = feedIds.filterNot { it.isBlank() },
+            feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            pinnedAt = pinnedAt,
+          )
+        }
+      )
+      .asFlow()
+      .mapToOne(ioDispatcher)
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
