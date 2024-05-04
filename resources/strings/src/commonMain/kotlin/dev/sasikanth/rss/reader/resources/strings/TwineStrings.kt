@@ -148,6 +148,7 @@ data class TwineStrings(
   val buttonAddToGroup: String,
   val removeSources: String,
   val removeSourcesDesc: String,
+  val noPinnedSources: String,
 )
 
 object Locales {

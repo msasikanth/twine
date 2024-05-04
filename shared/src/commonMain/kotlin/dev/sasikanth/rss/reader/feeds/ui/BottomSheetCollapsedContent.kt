@@ -18,11 +18,16 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
@@ -32,6 +37,7 @@ import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -44,60 +50,76 @@ internal fun BottomSheetCollapsedContent(
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  LazyRow(
-    modifier = modifier.fillMaxWidth().padding(start = 20.dp),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    contentPadding = PaddingValues(end = 24.dp)
-  ) {
-    stickyHeader {
-      val shadowColors =
-        arrayOf(
-          0.85f to AppTheme.colorScheme.tintedBackground,
-          0.9f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
-          1f to Color.Transparent
-        )
+  Box {
+    LazyRow(
+      modifier = modifier.fillMaxWidth().padding(start = 20.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(end = 24.dp)
+    ) {
+      stickyHeader {
+        val shadowColors =
+          arrayOf(
+            0.85f to AppTheme.colorScheme.tintedBackground,
+            0.9f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
+            1f to Color.Transparent
+          )
 
-      HomeBottomBarItem(
-        selected = activeSource == null,
-        onClick = onHomeSelected,
-        modifier =
-          Modifier.drawWithCache {
-              onDrawBehind {
-                val brush =
-                  Brush.horizontalGradient(
-                    colorStops = shadowColors,
+        HomeBottomBarItem(
+          selected = activeSource == null,
+          onClick = onHomeSelected,
+          modifier =
+            Modifier.drawWithCache {
+                onDrawBehind {
+                  val brush =
+                    Brush.horizontalGradient(
+                      colorStops = shadowColors,
+                    )
+                  drawRect(
+                    brush = brush,
                   )
-                drawRect(
-                  brush = brush,
-                )
+                }
               }
-            }
-            .padding(end = 4.dp)
-      )
-    }
+              .padding(end = 4.dp)
+        )
+      }
 
-    items(pinnedSources.itemCount) { index ->
-      val source = pinnedSources[index]
-      if (source != null) {
-        when (source) {
-          is FeedGroup -> {
-            FeedGroupBottomBarItem(
-              feedGroup = source,
-              canShowUnreadPostsCount = canShowUnreadPostsCount,
-              selected = activeSource?.id == source.id,
-              onClick = { onSourceClick(source) }
-            )
-          }
-          is Feed -> {
-            FeedBottomBarItem(
-              badgeCount = source.numberOfUnreadPosts,
-              iconUrl = source.icon,
-              canShowUnreadPostsCount = canShowUnreadPostsCount,
-              onClick = { onSourceClick(source) },
-              selected = activeSource?.id == source.id
-            )
+      items(pinnedSources.itemCount) { index ->
+        val source = pinnedSources[index]
+        if (source != null) {
+          when (source) {
+            is FeedGroup -> {
+              FeedGroupBottomBarItem(
+                feedGroup = source,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                selected = activeSource?.id == source.id,
+                onClick = { onSourceClick(source) }
+              )
+            }
+            is Feed -> {
+              FeedBottomBarItem(
+                badgeCount = source.numberOfUnreadPosts,
+                iconUrl = source.icon,
+                canShowUnreadPostsCount = canShowUnreadPostsCount,
+                onClick = { onSourceClick(source) },
+                selected = activeSource?.id == source.id
+              )
+            }
           }
         }
+      }
+    }
+
+    if (pinnedSources.itemCount == 0) {
+      Box(
+        modifier = Modifier.fillMaxWidth().requiredHeight(height = 64.dp),
+        contentAlignment = Alignment.Center
+      ) {
+        Text(
+          modifier = Modifier.padding(start = 24.dp),
+          text = LocalStrings.current.noPinnedSources,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.bodyMedium
+        )
       }
     }
   }
