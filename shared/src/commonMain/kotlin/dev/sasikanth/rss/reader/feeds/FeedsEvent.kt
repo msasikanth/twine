@@ -54,7 +54,7 @@ sealed interface FeedsEvent {
 
   data object UnPinSelectedSources : FeedsEvent
 
-  data object DeleteSelectedSources : FeedsEvent
+  data object DeleteSelectedSourcesClicked : FeedsEvent
 
   data class OnCreateGroup(val name: String) : FeedsEvent
 
@@ -65,4 +65,8 @@ sealed interface FeedsEvent {
   data object OnAddToGroupClicked : FeedsEvent
 
   data object OnNewFeedClicked : FeedsEvent
+
+  data object DismissDeleteConfirmation : FeedsEvent
+
+  data object DeleteSelectedSources : FeedsEvent
 }
