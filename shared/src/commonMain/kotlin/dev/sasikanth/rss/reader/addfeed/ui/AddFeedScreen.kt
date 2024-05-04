@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.addfeed.ui
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -86,7 +87,6 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedPresenter
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
-import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -235,56 +235,66 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
             ),
         )
 
-        OutlinedButton(
-          modifier = Modifier.fillMaxWidth(),
-          colors =
-            ButtonDefaults.outlinedButtonColors(
-              containerColor = AppTheme.colorScheme.surfaceContainerLowest,
-              contentColor = AppTheme.colorScheme.tintedForeground
-            ),
-          border = BorderStroke(1.dp, AppTheme.colorScheme.tintedForeground),
-          onClick = { presenter.dispatch(AddFeedEvent.OnGroupDropdownClicked) },
-          content = {
-            Text(modifier = Modifier.weight(1f), text = LocalStrings.current.buttonAddToGroup)
-
-            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowRight, contentDescription = null)
-          }
-        )
-
-        FlowRow(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          verticalArrangement = Arrangement.spacedBy(4.dp),
+        Column(
+          Modifier.requiredSizeIn(minHeight = 56.dp)
+            .fillMaxWidth()
+            .background(AppTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
         ) {
-          state.selectedFeedGroups.forEach { selectedGroup ->
-            InputChip(
-              selected = false,
-              onClick = { presenter.dispatch(AddFeedEvent.OnRemoveGroupClicked(selectedGroup)) },
-              colors =
-                InputChipDefaults.inputChipColors(
-                  containerColor = AppTheme.colorScheme.tintedForeground,
-                  labelColor = AppTheme.colorScheme.tintedBackground,
-                  leadingIconColor = AppTheme.colorScheme.tintedBackground,
-                  trailingIconColor = AppTheme.colorScheme.tintedBackground,
-                ),
-              border = null,
-              shape = RoundedCornerShape(50),
-              leadingIcon = {
-                Icon(
-                  modifier = Modifier.requiredSize(16.dp),
-                  imageVector = Icons.TwoTone.FolderOpen,
-                  contentDescription = null
-                )
-              },
-              trailingIcon = {
-                Icon(
-                  modifier = Modifier.requiredSize(16.dp),
-                  imageVector = Icons.Rounded.Close,
-                  contentDescription = null
-                )
-              },
-              label = { Text(text = selectedGroup.name) }
-            )
+          FlowRow(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            state.selectedFeedGroups.forEach { selectedGroup ->
+              InputChip(
+                selected = false,
+                onClick = { presenter.dispatch(AddFeedEvent.OnRemoveGroupClicked(selectedGroup)) },
+                colors =
+                  InputChipDefaults.inputChipColors(
+                    containerColor = AppTheme.colorScheme.tintedForeground,
+                    labelColor = AppTheme.colorScheme.tintedBackground,
+                    leadingIconColor = AppTheme.colorScheme.tintedBackground,
+                    trailingIconColor = AppTheme.colorScheme.tintedBackground,
+                  ),
+                border = null,
+                shape = RoundedCornerShape(50),
+                leadingIcon = {
+                  Icon(
+                    modifier = Modifier.requiredSize(16.dp),
+                    imageVector = Icons.TwoTone.FolderOpen,
+                    contentDescription = null
+                  )
+                },
+                trailingIcon = {
+                  Icon(
+                    modifier = Modifier.requiredSize(16.dp),
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = null
+                  )
+                },
+                label = { Text(text = selectedGroup.name) }
+              )
+            }
           }
+
+          Spacer(Modifier.requiredHeight(8.dp))
+
+          Button(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+            colors =
+              ButtonDefaults.buttonColors(
+                containerColor = AppTheme.colorScheme.tintedForeground,
+                contentColor = AppTheme.colorScheme.tintedBackground
+              ),
+            onClick = { presenter.dispatch(AddFeedEvent.OnGroupDropdownClicked) },
+            content = {
+              Text(modifier = Modifier.weight(1f), text = LocalStrings.current.buttonAddToGroup)
+
+              Icon(imageVector = Icons.AutoMirrored.Filled.ArrowRight, contentDescription = null)
+            }
+          )
+
+          Spacer(Modifier.requiredHeight(8.dp))
         }
       }
     },
