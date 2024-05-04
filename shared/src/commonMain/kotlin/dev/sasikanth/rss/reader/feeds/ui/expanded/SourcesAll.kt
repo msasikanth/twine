@@ -185,7 +185,7 @@ internal fun LazyGridScope.allSources(
 }
 
 @Composable
-private fun AllFeedsHeader(
+internal fun AllFeedsHeader(
   feedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
@@ -193,7 +193,7 @@ private fun AllFeedsHeader(
 ) {
   Row(
     modifier =
-      Modifier.padding(start = 32.dp, end = 20.dp).padding(vertical = 12.dp).then(modifier),
+      Modifier.then(modifier).padding(start = 32.dp, end = 20.dp).padding(vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }

@@ -143,6 +143,7 @@ val DeTwineStrings =
     actionDelete = "Löschen",
     actionAddTo = "Hinzufügen zu",
     actionMoveTo = "Ziehen nach",
+    actionUngroup = "Ungroup",
     createGroup = "Gruppe erstellen",
     createFeed = "Feed hinzufügen",
     groupNameHint = "Name",

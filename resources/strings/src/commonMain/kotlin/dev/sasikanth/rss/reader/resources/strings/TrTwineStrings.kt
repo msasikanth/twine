@@ -139,6 +139,7 @@ val TrTwineStrings =
     actionAddTo = "a ekle",
     actionMoveTo = "Taşınmak",
     actionDelete = "Sil",
+    actionUngroup = "Ungroup",
     createGroup = "Grup oluştur",
     createFeed = "İçerik ekle",
     groupNameHint = "İsim",

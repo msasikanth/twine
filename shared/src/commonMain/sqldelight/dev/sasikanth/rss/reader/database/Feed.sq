@@ -122,3 +122,28 @@ UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 
 updateAlwaysFetchSourceArticle:
 UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = :id;
+
+feedsInGroupPaginatedCount:
+SELECT COUNT(*) FROM feed
+WHERE id IN :feedIds;
+
+feedsInGroupPaginated:
+SELECT
+  f.id,
+  f.name,
+  f.icon,
+  f.description,
+  f.link,
+  f.homepageLink,
+  f.createdAt,
+  f.pinnedAt,
+  f.lastCleanUpAt,
+  0 AS numberOfUnreadPosts
+FROM feed f
+WHERE f.id IN :feedIds
+ORDER BY
+  CASE WHEN :orderBy = 'latest' THEN f.createdAt END DESC,
+  CASE WHEN :orderBy = 'oldest' THEN f.createdAt END ASC,
+  CASE WHEN :orderBy = 'alphabetical' THEN f.name END ASC,
+  f.createdAt DESC
+LIMIT :limit OFFSET :offset;
