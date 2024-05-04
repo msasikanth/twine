@@ -163,8 +163,6 @@ private fun ByteReadChannel.toCharIterator(
           currentBuffer = byteArray.commonToUtf8String().replace(xmlDeclarationPattern, "")
           currentIndex = 0
         }
-
-        byteArrayPool.recycle(byteArray)
       }
     }
 
