@@ -24,33 +24,15 @@ abstract class ContentParser {
 
   abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 
-  fun readAttrText(attrName: String, parser: XmlPullParser): String? {
-    val url = parser.getAttributeValue(parser.namespace, attrName)
-    skip(parser)
-    return url
+  fun XmlPullParser.attrText(attrName: String): String? {
+    return getAttributeValue(namespace, attrName).also { skip() }
   }
 
-  fun readTagText(tagName: String, parser: XmlPullParser): String {
-    parser.require(EventType.START_TAG, parser.namespace, tagName)
-    val title = readText(parser)
-    parser.require(EventType.END_TAG, parser.namespace, tagName)
-    return title
-  }
-
-  private fun readText(parser: XmlPullParser): String {
-    var result = ""
-    if (parser.next() == EventType.TEXT) {
-      result = parser.text
-      parser.nextTag()
-    }
-    return result
-  }
-
-  fun skip(parser: XmlPullParser) {
-    parser.require(EventType.START_TAG, parser.namespace, null)
+  fun XmlPullParser.skip() {
+    require(EventType.START_TAG, namespace, null)
     var depth = 1
     while (depth != 0) {
-      when (parser.next()) {
+      when (next()) {
         EventType.END_TAG -> depth--
         EventType.START_TAG -> depth++
         else -> {
