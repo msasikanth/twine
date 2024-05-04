@@ -51,22 +51,22 @@ internal object AtomContentParser : ContentParser() {
       if (parser.eventType != EventType.START_TAG) continue
       when (val name = parser.name) {
         TAG_TITLE -> {
-          title = readTagText(name, parser)
+          title = parser.nextText()
         }
         TAG_LINK -> {
           if (link.isNullOrBlank()) {
             link = readAtomLink(name, parser)
           } else {
-            skip(parser)
+            parser.skip()
           }
         }
         TAG_SUBTITLE -> {
-          description = readTagText(name, parser)
+          description = parser.nextText()
         }
         TAG_ATOM_ENTRY -> {
           posts.add(readAtomEntry(parser, link))
         }
-        else -> skip(parser)
+        else -> parser.skip()
       }
     }
 
@@ -108,18 +108,18 @@ internal object AtomContentParser : ContentParser() {
 
       when (val tagName = parser.name) {
         TAG_TITLE -> {
-          title = readTagText(tagName, parser)
+          title = parser.nextText()
         }
         TAG_LINK -> {
           if (link.isNullOrBlank()) {
             link = readAtomLink(tagName, parser)
           } else {
-            skip(parser)
+            parser.skip()
           }
         }
         TAG_CONTENT,
         TAG_SUMMARY -> {
-          rawContent = readTagText(tagName, parser).trimIndent()
+          rawContent = parser.nextText().trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
           if (image.isNullOrBlank() && htmlContent != null) {
@@ -131,12 +131,12 @@ internal object AtomContentParser : ContentParser() {
         TAG_PUBLISHED,
         TAG_UPDATED -> {
           if (date.isNullOrBlank()) {
-            date = readTagText(tagName, parser)
+            date = parser.nextText()
           } else {
-            skip(parser)
+            parser.skip()
           }
         }
-        else -> skip(parser)
+        else -> parser.skip()
       }
     }
 

@@ -52,24 +52,25 @@ internal object RssContentParser : ContentParser() {
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
+
       when (val name = parser.name) {
         TAG_TITLE -> {
-          title = readTagText(name, parser)
+          title = parser.nextText()
         }
         TAG_LINK -> {
           if (link.isNullOrBlank()) {
-            link = readTagText(name, parser)
+            link = parser.nextText()
           } else {
-            skip(parser)
+            parser.skip()
           }
         }
         TAG_DESCRIPTION -> {
-          description = readTagText(name, parser)
+          description = parser.nextText()
         }
         TAG_RSS_ITEM -> {
           posts.add(readRssItem(parser, link))
         }
-        else -> skip(parser)
+        else -> parser.skip()
       }
     }
 
@@ -113,16 +114,16 @@ internal object RssContentParser : ContentParser() {
 
       when {
         name == TAG_TITLE -> {
-          title = readTagText(name, parser)
+          title = parser.nextText()
         }
         link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
-          link = readTagText(name, parser)
+          link = parser.nextText()
         }
         name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
-          link = readAttrText(ATTR_URL, parser)
+          link = parser.attrText(ATTR_URL)
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          rawContent = readTagText(name, parser).trimIndent()
+          rawContent = parser.nextText().trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
           if (image.isNullOrBlank() && htmlContent != null) {
@@ -132,18 +133,18 @@ internal object RssContentParser : ContentParser() {
           description = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
         }
         name == TAG_PUB_DATE -> {
-          date = readTagText(name, parser)
+          date = parser.nextText()
         }
         image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
-          image = readAttrText(ATTR_URL, parser)
+          image = parser.attrText(ATTR_URL)
         }
         image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
-          image = readTagText(name, parser)
+          image = parser.nextText()
         }
         commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
-          commentsLink = readTagText(name, parser)
+          commentsLink = parser.nextText()
         }
-        else -> skip(parser)
+        else -> parser.skip()
       }
     }
 
