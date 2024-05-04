@@ -80,6 +80,7 @@ class FeedsPresenter(
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
+  @Assisted private val openGroupScreen: (groupId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -109,9 +110,7 @@ class FeedsPresenter(
       is FeedsEvent.OnEditSourceClicked -> {
         when (val source = event.source) {
           is Feed -> openFeedInfoSheet(source.id)
-          is FeedGroup -> {
-            // TODO: Open edit feed group screen
-          }
+          is FeedGroup -> openGroupScreen(source.id)
           else -> {
             throw IllegalArgumentException("Unknown source: $source")
           }
@@ -164,7 +163,7 @@ class FeedsPresenter(
         FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
         FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
-        FeedsEvent.DeleteSelectedSources -> onDeleteSelectedSources()
+        FeedsEvent.DeleteSelectedSourcesClicked -> onDeleteSelectedSourcesClicked()
         FeedsEvent.PinSelectedSources -> onPinSelectedSources()
         FeedsEvent.UnPinSelectedSources -> onUnpinSelectedSources()
         is FeedsEvent.OnCreateGroup -> onCreateGroup(event.name)
@@ -178,7 +177,24 @@ class FeedsPresenter(
         FeedsEvent.OnNewFeedClicked -> {
           // no-op
         }
+        FeedsEvent.DeleteSelectedSources -> deleteSelectedSources()
+        FeedsEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
       }
+    }
+
+    private fun dismissDeleteConfirmation() {
+      _state.update { it.copy(showDeleteConfirmation = false) }
+    }
+
+    private fun deleteSelectedSources() {
+      coroutineScope
+        .launch { rssRepository.deleteSources(_state.value.selectedSources) }
+        .invokeOnCompletion {
+          if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
+            observableActiveSource.clearSelection()
+          }
+          dispatch(FeedsEvent.CancelSourcesSelection)
+        }
     }
 
     private fun onGroupsSelected(groupIds: Set<String>) {
@@ -218,15 +234,8 @@ class FeedsPresenter(
         .invokeOnCompletion { dispatch(FeedsEvent.CancelSourcesSelection) }
     }
 
-    private fun onDeleteSelectedSources() {
-      coroutineScope
-        .launch { rssRepository.deleteSources(_state.value.selectedSources) }
-        .invokeOnCompletion {
-          if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
-            observableActiveSource.clearSelection()
-          }
-          dispatch(FeedsEvent.CancelSourcesSelection)
-        }
+    private fun onDeleteSelectedSourcesClicked() {
+      _state.update { it.copy(showDeleteConfirmation = true) }
     }
 
     private fun onCancelSourcesSelection() {

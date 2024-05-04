@@ -40,6 +40,8 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
+import dev.sasikanth.rss.reader.group.GroupEvent
+import dev.sasikanth.rss.reader.group.GroupPresenterFactory
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
@@ -73,6 +75,7 @@ class AppPresenter(
   private val feedPresenter: FeedPresenterFactory,
   private val groupSelectionPresenter: GroupSelectionPresenterFactory,
   private val addFeedPresenter: AddFeedPresenterFactory,
+  private val groupPresenter: GroupPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -144,6 +147,11 @@ class AppPresenter(
                         AddFeedEvent.OnGroupsSelected(selectedGroupIds)
                       )
                     }
+                    is Screen.GroupDetails -> {
+                      activeInstance.presenter.dispatch(
+                        GroupEvent.OnGroupsSelected(selectedGroupIds)
+                      )
+                    }
                     else -> {
                       throw IllegalArgumentException("Unhandled active instance: $activeInstance")
                     }
@@ -169,7 +177,8 @@ class AppPresenter(
               { openPost(it) },
               { modalNavigation.activate(ModalConfig.GroupSelection) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
-              { navigation.push(Config.AddFeed) }
+              { navigation.push(Config.AddFeed) },
+              { navigation.push(Config.GroupDetails(it)) }
             )
         )
       }
@@ -205,6 +214,17 @@ class AppPresenter(
         Screen.AddFeed(
           presenter =
             addFeedPresenter(
+              componentContext,
+              { navigation.pop() },
+              { modalNavigation.activate(ModalConfig.GroupSelection) }
+            )
+        )
+      }
+      is Config.GroupDetails -> {
+        Screen.GroupDetails(
+          presenter =
+            groupPresenter(
+              config.groupId,
               componentContext,
               { navigation.pop() },
               { modalNavigation.activate(ModalConfig.GroupSelection) }
@@ -265,6 +285,8 @@ class AppPresenter(
     @Serializable data class Reader(val postId: String) : Config
 
     @Serializable data object AddFeed : Config
+
+    @Serializable data class GroupDetails(val groupId: String) : Config
   }
 
   @Serializable

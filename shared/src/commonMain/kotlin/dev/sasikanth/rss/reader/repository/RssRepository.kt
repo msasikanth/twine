@@ -499,8 +499,21 @@ class RssRepository(
       transactionRunner.invoke {
         groupIds.forEach { groupId ->
           val group = feedGroupQueries.group(groupId).executeAsOne()
+          val updatedFeedIds = (group.feedIds + feedIds).distinct()
 
-          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds + feedIds)
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = updatedFeedIds)
+        }
+      }
+    }
+  }
+
+  suspend fun removeFeedIdsFromGroups(groupIds: Set<String>, feedIds: List<String>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        groupIds.forEach { groupId ->
+          val group = feedGroupQueries.group(groupId).executeAsOne()
+
+          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds - feedIds.toSet())
         }
       }
     }
@@ -728,6 +741,76 @@ class RssRepository(
         )
         .executeAsList()
     }
+  }
+
+  fun groupById(groupId: String): Flow<FeedGroup> {
+    return feedGroupQueries
+      .groupsByIds(
+        ids = setOf(groupId),
+        mapper = {
+          id: String,
+          name: String,
+          feedIds: List<String>,
+          feedIcons: String,
+          createdAt: Instant,
+          updatedAt: Instant,
+          pinnedAt: Instant? ->
+          FeedGroup(
+            id = id,
+            name = name,
+            feedIds = feedIds.filterNot { it.isBlank() },
+            feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+            createdAt = createdAt,
+            updatedAt = updatedAt,
+            pinnedAt = pinnedAt,
+          )
+        }
+      )
+      .asFlow()
+      .mapToOne(ioDispatcher)
+  }
+
+  fun feedsInGroup(
+    feedIds: List<String>,
+    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+  ): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedQueries.feedsInGroupPaginatedCount(feedIds),
+      transacter = feedQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedQueries.feedsInGroupPaginated(
+          feedIds = feedIds,
+          orderBy = orderBy.value,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            icon: String,
+            description: String,
+            link: String,
+            homepageLink: String,
+            createdAt: Instant,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long ->
+            Feed(
+              id = id,
+              name = name,
+              icon = icon,
+              description = description,
+              link = link,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+            )
+          }
+        )
+      }
+    )
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

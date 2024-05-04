@@ -150,6 +150,7 @@ val EnTwineStrings =
     actionDelete = "Delete",
     actionAddTo = "Add to",
     actionMoveTo = "Move to",
+    actionUngroup = "Ungroup",
     createGroup = "Create group",
     createFeed = "Add feed",
     groupNameHint = "Name",
@@ -164,5 +165,7 @@ val EnTwineStrings =
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
     edit = "Edit",
-    buttonAddToGroup = "Add to group..."
+    buttonAddToGroup = "Add to group...",
+    removeSources = "Delete sources",
+    removeSourcesDesc = "Do you want to delete selected sources?",
   )

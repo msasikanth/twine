@@ -139,6 +139,7 @@ val TrTwineStrings =
     actionAddTo = "a ekle",
     actionMoveTo = "Taşınmak",
     actionDelete = "Sil",
+    actionUngroup = "Ungroup",
     createGroup = "Grup oluştur",
     createFeed = "İçerik ekle",
     groupNameHint = "İsim",
@@ -153,5 +154,7 @@ val TrTwineStrings =
     groupAddNew = "Add new",
     appBarAllFeeds = "All feeds",
     edit = "Edit",
-    buttonAddToGroup = "Add to group..."
+    buttonAddToGroup = "Add to group...",
+    removeSources = "Delete sources",
+    removeSourcesDesc = "Do you want to delete selected sources?",
   )

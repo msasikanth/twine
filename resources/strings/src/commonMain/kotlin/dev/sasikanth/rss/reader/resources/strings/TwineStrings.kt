@@ -135,6 +135,7 @@ data class TwineStrings(
   val actionDelete: String,
   val actionAddTo: String,
   val actionMoveTo: String,
+  val actionUngroup: String,
   val createGroup: String,
   val createFeed: String,
   val groupNameHint: String,
@@ -145,6 +146,8 @@ data class TwineStrings(
   val appBarAllFeeds: String,
   val edit: String,
   val buttonAddToGroup: String,
+  val removeSources: String,
+  val removeSourcesDesc: String,
 )
 
 object Locales {
