@@ -757,6 +757,49 @@ class RssRepository(
       .mapToOne(ioDispatcher)
   }
 
+  fun feedsInGroup(
+    feedIds: List<String>,
+    orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
+  ): PagingSource<Int, Feed> {
+    return QueryPagingSource(
+      countQuery = feedQueries.feedsInGroupPaginatedCount(feedIds),
+      transacter = feedQueries,
+      context = ioDispatcher,
+      queryProvider = { limit, offset ->
+        feedQueries.feedsInGroupPaginated(
+          feedIds = feedIds,
+          orderBy = orderBy.value,
+          limit = limit,
+          offset = offset,
+          mapper = {
+            id: String,
+            name: String,
+            icon: String,
+            description: String,
+            link: String,
+            homepageLink: String,
+            createdAt: Instant,
+            pinnedAt: Instant?,
+            lastCleanUpAt: Instant?,
+            numberOfUnreadPosts: Long ->
+            Feed(
+              id = id,
+              name = name,
+              icon = icon,
+              description = description,
+              link = link,
+              homepageLink = homepageLink,
+              createdAt = createdAt,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+            )
+          }
+        )
+      }
+    )
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
