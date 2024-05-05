@@ -44,6 +44,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun BottomSheetCollapsedContent(
   pinnedSources: LazyPagingItems<Source>,
+  numberOfFeeds: Int,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -109,7 +110,7 @@ internal fun BottomSheetCollapsedContent(
       }
     }
 
-    if (pinnedSources.itemCount == 0) {
+    if (pinnedSources.itemCount == 0 && numberOfFeeds > 0) {
       Box(
         modifier = Modifier.fillMaxWidth().requiredHeight(height = 64.dp),
         contentAlignment = Alignment.Center

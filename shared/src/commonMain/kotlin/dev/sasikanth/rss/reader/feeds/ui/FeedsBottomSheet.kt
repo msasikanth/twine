@@ -67,6 +67,7 @@ internal fun FeedsBottomSheet(
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
         pinnedSources = state.pinnedSources.collectAsLazyPagingItems(),
+        numberOfFeeds = state.numberOfFeeds,
         activeSource = state.activeSource,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,
         onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnSourceClick(feed)) },
