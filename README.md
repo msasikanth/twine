@@ -72,6 +72,12 @@ This project uses ktfmt, provided via the spotless gradle plugin, and the bundle
 - [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development
 - [Eduardo Pratti](https://twitter.com/edpratti) / Design
 
+## Error Reporting by
+
+<a href="http://www.bugsnag.com/">
+  <img src="readme_images/bugsnag.png" width="250" alt="bugsnag logo"/>
+</a>
+
 ## License
 
 ```
