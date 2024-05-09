@@ -156,6 +156,7 @@ data class TwineStrings(
 object Locales {
   const val EN = "en"
   const val DE = "de"
+  const val ZH = "zh"
   const val TR = "tr"
 }
 
