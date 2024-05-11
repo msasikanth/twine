@@ -25,6 +25,9 @@ import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 
 internal sealed interface Screen {
+
+  data object Placeholder : Screen
+
   class Home(val presenter: HomePresenter) : Screen
 
   class Search(val presenter: SearchPresenter) : Screen
