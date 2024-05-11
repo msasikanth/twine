@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
@@ -86,6 +87,9 @@ fun App(
           ) { child ->
             val fillMaxSizeModifier = Modifier.fillMaxSize()
             when (val screen = child.instance) {
+              Screen.Placeholder -> {
+                PlaceholderScreen(modifier = fillMaxSizeModifier)
+              }
               is Screen.Home -> {
                 HomeScreen(homePresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }

@@ -149,6 +149,8 @@ data class TwineStrings(
   val removeSources: String,
   val removeSourcesDesc: String,
   val noPinnedSources: String,
+  val databaseMaintainenceTitle: String,
+  val databaseMaintainenceSubtitle: String,
 )
 
 object Locales {
