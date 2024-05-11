@@ -56,6 +56,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -115,6 +116,13 @@ class AppPresenter(
 
   init {
     lifecycle.doOnStart { presenterInstance.refreshFeedsIfExpired() }
+
+    // Loading feed count to make sure all database maintainence operations
+    // are finished and we can navigate to next screen
+    scope.launch {
+      withContext(dispatchersProvider.io) { rssRepository.numberOfFeeds().firstOrNull() }
+      navigation.push(Config.Home)
+    }
   }
 
   fun onBackClicked() {
