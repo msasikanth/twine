@@ -149,4 +149,6 @@ val ZhTwineStrings =
     removeSources = "删除来源",
     removeSourcesDesc = "您确定要删除所选的来源吗？",
     noPinnedSources = "没有置顶的订阅/分组",
+    databaseMaintainenceTitle = "请稍候...",
+    databaseMaintainenceSubtitle = "正在进行数据库维护，请勿关闭应用",
   )
