@@ -2,7 +2,7 @@ package dev.sasikanth.rss.reader.resources.strings
 
 import cafe.adriel.lyricist.LyricistStrings
 
-@LyricistStrings(languageTag = Locales.ZH, default = true)
+@LyricistStrings(languageTag = Locales.ZH, default = false)
 val ZhTwineStrings =
   TwineStrings(
     appName = "Twine",
