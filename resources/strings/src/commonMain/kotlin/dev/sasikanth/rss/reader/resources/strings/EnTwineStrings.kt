@@ -169,4 +169,6 @@ val EnTwineStrings =
     removeSources = "Delete sources",
     removeSourcesDesc = "Do you want to delete selected sources?",
     noPinnedSources = "No pinned feeds/groups",
+    databaseMaintainenceTitle = "Please wait...",
+    databaseMaintainenceSubtitle = "Performing database maintainence, don't close the app",
   )

@@ -98,7 +98,7 @@ class AppPresenter(
     childStack(
       source = navigation,
       serializer = Config.serializer(),
-      initialConfiguration = Config.Home,
+      initialConfiguration = Config.Placeholder,
       handleBackButton = true,
       childFactory = ::createScreen,
     )
@@ -166,6 +166,9 @@ class AppPresenter(
 
   private fun createScreen(config: Config, componentContext: ComponentContext): Screen =
     when (config) {
+      Config.Placeholder -> {
+        Screen.Placeholder
+      }
       Config.Home -> {
         Screen.Home(
           presenter =
@@ -271,6 +274,8 @@ class AppPresenter(
 
   @Serializable
   sealed interface Config {
+
+    @Serializable data object Placeholder : Config
 
     @Serializable data object Home : Config
 
