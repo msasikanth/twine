@@ -27,6 +27,7 @@ import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.decompose.router.stack.replaceCurrent
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -121,7 +122,7 @@ class AppPresenter(
     // are finished and we can navigate to next screen
     scope.launch {
       withContext(dispatchersProvider.io) { rssRepository.numberOfFeeds().firstOrNull() }
-      navigation.push(Config.Home)
+      navigation.replaceCurrent(Config.Home)
     }
   }
 
