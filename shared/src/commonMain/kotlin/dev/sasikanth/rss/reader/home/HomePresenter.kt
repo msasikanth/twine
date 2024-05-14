@@ -140,7 +140,10 @@ class HomePresenter(
   internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
-    lifecycle.doOnCreate { backHandler.register(backCallback) }
+    lifecycle.doOnCreate {
+      backHandler.register(backCallback)
+      backCallback.isEnabled = false
+    }
   }
 
   fun dispatch(event: HomeEvent) {
