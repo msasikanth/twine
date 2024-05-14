@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
@@ -105,7 +106,7 @@ internal fun FeaturedPostItem(
 
     Text(
       modifier = Modifier.padding(horizontal = 16.dp),
-      text = item.title.ifBlank { item.description },
+      text = item.title.ifBlank { item.description }.decodeUrlEncodedString(),
       style = MaterialTheme.typography.titleLarge,
       color = AppTheme.colorScheme.textEmphasisHigh,
       maxLines = 3,
@@ -127,7 +128,7 @@ internal fun FeaturedPostItem(
 
       Text(
         modifier = Modifier.padding(horizontal = 16.dp),
-        text = item.description,
+        text = item.description.decodeUrlEncodedString(),
         style = MaterialTheme.typography.bodySmall,
         color = AppTheme.colorScheme.textEmphasisHigh,
         minLines = 3,
