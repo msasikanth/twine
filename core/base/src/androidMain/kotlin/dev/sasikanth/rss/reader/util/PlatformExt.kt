@@ -22,7 +22,7 @@ import androidx.annotation.ChecksSdkIntAtLeast
 @ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
 actual val canBlurImage: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
-actual fun String.decodeUrlEncodedString(): String {
+actual fun String.decodeHTMLString(): String {
   return try {
     Html.fromHtml(this, Html.FROM_HTML_MODE_COMPACT).toString()
   } catch (e: Exception) {
