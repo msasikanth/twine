@@ -181,8 +181,7 @@ class ReaderPresenter(
       _state.update { it.copy(postMode = InProgress) }
       val post = rssRepository.post(postId)
       val postContent = post.rawContent ?: post.description
-      val htmlContent = extractArticleHtmlContent(post.link, postContent)
-      _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+      _state.update { it.copy(content = postContent, postMode = RssContent) }
     }
 
     private suspend fun loadSourceArticle() {
@@ -192,8 +191,7 @@ class ReaderPresenter(
         val content = postSourceFetcher.fetch(postLink)
 
         if (content.isSuccess) {
-          val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
-          _state.update { it.copy(content = htmlContent) }
+          _state.update { it.copy(content = content.getOrThrow()) }
         } else {
           loadRssContent()
         }
