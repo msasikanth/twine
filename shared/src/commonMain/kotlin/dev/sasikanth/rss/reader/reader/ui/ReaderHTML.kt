@@ -17,17 +17,16 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.runtime.Immutable
+import twine.shared.generated.resources.Res
 
-internal fun readerHTML(
+internal suspend fun readerHTML(
   title: String,
   feedName: String,
   feedHomePageLink: String,
   publishedAt: String,
-  content: String?,
   colors: ReaderHTMLColors,
-  featuredImage: String?,
 ): String {
-  val hasImgTags = content?.contains("""<img[^>]*>""".toRegex()) ?: false
+  val readabilityJS = Res.readBytes("files/readability.js").decodeToString()
 
   // language=HTML
   return """
@@ -45,33 +44,34 @@ internal fun readerHTML(
       ${ReaderCSS.content(colors)}
     </style>
     <body>
-    <h1>$title</h1>
-    ${feedSection(
-      feedName = feedName,
-      feedHomePageLink = feedHomePageLink,
-      publishedAt = publishedAt,
-      hasTitle = title.isNotBlank()
-    )}
-    ${if (!hasImgTags && !featuredImage.isNullOrBlank()) {
-      featuredImage(featuredImage)
-    } else {
-      // no-op  
-      ""
-    }}
-    ${content ?: ""}
-    <script>
-      ${ReaderJs.content}
-    </script>
+      <script>${ReaderJs.content}</script>
+      <script>$readabilityJS</script>
+      <script>
+        async function parse_content(link, html) {
+          console.log('Parsing content'); 
+          const result = await parse(html, link);
+          const content = result.content || html;
+    
+          document.getElementById("content").innerHTML += content;
+          
+          processLinks();
+          processIFrames();
+          removeTitle();
+        }
+      </script>
+      <h1 id='title'>$title</h1>
+    
+      ${feedSection(
+        feedName = feedName,
+        feedHomePageLink = feedHomePageLink,
+        publishedAt = publishedAt,
+        hasTitle = title.isNotBlank()
+      )}
+      
+      <div id='content' />
     </body>
     </html>
         """
-    .trimIndent()
-}
-
-private fun featuredImage(image: String): String {
-  return """
-    <img src='$image'  alt="featured_image"/>
-  """
     .trimIndent()
 }
 
@@ -141,19 +141,7 @@ private object ReaderJs {
         link.addEventListener("click", handleLinkClick);
       }
     }
-    
-    function processImgs() {
-      let imgs = document.querySelectorAll("img")
-      for (let i=0, max=imgs.length; i<max; i++) {
-        let img = imgs[i];
-        if (img.hasAttribute("data-src")) {
-          img.src = String(img.getAttribute("data-src"));
-        } else if (img.hasAttribute("data-runner-src")) {
-          img.src = String(img.getAttribute("data-runner-src"));
-        }
-      }
-    }
-    
+
     function processIFrames() {
       let iframes = document.querySelectorAll("iframe")
       for (let i=0, max=iframes.length; i<max; i++) {
@@ -170,13 +158,6 @@ private object ReaderJs {
     function removeTitle() {
       document.querySelectorAll("h1")[1].style.display = 'none';
     }
-    
-    document.addEventListener("DOMContentLoaded", function () {
-      processLinks();
-      processImgs();
-      processIFrames();
-      removeTitle();
-    });
   """
       .trimIndent()
 }
@@ -287,6 +268,20 @@ private object ReaderCSS {
       margin-left: 8px;
       padding-left: 8px;
       border-left: 4px solid ${colors.linkColor}
+    }
+    table {
+      display: flex;
+      flex-direction: column;
+    }
+
+    table img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 16px;
+    }
+
+    table td {
+      display: block;
     }
   """
       .trimIndent()

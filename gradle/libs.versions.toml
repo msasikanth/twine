@@ -12,6 +12,7 @@ ktor = "2.3.11"
 kotlinx_coroutines = "1.8.1"
 kotlinx_date_time = "0.6.0"
 kotlinx_immutable_collections = "0.3.7"
+kotlinx_serialization_json = "1.6.3"
 decompose = "3.0.0"
 essenty = "2.0.0"
 androidx_activity = "1.9.0"
@@ -23,7 +24,7 @@ androidx_test_rules = "1.5.0"
 androidx_work = "2.9.0"
 androidx_datastore = "1.1.1"
 androidx_browser = "1.8.0"
-androidx_annotation = "1.7.1"
+androidx_annotation = "1.8.0"
 coil = "3.0.0-alpha04"
 spotless = "6.25.0"
 ktfmt = "0.44"
@@ -68,6 +69,7 @@ kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
 kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
 kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
+kotlinx_serialization_json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx_serialization_json" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
@@ -133,6 +135,6 @@ bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
 compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
-kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections" ]
+kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
 xmlutil = [ "xmlutil-core", "xmlutil-serialization" ]
