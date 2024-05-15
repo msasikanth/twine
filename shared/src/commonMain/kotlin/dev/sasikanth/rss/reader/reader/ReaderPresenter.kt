@@ -21,7 +21,6 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import dev.sasikanth.readability.Readability
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -150,17 +148,6 @@ class ReaderPresenter(
           loadRssContent()
         }
       }
-    }
-
-    private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      val article =
-        withContext(dispatchersProvider.io) { Readability(postLink, content).parse() }
-          ?: return content
-      val articleContent = article.content
-
-      if (articleContent.isNullOrBlank()) return content
-
-      return articleContent
     }
 
     private fun articleShortcutClicked() {
