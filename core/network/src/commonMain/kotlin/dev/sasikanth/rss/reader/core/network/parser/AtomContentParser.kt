@@ -31,6 +31,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
+import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
 import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
@@ -84,8 +85,8 @@ internal object AtomContentParser : ContentParser() {
     val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
-      name = FeedParser.cleanText(title ?: link)!!,
-      description = FeedParser.cleanText(description).orEmpty(),
+      name = FeedParser.cleanText(title ?: link)!!.decodeUrlEncodedString(),
+      description = FeedParser.cleanText(description).orEmpty().decodeUrlEncodedString(),
       icon = iconUrl,
       homepageLink = link,
       link = feedUrl,
@@ -147,9 +148,9 @@ internal object AtomContentParser : ContentParser() {
     }
 
     return PostPayload(
-      title = FeedParser.cleanText(title).orEmpty(),
       link = FeedParser.cleanText(link)!!,
-      description = FeedParser.cleanTextCompact(content).orEmpty(),
+      title = FeedParser.cleanText(title).orEmpty().decodeUrlEncodedString(),
+      description = FeedParser.cleanTextCompact(content).orEmpty().decodeUrlEncodedString(),
       rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
