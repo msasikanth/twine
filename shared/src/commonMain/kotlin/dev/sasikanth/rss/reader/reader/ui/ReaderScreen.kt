@@ -39,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
+import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
@@ -67,6 +67,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.asJSString
 import kotlinx.coroutines.launch
 
 @Composable
@@ -212,28 +213,39 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         val dividerColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHigh.toArgb())
 
-        val htmlTemplate =
-          remember(state.content) {
+        val webViewState = rememberWebViewStateWithHTMLData("")
+        webViewState.webSettings.apply {
+          this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+          this.supportZoom = false
+        }
+
+        LaunchedEffect(state.content) {
+          val html =
             readerHTML(
               title = state.title!!,
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
               publishedAt = state.publishedAt!!,
-              content = state.content,
               colors =
                 ReaderHTMLColors(
                   textColor = textColor,
                   linkColor = linkColor,
                   dividerColor = dividerColor,
                   codeBackgroundColor = codeBackgroundColor
-                ),
-              featuredImage = state.postImage
+                )
+            )
+
+          navigator.loadHtml(html, state.link)
+        }
+
+        LaunchedEffect(webViewState.loadingState) {
+          if (
+            webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
+          ) {
+            navigator.evaluateJavaScript(
+              script = "parse_content(${state.link.asJSString}, ${state.content.asJSString})"
             )
           }
-        val webViewState = rememberWebViewStateWithHTMLData(htmlTemplate)
-        webViewState.webSettings.apply {
-          this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
-          this.supportZoom = false
         }
 
         Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {

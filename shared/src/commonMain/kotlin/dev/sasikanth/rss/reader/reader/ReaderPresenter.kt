@@ -21,7 +21,6 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import dev.sasikanth.readability.Readability
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
@@ -38,7 +37,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -152,17 +150,6 @@ class ReaderPresenter(
       }
     }
 
-    private suspend fun extractArticleHtmlContent(postLink: String, content: String): String {
-      val article =
-        withContext(dispatchersProvider.io) { Readability(postLink, content).parse() }
-          ?: return content
-      val articleContent = article.content
-
-      if (articleContent.isNullOrBlank()) return content
-
-      return articleContent
-    }
-
     private fun articleShortcutClicked() {
       coroutineScope.launch {
         val currentPostMode = _state.value.postMode
@@ -181,8 +168,7 @@ class ReaderPresenter(
       _state.update { it.copy(postMode = InProgress) }
       val post = rssRepository.post(postId)
       val postContent = post.rawContent ?: post.description
-      val htmlContent = extractArticleHtmlContent(post.link, postContent)
-      _state.update { it.copy(content = htmlContent, postMode = RssContent) }
+      _state.update { it.copy(content = postContent, postMode = RssContent) }
     }
 
     private suspend fun loadSourceArticle() {
@@ -192,8 +178,7 @@ class ReaderPresenter(
         val content = postSourceFetcher.fetch(postLink)
 
         if (content.isSuccess) {
-          val htmlContent = extractArticleHtmlContent(postLink, content.getOrThrow())
-          _state.update { it.copy(content = htmlContent) }
+          _state.update { it.copy(content = content.getOrThrow()) }
         } else {
           loadRssContent()
         }
