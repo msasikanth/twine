@@ -288,6 +288,20 @@ private object ReaderCSS {
       padding-left: 8px;
       border-left: 4px solid ${colors.linkColor}
     }
+    table {
+      display: flex;
+      flex-direction: column;
+    }
+
+    table img {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 16px;
+    }
+
+    table td {
+      display: block;
+    }
   """
       .trimIndent()
 }
