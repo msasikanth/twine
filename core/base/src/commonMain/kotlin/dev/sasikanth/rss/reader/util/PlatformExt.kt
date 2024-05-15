@@ -17,4 +17,4 @@ package dev.sasikanth.rss.reader.util
 
 expect val canBlurImage: Boolean
 
-expect fun String.decodeUrlEncodedString(): String
+expect fun String.decodeHTMLString(): String

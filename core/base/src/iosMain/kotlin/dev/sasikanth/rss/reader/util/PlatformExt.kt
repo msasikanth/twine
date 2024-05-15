@@ -30,7 +30,7 @@ actual val canBlurImage: Boolean = true
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 @Suppress("CAST_NEVER_SUCCEEDS")
-actual fun String.decodeUrlEncodedString(): String {
+actual fun String.decodeHTMLString(): String {
   try {
     val data = (this as NSString).dataUsingEncoding(NSUTF8StringEncoding)
     if (data != null) {

@@ -26,7 +26,7 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
-import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.decompose.router.stack.pushNew
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
@@ -183,14 +183,14 @@ class AppPresenter(
           presenter =
             homePresenter(
               componentContext,
-              { navigation.push(Config.Search) },
-              { navigation.push(Config.Bookmarks) },
-              { navigation.push(Config.Settings) },
+              { navigation.pushNew(Config.Search) },
+              { navigation.pushNew(Config.Bookmarks) },
+              { navigation.pushNew(Config.Settings) },
               { openPost(it) },
               { modalNavigation.activate(ModalConfig.GroupSelection) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
-              { navigation.push(Config.AddFeed) },
-              { navigation.push(Config.GroupDetails(it)) }
+              { navigation.pushNew(Config.AddFeed) },
+              { navigation.pushNew(Config.GroupDetails(it)) }
             )
         )
       }
@@ -210,7 +210,7 @@ class AppPresenter(
             settingsPresenter(
               componentContext,
               { navigation.pop() },
-              { navigation.push(Config.About) }
+              { navigation.pushNew(Config.About) }
             )
         )
       }
@@ -251,7 +251,7 @@ class AppPresenter(
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        navigation.push(Config.Reader(post.id))
+        navigation.pushNew(Config.Reader(post.id))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)

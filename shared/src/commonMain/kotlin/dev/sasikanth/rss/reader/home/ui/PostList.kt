@@ -51,7 +51,6 @@ import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.decodeUrlEncodedString
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.collections.immutable.ImmutableList
@@ -157,7 +156,7 @@ fun PostListItem(
       Text(
         modifier = Modifier.weight(1f).align(Alignment.Top),
         style = MaterialTheme.typography.titleMedium,
-        text = item.title.ifBlank { item.description }.decodeUrlEncodedString(),
+        text = item.title.ifBlank { item.description },
         color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 3,
         overflow = TextOverflow.Ellipsis
