@@ -53,6 +53,7 @@ import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
+import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
@@ -213,6 +214,14 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         val dividerColor =
           StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHigh.toArgb())
 
+        val colors =
+          ReaderHTMLColors(
+            textColor = textColor,
+            linkColor = linkColor,
+            dividerColor = dividerColor,
+            codeBackgroundColor = codeBackgroundColor
+          )
+
         val webViewState = rememberWebViewStateWithHTMLData("")
         webViewState.webSettings.apply {
           this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
@@ -221,18 +230,11 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
 
         LaunchedEffect(state.content) {
           val html =
-            readerHTML(
+            ReaderHTML.create(
               title = state.title!!,
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
               publishedAt = state.publishedAt!!,
-              colors =
-                ReaderHTMLColors(
-                  textColor = textColor,
-                  linkColor = linkColor,
-                  dividerColor = dividerColor,
-                  codeBackgroundColor = codeBackgroundColor
-                )
             )
 
           navigator.loadHtml(html, state.link)
@@ -243,7 +245,8 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
             webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
           ) {
             navigator.evaluateJavaScript(
-              script = "parse_content(${state.link.asJSString}, ${state.content.asJSString})"
+              script =
+                "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
             )
           }
         }
