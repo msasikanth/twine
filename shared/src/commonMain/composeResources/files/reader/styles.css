@@ -1,0 +1,82 @@
+h1 {
+  font-size: 24px;
+}
+body {
+  display: none;
+}
+figure {
+  margin: 0;
+}
+figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.caption {
+  font-size: 12px;
+}
+.feedName {
+  margin-bottom: 8px;
+}
+img, figure, video, div, object {
+  max-width: 100%;
+  height: auto !important;
+  margin: 0 auto;
+}
+ul {
+  list-style: none;
+  padding-left: 8px;
+}
+ul li p {
+  display: inline;
+}
+ol {
+  list-style: none;
+  padding-left: 8px;
+  counter-reset: item;
+}
+ol li p {
+  display: inline;
+}
+li:not(:last-of-type) {
+  margin-bottom: 1em;
+}
+pre {
+  max-width: 100%;
+  margin: 0;
+  overflow: auto;
+  overflow-y: hidden;
+  word-wrap: normal;
+  word-break: normal;
+  border-radius: 4px;
+  padding: 8px;
+}
+pre {
+  line-height: 1.4286;
+}
+code {
+  padding: 1px 2px;
+  border-radius: 2px;
+}
+pre code {
+  letter-spacing: -.027em;
+  font-size: 1.15em;
+}
+iframe {
+  width: 100%;
+  max-width: 100%;
+  height: 250px;
+  max-height: 250px;
+}
+table {
+  display: flex;
+  flex-direction: column;
+}
+table img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+}
+table td {
+  display: block;
+}
