@@ -19,11 +19,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     )
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        #if !DEBUG
-        Bugsnag.start()
-        let config = BugsnagConfiguration.loadConfig()
-        BugsnagConfigKt.startBugsnag(config: config)
-        #endif
+//        #if !DEBUG
+//        Bugsnag.start()
+//        let config = BugsnagConfiguration.loadConfig()
+//        BugsnagConfigKt.startBugsnag(config: config)
+//        #endif
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
