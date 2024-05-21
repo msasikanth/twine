@@ -105,9 +105,29 @@ function updateStyles(colors) {
 
 async function renderReaderView(link, html, colors) {
   console.log('Parsing content');
+
+  const fontPromise = new Promise(resolve => {
+    if (document.fonts) {
+      Promise.all([
+        document.fonts.load('1em Golos Text'),
+        document.fonts.load('1em "Source Code Pro"')
+      ]).then(() => resolve());
+    } else {
+      // Fallback timeout
+      setTimeout(() => resolve(), 3000);
+    }
+  });
+
   //noinspection JSUnresolvedVariable
-  const result = await parse(html, link);
-  const content = result.content || html;
+  const parsePromise = parse(html, link)
+    .then(result => result.content || html)
+    .catch(error => {
+      console.error('Error parsing content:', error);
+      return html;
+    });
+
+  const [content] = await Promise.all([parsePromise, fontPromise]);
+
   document.getElementById("content").innerHTML += content;
 
   updateStyles(colors)
