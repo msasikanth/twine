@@ -14,13 +14,6 @@ jobs:
       TERM: dumb
       BUGSNAG_API_KEY: ${{ secrets.BUGSNAG_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup project
-        run: |
-          mkdir -p shared/build/compose/cocoapods/compose-resources;
-          ./gradlew generateDummyFramework;
-
       - name: Configure Tramline
         id: tramline
         uses: tramlinehq/deploy-action@v0.1.6
