@@ -69,6 +69,10 @@ jobs:
           gem install cocoapods-bugsnag;
           ./gradlew --no-daemon podInstall;
 
+      - name: Link Pod Release Framework
+        run: |
+          ./gradlew linkPodReleaseFrameworkIosArm64
+
       - name: Build Archive
         run: |
           xcodebuild -workspace ./iosApp/iosApp.xcworkspace \
