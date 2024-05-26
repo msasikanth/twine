@@ -18,12 +18,9 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose)
-  alias(libs.plugins.compose.compiler)
   alias(libs.plugins.ksp)
   alias(libs.plugins.bugsnag)
 }
-
-composeCompiler { enableStrongSkippingMode = true }
 
 kotlin {
   jvmToolchain(20)
