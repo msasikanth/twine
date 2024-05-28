@@ -26,9 +26,9 @@
     {
       "description": "Automerge minor updates",
       "matchUpdateTypes": ["minor", "patch"],
-      "automerge": true,
+      "automerge": false,
       "automergeType": "pr",
-      "platformAutomerge": true
+      "platformAutomerge": false
     }
   ]
 }
