@@ -3,6 +3,9 @@
   "extends": [
     "config:base"
   ],
+  "ignoreDeps": [
+    "org.jetbrains.compose.*",
+  ],
   "packageRules": [
     {
       "groupName": "Kotlin, KSP and Compose Multiplatform",
