@@ -49,6 +49,7 @@ import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Inject
 
@@ -62,6 +63,7 @@ fun App(
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
+  dispatchersProvider: DispatchersProvider,
 ) {
   setSingletonImageLoaderFactory { imageLoader }
 
@@ -109,7 +111,11 @@ fun App(
                 AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
               is Screen.Reader -> {
-                ReaderScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+                ReaderScreen(
+                  presenter = screen.presenter,
+                  dispatchersProvider = dispatchersProvider,
+                  modifier = fillMaxSizeModifier
+                )
               }
               is Screen.AddFeed -> {
                 AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
