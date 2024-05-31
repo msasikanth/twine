@@ -68,11 +68,17 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.asJSString
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
-internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modifier) {
+internal fun ReaderScreen(
+  presenter: ReaderPresenter,
+  dispatchersProvider: DispatchersProvider,
+  modifier: Modifier = Modifier
+) {
   val state by presenter.state.collectAsState()
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
@@ -229,25 +235,30 @@ internal fun ReaderScreen(presenter: ReaderPresenter, modifier: Modifier = Modif
         }
 
         LaunchedEffect(state.content) {
-          val html =
-            ReaderHTML.create(
-              title = state.title!!,
-              feedName = state.feed!!.name,
-              feedHomePageLink = state.feed!!.homepageLink,
-              publishedAt = state.publishedAt!!,
-            )
+          withContext(dispatchersProvider.io) {
+            val htmlTemplate =
+              ReaderHTML.create(
+                title = state.title!!,
+                feedName = state.feed!!.name,
+                feedHomePageLink = state.feed!!.homepageLink,
+                publishedAt = state.publishedAt!!,
+              )
 
-          navigator.loadHtml(html, state.link)
+            navigator.loadHtml(htmlTemplate, state.link)
+          }
         }
 
         LaunchedEffect(webViewState.loadingState) {
-          if (
-            webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
-          ) {
-            navigator.evaluateJavaScript(
-              script =
-                "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
-            )
+          withContext(dispatchersProvider.io) {
+            val hasHtmlTemplateLoaded =
+              webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
+
+            if (hasHtmlTemplateLoaded) {
+              navigator.evaluateJavaScript(
+                script =
+                  "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
+              )
+            }
           }
         }
 
