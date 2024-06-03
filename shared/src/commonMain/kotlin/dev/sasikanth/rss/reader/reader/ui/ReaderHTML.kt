@@ -16,9 +16,6 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import twine.shared.generated.resources.Res
 
 object ReaderHTML {
@@ -89,6 +86,6 @@ object ReaderHTML {
   }
 
   private suspend fun readFile(fileName: String): String {
-    return withContext(Dispatchers.IO) { Res.readBytes("files/reader/$fileName").decodeToString() }
+    return Res.readBytes("files/reader/$fileName").decodeToString()
   }
 }
