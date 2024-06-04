@@ -24,14 +24,13 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.charsets.Charset
-import io.ktor.utils.io.charsets.Charsets
-import io.ktor.utils.io.charsets.decode
+import io.ktor.utils.io.core.readBytes
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
+import okio.internal.commonToUtf8String
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
@@ -42,12 +41,10 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   suspend fun parse(
     content: ByteReadChannel,
     feedUrl: String,
-    charset: Charset?,
   ): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val parser =
-          MiniXmlPullParser(source = content.toCharIterator(charset = charset ?: Charsets.UTF_8))
+        val parser = MiniXmlPullParser(source = content.toCharIterator())
 
         parser.nextTag()
 
@@ -142,7 +139,6 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 }
 
 private fun ByteReadChannel.toCharIterator(
-  charset: Charset,
   context: CoroutineContext = EmptyCoroutineContext
 ): CharIterator {
   return object : CharIterator() {
@@ -157,9 +153,7 @@ private fun ByteReadChannel.toCharIterator(
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      val decoder = charset.newDecoder()
-
-      currentBuffer = decoder.decode(packet).toCharArray()
+      currentBuffer = packet.readBytes().commonToUtf8String().toCharArray()
       packet.release()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
