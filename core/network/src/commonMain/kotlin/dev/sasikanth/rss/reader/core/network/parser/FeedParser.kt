@@ -147,12 +147,6 @@ private fun ByteReadChannel.toCharIterator(
     private var currentIndex = 0
     private var currentBuffer = ""
 
-    // Currently MiniXmlPullParser fails to parse XML if it contains
-    // the <?xml ?> tag in the first line. So we are removing it until
-    // the issue gets resolved.
-    // https://github.com/kobjects/ktxml/issues/5
-    private val xmlDeclarationPattern = Regex("<\\?xml .*\\?>")
-
     private fun refillBuffer() {
       val byteArray = byteArrayPool.borrow()
 
@@ -160,7 +154,7 @@ private fun ByteReadChannel.toCharIterator(
         val bytesRead = channel.readAvailable(byteArray)
 
         if (bytesRead != -1) {
-          currentBuffer = byteArray.commonToUtf8String().replace(xmlDeclarationPattern, "")
+          currentBuffer = byteArray.commonToUtf8String()
           currentIndex = 0
         }
       }
