@@ -64,6 +64,11 @@ jobs:
           /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ steps.tramline.outputs.version_code }}" "iosApp/iosApp/Info.plist"
           /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString ${{ steps.tramline.outputs.version_name }}" "iosApp/iosApp/Info.plist"
 
+      - name: Generate dummy framework
+        run: |
+          mkdir -p ./shared/build/compose/ios/shared/compose-resources;
+          ./gradlew generateDummyFramework;
+
       - name: Pod Install
         run:  |
           gem install cocoapods-bugsnag;
