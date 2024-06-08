@@ -64,6 +64,11 @@ jobs:
           /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ steps.tramline.outputs.version_code }}" "iosApp/iosApp/Info.plist"
           /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString ${{ steps.tramline.outputs.version_name }}" "iosApp/iosApp/Info.plist"
 
+      - name: Generate dummy framework
+        run: |
+          mkdir -p ./shared/build/compose/ios/shared/compose-resources;
+          ./gradlew generateDummyFramework;
+
       - name: Pod Install
         run:  |
           gem install cocoapods-bugsnag;
@@ -100,6 +105,12 @@ jobs:
         run: |
           security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
           rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
+      - name: Upload project file
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./iosApp/iosApp.xcodeproj
 
       - name: Upload app to TestFlight
         env:
