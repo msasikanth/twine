@@ -23,7 +23,7 @@ upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
 VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
 ON CONFLICT(id) DO
-UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl, date = excluded.date;
+UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl;
 
 count:
 SELECT COUNT(DISTINCT post.id) FROM post
