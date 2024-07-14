@@ -73,10 +73,10 @@ class AndroidFileManager(context: Context) : FileManager {
             registerDocumentOpenActivityResult(activity)
           }
         }
-        
+
         override fun onActivityDestroyed(activity: Activity) {
-            createDocumentLauncher = null
-            openDocumentLauncher = null
+          createDocumentLauncher = null
+          openDocumentLauncher = null
         }
       }
     application.registerActivityLifecycleCallbacks(callback)
