@@ -37,8 +37,8 @@ class AndroidFileManager(context: Context) : FileManager {
   private val application = context as Application
   private val result = Channel<String?>()
 
-  private lateinit var createDocumentLauncher: ActivityResultLauncher<String>
-  private lateinit var openDocumentLauncher: ActivityResultLauncher<Array<String>>
+  private var createDocumentLauncher: ActivityResultLauncher<String>? = null
+  private var openDocumentLauncher: ActivityResultLauncher<Array<String>>? = null
 
   private var content: String? = null
 
@@ -46,12 +46,12 @@ class AndroidFileManager(context: Context) : FileManager {
     this.content = content
 
     if (!this.content.isNullOrBlank()) {
-      createDocumentLauncher.launch(name)
+      createDocumentLauncher?.launch(name)
     }
   }
 
   override suspend fun read(): String? {
-    openDocumentLauncher.launch(
+    openDocumentLauncher?.launch(
       arrayOf("application/xml", "application/octet-stream", "text/xml", "text/x-opml")
     )
     return result.receiveAsFlow().first()
@@ -72,6 +72,11 @@ class AndroidFileManager(context: Context) : FileManager {
             registerDocumentCreateActivityResult(activity)
             registerDocumentOpenActivityResult(activity)
           }
+        }
+
+        override fun onActivityDestroyed(activity: Activity) {
+          createDocumentLauncher = null
+          openDocumentLauncher = null
         }
       }
     application.registerActivityLifecycleCallbacks(callback)
