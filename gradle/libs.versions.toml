@@ -46,7 +46,7 @@ uri = "0.0.18"
 webview = "1.9.12"
 uuid = "0.8.4"
 bugsnag-plugin = "8.1.0"
-bugsnag = "6.6.0"
+bugsnag = "6.6.1"
 crashkios-bugsnag = "0.8.6"
 kermit = "2.0.4"
 
