@@ -22,6 +22,7 @@ import androidx.core.graphics.drawable.toBitmap
 import coil3.Image
 import coil3.PlatformContext
 import coil3.annotation.ExperimentalCoilApi
+import coil3.asDrawable
 
 @OptIn(ExperimentalCoilApi::class)
 actual fun Image.toComposeImageBitmap(context: PlatformContext): ImageBitmap {
