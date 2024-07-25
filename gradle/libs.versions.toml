@@ -18,14 +18,14 @@ essenty = "2.1.0"
 androidx_activity = "1.9.1"
 androidx_appcompat = "1.7.0"
 androidx_core = "1.13.1"
-androidx_collection = "1.4.1"
+androidx_collection = "1.4.2"
 androidx_test_runner = "1.6.1"
 androidx_test_rules = "1.6.1"
 androidx_work = "2.9.0"
 androidx_datastore = "1.1.1"
 androidx_browser = "1.8.0"
 androidx_annotation = "1.8.1"
-coil = "3.0.0-alpha04"
+coil = "3.0.0-alpha09"
 spotless = "6.25.0"
 ktfmt = "0.44"
 kotlininject = "0.7.1"
@@ -92,7 +92,7 @@ androidx_datastore_preferences = { module = "androidx.datastore:datastore-prefer
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 androidx_annotation= { module = "androidx.annotation:annotation", version.ref = "androidx_annotation" }
 coil_compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil_network = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coil" }
+coil_network = { module = "io.coil-kt.coil3:coil-network-ktor2", version.ref = "coil" }
 coil_svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
