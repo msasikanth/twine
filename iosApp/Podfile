@@ -1,6 +1,0 @@
-target 'iosApp' do
-  use_frameworks!
-  platform :ios, '15.0'
-  pod 'shared', :path => '../shared'
-  plugin 'cocoapods-bugsnag'
-end
