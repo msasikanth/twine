@@ -112,6 +112,7 @@ kotlin {
       api(libs.crashkios.bugsnag)
       implementation(libs.kermit)
       implementation(libs.kermit.bugsnag)
+      implementation(libs.reorderable)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
