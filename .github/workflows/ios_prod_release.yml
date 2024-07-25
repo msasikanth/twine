@@ -66,7 +66,7 @@ jobs:
 
       - name: Build Archive
         run: |
-          xcodebuild clean archive
+          xcodebuild
           -project ./iosApp/iosApp.xcodeproj \
           -scheme iosApp \
           -archivePath $RUNNER_TEMP/twine.xcarchive \
@@ -76,6 +76,7 @@ jobs:
           DEVELOPMENT_TEAM=6XCS8KZXDA \
           PROVISIONING_PROFILE=${{ secrets.PROVISION_PROFILE_ID }} \
           BUGSNAG_API_KEY=${BUGSNAG_API_KEY} \
+          clean archive \
           CODE_SIGN_IDENTITY="iPhone Distribution: Sasi Kanth (6XCS8KZXDA)"
 
       - name: Export ipa
