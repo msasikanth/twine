@@ -59,6 +59,6 @@ allprojects {
   }
 
   tasks.withType<KotlinCompile>().all {
-    kotlinOptions { freeCompilerArgs += "-Xexpect-actual-classes" }
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
   }
 }
