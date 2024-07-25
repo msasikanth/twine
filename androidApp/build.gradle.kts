@@ -20,6 +20,7 @@ plugins {
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.bugsnag)
+  alias(libs.plugins.kotlin.compose)
 }
 
 kotlin {

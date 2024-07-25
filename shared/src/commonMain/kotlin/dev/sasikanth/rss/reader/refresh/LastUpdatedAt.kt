@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -54,5 +54,5 @@ class LastUpdatedAt(private val dataStore: DataStore<Preferences>) {
     dataStore.data
       .map { preferences -> preferences[lastUpdatedAtKey] ?: return@map null }
       .first()
-      ?.toInstant()
+      ?.let { Instant.parse(it) }
 }

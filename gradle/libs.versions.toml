@@ -1,7 +1,7 @@
 [versions]
-kotlin = "1.9.23"
+kotlin = "2.0.0"
 android_gradle_plugin = "8.5.1"
-compose = "1.6.2"
+compose = "1.6.11"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
@@ -9,7 +9,7 @@ android_sdk_min = "26"
 
 sqldelight = "2.0.2"
 ktor = "2.3.12"
-kotlinx_coroutines = "1.8.1"
+kotlinx_coroutines = "1.9.0-RC"
 kotlinx_date_time = "0.6.0"
 kotlinx_immutable_collections = "0.3.7"
 kotlinx_serialization_json = "1.6.3"
@@ -29,7 +29,7 @@ coil = "3.0.0-alpha04"
 spotless = "6.25.0"
 ktfmt = "0.44"
 kotlininject = "0.7.1"
-ksp = "1.9.23-1.0.20"
+ksp = "2.0.0-1.0.23"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.1.2"
 sqliteAndroid = "3.45.0"
@@ -124,8 +124,8 @@ android_application = { id = "com.android.application", version.ref = "android_g
 android_library = { id = "com.android.library", version.ref = "android_gradle_plugin" }
 kotlin_multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin_cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
+kotlin_compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }

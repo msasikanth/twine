@@ -20,14 +20,16 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
-  alias(libs.plugins.kotlin.cocoapods)
   alias(libs.plugins.android.library)
   alias(libs.plugins.compose)
   alias(libs.plugins.sqldelight)
   alias(libs.plugins.ksp)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.kotlin.compose)
 }
+
+composeCompiler { enableStrongSkippingMode = true }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -41,25 +43,15 @@ kotlin {
       "-linker-option", "-framework", "-linker-option", "Metal",
       "-linker-option", "-framework", "-linker-option", "CoreText",
       "-linker-option", "-framework", "-linker-option", "CoreGraphics",
-      )
+    )
   // spotless:on
 
-  iosArm64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
-  iosSimulatorArm64 { binaries.forEach { it.freeCompilerArgs += iOSBinaryFlags } }
-
-  applyDefaultHierarchyTemplate()
-
-  cocoapods {
-    version = "1.0.0"
-    summary = "Multiplatform RSS app built with Kotlin and Compose"
-    homepage = "https://github.com/msasikanth/rss_reader"
-    ios.deploymentTarget = "15.0"
-    podfile = project.file("../iosApp/Podfile")
-    pod("Bugsnag")
-
-    framework {
+  listOf(iosArm64(), iosSimulatorArm64()).forEach { iOSTarget ->
+    iOSTarget.binaries.framework {
       baseName = "shared"
       isStatic = true
+
+      freeCompilerArgs += iOSBinaryFlags
 
       export(libs.decompose)
       export(libs.essenty.lifecycle)
@@ -67,6 +59,8 @@ kotlin {
       export(libs.crashkios.bugsnag)
     }
   }
+
+  applyDefaultHierarchyTemplate()
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
