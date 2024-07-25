@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
+
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -17,6 +19,7 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.kotlin.compose)
 }
 
 kotlin {
@@ -38,7 +41,7 @@ ksp { arg("lyricist.packageName", "dev.sasikanth.rss.reader.resources.strings") 
 
 dependencies { add("kspCommonMainMetadata", libs.lyricist.processor) }
 
-tasks.withType<org.jetbrains.kotlin.gradle.dsl.KotlinCompile<*>>().all {
+tasks.withType<KotlinCompilationTask<*>>().all {
   if (name != "kspCommonMainKotlinMetadata") {
     dependsOn("kspCommonMainKotlinMetadata")
   }

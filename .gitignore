@@ -12,6 +12,7 @@ iosApp/iosApp.xcodeproj/*
 !iosApp/iosApp.xcodeproj/project.pbxproj
 shared/shared.podspec
 androidApp/release
+.kotlin
 
 # IntelliJ .idea folder
 .idea/workspace.xml
