@@ -151,4 +151,5 @@ val ZhTwineStrings =
     noPinnedSources = "没有置顶的订阅/分组",
     databaseMaintainenceTitle = "请稍候...",
     databaseMaintainenceSubtitle = "正在进行数据库维护，请勿关闭应用",
+    cdLoadFullArticle = "Load full article",
   )
