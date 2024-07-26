@@ -120,7 +120,7 @@ internal fun FeaturedPostItem(
           val lineBottom = textLayoutResult.getLineBottom(0)
           val lineHeight = with(density) { (lineTop + lineBottom).toDp() }
 
-          descriptionBottomPadding = lineHeight
+          descriptionBottomPadding = lineHeight * (3 - numberOfLines)
         }
       }
     )
