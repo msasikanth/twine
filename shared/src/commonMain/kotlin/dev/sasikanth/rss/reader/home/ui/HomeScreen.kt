@@ -202,7 +202,8 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
               PullRefreshIndicator(
                 refreshing = state.isRefreshing,
                 state = swipeRefreshState,
-                modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)
+                modifier =
+                  Modifier.windowInsetsPadding(WindowInsets.statusBars).align(Alignment.TopCenter)
               )
             }
           },
