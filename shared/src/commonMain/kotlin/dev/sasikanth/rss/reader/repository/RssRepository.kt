@@ -252,7 +252,8 @@ class RssRepository(
             createdAt: Instant,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
-            alwaysFetchSourceArticle: Boolean ->
+            alwaysFetchSourceArticle: Boolean,
+            pinnedPosition: Double ->
             Feed(
               id = id,
               name = name,
@@ -263,7 +264,8 @@ class RssRepository(
               link = link,
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+              pinnedPosition = pinnedPosition
             )
           }
         )
@@ -587,7 +589,8 @@ class RssRepository(
             numberOfUnreadPosts: Long,
             feedIds: List<String>?,
             feedIcons: String?,
-            updatedAt: Instant? ->
+            updatedAt: Instant?,
+            pinnedPosition: Double ->
             if (type == "group") {
               FeedGroup(
                 id = id,
@@ -598,6 +601,7 @@ class RssRepository(
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
                 numberOfUnreadPosts = numberOfUnreadPosts,
+                pinnedPosition = pinnedPosition
               )
             } else {
               Feed(
@@ -611,6 +615,7 @@ class RssRepository(
                 pinnedAt = pinnedAt,
                 lastCleanUpAt = lastCleanUpAt,
                 numberOfUnreadPosts = numberOfUnreadPosts,
+                pinnedPosition = pinnedPosition
               )
             }
           }
@@ -695,7 +700,8 @@ class RssRepository(
             feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
-            pinnedAt: Instant? ->
+            pinnedAt: Instant?,
+            pinnedPosition: Double ->
             FeedGroup(
               id = id,
               name = name,
@@ -704,6 +710,7 @@ class RssRepository(
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
+              pinnedPosition = pinnedPosition
             )
           }
         )

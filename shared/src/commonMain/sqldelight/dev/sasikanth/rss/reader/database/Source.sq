@@ -33,7 +33,8 @@ SELECT
   numberOfUnreadPosts,
   feedIds,
   feedIcons,
-  updatedAt
+  updatedAt,
+  pinnedPosition
 FROM (
   SELECT
     'feed' AS type,
@@ -49,7 +50,8 @@ FROM (
     NULL AS feedIcons,
     f.createdAt,
     f.pinnedAt,
-    NULL AS updatedAt
+    NULL AS updatedAt,
+    f.pinnedPosition
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
   GROUP BY f.id
@@ -73,13 +75,14 @@ FROM (
                 LIMIT 4), '') AS feedIcons,
     fg.createdAt,
     fg.pinnedAt,
-    fg.updatedAt
+    fg.updatedAt,
+    fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
-ORDER BY pinnedAt DESC
+ORDER BY pinnedPosition
 LIMIT :limit OFFSET :offset;
 
 sources:

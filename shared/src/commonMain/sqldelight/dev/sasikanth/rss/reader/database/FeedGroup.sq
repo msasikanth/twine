@@ -8,10 +8,12 @@ CREATE TABLE IF NOT EXISTS feedGroup(
   feedIds TEXT AS List<String> NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL,
-  pinnedAt INTEGER AS Instant
+  pinnedAt INTEGER AS Instant,
+  pinnedPosition REAL NOT NULL DEFAULT 0.0
 );
 
 CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
+CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
 
 count:
 SELECT COUNT(*) FROM feedGroup;
@@ -30,24 +32,9 @@ SELECT
               LIMIT 4), '') AS feedIcons,
   createdAt,
   updatedAt,
-  pinnedAt
+  pinnedAt,
+  pinnedPosition
 FROM feedGroup
-LIMIT :limit OFFSET :offset;
-
-pinnedGroups:
-SELECT
-  id,
-  name,
-  feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIcons,
-  createdAt,
-  updatedAt,
-  pinnedAt
-FROM feedGroup
-WHERE pinnedAt IS NOT NULL
 LIMIT :limit OFFSET :offset;
 
 createGroup:
