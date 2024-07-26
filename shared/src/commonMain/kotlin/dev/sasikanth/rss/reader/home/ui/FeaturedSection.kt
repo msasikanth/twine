@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -50,7 +51,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEachIndexed
 import coil3.size.Size
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -154,35 +154,42 @@ internal fun FeaturedSection(
           }
       }
 
-      FeaturedSectionBackground(
-        featuredPosts = featuredPosts,
-        pagerState = pagerState,
-        featuredItemBlurEnabled = featuredItemBlurEnabled
-      )
-
       HorizontalPager(
         state = pagerState,
-        contentPadding = pagerContentPadding,
-        pageSpacing = 16.dp,
         verticalAlignment = Alignment.Top,
         flingBehavior =
           PagerDefaults.flingBehavior(
             state = pagerState,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-          )
+          ),
       ) { page ->
         val featuredPost = featuredPosts.getOrNull(page)
         if (featuredPost != null) {
-          FeaturedPostItem(
-            item = featuredPost,
-            page = page,
-            pagerState = pagerState,
-            onClick = { onItemClick(featuredPost) },
-            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-            onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
-            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
-          )
+          Box {
+            FeaturedSectionBackground(
+              post = featuredPost,
+              featuredItemBlurEnabled = featuredItemBlurEnabled,
+              modifier =
+                Modifier.graphicsLayer {
+                  val pageOffset = pagerState.getOffsetFractionForPage(page)
+
+                  translationX = size.width * pageOffset
+                  alpha = (1f - pageOffset.absoluteValue)
+                }
+            )
+
+            FeaturedPostItem(
+              modifier = Modifier.padding(pagerContentPadding),
+              item = featuredPost,
+              page = page,
+              pagerState = pagerState,
+              onClick = { onItemClick(featuredPost) },
+              onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+              onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
+              onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
+              onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
+            )
+          }
         }
       }
     }
@@ -190,44 +197,36 @@ internal fun FeaturedSection(
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 private fun FeaturedSectionBackground(
-  pagerState: PagerState,
-  featuredPosts: ImmutableList<PostWithMetadata>,
+  post: PostWithMetadata,
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  // We want the gradient overlay to be displayed above the blur and gradient background, and
-  // also when overscrolling happens. For that reason we are applying the gradient modifier,
-  // directly to the individual composables rather than the parent Box.
   val gradientOverlayModifier =
     Modifier.drawWithCache {
-      val radialGradient =
-        Brush.radialGradient(
-          colors =
-            listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
-          center = Offset(x = this.size.width, y = 40f)
-        )
+        val radialGradient =
+          Brush.radialGradient(
+            colors =
+              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+            center = Offset(x = this.size.width, y = 40f)
+          )
 
-      val linearGradient =
-        Brush.verticalGradient(
-          colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-        )
+        val linearGradient =
+          Brush.verticalGradient(
+            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+          )
 
-      onDrawWithContent {
-        drawContent()
-        drawRect(radialGradient)
-        drawRect(linearGradient)
+        onDrawWithContent {
+          drawContent()
+          drawRect(radialGradient)
+          drawRect(linearGradient)
+        }
       }
-    }
+      .then(modifier)
 
-  Box(modifier = modifier) {
+  Box {
     if (canBlurImage && featuredItemBlurEnabled) {
-      FeaturedSectionBlurredBackground(
-        featuredPosts = featuredPosts,
-        pagerState = pagerState,
-        modifier = gradientOverlayModifier
-      )
+      FeaturedSectionBlurredBackground(post = post, modifier = gradientOverlayModifier)
     } else {
       FeaturedSectionGradientBackground(modifier = gradientOverlayModifier)
     }
@@ -257,47 +256,24 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
 }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 private fun FeaturedSectionBlurredBackground(
-  featuredPosts: ImmutableList<PostWithMetadata>,
-  pagerState: PagerState,
+  post: PostWithMetadata,
   modifier: Modifier = Modifier
 ) {
-  // We are loading all featured posts images at once to avoid blinking issues that can occur
-  // due to state changes when we try to do this lazily. Since the alpha is set to 0 for images that
-  // don't need to be rendered, they are not drawn. If need more featured posts, we can convert this
-  // to a proper lazy layout. But for 6 items, this is the simplest approach to take.
-  featuredPosts.fastForEachIndexed { index, post ->
-    AsyncImage(
-      url = post.imageUrl!!,
-      modifier =
-        Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
-          .graphicsLayer {
-            val offsetFraction =
-              if (index in 0..pagerState.pageCount) {
-                pagerState.getOffsetFractionForPage(index).absoluteValue.coerceIn(0f, 1f)
-              } else {
-                0f
-              }
-            alpha = ((1f - offsetFraction) / 1f)
-
-            val blurRadiusInPx = 100.dp.toPx()
-            // Since blur can be expensive memory wise, there is no point blurring images when not
-            // needed.
-            renderEffect =
-              if (index in pagerState.settledPage - 2..pagerState.settledPage + 2) {
-                BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-              } else {
-                null
-              }
-            shape = RectangleShape
-            clip = false
-          }
-          .then(modifier),
-      contentDescription = null,
-      contentScale = ContentScale.Crop,
-      size = Size(128, 128),
-      backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
-    )
-  }
+  AsyncImage(
+    url = post.imageUrl!!,
+    modifier =
+      Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+        .graphicsLayer {
+          val blurRadiusInPx = 100.dp.toPx()
+          renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
+          shape = RectangleShape
+          clip = false
+        }
+        .then(modifier),
+    contentDescription = null,
+    contentScale = ContentScale.Crop,
+    size = Size(128, 128),
+    backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+  )
 }

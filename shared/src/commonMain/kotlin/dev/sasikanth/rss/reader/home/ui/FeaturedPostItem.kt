@@ -71,10 +71,12 @@ internal fun FeaturedPostItem(
   onCommentsClick: () -> Unit,
   onSourceClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Column(
     modifier =
-      Modifier.clip(MaterialTheme.shapes.extraLarge)
+      Modifier.then(modifier)
+        .clip(MaterialTheme.shapes.extraLarge)
         .clickable(onClick = onClick)
         .alpha(if (item.read) 0.65f else 1f)
   ) {
