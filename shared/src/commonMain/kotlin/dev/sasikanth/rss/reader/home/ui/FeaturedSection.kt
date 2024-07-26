@@ -203,26 +203,25 @@ private fun FeaturedSectionBackground(
   modifier: Modifier = Modifier,
 ) {
   val gradientOverlayModifier =
-    Modifier.drawWithCache {
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
-            center = Offset(x = this.size.width, y = 40f)
-          )
+    Modifier.then(modifier).drawWithCache {
+      val radialGradient =
+        Brush.radialGradient(
+          colors =
+            listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+          center = Offset(x = this.size.width, y = 40f)
+        )
 
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-          )
+      val linearGradient =
+        Brush.verticalGradient(
+          colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+        )
 
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
-        }
+      onDrawWithContent {
+        drawContent()
+        drawRect(radialGradient)
+        drawRect(linearGradient)
       }
-      .then(modifier)
+    }
 
   Box {
     if (canBlurImage && featuredItemBlurEnabled) {
