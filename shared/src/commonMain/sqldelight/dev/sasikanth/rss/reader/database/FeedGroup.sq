@@ -73,3 +73,6 @@ SELECT
   pinnedAt
 FROM feedGroup
 WHERE id IN :ids;
+
+updatedPinnedPosition:
+UPDATE feedGroup SET pinnedPosition = :pinnedPosition WHERE id = :id;

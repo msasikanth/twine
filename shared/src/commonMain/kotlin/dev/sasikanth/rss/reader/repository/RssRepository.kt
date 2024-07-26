@@ -824,6 +824,10 @@ class RssRepository(
     withContext(ioDispatcher) { feedQueries.updatedPinnedPosition(pinnedPosition, id) }
   }
 
+  suspend fun updatedFeedGroupPinnedPosition(pinnedPosition: Double, id: String) {
+    withContext(ioDispatcher) { feedGroupQueries.updatedPinnedPosition(pinnedPosition, id) }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
