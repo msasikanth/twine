@@ -131,3 +131,6 @@ ORDER BY
   CASE WHEN :orderBy = 'alphabetical' THEN f.name END ASC,
   f.createdAt DESC
 LIMIT :limit OFFSET :offset;
+
+updatedPinnedPosition:
+UPDATE feed SET pinnedPosition = :pinnedPosition WHERE id = :id;
