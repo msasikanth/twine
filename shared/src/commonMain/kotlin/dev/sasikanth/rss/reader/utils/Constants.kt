@@ -40,4 +40,7 @@ internal object Constants {
   const val MINIMUM_REQUIRED_SEARCH_CHARACTERS = 3
 
   const val BADGE_COUNT_TRIM_LIMIT = 99
+
+  const val ITEM_READ_ALPHA = 0.65f
+  const val ITEM_UNREAD_ALPHA = 1f
 }
