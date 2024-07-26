@@ -151,6 +151,7 @@ data class TwineStrings(
   val noPinnedSources: String,
   val databaseMaintainenceTitle: String,
   val databaseMaintainenceSubtitle: String,
+  val cdLoadFullArticle: String,
 )
 
 object Locales {
