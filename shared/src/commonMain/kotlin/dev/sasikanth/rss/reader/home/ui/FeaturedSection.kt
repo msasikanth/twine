@@ -171,7 +171,12 @@ internal fun FeaturedSection(
               featuredItemBlurEnabled = featuredItemBlurEnabled,
               modifier =
                 Modifier.graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
+                  val pageOffset =
+                    if (page in 0..pagerState.pageCount) {
+                      pagerState.getOffsetFractionForPage(page)
+                    } else {
+                      0f
+                    }
 
                   translationX = size.width * pageOffset
                   alpha = (1f - pageOffset.absoluteValue)
