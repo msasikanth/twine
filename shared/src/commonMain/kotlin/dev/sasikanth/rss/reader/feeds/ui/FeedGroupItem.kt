@@ -58,7 +58,8 @@ internal fun FeedGroupItem(
   selected: Boolean,
   onFeedGroupSelected: (FeedGroup) -> Unit,
   onFeedGroupClick: (FeedGroup) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  dragHandle: (@Composable () -> Unit)? = null,
 ) {
   val haptic = LocalHapticFeedback.current
   val backgroundColor =
@@ -179,6 +180,11 @@ internal fun FeedGroupItem(
           tint = tint,
           modifier = Modifier.requiredSize(24.dp),
         )
+      }
+
+      if (!isInMultiSelectMode) {
+        Spacer(Modifier.requiredWidth(8.dp))
+        dragHandle?.invoke()
       }
     }
   }

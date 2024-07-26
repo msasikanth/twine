@@ -69,4 +69,6 @@ sealed interface FeedsEvent {
   data object DismissDeleteConfirmation : FeedsEvent
 
   data object DeleteSelectedSources : FeedsEvent
+
+  data class OnPinnedSourcePositionChanged(val fromIndex: Int, val toIndex: Int) : FeedsEvent
 }

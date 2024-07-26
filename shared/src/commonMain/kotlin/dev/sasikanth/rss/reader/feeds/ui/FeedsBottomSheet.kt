@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
@@ -60,7 +59,7 @@ internal fun FeedsBottomSheet(
     if (hasBottomSheetExpandedThreshold) {
       BottomSheetCollapsedContent(
         modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
-        pinnedSources = state.pinnedSources.collectAsLazyPagingItems(),
+        pinnedSources = state.pinnedSources,
         numberOfFeeds = state.numberOfFeeds,
         activeSource = state.activeSource,
         canShowUnreadPostsCount = state.canShowUnreadPostsCount,

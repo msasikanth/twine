@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -85,6 +86,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 @Composable
 internal fun BottomSheetExpandedContent(
@@ -199,7 +201,7 @@ internal fun BottomSheetExpandedContent(
     },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
-    val pinnedSources = state.pinnedSources.collectAsLazyPagingItems()
+    val pinnedSources = state.pinnedSources
     val allSources = state.sources.collectAsLazyPagingItems()
     val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
 
@@ -213,6 +215,13 @@ internal fun BottomSheetExpandedContent(
         FeedsViewMode.Grid -> GridItemSpan(1)
         FeedsViewMode.List -> GridItemSpan(2)
       }
+    val lazyGridState = rememberLazyGridState()
+    val reorderableLazyGridState =
+      rememberReorderableLazyGridState(lazyGridState) { from, to ->
+        feedsPresenter.dispatch(
+          FeedsEvent.OnPinnedSourcePositionChanged(from.index - 1, to.index - 1)
+        )
+      }
 
     SourcesGrid(
       modifier =
@@ -222,8 +231,10 @@ internal fun BottomSheetExpandedContent(
           // not overlap with each other
           top = padding.calculateTopPadding() - 1.dp
         ),
+      state = lazyGridState,
       pinnedSources = {
         pinnedSources(
+          reorderableLazyGridState = reorderableLazyGridState,
           pinnedSources = pinnedSources,
           selectedSources = state.selectedSources,
           isPinnedSectionExpanded = state.isPinnedSectionExpanded,

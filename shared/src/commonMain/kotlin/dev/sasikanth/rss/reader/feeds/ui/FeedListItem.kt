@@ -58,6 +58,7 @@ internal fun FeedListItem(
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier,
+  dragHandle: (@Composable () -> Unit)? = null,
 ) {
   val haptic = LocalHapticFeedback.current
   val backgroundColor =
@@ -151,6 +152,11 @@ internal fun FeedListItem(
           tint = tint,
           modifier = Modifier.requiredSize(24.dp),
         )
+      }
+
+      if (!isInMultiSelectMode) {
+        Spacer(Modifier.requiredWidth(8.dp))
+        dragHandle?.invoke()
       }
 
       Spacer(Modifier.requiredWidth(4.dp))

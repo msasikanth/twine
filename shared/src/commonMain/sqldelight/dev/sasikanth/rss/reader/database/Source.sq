@@ -1,13 +1,3 @@
-pinnedSourcesCount:
-WITH pinnedFeeds AS (
-  SELECT COUNT(*) AS count FROM feed WHERE pinnedAt IS NOT NULL
-),
-pinnedFeedGroups AS (
-  SELECT COUNT(*) AS count FROM feedGroup WHERE pinnedAt IS NOT NULL
-)
-SELECT pinnedFeeds.count + pinnedFeedGroups.count
-FROM pinnedFeeds, pinnedFeedGroups;
-
 sourcesCount:
 WITH feeds AS (
   SELECT COUNT(*) AS count FROM feed
@@ -82,8 +72,7 @@ FROM (
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
-ORDER BY pinnedPosition
-LIMIT :limit OFFSET :offset;
+ORDER BY pinnedPosition;
 
 sources:
 SELECT
