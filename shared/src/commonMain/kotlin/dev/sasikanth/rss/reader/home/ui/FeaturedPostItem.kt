@@ -48,6 +48,7 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
 private val featuredImageAspectRatio: Float
@@ -71,12 +72,14 @@ internal fun FeaturedPostItem(
   onCommentsClick: () -> Unit,
   onSourceClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Column(
     modifier =
-      Modifier.clip(MaterialTheme.shapes.extraLarge)
+      Modifier.then(modifier)
+        .clip(MaterialTheme.shapes.extraLarge)
         .clickable(onClick = onClick)
-        .alpha(if (item.read) 0.65f else 1f)
+        .alpha(if (item.read) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
   ) {
     val density = LocalDensity.current
     var descriptionBottomPadding by remember(item.link) { mutableStateOf(0.dp) }
@@ -117,7 +120,7 @@ internal fun FeaturedPostItem(
           val lineBottom = textLayoutResult.getLineBottom(0)
           val lineHeight = with(density) { (lineTop + lineBottom).toDp() }
 
-          descriptionBottomPadding = lineHeight
+          descriptionBottomPadding = lineHeight * (3 - numberOfLines)
         }
       }
     )

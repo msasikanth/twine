@@ -18,10 +18,9 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue.Collapsed
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
@@ -34,7 +33,7 @@ internal data class HomeState(
   val featuredPosts: ImmutableList<PostWithMetadata>?,
   val posts: Flow<PagingData<PostWithMetadata>>?,
   val loadingState: HomeLoadingState,
-  val feedsSheetState: BottomSheetValue,
+  val feedsSheetState: SheetValue,
   val activeSource: Source?,
   val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
@@ -48,7 +47,7 @@ internal data class HomeState(
         featuredPosts = null,
         posts = null,
         loadingState = HomeLoadingState.Idle,
-        feedsSheetState = Collapsed,
+        feedsSheetState = SheetValue.PartiallyExpanded,
         activeSource = null,
         featuredItemBlurEnabled = true,
         hasFeeds = null,

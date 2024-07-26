@@ -160,4 +160,5 @@ val TrTwineStrings =
     noPinnedSources = "Sabitlenmiş yayın/grup yok",
     databaseMaintainenceTitle = "Lütfen bekleyin...",
     databaseMaintainenceSubtitle = "Veritabanı bakımı gerçekleştiriliyor, uygulamayı kapatmayın",
+    cdLoadFullArticle = "Load full article",
   )

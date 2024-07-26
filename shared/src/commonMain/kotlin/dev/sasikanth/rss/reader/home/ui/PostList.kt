@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.collections.immutable.ImmutableList
 
@@ -147,7 +148,10 @@ fun PostListItem(
       Modifier.clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
-        .alpha(if (item.read && reduceReadItemAlpha) 0.65f else 1f)
+        .alpha(
+          if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+          else Constants.ITEM_UNREAD_ALPHA
+        )
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp),

@@ -66,6 +66,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
+import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -92,7 +93,7 @@ internal fun ReaderScreen(
           title = {},
           navigationIcon = {
             IconButton(onClick = { presenter.dispatch(ReaderEvent.BackClicked) }) {
-              Icon(TwineIcons.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = LocalStrings.current.buttonGoBack)
             }
           },
           colors =
@@ -130,7 +131,7 @@ internal fun ReaderScreen(
                 TwineIcons.Bookmark
               }
             IconButton(onClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }) {
-              Icon(bookmarkIcon, contentDescription = null)
+              Icon(bookmarkIcon, contentDescription = LocalStrings.current.bookmark)
             }
           }
 
@@ -159,7 +160,11 @@ internal fun ReaderScreen(
                     coroutineScope.launch { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
                   }
                 ) {
-                  Icon(TwineIcons.ArticleShortcut, contentDescription = null, tint = iconTint)
+                  Icon(
+                    TwineIcons.ArticleShortcut,
+                    contentDescription = LocalStrings.current.cdLoadFullArticle,
+                    tint = iconTint
+                  )
                 }
               }
               InProgress -> {
@@ -176,14 +181,14 @@ internal fun ReaderScreen(
               Icon(
                 modifier = Modifier.requiredSize(24.dp),
                 imageVector = TwineIcons.Website,
-                contentDescription = null
+                contentDescription = LocalStrings.current.openWebsite
               )
             }
           }
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
             IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link!!) } }) {
-              Icon(TwineIcons.Share, contentDescription = null)
+              Icon(TwineIcons.Share, contentDescription = LocalStrings.current.share)
             }
           }
         }

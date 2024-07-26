@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.SheetValue
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
@@ -28,7 +29,6 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetValue
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -119,7 +119,7 @@ class HomePresenter(
       return@BackCallback
     }
 
-    if (state.value.feedsSheetState == BottomSheetValue.Expanded) {
+    if (state.value.feedsSheetState == SheetValue.Expanded) {
       dispatch(HomeEvent.BackClicked)
       return@BackCallback
     }
@@ -149,7 +149,7 @@ class HomePresenter(
   fun dispatch(event: HomeEvent) {
     when (event) {
       is HomeEvent.FeedsSheetStateChanged -> {
-        backCallback.isEnabled = event.feedsSheetState == BottomSheetValue.Expanded
+        backCallback.isEnabled = event.feedsSheetState == SheetValue.Expanded
       }
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
@@ -321,10 +321,10 @@ class HomePresenter(
         .launchIn(coroutineScope)
     }
 
-    private fun feedsSheetStateChanged(feedsSheetState: BottomSheetValue) {
+    private fun feedsSheetStateChanged(feedsSheetState: SheetValue) {
       _state.update {
         // Clear search query once feeds sheet is collapsed
-        if (feedsSheetState == BottomSheetValue.Collapsed) {
+        if (feedsSheetState == SheetValue.PartiallyExpanded) {
           feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery)
         }
 

@@ -21,22 +21,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.bottomsheet.BottomSheetState
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
-import dev.sasikanth.rss.reader.feeds.ui.expanded.pinnedSources
 import dev.sasikanth.rss.reader.utils.inverse
 
 @Composable
 internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
-  bottomSheetState: BottomSheetState,
+  bottomSheetProgress: Float,
   closeSheet: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
@@ -50,9 +47,6 @@ internal fun FeedsBottomSheet(
       }
     }
   }
-
-  val bottomSheetProgress =
-    remember(bottomSheetState.offsetProgress) { bottomSheetState.offsetProgress }
 
   Column(modifier = Modifier.fillMaxSize()) {
     BottomSheetHandle(bottomSheetProgress)
