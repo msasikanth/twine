@@ -474,6 +474,17 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.markPostsAsRead(postsAfter) }
   }
 
+  suspend fun markPostsInFeedAsRead(
+    feedIds: List<String>,
+    postsAfter: Instant = Instant.DISTANT_PAST
+  ) {
+    withContext(ioDispatcher) {
+      postQueries.transaction {
+        feedIds.forEach { feedId -> postQueries.markPostsInFeedAsRead(feedId, postsAfter) }
+      }
+    }
+  }
+
   suspend fun post(postId: String): Post {
     return withContext(ioDispatcher) { postQueries.post(postId, ::Post).executeAsOne() }
   }
