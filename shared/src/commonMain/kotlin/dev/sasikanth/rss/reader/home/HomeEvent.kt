@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.ui.PostsType
 
 sealed interface HomeEvent {
@@ -49,4 +50,6 @@ sealed interface HomeEvent {
   data object SettingsClicked : HomeEvent
 
   data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : HomeEvent
+
+  data class MarkPostsAsRead(val source: Source?) : HomeEvent
 }

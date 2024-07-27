@@ -158,7 +158,8 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
               onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
               onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
               onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-              onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) }
+              onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
+              onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) }
             )
           },
           body = { paddingValues ->
