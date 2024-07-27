@@ -93,7 +93,7 @@ hasFeed:
 SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id);
 
 updatePinnedAt:
-UPDATE feed SET pinnedAt = :pinnedAt WHERE id = :id;
+UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
 
 numberOfPinnedFeeds:
 SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
