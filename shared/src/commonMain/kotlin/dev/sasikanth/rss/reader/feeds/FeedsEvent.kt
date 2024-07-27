@@ -70,5 +70,5 @@ sealed interface FeedsEvent {
 
   data object DeleteSelectedSources : FeedsEvent
 
-  data class OnPinnedSourcePositionChanged(val fromIndex: Int, val toIndex: Int) : FeedsEvent
+  data class OnPinnedSourcePositionChanged(val newSourcesList: List<Source>) : FeedsEvent
 }

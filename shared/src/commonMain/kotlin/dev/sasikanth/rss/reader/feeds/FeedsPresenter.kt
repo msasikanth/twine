@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
@@ -33,7 +34,6 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
-import dev.sasikanth.rss.reader.core.model.local.SourceType.*
 import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
 import dev.sasikanth.rss.reader.home.ui.PostsType
 import dev.sasikanth.rss.reader.repository.FeedsOrderBy
@@ -182,18 +182,14 @@ class FeedsPresenter(
         FeedsEvent.DeleteSelectedSources -> deleteSelectedSources()
         FeedsEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
         is FeedsEvent.OnPinnedSourcePositionChanged ->
-          onPinnedSourcePositionChanged(event.fromIndex, event.toIndex)
+          onPinnedSourcePositionChanged(event.newSourcesList)
       }
     }
 
-    private fun onPinnedSourcePositionChanged(fromIndex: Int, toIndex: Int) {
+    private fun onPinnedSourcePositionChanged(newSourcesList: List<Source>) {
       coroutineScope.launch {
-        val pinnedSources = _state.value.pinnedSources
-        val updatedPinnedSources =
-          pinnedSources.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
-
-        _state.update { it.copy(pinnedSources = updatedPinnedSources) }
-        rssRepository.updatedSourcePinnedPosition(updatedPinnedSources)
+        _state.update { it.copy(pinnedSources = newSourcesList) }
+        rssRepository.updatedSourcePinnedPosition(_state.value.pinnedSources)
       }
     }
 
@@ -391,25 +387,39 @@ class FeedsPresenter(
         }
         .launchIn(coroutineScope)
 
-      combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
-          postsType,
-          feedsSortOrder ->
-          Pair(postsType, feedsSortOrder)
-        }
-        .flatMapLatest { (postsType, feedsSortOrder) ->
+      val pinnedSourcesFlow =
+        settingsRepository.postsType.flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
-
-          rssRepository.pinnedSources(postsAfter).map { Triple(postsAfter, feedsSortOrder, it) }
+          rssRepository.pinnedSources(postsAfter)
         }
-        .onEach { (postsAfter, feedsSortOrder, pinnedSources) ->
-          val sources =
-            sources(
-              postsAfter = postsAfter,
-              feedsSortOrder = feedsSortOrder,
-            )
-          val sourcesWithSeparator = addSourcesSeparator(sources)
 
-          _state.update { it.copy(pinnedSources = pinnedSources, sources = sourcesWithSeparator) }
+      val allSourcesFlow =
+        combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
+            postsType,
+            feedsSortOrder ->
+            Pair(postsType, feedsSortOrder)
+          }
+          .map { (postsType, feedsSortOrder) ->
+            val postsAfter = postsAfterInstantFromPostsType(postsType)
+            val sources =
+              sources(
+                postsAfter = postsAfter,
+                feedsSortOrder = feedsSortOrder,
+              )
+
+            addSourcesSeparator(sources).cachedIn(coroutineScope)
+          }
+
+      combine(pinnedSourcesFlow, allSourcesFlow) { pinnedSources, allSources ->
+          Pair(pinnedSources, allSources)
+        }
+        .onEach { (pinnedSources, allSources) ->
+          _state.update {
+            it.copy(
+              pinnedSources = pinnedSources,
+              sources = allSources,
+            )
+          }
         }
         .launchIn(coroutineScope)
     }
