@@ -467,7 +467,7 @@ class RssRepository(
   }
 
   suspend fun markPostsAsRead(postsAfter: Instant = Instant.DISTANT_PAST) {
-    withContext(ioDispatcher) { postQueries.markPostsAsRead(postsAfter) }
+    withContext(ioDispatcher) { postQueries.markPostsAsRead(sourceId = null, after = postsAfter) }
   }
 
   suspend fun markPostsInFeedAsRead(
@@ -476,7 +476,9 @@ class RssRepository(
   ) {
     withContext(ioDispatcher) {
       postQueries.transaction {
-        feedIds.forEach { feedId -> postQueries.markPostsInFeedAsRead(feedId, postsAfter) }
+        feedIds.forEach { feedId ->
+          postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter)
+        }
       }
     }
   }

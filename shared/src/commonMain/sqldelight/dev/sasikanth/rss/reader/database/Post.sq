@@ -107,15 +107,10 @@ DELETE FROM post
 WHERE post.read == 1 AND post.date < :before
 RETURNING post.sourceId;
 
-markPostsInFeedAsRead:
-UPDATE post
-SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE sourceId = :sourceId AND date > :after;
-
 markPostsAsRead:
 UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE date > :after;
+WHERE (sourceId = :sourceId OR :sourceId IS NULL) AND date > :after;
 
 post:
 SELECT * FROM post
