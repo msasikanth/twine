@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -88,6 +90,7 @@ internal fun LazyGridScope.pinnedSources(
         val endPadding = endPaddingOfSourceItem(gridItemSpan, index)
         val topPadding = topPaddingOfSourceItem(gridItemSpan, index)
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
+        val interactionSource = remember { MutableInteractionSource() }
 
         ReorderableItem(state = reorderableLazyGridState, key = "PinnedSource: ${source.id}") {
           when (source) {
@@ -99,7 +102,8 @@ internal fun LazyGridScope.pinnedSources(
                 selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
-                dragHandle = { DragHandle(this) },
+                dragHandle = { DragHandle(this, interactionSource) },
+                interactionSource = interactionSource,
                 modifier =
                   Modifier.padding(
                     start = startPadding,
@@ -117,7 +121,8 @@ internal fun LazyGridScope.pinnedSources(
                 isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
-                dragHandle = { DragHandle(this) },
+                dragHandle = { DragHandle(this, interactionSource) },
+                interactionSource = interactionSource,
                 modifier =
                   Modifier.padding(
                     start = startPadding,
@@ -142,10 +147,13 @@ internal fun LazyGridScope.pinnedSources(
 }
 
 @Composable
-private fun DragHandle(scope: ReorderableCollectionItemScope) {
+private fun DragHandle(
+  scope: ReorderableCollectionItemScope,
+  interactionSource: MutableInteractionSource
+) {
   with(scope) {
     Icon(
-      modifier = Modifier.draggableHandle(),
+      modifier = Modifier.draggableHandle(interactionSource = interactionSource),
       imageVector = TwineIcons.DragIndicator,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurfaceVariant,
