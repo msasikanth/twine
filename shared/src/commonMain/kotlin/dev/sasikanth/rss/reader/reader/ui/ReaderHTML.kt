@@ -25,6 +25,7 @@ object ReaderHTML {
     feedName: String,
     feedHomePageLink: String,
     publishedAt: String,
+    locale: String,
   ): String {
     val readabilityJS = readFile("readability.js")
     val readerJS = readFile("main.js")
@@ -40,7 +41,7 @@ object ReaderHTML {
 
     // language=HTML
     return """
-    <html lang="en">
+    <html lang="$locale">
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
