@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -56,6 +57,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,6 +87,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import sh.calvin.reorderable.rememberReorderableLazyGridState
 
 @Composable
 internal fun BottomSheetExpandedContent(
@@ -199,19 +202,30 @@ internal fun BottomSheetExpandedContent(
     },
     containerColor = AppTheme.colorScheme.tintedBackground
   ) { padding ->
-    val pinnedSources = state.pinnedSources.collectAsLazyPagingItems()
     val allSources = state.sources.collectAsLazyPagingItems()
     val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
 
-    val isInSearchMode =
-      searchResults.itemCount == 0 &&
-        searchQuery.text.length < Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+    var pinnedSources by remember(state.pinnedSources) { mutableStateOf(state.pinnedSources) }
+    val isInSearchMode by derivedStateOf {
+      searchQuery.text.length < Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+    }
 
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
     val gridItemSpan =
       when (state.feedsViewMode) {
         FeedsViewMode.Grid -> GridItemSpan(1)
         FeedsViewMode.List -> GridItemSpan(2)
+      }
+    val lazyGridState = rememberLazyGridState()
+    val reorderableLazyGridState =
+      rememberReorderableLazyGridState(lazyGridState) { from, to ->
+        // We are doing this here instead of the presenter is to avoid
+        // items blinking or having janky frames while the presenter updates happen and
+        // state changes.
+        pinnedSources =
+          pinnedSources.toMutableList().apply { add(to.index - 1, removeAt(from.index - 1)) }
+
+        feedsPresenter.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(pinnedSources))
       }
 
     SourcesGrid(
@@ -222,8 +236,10 @@ internal fun BottomSheetExpandedContent(
           // not overlap with each other
           top = padding.calculateTopPadding() - 1.dp
         ),
+      state = lazyGridState,
       pinnedSources = {
         pinnedSources(
+          reorderableLazyGridState = reorderableLazyGridState,
           pinnedSources = pinnedSources,
           selectedSources = state.selectedSources,
           isPinnedSectionExpanded = state.isPinnedSectionExpanded,

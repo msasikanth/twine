@@ -16,8 +16,10 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +61,8 @@ internal fun FeedListItem(
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
   modifier: Modifier = Modifier,
+  dragHandle: (@Composable () -> Unit)? = null,
+  interactionSource: MutableInteractionSource? = null,
 ) {
   val haptic = LocalHapticFeedback.current
   val backgroundColor =
@@ -74,6 +79,8 @@ internal fun FeedListItem(
         .clip(RoundedCornerShape(16.dp))
         .background(backgroundColor)
         .combinedClickable(
+          interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+          indication = LocalIndication.current,
           onClick = {
             if (isInMultiSelectMode) {
               haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -151,6 +158,11 @@ internal fun FeedListItem(
           tint = tint,
           modifier = Modifier.requiredSize(24.dp),
         )
+      }
+
+      if (!isInMultiSelectMode) {
+        Spacer(Modifier.requiredWidth(8.dp))
+        dragHandle?.invoke()
       }
 
       Spacer(Modifier.requiredWidth(4.dp))

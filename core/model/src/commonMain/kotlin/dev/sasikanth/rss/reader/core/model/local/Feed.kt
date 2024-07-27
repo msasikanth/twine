@@ -31,5 +31,6 @@ data class Feed(
   val lastCleanUpAt: Instant? = null,
   val numberOfUnreadPosts: Long = 0L,
   val alwaysFetchSourceArticle: Boolean = false,
-  override val sourceType: SourceType = SourceType.Feed
+  override val sourceType: SourceType = SourceType.Feed,
+  override val pinnedPosition: Double = 0.0,
 ) : Source

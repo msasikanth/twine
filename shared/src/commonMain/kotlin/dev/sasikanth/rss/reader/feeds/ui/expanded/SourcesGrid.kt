@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun SourcesGrid(
+  state: LazyGridState,
   pinnedSources: LazyGridScope.() -> Unit,
   allSources: LazyGridScope.() -> Unit,
   searchResults: LazyGridScope.() -> Unit,
@@ -45,6 +47,7 @@ internal fun SourcesGrid(
 
   LazyVerticalGrid(
     modifier = Modifier.fillMaxSize().then(modifier),
+    state = state,
     columns = GridCells.Fixed(2),
     contentPadding =
       PaddingValues(

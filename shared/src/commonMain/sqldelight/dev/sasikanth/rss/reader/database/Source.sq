@@ -1,13 +1,3 @@
-pinnedSourcesCount:
-WITH pinnedFeeds AS (
-  SELECT COUNT(*) AS count FROM feed WHERE pinnedAt IS NOT NULL
-),
-pinnedFeedGroups AS (
-  SELECT COUNT(*) AS count FROM feedGroup WHERE pinnedAt IS NOT NULL
-)
-SELECT pinnedFeeds.count + pinnedFeedGroups.count
-FROM pinnedFeeds, pinnedFeedGroups;
-
 sourcesCount:
 WITH feeds AS (
   SELECT COUNT(*) AS count FROM feed
@@ -33,7 +23,8 @@ SELECT
   numberOfUnreadPosts,
   feedIds,
   feedIcons,
-  updatedAt
+  updatedAt,
+  pinnedPosition
 FROM (
   SELECT
     'feed' AS type,
@@ -49,7 +40,8 @@ FROM (
     NULL AS feedIcons,
     f.createdAt,
     f.pinnedAt,
-    NULL AS updatedAt
+    NULL AS updatedAt,
+    f.pinnedPosition
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
   GROUP BY f.id
@@ -73,14 +65,14 @@ FROM (
                 LIMIT 4), '') AS feedIcons,
     fg.createdAt,
     fg.pinnedAt,
-    fg.updatedAt
+    fg.updatedAt,
+    fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
-ORDER BY pinnedAt DESC
-LIMIT :limit OFFSET :offset;
+ORDER BY pinnedPosition, pinnedAt DESC;
 
 sources:
 SELECT

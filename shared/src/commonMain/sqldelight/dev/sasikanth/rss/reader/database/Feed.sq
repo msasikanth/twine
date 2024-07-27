@@ -11,11 +11,13 @@ CREATE TABLE feed(
   createdAt INTEGER AS Instant NOT NULL,
   pinnedAt INTEGER AS Instant,
   lastCleanUpAt INTEGER AS Instant,
-  alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0
+  alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0,
+  pinnedPosition REAL NOT NULL DEFAULT 0.0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
 CREATE INDEX feed_pinned_at ON feed(pinnedAt);
+CREATE INDEX feed_pinned_position ON feed(pinnedPosition);
 
 upsert:
 INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
@@ -48,7 +50,8 @@ SELECT
   f.createdAt,
   f.pinnedAt,
   f.lastCleanUpAt,
-  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+  f.pinnedPosition
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
 GROUP BY f.id
@@ -58,25 +61,6 @@ ORDER BY
   CASE WHEN :orderBy = 'alphabetical' THEN f.name END ASC,
   CASE WHEN :orderBy = 'pinned' THEN f.pinnedAt END DESC,
   f.createdAt DESC
-LIMIT :limit OFFSET :offset;
-
-pinnedFeedsPaginated:
-SELECT
-  f.id,
-  f.name,
-  f.icon,
-  f.description,
-  f.link,
-  f.homepageLink,
-  f.createdAt,
-  f.pinnedAt,
-  f.lastCleanUpAt,
-  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
-FROM feed f
-LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
-WHERE pinnedAt IS NOT NULL
-GROUP BY f.id
-ORDER BY f.pinnedAt DESC
 LIMIT :limit OFFSET :offset;
 
 feed:
@@ -109,7 +93,7 @@ hasFeed:
 SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id);
 
 updatePinnedAt:
-UPDATE feed SET pinnedAt = :pinnedAt WHERE id = :id;
+UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
 
 numberOfPinnedFeeds:
 SELECT COUNT(*) FROM feed WHERE pinnedAt IS NOT NULL;
@@ -147,3 +131,6 @@ ORDER BY
   CASE WHEN :orderBy = 'alphabetical' THEN f.name END ASC,
   f.createdAt DESC
 LIMIT :limit OFFSET :offset;
+
+updatedPinnedPosition:
+UPDATE feed SET pinnedPosition = :pinnedPosition WHERE id = :id;
