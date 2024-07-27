@@ -72,7 +72,7 @@ FROM (
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
-ORDER BY pinnedPosition;
+ORDER BY pinnedPosition, pinnedAt DESC;
 
 sources:
 SELECT
