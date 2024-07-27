@@ -252,7 +252,8 @@ class RssRepository(
             createdAt: Instant,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
-            alwaysFetchSourceArticle: Boolean ->
+            alwaysFetchSourceArticle: Boolean,
+            pinnedPosition: Double ->
             Feed(
               id = id,
               name = name,
@@ -263,7 +264,8 @@ class RssRepository(
               link = link,
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle
+              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+              pinnedPosition = pinnedPosition
             )
           }
         )
@@ -563,60 +565,57 @@ class RssRepository(
     }
   }
 
-  fun pinnedSources(postsAfter: Instant = Instant.DISTANT_PAST): PagingSource<Int, Source> {
-    return QueryPagingSource(
-      countQuery = sourceQueries.pinnedSourcesCount(),
-      transacter = sourceQueries,
-      context = ioDispatcher,
-      queryProvider = { limit, offset ->
-        sourceQueries.pinnedSources(
-          postsAfter = postsAfter,
-          limit = limit,
-          offset = offset,
-          mapper = {
-            type: String,
-            id: String,
-            name: String,
-            icon: String?,
-            description: String?,
-            link: String?,
-            homepageLink: String?,
-            createdAt: Instant?,
-            pinnedAt: Instant?,
-            lastCleanUpAt: Instant?,
-            numberOfUnreadPosts: Long,
-            feedIds: List<String>?,
-            feedIcons: String?,
-            updatedAt: Instant? ->
-            if (type == "group") {
-              FeedGroup(
-                id = id,
-                name = name,
-                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
-                feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
-                createdAt = createdAt!!,
-                updatedAt = updatedAt!!,
-                pinnedAt = pinnedAt,
-                numberOfUnreadPosts = numberOfUnreadPosts,
-              )
-            } else {
-              Feed(
-                id = id,
-                name = name,
-                icon = icon!!,
-                description = description!!,
-                link = link!!,
-                homepageLink = homepageLink!!,
-                createdAt = createdAt!!,
-                pinnedAt = pinnedAt,
-                lastCleanUpAt = lastCleanUpAt,
-                numberOfUnreadPosts = numberOfUnreadPosts,
-              )
-            }
+  fun pinnedSources(postsAfter: Instant = Instant.DISTANT_PAST): Flow<List<Source>> {
+    return sourceQueries
+      .pinnedSources(
+        postsAfter = postsAfter,
+        mapper = {
+          type: String,
+          id: String,
+          name: String,
+          icon: String?,
+          description: String?,
+          link: String?,
+          homepageLink: String?,
+          createdAt: Instant?,
+          pinnedAt: Instant?,
+          lastCleanUpAt: Instant?,
+          numberOfUnreadPosts: Long,
+          feedIds: List<String>?,
+          feedIcons: String?,
+          updatedAt: Instant?,
+          pinnedPosition: Double ->
+          if (type == "group") {
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+              feedIcons = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              createdAt = createdAt!!,
+              updatedAt = updatedAt!!,
+              pinnedAt = pinnedAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              pinnedPosition = pinnedPosition
+            )
+          } else {
+            Feed(
+              id = id,
+              name = name,
+              icon = icon!!,
+              description = description!!,
+              link = link!!,
+              homepageLink = homepageLink!!,
+              createdAt = createdAt!!,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              pinnedPosition = pinnedPosition
+            )
           }
-        )
-      }
-    )
+        }
+      )
+      .asFlow()
+      .mapToList(ioDispatcher)
   }
 
   fun sources(
@@ -695,7 +694,8 @@ class RssRepository(
             feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
-            pinnedAt: Instant? ->
+            pinnedAt: Instant?,
+            pinnedPosition: Double ->
             FeedGroup(
               id = id,
               name = name,
@@ -704,6 +704,7 @@ class RssRepository(
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
+              pinnedPosition = pinnedPosition
             )
           }
         )
@@ -811,6 +812,25 @@ class RssRepository(
         )
       }
     )
+  }
+
+  suspend fun updatedFeedPinnedPosition(pinnedPosition: Double, id: String) {
+    withContext(ioDispatcher) { feedQueries.updatedPinnedPosition(pinnedPosition, id) }
+  }
+
+  suspend fun updatedFeedGroupPinnedPosition(pinnedPosition: Double, id: String) {
+    withContext(ioDispatcher) { feedGroupQueries.updatedPinnedPosition(pinnedPosition, id) }
+  }
+
+  suspend fun updatedSourcePinnedPosition(sources: List<Source>) {
+    withContext(ioDispatcher) {
+      feedQueries.transaction {
+        sources.forEachIndexed { index, source ->
+          feedQueries.updatedPinnedPosition(index.toDouble(), source.id)
+          feedGroupQueries.updatedPinnedPosition(index.toDouble(), source.id)
+        }
+      }
+    }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

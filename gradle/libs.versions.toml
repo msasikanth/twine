@@ -49,6 +49,7 @@ bugsnag-plugin = "8.1.0"
 bugsnag = "6.6.1"
 crashkios-bugsnag = "0.8.6"
 kermit = "2.0.4"
+reorderable = "2.2.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -118,6 +119,7 @@ bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable"  }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

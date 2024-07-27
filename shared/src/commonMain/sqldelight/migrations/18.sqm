@@ -1,0 +1,5 @@
+ALTER TABLE feed ADD COLUMN pinnedPosition REAL NOT NULL DEFAULT 0.0;
+ALTER TABLE feedGroup ADD COLUMN pinnedPosition REAL NOT NULL DEFAULT 0.0;
+
+CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
+CREATE INDEX feed_pinned_position ON feed(pinnedPosition);

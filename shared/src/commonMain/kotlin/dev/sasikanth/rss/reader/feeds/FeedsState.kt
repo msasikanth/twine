@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
 internal data class FeedsState(
-  val pinnedSources: Flow<PagingData<Source>>,
+  val pinnedSources: List<Source>,
   val sources: Flow<PagingData<SourceListItem>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
   val activeSource: Source?,
@@ -48,7 +48,7 @@ internal data class FeedsState(
     val DEFAULT =
       FeedsState(
         feedsSearchResults = emptyFlow(),
-        pinnedSources = emptyFlow(),
+        pinnedSources = emptyList(),
         sources = emptyFlow(),
         activeSource = null,
         canShowUnreadPostsCount = false,

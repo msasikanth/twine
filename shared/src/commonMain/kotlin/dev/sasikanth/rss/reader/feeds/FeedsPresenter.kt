@@ -21,8 +21,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
-import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import app.cash.paging.map
@@ -58,8 +58,10 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -179,6 +181,15 @@ class FeedsPresenter(
         }
         FeedsEvent.DeleteSelectedSources -> deleteSelectedSources()
         FeedsEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
+        is FeedsEvent.OnPinnedSourcePositionChanged ->
+          onPinnedSourcePositionChanged(event.newSourcesList)
+      }
+    }
+
+    private fun onPinnedSourcePositionChanged(newSourcesList: List<Source>) {
+      coroutineScope.launch {
+        _state.update { it.copy(pinnedSources = newSourcesList) }
+        rssRepository.updatedSourcePinnedPosition(_state.value.pinnedSources)
       }
     }
 
@@ -376,32 +387,42 @@ class FeedsPresenter(
         }
         .launchIn(coroutineScope)
 
-      combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
-          postsType,
-          feedsSortOrder ->
-          Pair(postsType, feedsSortOrder)
-        }
-        .onEach { (postsType, feedsSortOrder) ->
+      val pinnedSourcesFlow =
+        settingsRepository.postsType.flatMapLatest { postsType ->
           val postsAfter = postsAfterInstantFromPostsType(postsType)
+          rssRepository.pinnedSources(postsAfter)
+        }
 
-          val pinnedSources = pinnedSources(postsAfter = postsAfter).cachedIn(coroutineScope)
-          val sources =
-            sources(
-              postsAfter = postsAfter,
-              feedsSortOrder = feedsSortOrder,
+      val allSourcesFlow =
+        combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
+            postsType,
+            feedsSortOrder ->
+            Pair(postsType, feedsSortOrder)
+          }
+          .map { (postsType, feedsSortOrder) ->
+            val postsAfter = postsAfterInstantFromPostsType(postsType)
+            val sources =
+              sources(
+                postsAfter = postsAfter,
+                feedsSortOrder = feedsSortOrder,
+              )
+
+            addSourcesSeparator(sources).cachedIn(coroutineScope)
+          }
+
+      combine(pinnedSourcesFlow, allSourcesFlow) { pinnedSources, allSources ->
+          Pair(pinnedSources, allSources)
+        }
+        .onEach { (pinnedSources, allSources) ->
+          _state.update {
+            it.copy(
+              pinnedSources = pinnedSources,
+              sources = allSources,
             )
-          val sourcesWithSeparator = addSourcesSeparator(sources)
-
-          _state.update { it.copy(pinnedSources = pinnedSources, sources = sourcesWithSeparator) }
+          }
         }
         .launchIn(coroutineScope)
     }
-
-    private fun pinnedSources(postsAfter: Instant) =
-      createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.pinnedSources(postsAfter = postsAfter)
-        }
-        .flow
 
     private fun feedsSearchResultsPager(transformedSearchQuery: String, postsAfter: Instant) =
       createPager(config = createPagingConfig(pageSize = 20)) {

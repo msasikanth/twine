@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -43,7 +42,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun BottomSheetCollapsedContent(
-  pinnedSources: LazyPagingItems<Source>,
+  pinnedSources: List<Source>,
   numberOfFeeds: Int,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
@@ -84,33 +83,30 @@ internal fun BottomSheetCollapsedContent(
         )
       }
 
-      items(pinnedSources.itemCount) { index ->
-        val source = pinnedSources[index]
-        if (source != null) {
-          when (source) {
-            is FeedGroup -> {
-              FeedGroupBottomBarItem(
-                feedGroup = source,
-                canShowUnreadPostsCount = canShowUnreadPostsCount,
-                selected = activeSource?.id == source.id,
-                onClick = { onSourceClick(source) }
-              )
-            }
-            is Feed -> {
-              FeedBottomBarItem(
-                badgeCount = source.numberOfUnreadPosts,
-                iconUrl = source.icon,
-                canShowUnreadPostsCount = canShowUnreadPostsCount,
-                onClick = { onSourceClick(source) },
-                selected = activeSource?.id == source.id
-              )
-            }
+      items(pinnedSources.size) { index ->
+        when (val source = pinnedSources[index]) {
+          is FeedGroup -> {
+            FeedGroupBottomBarItem(
+              feedGroup = source,
+              canShowUnreadPostsCount = canShowUnreadPostsCount,
+              selected = activeSource?.id == source.id,
+              onClick = { onSourceClick(source) }
+            )
+          }
+          is Feed -> {
+            FeedBottomBarItem(
+              badgeCount = source.numberOfUnreadPosts,
+              iconUrl = source.icon,
+              canShowUnreadPostsCount = canShowUnreadPostsCount,
+              onClick = { onSourceClick(source) },
+              selected = activeSource?.id == source.id
+            )
           }
         }
       }
     }
 
-    if (pinnedSources.itemCount == 0 && numberOfFeeds > 0) {
+    if (pinnedSources.isEmpty() && numberOfFeeds > 0) {
       Box(
         modifier = Modifier.fillMaxWidth().requiredHeight(height = 64.dp),
         contentAlignment = Alignment.Center
