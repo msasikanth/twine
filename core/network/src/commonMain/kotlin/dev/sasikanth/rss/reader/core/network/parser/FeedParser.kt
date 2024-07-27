@@ -149,14 +149,14 @@ private fun ByteReadChannel.toCharIterator(
     private val DEFAULT_BUFFER_SIZE = 1024L
 
     private var currentIndex = 0
-    private var currentBuffer = CharArray(0)
+    private var currentBuffer = String()
 
     override fun hasNext(): Boolean {
-      if (currentIndex < currentBuffer.size) return true
+      if (currentIndex < currentBuffer.length) return true
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      currentBuffer = String(packet.readBytes(), charset = charset).toCharArray()
+      currentBuffer = String(bytes = packet.readBytes(), charset = charset)
       packet.release()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
