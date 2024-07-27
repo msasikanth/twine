@@ -112,6 +112,11 @@ UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
 WHERE sourceId = :sourceId AND date > :after;
 
+markPostsAsRead:
+UPDATE post
+SET read = CASE WHEN read != 1 THEN 1 ELSE read END
+WHERE date > :after;
+
 post:
 SELECT * FROM post
 WHERE post.id = :id;
