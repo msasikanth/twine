@@ -24,13 +24,14 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.charsets.Charset
+import io.ktor.utils.io.core.String
 import io.ktor.utils.io.core.readBytes
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
-import okio.internal.commonToUtf8String
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
@@ -41,10 +42,11 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   suspend fun parse(
     content: ByteReadChannel,
     feedUrl: String,
+    charset: Charset,
   ): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val parser = MiniXmlPullParser(source = content.toCharIterator())
+        val parser = MiniXmlPullParser(source = content.toCharIterator(charset))
 
         parser.nextTag()
 
@@ -139,6 +141,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 }
 
 private fun ByteReadChannel.toCharIterator(
+  charset: Charset,
   context: CoroutineContext = EmptyCoroutineContext
 ): CharIterator {
   return object : CharIterator() {
@@ -146,14 +149,14 @@ private fun ByteReadChannel.toCharIterator(
     private val DEFAULT_BUFFER_SIZE = 1024L
 
     private var currentIndex = 0
-    private var currentBuffer = CharArray(0)
+    private var currentBuffer = String()
 
     override fun hasNext(): Boolean {
-      if (currentIndex < currentBuffer.size) return true
+      if (currentIndex < currentBuffer.length) return true
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      currentBuffer = packet.readBytes().commonToUtf8String().toCharArray()
+      currentBuffer = String(bytes = packet.readBytes(), charset = charset)
       packet.release()
       currentIndex = 0
       return currentBuffer.isNotEmpty()

@@ -32,6 +32,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.home.ui.PostsType
@@ -209,6 +210,38 @@ class HomePresenter(
         is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedId)
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
         is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
+        is HomeEvent.MarkPostsAsRead -> markPostsAsRead(event.source)
+      }
+    }
+
+    private fun markPostsAsRead(source: Source?) {
+      coroutineScope.launch {
+        val postsAfter =
+          when (_state.value.postsType) {
+            PostsType.ALL,
+            PostsType.UNREAD -> Instant.DISTANT_PAST
+            PostsType.TODAY -> {
+              getTodayStartInstant()
+            }
+            PostsType.LAST_24_HOURS -> {
+              getLast24HourStart()
+            }
+          }
+
+        when (source) {
+          is Feed -> {
+            rssRepository.markPostsInFeedAsRead(
+              feedIds = listOf(source.id),
+              postsAfter = postsAfter
+            )
+          }
+          is FeedGroup -> {
+            rssRepository.markPostsInFeedAsRead(feedIds = source.feedIds, postsAfter = postsAfter)
+          }
+          null -> {
+            rssRepository.markPostsAsRead(postsAfter = postsAfter)
+          }
+        }
       }
     }
 

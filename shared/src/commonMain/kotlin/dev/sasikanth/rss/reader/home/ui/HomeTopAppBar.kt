@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
@@ -79,7 +80,8 @@ internal fun HomeTopAppBar(
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
-  onPostTypeChanged: (PostsType) -> Unit
+  onPostTypeChanged: (PostsType) -> Unit,
+  onMarkPostsAsRead: (Source?) -> Unit,
 ) {
   val backgroundAlpha by
     remember(listState) {
@@ -92,7 +94,7 @@ internal fun HomeTopAppBar(
       }
     }
 
-  Row(
+  Column(
     modifier =
       modifier
         .pointerInput(Unit) {}
@@ -102,112 +104,68 @@ internal fun HomeTopAppBar(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
         .padding(horizontal = 8.dp, vertical = 16.dp),
-    verticalAlignment = Alignment.CenterVertically
+    verticalArrangement = Arrangement.spacedBy(12.dp)
   ) {
-    PostsFilter(
-      modifier = Modifier.weight(1f),
-      source = source,
-      postsType = postsType,
-      onPostTypeChanged = onPostTypeChanged
-    )
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+      SourceInfo(
+        modifier = Modifier.weight(1f),
+        source = source,
+      )
 
-    Spacer(Modifier.requiredWidth(16.dp))
+      Spacer(Modifier.requiredWidth(16.dp))
 
-    IconButton(
-      onClick = onSearchClicked,
-    ) {
-      Icon(
-        imageVector = Icons.Rounded.Search,
-        contentDescription = LocalStrings.current.postsSearchHint,
-        tint = AppTheme.colorScheme.tintedForeground
+      IconButton(
+        onClick = onSearchClicked,
+      ) {
+        Icon(
+          imageVector = Icons.Rounded.Search,
+          contentDescription = LocalStrings.current.postsSearchHint,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      }
+
+      OverflowMenu(
+        onSettingsClicked = onSettingsClicked,
+        onBookmarksClicked = onBookmarksClicked,
       )
     }
 
-    OverflowMenu(
-      onSettingsClicked = onSettingsClicked,
-      onBookmarksClicked = onBookmarksClicked,
-    )
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+      PostsFilterButton(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
+
+      MarkPostsAsReadButton(source = source, onMarkPostsAsRead = onMarkPostsAsRead)
+    }
   }
 }
 
 @Composable
-fun PostsFilter(
-  modifier: Modifier = Modifier,
+fun SourceInfo(
   source: Source?,
-  postsType: PostsType = PostsType.ALL,
-  onPostTypeChanged: (PostsType) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  var showDropdown by remember { mutableStateOf(false) }
-  val postsTypeLabel = getPostTypeLabel(postsType)
-
   Row(
-    modifier = modifier.clip(MaterialTheme.shapes.large).clickable { showDropdown = true },
+    modifier = modifier.clip(MaterialTheme.shapes.large),
     verticalAlignment = Alignment.CenterVertically
   ) {
     SourceIcon(source)
 
-    Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp)) {
-      val sourceLabel =
-        when (source) {
-          is FeedGroup -> source.name
-          is Feed -> source.name
-          else -> LocalStrings.current.appBarAllFeeds
-        }
-
-      Text(
-        text = sourceLabel,
-        style = MaterialTheme.typography.titleLarge,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        maxLines = 1,
-      )
-
-      Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-          text = postsTypeLabel,
-          style = MaterialTheme.typography.bodyMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
-        )
-
-        Icon(
-          imageVector = Icons.Filled.ExpandMore,
-          contentDescription = null,
-          modifier = Modifier.requiredSize(20.dp),
-          tint = AppTheme.colorScheme.tintedForeground,
-        )
+    val sourceLabel =
+      when (source) {
+        is FeedGroup -> source.name
+        is Feed -> source.name
+        else -> LocalStrings.current.appBarAllFeeds
       }
-    }
-  }
 
-  DropdownMenu(
-    modifier = Modifier.requiredWidth(158.dp),
-    expanded = showDropdown,
-    onDismissRequest = { showDropdown = false },
-  ) {
-    PostsType.entries.forEach { type ->
-      val label = getPostTypeLabel(type)
-      val color =
-        if (postsType == type) {
-          AppTheme.colorScheme.tintedSurface
-        } else {
-          Color.Unspecified
-        }
-      val labelColor =
-        if (postsType == type) {
-          AppTheme.colorScheme.onSurface
-        } else {
-          AppTheme.colorScheme.textEmphasisHigh
-        }
-
-      DropdownMenuItem(
-        onClick = {
-          onPostTypeChanged(type)
-          showDropdown = false
-        },
-        modifier = Modifier.background(color)
-      ) {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
-      }
-    }
+    Text(
+      modifier = Modifier.padding(start = 16.dp, end = 8.dp),
+      text = sourceLabel,
+      style = MaterialTheme.typography.titleLarge,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      maxLines = 1,
+    )
   }
 }
 
@@ -252,6 +210,121 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
       }
       else -> {
         // no-op
+      }
+    }
+  }
+}
+
+@Composable
+private fun MarkPostsAsReadButton(
+  source: Source?,
+  onMarkPostsAsRead: (Source?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier =
+      modifier
+        .clip(RoundedCornerShape(8.dp))
+        .clickable(onClick = { onMarkPostsAsRead(source) })
+        .background(color = Color.White.copy(alpha = 0.12f))
+        .padding(vertical = 4.dp)
+        .padding(start = 8.dp, end = 12.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Text(
+      text = LocalStrings.current.markAsRead,
+      style = MaterialTheme.typography.bodyMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+    )
+
+    Icon(
+      imageVector = Icons.Filled.DoneAll,
+      contentDescription = null,
+      modifier = Modifier.requiredSize(20.dp),
+      tint = AppTheme.colorScheme.textEmphasisHigh,
+    )
+  }
+}
+
+@Composable
+private fun PostsFilterButton(
+  postsType: PostsType,
+  onPostTypeChanged: (PostsType) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var showPostsTypeDropDown by remember { mutableStateOf(false) }
+
+  Box {
+    Row(
+      modifier =
+        modifier
+          .clip(RoundedCornerShape(8.dp))
+          .clickable(onClick = { showPostsTypeDropDown = true })
+          .background(color = Color.White.copy(alpha = 0.12f))
+          .padding(vertical = 4.dp)
+          .padding(start = 8.dp, end = 12.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      val postsTypeLabel = getPostTypeLabel(postsType)
+
+      Text(
+        text = postsTypeLabel,
+        style = MaterialTheme.typography.bodyMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+      )
+
+      Icon(
+        imageVector = Icons.Filled.ExpandMore,
+        contentDescription = null,
+        modifier = Modifier.requiredSize(20.dp),
+        tint = AppTheme.colorScheme.textEmphasisHigh,
+      )
+    }
+
+    PostsFilterDropdown(
+      showDropdown = showPostsTypeDropDown,
+      postsType = postsType,
+      onPostTypeChanged = onPostTypeChanged,
+      onDismiss = { showPostsTypeDropDown = false }
+    )
+  }
+}
+
+@Composable
+private fun PostsFilterDropdown(
+  showDropdown: Boolean,
+  postsType: PostsType,
+  onPostTypeChanged: (PostsType) -> Unit,
+  onDismiss: () -> Unit,
+) {
+  DropdownMenu(
+    modifier = Modifier.requiredWidth(158.dp),
+    expanded = showDropdown,
+    onDismissRequest = onDismiss,
+  ) {
+    PostsType.entries.forEach { type ->
+      val label = getPostTypeLabel(type)
+      val color =
+        if (postsType == type) {
+          AppTheme.colorScheme.tintedSurface
+        } else {
+          Color.Unspecified
+        }
+      val labelColor =
+        if (postsType == type) {
+          AppTheme.colorScheme.onSurface
+        } else {
+          AppTheme.colorScheme.textEmphasisHigh
+        }
+
+      DropdownMenuItem(
+        onClick = {
+          onPostTypeChanged(type)
+          onDismiss()
+        },
+        modifier = Modifier.background(color)
+      ) {
+        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
       }
     }
   }

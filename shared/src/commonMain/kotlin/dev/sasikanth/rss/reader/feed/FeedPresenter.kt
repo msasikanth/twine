@@ -144,7 +144,7 @@ class FeedPresenter(
             }
           }
 
-        rssRepository.markPostsInFeedAsRead(feedId = feedId, postsAfter = postsAfter)
+        rssRepository.markPostsInFeedAsRead(feedIds = listOf(feedId), postsAfter = postsAfter)
       }
     }
 

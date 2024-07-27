@@ -466,8 +466,21 @@ class RssRepository(
     }
   }
 
-  suspend fun markPostsInFeedAsRead(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST) {
-    withContext(ioDispatcher) { postQueries.markPostsInFeedAsRead(feedId, postsAfter) }
+  suspend fun markPostsAsRead(postsAfter: Instant = Instant.DISTANT_PAST) {
+    withContext(ioDispatcher) { postQueries.markPostsAsRead(sourceId = null, after = postsAfter) }
+  }
+
+  suspend fun markPostsInFeedAsRead(
+    feedIds: List<String>,
+    postsAfter: Instant = Instant.DISTANT_PAST
+  ) {
+    withContext(ioDispatcher) {
+      postQueries.transaction {
+        feedIds.forEach { feedId ->
+          postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter)
+        }
+      }
+    }
   }
 
   suspend fun post(postId: String): Post {

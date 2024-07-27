@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.LoadingState
@@ -247,6 +248,7 @@ internal fun ReaderScreen(
                 feedName = state.feed!!.name,
                 feedHomePageLink = state.feed!!.homepageLink,
                 publishedAt = state.publishedAt!!,
+                locale = Locale.current.toLanguageTag()
               )
 
             navigator.loadHtml(htmlTemplate, state.link)
