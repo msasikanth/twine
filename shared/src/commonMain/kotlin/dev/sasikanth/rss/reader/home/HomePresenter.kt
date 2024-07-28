@@ -349,6 +349,32 @@ class HomePresenter(
         .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
         .launchIn(coroutineScope)
 
+      combine(observableActiveSource.activeSource, settingsRepository.postsType) {
+          activeSource,
+          postsType ->
+          Pair(activeSource, postsType)
+        }
+        .flatMapLatest { (activeSource, postsType) ->
+          val postsAfter =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.UNREAD -> Instant.DISTANT_PAST
+              PostsType.TODAY -> {
+                getTodayStartInstant()
+              }
+              PostsType.LAST_24_HOURS -> {
+                getLast24HourStart()
+              }
+            }
+
+          rssRepository.hasUnreadPosts(
+            sourceId = activeSource?.id,
+            postsAfter = postsAfter,
+          )
+        }
+        .onEach { hasUnreadPosts -> _state.update { it.copy(hasUnreadPosts = hasUnreadPosts) } }
+        .launchIn(coroutineScope)
+
       settingsRepository.enableFeaturedItemBlur
         .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
