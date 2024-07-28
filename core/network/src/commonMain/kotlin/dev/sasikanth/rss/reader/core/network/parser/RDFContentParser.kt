@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT_ENCODED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DC_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
@@ -122,7 +123,7 @@ internal object RDFContentParser : ContentParser() {
         link.isNullOrBlank() && name == TAG_LINK -> {
           link = parser.nextText()
         }
-        name == TAG_DESCRIPTION -> {
+        name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
