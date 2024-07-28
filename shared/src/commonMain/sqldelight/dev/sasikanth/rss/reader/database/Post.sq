@@ -119,5 +119,14 @@ WHERE post.id = :id;
 hasPost:
 SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
 
-unreadPostsCount:
-SELECT COUNT(*) FROM post WHERE read != 1 AND date > :after AND (sourceId = :sourceId OR :sourceId IS NULL);
+unreadPostsCountInSource:
+SELECT COUNT(*) FROM post
+LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
+WHERE
+  read != 1 AND
+  date > :after AND
+  (
+    :sourceId IS NULL OR
+    post.sourceId = :sourceId OR
+    feedGroup.id = :sourceId
+  );
