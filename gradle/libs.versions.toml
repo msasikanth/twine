@@ -49,7 +49,7 @@ bugsnag-plugin = "8.1.0"
 bugsnag = "6.6.1"
 crashkios-bugsnag = "0.8.6"
 kermit = "2.0.4"
-reorderable = "2.2.0"
+reorderable = "2.3.0"
 korlibs = "6.0.0"
 
 [libraries]
