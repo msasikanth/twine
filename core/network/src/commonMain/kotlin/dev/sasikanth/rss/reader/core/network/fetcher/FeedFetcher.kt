@@ -32,9 +32,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
-import io.ktor.http.charset
 import io.ktor.http.contentType
-import io.ktor.utils.io.charsets.Charsets
+import korlibs.io.lang.Charset
+import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -99,12 +99,10 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       }
     } else {
       val content = response.bodyAsChannel()
-      val feedPayload =
-        feedParser.parse(
-          feedUrl = url,
-          content = content,
-          charset = response.charset() ?: Charsets.UTF_8
-        )
+      val responseCharset = response.contentType()?.parameter("charset")
+      val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
+
+      val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
 
       FeedFetchResult.Success(feedPayload)
     }
