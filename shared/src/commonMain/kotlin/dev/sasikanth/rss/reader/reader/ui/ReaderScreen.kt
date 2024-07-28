@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
@@ -240,6 +241,7 @@ internal fun ReaderScreen(
           this.supportZoom = false
         }
 
+        val layoutDirection = LocalLayoutDirection.current
         LaunchedEffect(state.content) {
           withContext(dispatchersProvider.io) {
             val htmlTemplate =
@@ -248,7 +250,8 @@ internal fun ReaderScreen(
                 feedName = state.feed!!.name,
                 feedHomePageLink = state.feed!!.homepageLink,
                 publishedAt = state.publishedAt!!,
-                locale = Locale.current.toLanguageTag()
+                locale = Locale.current.toLanguageTag(),
+                direction = layoutDirection
               )
 
             navigator.loadHtml(htmlTemplate, state.link)
