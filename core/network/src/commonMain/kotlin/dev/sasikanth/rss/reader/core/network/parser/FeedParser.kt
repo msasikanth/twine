@@ -52,6 +52,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
         parser.nextTag()
 
         return@withContext when (parser.name) {
+          RDF_TAG -> RDFContentParser.parse(feedUrl, parser)
           RSS_TAG -> RssContentParser.parse(feedUrl, parser)
           ATOM_TAG -> AtomContentParser.parse(feedUrl, parser)
           HTML_TAG -> throw HtmlContentException()
@@ -65,6 +66,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   }
 
   companion object {
+    const val RDF_TAG = "rdf:RDF"
     const val RSS_TAG = "rss"
     const val ATOM_TAG = "feed"
     const val HTML_TAG = "html"
@@ -92,6 +94,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val TAG_SUMMARY = "summary"
     internal const val TAG_SUBTITLE = "subtitle"
     internal const val TAG_PUB_DATE = "pubDate"
+    internal const val TAG_DC_DATE = "dc:date"
     internal const val TAG_PUBLISHED = "published"
     internal const val TAG_UPDATED = "updated"
     internal const val TAG_FEATURED_IMAGE = "featuredImage"

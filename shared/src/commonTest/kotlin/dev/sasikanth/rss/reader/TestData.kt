@@ -77,6 +77,32 @@ const val rssXmlContent =
   </rss>
   """
 
+const val rdfXmlContent =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <rdf:RDF>
+  <channel>
+    <title>Feed title</title>
+    <link>https://example.com</link>
+    <description>Feed description</description>
+  </channel>
+    <item>
+      <title>Post</title>
+      <link>https://example.com/first-post</link>
+      <description>First post description.</description>
+      <dc:date>Thu, 25 May 2023 09:00:00 +0000</dc:date>
+    </item>
+    <item>
+      <title>Post with encoded description</title>
+      <description>
+        &lt;p&gt;Second post description in HTML syntax.&lt;/p&gt;
+        &lt;img src="https://example.com/encoded-image" alt="encoded image" /&gt;
+      </description>
+      <link>https://example.com/second-post</link>
+      <dc:date>Wed, 24 May 2023 10:30:00 +0000</dc:date>
+    </item>
+  </rdf:RDF>
+  """
+
 const val atomXmlContent =
   """<?xml version="1.0" encoding="UTF-8"?>
   <feed xmlns="http://www.w3.org/2005/Atom">
