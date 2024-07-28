@@ -76,6 +76,7 @@ internal fun HomeTopAppBar(
   source: Source?,
   postsType: PostsType,
   listState: LazyListState,
+  hasFeeds: Boolean?,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -130,13 +131,15 @@ internal fun HomeTopAppBar(
       )
     }
 
-    Row(
-      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-      horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-      PostsFilterButton(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
+    if (hasFeeds == true) {
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+      ) {
+        PostsFilterButton(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
 
-      MarkPostsAsReadButton(source = source, onMarkPostsAsRead = onMarkPostsAsRead)
+        MarkPostsAsReadButton(source = source, onMarkPostsAsRead = onMarkPostsAsRead)
+      }
     }
   }
 }
