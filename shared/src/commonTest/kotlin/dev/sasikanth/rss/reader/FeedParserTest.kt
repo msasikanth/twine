@@ -19,8 +19,8 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
+import korlibs.io.lang.Charsets
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -114,7 +114,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(rssXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF_8)
+    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
@@ -191,7 +191,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(atomXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF_8)
+    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
