@@ -18,20 +18,14 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_URL
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VALUE_IMAGE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_COMMENTS
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT_ENCODED
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DC_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ENCLOSURE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEATURED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
 import io.ktor.http.Url
@@ -39,7 +33,7 @@ import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal object RssContentParser : ContentParser() {
+internal object RDFContentParser : ContentParser() {
 
   override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
@@ -51,10 +45,11 @@ internal object RssContentParser : ContentParser() {
     var link: String? = null
     var description: String? = null
 
+    // Parse channel
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
 
-      when (val name = parser.name) {
+      when (parser.name) {
         TAG_TITLE -> {
           title = parser.nextText()
         }
@@ -68,6 +63,14 @@ internal object RssContentParser : ContentParser() {
         TAG_DESCRIPTION -> {
           description = parser.nextText()
         }
+        else -> parser.skip()
+      }
+    }
+
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
+
+      when (parser.name) {
         TAG_RSS_ITEM -> {
           posts.add(readRssItem(parser, link))
         }
@@ -107,7 +110,7 @@ internal object RssContentParser : ContentParser() {
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
-    var commentsLink: String? = null
+    val commentsLink: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -117,11 +120,8 @@ internal object RssContentParser : ContentParser() {
         name == TAG_TITLE -> {
           title = parser.nextText()
         }
-        link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
+        link.isNullOrBlank() && name == TAG_LINK -> {
           link = parser.nextText()
-        }
-        name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
-          link = parser.attrText(ATTR_URL)
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
@@ -133,17 +133,8 @@ internal object RssContentParser : ContentParser() {
 
           description = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
         }
-        name == TAG_PUB_DATE -> {
+        name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()
-        }
-        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
-          image = parser.attrText(ATTR_URL)
-        }
-        image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
-          image = parser.nextText()
-        }
-        commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
-          commentsLink = parser.nextText()
         }
         else -> parser.skip()
       }
@@ -165,10 +156,4 @@ internal object RssContentParser : ContentParser() {
       commentsLink = commentsLink?.trim()
     )
   }
-
-  private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
-    (FeedParser.imageTags.contains(name) ||
-      (name == TAG_ENCLOSURE &&
-        parser.getAttributeValue(parser.namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
-      !parser.getAttributeValue(parser.namespace, ATTR_URL).isNullOrBlank()
 }

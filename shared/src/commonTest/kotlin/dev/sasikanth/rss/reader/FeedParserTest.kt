@@ -19,8 +19,8 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
+import korlibs.io.lang.Charsets
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -114,7 +114,53 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(rssXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF_8)
+    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
+
+    // then
+    assertEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingRDFFeedShouldWorkCorrectly() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Feed title",
+        icon = "https://icon.horse/icon/example.com",
+        description = "Feed description",
+        link = feedUrl,
+        homepageLink = "https://example.com",
+        posts =
+          listOf(
+            PostPayload(
+              title = "Post",
+              link = "https://example.com/first-post",
+              description = "First post description.",
+              rawContent = "First post description.",
+              imageUrl = null,
+              date = 1685005200000,
+              commentsLink = null
+            ),
+            PostPayload(
+              title = "Post with encoded description",
+              link = "https://example.com/second-post",
+              description = "Second post description in HTML syntax.",
+              rawContent =
+                """
+                  <p>Second post description in HTML syntax.</p>
+                  <img src="https://example.com/encoded-image" alt="encoded image" />
+                """
+                  .trimIndent(),
+              imageUrl = "https://example.com/encoded-image",
+              date = 1684924200000,
+              commentsLink = null
+            ),
+          )
+      )
+
+    // when
+    val content = ByteReadChannel(rdfXmlContent.toByteArray())
+    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
@@ -191,7 +237,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(atomXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF_8)
+    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
