@@ -43,6 +43,7 @@ kotlin {
       implementation(libs.ktxml)
       implementation(libs.kermit)
       implementation(libs.crashkios.bugsnag)
+      api(libs.korlibs.string)
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
