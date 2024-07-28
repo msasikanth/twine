@@ -846,6 +846,14 @@ class RssRepository(
     }
   }
 
+  fun hasUnreadPosts(sourceId: String?, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Boolean> {
+    return postQueries
+      .unreadPostsCount(sourceId = sourceId, after = postsAfter)
+      .asFlow()
+      .mapToOne(ioDispatcher)
+      .map { it > 0 }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }

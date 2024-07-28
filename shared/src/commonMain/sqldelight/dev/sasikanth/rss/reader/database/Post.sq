@@ -118,3 +118,6 @@ WHERE post.id = :id;
 
 hasPost:
 SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
+
+unreadPostsCount:
+SELECT COUNT(*) FROM post WHERE read != 1 AND date > :after AND (sourceId = :sourceId OR :sourceId IS NULL);
