@@ -367,7 +367,7 @@ class HomePresenter(
               }
             }
 
-          rssRepository.hasUnreadPosts(
+          rssRepository.hasUnreadPostsInSource(
             sourceId = activeSource?.id,
             postsAfter = postsAfter,
           )
