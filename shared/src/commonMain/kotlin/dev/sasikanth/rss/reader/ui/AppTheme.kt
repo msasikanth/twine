@@ -15,10 +15,10 @@
  */
 package dev.sasikanth.rss.reader.ui
 
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -42,7 +42,11 @@ internal fun AppTheme(
   ) {
     CompositionLocalProvider(
       LocalAppColorScheme provides appColorScheme,
-      LocalRippleTheme provides AppRippleTheme
+      LocalRippleConfiguration provides
+        RippleConfiguration(
+          color = AppTheme.colorScheme.tintedForeground,
+          rippleAlpha = DefaultRippleAlpha
+        )
     ) {
       content()
     }
@@ -53,13 +57,6 @@ internal object AppTheme {
 
   val colorScheme: AppColorScheme
     @Composable @ReadOnlyComposable get() = LocalAppColorScheme.current
-}
-
-private object AppRippleTheme : RippleTheme {
-
-  @Composable override fun defaultColor() = AppTheme.colorScheme.tintedForeground
-
-  @Composable override fun rippleAlpha(): RippleAlpha = DefaultRippleAlpha
 }
 
 private val GolosFontFamily: FontFamily
