@@ -24,8 +24,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.charsets.decode
-import io.ktor.utils.io.core.String
 import io.ktor.utils.io.core.readBytes
 import korlibs.io.lang.Charset
 import kotlin.coroutines.CoroutineContext
@@ -53,7 +51,7 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
         return@withContext when (parser.name) {
           RDF_TAG -> RDFContentParser.parse(feedUrl, parser)
-          RSS_TAG -> RssContentParser.parse(feedUrl, parser)
+          RSS_TAG -> RSSContentParser.parse(feedUrl, parser)
           ATOM_TAG -> AtomContentParser.parse(feedUrl, parser)
           HTML_TAG -> throw HtmlContentException()
           else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
