@@ -156,6 +156,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
               postsType = state.postsType,
               listState = listState,
               hasFeeds = hasFeeds,
+              hasUnreadPosts = state.hasUnreadPosts,
               onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
               onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
               onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },

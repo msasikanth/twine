@@ -37,7 +37,8 @@ internal data class HomeState(
   val activeSource: Source?,
   val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
-  val postsType: PostsType
+  val postsType: PostsType,
+  val hasUnreadPosts: Boolean
 ) {
 
   companion object {
@@ -51,7 +52,8 @@ internal data class HomeState(
         activeSource = null,
         featuredItemBlurEnabled = true,
         hasFeeds = null,
-        postsType = PostsType.ALL
+        postsType = PostsType.ALL,
+        hasUnreadPosts = false,
       )
   }
 

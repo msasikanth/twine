@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +43,11 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -77,6 +81,7 @@ internal fun HomeTopAppBar(
   postsType: PostsType,
   listState: LazyListState,
   hasFeeds: Boolean?,
+  hasUnreadPosts: Boolean,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -138,7 +143,11 @@ internal fun HomeTopAppBar(
       ) {
         PostsFilterButton(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
 
-        MarkPostsAsReadButton(source = source, onMarkPostsAsRead = onMarkPostsAsRead)
+        MarkPostsAsReadButton(
+          source = source,
+          onMarkPostsAsRead = onMarkPostsAsRead,
+          enabled = hasUnreadPosts,
+        )
       }
     }
   }
@@ -223,29 +232,41 @@ private fun MarkPostsAsReadButton(
   source: Source?,
   onMarkPostsAsRead: (Source?) -> Unit,
   modifier: Modifier = Modifier,
+  enabled: Boolean = true,
 ) {
+  val transition = updateTransition(enabled, "button_enable_state")
+  val backgroundColor by
+    transition.animateColor {
+      if (it) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0f)
+    }
+  val contentColor by
+    transition.animateColor {
+      if (it) AppTheme.colorScheme.textEmphasisHigh
+      else AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    }
+
   Row(
     modifier =
       modifier
         .clip(RoundedCornerShape(8.dp))
-        .clickable(onClick = { onMarkPostsAsRead(source) })
-        .background(color = Color.White.copy(alpha = 0.12f))
+        .clickable(enabled = enabled, onClick = { onMarkPostsAsRead(source) })
+        .background(color = backgroundColor)
         .padding(vertical = 4.dp)
         .padding(start = 8.dp, end = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
-    Text(
-      text = LocalStrings.current.markAsRead,
-      style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-    )
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
+      Text(
+        text = LocalStrings.current.markAsRead,
+        style = MaterialTheme.typography.bodyMedium,
+      )
 
-    Icon(
-      imageVector = Icons.Filled.DoneAll,
-      contentDescription = null,
-      modifier = Modifier.requiredSize(20.dp),
-      tint = AppTheme.colorScheme.textEmphasisHigh,
-    )
+      Icon(
+        imageVector = Icons.Filled.DoneAll,
+        contentDescription = null,
+        modifier = Modifier.requiredSize(20.dp),
+      )
+    }
   }
 }
 
