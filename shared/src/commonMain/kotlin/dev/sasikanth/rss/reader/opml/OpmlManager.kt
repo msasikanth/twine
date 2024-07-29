@@ -22,9 +22,12 @@ import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.filemanager.FileManager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
+import io.github.vinceglb.filekit.core.FileKit
+import io.github.vinceglb.filekit.core.PickerMode
+import io.github.vinceglb.filekit.core.PickerType
+import io.github.vinceglb.filekit.core.pickFile
 import kotlin.math.roundToInt
 import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
@@ -47,7 +50,6 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class OpmlManager(
   dispatchersProvider: DispatchersProvider,
-  private val fileManager: FileManager,
   private val feedsOpml: FeedsOpml,
   private val rssRepository: RssRepository,
 ) {
@@ -69,7 +71,16 @@ class OpmlManager(
     val duration = measureTime {
       try {
         withContext(job) {
-          val opmlXmlContent = fileManager.read()
+          val opmlXmlContent =
+            FileKit.pickFile(
+                title = "Import OPML",
+                type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
+                mode = PickerMode.Single,
+                initialDirectory = "downloads"
+              )
+              ?.readBytes()
+              ?.decodeToString()
+
           Logger.i { opmlXmlContent.orEmpty() }
 
           if (!opmlXmlContent.isNullOrBlank()) {
@@ -115,7 +126,15 @@ class OpmlManager(
             _result.emit(OpmlResult.InProgress.Exporting(50))
             feedsOpml.encode(this)
           }
-        fileManager.save(BACKUP_FILE_NAME, opmlString)
+
+        val directory = FileKit.pickDirectory()
+
+        FileKit.saveFile(
+          bytes = opmlString.encodeToByteArray(),
+          baseName = BACKUP_FILE_NAME,
+          extension = "xml",
+          initialDirectory = directory?.path,
+        )
 
         _result.emit(OpmlResult.InProgress.Exporting(100))
         _result.emit(OpmlResult.Idle)

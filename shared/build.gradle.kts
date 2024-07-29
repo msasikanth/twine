@@ -111,6 +111,7 @@ kotlin {
       implementation(libs.kermit)
       implementation(libs.kermit.bugsnag)
       implementation(libs.reorderable)
+      api(libs.filekit)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

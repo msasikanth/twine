@@ -20,7 +20,6 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
@@ -29,12 +28,16 @@ import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
+import io.github.vinceglb.filekit.core.FileKit
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    FileKit.init(this)
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
     window.statusBarColor = Color.TRANSPARENT
