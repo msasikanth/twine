@@ -31,6 +31,7 @@ import io.github.vinceglb.filekit.core.pickFile
 import kotlin.math.roundToInt
 import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ProducerScope
@@ -49,12 +50,13 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @AppScope
 class OpmlManager(
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
   private val feedsOpml: FeedsOpml,
   private val rssRepository: RssRepository,
 ) {
 
-  private val job = SupervisorJob() + dispatchersProvider.io
+  private val job = SupervisorJob() + dispatchersProvider.main
+  private val coroutineScope = CoroutineScope(job)
 
   private val _result = MutableSharedFlow<OpmlResult>(replay = 1)
   val result: SharedFlow<OpmlResult> = _result
@@ -70,29 +72,31 @@ class OpmlManager(
   suspend fun import() {
     val duration = measureTime {
       try {
-        withContext(job) {
-          val opmlXmlContent =
+        coroutineScope.launch {
+          val file =
             FileKit.pickFile(
-                title = "Import OPML",
-                type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
-                mode = PickerMode.Single,
-                initialDirectory = "downloads"
-              )
-              ?.readBytes()
-              ?.decodeToString()
+              title = "Import OPML",
+              type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
+              mode = PickerMode.Single,
+              initialDirectory = "downloads"
+            )
 
-          Logger.i { opmlXmlContent.orEmpty() }
+          withContext(dispatchersProvider.io) {
+            val opmlXmlContent = file?.readBytes()?.decodeToString()
 
-          if (!opmlXmlContent.isNullOrBlank()) {
-            _result.emit(OpmlResult.InProgress.Importing(0))
-            val opmlFeeds = feedsOpml.decode(opmlXmlContent)
+            Logger.i { opmlXmlContent.orEmpty() }
 
-            addOpmlFeeds(opmlFeeds)
-              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-              .onCompletion { _result.emit(OpmlResult.Idle) }
-              .collect()
-          } else {
-            _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+            if (!opmlXmlContent.isNullOrBlank()) {
+              _result.emit(OpmlResult.InProgress.Importing(0))
+              val opmlFeeds = feedsOpml.decode(opmlXmlContent)
+
+              addOpmlFeeds(opmlFeeds)
+                .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+                .onCompletion { _result.emit(OpmlResult.Idle) }
+                .collect()
+            } else {
+              _result.emit(OpmlResult.Error.NoContentInOpmlFile)
+            }
           }
         }
       } catch (e: Exception) {
@@ -110,30 +114,28 @@ class OpmlManager(
 
   suspend fun export() {
     try {
-      withContext(job) {
+      coroutineScope.launch {
         _result.emit(OpmlResult.InProgress.Exporting(0))
 
-        // TODO: Use pagination for fetching feeds?
-        //  will be much more memory efficient if there are lot of feeds.
-        //  Need to modify encode as well to support paginated input
-
-        // TODO: Should we track real time progress as we loop through the feeds?
-        //  It's a quick action, so not sure. Maybe once pagination support is added here
-        //  I can do that
-
         val opmlString =
-          rssRepository.allFeedsBlocking().run {
-            _result.emit(OpmlResult.InProgress.Exporting(50))
-            feedsOpml.encode(this)
-          }
+          withContext(dispatchersProvider.io) {
+            // TODO: Use pagination for fetching feeds?
+            //  will be much more memory efficient if there are lot of feeds.
+            //  Need to modify encode as well to support paginated input
 
-        val directory = FileKit.pickDirectory()
+            // TODO: Should we track real time progress as we loop through the feeds?
+            //  It's a quick action, so not sure. Maybe once pagination support is added here
+            //  I can do that
+            rssRepository.allFeedsBlocking().run {
+              _result.emit(OpmlResult.InProgress.Exporting(50))
+              feedsOpml.encode(this)
+            }
+          }
 
         FileKit.saveFile(
           bytes = opmlString.encodeToByteArray(),
           baseName = BACKUP_FILE_NAME,
           extension = "xml",
-          initialDirectory = directory?.path,
         )
 
         _result.emit(OpmlResult.InProgress.Exporting(100))
