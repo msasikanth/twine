@@ -22,11 +22,11 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
+import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
-import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import kotlinx.coroutines.CoroutineScope

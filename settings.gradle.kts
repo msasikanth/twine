@@ -47,6 +47,8 @@ include(":core:model")
 
 include(":core:network")
 
+include(":core:data")
+
 include(":resources:strings")
 
 include(":resources:icons")

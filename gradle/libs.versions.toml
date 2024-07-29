@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.0.0"
 android_gradle_plugin = "8.5.1"
-compose = "1.7.0-alpha02"
+compose = "1.6.11"
 
 android_sdk_compile = "34"
 android_sdk_target = "34"
@@ -49,8 +49,9 @@ bugsnag-plugin = "8.1.0"
 bugsnag = "6.6.1"
 crashkios-bugsnag = "0.8.6"
 kermit = "2.0.4"
-reorderable = "2.2.0"
+reorderable = "2.3.0"
 korlibs = "6.0.0"
+filekit = "0.7.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -122,6 +123,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable"  }
 korlibs-string = { module = "com.soywiz:korlibs-string", version.ref = "korlibs" }
+filekit = { module = "io.github.vinceglb:filekit-compose", version.ref = "filekit" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

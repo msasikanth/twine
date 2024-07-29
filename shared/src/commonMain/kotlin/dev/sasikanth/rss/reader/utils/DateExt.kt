@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.utils
 
-import dev.sasikanth.rss.reader.repository.Period
+import dev.sasikanth.rss.reader.data.repository.Period
 import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod

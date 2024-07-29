@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.search
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

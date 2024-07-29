@@ -71,6 +71,8 @@ import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.*
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -80,8 +82,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.search.SearchSortOrder
-import dev.sasikanth.rss.reader.search.SearchSortOrder.*
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState

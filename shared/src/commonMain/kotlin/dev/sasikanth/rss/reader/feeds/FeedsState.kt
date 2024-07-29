@@ -18,9 +18,9 @@ package dev.sasikanth.rss.reader.feeds
 import androidx.compose.runtime.Immutable
 import androidx.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
 import dev.sasikanth.rss.reader.core.model.local.Source
-import dev.sasikanth.rss.reader.feeds.ui.FeedsViewMode
-import dev.sasikanth.rss.reader.repository.FeedsOrderBy
+import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 

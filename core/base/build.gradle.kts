@@ -30,6 +30,7 @@ kotlin {
       implementation(libs.kotlinx.datetime)
       implementation(libs.kotlinx.coroutines)
       implementation(libs.kotlininject.runtime)
+      api(libs.uuid)
     }
 
     commonTest.dependencies { implementation(libs.kotlin.test) }

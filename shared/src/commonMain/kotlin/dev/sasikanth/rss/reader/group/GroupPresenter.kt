@@ -27,8 +27,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.repository.FeedsOrderBy
-import dev.sasikanth.rss.reader.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
+import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

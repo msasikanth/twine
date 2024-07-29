@@ -21,9 +21,9 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.repository.BrowserType
-import dev.sasikanth.rss.reader.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 import me.tatarka.inject.annotations.Inject
 

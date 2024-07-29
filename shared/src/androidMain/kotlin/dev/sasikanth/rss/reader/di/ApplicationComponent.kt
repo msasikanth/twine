@@ -20,9 +20,9 @@ import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.core.network.post.PostSourceFetcher
+import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.repository.SettingsRepository
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 

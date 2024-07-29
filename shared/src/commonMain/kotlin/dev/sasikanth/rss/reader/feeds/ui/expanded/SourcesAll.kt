@@ -49,10 +49,10 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
+import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 

@@ -21,9 +21,9 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.data.repository.FeedAddResult
+import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
-import dev.sasikanth.rss.reader.repository.FeedAddResult
-import dev.sasikanth.rss.reader.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException

@@ -16,9 +16,9 @@
 
 package dev.sasikanth.rss.reader.platform
 
+import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
-import dev.sasikanth.rss.reader.repository.BrowserType
-import dev.sasikanth.rss.reader.repository.SettingsRepository
 import kotlinx.coroutines.flow.first
 import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSURL

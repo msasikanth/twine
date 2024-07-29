@@ -22,9 +22,9 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
-import dev.sasikanth.rss.reader.home.ui.PostsType
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.flow.Flow
 
