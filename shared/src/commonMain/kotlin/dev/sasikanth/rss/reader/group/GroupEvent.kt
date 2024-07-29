@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.group
 
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.repository.FeedsOrderBy
+import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 
 sealed interface GroupEvent {
 

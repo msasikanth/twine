@@ -17,9 +17,9 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.opml.OpmlResult
-import dev.sasikanth.rss.reader.repository.BrowserType
-import dev.sasikanth.rss.reader.repository.Period
 
 @Immutable
 internal data class SettingsState(

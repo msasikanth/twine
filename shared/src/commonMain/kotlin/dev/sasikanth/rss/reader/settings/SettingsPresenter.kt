@@ -19,11 +19,11 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.Period
+import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.opml.OpmlManager
-import dev.sasikanth.rss.reader.repository.BrowserType
-import dev.sasikanth.rss.reader.repository.Period
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.CoroutineScope

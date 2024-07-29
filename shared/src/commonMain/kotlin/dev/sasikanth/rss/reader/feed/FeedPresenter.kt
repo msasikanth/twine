@@ -20,10 +20,10 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
-import dev.sasikanth.rss.reader.home.ui.PostsType
-import dev.sasikanth.rss.reader.repository.ObservableActiveSource
-import dev.sasikanth.rss.reader.repository.RssRepository
-import dev.sasikanth.rss.reader.repository.SettingsRepository
+import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
+import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant

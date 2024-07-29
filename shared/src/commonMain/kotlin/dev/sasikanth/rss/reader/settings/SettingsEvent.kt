@@ -15,8 +15,8 @@
  */
 package dev.sasikanth.rss.reader.settings
 
-import dev.sasikanth.rss.reader.repository.BrowserType
-import dev.sasikanth.rss.reader.repository.Period
+import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.Period
 
 sealed interface SettingsEvent {
 

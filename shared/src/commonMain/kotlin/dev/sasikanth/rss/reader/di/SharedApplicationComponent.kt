@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.core.network.di.NetworkComponent
+import dev.sasikanth.rss.reader.data.di.DataComponent
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.filemanager.FileManagerComponent
 import dev.sasikanth.rss.reader.initializers.Initializer

@@ -22,7 +22,6 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.android.library)
   alias(libs.plugins.compose)
-  alias(libs.plugins.sqldelight)
   alias(libs.plugins.ksp)
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
@@ -76,6 +75,7 @@ kotlin {
       api(projects.core.base)
       api(projects.core.model)
       api(projects.core.network)
+      api(projects.core.data)
 
       implementation(projects.resources.strings)
       implementation(projects.resources.icons)
@@ -84,8 +84,6 @@ kotlin {
       implementation(libs.bundles.kotlinx)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
-      implementation(libs.sqldelight.extensions.coroutines)
-      implementation(libs.sqldelight.extensions.paging)
       api(libs.decompose)
       implementation(libs.decompose.extensions.compose)
       api(libs.essenty.lifecycle)
@@ -125,8 +123,6 @@ kotlin {
       api(libs.androidx.core)
       api(libs.androidx.browser)
       implementation(libs.ktor.client.okhttp)
-      implementation(libs.sqldelight.driver.android)
-      api(libs.sqliteAndroid)
     }
     val androidInstrumentedTest by getting {
       dependencies {
@@ -135,21 +131,7 @@ kotlin {
       }
     }
 
-    iosMain.dependencies {
-      implementation(libs.ktor.client.darwin)
-      implementation(libs.sqldelight.driver.native)
-    }
-  }
-}
-
-sqldelight {
-  databases {
-    create("ReaderDatabase") {
-      packageName.set("dev.sasikanth.rss.reader.database")
-      dialect(libs.sqldelight.sqlite.dialect)
-      schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
-      verifyMigrations.set(true)
-    }
+    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
   }
 }
 
