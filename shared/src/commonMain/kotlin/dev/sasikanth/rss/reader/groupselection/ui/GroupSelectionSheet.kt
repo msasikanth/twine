@@ -74,11 +74,10 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
     onDismissRequest = { presenter.dispatch(GroupSelectionEvent.BackClicked) },
     containerColor = AppTheme.colorScheme.tintedBackground,
     contentColor = Color.Unspecified,
-    contentWindowInsets = {
+    windowInsets =
       WindowInsets.systemBars
         .only(WindowInsetsSides.Bottom)
-        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
-    },
+        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
     sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
     scrimColor = SYSTEM_SCRIM
   ) {
