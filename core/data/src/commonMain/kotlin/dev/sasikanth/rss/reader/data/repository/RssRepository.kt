@@ -94,7 +94,7 @@ class RssRepository(
               id = feedId
             )
 
-            postQueries.transaction {
+            transactionRunner.invoke {
               val feedLastCleanUpAtEpochMilli =
                 feedLastCleanUpAt?.toEpochMilliseconds()
                   ?: Instant.DISTANT_PAST.toEpochMilliseconds()
@@ -486,7 +486,7 @@ class RssRepository(
 
   suspend fun updateFeedsLastCleanUpAt(feedIds: List<String>) {
     withContext(ioDispatcher) {
-      feedQueries.transaction {
+      transactionRunner.invoke {
         feedIds.forEach { feedId ->
           feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now(), id = feedId)
         }
@@ -503,7 +503,7 @@ class RssRepository(
     postsAfter: Instant = Instant.DISTANT_PAST
   ) {
     withContext(ioDispatcher) {
-      postQueries.transaction {
+      transactionRunner.invoke {
         feedIds.forEach { feedId ->
           postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter)
         }
@@ -868,7 +868,7 @@ class RssRepository(
 
   suspend fun updatedSourcePinnedPosition(sources: List<Source>) {
     withContext(ioDispatcher) {
-      feedQueries.transaction {
+      transactionRunner.invoke {
         sources.forEachIndexed { index, source ->
           feedQueries.updatedPinnedPosition(index.toDouble(), source.id)
           feedGroupQueries.updatedPinnedPosition(index.toDouble(), source.id)

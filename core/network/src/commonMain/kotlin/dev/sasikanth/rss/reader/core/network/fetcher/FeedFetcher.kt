@@ -53,34 +53,34 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     transformUrl: Boolean,
     redirectCount: Int,
   ): FeedFetchResult {
-    return if (redirectCount < MAX_REDIRECTS_ALLOWED) {
-      try {
-        // We are mainly doing this check to avoid creating duplicates while refreshing feeds
-        // after the app update
-        val transformedUrl = transformUrl(url, transformUrl)
-        val response = httpClient.get(transformedUrl.toString())
+    if (redirectCount >= MAX_REDIRECTS_ALLOWED) {
+      return FeedFetchResult.TooManyRedirects
+    }
 
-        when (response.status) {
-          HttpStatusCode.OK -> {
-            parseContent(response, transformedUrl.toString(), redirectCount)
-          }
-          HttpStatusCode.MultipleChoices,
-          HttpStatusCode.MovedPermanently,
-          HttpStatusCode.Found,
-          HttpStatusCode.SeeOther,
-          HttpStatusCode.TemporaryRedirect,
-          HttpStatusCode.PermanentRedirect -> {
-            handleHttpRedirect(response, transformedUrl.toString(), redirectCount)
-          }
-          else -> {
-            FeedFetchResult.HttpStatusError(statusCode = response.status)
-          }
+    return try {
+      // We are mainly doing this to avoid creating duplicates while refreshing feeds
+      // after the app update
+      val transformedUrl = transformUrl(url, transformUrl)
+      val response = httpClient.get(transformedUrl.toString())
+
+      when (response.status) {
+        HttpStatusCode.OK -> {
+          parseContent(response, transformedUrl.toString(), redirectCount)
         }
-      } catch (e: Exception) {
-        FeedFetchResult.Error(e)
+        HttpStatusCode.MultipleChoices,
+        HttpStatusCode.MovedPermanently,
+        HttpStatusCode.Found,
+        HttpStatusCode.SeeOther,
+        HttpStatusCode.TemporaryRedirect,
+        HttpStatusCode.PermanentRedirect -> {
+          handleHttpRedirect(response, transformedUrl.toString(), redirectCount)
+        }
+        else -> {
+          FeedFetchResult.HttpStatusError(statusCode = response.status)
+        }
       }
-    } else {
-      FeedFetchResult.TooManyRedirects
+    } catch (e: Exception) {
+      FeedFetchResult.Error(e)
     }
   }
 
@@ -89,23 +89,23 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    return if (response.contentType()?.withoutParameters() == ContentType.Text.Html) {
-      val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsText(), url)
-
-      if (feedUrl != url && !feedUrl.isNullOrBlank()) {
-        fetch(url = feedUrl, transformUrl = false, redirectCount = redirectCount + 1)
-      } else {
-        throw UnsupportedOperationException()
-      }
-    } else {
+    if (response.contentType()?.withoutParameters() != ContentType.Text.Html) {
       val content = response.bodyAsChannel()
       val responseCharset = response.contentType()?.parameter("charset")
       val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
 
       val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
 
-      FeedFetchResult.Success(feedPayload)
+      return FeedFetchResult.Success(feedPayload)
     }
+
+    val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsText(), url)
+
+    if (feedUrl != url && !feedUrl.isNullOrBlank()) {
+      return fetch(url = feedUrl, transformUrl = false, redirectCount = redirectCount + 1)
+    }
+
+    throw UnsupportedOperationException()
   }
 
   private suspend fun handleHttpRedirect(
