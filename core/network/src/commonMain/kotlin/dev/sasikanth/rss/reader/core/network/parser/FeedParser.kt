@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
-import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.http.URLBuilder
@@ -35,7 +34,6 @@ import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
-@AppScope
 class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
   suspend fun parse(
