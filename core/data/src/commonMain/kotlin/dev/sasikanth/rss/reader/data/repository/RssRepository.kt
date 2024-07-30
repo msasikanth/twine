@@ -273,6 +273,35 @@ class RssRepository(
     }
   }
 
+  suspend fun allFeedGroupsBlocking(): List<FeedGroup> {
+    return withContext(ioDispatcher) {
+      feedGroupQueries
+        .groupsBlocking(
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: List<String>,
+            feedIcons: String,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant?,
+            pinnedPosition: Double ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIcons = feedIcons.split(",").filterNot { it.isBlank() },
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+              pinnedPosition = pinnedPosition
+            )
+          }
+        )
+        .executeAsList()
+    }
+  }
+
   fun numberOfFeeds(): Flow<Long> {
     return feedQueries.numberOfFeeds().asFlow().mapToOne(ioDispatcher)
   }
@@ -493,15 +522,18 @@ class RssRepository(
     }
   }
 
-  suspend fun createGroup(name: String) {
-    withContext(ioDispatcher) {
+  suspend fun createGroup(name: String): String {
+    return withContext(ioDispatcher) {
+      val id = uuid4().toString()
       feedGroupQueries.createGroup(
-        id = uuid4().toString(),
+        id = id,
         name = name,
         feedIds = emptyList(),
         createdAt = Clock.System.now(),
         updatedAt = Clock.System.now()
       )
+
+      return@withContext id
     }
   }
 

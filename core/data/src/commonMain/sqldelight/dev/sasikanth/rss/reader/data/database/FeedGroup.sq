@@ -37,6 +37,21 @@ SELECT
 FROM feedGroup
 LIMIT :limit OFFSET :offset;
 
+groupsBlocking:
+SELECT
+  id,
+  name,
+  feedIds,
+  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+              FROM feed
+              WHERE INSTR(feedGroup.feedIds, feed.id)
+              LIMIT 4), '') AS feedIcons,
+  createdAt,
+  updatedAt,
+  pinnedAt,
+  pinnedPosition
+FROM feedGroup;
+
 createGroup:
 INSERT INTO feedGroup(id, name, feedIds, createdAt, updatedAt)
 VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt);
