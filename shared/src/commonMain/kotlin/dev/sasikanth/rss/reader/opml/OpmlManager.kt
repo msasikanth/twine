@@ -21,13 +21,11 @@ import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
-import io.github.vinceglb.filekit.core.pickFile
 import kotlin.math.roundToInt
 import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
@@ -48,10 +46,9 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@AppScope
 class OpmlManager(
   private val dispatchersProvider: DispatchersProvider,
-  private val feedsOpml: FeedsOpml,
+  private val sourcesOpml: SourcesOpml,
   private val rssRepository: RssRepository,
 ) {
 
@@ -88,9 +85,9 @@ class OpmlManager(
 
             if (!opmlXmlContent.isNullOrBlank()) {
               _result.emit(OpmlResult.InProgress.Importing(0))
-              val opmlFeeds = feedsOpml.decode(opmlXmlContent)
+              val opmlSources = sourcesOpml.decode(opmlXmlContent)
 
-              addOpmlFeeds(opmlFeeds)
+              addOpmlSources(opmlSources)
                 .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
                 .onCompletion { _result.emit(OpmlResult.Idle) }
                 .collect()
@@ -119,18 +116,37 @@ class OpmlManager(
 
         val opmlString =
           withContext(dispatchersProvider.io) {
-            // TODO: Use pagination for fetching feeds?
-            //  will be much more memory efficient if there are lot of feeds.
-            //  Need to modify encode as well to support paginated input
+            val feeds = rssRepository.allFeedsBlocking()
+            val feedGroups = rssRepository.allFeedGroupsBlocking()
+            val opmlSources = mutableListOf<OpmlSource>()
 
-            // TODO: Should we track real time progress as we loop through the feeds?
-            //  It's a quick action, so not sure. Maybe once pagination support is added here
-            //  I can do that
-            rssRepository.allFeedsBlocking().run {
-              _result.emit(OpmlResult.InProgress.Exporting(50))
-              feedsOpml.encode(this)
+            val feedsById = feeds.associateBy { it.id }
+
+            feedGroups.forEach { feedGroup ->
+              val feedsInGroup =
+                feedGroup.feedIds.mapNotNull { feedId ->
+                  feedsById[feedId]?.let { feed ->
+                    OpmlFeed(
+                      title = feed.name,
+                      link = feed.link,
+                    )
+                  }
+                }
+
+              val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
+              opmlSources.add(opmlFeedGroup)
             }
+
+            feeds.forEach { feed ->
+              if (feedGroups.none { it.feedIds.contains(feed.id) }) {
+                opmlSources.add(OpmlFeed(title = feed.name, link = feed.link))
+              }
+            }
+
+            sourcesOpml.encode(opmlSources)
           }
+
+        _result.emit(OpmlResult.InProgress.Importing(50))
 
         FileKit.saveFile(
           bytes = opmlString.encodeToByteArray(),
@@ -138,7 +154,6 @@ class OpmlManager(
           extension = "xml",
         )
 
-        _result.emit(OpmlResult.InProgress.Exporting(100))
         _result.emit(OpmlResult.Idle)
       }
     } catch (e: Exception) {
@@ -156,34 +171,48 @@ class OpmlManager(
     _result.tryEmit(OpmlResult.Idle)
   }
 
-  private fun addOpmlFeeds(feedLinks: List<OpmlFeed>): Flow<Int> = channelFlow {
-    val totalFeedCount = feedLinks.size
+  private fun addOpmlSources(sources: List<OpmlSource>): Flow<Int> = channelFlow {
+    val totalSourcesCount = sources.size
     val processedFeedsCount = AtomicInt(0)
 
-    Logger.i("OPMLImport") { "Importing: $totalFeedCount feeds" }
+    if (sources.size > IMPORT_CHUNKS) {
+      sources.reversed().chunked(IMPORT_CHUNKS).forEach { sourcesInChunk ->
+        sourcesInChunk.map { source -> launch { createSourceInDB(source) } }.joinAll()
 
-    if (totalFeedCount > IMPORT_CHUNKS) {
-      feedLinks.reversed().chunked(IMPORT_CHUNKS).forEach { feedsGroup ->
-        feedsGroup
-          .map { feed ->
-            launch {
-              val result = rssRepository.addFeed(feedLink = feed.link, title = feed.title)
-              if (result !is FeedAddResult.Success) {
-                Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
-              }
-            }
-          }
-          .joinAll()
-
-        val size = processedFeedsCount.addAndGet(feedsGroup.size)
-        sendProgress(size, totalFeedCount)
+        val size = processedFeedsCount.addAndGet(sourcesInChunk.size)
+        sendProgress(size, totalSourcesCount)
       }
     } else {
-      feedLinks.reversed().forEachIndexed { index, feed ->
-        rssRepository.addFeed(feedLink = feed.link, title = feed.title)
-        sendProgress(index, totalFeedCount)
+      sources.reversed().forEachIndexed { index, source ->
+        launch { createSourceInDB(source) }.join()
+
+        sendProgress(index, totalSourcesCount)
       }
     }
+  }
+
+  private suspend fun createSourceInDB(source: OpmlSource) {
+    when (source) {
+      is OpmlFeed -> {
+        addFeed(source)
+      }
+      is OpmlFeedGroup -> {
+        val groupId = rssRepository.createGroup(source.title)
+        val feedIds = source.feeds.mapNotNull { feed -> addFeed(feed) }
+
+        rssRepository.addFeedIdsToGroups(groupIds = setOf(groupId), feedIds = feedIds)
+      }
+    }
+  }
+
+  private suspend fun addFeed(feed: OpmlFeed): String? {
+    val result = rssRepository.addFeed(feedLink = feed.link, title = feed.title)
+    if (result !is FeedAddResult.Success) {
+      Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
+      return null
+    }
+
+    return result.feedId
   }
 
   private suspend fun ProducerScope<Int>.sendProgress(progressIndex: Int, totalFeedCount: Int) {
