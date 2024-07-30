@@ -20,7 +20,6 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
-import com.benasher44.uuid.uuid4
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
@@ -524,7 +523,7 @@ class RssRepository(
 
   suspend fun createGroup(name: String): String {
     return withContext(ioDispatcher) {
-      val id = uuid4().toString()
+      val id = nameBasedUuidOf(name).toString()
       feedGroupQueries.createGroup(
         id = id,
         name = name,

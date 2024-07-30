@@ -53,7 +53,7 @@ SELECT
 FROM feedGroup;
 
 createGroup:
-INSERT INTO feedGroup(id, name, feedIds, createdAt, updatedAt)
+INSERT OR IGNORE INTO feedGroup(id, name, feedIds, createdAt, updatedAt)
 VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt);
 
 updateGroupName:
