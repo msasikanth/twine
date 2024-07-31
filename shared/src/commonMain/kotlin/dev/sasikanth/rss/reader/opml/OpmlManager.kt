@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import io.github.vinceglb.filekit.core.FileKit
@@ -46,6 +47,7 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@AppScope
 class OpmlManager(
   private val dispatchersProvider: DispatchersProvider,
   private val sourcesOpml: SourcesOpml,
