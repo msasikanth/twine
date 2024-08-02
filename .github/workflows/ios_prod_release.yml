@@ -75,11 +75,11 @@ jobs:
           -sdk iphoneos \
           -configuration Release \
           -destination generic/platform=iOS \
-          DEVELOPMENT_TEAM=6XCS8KZXDA \
+          DEVELOPMENT_TEAM=V9V8885383 \
           PROVISIONING_PROFILE=${{ secrets.PROVISION_PROFILE_ID }} \
           BUGSNAG_API_KEY=${BUGSNAG_API_KEY} \
           clean archive
-          CODE_SIGN_IDENTITY="iPhone Distribution: Sasi Kanth (6XCS8KZXDA)";
+          CODE_SIGN_IDENTITY="iPhone Distribution: Sasikanth Miriyampalli (V9V8885383)";
 
       - name: Export ipa
         env:

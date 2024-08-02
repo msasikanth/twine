@@ -392,8 +392,8 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = 6XCS8KZXDA;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 6XCS8KZXDA;
+				DEVELOPMENT_TEAM = "V9V8885383";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V9V8885383;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -416,7 +416,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "${BUNDLE_ID}";
 				PRODUCT_NAME = "${APP_NAME}";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = app_store_distribution_profile;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = twine_adhoc_dist;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
