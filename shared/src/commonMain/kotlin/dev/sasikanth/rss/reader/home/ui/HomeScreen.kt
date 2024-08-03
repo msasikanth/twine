@@ -96,8 +96,12 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     rememberStandardBottomSheetState(
       initialValue = state.feedsSheetState,
       confirmValueChange = {
-        homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
-        true
+        if (it != SheetValue.Hidden) {
+          homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+          true
+        } else {
+          false
+        }
       }
     )
   val bottomSheetScaffoldState =
