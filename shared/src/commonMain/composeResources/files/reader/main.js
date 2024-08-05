@@ -63,8 +63,11 @@ function updateStyles(colors) {
   const styles = `
   body {
     padding-top: 16px;
+    padding-left: 16px;
+    padding-right: 16px;
     color: ${colors.textColor};
     font-family: 'Golos Text', sans-serif;
+    overflow-wrap: break-word;
   }
   a {
     color: ${colors.linkColor};
