@@ -19,6 +19,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,7 +29,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -106,23 +106,15 @@ internal fun FeaturedSection(
 
       val systemBarsPaddingValues =
         WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-      val startPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
-      val endPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
+      val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
+      val systemBarsEndPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
 
-      val horizontalPadding =
-        if (startPadding > endPadding) {
-          startPadding
+      val systemBarsHorizontalPadding =
+        if (systemBarsStartPadding > systemBarsEndPadding) {
+          systemBarsStartPadding
         } else {
-          endPadding
+          systemBarsEndPadding
         }
-
-      val pagerContentPadding =
-        PaddingValues(
-          start = horizontalPadding + 24.dp,
-          top = 8.dp + paddingValues.calculateTopPadding(),
-          end = horizontalPadding + 24.dp,
-          bottom = 24.dp
-        )
 
       LaunchedEffect(pagerState, featuredPosts) {
         dynamicColorState.onContentChange(featuredPosts.map { it.imageUrl!! })
@@ -154,46 +146,52 @@ internal fun FeaturedSection(
           }
       }
 
-      HorizontalPager(
-        state = pagerState,
-        verticalAlignment = Alignment.Top,
-        flingBehavior =
+      Box {
+        // Duplicated pager setup for background, to avoid pager content padding
+        // from the items
+        val pagerFlingBehavior =
           PagerDefaults.flingBehavior(
             state = pagerState,
             snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-          ),
-      ) { page ->
-        val featuredPost = featuredPosts.getOrNull(page)
-        if (featuredPost != null) {
-          Box {
-            FeaturedSectionBackground(
-              post = featuredPost,
-              featuredItemBlurEnabled = featuredItemBlurEnabled,
-              modifier =
-                Modifier.graphicsLayer {
-                  val pageOffset =
-                    if (page in 0..pagerState.pageCount) {
-                      pagerState.getOffsetFractionForPage(page)
-                    } else {
-                      0f
-                    }
+          )
 
-                  translationX = size.width * pageOffset
-                  alpha = (1f - pageOffset.absoluteValue)
+        FeaturedSectionBackground(
+          modifier = Modifier.matchParentSize(),
+          state = pagerState,
+          featuredPosts = featuredPosts,
+          flingBehavior = pagerFlingBehavior,
+          featuredItemBlurEnabled = featuredItemBlurEnabled,
+        )
+
+        HorizontalPager(
+          state = pagerState,
+          verticalAlignment = Alignment.Top,
+          contentPadding =
+            PaddingValues(
+              start = systemBarsHorizontalPadding + 24.dp,
+              top = 8.dp + paddingValues.calculateTopPadding(),
+              end = systemBarsHorizontalPadding + 24.dp,
+              bottom = 24.dp
+            ),
+          pageSpacing = 16.dp,
+          flingBehavior = pagerFlingBehavior,
+        ) { page ->
+          val featuredPost = featuredPosts.getOrNull(page)
+          if (featuredPost != null) {
+            Box {
+              FeaturedPostItem(
+                item = featuredPost,
+                page = page,
+                pagerState = pagerState,
+                onClick = { onItemClick(featuredPost) },
+                onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+                onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
+                onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
+                onTogglePostReadClick = {
+                  onTogglePostReadClick(featuredPost.id, featuredPost.read)
                 }
-            )
-
-            FeaturedPostItem(
-              modifier = Modifier.padding(pagerContentPadding),
-              item = featuredPost,
-              page = page,
-              pagerState = pagerState,
-              onClick = { onItemClick(featuredPost) },
-              onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-              onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-              onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
-              onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
-            )
+              )
+            }
           }
         }
       }
@@ -201,38 +199,63 @@ internal fun FeaturedSection(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FeaturedSectionBackground(
-  post: PostWithMetadata,
+  state: PagerState,
+  featuredPosts: ImmutableList<PostWithMetadata>,
+  flingBehavior: SnapFlingBehavior,
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  val gradientOverlayModifier =
-    Modifier.then(modifier).drawWithCache {
-      val radialGradient =
-        Brush.radialGradient(
-          colors =
-            listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
-          center = Offset(x = this.size.width, y = 40f)
-        )
+  HorizontalPager(
+    modifier = modifier,
+    state = state,
+    verticalAlignment = Alignment.Top,
+    flingBehavior = flingBehavior
+  ) { page ->
+    val featuredPost = featuredPosts.getOrNull(page)
+    featuredPost?.let {
+      val gradientOverlayModifier =
+        Modifier.drawWithCache {
+          val radialGradient =
+            Brush.radialGradient(
+              colors =
+                listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+              center = Offset(x = this.size.width, y = 40f)
+            )
 
-      val linearGradient =
-        Brush.verticalGradient(
-          colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-        )
+          val linearGradient =
+            Brush.verticalGradient(
+              colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+            )
 
-      onDrawWithContent {
-        drawContent()
-        drawRect(radialGradient)
-        drawRect(linearGradient)
+          onDrawWithContent {
+            drawContent()
+            drawRect(radialGradient)
+            drawRect(linearGradient)
+          }
+        }
+
+      val swipeTransitionModifier =
+        Modifier.graphicsLayer {
+            val pageOffset =
+              if (page in 0..state.pageCount) {
+                state.getOffsetFractionForPage(page)
+              } else {
+                0f
+              }
+
+            translationX = size.width * pageOffset
+            alpha = (1f - pageOffset.absoluteValue)
+          }
+          .then(gradientOverlayModifier)
+
+      if (canBlurImage && featuredItemBlurEnabled) {
+        FeaturedSectionBlurredBackground(post = featuredPost, modifier = swipeTransitionModifier)
+      } else {
+        FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)
       }
-    }
-
-  Box {
-    if (canBlurImage && featuredItemBlurEnabled) {
-      FeaturedSectionBlurredBackground(post = post, modifier = gradientOverlayModifier)
-    } else {
-      FeaturedSectionGradientBackground(modifier = gradientOverlayModifier)
     }
   }
 }

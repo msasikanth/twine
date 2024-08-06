@@ -96,7 +96,12 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     rememberStandardBottomSheetState(
       initialValue = state.feedsSheetState,
       confirmValueChange = {
-        homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+        if (it != SheetValue.Hidden) {
+          homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+        } else {
+          homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(SheetValue.PartiallyExpanded))
+        }
+
         true
       }
     )
