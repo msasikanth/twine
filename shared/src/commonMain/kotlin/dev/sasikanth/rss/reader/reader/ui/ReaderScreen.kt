@@ -272,7 +272,7 @@ internal fun ReaderScreen(
           }
         }
 
-        Box(Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp)) {
           WebView(
             modifier = Modifier.fillMaxSize(),
             state = webViewState,
