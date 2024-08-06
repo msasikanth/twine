@@ -19,7 +19,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapFlingBehavior
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -52,16 +51,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import coil3.size.Size
-import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
-import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.flow.collectLatest
 
 private val featuredImageBackgroundAspectRatio: Float
   @Composable
@@ -89,9 +86,10 @@ private val featuredGradientBackgroundAspectRatio: Float
 @Composable
 internal fun FeaturedSection(
   paddingValues: PaddingValues,
-  featuredPosts: ImmutableList<PostWithMetadata>,
+  featuredPosts: ImmutableList<FeaturedPostItem>,
   pagerState: PagerState,
   featuredItemBlurEnabled: Boolean,
+  useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
@@ -99,100 +97,84 @@ internal fun FeaturedSection(
   onPostSourceClick: (String) -> Unit,
   onTogglePostReadClick: (String, Boolean) -> Unit,
 ) {
-  Box(modifier = modifier) {
-    if (featuredPosts.isNotEmpty()) {
-      val layoutDirection = LocalLayoutDirection.current
-      val dynamicColorState = LocalDynamicColorState.current
+  val layoutDirection = LocalLayoutDirection.current
+  val dynamicColorState = LocalDynamicColorState.current
 
-      val systemBarsPaddingValues =
-        WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
-      val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
-      val systemBarsEndPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
+  val systemBarsPaddingValues =
+    WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
+  val systemBarsStartPadding = systemBarsPaddingValues.calculateStartPadding(layoutDirection)
+  val systemBarsEndPadding = systemBarsPaddingValues.calculateEndPadding(layoutDirection)
 
-      val systemBarsHorizontalPadding =
-        if (systemBarsStartPadding > systemBarsEndPadding) {
-          systemBarsStartPadding
-        } else {
-          systemBarsEndPadding
+  val systemBarsHorizontalPadding =
+    if (systemBarsStartPadding > systemBarsEndPadding) {
+      systemBarsStartPadding
+    } else {
+      systemBarsEndPadding
+    }
+
+  LaunchedEffect(pagerState) {
+    snapshotFlow {
+        val settledPage = pagerState.settledPage
+        try {
+          pagerState.getOffsetFractionForPage(settledPage)
+        } catch (e: Throwable) {
+          0f
         }
-
-      LaunchedEffect(pagerState, featuredPosts) {
-        dynamicColorState.onContentChange(featuredPosts.map { it.imageUrl!! })
-
-        snapshotFlow {
-            val settledPage = pagerState.settledPage
-            val offset =
-              if (settledPage in 0..pagerState.pageCount) {
-                pagerState.getOffsetFractionForPage(settledPage).coerceIn(-1f, 1f)
-              } else {
-                0f
-              }
-
-            settledPage to
-              when {
-                (settledPage == 0 && offset < -EPSILON) ||
-                  (settledPage == featuredPosts.lastIndex && offset > EPSILON) -> {
-                  offset.coerceAtMost(0f)
-                }
-                else -> offset
-              }
-          }
-          .collectLatest { (settledPage, offset) ->
-            val previousImageUrl = featuredPosts.getOrNull(settledPage - 1)?.imageUrl
-            val currentImageUrl = featuredPosts[settledPage].imageUrl!!
-            val nextImageUrl = featuredPosts.getOrNull(settledPage + 1)?.imageUrl
-
-            dynamicColorState.updateOffset(previousImageUrl, currentImageUrl, nextImageUrl, offset)
-          }
       }
+      .collect { offset ->
+        val currentItem = featuredPosts[pagerState.settledPage]
+        val targetItem = featuredPosts[pagerState.targetPage]
 
-      Box {
-        // Duplicated pager setup for background, to avoid pager content padding
-        // from the items
-        val pagerFlingBehavior =
-          PagerDefaults.flingBehavior(
-            state = pagerState,
-            snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-          )
-
-        FeaturedSectionBackground(
-          modifier = Modifier.matchParentSize(),
-          state = pagerState,
-          featuredPosts = featuredPosts,
-          flingBehavior = pagerFlingBehavior,
-          featuredItemBlurEnabled = featuredItemBlurEnabled,
+        dynamicColorState.animate(
+          fromSeedColor = Color(currentItem.seedColor!!),
+          toSeedColor = Color(targetItem.seedColor!!),
+          progress = offset
         )
+      }
+  }
 
-        HorizontalPager(
+  Box(modifier) {
+    // Duplicated pager setup for background, to avoid pager content padding
+    // from the items
+    if (useDarkTheme) {
+      FeaturedSectionBackground(
+        modifier = Modifier.matchParentSize(),
+        state = pagerState,
+        featuredPosts = featuredPosts,
+        featuredItemBlurEnabled = featuredItemBlurEnabled,
+      )
+    }
+
+    HorizontalPager(
+      state = pagerState,
+      verticalAlignment = Alignment.Top,
+      contentPadding =
+        PaddingValues(
+          start = systemBarsHorizontalPadding + 24.dp,
+          top = 8.dp + paddingValues.calculateTopPadding(),
+          end = systemBarsHorizontalPadding + 24.dp,
+          bottom = 24.dp
+        ),
+      pageSpacing = 16.dp,
+      flingBehavior =
+        PagerDefaults.flingBehavior(
           state = pagerState,
-          verticalAlignment = Alignment.Top,
-          contentPadding =
-            PaddingValues(
-              start = systemBarsHorizontalPadding + 24.dp,
-              top = 8.dp + paddingValues.calculateTopPadding(),
-              end = systemBarsHorizontalPadding + 24.dp,
-              bottom = 24.dp
-            ),
-          pageSpacing = 16.dp,
-          flingBehavior = pagerFlingBehavior,
-        ) { page ->
-          val featuredPost = featuredPosts.getOrNull(page)
-          if (featuredPost != null) {
-            Box {
-              FeaturedPostItem(
-                item = featuredPost,
-                page = page,
-                pagerState = pagerState,
-                onClick = { onItemClick(featuredPost) },
-                onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-                onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-                onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
-                onTogglePostReadClick = {
-                  onTogglePostReadClick(featuredPost.id, featuredPost.read)
-                }
-              )
-            }
-          }
+          snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+        ),
+    ) { page ->
+      val featuredPost = featuredPosts.getOrNull(page)?.postWithMetadata
+      if (featuredPost != null) {
+        Box {
+          FeaturedPostItem(
+            item = featuredPost,
+            page = page,
+            pagerState = pagerState,
+            onClick = { onItemClick(featuredPost) },
+            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
+            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
+            onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
+            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
+          )
         }
       }
     }
@@ -203,8 +185,7 @@ internal fun FeaturedSection(
 @Composable
 private fun FeaturedSectionBackground(
   state: PagerState,
-  featuredPosts: ImmutableList<PostWithMetadata>,
-  flingBehavior: SnapFlingBehavior,
+  featuredPosts: ImmutableList<FeaturedPostItem>,
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
@@ -212,7 +193,6 @@ private fun FeaturedSectionBackground(
     modifier = modifier,
     state = state,
     verticalAlignment = Alignment.Top,
-    flingBehavior = flingBehavior
   ) { page ->
     val featuredPost = featuredPosts.getOrNull(page)
     featuredPost?.let {
@@ -284,11 +264,11 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
 
 @Composable
 private fun FeaturedSectionBlurredBackground(
-  post: PostWithMetadata,
+  post: FeaturedPostItem,
   modifier: Modifier = Modifier
 ) {
   AsyncImage(
-    url = post.imageUrl!!,
+    url = post.postWithMetadata.imageUrl!!,
     modifier =
       Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
         .graphicsLayer {

@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +62,8 @@ private val featuredImageAspectRatio: Float
       WindowWidthSizeClass.Expanded -> 1.9f
       else -> 1.77f
     }
+
+@Immutable data class FeaturedPostItem(val postWithMetadata: PostWithMetadata, val seedColor: Int?)
 
 @Composable
 internal fun FeaturedPostItem(

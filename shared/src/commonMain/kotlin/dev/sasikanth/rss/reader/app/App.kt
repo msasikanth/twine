@@ -15,13 +15,18 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import coil3.ImageLoader
 import coil3.annotation.ExperimentalCoilApi
@@ -33,9 +38,7 @@ import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
-import dev.sasikanth.rss.reader.components.DynamicContentTheme
-import dev.sasikanth.rss.reader.components.LocalDynamicColorState
-import dev.sasikanth.rss.reader.components.rememberDynamicColorState
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
@@ -49,11 +52,16 @@ import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
+import dev.sasikanth.rss.reader.ui.DynamicContentTheme
+import dev.sasikanth.rss.reader.ui.darkAppColorScheme
+import dev.sasikanth.rss.reader.ui.lightAppColorScheme
+import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App = @Composable () -> Unit
+typealias App = @Composable (onThemeChange: (useDarkTheme: Boolean) -> Unit) -> Unit
 
 @Inject
 @Composable
@@ -64,18 +72,36 @@ fun App(
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
   dispatchersProvider: DispatchersProvider,
+  @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit
 ) {
-  setSingletonImageLoaderFactory { imageLoader }
+  val appState by appPresenter.state.collectAsState()
 
-  val dynamicColorState = rememberDynamicColorState(imageLoader = imageLoader)
+  setSingletonImageLoaderFactory { imageLoader }
 
   CompositionLocalProvider(
     LocalWindowSizeClass provides calculateWindowSizeClass(),
-    LocalDynamicColorState provides dynamicColorState,
     LocalShareHandler provides shareHandler,
-    LocalLinkHandler provides linkHandler
+    LocalLinkHandler provides linkHandler,
   ) {
-    DynamicContentTheme(dynamicColorState) {
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    val useDarkTheme =
+      remember(isSystemInDarkTheme) {
+        when (appState.appThemeMode) {
+          AppThemeMode.Light -> false
+          AppThemeMode.Dark -> true
+          AppThemeMode.Auto -> isSystemInDarkTheme
+        }
+      }
+
+    LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
+
+    val dynamicColorsState =
+      rememberDynamicColorState(
+        defaultLightAppColorScheme = lightAppColorScheme(),
+        defaultDarkAppColorScheme = darkAppColorScheme(),
+      )
+
+    DynamicContentTheme(state = dynamicColorsState, useDarkTheme = useDarkTheme) {
       ProvideStrings {
         Box {
           Children(
@@ -93,7 +119,21 @@ fun App(
                 PlaceholderScreen(modifier = fillMaxSizeModifier)
               }
               is Screen.Home -> {
-                HomeScreen(homePresenter = screen.presenter, modifier = fillMaxSizeModifier)
+                HomeScreen(
+                  homePresenter = screen.presenter,
+                  useDarkTheme = useDarkTheme,
+                  modifier = fillMaxSizeModifier,
+                  onBottomSheetStateChanged = { sheetValue ->
+                    val tempUseDarkTheme =
+                      if (sheetValue == SheetValue.Expanded) {
+                        true
+                      } else {
+                        useDarkTheme
+                      }
+
+                    onThemeChange(tempUseDarkTheme)
+                  }
+                )
               }
               is Screen.Search -> {
                 SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
@@ -118,10 +158,14 @@ fun App(
                 )
               }
               is Screen.AddFeed -> {
-                AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+                DynamicContentTheme(useDarkTheme = true) {
+                  AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+                }
               }
               is Screen.GroupDetails -> {
-                GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+                DynamicContentTheme(useDarkTheme = true) {
+                  GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
+                }
               }
             }
           }

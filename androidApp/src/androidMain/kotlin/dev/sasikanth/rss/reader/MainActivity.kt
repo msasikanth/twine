@@ -40,14 +40,23 @@ class MainActivity : ComponentActivity() {
 
     FileKit.init(this)
 
-    enableEdgeToEdge(
-      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
-    )
+    enableEdgeToEdge()
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 
-    setContent { activityComponent.app() }
+    setContent {
+      activityComponent.app { useDarkTheme ->
+        enableEdgeToEdge(
+          statusBarStyle =
+            if (useDarkTheme) {
+              SystemBarStyle.dark(Color.TRANSPARENT)
+            } else {
+              SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+            },
+          navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+        )
+      }
+    }
   }
 }
 

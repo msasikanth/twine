@@ -31,13 +31,16 @@ typealias HomeViewController = (backDispatcher: BackDispatcher) -> UIViewControl
 
 @OptIn(ExperimentalDecomposeApi::class)
 @Inject
-fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher) =
-  ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
+fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher): UIViewController {
+  return ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
     PredictiveBackGestureOverlay(
       backDispatcher = backDispatcher,
       backIcon = null,
       modifier = Modifier.fillMaxSize()
     ) {
-      app()
+      app {
+        // no-op
+      }
     }
   }
+}

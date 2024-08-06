@@ -65,112 +65,115 @@ import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.DynamicContentTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 
 @Composable
 fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier = Modifier) {
-  ModalBottomSheet(
-    modifier = Modifier.then(modifier),
-    onDismissRequest = { presenter.dispatch(GroupSelectionEvent.BackClicked) },
-    containerColor = AppTheme.colorScheme.tintedBackground,
-    contentColor = Color.Unspecified,
-    windowInsets =
-      WindowInsets.systemBars
-        .only(WindowInsetsSides.Bottom)
-        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
-    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
-    scrimColor = SYSTEM_SCRIM
-  ) {
-    val state by presenter.state.collectAsState()
-    val groups = state.groups.collectAsLazyPagingItems()
-
-    var showCreateGroupDialog by remember { mutableStateOf(false) }
-
-    if (showCreateGroupDialog) {
-      CreateGroupDialog(
-        onCreateGroup = { presenter.dispatch(GroupSelectionEvent.OnCreateGroup(it)) },
-        onDismiss = { showCreateGroupDialog = false }
-      )
-    }
-
-    LazyVerticalGrid(
-      columns = GridCells.Fixed(2),
-      modifier = Modifier.fillMaxWidth(),
-      contentPadding = PaddingValues(horizontal = 24.dp),
-      horizontalArrangement = Arrangement.spacedBy(16.dp),
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+  DynamicContentTheme(useDarkTheme = true) {
+    ModalBottomSheet(
+      modifier = Modifier.then(modifier),
+      onDismissRequest = { presenter.dispatch(GroupSelectionEvent.BackClicked) },
+      containerColor = AppTheme.colorScheme.tintedBackground,
+      contentColor = Color.Unspecified,
+      windowInsets =
+        WindowInsets.systemBars
+          .only(WindowInsetsSides.Bottom)
+          .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
+      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      scrimColor = SYSTEM_SCRIM
     ) {
-      item {
-        Box(
-          modifier =
-            Modifier.clip(MaterialTheme.shapes.large)
-              .background(AppTheme.colorScheme.tintedSurface)
-              .clickable { showCreateGroupDialog = true }
-              .padding(vertical = 16.dp),
-          contentAlignment = Alignment.Center
-        ) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-              imageVector = TwineIcons.Add,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.tintedForeground
-            )
+      val state by presenter.state.collectAsState()
+      val groups = state.groups.collectAsLazyPagingItems()
 
-            Spacer(Modifier.requiredWidth(8.dp))
+      var showCreateGroupDialog by remember { mutableStateOf(false) }
 
-            Text(
-              text = LocalStrings.current.groupAddNew,
-              style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.tintedForeground,
+      if (showCreateGroupDialog) {
+        CreateGroupDialog(
+          onCreateGroup = { presenter.dispatch(GroupSelectionEvent.OnCreateGroup(it)) },
+          onDismiss = { showCreateGroupDialog = false }
+        )
+      }
+
+      LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        item {
+          Box(
+            modifier =
+              Modifier.clip(MaterialTheme.shapes.large)
+                .background(AppTheme.colorScheme.tintedSurface)
+                .clickable { showCreateGroupDialog = true }
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Icon(
+                imageVector = TwineIcons.Add,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.tintedForeground
+              )
+
+              Spacer(Modifier.requiredWidth(8.dp))
+
+              Text(
+                text = LocalStrings.current.groupAddNew,
+                style = MaterialTheme.typography.labelLarge,
+                color = AppTheme.colorScheme.tintedForeground,
+              )
+            }
+          }
+        }
+
+        items(groups.itemCount) { index ->
+          val group = groups[index]
+          if (group != null) {
+            FeedGroupItem(
+              feedGroup = group,
+              canShowUnreadPostsCount = false,
+              isInMultiSelectMode = true,
+              selected = state.selectedGroups.contains(group.id),
+              onFeedGroupSelected = {
+                presenter.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group))
+              },
+              onFeedGroupClick = {
+                // no-op
+              }
             )
           }
         }
       }
 
-      items(groups.itemCount) { index ->
-        val group = groups[index]
-        if (group != null) {
-          FeedGroupItem(
-            feedGroup = group,
-            canShowUnreadPostsCount = false,
-            isInMultiSelectMode = true,
-            selected = state.selectedGroups.contains(group.id),
-            onFeedGroupSelected = {
-              presenter.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group))
-            },
-            onFeedGroupClick = {
-              // no-op
-            }
-          )
+      Row(
+        modifier =
+          Modifier.fillMaxWidth().padding(start = 24.dp, top = 40.dp, end = 24.dp, bottom = 24.dp)
+      ) {
+        OutlinedButton(
+          modifier = Modifier.weight(1f),
+          colors =
+            ButtonDefaults.outlinedButtonColors(
+              containerColor = AppTheme.colorScheme.tintedBackground,
+              contentColor = AppTheme.colorScheme.tintedForeground
+            ),
+          border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
+          onClick = { presenter.dispatch(GroupSelectionEvent.BackClicked) }
+        ) {
+          Text(text = LocalStrings.current.buttonGoBack)
         }
-      }
-    }
 
-    Row(
-      modifier =
-        Modifier.fillMaxWidth().padding(start = 24.dp, top = 40.dp, end = 24.dp, bottom = 24.dp)
-    ) {
-      OutlinedButton(
-        modifier = Modifier.weight(1f),
-        colors =
-          ButtonDefaults.outlinedButtonColors(
-            containerColor = AppTheme.colorScheme.tintedBackground,
-            contentColor = AppTheme.colorScheme.tintedForeground
-          ),
-        border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
-        onClick = { presenter.dispatch(GroupSelectionEvent.BackClicked) }
-      ) {
-        Text(text = LocalStrings.current.buttonGoBack)
-      }
+        Spacer(Modifier.requiredWidth(16.dp))
 
-      Spacer(Modifier.requiredWidth(16.dp))
-
-      Button(
-        modifier = Modifier.weight(1f),
-        enabled = state.areGroupsSelected,
-        onClick = { presenter.dispatch(GroupSelectionEvent.OnConfirmGroupSelectionClicked) }
-      ) {
-        Text(text = LocalStrings.current.buttonConfirm)
+        Button(
+          modifier = Modifier.weight(1f),
+          enabled = state.areGroupsSelected,
+          onClick = { presenter.dispatch(GroupSelectionEvent.OnConfirmGroupSelectionClicked) }
+        ) {
+          Text(text = LocalStrings.current.buttonConfirm)
+        }
       }
     }
   }

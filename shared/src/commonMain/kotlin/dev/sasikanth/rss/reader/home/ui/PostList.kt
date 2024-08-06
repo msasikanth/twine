@@ -69,9 +69,10 @@ private val postListPadding
 @OptIn(ExperimentalFoundationApi::class)
 internal fun PostsList(
   paddingValues: PaddingValues,
-  featuredPosts: ImmutableList<PostWithMetadata>,
+  featuredPosts: ImmutableList<FeaturedPostItem>,
   posts: LazyPagingItems<PostWithMetadata>,
   featuredItemBlurEnabled: Boolean,
+  useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   onPostClicked: (post: PostWithMetadata) -> Unit,
