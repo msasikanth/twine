@@ -16,8 +16,6 @@
 
 package dev.sasikanth.rss.reader.ui
 
-import androidx.collection.lruCache
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -36,14 +34,9 @@ class SeedColorExtractor(
   private val imageLoader: Lazy<ImageLoader>,
   private val platformContext: Lazy<PlatformContext>,
 ) {
-  private val cache = lruCache<String, Color>(100)
-
   @OptIn(ExperimentalCoilApi::class)
-  suspend fun calculateSeedColor(url: String): Color {
-    val cached = cache[url]
-    if (cached != null) {
-      return cached
-    }
+  suspend fun calculateSeedColor(url: String?): Int? {
+    if (url.isNullOrBlank()) return null
 
     val bitmap = suspendCancellableCoroutine { cont ->
       val request =
@@ -61,14 +54,14 @@ class SeedColorExtractor(
       imageLoader.value.enqueue(request)
     }
 
-    return bitmap.seedColor().also { cache.put(url, it) }
+    return bitmap.seedColor()
   }
 
-  private fun ImageBitmap.seedColor(): Color {
+  private fun ImageBitmap.seedColor(): Int {
     val bitmapPixels = IntArray(width * height)
     readPixels(buffer = bitmapPixels)
 
-    return Color(Score.score(QuantizerCelebi.quantize(bitmapPixels, maxColors = 128)).first())
+    return Score.score(QuantizerCelebi.quantize(bitmapPixels, maxColors = 128)).first()
   }
 
   private companion object {
