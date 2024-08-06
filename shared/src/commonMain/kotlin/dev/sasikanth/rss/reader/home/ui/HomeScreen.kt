@@ -70,7 +70,6 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.LocalDynamicColorState
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
-import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -79,7 +78,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
@@ -113,22 +111,21 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
 
   val linkHandler = LocalLinkHandler.current
 
-  LaunchedEffect(Unit) {
-    homePresenter.effects.collectLatest { effect ->
-      when (effect) {
-        HomeEffect.MinimizeSheet -> {
-          bottomSheetState.partialExpand()
-        }
-      }
-    }
-  }
-
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
   val sheetPeekHeight =
     BOTTOM_SHEET_PEEK_HEIGHT +
       WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+
+  LaunchedEffect(state.feedsSheetState) {
+    if (
+      state.feedsSheetState == SheetValue.PartiallyExpanded &&
+        bottomSheetState.currentValue == SheetValue.Expanded
+    ) {
+      bottomSheetState.partialExpand()
+    }
+  }
 
   BottomSheetScaffold(
     modifier = modifier,

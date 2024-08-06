@@ -48,11 +48,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -138,7 +136,6 @@ class HomePresenter(
     }
 
   internal val state = presenterInstance.state
-  internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate {
@@ -180,8 +177,6 @@ class HomePresenter(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeState.DEFAULT
       )
-
-    val effects = MutableSharedFlow<HomeEffect>()
 
     init {
       dispatch(HomeEvent.Init)
@@ -267,7 +262,9 @@ class HomePresenter(
     }
 
     private fun backClicked() {
-      coroutineScope.launch { effects.emit(HomeEffect.MinimizeSheet) }
+      coroutineScope.launch {
+        _state.update { it.copy(feedsSheetState = SheetValue.PartiallyExpanded) }
+      }
     }
 
     private fun init() {
