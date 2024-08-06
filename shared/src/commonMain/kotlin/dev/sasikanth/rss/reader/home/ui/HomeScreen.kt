@@ -123,7 +123,7 @@ internal fun HomeScreen(homePresenter: HomePresenter, modifier: Modifier = Modif
     }
   }
 
-  val bottomSheetProgress by bottomSheetState.progress()
+  val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
   val sheetPeekHeight =
@@ -361,7 +361,7 @@ private fun NoNewPosts() {
 }
 
 @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-private fun SheetState.progress(): State<Float> {
+private fun SheetState.progressAsState(): State<Float> {
   return derivedStateOf {
     when {
       currentValue == SheetValue.Expanded && targetValue == SheetValue.Expanded -> 1f
