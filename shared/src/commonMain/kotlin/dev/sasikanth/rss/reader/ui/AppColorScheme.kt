@@ -129,6 +129,27 @@ class AppColorScheme(
     )
 }
 
+fun lightAppColorScheme(): AppColorScheme {
+  return AppColorScheme(
+    tintedBackground = Color(0xFFF4FFF8),
+    tintedSurface = Color(0xFFBAFFE4),
+    tintedForeground = Color(0xFF006C53),
+    tintedHighlight = Color(0xFF63DBB5),
+    outline = Color(0xFF6A7771),
+    outlineVariant = Color(0xFFBCCAC2),
+    surface = Color(0xFFF5FBF6),
+    onSurface = Color(0xFF171D1A),
+    onSurfaceVariant = Color(0xFF3D4944),
+    surfaceContainer = Color(0xFFE9EFEA),
+    surfaceContainerLow = Color(0xFFEFF5F0),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerHigh = Color(0xFFE4EAE5),
+    surfaceContainerHighest = Color(0xFFDEE4DF),
+    textEmphasisHigh = Color.Black.copy(alpha = 0.9f),
+    textEmphasisMed = Color.Black.copy(alpha = 0.7f)
+  )
+}
+
 fun darkAppColorScheme(): AppColorScheme {
   return AppColorScheme(
     tintedBackground = Color(0xFF002117),
