@@ -48,7 +48,6 @@ import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -273,7 +272,6 @@ class HomePresenter(
       }
     }
 
-    @OptIn(FlowPreview::class)
     private fun init() {
       combine(observableActiveSource.activeSource, settingsRepository.postsType) {
           activeSource,
@@ -286,6 +284,7 @@ class HomePresenter(
             it.copy(
               activeSource = activeSource,
               postsType = postsType,
+              loadingState = HomeLoadingState.Loading,
               featuredPosts = null,
               posts = null
             )
@@ -339,6 +338,7 @@ class HomePresenter(
               NTuple4(activeSource, postsAfter, unreadOnly, featuredPostsIds)
             }
         }
+        .onEach { _state.update { it.copy(loadingState = HomeLoadingState.Idle) } }
         .distinctUntilChanged()
         .onEach { (activeSource, postsAfter, unreadOnly, featuredPostsIds) ->
           val posts =

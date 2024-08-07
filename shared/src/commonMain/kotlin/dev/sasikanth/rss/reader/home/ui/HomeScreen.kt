@@ -30,8 +30,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -182,7 +180,7 @@ internal fun HomeScreen(
                 )
               },
               body = { paddingValues ->
-                Box {
+                Box(modifier = Modifier.fillMaxSize()) {
                   when {
                     hasFeeds == null || (posts == null || featuredPosts == null) -> {
                       // no-op
@@ -223,9 +221,7 @@ internal fun HomeScreen(
                   PullRefreshIndicator(
                     refreshing = state.isRefreshing,
                     state = swipeRefreshState,
-                    modifier =
-                      Modifier.windowInsetsPadding(WindowInsets.statusBars)
-                        .align(Alignment.TopCenter)
+                    modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter)
                   )
                 }
               },
