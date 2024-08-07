@@ -39,12 +39,13 @@ import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 
 @Composable
-internal fun DynamicContentTheme(
-  state: DynamicColorState? = null,
-  useDarkTheme: Boolean = false,
-  content: @Composable () -> Unit
-) {
-  val dynamicColorState = state ?: LocalDynamicColorState.current
+internal fun DynamicContentTheme(useDarkTheme: Boolean = false, content: @Composable () -> Unit) {
+  val dynamicColorState =
+    LocalDynamicColorState.current
+      ?: rememberDynamicColorState(
+        defaultLightAppColorScheme = lightAppColorScheme(),
+        defaultDarkAppColorScheme = darkAppColorScheme(),
+      )
   val colorScheme =
     if (useDarkTheme) {
       dynamicColorState.darkAppColorScheme
@@ -309,7 +310,4 @@ fun AppColorScheme.animate(
   )
 }
 
-internal val LocalDynamicColorState =
-  staticCompositionLocalOf<DynamicColorState> {
-    throw NullPointerException("Please provide a dynamic color state")
-  }
+internal val LocalDynamicColorState = staticCompositionLocalOf<DynamicColorState?> { null }

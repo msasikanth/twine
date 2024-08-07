@@ -145,7 +145,7 @@ internal fun FeaturedSection(
             currentItem
           }
 
-        dynamicColorState.animate(
+        dynamicColorState?.animate(
           fromSeedColor = Color(fromItem.seedColor!!),
           toSeedColor = Color(toItem.seedColor!!),
           progress = offset

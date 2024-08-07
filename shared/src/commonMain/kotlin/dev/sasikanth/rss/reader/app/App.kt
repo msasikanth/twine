@@ -53,9 +53,6 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
 import dev.sasikanth.rss.reader.ui.DynamicContentTheme
-import dev.sasikanth.rss.reader.ui.darkAppColorScheme
-import dev.sasikanth.rss.reader.ui.lightAppColorScheme
-import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
@@ -95,13 +92,7 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    val dynamicColorsState =
-      rememberDynamicColorState(
-        defaultLightAppColorScheme = lightAppColorScheme(),
-        defaultDarkAppColorScheme = darkAppColorScheme(),
-      )
-
-    DynamicContentTheme(state = dynamicColorsState, useDarkTheme = useDarkTheme) {
+    DynamicContentTheme(useDarkTheme = useDarkTheme) {
       ProvideStrings {
         Box {
           Children(
