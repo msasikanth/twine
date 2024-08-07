@@ -15,81 +15,31 @@
  */
 package dev.sasikanth.rss.reader.ui
 
-import androidx.compose.runtime.Stable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.structuralEqualityPolicy
 import androidx.compose.ui.graphics.Color
 
-@Stable
+@Immutable
 class AppColorScheme(
-  tintedBackground: Color,
-  tintedSurface: Color,
-  tintedForeground: Color,
-  tintedHighlight: Color,
-  outline: Color,
-  outlineVariant: Color,
-  surface: Color,
-  onSurface: Color,
-  onSurfaceVariant: Color,
-  surfaceContainer: Color,
-  surfaceContainerLow: Color,
-  surfaceContainerLowest: Color,
-  surfaceContainerHigh: Color,
-  surfaceContainerHighest: Color,
-  textEmphasisHigh: Color,
-  textEmphasisMed: Color,
+  val tintedBackground: Color,
+  val tintedSurface: Color,
+  val tintedForeground: Color,
+  val tintedHighlight: Color,
+  val outline: Color,
+  val outlineVariant: Color,
+  val surface: Color,
+  val onSurface: Color,
+  val onSurfaceVariant: Color,
+  val surfaceContainer: Color,
+  val surfaceContainerLow: Color,
+  val surfaceContainerLowest: Color,
+  val surfaceContainerHigh: Color,
+  val surfaceContainerHighest: Color,
+  val textEmphasisHigh: Color,
+  val textEmphasisMed: Color,
 ) {
-
-  var tintedBackground by mutableStateOf(tintedBackground, structuralEqualityPolicy())
-    internal set
-
-  var tintedSurface by mutableStateOf(tintedSurface, structuralEqualityPolicy())
-    internal set
-
-  var tintedForeground by mutableStateOf(tintedForeground, structuralEqualityPolicy())
-    internal set
-
-  var tintedHighlight by mutableStateOf(tintedHighlight, structuralEqualityPolicy())
-    internal set
-
-  var outline by mutableStateOf(outline, structuralEqualityPolicy())
-    internal set
-
-  var outlineVariant by mutableStateOf(outlineVariant, structuralEqualityPolicy())
-    internal set
-
-  var surface by mutableStateOf(surface, structuralEqualityPolicy())
-    internal set
-
-  var onSurface by mutableStateOf(onSurface, structuralEqualityPolicy())
-    internal set
-
-  var onSurfaceVariant by mutableStateOf(onSurfaceVariant, structuralEqualityPolicy())
-    internal set
-
-  var surfaceContainer by mutableStateOf(surfaceContainer, structuralEqualityPolicy())
-    internal set
-
-  var surfaceContainerLow by mutableStateOf(surfaceContainerLow, structuralEqualityPolicy())
-    internal set
-
-  var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest, structuralEqualityPolicy())
-    internal set
-
-  var surfaceContainerHigh by mutableStateOf(surfaceContainerHigh, structuralEqualityPolicy())
-    internal set
-
-  var surfaceContainerHighest by mutableStateOf(surfaceContainerHighest, structuralEqualityPolicy())
-    internal set
-
-  var textEmphasisHigh by mutableStateOf(textEmphasisHigh, structuralEqualityPolicy())
-    internal set
-
-  var textEmphasisMed by mutableStateOf(textEmphasisMed, structuralEqualityPolicy())
-    internal set
 
   fun copy(
     tintedBackground: Color = this.tintedBackground,
