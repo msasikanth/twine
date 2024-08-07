@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import androidx.compose.ui.unit.LayoutDirection
 import twine.shared.generated.resources.Res
 
 object ReaderHTML {
@@ -26,9 +25,7 @@ object ReaderHTML {
     feedName: String,
     feedHomePageLink: String,
     feedIcon: String,
-    publishedAt: String,
-    locale: String,
-    direction: LayoutDirection
+    publishedAt: String
   ): String {
     val readabilityJS = readFile("readability.js")
     val readerJS = readFile("main.js")
@@ -44,8 +41,9 @@ object ReaderHTML {
       )
 
     // language=HTML
+    @Suppress("HtmlRequiredLangAttribute")
     return """
-    <html lang="$locale" dir="${direction.name}">
+    <html dir='auto'>
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
