@@ -40,6 +40,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsViewModeKey = stringPreferencesKey("pref_feeds_view_mode")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
+  private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -71,6 +72,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val feedsSortOrder: Flow<FeedsOrderBy> =
     dataStore.data.map { preferences ->
       mapToFeedsOrderBy(preferences[feedsSortOrderKey]) ?: FeedsOrderBy.Latest
+    }
+
+  val appThemeMode: Flow<AppThemeMode> =
+    dataStore.data.map { preferences ->
+      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
     }
 
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
@@ -109,6 +115,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[feedsViewModeKey] = value.name }
   }
 
+  suspend fun updateAppTheme(value: AppThemeMode) {
+    dataStore.edit { preferences -> preferences[appThemeModeKey] = value.name }
+  }
+
+  private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
+    if (pref.isNullOrBlank()) return null
+    return AppThemeMode.valueOf(pref)
+  }
+
   private fun mapToFeedsOrderBy(pref: String?): FeedsOrderBy? {
     if (pref.isNullOrBlank()) return null
     return FeedsOrderBy.valueOf(pref)
@@ -133,6 +148,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     if (pref.isNullOrBlank()) return null
     return PostsType.valueOf(pref)
   }
+}
+
+enum class AppThemeMode {
+  Light,
+  Dark,
+  Auto
 }
 
 enum class BrowserType {

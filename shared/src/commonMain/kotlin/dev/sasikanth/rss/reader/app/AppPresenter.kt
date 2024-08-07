@@ -56,8 +56,15 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -89,7 +96,8 @@ class AppPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         lastUpdatedAt = lastUpdatedAt,
-        rssRepository = rssRepository
+        rssRepository = rssRepository,
+        settingsRepository = settingsRepository,
       )
     }
 
@@ -112,6 +120,8 @@ class AppPresenter(
       handleBackButton = true,
       childFactory = ::createModal,
     )
+
+  internal val state = presenterInstance.state
 
   private val scope = coroutineScope(dispatchersProvider.main + SupervisorJob())
 
@@ -262,10 +272,24 @@ class AppPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val lastUpdatedAt: LastUpdatedAt,
-    private val rssRepository: RssRepository
+    private val rssRepository: RssRepository,
+    private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    private val _state = MutableStateFlow(AppState.DEFAULT)
+    val state: StateFlow<AppState> =
+      _state.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AppState.DEFAULT
+      )
+
+    init {
+      settingsRepository.appThemeMode
+        .onEach { appThemeMode -> _state.update { it.copy(appThemeMode = appThemeMode) } }
+        .launchIn(coroutineScope)
+    }
 
     fun refreshFeedsIfExpired() {
       coroutineScope.launch {

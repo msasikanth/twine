@@ -20,6 +20,7 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -32,16 +33,21 @@ import twine.shared.generated.resources.golos_medium
 import twine.shared.generated.resources.golos_regular
 
 @Composable
-internal fun AppTheme(
-  appColorScheme: AppColorScheme = AppTheme.colorScheme,
-  content: @Composable () -> Unit
-) {
+internal fun AppTheme(useDarkTheme: Boolean = false, content: @Composable () -> Unit) {
   MaterialTheme(
-    colorScheme = darkColorScheme(),
+    colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
     typography = typography(GolosFontFamily),
   ) {
+    val dynamicColorState = LocalDynamicColorState.current
+    val colorScheme =
+      if (useDarkTheme) {
+        dynamicColorState.darkAppColorScheme
+      } else {
+        dynamicColorState.lightAppColorScheme
+      }
+
     CompositionLocalProvider(
-      LocalAppColorScheme provides appColorScheme,
+      LocalAppColorScheme provides colorScheme,
       LocalRippleTheme provides AppRippleTheme
     ) {
       content()

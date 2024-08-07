@@ -46,7 +46,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -339,7 +338,7 @@ private fun PostsDeletionPeriodSettingItem(
 
           val backgroundColor =
             if (period == postsDeletionPeriod) {
-              AppTheme.colorScheme.tintedSurface
+              AppTheme.colorScheme.tintedHighlight
             } else {
               Color.Unspecified
             }
@@ -486,29 +485,19 @@ private fun BrowserTypeSettingItem(
 
       Spacer(Modifier.width(16.dp))
 
-      MaterialTheme(
-        colorScheme =
-          darkColorScheme(
-            primary = AppTheme.colorScheme.tintedSurface,
-            onPrimary = AppTheme.colorScheme.tintedForeground,
-            outline = AppTheme.colorScheme.outline,
-            surfaceVariant = AppTheme.colorScheme.surfaceContainer
-          )
-      ) {
-        Switch(
-          checked = checked,
-          onCheckedChange = { checked ->
-            val newBrowserType =
-              if (checked) {
-                BrowserType.InApp
-              } else {
-                BrowserType.Default
-              }
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked ->
+          val newBrowserType =
+            if (checked) {
+              BrowserType.InApp
+            } else {
+              BrowserType.Default
+            }
 
-            onBrowserTypeChanged(newBrowserType)
-          },
-        )
-      }
+          onBrowserTypeChanged(newBrowserType)
+        },
+      )
     }
   }
 }

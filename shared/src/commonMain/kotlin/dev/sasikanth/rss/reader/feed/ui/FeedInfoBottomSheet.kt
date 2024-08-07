@@ -91,6 +91,7 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.DynamicContentTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -116,64 +117,66 @@ fun FeedInfoBottomSheet(
     }
   }
 
-  ModalBottomSheet(
-    modifier = Modifier.then(modifier),
-    onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
-    containerColor = AppTheme.colorScheme.tintedBackground,
-    contentColor = Color.Unspecified,
-    windowInsets =
-      WindowInsets.systemBars
-        .only(WindowInsetsSides.Bottom)
-        .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
-    sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
-    scrimColor = SYSTEM_SCRIM
-  ) {
-    Column(
-      modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+  DynamicContentTheme(useDarkTheme = true) {
+    ModalBottomSheet(
+      modifier = Modifier.then(modifier),
+      onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
+      containerColor = AppTheme.colorScheme.tintedBackground,
+      contentColor = Color.Unspecified,
+      windowInsets =
+        WindowInsets.systemBars
+          .only(WindowInsetsSides.Bottom)
+          .union(WindowInsets.ime.only(WindowInsetsSides.Bottom)),
+      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      scrimColor = SYSTEM_SCRIM
     ) {
-      val feed = state.feed
-      if (feed != null) {
-        FeedLabelInput(
-          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
-          feed = feed,
-          onFeedNameChange = { newFeedName ->
-            feedPresenter.dispatch(
-              FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedId = feed.id)
-            )
-          }
-        )
+      Column(
+        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+      ) {
+        val feed = state.feed
+        if (feed != null) {
+          FeedLabelInput(
+            modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
+            feed = feed,
+            onFeedNameChange = { newFeedName ->
+              feedPresenter.dispatch(
+                FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedId = feed.id)
+              )
+            }
+          )
 
-        Spacer(Modifier.requiredHeight(8.dp))
+          Spacer(Modifier.requiredHeight(8.dp))
 
-        FeedUnreadCount(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
-          numberOfUnreadPosts = feed.numberOfUnreadPosts,
-          onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
-        )
+          FeedUnreadCount(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
+            numberOfUnreadPosts = feed.numberOfUnreadPosts,
+            onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
+          )
 
-        Divider(horizontalInsets = HORIZONTAL_PADDING)
+          Divider(horizontalInsets = HORIZONTAL_PADDING)
 
-        AlwaysFetchSourceArticleSwitch(
-          feed = feed,
-          onValueChanged = { newValue, feedId ->
-            feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
-          }
-        )
+          AlwaysFetchSourceArticleSwitch(
+            feed = feed,
+            onValueChanged = { newValue, feedId ->
+              feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
+            }
+          )
 
-        Divider(horizontalInsets = HORIZONTAL_PADDING)
+          Divider(horizontalInsets = HORIZONTAL_PADDING)
 
-        FeedOptions(
-          modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
-          feed = feed,
-          onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
-        )
+          FeedOptions(
+            modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
+            feed = feed,
+            onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
+          )
 
-        Spacer(Modifier.requiredHeight(8.dp))
-      } else {
-        CircularProgressIndicator(
-          modifier = Modifier.align(Alignment.CenterHorizontally),
-          color = AppTheme.colorScheme.tintedForeground
-        )
+          Spacer(Modifier.requiredHeight(8.dp))
+        } else {
+          CircularProgressIndicator(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            color = AppTheme.colorScheme.tintedForeground
+          )
+        }
       }
     }
   }
