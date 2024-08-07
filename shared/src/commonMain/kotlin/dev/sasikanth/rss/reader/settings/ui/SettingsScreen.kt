@@ -339,7 +339,7 @@ private fun PostsDeletionPeriodSettingItem(
 
           val backgroundColor =
             if (period == postsDeletionPeriod) {
-              AppTheme.colorScheme.tintedSurface
+              AppTheme.colorScheme.tintedHighlight
             } else {
               Color.Unspecified
             }
