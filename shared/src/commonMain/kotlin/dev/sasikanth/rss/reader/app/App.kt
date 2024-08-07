@@ -53,6 +53,10 @@ import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
 import dev.sasikanth.rss.reader.ui.DynamicContentTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.darkAppColorScheme
+import dev.sasikanth.rss.reader.ui.lightAppColorScheme
+import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
@@ -71,14 +75,20 @@ fun App(
   dispatchersProvider: DispatchersProvider,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit
 ) {
-  val appState by appPresenter.state.collectAsState()
-
   setSingletonImageLoaderFactory { imageLoader }
+
+  val appState by appPresenter.state.collectAsState()
+  val dynamicColorState =
+    rememberDynamicColorState(
+      defaultLightAppColorScheme = lightAppColorScheme(),
+      defaultDarkAppColorScheme = darkAppColorScheme(),
+    )
 
   CompositionLocalProvider(
     LocalWindowSizeClass provides calculateWindowSizeClass(),
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
+    LocalDynamicColorState provides dynamicColorState,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =

@@ -33,15 +33,12 @@ import twine.shared.generated.resources.golos_medium
 import twine.shared.generated.resources.golos_regular
 
 @Composable
-internal fun AppTheme(
-  dynamicColorState: DynamicColorState,
-  useDarkTheme: Boolean = false,
-  content: @Composable () -> Unit
-) {
+internal fun AppTheme(useDarkTheme: Boolean = false, content: @Composable () -> Unit) {
   MaterialTheme(
     colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
     typography = typography(GolosFontFamily),
   ) {
+    val dynamicColorState = LocalDynamicColorState.current
     val colorScheme =
       if (useDarkTheme) {
         dynamicColorState.darkAppColorScheme

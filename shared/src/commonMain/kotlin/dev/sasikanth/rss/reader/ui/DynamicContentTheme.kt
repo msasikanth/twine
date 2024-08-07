@@ -17,14 +17,13 @@ package dev.sasikanth.rss.reader.ui
 
 import androidx.collection.lruCache
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
@@ -40,16 +39,7 @@ import kotlin.math.absoluteValue
 
 @Composable
 internal fun DynamicContentTheme(useDarkTheme: Boolean = false, content: @Composable () -> Unit) {
-  val dynamicColorState =
-    LocalDynamicColorState.current
-      ?: rememberDynamicColorState(
-        defaultLightAppColorScheme = lightAppColorScheme(),
-        defaultDarkAppColorScheme = darkAppColorScheme(),
-      )
-
-  CompositionLocalProvider(LocalDynamicColorState provides dynamicColorState) {
-    AppTheme(dynamicColorState = dynamicColorState, useDarkTheme = useDarkTheme, content = content)
-  }
+  AppTheme(useDarkTheme = useDarkTheme, content = content)
 }
 
 @Composable
@@ -304,4 +294,7 @@ fun AppColorScheme.animate(
   )
 }
 
-internal val LocalDynamicColorState = compositionLocalOf<DynamicColorState?> { null }
+internal val LocalDynamicColorState =
+  staticCompositionLocalOf<DynamicColorState> {
+    throw NullPointerException("Please provide a dynamic color state")
+  }
