@@ -56,6 +56,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
@@ -122,12 +123,31 @@ internal fun FeaturedSection(
         }
       }
       .collect { offset ->
+        // The default snap position of the pager is 0.5f, that means the targetPage
+        // state only changes after reaching half way point. We instead want it to scale
+        // as we start swiping.
+        //
+        // Instead of using EPSILON for snap threshold, we are doing that calculation
+        // as the page offset changes
+        //
         val currentItem = featuredPosts[pagerState.settledPage]
-        val targetItem = featuredPosts[pagerState.targetPage]
+        val fromItem =
+          if (offset < -EPSILON) {
+            featuredPosts[pagerState.settledPage - 1]
+          } else {
+            currentItem
+          }
+
+        val toItem =
+          if (offset > EPSILON) {
+            featuredPosts[pagerState.settledPage + 1]
+          } else {
+            currentItem
+          }
 
         dynamicColorState.animate(
-          fromSeedColor = Color(currentItem.seedColor!!),
-          toSeedColor = Color(targetItem.seedColor!!),
+          fromSeedColor = Color(fromItem.seedColor!!),
+          toSeedColor = Color(toItem.seedColor!!),
           progress = offset
         )
       }
