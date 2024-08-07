@@ -45,7 +45,6 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
-import kotlin.time.measureTimedValue
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -325,13 +324,11 @@ class HomePresenter(
             .map { featuredPosts ->
               featuredPosts
                 .map { postWithMetadata ->
-                  val seedColor = measureTimedValue {
-                    seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
-                  }
+                  val seedColor = seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
 
                   FeaturedPostItem(
                     postWithMetadata = postWithMetadata,
-                    seedColor = seedColor.value,
+                    seedColor = seedColor,
                   )
                 }
                 .toImmutableList()
