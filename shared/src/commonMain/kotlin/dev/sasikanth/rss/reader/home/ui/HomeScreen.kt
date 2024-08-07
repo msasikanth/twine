@@ -141,7 +141,7 @@ internal fun HomeScreen(
 
   LaunchedEffect(featuredPosts) {
     if (featuredPosts.isNullOrEmpty()) {
-      dynamicColorState?.reset()
+      dynamicColorState.reset()
     }
   }
 
