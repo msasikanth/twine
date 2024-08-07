@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.ui
 
+import androidx.collection.lruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -80,6 +81,8 @@ internal class DynamicColorState(
   var darkAppColorScheme by mutableStateOf(defaultDarkAppColorScheme)
     private set
 
+  private val cache = lruCache<String, DynamicColors>(maxSize = 10)
+
   fun animate(fromSeedColor: Color, toSeedColor: Color, progress: Float) {
     val normalizedProgress =
       if (progress < -EPSILON) {
@@ -89,16 +92,20 @@ internal class DynamicColorState(
       }
 
     val startLightColors =
-      generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = fromSeedColor)
+      cache["light_$fromSeedColor"]
+        ?: generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = fromSeedColor)
 
     val startDarkColors =
-      generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = fromSeedColor)
+      cache["dark_$fromSeedColor"]
+        ?: generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = fromSeedColor)
 
     val endLightColors =
-      generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = toSeedColor)
+      cache["light_$toSeedColor"]
+        ?: generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = toSeedColor)
 
     val endDarkColors =
-      generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = toSeedColor)
+      cache["dark_$toSeedColor"]
+        ?: generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = toSeedColor)
 
     lightAppColorScheme =
       defaultLightAppColorScheme.animate(
