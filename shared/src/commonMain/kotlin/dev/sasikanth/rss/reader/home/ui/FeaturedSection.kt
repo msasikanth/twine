@@ -36,6 +36,7 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,8 +49,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import coil3.size.Size
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -145,7 +148,7 @@ internal fun FeaturedSection(
             currentItem
           }
 
-        dynamicColorState?.animate(
+        dynamicColorState.animate(
           fromSeedColor = Color(fromItem.seedColor!!),
           toSeedColor = Color(toItem.seedColor!!),
           progress = offset
@@ -154,27 +157,20 @@ internal fun FeaturedSection(
   }
 
   Box(modifier) {
-    // Duplicated pager setup for background, to avoid pager content padding
-    // from the items
-    if (useDarkTheme) {
-      FeaturedSectionBackground(
-        modifier = Modifier.matchParentSize(),
-        state = pagerState,
-        featuredPosts = featuredPosts,
-        featuredItemBlurEnabled = featuredItemBlurEnabled,
-      )
-    }
-
-    HorizontalPager(
-      state = pagerState,
-      verticalAlignment = Alignment.Top,
-      contentPadding =
+    val contentPadding =
+      remember(systemBarsHorizontalPadding, paddingValues) {
         PaddingValues(
           start = systemBarsHorizontalPadding + 24.dp,
           top = 8.dp + paddingValues.calculateTopPadding(),
           end = systemBarsHorizontalPadding + 24.dp,
           bottom = 24.dp
-        ),
+        )
+      }
+
+    HorizontalPager(
+      state = pagerState,
+      verticalAlignment = Alignment.Top,
+      contentPadding = contentPadding,
       pageSpacing = 16.dp,
       flingBehavior =
         PagerDefaults.flingBehavior(
@@ -182,18 +178,43 @@ internal fun FeaturedSection(
           snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
         ),
     ) { page ->
-      val featuredPost = featuredPosts.getOrNull(page)?.postWithMetadata
+      val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
         Box {
+          if (useDarkTheme) {
+            FeaturedSectionBackground(
+              modifier =
+                Modifier.matchParentSize().layout { measurable, constraints ->
+                  val topPadding = contentPadding.calculateTopPadding().roundToPx()
+                  val horizontalContentPadding =
+                    contentPadding.calculateStartPadding(layoutDirection) +
+                      contentPadding.calculateEndPadding(layoutDirection)
+                  val fullWidth = constraints.maxWidth + horizontalContentPadding.roundToPx()
+                  val placeable = measurable.measure(constraints.copy(maxWidth = fullWidth))
+
+                  layout(placeable.width, placeable.height) {
+                    placeable.place(0, topPadding.unaryMinus())
+                  }
+                },
+              state = pagerState,
+              page = page,
+              featuredPost = featuredPost,
+              featuredItemBlurEnabled = featuredItemBlurEnabled,
+            )
+          }
+
+          val postWithMetadata = featuredPost.postWithMetadata
           FeaturedPostItem(
-            item = featuredPost,
+            item = postWithMetadata,
             page = page,
             pagerState = pagerState,
-            onClick = { onItemClick(featuredPost) },
-            onBookmarkClick = { onPostBookmarkClick(featuredPost) },
-            onCommentsClick = { onPostCommentsClick(featuredPost.commentsLink!!) },
-            onSourceClick = { onPostSourceClick(featuredPost.sourceId) },
-            onTogglePostReadClick = { onTogglePostReadClick(featuredPost.id, featuredPost.read) }
+            onClick = { onItemClick(postWithMetadata) },
+            onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
+            onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
+            onSourceClick = { onPostSourceClick(postWithMetadata.sourceId) },
+            onTogglePostReadClick = {
+              onTogglePostReadClick(postWithMetadata.id, postWithMetadata.read)
+            }
           )
         }
       }
@@ -205,57 +226,51 @@ internal fun FeaturedSection(
 @Composable
 private fun FeaturedSectionBackground(
   state: PagerState,
-  featuredPosts: ImmutableList<FeaturedPostItem>,
+  page: Int,
+  featuredPost: FeaturedPostItem,
   featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
-  HorizontalPager(
-    modifier = modifier,
-    state = state,
-    verticalAlignment = Alignment.Top,
-  ) { page ->
-    val featuredPost = featuredPosts.getOrNull(page)
-    featuredPost?.let {
-      val gradientOverlayModifier =
-        Modifier.drawWithCache {
-          val radialGradient =
-            Brush.radialGradient(
-              colors =
-                listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
-              center = Offset(x = this.size.width, y = 40f)
-            )
+  Box(modifier) {
+    val gradientOverlayModifier =
+      Modifier.drawWithCache {
+        val radialGradient =
+          Brush.radialGradient(
+            colors =
+              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+            center = Offset(x = this.size.width, y = 40f)
+          )
 
-          val linearGradient =
-            Brush.verticalGradient(
-              colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
-            )
+        val linearGradient =
+          Brush.verticalGradient(
+            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+          )
 
-          onDrawWithContent {
-            drawContent()
-            drawRect(radialGradient)
-            drawRect(linearGradient)
-          }
+        onDrawWithContent {
+          drawContent()
+          drawRect(radialGradient)
+          drawRect(linearGradient)
         }
-
-      val swipeTransitionModifier =
-        Modifier.graphicsLayer {
-            val pageOffset =
-              if (page in 0..state.pageCount) {
-                state.getOffsetFractionForPage(page)
-              } else {
-                0f
-              }
-
-            translationX = size.width * pageOffset
-            alpha = (1f - pageOffset.absoluteValue)
-          }
-          .then(gradientOverlayModifier)
-
-      if (canBlurImage && featuredItemBlurEnabled) {
-        FeaturedSectionBlurredBackground(post = featuredPost, modifier = swipeTransitionModifier)
-      } else {
-        FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)
       }
+
+    val swipeTransitionModifier =
+      Modifier.graphicsLayer {
+          val pageOffset =
+            if (page in 0..state.pageCount) {
+              state.getOffsetFractionForPage(page)
+            } else {
+              0f
+            }
+
+          translationX = size.width * pageOffset
+          alpha = (1f - pageOffset.absoluteValue)
+        }
+        .then(gradientOverlayModifier)
+
+    if (canBlurImage && featuredItemBlurEnabled) {
+      FeaturedSectionBlurredBackground(post = featuredPost, modifier = swipeTransitionModifier)
+    } else {
+      FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)
     }
   }
 }

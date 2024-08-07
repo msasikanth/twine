@@ -238,7 +238,7 @@ private fun MarkPostsAsReadButton(
   val transition = updateTransition(enabled, "button_enable_state")
   val backgroundColor by
     transition.animateColor {
-      if (it) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0f)
+      if (it) AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f) else Color.Transparent
     }
   val contentColor by
     transition.animateColor {
@@ -285,7 +285,7 @@ private fun PostsFilterButton(
         modifier
           .clip(RoundedCornerShape(8.dp))
           .clickable(onClick = { showPostsTypeDropDown = true })
-          .background(color = Color.White.copy(alpha = 0.12f))
+          .background(color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f))
           .padding(vertical = 4.dp)
           .padding(start = 8.dp, end = 12.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
