@@ -20,6 +20,10 @@ Steps to reproduce the behavior:
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+
+**Feed Information**
+Links to the feed that are having this issue
+
 **Device Information**
  - Device: [e.g. Pixel 7]
  - OS: [e.g. Android 13]
