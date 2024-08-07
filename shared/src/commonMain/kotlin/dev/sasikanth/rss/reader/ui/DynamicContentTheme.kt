@@ -230,49 +230,7 @@ data class DynamicColors(
   val surfaceContainerLowest: Color,
   val surfaceContainerHigh: Color,
   val surfaceContainerHighest: Color,
-) {
-
-  companion object {
-
-    fun fromColorScheme(colorScheme: AppColorScheme) =
-      DynamicColors(
-        tintedBackground = colorScheme.tintedBackground,
-        tintedSurface = colorScheme.tintedSurface,
-        tintedForeground = colorScheme.tintedForeground,
-        tintedHighlight = colorScheme.tintedHighlight,
-        outline = colorScheme.outline,
-        outlineVariant = colorScheme.outlineVariant,
-        surface = colorScheme.surface,
-        onSurface = colorScheme.onSurface,
-        onSurfaceVariant = colorScheme.onSurfaceVariant,
-        surfaceContainer = colorScheme.surfaceContainer,
-        surfaceContainerLow = colorScheme.surfaceContainerLow,
-        surfaceContainerLowest = colorScheme.surfaceContainerLowest,
-        surfaceContainerHigh = colorScheme.surfaceContainerHigh,
-        surfaceContainerHighest = colorScheme.surfaceContainerHighest,
-      )
-  }
-
-  fun toColorScheme(defaultColorScheme: AppColorScheme) =
-    AppColorScheme(
-      tintedBackground = tintedBackground,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
-      tintedHighlight = tintedHighlight,
-      outline = outline,
-      outlineVariant = outlineVariant,
-      surface = surface,
-      onSurface = onSurface,
-      onSurfaceVariant = onSurfaceVariant,
-      surfaceContainer = surfaceContainer,
-      surfaceContainerLow = surfaceContainerLow,
-      surfaceContainerLowest = surfaceContainerLowest,
-      surfaceContainerHigh = surfaceContainerHigh,
-      surfaceContainerHighest = surfaceContainerHighest,
-      textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
-      textEmphasisMed = defaultColorScheme.textEmphasisMed,
-    )
-}
+)
 
 fun AppColorScheme.animate(
   startColors: DynamicColors?,
