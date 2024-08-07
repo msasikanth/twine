@@ -23,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sasikanth.rss.reader.utils.toSp
@@ -32,7 +33,12 @@ expect fun createDefaultTextStyle(): TextStyle
 private val figmaLineHeightStyle =
   LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.None)
 
-@Stable private val defaultTextStyle = createDefaultTextStyle()
+@Stable
+private val defaultTextStyle =
+  createDefaultTextStyle()
+    .copy(
+      textDirection = TextDirection.ContentOrLtr,
+    )
 
 internal fun typography(fontFamily: FontFamily) =
   Typography(
@@ -42,7 +48,7 @@ internal fun typography(fontFamily: FontFamily) =
         fontWeight = FontWeight.Normal,
         fontSize = 57.sp,
         lineHeight = 64.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     displayMedium =
       defaultTextStyle.copy(
