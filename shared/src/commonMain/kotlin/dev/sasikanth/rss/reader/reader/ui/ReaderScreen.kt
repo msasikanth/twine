@@ -246,6 +246,7 @@ internal fun ReaderScreen(
                 title = state.title!!,
                 feedName = state.feed!!.name,
                 feedHomePageLink = state.feed!!.homepageLink,
+                feedIcon = state.feed!!.icon,
                 publishedAt = state.publishedAt!!,
                 locale = Locale.current.toLanguageTag(),
                 direction = layoutDirection
