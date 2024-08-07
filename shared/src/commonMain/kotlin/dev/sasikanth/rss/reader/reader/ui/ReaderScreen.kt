@@ -43,7 +43,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
@@ -52,7 +51,6 @@ import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
-import dev.sasikanth.material.color.utilities.utils.StringUtils
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
@@ -73,6 +71,7 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.asJSString
+import dev.sasikanth.rss.reader.utils.hexString
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -220,12 +219,10 @@ internal fun ReaderScreen(
           )
         }
 
-        val codeBackgroundColor =
-          StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHighest.toArgb())
-        val textColor = StringUtils.hexFromArgb(AppTheme.colorScheme.onSurface.toArgb())
-        val linkColor = StringUtils.hexFromArgb(AppTheme.colorScheme.tintedForeground.toArgb())
-        val dividerColor =
-          StringUtils.hexFromArgb(AppTheme.colorScheme.surfaceContainerHigh.toArgb())
+        val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
+        val textColor = AppTheme.colorScheme.onSurface.hexString()
+        val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
+        val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
 
         val colors =
           ReaderHTMLColors(

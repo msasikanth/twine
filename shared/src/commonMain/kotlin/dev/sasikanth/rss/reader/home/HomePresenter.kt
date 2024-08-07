@@ -39,6 +39,8 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.home.ui.FeaturedPostItem
+import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
@@ -46,13 +48,12 @@ import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
@@ -94,6 +95,7 @@ class HomePresenter(
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
+  private val seedColorExtractor: SeedColorExtractor,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
@@ -133,12 +135,12 @@ class HomePresenter(
         rssRepository = rssRepository,
         observableActiveSource = observableActiveSource,
         settingsRepository = settingsRepository,
-        feedsPresenter = feedsPresenter
+        feedsPresenter = feedsPresenter,
+        seedColorExtractor = seedColorExtractor,
       )
     }
 
   internal val state = presenterInstance.state
-  internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate {
@@ -169,6 +171,7 @@ class HomePresenter(
     private val observableActiveSource: ObservableActiveSource,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
+    private val seedColorExtractor: SeedColorExtractor,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -180,8 +183,6 @@ class HomePresenter(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = HomeState.DEFAULT
       )
-
-    val effects = MutableSharedFlow<HomeEffect>()
 
     init {
       dispatch(HomeEvent.Init)
@@ -267,9 +268,12 @@ class HomePresenter(
     }
 
     private fun backClicked() {
-      coroutineScope.launch { effects.emit(HomeEffect.MinimizeSheet) }
+      coroutineScope.launch {
+        _state.update { it.copy(feedsSheetState = SheetValue.PartiallyExpanded) }
+      }
     }
 
+    @OptIn(FlowPreview::class)
     private fun init() {
       combine(observableActiveSource.activeSource, settingsRepository.postsType) {
           activeSource,
@@ -317,11 +321,21 @@ class HomePresenter(
               unreadOnly = unreadOnly,
               after = postsAfter
             )
-            .onEach { featuredPosts ->
-              _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
-            }
             .map { featuredPosts ->
-              val featuredPostsIds = featuredPosts.map { it.id }
+              featuredPosts
+                .map { postWithMetadata ->
+                  val seedColor = seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
+
+                  FeaturedPostItem(
+                    postWithMetadata = postWithMetadata,
+                    seedColor = seedColor,
+                  )
+                }
+                .toImmutableList()
+            }
+            .onEach { featuredPosts -> _state.update { it.copy(featuredPosts = featuredPosts) } }
+            .map { featuredPosts ->
+              val featuredPostsIds = featuredPosts.map { it.postWithMetadata.id }
               NTuple4(activeSource, postsAfter, unreadOnly, featuredPostsIds)
             }
         }

@@ -65,6 +65,7 @@ function updateStyles(colors) {
     padding-top: 16px;
     color: ${colors.textColor};
     font-family: 'Golos Text', sans-serif;
+    overflow-wrap: break-word;
   }
   a {
     color: ${colors.linkColor};

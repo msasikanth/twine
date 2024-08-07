@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.home
 
-sealed interface HomeEffect {
+package dev.sasikanth.rss.reader.app
 
-  data object MinimizeSheet : HomeEffect
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+
+data class AppState(val appThemeMode: AppThemeMode) {
+
+  companion object {
+    val DEFAULT = AppState(appThemeMode = AppThemeMode.Auto)
+  }
 }

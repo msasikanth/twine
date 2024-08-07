@@ -135,7 +135,7 @@ private fun PostSourcePill(
       if (config.enablePostSource) {
         Modifier.clip(RoundedCornerShape(50))
           .clickable(onClick = onSourceClick)
-          .background(color = Color.White.copy(alpha = 0.12f))
+          .background(color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f))
           .padding(vertical = 4.dp)
           .padding(start = 8.dp, end = 12.dp)
       } else {
@@ -144,7 +144,7 @@ private fun PostSourcePill(
 
     val postSourceTextColor =
       if (config.enablePostSource) {
-        Color.White
+        AppTheme.colorScheme.textEmphasisHigh
       } else {
         AppTheme.colorScheme.onSurfaceVariant
       }
@@ -187,7 +187,7 @@ private fun PostOptionsButtonRow(
     if (!commentsLink.isNullOrBlank()) {
       PostOptionIconButton(
         icon = TwineIcons.Comments,
-        iconTint = Color.White,
+        iconTint = AppTheme.colorScheme.textEmphasisHigh,
         contentDescription = LocalStrings.current.comments,
         onClick = onCommentsClick
       )
@@ -204,7 +204,7 @@ private fun PostOptionsButtonRow(
         if (postBookmarked) {
           AppTheme.colorScheme.tintedForeground
         } else {
-          Color.White
+          AppTheme.colorScheme.textEmphasisHigh
         },
       contentDescription = LocalStrings.current.bookmark,
       onClick = onBookmarkClick
@@ -320,7 +320,7 @@ private fun PostOptionIconButton(
   icon: ImageVector,
   contentDescription: String,
   modifier: Modifier = Modifier,
-  iconTint: Color = Color.White,
+  iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
   onClick: () -> Unit,
 ) {
   Box(

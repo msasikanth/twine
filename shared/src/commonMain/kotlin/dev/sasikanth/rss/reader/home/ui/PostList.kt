@@ -69,9 +69,10 @@ private val postListPadding
 @OptIn(ExperimentalFoundationApi::class)
 internal fun PostsList(
   paddingValues: PaddingValues,
-  featuredPosts: ImmutableList<PostWithMetadata>,
+  featuredPosts: ImmutableList<FeaturedPostItem>,
   posts: LazyPagingItems<PostWithMetadata>,
   featuredItemBlurEnabled: Boolean,
+  useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   onPostClicked: (post: PostWithMetadata) -> Unit,
@@ -92,18 +93,21 @@ internal fun PostsList(
     contentPadding =
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
   ) {
-    item {
-      FeaturedSection(
-        paddingValues = paddingValues,
-        pagerState = featuredPostsPagerState,
-        featuredPosts = featuredPosts,
-        featuredItemBlurEnabled = featuredItemBlurEnabled,
-        onItemClick = onPostClicked,
-        onPostBookmarkClick = onPostBookmarkClick,
-        onPostCommentsClick = onPostCommentsClick,
-        onPostSourceClick = onPostSourceClick,
-        onTogglePostReadClick = onTogglePostReadClick
-      )
+    if (featuredPosts.isNotEmpty()) {
+      item {
+        FeaturedSection(
+          paddingValues = paddingValues,
+          pagerState = featuredPostsPagerState,
+          featuredPosts = featuredPosts,
+          featuredItemBlurEnabled = featuredItemBlurEnabled,
+          useDarkTheme = useDarkTheme,
+          onItemClick = onPostClicked,
+          onPostBookmarkClick = onPostBookmarkClick,
+          onPostCommentsClick = onPostCommentsClick,
+          onPostSourceClick = onPostSourceClick,
+          onTogglePostReadClick = onTogglePostReadClick
+        )
+      }
     }
 
     items(posts.itemCount) { index ->

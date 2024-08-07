@@ -331,7 +331,7 @@ private fun PostsFilterDropdown(
       val label = getPostTypeLabel(type)
       val color =
         if (postsType == type) {
-          AppTheme.colorScheme.tintedSurface
+          AppTheme.colorScheme.tintedHighlight
         } else {
           Color.Unspecified
         }
