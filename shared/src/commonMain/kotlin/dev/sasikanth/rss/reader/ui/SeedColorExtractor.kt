@@ -25,7 +25,6 @@ import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
 import dev.sasikanth.material.color.utilities.score.Score
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
 import me.tatarka.inject.annotations.Inject
 
@@ -38,7 +37,7 @@ class SeedColorExtractor(
   suspend fun calculateSeedColor(url: String?): Int? {
     if (url.isNullOrBlank()) return null
 
-    val bitmap = suspendCancellableCoroutine { cont ->
+    val bitmap: ImageBitmap? = suspendCancellableCoroutine { cont ->
       val request =
         ImageRequest.Builder(platformContext.value)
           .data(url)
@@ -47,14 +46,14 @@ class SeedColorExtractor(
             onSuccess = { result ->
               cont.resume(result.toComposeImageBitmap(platformContext.value))
             },
-            onError = { cont.resumeWithException(IllegalArgumentException()) },
+            onError = { cont.resume(null) },
           )
           .build()
 
       imageLoader.value.enqueue(request)
     }
 
-    return bitmap.seedColor()
+    return bitmap?.seedColor()
   }
 
   private fun ImageBitmap.seedColor(): Int {
