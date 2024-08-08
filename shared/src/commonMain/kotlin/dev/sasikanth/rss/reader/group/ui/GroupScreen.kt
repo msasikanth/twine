@@ -40,7 +40,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -195,7 +194,9 @@ fun GroupNameTextField(
     onValueChanged(input)
   }
 
-  MaterialTheme(colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)) {
+  MaterialTheme(
+    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+  ) {
     OutlinedTextField(
       modifier = modifier,
       value = input.copy(selection = TextRange(input.text.length)),

@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -26,7 +25,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Boolean) -> Unit) {
   MaterialTheme(
     colorScheme =
-      darkColorScheme(
+      MaterialTheme.colorScheme.copy(
         primary = AppTheme.colorScheme.tintedForeground,
         onPrimary = AppTheme.colorScheme.tintedSurface,
         outline = AppTheme.colorScheme.outline,
