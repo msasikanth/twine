@@ -45,7 +45,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -220,7 +219,8 @@ private fun SearchBar(
           .padding(horizontal = 4.dp)
     ) {
       MaterialTheme(
-        colorScheme = darkColorScheme(primary = AppTheme.colorScheme.tintedForeground)
+        colorScheme =
+          MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
       ) {
         TextField(
           modifier =
