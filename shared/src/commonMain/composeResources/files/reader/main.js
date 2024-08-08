@@ -112,6 +112,12 @@ function updateStyles(colors) {
 
 async function renderReaderView(link, html, colors) {
   console.log('Preparing reader content for rendering');
+  //noinspection JSUnresolvedVariable
+  window.kmpJsBridge.callNative(
+    "renderProgress",
+    "Loading",
+    {}
+  );
 
   //noinspection JSUnresolvedVariable
   const result = await parse(html, link);
@@ -130,4 +136,10 @@ async function renderReaderView(link, html, colors) {
   document.body.style.display = "block";
 
   console.log('Reader content rendered')
+  //noinspection JSUnresolvedVariable
+  window.kmpJsBridge.callNative(
+    "renderProgress",
+    "Idle",
+    {}
+  );
 }

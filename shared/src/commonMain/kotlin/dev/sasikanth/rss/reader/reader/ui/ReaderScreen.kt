@@ -40,14 +40,20 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.multiplatform.webview.jsbridge.IJsMessageHandler
+import com.multiplatform.webview.jsbridge.JsMessage
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.LoadingState
 import com.multiplatform.webview.web.WebView
+import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -58,6 +64,7 @@ import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
+import dev.sasikanth.rss.reader.reader.ui.ReaderRenderProgressHandler.ReaderRenderLoadingState
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
@@ -150,10 +157,11 @@ internal fun ReaderScreen(
                 Color.Transparent
               }
 
-            when (state.postMode) {
-              Idle,
-              RssContent,
-              Source -> {
+            when {
+              state.content == null ||
+                state.postMode == Idle ||
+                state.postMode == RssContent ||
+                state.postMode == Source -> {
                 IconButton(
                   colors = IconButtonDefaults.iconButtonColors(containerColor = iconBackground),
                   onClick = {
@@ -167,7 +175,7 @@ internal fun ReaderScreen(
                   )
                 }
               }
-              InProgress -> {
+              (state.postMode == InProgress && state.content != null) -> {
                 CircularProgressIndicator(
                   color = AppTheme.colorScheme.tintedForeground,
                   modifier = Modifier.requiredSize(24.dp)
@@ -197,8 +205,89 @@ internal fun ReaderScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified
   ) { paddingValues ->
+    var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
+
+    if (state.canShowReaderView) {
+      val navigator = rememberWebViewNavigator()
+      val jsBridge = rememberWebViewJsBridge()
+
+      DisposableEffect(jsBridge) {
+        jsBridge.register(
+          ReaderLinkHandler(
+            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+          )
+        )
+
+        jsBridge.register(
+          ReaderRenderProgressHandler(
+            renderState = { newRenderingState -> renderingState = newRenderingState }
+          )
+        )
+
+        onDispose { jsBridge.clear() }
+      }
+
+      val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
+      val textColor = AppTheme.colorScheme.onSurface.hexString()
+      val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
+      val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
+
+      val colors =
+        ReaderHTMLColors(
+          textColor = textColor,
+          linkColor = linkColor,
+          dividerColor = dividerColor,
+          codeBackgroundColor = codeBackgroundColor
+        )
+
+      val webViewState = rememberWebViewStateWithHTMLData("")
+      webViewState.webSettings.apply {
+        this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+        this.supportZoom = false
+      }
+
+      LaunchedEffect(state.content) {
+        withContext(dispatchersProvider.io) {
+          val htmlTemplate =
+            ReaderHTML.create(
+              title = state.title!!,
+              feedName = state.feed!!.name,
+              feedHomePageLink = state.feed!!.homepageLink,
+              feedIcon = state.feed!!.icon,
+              publishedAt = state.publishedAt!!
+            )
+
+          navigator.loadHtml(htmlTemplate, state.link)
+        }
+      }
+
+      LaunchedEffect(webViewState.loadingState) {
+        withContext(dispatchersProvider.io) {
+          val hasHtmlTemplateLoaded =
+            webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
+
+          if (hasHtmlTemplateLoaded) {
+            navigator.evaluateJavaScript(
+              script =
+                "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
+            )
+          }
+        }
+      }
+
+      Box(Modifier.fillMaxSize().padding(paddingValues).padding(start = 16.dp)) {
+        WebView(
+          modifier = Modifier.fillMaxSize(),
+          state = webViewState,
+          navigator = navigator,
+          webViewJsBridge = jsBridge,
+          captureBackPresses = false,
+        )
+      }
+    }
+
     when {
-      state.content == null -> {
+      renderingState == ReaderRenderLoadingState.Loading -> {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           CircularProgressIndicator(
             color = AppTheme.colorScheme.tintedForeground,
@@ -206,81 +295,33 @@ internal fun ReaderScreen(
           )
         }
       }
-      state.canShowReaderView -> {
-        val navigator = rememberWebViewNavigator()
-        val jsBridge = rememberWebViewJsBridge()
-
-        DisposableEffect(jsBridge) {
-          jsBridge.register(
-            ReaderLinkHandler(
-              openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
-            )
-          )
-
-          onDispose { jsBridge.clear() }
-        }
-
-        val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
-        val textColor = AppTheme.colorScheme.onSurface.hexString()
-        val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
-        val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
-
-        val colors =
-          ReaderHTMLColors(
-            textColor = textColor,
-            linkColor = linkColor,
-            dividerColor = dividerColor,
-            codeBackgroundColor = codeBackgroundColor
-          )
-
-        val webViewState = rememberWebViewStateWithHTMLData("")
-        webViewState.webSettings.apply {
-          this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
-          this.supportZoom = false
-        }
-
-        LaunchedEffect(state.content) {
-          withContext(dispatchersProvider.io) {
-            val htmlTemplate =
-              ReaderHTML.create(
-                title = state.title!!,
-                feedName = state.feed!!.name,
-                feedHomePageLink = state.feed!!.homepageLink,
-                feedIcon = state.feed!!.icon,
-                publishedAt = state.publishedAt!!
-              )
-
-            navigator.loadHtml(htmlTemplate, state.link)
-          }
-        }
-
-        LaunchedEffect(webViewState.loadingState) {
-          withContext(dispatchersProvider.io) {
-            val hasHtmlTemplateLoaded =
-              webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
-
-            if (hasHtmlTemplateLoaded) {
-              navigator.evaluateJavaScript(
-                script =
-                  "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
-              )
-            }
-          }
-        }
-
-        Box(Modifier.fillMaxSize().padding(paddingValues).padding(start = 16.dp)) {
-          WebView(
-            modifier = Modifier.fillMaxSize(),
-            state = webViewState,
-            navigator = navigator,
-            webViewJsBridge = jsBridge,
-            captureBackPresses = false,
-          )
-        }
-      }
-      else -> {
+      !state.canShowReaderView && state.content.isNullOrBlank() -> {
         Text("No reader content")
       }
     }
+  }
+}
+
+private class ReaderRenderProgressHandler(
+  private val renderState: (ReaderRenderLoadingState) -> Unit,
+) : IJsMessageHandler {
+
+  enum class ReaderRenderLoadingState {
+    Loading,
+    Idle
+  }
+
+  override fun handle(
+    message: JsMessage,
+    navigator: WebViewNavigator?,
+    callback: (String) -> Unit
+  ) {
+    if (message.params.isNotBlank()) {
+      renderState(ReaderRenderLoadingState.valueOf(message.params))
+    }
+  }
+
+  override fun methodName(): String {
+    return "renderProgress"
   }
 }
