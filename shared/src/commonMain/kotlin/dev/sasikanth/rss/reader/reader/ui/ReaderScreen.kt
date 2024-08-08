@@ -36,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -209,12 +210,14 @@ internal fun ReaderScreen(
         val navigator = rememberWebViewNavigator()
         val jsBridge = rememberWebViewJsBridge()
 
-        LaunchedEffect(jsBridge) {
+        DisposableEffect(jsBridge) {
           jsBridge.register(
             ReaderLinkHandler(
               openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
             )
           )
+
+          onDispose { jsBridge.clear() }
         }
 
         val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
