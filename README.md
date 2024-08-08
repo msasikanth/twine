@@ -31,15 +31,17 @@ user interface and experience to browse through the feeds, and supports Material
 ## Features ✨
 
 - Supports RSS & Atom feeds
-- Gorgeous home feed
-- Pin frequently visited feeds
+- Feed management: Add, Edit & Pin feeds
+- Feed grouping
+- Access to pinned feeds/groups from bottom bar
 - Smart fetching: Twine looks for feeds when given any website homepage
-- Reading view with shortcut to fetch full article
+- Article shortcut to fetch full article in reader view
 - Bookmark posts to read later
 - Search posts
 - Background sync
-- Feed management: Add, Edit & Pin feeds
-- Import and exports your feeds with OPML 
+- Import and exports your feeds with OPML
+- Dynamic content theming
+- Light/Dark mode support
 
 ## Tech Stack 📚
 
