@@ -67,19 +67,25 @@ function updateStyles(colors) {
     font-family: 'Golos Text', sans-serif;
     overflow-wrap: break-word;
   }
+  body:dir(rtl) {
+    padding-inline-start: 16px;
+  }
+  body:dir(ltr) {
+    padding-inline-end: 16px;
+  }
   a {
     color: ${colors.linkColor};
   }
   ul li::before {
     content: "\u2022";
     color: ${colors.textColor};
-    margin-right: 0.25em;
+    margin-inline-end: 0.25em;
   }
   ol li::before {
     counter-increment: item;
     content: counters(item, ".") ".";
     color: ${colors.textColor};
-    margin-right: 0.25em;
+    margin-inline-end: 0.25em;
   }
   code, pre {
     font-family: 'Source Code Pro', monospace;
@@ -93,7 +99,7 @@ function updateStyles(colors) {
     border: 1px solid ${colors.dividerColor};
   }
   blockquote {
-    margin-left: 8px;
+    margin-inline-start: 8px;
     padding-left: 8px;
     border-left: 4px solid ${colors.linkColor}
   }
@@ -105,11 +111,16 @@ function updateStyles(colors) {
 }
 
 async function renderReaderView(link, html, colors) {
-  console.log('Parsing content');
+  console.log('Preparing reader content for rendering');
+
   //noinspection JSUnresolvedVariable
   const result = await parse(html, link);
   const content = result.content || html;
+
   document.getElementById("content").innerHTML += content;
+  document.querySelectorAll("pre").forEach((element) =>
+    element.dir = "auto"
+  );
 
   updateStyles(colors)
   processLinks();
@@ -117,4 +128,6 @@ async function renderReaderView(link, html, colors) {
   removeTitle();
 
   document.body.style.display = "block";
+
+  console.log('Reader content rendered')
 }

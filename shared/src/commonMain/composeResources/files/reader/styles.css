@@ -18,7 +18,7 @@ figcaption {
   align-items: center;
 }
 .column {
-  margin-left: 16px;
+  margin-inline-start: 16px;
   flex: 1;
 }
 .caption {
