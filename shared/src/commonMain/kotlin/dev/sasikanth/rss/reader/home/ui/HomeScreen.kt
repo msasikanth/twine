@@ -76,7 +76,6 @@ import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.DynamicContentTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.coroutines.launch
@@ -143,12 +142,12 @@ internal fun HomeScreen(
     }
   }
 
-  DynamicContentTheme(useDarkTheme = true) {
+  AppTheme(useDarkTheme = true) {
     BottomSheetScaffold(
       modifier = modifier,
       scaffoldState = bottomSheetScaffoldState,
       content = { _ ->
-        DynamicContentTheme(useDarkTheme = useDarkTheme) {
+        AppTheme(useDarkTheme = useDarkTheme) {
           Box(
             modifier =
               Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest)

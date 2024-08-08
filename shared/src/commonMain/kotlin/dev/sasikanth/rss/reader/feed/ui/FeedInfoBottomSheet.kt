@@ -91,7 +91,6 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.DynamicContentTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -117,7 +116,7 @@ fun FeedInfoBottomSheet(
     }
   }
 
-  DynamicContentTheme(useDarkTheme = true) {
+  AppTheme(useDarkTheme = true) {
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
       onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },

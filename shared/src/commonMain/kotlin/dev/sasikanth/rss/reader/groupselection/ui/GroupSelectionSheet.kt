@@ -64,12 +64,11 @@ import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.DynamicContentTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 
 @Composable
 fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier = Modifier) {
-  DynamicContentTheme(useDarkTheme = true) {
+  AppTheme(useDarkTheme = true) {
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
       onDismissRequest = { presenter.dispatch(GroupSelectionEvent.BackClicked) },

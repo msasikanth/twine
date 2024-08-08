@@ -37,11 +37,6 @@ import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 
 @Composable
-internal fun DynamicContentTheme(useDarkTheme: Boolean = false, content: @Composable () -> Unit) {
-  AppTheme(useDarkTheme = useDarkTheme, content = content)
-}
-
-@Composable
 internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
