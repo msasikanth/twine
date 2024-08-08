@@ -50,6 +50,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -274,9 +275,48 @@ class HomePresenter(
     }
 
     private fun init() {
-      combine(observableActiveSource.activeSource, settingsRepository.postsType) {
-          activeSource,
-          postsType ->
+      val activeSourceFlow = observableActiveSource.activeSource
+      val postsTypeFlow = settingsRepository.postsType
+
+      observePosts(activeSourceFlow, postsTypeFlow)
+
+      rssRepository
+        .hasFeeds()
+        .distinctUntilChanged()
+        .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
+        .launchIn(coroutineScope)
+
+      combine(activeSourceFlow, postsTypeFlow) { activeSource, postsType ->
+          Pair(activeSource, postsType)
+        }
+        .flatMapLatest { (activeSource, postsType) ->
+          val postsAfter =
+            when (postsType) {
+              PostsType.ALL,
+              PostsType.UNREAD -> Instant.DISTANT_PAST
+              PostsType.TODAY -> {
+                getTodayStartInstant()
+              }
+              PostsType.LAST_24_HOURS -> {
+                getLast24HourStart()
+              }
+            }
+
+          rssRepository.hasUnreadPostsInSource(
+            sourceId = activeSource?.id,
+            postsAfter = postsAfter,
+          )
+        }
+        .onEach { hasUnreadPosts -> _state.update { it.copy(hasUnreadPosts = hasUnreadPosts) } }
+        .launchIn(coroutineScope)
+
+      settingsRepository.enableFeaturedItemBlur
+        .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
+        .launchIn(coroutineScope)
+    }
+
+    private fun observePosts(activeSourceFlow: Flow<Source?>, postsTypeFlow: Flow<PostsType>) {
+      combine(activeSourceFlow, postsTypeFlow) { activeSource, postsType ->
           Pair(activeSource, postsType)
         }
         .distinctUntilChanged()
@@ -359,42 +399,6 @@ class HomePresenter(
 
           _state.update { it.copy(posts = posts) }
         }
-        .launchIn(coroutineScope)
-
-      rssRepository
-        .hasFeeds()
-        .distinctUntilChanged()
-        .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
-        .launchIn(coroutineScope)
-
-      combine(observableActiveSource.activeSource, settingsRepository.postsType) {
-          activeSource,
-          postsType ->
-          Pair(activeSource, postsType)
-        }
-        .flatMapLatest { (activeSource, postsType) ->
-          val postsAfter =
-            when (postsType) {
-              PostsType.ALL,
-              PostsType.UNREAD -> Instant.DISTANT_PAST
-              PostsType.TODAY -> {
-                getTodayStartInstant()
-              }
-              PostsType.LAST_24_HOURS -> {
-                getLast24HourStart()
-              }
-            }
-
-          rssRepository.hasUnreadPostsInSource(
-            sourceId = activeSource?.id,
-            postsAfter = postsAfter,
-          )
-        }
-        .onEach { hasUnreadPosts -> _state.update { it.copy(hasUnreadPosts = hasUnreadPosts) } }
-        .launchIn(coroutineScope)
-
-      settingsRepository.enableFeaturedItemBlur
-        .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
         .launchIn(coroutineScope)
     }
 
