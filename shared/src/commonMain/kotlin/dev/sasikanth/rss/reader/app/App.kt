@@ -52,7 +52,7 @@ import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
-import dev.sasikanth.rss.reader.ui.DynamicContentTheme
+import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
@@ -102,7 +102,7 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    DynamicContentTheme(useDarkTheme = useDarkTheme) {
+    AppTheme(useDarkTheme = useDarkTheme) {
       ProvideStrings {
         Box {
           Children(
@@ -159,12 +159,12 @@ fun App(
                 )
               }
               is Screen.AddFeed -> {
-                DynamicContentTheme(useDarkTheme = true) {
+                AppTheme(useDarkTheme = true) {
                   AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
                 }
               }
               is Screen.GroupDetails -> {
-                DynamicContentTheme(useDarkTheme = true) {
+                AppTheme(useDarkTheme = true) {
                   GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
                 }
               }
