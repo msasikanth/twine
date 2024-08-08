@@ -19,14 +19,8 @@ package dev.sasikanth.rss.reader.di
 import android.content.Context
 import coil3.PlatformContext
 import me.tatarka.inject.annotations.Provides
-import okio.Path
-import okio.Path.Companion.toPath
 
 actual interface ImageLoaderPlatformComponent {
 
   @Provides fun providePlatformContext(context: Context): PlatformContext = context
-
-  @Provides
-  fun diskCache(application: Context): Path =
-    application.cacheDir.absolutePath.toPath().resolve("dev_sasikanth_rss_reader_images_cache")
 }

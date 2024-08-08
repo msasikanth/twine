@@ -16,4 +16,9 @@
 
 package dev.sasikanth.rss.reader.app
 
-data class AppInfo(val versionCode: Int, val versionName: String, val isDebugBuild: Boolean)
+data class AppInfo(
+  val versionCode: Int,
+  val versionName: String,
+  val isDebugBuild: Boolean,
+  val cachePath: () -> String,
+)

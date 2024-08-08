@@ -54,7 +54,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
     return AppInfo(
       versionName = packageInfo.versionName,
       versionCode = versionCode,
-      isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0
+      isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
+      cachePath = { context.cacheDir.absolutePath }
     )
   }
 
