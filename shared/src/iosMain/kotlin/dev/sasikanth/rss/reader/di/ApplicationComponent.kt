@@ -20,9 +20,13 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.experimental.ExperimentalNativeApi
+import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 import platform.Foundation.NSBundle
+import platform.Foundation.NSCachesDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSUserDomainMask
 import platform.UIKit.UIViewController
 
 @AppScope
@@ -45,5 +49,19 @@ abstract class ApplicationComponent(
       versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
           ?: "",
       isDebugBuild = Platform.isDebugBinary,
+      cachePath = { NSFileManager.defaultManager.cacheDir }
     )
+
+  @OptIn(ExperimentalForeignApi::class)
+  private val NSFileManager.cacheDir: String
+    get() =
+      URLForDirectory(
+          directory = NSCachesDirectory,
+          inDomain = NSUserDomainMask,
+          appropriateForURL = null,
+          create = true,
+          error = null,
+        )
+        ?.path
+        .orEmpty()
 }

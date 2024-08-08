@@ -17,32 +17,9 @@
 package dev.sasikanth.rss.reader.di
 
 import coil3.PlatformContext
-import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Provides
-import okio.Path
-import okio.Path.Companion.toPath
-import platform.Foundation.NSCachesDirectory
-import platform.Foundation.NSFileManager
-import platform.Foundation.NSUserDomainMask
 
 actual interface ImageLoaderPlatformComponent {
 
   @Provides fun providePlatformContext(): PlatformContext = PlatformContext.INSTANCE
-
-  @Provides
-  fun diskCache(): Path =
-    NSFileManager.defaultManager.cacheDir.toPath().resolve("dev_sasikanth_rss_reader_images_cache")
-
-  @OptIn(ExperimentalForeignApi::class)
-  private val NSFileManager.cacheDir: String
-    get() =
-      URLForDirectory(
-          directory = NSCachesDirectory,
-          inDomain = NSUserDomainMask,
-          appropriateForURL = null,
-          create = true,
-          error = null,
-        )
-        ?.path
-        .orEmpty()
 }

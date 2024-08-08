@@ -116,7 +116,7 @@ internal fun FeaturedSection(
       systemBarsEndPadding
     }
 
-  LaunchedEffect(pagerState) {
+  LaunchedEffect(pagerState, featuredPosts) {
     snapshotFlow {
         val settledPage = pagerState.settledPage
         try {
