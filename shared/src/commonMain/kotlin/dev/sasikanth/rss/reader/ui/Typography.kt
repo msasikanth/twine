@@ -139,7 +139,7 @@ internal fun typography(fontFamily: FontFamily) =
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
-        lineHeight = 20.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
