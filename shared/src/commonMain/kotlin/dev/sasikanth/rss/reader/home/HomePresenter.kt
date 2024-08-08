@@ -62,6 +62,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -165,7 +166,7 @@ class HomePresenter(
   }
 
   private class PresenterInstance(
-    dispatchersProvider: DispatchersProvider,
+    private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
     private val settingsRepository: SettingsRepository,
@@ -323,7 +324,10 @@ class HomePresenter(
             .map { featuredPosts ->
               featuredPosts
                 .map { postWithMetadata ->
-                  val seedColor = seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
+                  val seedColor =
+                    withContext(dispatchersProvider.default) {
+                      seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
+                    }
 
                   FeaturedPostItem(
                     postWithMetadata = postWithMetadata,
