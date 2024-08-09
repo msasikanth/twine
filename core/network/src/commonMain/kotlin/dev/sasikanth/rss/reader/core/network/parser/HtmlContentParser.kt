@@ -17,36 +17,41 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.safety.Safelist
 import io.ktor.utils.io.charsets.MalformedInputException
 
 internal object HtmlContentParser {
 
-  private val allowedContentTags = setOf("p", "span", "em", "u", "b", "i", "strong")
+  private const val TAG_BODY = "body"
+  private const val TAG_IMG = "img"
+  private const val TAG_FIGCAPTION = "figcaption"
+  private const val ATTR_SRC = "src"
 
-  fun parse(htmlContent: String): HtmlContent? {
+  private val allowedContentTags =
+    Safelist().addTags(TAG_FIGCAPTION, TAG_IMG).addAttributes(TAG_IMG, ATTR_SRC)
+  private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
+
+  fun parse(htmlContent: String): Result? {
     if (htmlContent.isBlank()) return null
 
     return try {
-      val document = Ksoup.parse(htmlContent)
+      val cleanedHtml = Ksoup.clean(htmlContent, allowedContentTags)
+      val document = Ksoup.parse(cleanedHtml)
+      val body = document.getElementsByTag(TAG_BODY).first() ?: return null
+      val elements = body.children()
 
-      val imageUrl =
-        document
-          .getElementsByTag("img")
-          .firstOrNull { it.hasAttr("src") && !it.attr("src").endsWith(".gif") }
-          ?.attr("src")
-
-      val contentStringBuilder = StringBuilder()
-      document.getAllElements().forEach { element ->
-        if (allowedContentTags.contains(element.tagName())) {
-          contentStringBuilder.append(element.text().cleanWhitespaces())
+      val leadImage =
+        elements.firstNotNullOfOrNull {
+          val imageUrl = it.attr(ATTR_SRC)
+          if (it.tagName() == TAG_IMG && !gifRegex.containsMatchIn(imageUrl)) {
+            imageUrl.removeSurrounding("\"")
+          } else {
+            null
+          }
         }
+      val content = body.ownText()
 
-        if (element.tagName() == "p" || element.tagName() == "br") {
-          contentStringBuilder.appendLine()
-        }
-      }
-
-      HtmlContent(imageUrl = imageUrl, content = contentStringBuilder.toString())
+      Result(leadImage = leadImage, content = content)
     } catch (e: Exception) {
       null
     } catch (e: MalformedInputException) {
@@ -55,18 +60,5 @@ internal object HtmlContentParser {
     }
   }
 
-  private fun String.cleanWhitespaces(): String {
-    var formattedText = this.trim()
-    if (formattedText.isNotBlank()) {
-      if (this[0].isWhitespace()) {
-        formattedText = " $formattedText"
-      }
-      if (this.last().isWhitespace()) {
-        formattedText += " "
-      }
-    }
-    return formattedText
-  }
-
-  data class HtmlContent(val imageUrl: String?, val content: String)
+  data class Result(val leadImage: String?, val content: String)
 }

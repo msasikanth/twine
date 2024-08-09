@@ -128,7 +128,7 @@ internal object RSSContentParser : ContentParser() {
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
           if (image.isNullOrBlank() && htmlContent != null) {
-            image = htmlContent.imageUrl
+            image = htmlContent.leadImage
           }
 
           description = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()

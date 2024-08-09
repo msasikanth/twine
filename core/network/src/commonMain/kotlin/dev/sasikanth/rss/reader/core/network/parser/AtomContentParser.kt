@@ -124,7 +124,7 @@ internal object AtomContentParser : ContentParser() {
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
           if (image.isNullOrBlank() && htmlContent != null) {
-            image = htmlContent.imageUrl
+            image = htmlContent.leadImage
           }
 
           content = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
