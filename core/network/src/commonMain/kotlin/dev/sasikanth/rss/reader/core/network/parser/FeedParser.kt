@@ -108,8 +108,6 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
 
-    fun cleanTextCompact(text: String?) = cleanText(text)?.take(300)
-
     fun feedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
     }

@@ -858,14 +858,6 @@ class RssRepository(
     )
   }
 
-  suspend fun updatedFeedPinnedPosition(pinnedPosition: Double, id: String) {
-    withContext(ioDispatcher) { feedQueries.updatedPinnedPosition(pinnedPosition, id) }
-  }
-
-  suspend fun updatedFeedGroupPinnedPosition(pinnedPosition: Double, id: String) {
-    withContext(ioDispatcher) { feedGroupQueries.updatedPinnedPosition(pinnedPosition, id) }
-  }
-
   suspend fun updatedSourcePinnedPosition(sources: List<Source>) {
     withContext(ioDispatcher) {
       transactionRunner.invoke {

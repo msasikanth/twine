@@ -32,7 +32,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class PostSourceFetcher(
+class FullArticleFetcher(
   private val httpClient: HttpClient,
   private val dispatchersProvider: DispatchersProvider
 ) {

@@ -127,11 +127,8 @@ internal object RDFContentParser : ContentParser() {
           rawContent = parser.nextText().trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
-          if (image.isNullOrBlank() && htmlContent != null) {
-            image = htmlContent.imageUrl
-          }
-
-          description = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
+          image = htmlContent?.leadImage ?: image
+          description = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }
         name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()
@@ -149,7 +146,7 @@ internal object RDFContentParser : ContentParser() {
     return PostPayload(
       link = FeedParser.cleanText(link)!!,
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      description = FeedParser.cleanTextCompact(description).orEmpty().decodeHTMLString(),
+      description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),

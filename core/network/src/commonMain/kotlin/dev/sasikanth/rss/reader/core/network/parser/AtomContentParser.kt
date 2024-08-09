@@ -123,11 +123,8 @@ internal object AtomContentParser : ContentParser() {
           rawContent = parser.nextText().trimIndent()
 
           val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
-          if (image.isNullOrBlank() && htmlContent != null) {
-            image = htmlContent.imageUrl
-          }
-
-          content = htmlContent?.content?.ifBlank { rawContent.trim() } ?: rawContent.trim()
+          image = htmlContent?.leadImage ?: image
+          content = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
@@ -150,7 +147,7 @@ internal object AtomContentParser : ContentParser() {
     return PostPayload(
       link = FeedParser.cleanText(link)!!,
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      description = FeedParser.cleanTextCompact(content).orEmpty().decodeHTMLString(),
+      description = content.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = FeedParser.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
