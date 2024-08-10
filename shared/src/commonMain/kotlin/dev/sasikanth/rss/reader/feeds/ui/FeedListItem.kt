@@ -38,13 +38,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.RadioSelected
 import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
@@ -96,18 +95,12 @@ internal fun FeedListItem(
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      Box(
-        modifier = Modifier.requiredSize(36.dp).background(Color.White, RoundedCornerShape(8.dp)),
-        contentAlignment = Alignment.Center
-      ) {
-        AsyncImage(
-          url = feed.icon,
-          contentDescription = null,
-          contentScale = ContentScale.Crop,
-          modifier =
-            Modifier.requiredSize(28.dp).clip(RoundedCornerShape(4.dp)).align(Alignment.Center),
-        )
-      }
+      FeedFavIcon(
+        url = feed.homepageLink,
+        contentDescription = null,
+        modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),
+        contentScale = ContentScale.Crop,
+      )
 
       Spacer(Modifier.requiredWidth(12.dp))
 

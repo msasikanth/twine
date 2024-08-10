@@ -34,7 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
@@ -103,7 +103,7 @@ internal fun FeedGroupIconGrid(
 @Composable
 private fun FeedIcon(icon: String?, iconSize: Dp, iconShape: Shape, modifier: Modifier = Modifier) {
   if (!icon.isNullOrBlank()) {
-    AsyncImage(
+    FeedFavIcon(
       url = icon,
       contentDescription = null,
       modifier =

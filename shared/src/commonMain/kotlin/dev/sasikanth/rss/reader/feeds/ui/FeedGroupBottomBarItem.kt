@@ -58,21 +58,21 @@ internal fun FeedGroupBottomBarItem(
         contentAlignment = Alignment.Center
       ) {
         val iconSize =
-          if (feedGroup.feedIcons.size > 2) {
+          if (feedGroup.feedHomepageLinks.size > 2) {
             18.dp
           } else {
             20.dp
           }
 
         val iconSpacing =
-          if (feedGroup.feedIcons.size > 2) {
+          if (feedGroup.feedHomepageLinks.size > 2) {
             4.dp
           } else {
             0.dp
           }
 
         FeedGroupIconGrid(
-          icons = feedGroup.feedIcons,
+          icons = feedGroup.feedHomepageLinks,
           iconSize = iconSize,
           iconShape = CircleShape,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),

@@ -96,7 +96,7 @@ internal fun BottomSheetCollapsedContent(
           is Feed -> {
             FeedBottomBarItem(
               badgeCount = source.numberOfUnreadPosts,
-              iconUrl = source.icon,
+              homePageUrl = source.homepageLink,
               canShowUnreadPostsCount = canShowUnreadPostsCount,
               onClick = { onSourceClick(source) },
               selected = activeSource?.id == source.id

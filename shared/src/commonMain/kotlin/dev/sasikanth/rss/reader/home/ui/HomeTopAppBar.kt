@@ -62,7 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
@@ -192,21 +192,21 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
     when (source) {
       is FeedGroup -> {
         val iconSize =
-          if (source.feedIcons.size > 2) {
+          if (source.feedHomepageLinks.size > 2) {
             18.dp
           } else {
             20.dp
           }
 
         val iconSpacing =
-          if (source.feedIcons.size > 2) {
+          if (source.feedHomepageLinks.size > 2) {
             4.dp
           } else {
             0.dp
           }
 
         FeedGroupIconGrid(
-          icons = source.feedIcons,
+          icons = source.feedHomepageLinks,
           iconSize = iconSize,
           iconShape = RoundedCornerShape(percent = 30),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
@@ -214,10 +214,9 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
         )
       }
       is Feed -> {
-        AsyncImage(
-          url = source.icon,
+        FeedFavIcon(
+          url = source.homepageLink,
           contentDescription = null,
-          backgroundColor = Color.White,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )
       }
