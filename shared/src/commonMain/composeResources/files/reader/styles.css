@@ -12,24 +12,11 @@ figcaption {
   font-size: 14px;
   line-height: 1.6;
 }
-.row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.column {
-  margin-inline-start: 16px;
-  flex: 1;
-}
 .caption {
   font-size: 12px;
 }
 .feedName {
   margin-bottom: 8px;
-}
-.feedIcon {
-  width: 32px;
-  height: auto;
 }
 img, figure, video, div, object {
   max-width: 100%;

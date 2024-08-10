@@ -24,7 +24,6 @@ object ReaderHTML {
     title: String,
     feedName: String,
     feedHomePageLink: String,
-    feedIcon: String,
     publishedAt: String
   ): String {
     val readabilityJS = readFile("readability.js")
@@ -35,7 +34,6 @@ object ReaderHTML {
       postMetadata(
         feedName = feedName,
         feedHomePageLink = feedHomePageLink,
-        feedIcon = feedIcon,
         publishedAt = publishedAt,
         hasTitle = title.isNotBlank()
       )
@@ -69,7 +67,6 @@ object ReaderHTML {
   private fun postMetadata(
     feedName: String,
     feedHomePageLink: String,
-    feedIcon: String,
     publishedAt: String,
     hasTitle: Boolean,
   ): String {
@@ -81,13 +78,8 @@ object ReaderHTML {
       // language=HTML
       appendLine(
         """
-      <div class="row">
-        <img class="feedIcon" src="$feedIcon" alt="Feed Icon">
-        <div class="column">
-          <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
-          <div class="caption">$publishedAt</div>
-        </div>
-      </div>
+      <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
+      <div class="caption">$publishedAt</div>
       <hr class="top-divider">
     """
           .trimIndent()
