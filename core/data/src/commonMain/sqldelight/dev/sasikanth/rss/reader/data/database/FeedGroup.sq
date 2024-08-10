@@ -26,10 +26,10 @@ SELECT
   id,
   name,
   feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
               FROM feed
               WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIcons,
+              LIMIT 4), '') AS feedHomepageLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -42,10 +42,10 @@ SELECT
   id,
   name,
   feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
               FROM feed
               WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIcons,
+              LIMIT 4), '') AS feedHomepageLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -79,10 +79,10 @@ SELECT
   id,
   name,
   feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
+  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
               FROM feed
               WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIcons,
+              LIMIT 4), '') AS feedHomepageLinks,
   createdAt,
   updatedAt,
   pinnedAt

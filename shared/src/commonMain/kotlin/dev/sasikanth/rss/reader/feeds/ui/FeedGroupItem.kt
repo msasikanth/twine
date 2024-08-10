@@ -99,14 +99,14 @@ internal fun FeedGroupItem(
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       val iconSize =
-        if (feedGroup.feedIcons.size > 2) {
+        if (feedGroup.feedHomepageLinks.size > 2) {
           17.dp
         } else {
           19.dp
         }
 
       val iconSpacing =
-        if (feedGroup.feedIcons.size > 2) {
+        if (feedGroup.feedHomepageLinks.size > 2) {
           2.dp
         } else {
           0.dp
@@ -114,7 +114,7 @@ internal fun FeedGroupItem(
 
       FeedGroupIconGrid(
         modifier = Modifier.requiredSize(36.dp),
-        icons = feedGroup.feedIcons,
+        icons = feedGroup.feedHomepageLinks,
         iconSize = iconSize,
         iconShape = CircleShape,
         verticalArrangement = Arrangement.spacedBy(iconSpacing),
