@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2024 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,40 +17,52 @@ package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RssFeed
+import androidx.compose.material.icons.rounded.RssFeed
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Dimension
 import coil3.size.Size
+import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
+import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-internal fun AsyncImage(
+internal fun FeedFavIcon(
   url: String,
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size(Dimension.Undefined, 500),
-  backgroundColor: Color? = null
+  size: Size = Size(Dimension.Undefined, 500)
 ) {
-  val backgroundColorModifier =
-    if (backgroundColor != null) {
-      Modifier.background(color = backgroundColor)
-    } else {
-      Modifier
-    }
+  Box(modifier.background(Color.White)) {
+    val context = LocalPlatformContext.current
+    val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
+    val imageLoader = FavIconImageLoader.get(context)
 
-  Box(modifier.then(backgroundColorModifier)) {
-    val imageRequest =
-      ImageRequest.Builder(LocalPlatformContext.current).data(url).size(size).build()
-
-    coil3.compose.AsyncImage(
+    SubcomposeAsyncImage(
       model = imageRequest,
       contentDescription = contentDescription,
       modifier = Modifier.matchParentSize(),
-      contentScale = contentScale
+      contentScale = contentScale,
+      imageLoader = imageLoader,
+      error = { PlaceHolderIcon() },
+      loading = { PlaceHolderIcon() }
     )
   }
+}
+
+@Composable
+private fun PlaceHolderIcon() {
+  Icon(
+    imageVector = Icons.Rounded.RssFeed,
+    contentDescription = null,
+    tint = AppTheme.colorScheme.tintedBackground,
+  )
 }

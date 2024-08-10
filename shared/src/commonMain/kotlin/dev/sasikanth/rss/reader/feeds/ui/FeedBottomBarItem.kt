@@ -33,17 +33,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
 @Composable
 internal fun FeedBottomBarItem(
   badgeCount: Long,
-  iconUrl: String,
+  homePageUrl: String,
   canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -52,19 +51,12 @@ internal fun FeedBottomBarItem(
   Box(modifier = modifier) {
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
-      Box(
-        modifier = Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)),
-        contentAlignment = Alignment.Center
-      ) {
-        AsyncImage(
-          url = iconUrl,
-          contentDescription = null,
-          modifier =
-            Modifier.requiredSize(48.dp)
-              .clip(RoundedCornerShape(12.dp))
-              .clickable(onClick = onClick)
-        )
-      }
+      FeedFavIcon(
+        url = homePageUrl,
+        contentDescription = null,
+        modifier =
+          Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
+      )
     }
 
     if (badgeCount > 0 && canShowUnreadPostsCount) {
