@@ -62,7 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.SourceFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
@@ -214,10 +214,9 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
         )
       }
       is Feed -> {
-        AsyncImage(
-          url = source.icon,
+        SourceFavIcon(
+          url = source.homepageLink,
           contentDescription = null,
-          backgroundColor = Color.White,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )
       }

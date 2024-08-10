@@ -19,7 +19,6 @@ package dev.sasikanth.rss.reader.feed.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -78,7 +77,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
-import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.SourceFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
@@ -246,16 +245,11 @@ private fun FeedLabelInput(
       .padding(8.dp)
       .fillMaxWidth()
   ) {
-    Box(
-      Modifier.requiredSize(56.dp).background(Color.White, RoundedCornerShape(16.dp)).padding(8.dp)
-    ) {
-      AsyncImage(
-        url = feed.icon,
-        contentDescription = feed.name,
-        modifier =
-          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(12.dp)).align(Alignment.Center)
-      )
-    }
+    SourceFavIcon(
+      url = feed.homepageLink,
+      contentDescription = feed.name,
+      modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
+    )
 
     Spacer(Modifier.requiredWidth(16.dp))
 
