@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.SourceFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 
@@ -51,7 +51,7 @@ internal fun FeedBottomBarItem(
   Box(modifier = modifier) {
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
-      SourceFavIcon(
+      FeedFavIcon(
         url = homePageUrl,
         contentDescription = null,
         modifier =

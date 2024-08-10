@@ -43,7 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.SourceFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.RadioSelected
 import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
@@ -95,7 +95,7 @@ internal fun FeedListItem(
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      SourceFavIcon(
+      FeedFavIcon(
         url = feed.homepageLink,
         contentDescription = null,
         modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),

@@ -77,7 +77,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
-import dev.sasikanth.rss.reader.components.image.SourceFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedFavIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
@@ -245,7 +245,7 @@ private fun FeedLabelInput(
       .padding(8.dp)
       .fillMaxWidth()
   ) {
-    SourceFavIcon(
+    FeedFavIcon(
       url = feed.homepageLink,
       contentDescription = feed.name,
       modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),

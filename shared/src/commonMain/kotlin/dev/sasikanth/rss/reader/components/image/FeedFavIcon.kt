@@ -28,7 +28,7 @@ import coil3.size.Size
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
 
 @Composable
-internal fun SourceFavIcon(
+internal fun FeedFavIcon(
   url: String,
   contentDescription: String?,
   modifier: Modifier = Modifier,
