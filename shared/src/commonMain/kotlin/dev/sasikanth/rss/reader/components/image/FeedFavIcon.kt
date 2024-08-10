@@ -17,15 +17,21 @@ package dev.sasikanth.rss.reader.components.image
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RssFeed
+import androidx.compose.material.icons.rounded.RssFeed
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
+import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
 internal fun FeedFavIcon(
@@ -40,12 +46,23 @@ internal fun FeedFavIcon(
     val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
     val imageLoader = FavIconImageLoader.get(context)
 
-    coil3.compose.AsyncImage(
+    SubcomposeAsyncImage(
       model = imageRequest,
       contentDescription = contentDescription,
       modifier = Modifier.matchParentSize(),
       contentScale = contentScale,
-      imageLoader = imageLoader
+      imageLoader = imageLoader,
+      error = { PlaceHolderIcon() },
+      loading = { PlaceHolderIcon() }
     )
   }
+}
+
+@Composable
+private fun PlaceHolderIcon() {
+  Icon(
+    imageVector = Icons.Rounded.RssFeed,
+    contentDescription = null,
+    tint = AppTheme.colorScheme.tintedBackground,
+  )
 }
