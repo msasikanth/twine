@@ -254,6 +254,7 @@ private fun MarkPostsAsReadButton(
         .padding(vertical = 4.dp)
         .padding(start = 8.dp, end = 12.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     CompositionLocalProvider(LocalContentColor provides contentColor) {
       Text(
@@ -288,6 +289,7 @@ private fun PostsFilterButton(
           .padding(vertical = 4.dp)
           .padding(start = 8.dp, end = 12.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       val postsTypeLabel = getPostTypeLabel(postsType)
 
