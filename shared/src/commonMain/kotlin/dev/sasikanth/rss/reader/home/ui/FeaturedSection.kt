@@ -116,6 +116,8 @@ internal fun FeaturedSection(
       systemBarsEndPadding
     }
 
+  val defaultSeedColor = AppTheme.colorScheme.tintedForeground
+
   LaunchedEffect(pagerState, featuredPosts) {
     snapshotFlow {
         val settledPage = pagerState.settledPage
@@ -148,9 +150,14 @@ internal fun FeaturedSection(
             currentItem
           }
 
+        val fromSeedColor =
+          fromItem.seedColor.run { if (this != null) Color(this) else defaultSeedColor }
+        val toSeedColor =
+          toItem.seedColor.run { if (this != null) Color(this) else defaultSeedColor }
+
         dynamicColorState.animate(
-          fromSeedColor = Color(fromItem.seedColor!!),
-          toSeedColor = Color(toItem.seedColor!!),
+          fromSeedColor = fromSeedColor,
+          toSeedColor = toSeedColor,
           progress = offset
         )
       }
