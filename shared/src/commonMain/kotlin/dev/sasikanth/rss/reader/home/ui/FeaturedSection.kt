@@ -61,6 +61,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
 
