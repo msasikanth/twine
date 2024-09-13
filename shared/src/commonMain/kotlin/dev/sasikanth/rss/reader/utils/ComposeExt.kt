@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.utils
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
@@ -60,4 +61,8 @@ internal fun LogCompositions(tag: String, msg: String) {
   val ref = remember { Ref(0) }
   SideEffect { ref.value++ }
   Logger.d(tag) { "Compositions: $msg ${ref.value}" }
+}
+
+fun PagerState.getOffsetFractionForPage(page: Int): Float {
+  return (currentPage - page) + currentPageOffsetFraction
 }
