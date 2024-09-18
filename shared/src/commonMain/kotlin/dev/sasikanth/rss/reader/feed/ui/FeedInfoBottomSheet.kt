@@ -287,7 +287,7 @@ private fun FeedLabelInput(
           modifier = Modifier.fillMaxWidth(),
           value = input,
           onValueChange = { input = it },
-          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, autoCorrect = false),
+          keyboardOptions = KeyboardOptions(autoCorrectEnabled = false, imeAction = ImeAction.Done),
           keyboardActions =
             KeyboardActions(
               onDone = {

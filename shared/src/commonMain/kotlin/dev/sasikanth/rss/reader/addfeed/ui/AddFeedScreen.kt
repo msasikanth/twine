@@ -44,7 +44,6 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRight
-import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.twotone.FolderOpen
 import androidx.compose.material3.ButtonDefaults
@@ -213,9 +212,9 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
           hint = LocalStrings.current.feedEntryLinkHint,
           keyboardOptions =
             KeyboardOptions(
-              imeAction = ImeAction.Next,
+              autoCorrectEnabled = false,
               keyboardType = KeyboardType.Uri,
-              autoCorrect = false
+              imeAction = ImeAction.Next
             )
         )
 
@@ -229,9 +228,9 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
           hint = LocalStrings.current.feedEntryTitleHint,
           keyboardOptions =
             KeyboardOptions(
-              imeAction = ImeAction.Done,
+              autoCorrectEnabled = false,
               keyboardType = KeyboardType.Text,
-              autoCorrect = false
+              imeAction = ImeAction.Done
             ),
         )
 
