@@ -120,7 +120,7 @@ async function renderReaderView(link, html, colors) {
   );
 
   //noinspection JSUnresolvedVariable
-  const result = await Mercury.parse(link, { html: html });
+  const result = await parse(html, link);
   const content = result.content || html;
 
   document.getElementById("content").innerHTML += content;

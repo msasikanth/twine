@@ -26,7 +26,7 @@ object ReaderHTML {
     feedHomePageLink: String,
     publishedAt: String
   ): String {
-    val mercuryJS = readFile("mercury.web.js")
+    val readabilityJS = readFile("readability.js")
     val readerJS = readFile("main.js")
     val readerStyles = readFile("styles.css")
 
@@ -50,7 +50,7 @@ object ReaderHTML {
       <link rel="preload" as='style' href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap">
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap">
       <style>$readerStyles</style>
-      <script>$mercuryJS</script>
+      <script>$readabilityJS</script>
       <script>$readerJS</script>
       <title>$title</title>
     </head>
