@@ -52,6 +52,7 @@ val TrTwineStrings =
     settingsHeaderBehaviour = "Davranış",
     settingsHeaderFeedback = "Geri bildirim & Hata raporları",
     settingsHeaderOpml = "OPML",
+    settingsHeaderTheme = "Theme",
     settingsBrowserTypeTitle = "Uygulama içi tarayıcıyı kullan",
     settingsBrowserTypeSubtitle =
       "Kapatıldığında, bağlantılar varsayılan tarayıcınızda açılacaktır.",
@@ -78,6 +79,9 @@ val TrTwineStrings =
     settingsShowReaderViewTitle = "Okuyucu görünümünü etkinleştir",
     settingsShowReaderViewSubtitle =
       "Gönderiler basitleştirilmiş, okunması kolay bir görünümde gösterilecek.",
+    settingsThemeAuto = "Auto",
+    settingsThemeLight = "Light",
+    settingsThemeDark = "Dark",
     feeds = "İçerikler",
     editFeeds = "İçerikleri düzenle",
     comments = "Yorumlar",

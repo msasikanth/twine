@@ -55,6 +55,7 @@ val DeTwineStrings =
     settingsHeaderBehaviour = "Verhalten",
     settingsHeaderFeedback = "Feedback und Fehlerberichte",
     settingsHeaderOpml = "OPML",
+    settingsHeaderTheme = "Theme",
     settingsBrowserTypeTitle = "Verwende den In-App-Browser",
     settingsBrowserTypeSubtitle =
       "Wenn diese Option deaktiviert ist, werden Links in Ihrem Standardbrowser geöffnet.",
@@ -82,6 +83,9 @@ val DeTwineStrings =
     settingsShowReaderViewTitle = "Aktiviere Leseansicht",
     settingsShowReaderViewSubtitle =
       "Artikel werden in einer vereinfachten, leicht lesbaren Ansicht angezeigt.",
+    settingsThemeAuto = "Auto",
+    settingsThemeLight = "Light",
+    settingsThemeDark = "Dark",
     feeds = "Feeds",
     editFeeds = "Feeds bearbeiten",
     comments = "Kommentare",

@@ -166,7 +166,12 @@ class SettingsPresenter(
         SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
+        is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       }
+    }
+
+    private fun onAppThemeModeChanged(appThemeMode: AppThemeMode) {
+      coroutineScope.launch { settingsRepository.updateAppTheme(appThemeMode) }
     }
 
     private fun toggleShowReaderView(value: Boolean) {
