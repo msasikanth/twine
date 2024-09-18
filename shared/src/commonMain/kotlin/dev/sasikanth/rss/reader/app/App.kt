@@ -92,7 +92,7 @@ fun App(
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
-      remember(isSystemInDarkTheme) {
+      remember(isSystemInDarkTheme, appState.appThemeMode) {
         when (appState.appThemeMode) {
           AppThemeMode.Light -> false
           AppThemeMode.Dark -> true
