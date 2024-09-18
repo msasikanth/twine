@@ -19,6 +19,7 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -109,6 +110,7 @@ class SettingsPresenter(
           settingsRepository.showUnreadPostsCount,
           settingsRepository.postsDeletionPeriod,
           settingsRepository.showReaderView,
+          settingsRepository.appThemeMode,
           rssRepository.hasFeeds()
         ) {
           browserType,
@@ -116,6 +118,7 @@ class SettingsPresenter(
           showUnreadPostsCount,
           postsDeletionPeriod,
           showReaderView,
+          appThemeMode,
           hasFeeds ->
           Settings(
             browserType = browserType,
@@ -123,7 +126,8 @@ class SettingsPresenter(
             showUnreadPostsCount = showUnreadPostsCount,
             hasFeeds = hasFeeds,
             postsDeletionPeriod = postsDeletionPeriod,
-            showReaderView = showReaderView
+            showReaderView = showReaderView,
+            appThemeMode = appThemeMode,
           )
         }
         .onEach { settings ->
@@ -134,7 +138,8 @@ class SettingsPresenter(
               showUnreadPostsCount = settings.showUnreadPostsCount,
               hasFeeds = settings.hasFeeds,
               postsDeletionPeriod = settings.postsDeletionPeriod,
-              showReaderView = settings.showReaderView
+              showReaderView = settings.showReaderView,
+              appThemeMode = settings.appThemeMode,
             )
           }
         }
@@ -161,7 +166,12 @@ class SettingsPresenter(
         SettingsEvent.ExportOpmlClicked -> exportOpmlClicked()
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
+        is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       }
+    }
+
+    private fun onAppThemeModeChanged(appThemeMode: AppThemeMode) {
+      coroutineScope.launch { settingsRepository.updateAppTheme(appThemeMode) }
     }
 
     private fun toggleShowReaderView(value: Boolean) {
@@ -209,4 +219,5 @@ private data class Settings(
   val hasFeeds: Boolean,
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
+  val appThemeMode: AppThemeMode,
 )

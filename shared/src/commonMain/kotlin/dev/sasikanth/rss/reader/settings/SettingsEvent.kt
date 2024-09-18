@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.settings
 
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.Period
 
@@ -39,4 +40,6 @@ sealed interface SettingsEvent {
   data object CancelOpmlImportOrExport : SettingsEvent
 
   data class PostsDeletionPeriodChanged(val newPeriod: Period) : SettingsEvent
+
+  data class OnAppThemeModeChanged(val appThemeMode: AppThemeMode) : SettingsEvent
 }

@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.opml.OpmlResult
@@ -31,6 +32,7 @@ internal data class SettingsState(
   val opmlResult: OpmlResult?,
   val postsDeletionPeriod: Period?,
   val showReaderView: Boolean,
+  val appThemeMode: AppThemeMode,
 ) {
 
   companion object {
@@ -45,6 +47,7 @@ internal data class SettingsState(
         opmlResult = null,
         postsDeletionPeriod = null,
         showReaderView = false,
+        appThemeMode = AppThemeMode.Auto,
       )
   }
 }

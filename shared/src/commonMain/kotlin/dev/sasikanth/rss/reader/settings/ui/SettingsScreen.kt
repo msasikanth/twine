@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.settings.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,7 +69,10 @@ import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.Switch
+import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
+import dev.sasikanth.rss.reader.components.ToggleableButtonItem
 import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_MONTH
@@ -97,6 +101,11 @@ internal fun SettingsScreen(
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+  val isSystemInDarkMode =
+    when (state.appThemeMode) {
+      AppThemeMode.Dark -> true
+      else -> isSystemInDarkTheme()
+    }
 
   Scaffold(
     modifier = modifier,
@@ -137,6 +146,45 @@ internal fun SettingsScreen(
         ) {
           item {
             SubHeader(
+              text = LocalStrings.current.settingsHeaderTheme,
+            )
+          }
+
+          item {
+            val appThemeMode = state.appThemeMode
+            ToggleableButtonGroup(
+              modifier =
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp),
+              items =
+                listOf(
+                  ToggleableButtonItem(
+                    label = LocalStrings.current.settingsThemeAuto,
+                    isSelected = appThemeMode == AppThemeMode.Auto,
+                    identifier = AppThemeMode.Auto,
+                  ),
+                  ToggleableButtonItem(
+                    label = LocalStrings.current.settingsThemeLight,
+                    isSelected = appThemeMode == AppThemeMode.Light,
+                    identifier = AppThemeMode.Light
+                  ),
+                  ToggleableButtonItem(
+                    label = LocalStrings.current.settingsThemeDark,
+                    isSelected = appThemeMode == AppThemeMode.Dark,
+                    identifier = AppThemeMode.Dark
+                  )
+                ),
+              onItemSelected = {
+                settingsPresenter.dispatch(
+                  SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode)
+                )
+              }
+            )
+          }
+
+          item { Divider() }
+
+          item {
+            SubHeader(
               text = LocalStrings.current.settingsHeaderBehaviour,
             )
           }
@@ -161,7 +209,7 @@ internal fun SettingsScreen(
             )
           }
 
-          if (canBlurImage) {
+          if (canBlurImage && isSystemInDarkMode) {
             item { Divider(horizontalInsets = 24.dp) }
 
             item {
