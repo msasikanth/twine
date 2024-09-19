@@ -65,7 +65,7 @@ class RssRepository(
 
   companion object {
     private const val NUMBER_OF_FEATURED_POSTS = 6L
-    private const val UPDATE_CHUNKS = 20
+    private const val UPDATE_CHUNKS = 6
   }
 
   private val ioDispatcher = dispatchersProvider.io
