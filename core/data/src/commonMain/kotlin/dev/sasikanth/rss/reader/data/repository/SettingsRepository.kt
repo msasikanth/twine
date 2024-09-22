@@ -33,7 +33,6 @@ import me.tatarka.inject.annotations.Inject
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
-  private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
@@ -46,9 +45,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.data.map { preferences ->
       mapToBrowserType(preferences[browserTypeKey]) ?: BrowserType.Default
     }
-
-  val enableFeaturedItemBlur: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[enableFeaturedItemBlurKey] ?: true }
 
   val showUnreadPostsCount: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
@@ -89,10 +85,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }
-  }
-
-  suspend fun toggleFeaturedItemBlur(value: Boolean) {
-    dataStore.edit { preferences -> preferences[enableFeaturedItemBlurKey] = value }
   }
 
   suspend fun toggleShowUnreadPostsCount(value: Boolean) {

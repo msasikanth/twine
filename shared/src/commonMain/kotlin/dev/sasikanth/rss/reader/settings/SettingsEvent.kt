@@ -25,8 +25,6 @@ sealed interface SettingsEvent {
 
   data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
 
-  data class ToggleFeaturedItemBlur(val value: Boolean) : SettingsEvent
-
   data class ToggleShowUnreadPostsCount(val value: Boolean) : SettingsEvent
 
   data class ToggleShowReaderView(val value: Boolean) : SettingsEvent

@@ -309,10 +309,6 @@ class HomePresenter(
         }
         .onEach { hasUnreadPosts -> _state.update { it.copy(hasUnreadPosts = hasUnreadPosts) } }
         .launchIn(coroutineScope)
-
-      settingsRepository.enableFeaturedItemBlur
-        .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
-        .launchIn(coroutineScope)
     }
 
     private fun observePosts(activeSourceFlow: Flow<Source?>, postsTypeFlow: Flow<PostsType>) {
