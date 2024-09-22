@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -87,13 +86,11 @@ private val featuredGradientBackgroundAspectRatio: Float
       else -> 0.8f
     }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun FeaturedSection(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   pagerState: PagerState,
-  featuredItemBlurEnabled: Boolean,
   useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   onItemClick: (PostWithMetadata) -> Unit,
@@ -207,7 +204,6 @@ internal fun FeaturedSection(
               state = pagerState,
               page = page,
               featuredPost = featuredPost,
-              featuredItemBlurEnabled = featuredItemBlurEnabled,
             )
           }
 
@@ -230,13 +226,11 @@ internal fun FeaturedSection(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun FeaturedSectionBackground(
   state: PagerState,
   page: Int,
   featuredPost: FeaturedPostItem,
-  featuredItemBlurEnabled: Boolean,
   modifier: Modifier = Modifier,
 ) {
   Box(modifier) {
@@ -275,7 +269,7 @@ private fun FeaturedSectionBackground(
         }
         .then(gradientOverlayModifier)
 
-    if (canBlurImage && featuredItemBlurEnabled) {
+    if (canBlurImage) {
       FeaturedSectionBlurredBackground(post = featuredPost, modifier = swipeTransitionModifier)
     } else {
       FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)

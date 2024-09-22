@@ -106,7 +106,6 @@ class SettingsPresenter(
     init {
       combine(
           settingsRepository.browserType,
-          settingsRepository.enableFeaturedItemBlur,
           settingsRepository.showUnreadPostsCount,
           settingsRepository.postsDeletionPeriod,
           settingsRepository.showReaderView,
@@ -114,7 +113,6 @@ class SettingsPresenter(
           rssRepository.hasFeeds()
         ) {
           browserType,
-          featuredItemBlurEnabled,
           showUnreadPostsCount,
           postsDeletionPeriod,
           showReaderView,
@@ -122,7 +120,6 @@ class SettingsPresenter(
           hasFeeds ->
           Settings(
             browserType = browserType,
-            enableHomePageBlur = featuredItemBlurEnabled,
             showUnreadPostsCount = showUnreadPostsCount,
             hasFeeds = hasFeeds,
             postsDeletionPeriod = postsDeletionPeriod,
@@ -134,7 +131,6 @@ class SettingsPresenter(
           _state.update {
             it.copy(
               browserType = settings.browserType,
-              enableHomePageBlur = settings.enableHomePageBlur,
               showUnreadPostsCount = settings.showUnreadPostsCount,
               hasFeeds = settings.hasFeeds,
               postsDeletionPeriod = settings.postsDeletionPeriod,
@@ -156,7 +152,6 @@ class SettingsPresenter(
           // no-op
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
-        is SettingsEvent.ToggleFeaturedItemBlur -> toggleFeaturedItemBlur(event.value)
         is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
         is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
         SettingsEvent.AboutClicked -> {
@@ -198,10 +193,6 @@ class SettingsPresenter(
       coroutineScope.launch { opmlManager.import() }
     }
 
-    private fun toggleFeaturedItemBlur(value: Boolean) {
-      coroutineScope.launch { settingsRepository.toggleFeaturedItemBlur(value) }
-    }
-
     private fun updateBrowserType(browserType: BrowserType) {
       coroutineScope.launch { settingsRepository.updateBrowserType(browserType) }
     }
@@ -214,7 +205,6 @@ class SettingsPresenter(
 
 private data class Settings(
   val browserType: BrowserType,
-  val enableHomePageBlur: Boolean,
   val showUnreadPostsCount: Boolean,
   val hasFeeds: Boolean,
   val postsDeletionPeriod: Period,

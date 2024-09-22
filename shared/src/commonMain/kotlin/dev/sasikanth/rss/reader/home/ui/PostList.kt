@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,12 +65,10 @@ private val postListPadding
     }
 
 @Composable
-@OptIn(ExperimentalFoundationApi::class)
 internal fun PostsList(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   posts: LazyPagingItems<PostWithMetadata>,
-  featuredItemBlurEnabled: Boolean,
   useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
@@ -99,7 +96,6 @@ internal fun PostsList(
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
-          featuredItemBlurEnabled = featuredItemBlurEnabled,
           useDarkTheme = useDarkTheme,
           onItemClick = onPostClicked,
           onPostBookmarkClick = onPostBookmarkClick,

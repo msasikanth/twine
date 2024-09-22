@@ -190,7 +190,6 @@ internal fun HomeScreen(
                         paddingValues = paddingValues,
                         featuredPosts = featuredPosts,
                         posts = posts,
-                        featuredItemBlurEnabled = state.featuredItemBlurEnabled,
                         useDarkTheme = useDarkTheme,
                         listState = listState,
                         featuredPostsPagerState = featuredPostsPagerState,

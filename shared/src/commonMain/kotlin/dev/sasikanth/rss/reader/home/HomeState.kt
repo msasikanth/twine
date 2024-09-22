@@ -36,7 +36,6 @@ internal data class HomeState(
   val loadingState: HomeLoadingState,
   val feedsSheetState: SheetValue,
   val activeSource: Source?,
-  val featuredItemBlurEnabled: Boolean,
   val hasFeeds: Boolean?,
   val postsType: PostsType,
   val hasUnreadPosts: Boolean
@@ -51,7 +50,6 @@ internal data class HomeState(
         loadingState = HomeLoadingState.Idle,
         feedsSheetState = SheetValue.PartiallyExpanded,
         activeSource = null,
-        featuredItemBlurEnabled = true,
         hasFeeds = null,
         postsType = PostsType.ALL,
         hasUnreadPosts = false,

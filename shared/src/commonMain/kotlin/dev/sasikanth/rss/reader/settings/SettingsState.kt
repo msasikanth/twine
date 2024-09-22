@@ -25,7 +25,6 @@ import dev.sasikanth.rss.reader.opml.OpmlResult
 @Immutable
 internal data class SettingsState(
   val browserType: BrowserType,
-  val enableHomePageBlur: Boolean,
   val showUnreadPostsCount: Boolean,
   val hasFeeds: Boolean,
   val appInfo: AppInfo,
@@ -40,7 +39,6 @@ internal data class SettingsState(
     fun default(appInfo: AppInfo) =
       SettingsState(
         browserType = BrowserType.Default,
-        enableHomePageBlur = false,
         showUnreadPostsCount = false,
         hasFeeds = false,
         appInfo = appInfo,

@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -50,8 +50,8 @@ fun ToggleableButtonGroup(
         .requiredHeightIn(min = 56.dp)
         .border(
           width = 1.dp,
-          color = AppTheme.colorScheme.outlineVariant,
-          shape = RoundedCornerShape(50)
+          color = AppTheme.colorScheme.surfaceContainerHigh,
+          shape = MaterialTheme.shapes.large,
         )
   ) {
     val backgroundColor = AppTheme.colorScheme.tintedForeground
@@ -72,7 +72,7 @@ fun ToggleableButtonGroup(
                 y = 0f
               ),
             size = Size(width = itemWidth, height = size.height),
-            cornerRadius = CornerRadius(size.height / 2)
+            cornerRadius = CornerRadius(12.dp.toPx()),
           )
         },
       verticalAlignment = Alignment.CenterVertically,
@@ -82,6 +82,7 @@ fun ToggleableButtonGroup(
         TextButton(
           modifier = Modifier.weight(1f).requiredHeightIn(min = 48.dp),
           content = { Text(toggleableButtonItem.label) },
+          shape = MaterialTheme.shapes.medium,
           colors =
             ButtonDefaults.textButtonColors(
               contentColor =

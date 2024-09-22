@@ -309,10 +309,6 @@ class HomePresenter(
         }
         .onEach { hasUnreadPosts -> _state.update { it.copy(hasUnreadPosts = hasUnreadPosts) } }
         .launchIn(coroutineScope)
-
-      settingsRepository.enableFeaturedItemBlur
-        .onEach { value -> _state.update { it.copy(featuredItemBlurEnabled = value) } }
-        .launchIn(coroutineScope)
     }
 
     private fun observePosts(activeSourceFlow: Flow<Source?>, postsTypeFlow: Flow<PostsType>) {
@@ -362,34 +358,25 @@ class HomePresenter(
               after = postsAfter
             )
             .map { featuredPosts ->
-              featuredPosts
-                .map { postWithMetadata ->
-                  val seedColor =
-                    withContext(dispatchersProvider.default) {
-                      seedColorExtractor.calculateSeedColor(postWithMetadata.imageUrl)
-                    }
-
-                  FeaturedPostItem(
-                    postWithMetadata = postWithMetadata,
-                    seedColor = seedColor,
-                  )
-                }
-                .toImmutableList()
+              featuredPosts.map { postWithMetadata ->
+                FeaturedPostItem(
+                  postWithMetadata = postWithMetadata,
+                  seedColor = null,
+                )
+              }
             }
-            .onEach { featuredPosts -> _state.update { it.copy(featuredPosts = featuredPosts) } }
-            .map { featuredPosts ->
-              val featuredPostsIds = featuredPosts.map { it.postWithMetadata.id }
-              NTuple4(activeSource, postsAfter, unreadOnly, featuredPostsIds)
+            .onEach { featuredPosts ->
+              _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
             }
+            .map { featuredPosts -> NTuple4(activeSource, postsAfter, unreadOnly, featuredPosts) }
         }
-        .onEach { _state.update { it.copy(loadingState = HomeLoadingState.Idle) } }
         .distinctUntilChanged()
-        .onEach { (activeSource, postsAfter, unreadOnly, featuredPostsIds) ->
+        .onEach { (activeSource, postsAfter, unreadOnly, featuredPosts) ->
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
                   selectedFeedId = activeSource?.id,
-                  featuredPostsIds = featuredPostsIds,
+                  featuredPostsIds = featuredPosts.map { it.postWithMetadata.id },
                   unreadOnly = unreadOnly,
                   after = postsAfter,
                 )
@@ -397,7 +384,20 @@ class HomePresenter(
               .flow
               .cachedIn(coroutineScope)
 
-          _state.update { it.copy(posts = posts) }
+          _state.update { it.copy(posts = posts, loadingState = HomeLoadingState.Idle) }
+        }
+        .onEach { (_, _, _, featuredPosts) ->
+          val featuredPostsWithSeedColor =
+            featuredPosts.map { featuredPost ->
+              val seedColor =
+                withContext(dispatchersProvider.default) {
+                  seedColorExtractor.calculateSeedColor(featuredPost.postWithMetadata.imageUrl)
+                }
+
+              featuredPost.copy(seedColor = seedColor)
+            }
+
+          _state.update { it.copy(featuredPosts = featuredPostsWithSeedColor.toImmutableList()) }
         }
         .launchIn(coroutineScope)
     }

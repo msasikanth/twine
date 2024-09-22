@@ -33,22 +33,18 @@ import me.tatarka.inject.annotations.Inject
 class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
-  private val enableFeaturedItemBlurKey = booleanPreferencesKey("pref_enable_blur")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsViewModeKey = stringPreferencesKey("pref_feeds_view_mode")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
-  private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode")
+  private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
       mapToBrowserType(preferences[browserTypeKey]) ?: BrowserType.Default
     }
-
-  val enableFeaturedItemBlur: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[enableFeaturedItemBlurKey] ?: true }
 
   val showUnreadPostsCount: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[showUnreadPostsCountKey] ?: true }
@@ -76,7 +72,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val appThemeMode: Flow<AppThemeMode> =
     dataStore.data.map { preferences ->
-      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
+      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Dark
     }
 
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
@@ -89,10 +85,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updateBrowserType(browserType: BrowserType) {
     dataStore.edit { preferences -> preferences[browserTypeKey] = browserType.name }
-  }
-
-  suspend fun toggleFeaturedItemBlur(value: Boolean) {
-    dataStore.edit { preferences -> preferences[enableFeaturedItemBlurKey] = value }
   }
 
   suspend fun toggleShowUnreadPostsCount(value: Boolean) {
