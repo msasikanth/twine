@@ -88,7 +88,6 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
 
@@ -207,19 +206,6 @@ internal fun SettingsScreen(
                 settingsPresenter.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
               }
             )
-          }
-
-          if (canBlurImage && isSystemInDarkMode) {
-            item { Divider(horizontalInsets = 24.dp) }
-
-            item {
-              FeaturedItemBlurSettingItem(
-                featuredItemBlurEnabled = state.enableHomePageBlur,
-                onValueChanged = { newValue ->
-                  settingsPresenter.dispatch(SettingsEvent.ToggleFeaturedItemBlur(newValue))
-                }
-              )
-            }
           }
 
           item { Divider(24.dp) }
@@ -438,46 +424,6 @@ private fun UnreadPostsCountSettingItem(
         )
         Text(
           LocalStrings.current.settingsShowUnreadCountSubtitle,
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
-        )
-      }
-
-      Spacer(Modifier.width(16.dp))
-
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
-    }
-  }
-}
-
-@Composable
-private fun FeaturedItemBlurSettingItem(
-  featuredItemBlurEnabled: Boolean,
-  onValueChanged: (Boolean) -> Unit
-) {
-  var checked by remember(featuredItemBlurEnabled) { mutableStateOf(featuredItemBlurEnabled) }
-  Box(
-    modifier =
-      Modifier.clickable {
-        checked = !checked
-        onValueChanged(!featuredItemBlurEnabled)
-      }
-  ) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          LocalStrings.current.settingsEnableBlurTitle,
-          style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
-        )
-        Text(
-          LocalStrings.current.settingsEnableBlurSubtitle,
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
