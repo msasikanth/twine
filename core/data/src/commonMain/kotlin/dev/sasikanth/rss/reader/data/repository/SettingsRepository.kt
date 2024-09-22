@@ -40,7 +40,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsViewModeKey = stringPreferencesKey("pref_feeds_view_mode")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
-  private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode")
+  private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -76,7 +76,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val appThemeMode: Flow<AppThemeMode> =
     dataStore.data.map { preferences ->
-      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
+      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Dark
     }
 
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
