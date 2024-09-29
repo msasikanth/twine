@@ -119,8 +119,9 @@ async function renderReaderView(link, html, colors) {
     {}
   );
 
+  const sanitizedHtml = `<div>${html}</div>`
   //noinspection JSUnresolvedVariable
-  const result = await Mercury.parse(link, { html: html });
+  const result = await Mercury.parse(link, { html: sanitizedHtml });
   const content = result.content || html;
 
   document.getElementById("content").innerHTML += content;
