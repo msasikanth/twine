@@ -93,6 +93,7 @@ kotlin {
       implementation(libs.androidx.collection)
       implementation(libs.material.color.utilities)
       implementation(libs.ksoup)
+      implementation(libs.ksoup.okio)
       implementation(libs.windowSizeClass)
       api(libs.androidx.datastore.okio)
       api(libs.androidx.datastore.preferences)
