@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.0.20"
-android_gradle_plugin = "8.6.1"
+android_gradle_plugin = "8.7.0"
 compose = "1.7.0-rc01"
 
 android_sdk_compile = "34"
