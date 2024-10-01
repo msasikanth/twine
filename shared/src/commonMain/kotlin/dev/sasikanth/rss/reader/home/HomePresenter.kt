@@ -322,8 +322,6 @@ class HomePresenter(
               activeSource = activeSource,
               postsType = postsType,
               loadingState = HomeLoadingState.Loading,
-              featuredPosts = null,
-              posts = null
             )
           }
         }
