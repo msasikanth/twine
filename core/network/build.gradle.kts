@@ -40,6 +40,7 @@ kotlin {
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
       implementation(libs.ksoup)
+      implementation(libs.ksoup.ktor2)
       implementation(libs.ktxml)
       implementation(libs.kermit)
       implementation(libs.crashkios.bugsnag)
