@@ -30,6 +30,7 @@ internal val dateFormatterPatterns =
     "E, d MMM yyyy HH:mm Z",
     "E, dd MMM yyyy",
     "d MMM yyyy HH:mm:ss z",
+    "dd MMM yyyy HH:mm Z",
     "yyyy-MM-dd'T'HH:mm:ssz",
     "yyyy-MM-dd'T'HH:mm:ssZ",
     "yyyy-MM-dd'T'HH:mm:ss",
