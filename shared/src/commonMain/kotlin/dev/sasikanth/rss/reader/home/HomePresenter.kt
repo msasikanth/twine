@@ -45,9 +45,11 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
@@ -377,6 +379,7 @@ class HomePresenter(
         .launchIn(coroutineScope)
     }
 
+    @OptIn(FlowPreview::class)
     private fun loadFeaturedPostsItems(
       activeSource: Source?,
       unreadOnly: Boolean?,
@@ -400,6 +403,7 @@ class HomePresenter(
             )
           }
         }
+        .debounce(500.milliseconds)
 
     private fun feedsSheetStateChanged(feedsSheetState: SheetValue) {
       _state.update {
