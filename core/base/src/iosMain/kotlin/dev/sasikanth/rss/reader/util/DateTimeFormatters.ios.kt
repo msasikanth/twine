@@ -33,49 +33,26 @@ import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.timeIntervalSince1970
 
-private fun createDateFormatter(
-  pattern: String,
-  timeZone: TimeZone? = null,
-): NSDateFormatter {
-  return NSDateFormatter().apply {
-    dateFormat = pattern
-    locale = NSLocale("en_US_POSIX")
-
-    timeZone?.let { this.timeZone = it.toNSTimeZone() }
-  }
-}
-
-private val dateFormatters =
-  listOf(
-    // Keep the two character year before parsing the four
-    // character year of similar pattern. Not sure why,
-    // but unlike JVM, iOS is not keep it strict?
-    createDateFormatter("E, d MMM yy HH:mm:ss Z"),
-    createDateFormatter("E, d MMM yyyy HH:mm:ss O"),
-    createDateFormatter("E, d MMM yyyy HH:mm:ss Z"),
-    createDateFormatter("E, d MMM yyyy HH:mm:ss z"),
-    createDateFormatter("E, d MMM yyyy HH:mm Z"),
-    createDateFormatter("E, dd MMM yyyy", TimeZone.UTC),
-    createDateFormatter("d MMM yyyy HH:mm:ss z"),
-    createDateFormatter("MM-dd HH:mm:ss", TimeZone.UTC),
-    createDateFormatter("yyyy-MM-dd'T'HH:mm:ssz"),
-    createDateFormatter("yyyy-MM-dd'T'HH:mm:ssZ"),
-    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss", TimeZone.UTC),
-    createDateFormatter("yyyy-MM-dd HH:mm:ss", TimeZone.UTC),
-    createDateFormatter("yyyy-MM-dd HH:mm:ss z"),
-    createDateFormatter("yyyy-MM-dd", TimeZone.UTC),
-    createDateFormatter("E, d MMM yyyy HH:mm:ss zzzz"),
-    createDateFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
-  )
-
 @Throws(DateTimeFormatException::class)
 actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   if (this.isNullOrBlank()) return null
 
   try {
     val date =
-      dateFormatters.firstNotNullOfOrNull { dateFormatter ->
-        dateFormatter.dateFromString(this.trim())
+      dateFormatterPatterns.firstNotNullOfOrNull { pattern ->
+        val timeZone =
+          if (hasTimeZonePattern(pattern)) {
+            null
+          } else {
+            TimeZone.UTC
+          }
+        val dateTimeFormatter =
+          createDateFormatter(
+            pattern = pattern,
+            timeZone = timeZone,
+          )
+
+        dateTimeFormatter.dateFromString(this.trim())
       }
 
     if (date != null) {
@@ -113,4 +90,21 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   }
 
   return null
+}
+
+private fun hasTimeZonePattern(pattern: String) =
+  pattern.contains("Z", ignoreCase = true) ||
+    pattern.contains("O", ignoreCase = true) ||
+    pattern.contains("X", ignoreCase = true)
+
+private fun createDateFormatter(
+  pattern: String,
+  timeZone: TimeZone? = null,
+): NSDateFormatter {
+  return NSDateFormatter().apply {
+    dateFormat = pattern
+    locale = NSLocale("en_US_POSIX")
+
+    timeZone?.let { this.timeZone = it.toNSTimeZone() }
+  }
 }

@@ -22,31 +22,12 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.UnsupportedTemporalTypeException
+import java.util.Locale
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId
 import kotlinx.datetime.toLocalDateTime
-
-private val dateFormatters =
-  listOf(
-    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss O"),
-    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss Z"),
-    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss z"),
-    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm Z"),
-    DateTimeFormatter.ofPattern("E, d MMM yy HH:mm:ss Z"),
-    DateTimeFormatter.ofPattern("E, dd MMM yyyy"),
-    DateTimeFormatter.ofPattern("d MMM yyyy HH:mm:ss z"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssz"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssZ"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-    DateTimeFormatter.ofPattern("MM-dd HH:mm:ss"),
-    DateTimeFormatter.ofPattern("E, d MMM yyyy HH:mm:ss zzzz"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSXXX"),
-  )
 
 @Throws(DateTimeFormatException::class)
 actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
@@ -55,13 +36,15 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
   val currentDate =
     clock.now().toLocalDateTime(TimeZone.currentSystemDefault()).toJavaLocalDateTime()
 
-  for (dateFormatter in dateFormatters) {
+  for (pattern in dateFormatterPatterns) {
+    val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern, Locale.US)
+
     try {
-      val parsedValue = parseToInstant(dateFormatter, this)
+      val parsedValue = parseToInstant(dateTimeFormatter, this)
       return parsedValue.toEpochMilli()
     } catch (e: Exception) {
       try {
-        val parsedValue = fallbackParseToInstant(currentDate, dateFormatter, this)
+        val parsedValue = fallbackParseToInstant(currentDate, dateTimeFormatter, this)
         return parsedValue.toEpochMilli()
       } catch (e: Exception) {
         // no-op
