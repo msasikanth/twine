@@ -18,6 +18,30 @@ package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Clock
 
+internal val dateFormatterPatterns =
+  setOf(
+    // Keep the two character year before parsing the four
+    // character year of similar pattern. Not sure why,
+    // but unlike JVM, iOS is not keep it strict?
+    "E, d MMM yy HH:mm:ss Z",
+    "E, d MMM yyyy HH:mm:ss O",
+    "E, d MMM yyyy HH:mm:ss Z",
+    "E, d MMM yyyy HH:mm:ss z",
+    "E, d MMM yyyy HH:mm Z",
+    "E, dd MMM yyyy",
+    "d MMM yyyy HH:mm:ss z",
+    "dd MMM yyyy HH:mm Z",
+    "yyyy-MM-dd'T'HH:mm:ssz",
+    "yyyy-MM-dd'T'HH:mm:ssZ",
+    "yyyy-MM-dd'T'HH:mm:ss",
+    "yyyy-MM-dd HH:mm:ss",
+    "yyyy-MM-dd HH:mm:ss z",
+    "yyyy-MM-dd",
+    "MM-dd HH:mm:ss",
+    "E, d MMM yyyy HH:mm:ss zzzz",
+    "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+  )
+
 expect fun String?.dateStringToEpochMillis(clock: Clock = Clock.System): Long?
 
 data class DateTimeFormatException(val exception: Exception) : Exception()
