@@ -1,5 +1,5 @@
 [versions]
-kotlin = "2.0.20"
+kotlin = "2.0.21"
 android_gradle_plugin = "8.7.0"
 compose = "1.7.0-rc01"
 
