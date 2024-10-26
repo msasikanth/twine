@@ -23,12 +23,13 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
@@ -154,9 +155,9 @@ private fun ByteReadChannel.toCharIterator(
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      currentBuffer = buildString { charset.decode(this, packet.readBytes()) }
+      currentBuffer = buildString { charset.decode(this, packet.readByteArray()) }
 
-      packet.release()
+      packet.close()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
     }
