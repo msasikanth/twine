@@ -96,7 +96,7 @@ internal fun FeedListItem(
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
       FeedFavIcon(
-        url = feed.homepageLink,
+        url = feed.icon,
         contentDescription = null,
         modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),
         contentScale = ContentScale.Crop,

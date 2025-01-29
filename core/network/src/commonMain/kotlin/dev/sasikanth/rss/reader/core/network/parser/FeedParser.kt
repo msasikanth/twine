@@ -77,6 +77,8 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
     internal const val TAG_RSS_CHANNEL = "channel"
     internal const val TAG_ATOM_FEED = "feed"
+    internal const val TAG_ATOM_ICON = "icon"
+    internal const val TAG_ATOM_LOGO = "logo"
     internal const val TAG_RSS_ITEM = "item"
     internal const val TAG_ATOM_ENTRY = "entry"
 
@@ -101,16 +103,13 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
     internal const val ATTR_REL = "rel"
+    internal const val ATTR_RDF_RESOURCE = "rdf:resource"
     internal const val ATTR_HREF = "href"
 
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
-
-    fun feedIcon(host: String): String {
-      return "https://icon.horse/icon/$host"
-    }
 
     fun safeUrl(host: String?, url: String?): String? {
       if (host.isNullOrBlank()) return null

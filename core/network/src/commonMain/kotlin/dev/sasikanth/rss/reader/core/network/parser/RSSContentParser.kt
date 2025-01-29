@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CON
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ENCLOSURE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
@@ -34,7 +35,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TIT
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -50,6 +50,7 @@ internal object RSSContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var description: String? = null
+    var iconUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -71,6 +72,9 @@ internal object RSSContentParser : ContentParser() {
         TAG_RSS_ITEM -> {
           posts.add(readRssItem(parser, link))
         }
+        TAG_FEED_IMAGE -> {
+          iconUrl = readFeedIcon(name, parser)
+        }
         else -> parser.skip()
       }
     }
@@ -79,19 +83,10 @@ internal object RSSContentParser : ContentParser() {
       link = feedUrl
     }
 
-    val domain = Url(link)
-    val host =
-      if (domain.host != "localhost") {
-        domain.host
-      } else {
-        throw NullPointerException("Unable to get host domain")
-      }
-    val iconUrl = FeedParser.feedIcon(host)
-
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
       description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
-      icon = iconUrl,
+      icon = iconUrl ?: link,
       homepageLink = link,
       link = feedUrl,
       posts = posts.filterNotNull()
@@ -161,6 +156,17 @@ internal object RSSContentParser : ContentParser() {
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
     )
+  }
+
+  private fun readFeedIcon(tagName: String, parser: XmlPullParser): String? {
+    var link: String? = null
+    parser.require(EventType.START_TAG, parser.namespace, tagName)
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
+      if (parser.name == TAG_URL) link = parser.nextText() else parser.skip()
+    }
+    parser.require(EventType.END_TAG, parser.namespace, tagName)
+    return link
   }
 
   private fun hasRssImageUrl(name: String, parser: XmlPullParser) =

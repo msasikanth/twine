@@ -247,7 +247,7 @@ private fun FeedLabelInput(
       .fillMaxWidth()
   ) {
     FeedFavIcon(
-      url = feed.homepageLink,
+      url = feed.icon,
       contentDescription = feed.name,
       modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
     )

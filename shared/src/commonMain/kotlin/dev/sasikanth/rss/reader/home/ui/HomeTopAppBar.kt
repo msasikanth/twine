@@ -215,7 +215,7 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
       }
       is Feed -> {
         FeedFavIcon(
-          url = source.homepageLink,
+          url = source.icon,
           contentDescription = null,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )

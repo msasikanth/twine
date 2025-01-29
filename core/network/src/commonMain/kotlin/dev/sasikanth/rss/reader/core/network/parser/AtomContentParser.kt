@@ -23,6 +23,8 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_RE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VALUE_ALTERNATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ENTRY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ICON
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_LOGO
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
@@ -32,7 +34,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TIT
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -47,6 +48,7 @@ internal object AtomContentParser : ContentParser() {
     var title: String? = null
     var description: String? = null
     var link: String? = null
+    var iconUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -67,6 +69,16 @@ internal object AtomContentParser : ContentParser() {
         TAG_ATOM_ENTRY -> {
           posts.add(readAtomEntry(parser, link))
         }
+        TAG_ATOM_ICON -> {
+          iconUrl = parser.nextText()
+        }
+        TAG_ATOM_LOGO -> {
+          if (iconUrl.isNullOrBlank()) {
+            iconUrl = parser.nextText()
+          } else {
+            parser.skip()
+          }
+        }
         else -> parser.skip()
       }
     }
@@ -75,19 +87,10 @@ internal object AtomContentParser : ContentParser() {
       link = feedUrl
     }
 
-    val domain = Url(link)
-    val host =
-      if (domain.host != "localhost") {
-        domain.host
-      } else {
-        throw NullPointerException("Unable to get host domain")
-      }
-    val iconUrl = FeedParser.feedIcon(host)
-
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
       description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
-      icon = iconUrl,
+      icon = iconUrl ?: link,
       homepageLink = link,
       link = feedUrl,
       posts = posts.filterNotNull()

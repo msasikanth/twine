@@ -18,9 +18,11 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_RDF_RESOURCE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT_ENCODED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DC_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
@@ -28,7 +30,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -44,12 +45,13 @@ internal object RDFContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var description: String? = null
+    var iconUrl: String? = null
 
     // Parse channel
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
 
-      when (parser.name) {
+      when (val name = parser.name) {
         TAG_TITLE -> {
           title = parser.nextText()
         }
@@ -62,6 +64,9 @@ internal object RDFContentParser : ContentParser() {
         }
         TAG_DESCRIPTION -> {
           description = parser.nextText()
+        }
+        TAG_FEED_IMAGE -> {
+          iconUrl = readRdfLink(name, parser)
         }
         else -> parser.skip()
       }
@@ -82,19 +87,10 @@ internal object RDFContentParser : ContentParser() {
       link = feedUrl
     }
 
-    val domain = Url(link)
-    val host =
-      if (domain.host != "localhost") {
-        domain.host
-      } else {
-        throw NullPointerException("Unable to get host domain")
-      }
-    val iconUrl = FeedParser.feedIcon(host)
-
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
       description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
-      icon = iconUrl,
+      icon = iconUrl ?: link,
       homepageLink = link,
       link = feedUrl,
       posts = posts.filterNotNull()
@@ -152,5 +148,13 @@ internal object RDFContentParser : ContentParser() {
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
     )
+  }
+
+  private fun readRdfLink(tagName: String, parser: XmlPullParser): String? {
+    parser.require(EventType.START_TAG, parser.namespace, tagName)
+    val link = parser.getAttributeValue(parser.namespace, ATTR_RDF_RESOURCE)
+    parser.nextTag()
+    parser.require(EventType.END_TAG, parser.namespace, tagName)
+    return link
   }
 }

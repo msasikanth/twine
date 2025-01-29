@@ -42,7 +42,7 @@ import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 @Composable
 internal fun FeedBottomBarItem(
   badgeCount: Long,
-  homePageUrl: String,
+  iconUrl: String,
   canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -52,7 +52,7 @@ internal fun FeedBottomBarItem(
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
       FeedFavIcon(
-        url = homePageUrl,
+        url = iconUrl,
         contentDescription = null,
         modifier =
           Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
