@@ -634,8 +634,7 @@ class RssRepository(
               id = id,
               name = name,
               feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
-              feedIconLinks =
-                feedIconLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              feedIconLinks = feedIconLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               createdAt = createdAt!!,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
@@ -697,8 +696,7 @@ class RssRepository(
                 id = id,
                 name = name,
                 feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
-                feedIconLinks =
-                  feedIconLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedIconLinks = feedIconLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
