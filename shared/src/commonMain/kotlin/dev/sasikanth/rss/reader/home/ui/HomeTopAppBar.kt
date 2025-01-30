@@ -192,21 +192,21 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
     when (source) {
       is FeedGroup -> {
         val iconSize =
-          if (source.feedHomepageLinks.size > 2) {
+          if (source.feedIconLinks.size > 2) {
             18.dp
           } else {
             20.dp
           }
 
         val iconSpacing =
-          if (source.feedHomepageLinks.size > 2) {
+          if (source.feedIconLinks.size > 2) {
             4.dp
           } else {
             0.dp
           }
 
         FeedGroupIconGrid(
-          icons = source.feedHomepageLinks,
+          icons = source.feedIconLinks,
           iconSize = iconSize,
           iconShape = RoundedCornerShape(percent = 30),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),

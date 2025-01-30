@@ -59,10 +59,10 @@ FROM (
     NULL AS lastCleanUpAt,
     COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
-    COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
+    COALESCE((SELECT GROUP_CONCAT(feed.icon)
                 FROM feed
                 WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedHomepageLinks,
+                LIMIT 4), '') AS feedIconLinks,
     fg.createdAt,
     fg.pinnedAt,
     fg.updatedAt,
@@ -123,10 +123,10 @@ FROM (
     NULL AS lastCleanUpAt,
     COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
-    COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
+    COALESCE((SELECT GROUP_CONCAT(feed.icon)
                 FROM feed
                 WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedHomepageLinks,
+                LIMIT 4), '') AS feedIconLinks,
     fg.createdAt,
     fg.pinnedAt,
     fg.updatedAt

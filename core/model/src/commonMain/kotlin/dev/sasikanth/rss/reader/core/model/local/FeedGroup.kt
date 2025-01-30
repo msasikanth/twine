@@ -19,14 +19,14 @@ package dev.sasikanth.rss.reader.core.model.local
 import kotlinx.datetime.Instant
 
 data class FeedGroup(
-  override val id: String,
-  val name: String,
-  val feedIds: List<String>,
-  val feedHomepageLinks: List<String>,
-  val numberOfUnreadPosts: Long = 0,
-  val createdAt: Instant,
-  val updatedAt: Instant,
-  override val pinnedAt: Instant?,
-  override val sourceType: SourceType = SourceType.FeedGroup,
-  override val pinnedPosition: Double = 0.0,
+    override val id: String,
+    val name: String,
+    val feedIds: List<String>,
+    val feedIconLinks: List<String>,
+    val numberOfUnreadPosts: Long = 0,
+    val createdAt: Instant,
+    val updatedAt: Instant,
+    override val pinnedAt: Instant?,
+    override val sourceType: SourceType = SourceType.FeedGroup,
+    override val pinnedPosition: Double = 0.0,
 ) : Source
