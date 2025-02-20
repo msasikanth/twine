@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.core.network.fetcher
 
+import co.touchlab.kermit.Logger
 import com.fleeksoft.ksoup.Ksoup
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
@@ -38,6 +39,7 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
+import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 import rhodium.crypto.Nip19Parser
 import rhodium.crypto.tlv.entity.NAddress
@@ -230,13 +232,15 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       )
     } else {
       val authorInfo = authorInfoEvent.userInfo()
+      Logger.i(
+        "NostrFetcher",
+      ) {
+        "UserInfo: $authorInfo"
+      }
 
       val userPublishRelays =
         nostrService
-          .fetchRelayListFor(
-            profileHex = profilePubKey,
-            fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
-          )
+          .fetchRelayListFor(profileHex = profilePubKey, fetchRelays = DEFAULT_FETCH_RELAYS)
           .filter { relay -> relay.writePolicy }
 
       val userArticlesRequest =
@@ -256,7 +260,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         FeedFetchResult.Success(
           FeedPayload(
             name = authorInfo.name,
-            icon = authorInfo.picture ?: authorInfo.banner ?: "",
+            icon = authorInfo.picture ?: "",
             description = authorInfo.about ?: "",
             homepageLink = authorInfo.website ?: "",
             link = "https://njump.me/$profilePubKey",
@@ -302,14 +306,19 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         }
 
     val articleContent = event.content
+    Logger.i("NostrFetcher") {
+      "Tag date is ${publishDate?.description?.toLong()}, and Event date is ${event.creationDate}"
+    }
 
     return PostPayload(
       title = postTitle?.description ?: "",
       link = articleLink,
       description = summary?.description ?: "",
       rawContent = articleContent,
-      imageUrl = image?.description ?: "",
-      date = publishDate?.description?.toLong() ?: event.creationDate,
+      imageUrl = image?.description,
+      date =
+        Instant.fromEpochSeconds(publishDate?.description?.toLong() ?: event.creationDate)
+          .toEpochMilliseconds(),
       commentsLink = null
     )
   }
