@@ -72,11 +72,7 @@ class FavIconFetcher(
       if (snapshot != null) {
         var cacheResponse = snapshot.toCacheResponse()
         if (cacheResponse != null) {
-          output = cacheStrategy.value.read(
-            cacheResponse,
-            newRequest(),
-            options
-          )
+          output = cacheStrategy.value.read(cacheResponse, newRequest(), options)
           cacheResponse = output.response
         }
         if (cacheResponse != null) {
