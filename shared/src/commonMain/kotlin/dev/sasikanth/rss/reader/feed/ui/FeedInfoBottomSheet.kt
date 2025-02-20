@@ -54,6 +54,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -126,7 +127,7 @@ fun FeedInfoBottomSheet(
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
       scrimColor = SYSTEM_SCRIM
     ) {
       Column(
