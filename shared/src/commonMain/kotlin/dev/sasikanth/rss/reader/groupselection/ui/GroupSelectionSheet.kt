@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,7 +80,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
       scrimColor = SYSTEM_SCRIM
     ) {
       val state by presenter.state.collectAsState()
