@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
@@ -36,12 +37,25 @@ import io.ktor.http.contentType
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
+import rhodium.crypto.Nip19Parser
+import rhodium.crypto.tlv.entity.NProfile
+import rhodium.crypto.tlv.entity.NPub
+import rhodium.net.NostrService
+import rhodium.net.NostrUtils
+import rhodium.net.UrlUtil
+import rhodium.nostr.NostrFilter
+import rhodium.nostr.client.RequestMessage
+import rhodium.nostr.relay.Relay
 
 @Inject
 class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
+    // The default relays to get info from, separated by purpose.
+    private val DEFAULT_FETCH_RELAYS = listOf("wss://relay.nostr.band", "wss://relay.damus.io")
+    private val DEFAULT_METADATA_RELAYS = listOf("wss://purplepag.es", "wss://user.kindpag.es")
+    private val DEFAULT_ARTICLE_FETCH_RELAYS = setOf("wss://nos.lol") + DEFAULT_FETCH_RELAYS
   }
 
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
@@ -161,4 +175,65 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
     return FeedParser.safeUrl(rootUrl, link)
   }
+
+  private suspend fun fetchNostrFeed(nostrUri: String): FeedFetchResult {
+    val rawNostrAddress = nostrUri.removePrefix("nostr:")
+    val nostrService = NostrService(client = httpClient.config { install(WebSockets){ } })
+    if (rawNostrAddress.contains("@") || UrlUtil.isValidUrl(rawNostrAddress)) { // It is a NIP05 address
+      val profileInfo = NostrUtils.getProfileInfoFromAddress(nip05 = rawNostrAddress, httpClient)
+      val profileIdentifier = profileInfo[0]
+      val potentialRelays = profileInfo.drop(1)
+
+      return innerFetchNostrFeed(profileIdentifier, potentialRelays, nostrService)
+    }
+    else {
+      val parsedProfile = Nip19Parser.parse(rawNostrAddress)?.entity
+      return if (parsedProfile == null){
+        FeedFetchResult.Error(Exception("Could not parse the input, as it is null"))
+      } else {
+        when(parsedProfile){
+          is NPub -> {
+            innerFetchNostrFeed(parsedProfile.hex, DEFAULT_METADATA_RELAYS, nostrService)
+          }
+
+          is NProfile -> {
+            innerFetchNostrFeed(parsedProfile.hex, parsedProfile.relay, nostrService)
+          }
+
+          else -> FeedFetchResult.Error(Exception("Could not find any profile from the input : $parsedProfile"))
+          }
+      }
+    }
+  }
+
+  private suspend fun innerFetchNostrFeed(
+    profilePubKey: String,
+    profileRelays: List<String>,
+    nostrService: NostrService
+  ): FeedFetchResult {
+    val authorInfo = nostrService.getMetadataFor(
+      profileHex = profilePubKey,
+      preferredRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+    )
+
+    val userPublishRelays = nostrService.fetchRelayListFor(
+      profileHex = profilePubKey,
+      fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
+    ).filter { relay -> relay.writePolicy }
+
+    val userArticlesRequest = RequestMessage.singleFilterRequest(
+      filter = NostrFilter.newFilter()
+        .authors(profilePubKey)
+        .kinds(30023)
+        .build()
+    )
+
+    val articleEvents = nostrService.requestWithResult(
+      userArticlesRequest,
+      userPublishRelays.ifEmpty { DEFAULT_ARTICLE_FETCH_RELAYS.map { Relay(it) } }
+    )
+
+  }
+
+
 }
