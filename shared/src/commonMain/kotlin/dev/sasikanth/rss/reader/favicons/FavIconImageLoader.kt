@@ -47,7 +47,7 @@ object FavIconImageLoader {
               add(
                 FavIconFetcher.Factory(
                   networkClient = { HttpClient().asNetworkClient() },
-                  cacheStrategy = { CacheStrategy() }
+                  cacheStrategy = { CacheStrategy.DEFAULT }
                 )
               )
             }

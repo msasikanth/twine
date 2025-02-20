@@ -30,8 +30,8 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.getExtra
-import coil3.network.CacheResponse
 import coil3.network.CacheStrategy
+import coil3.network.ConnectivityChecker
 import coil3.network.HttpException
 import coil3.network.NetworkClient
 import coil3.network.NetworkFetcher
@@ -68,25 +68,24 @@ class FavIconFetcher(
     val snapshot = readFromDiskCache()
     try {
       // Fast path: fetch the fav icon from the disk cache without performing a network request.
-      var output: CacheStrategy.Output? = null
+      var output: CacheStrategy.ReadResult? = null
       if (snapshot != null) {
         var cacheResponse = snapshot.toCacheResponse()
         if (cacheResponse != null) {
-          val input = CacheStrategy.Input(cacheResponse, newRequest(), options)
-          output = cacheStrategy.value.compute(input)
-          cacheResponse = output.cacheResponse
+          output = cacheStrategy.value.read(cacheResponse, newRequest(), options)
+          cacheResponse = output.response
         }
         if (cacheResponse != null) {
           return SourceFetchResult(
             source = snapshot.toImageSource(),
-            mimeType = getMimeType(url, cacheResponse.responseHeaders[CONTENT_TYPE]),
+            mimeType = getMimeType(url, cacheResponse.headers[CONTENT_TYPE]),
             dataSource = DataSource.DISK,
           )
         }
       }
 
       // Slow path: fetch the fav icon by parsing response HTML
-      val networkRequest = output?.networkRequest ?: newRequest()
+      val networkRequest = output?.request ?: newRequest()
       return executeNetworkRequest(networkRequest) { response ->
         // Write the response to the disk cache then open a new snapshot.
         val responseBody = checkNotNull(response.body) { "body == null" }
@@ -207,9 +206,9 @@ class FavIconFetcher(
     return contentType?.substringBefore(';')
   }
 
-  private fun DiskCache.Snapshot.toCacheResponse(): CacheResponse? {
+  private fun DiskCache.Snapshot.toCacheResponse(): NetworkResponse? {
     return try {
-      fileSystem.read(metadata) { CacheResponse(this) }
+      fileSystem.read(metadata) { NetworkResponse(body = NetworkResponseBody(this)) }
     } catch (_: IOException) {
       // If we can't parse the metadata, ignore this entry.
       null
@@ -283,6 +282,7 @@ class FavIconFetcher(
             networkClient = networkClientLazy,
             diskCache = diskCacheLazy,
             cacheStrategy = cacheStrategyLazy,
+            connectivityChecker = ConnectivityChecker.ONLINE
           )
         }
       )
