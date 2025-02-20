@@ -24,6 +24,8 @@ import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.core.release
+import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext

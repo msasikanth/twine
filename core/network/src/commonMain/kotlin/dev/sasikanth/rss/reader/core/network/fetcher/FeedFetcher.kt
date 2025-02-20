@@ -63,7 +63,8 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
-    return fetch(url, transformUrl, redirectCount = 0)
+    return if (url.startsWith("nostr:")) fetchNostrFeed(url)
+    else fetch(url, transformUrl, redirectCount = 0)
   }
 
   private suspend fun fetch(
@@ -182,30 +183,32 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
   private suspend fun fetchNostrFeed(nostrUri: String): FeedFetchResult {
     val rawNostrAddress = nostrUri.removePrefix("nostr:")
-    val nostrService = NostrService(client = httpClient.config { install(WebSockets){ } })
-    if (rawNostrAddress.contains("@") || UrlUtil.isValidUrl(rawNostrAddress)) { // It is a NIP05 address
+    val nostrService = NostrService(client = httpClient.config { install(WebSockets) {} })
+    if (
+      rawNostrAddress.contains("@") || UrlUtil.isValidUrl(rawNostrAddress)
+    ) { // It is a NIP05 address
       val profileInfo = NostrUtils.getProfileInfoFromAddress(nip05 = rawNostrAddress, httpClient)
       val profileIdentifier = profileInfo[0]
       val potentialRelays = profileInfo.drop(1)
 
       return innerFetchNostrFeed(profileIdentifier, potentialRelays, nostrService)
-    }
-    else {
+    } else {
       val parsedProfile = Nip19Parser.parse(rawNostrAddress)?.entity
-      return if (parsedProfile == null){
+      return if (parsedProfile == null) {
         FeedFetchResult.Error(Exception("Could not parse the input, as it is null"))
       } else {
-        when(parsedProfile){
+        when (parsedProfile) {
           is NPub -> {
             innerFetchNostrFeed(parsedProfile.hex, DEFAULT_METADATA_RELAYS, nostrService)
           }
-
           is NProfile -> {
             innerFetchNostrFeed(parsedProfile.hex, parsedProfile.relay, nostrService)
           }
-
-          else -> FeedFetchResult.Error(Exception("Could not find any profile from the input : $parsedProfile"))
-          }
+          else ->
+            FeedFetchResult.Error(
+              Exception("Could not find any profile from the input : $parsedProfile")
+            )
+        }
       }
     }
   }
@@ -215,53 +218,53 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     profileRelays: List<String>,
     nostrService: NostrService
   ): FeedFetchResult {
-    val authorInfoEvent = nostrService.getMetadataFor(
-      profileHex = profilePubKey,
-      preferredRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
-    )
+    val authorInfoEvent =
+      nostrService.getMetadataFor(
+        profileHex = profilePubKey,
+        preferredRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+      )
 
     if (authorInfoEvent.content.isBlank()) {
       return FeedFetchResult.Error(
         Exception("No corresponding author profile found for this Nostr address.")
       )
-    }
-    else {
+    } else {
       val authorInfo = authorInfoEvent.userInfo()
 
-      val userPublishRelays = nostrService.fetchRelayListFor(
-        profileHex = profilePubKey,
-        fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
-      ).filter { relay -> relay.writePolicy }
+      val userPublishRelays =
+        nostrService
+          .fetchRelayListFor(
+            profileHex = profilePubKey,
+            fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
+          )
+          .filter { relay -> relay.writePolicy }
 
-      val userArticlesRequest = RequestMessage.singleFilterRequest(
-        filter = NostrFilter.newFilter()
-          .authors(profilePubKey)
-          .kinds(30023)
-          .build()
-      )
+      val userArticlesRequest =
+        RequestMessage.singleFilterRequest(
+          filter = NostrFilter.newFilter().authors(profilePubKey).kinds(30023).build()
+        )
 
-      val articleEvents = nostrService.requestWithResult(
-        userArticlesRequest,
-        userPublishRelays.ifEmpty { DEFAULT_ARTICLE_FETCH_RELAYS.map { Relay(it) } }
-      )
+      val articleEvents =
+        nostrService.requestWithResult(
+          userArticlesRequest,
+          userPublishRelays.ifEmpty { DEFAULT_ARTICLE_FETCH_RELAYS.map { Relay(it) } }
+        )
 
-      return if (articleEvents.isEmpty()) FeedFetchResult.Error(
-        Exception("No articles found for ${authorInfo.name}")
-      )
+      return if (articleEvents.isEmpty())
+        FeedFetchResult.Error(Exception("No articles found for ${authorInfo.name}"))
       else {
         FeedFetchResult.Success(
           FeedPayload(
             name = authorInfo.name,
             icon = authorInfo.picture ?: authorInfo.banner ?: "",
             description = authorInfo.about ?: "",
-            homepageLink = authorInfo.website?: "",
+            homepageLink = authorInfo.website ?: "",
             link = "https://njump.me/$profilePubKey",
             articleEvents.map { mapEventToPost(it) }
           )
         )
       }
     }
-
   }
 
   private fun mapEventToPost(event: Event): PostPayload {
@@ -269,33 +272,34 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     val image = event.tags.find { it.identifier == "image" }
     val summary = event.tags.find { it.identifier == "summary" }
     val publishDate = event.tags.find { it.identifier == "published_at" }
-    val articleIdentifier = event.tags.find { it.identifier =="d" }
-    val articleLink = event.tags.find { it.identifier == "a" }
-      .run {
-        if (this != null){
-          val tagElements = this.description.split(":")
-          val address = NAddress.create(
-            kind = tagElements[0].toInt(),
-            pubKeyHex = tagElements[1],
-            dTag = tagElements[2],
-            relay = articleIdentifier?.description
-          )
+    val articleIdentifier = event.tags.find { it.identifier == "d" }
+    val articleLink =
+      event.tags
+        .find { it.identifier == "a" }
+        .run {
+          if (this != null) {
+            val tagElements = this.description.split(":")
+            val address =
+              NAddress.create(
+                kind = tagElements[0].toInt(),
+                pubKeyHex = tagElements[1],
+                dTag = tagElements[2],
+                relay = articleIdentifier?.description
+              )
 
-          "https://highlighter.com/a/$address"
+            "https://highlighter.com/a/$address"
+          } else if (articleIdentifier != null) {
+            val articleAddress =
+              NAddress.create(
+                event.eventKind,
+                event.pubkey,
+                articleIdentifier.description,
+                this?.customContent
+              )
+
+            "https://highlighter.com/a/$articleAddress"
+          } else "https://njump.me/${event.id}"
         }
-        else if (articleIdentifier != null){
-          val articleAddress = NAddress.create(
-            event.eventKind,
-            event.pubkey,
-            articleIdentifier.description,
-            this?.customContent
-          )
-
-          "https://highlighter.com/a/$articleAddress"
-        }
-
-        else "https://njump.me/${event.id}"
-      }
 
     val articleContent = event.content
 
@@ -308,7 +312,5 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       date = publishDate?.description?.toLong() ?: event.creationDate,
       commentsLink = null
     )
-
   }
-
 }
