@@ -3,8 +3,8 @@ kotlin = "2.0.21"
 android_gradle_plugin = "8.8.1"
 compose = "1.7.0"
 
-android_sdk_compile = "34"
-android_sdk_target = "34"
+android_sdk_compile = "35"
+android_sdk_target = "35"
 android_sdk_min = "26"
 
 sqldelight = "2.0.2"
