@@ -16,6 +16,8 @@
 package dev.sasikanth.rss.reader.core.network.fetcher
 
 import com.fleeksoft.ksoup.Ksoup
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
@@ -38,11 +40,13 @@ import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
 import rhodium.crypto.Nip19Parser
+import rhodium.crypto.tlv.entity.NAddress
 import rhodium.crypto.tlv.entity.NProfile
 import rhodium.crypto.tlv.entity.NPub
 import rhodium.net.NostrService
 import rhodium.net.NostrUtils
 import rhodium.net.UrlUtil
+import rhodium.nostr.Event
 import rhodium.nostr.NostrFilter
 import rhodium.nostr.client.RequestMessage
 import rhodium.nostr.relay.Relay
@@ -211,29 +215,100 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     profileRelays: List<String>,
     nostrService: NostrService
   ): FeedFetchResult {
-    val authorInfo = nostrService.getMetadataFor(
+    val authorInfoEvent = nostrService.getMetadataFor(
       profileHex = profilePubKey,
       preferredRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
     )
 
-    val userPublishRelays = nostrService.fetchRelayListFor(
-      profileHex = profilePubKey,
-      fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
-    ).filter { relay -> relay.writePolicy }
+    if (authorInfoEvent.content.isBlank()) {
+      return FeedFetchResult.Error(
+        Exception("No corresponding author profile found for this Nostr address.")
+      )
+    }
+    else {
+      val authorInfo = authorInfoEvent.userInfo()
 
-    val userArticlesRequest = RequestMessage.singleFilterRequest(
-      filter = NostrFilter.newFilter()
-        .authors(profilePubKey)
-        .kinds(30023)
-        .build()
-    )
+      val userPublishRelays = nostrService.fetchRelayListFor(
+        profileHex = profilePubKey,
+        fetchRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
+      ).filter { relay -> relay.writePolicy }
 
-    val articleEvents = nostrService.requestWithResult(
-      userArticlesRequest,
-      userPublishRelays.ifEmpty { DEFAULT_ARTICLE_FETCH_RELAYS.map { Relay(it) } }
-    )
+      val userArticlesRequest = RequestMessage.singleFilterRequest(
+        filter = NostrFilter.newFilter()
+          .authors(profilePubKey)
+          .kinds(30023)
+          .build()
+      )
+
+      val articleEvents = nostrService.requestWithResult(
+        userArticlesRequest,
+        userPublishRelays.ifEmpty { DEFAULT_ARTICLE_FETCH_RELAYS.map { Relay(it) } }
+      )
+
+      return if (articleEvents.isEmpty()) FeedFetchResult.Error(
+        Exception("No articles found for ${authorInfo.name}")
+      )
+      else {
+        FeedFetchResult.Success(
+          FeedPayload(
+            name = authorInfo.name,
+            icon = authorInfo.picture ?: authorInfo.banner ?: "",
+            description = authorInfo.about ?: "",
+            homepageLink = authorInfo.website?: "",
+            link = "https://njump.me/$profilePubKey",
+            articleEvents.map { mapEventToPost(it) }
+          )
+        )
+      }
+    }
 
   }
 
+  private fun mapEventToPost(event: Event): PostPayload {
+    val postTitle = event.tags.find { tag -> tag.identifier == "title" }
+    val image = event.tags.find { it.identifier == "image" }
+    val summary = event.tags.find { it.identifier == "summary" }
+    val publishDate = event.tags.find { it.identifier == "published_at" }
+    val articleIdentifier = event.tags.find { it.identifier =="d" }
+    val articleLink = event.tags.find { it.identifier == "a" }
+      .run {
+        if (this != null){
+          val tagElements = this.description.split(":")
+          val address = NAddress.create(
+            kind = tagElements[0].toInt(),
+            pubKeyHex = tagElements[1],
+            dTag = tagElements[2],
+            relay = articleIdentifier?.description
+          )
+
+          "https://highlighter.com/a/$address"
+        }
+        else if (articleIdentifier != null){
+          val articleAddress = NAddress.create(
+            event.eventKind,
+            event.pubkey,
+            articleIdentifier.description,
+            this?.customContent
+          )
+
+          "https://highlighter.com/a/$articleAddress"
+        }
+
+        else "https://njump.me/${event.id}"
+      }
+
+    val articleContent = event.content
+
+    return PostPayload(
+      title = postTitle?.description ?: "",
+      link = articleLink,
+      description = summary?.description ?: "",
+      rawContent = articleContent,
+      imageUrl = image?.description ?: "",
+      date = publishDate?.description?.toLong() ?: event.creationDate,
+      commentsLink = null
+    )
+
+  }
 
 }
