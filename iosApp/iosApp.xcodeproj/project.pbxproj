@@ -392,7 +392,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "V9V8885383";
+				DEVELOPMENT_TEAM = V9V8885383;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V9V8885383;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -451,7 +451,7 @@
 			repositoryURL = "https://github.com/bugsnag/bugsnag-cocoa";
 			requirement = {
 				kind = exactVersion;
-				version = 6.30.0;
+				version = 6.32.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
