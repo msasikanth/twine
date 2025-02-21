@@ -39,8 +39,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.Button
@@ -79,7 +78,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
       scrimColor = SYSTEM_SCRIM
     ) {
       val state by presenter.state.collectAsState()

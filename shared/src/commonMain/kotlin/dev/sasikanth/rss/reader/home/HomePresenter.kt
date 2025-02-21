@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:OptIn(ExperimentalMaterialApi::class)
 
 package dev.sasikanth.rss.reader.home
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
@@ -50,7 +48,20 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -361,7 +372,7 @@ class HomePresenter(
 
           _state.update { it.copy(posts = posts, loadingState = HomeLoadingState.Idle) }
         }
-        .onEach { (_, _, _, featuredPosts) ->
+        .transformLatest { (_, _, _, featuredPosts) ->
           val featuredPostsWithSeedColor =
             featuredPosts.map { featuredPost ->
               val seedColor =
@@ -373,6 +384,7 @@ class HomePresenter(
             }
 
           _state.update { it.copy(featuredPosts = featuredPostsWithSeedColor.toImmutableList()) }
+          emit(Unit)
         }
         .launchIn(coroutineScope)
     }

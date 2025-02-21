@@ -375,6 +375,7 @@
 					"-framework",
 					"\"shared\"",
 					"-lsqlite3",
+					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "${BUNDLE_ID}";
 				PRODUCT_NAME = "${APP_NAME}";
@@ -392,7 +393,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "V9V8885383";
+				DEVELOPMENT_TEAM = V9V8885383;
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V9V8885383;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -412,6 +413,7 @@
 					"-framework",
 					"\"shared\"",
 					"-lsqlite3",
+					"-ld_classic",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "${BUNDLE_ID}";
 				PRODUCT_NAME = "${APP_NAME}";
@@ -451,7 +453,7 @@
 			repositoryURL = "https://github.com/bugsnag/bugsnag-cocoa";
 			requirement = {
 				kind = exactVersion;
-				version = 6.30.0;
+				version = 6.32.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
