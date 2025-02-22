@@ -31,9 +31,9 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import io.ktor.http.contentType
+import io.ktor.http.isRelativePath
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
@@ -45,13 +45,12 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
-  suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
-    return fetch(url, transformUrl, redirectCount = 0)
+  suspend fun fetch(url: String): FeedFetchResult {
+    return fetch(url, redirectCount = 0)
   }
 
   private suspend fun fetch(
     url: String,
-    transformUrl: Boolean,
     redirectCount: Int,
   ): FeedFetchResult {
     if (redirectCount >= MAX_REDIRECTS_ALLOWED) {
@@ -59,9 +58,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     }
 
     return try {
-      // We are mainly doing this to avoid creating duplicates while refreshing feeds
-      // after the app update
-      val transformedUrl = transformUrl(url, transformUrl)
+      val transformedUrl = buildFeedUrl(url)
       val response = httpClient.get(transformedUrl.toString())
 
       when (response.status) {
@@ -85,6 +82,21 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     }
   }
 
+  private fun buildFeedUrl(urlString: String): Url {
+    val url = Url(urlString)
+
+    return if (url.isRelativePath) {
+      URLBuilder()
+        .apply {
+          host = urlString
+          protocol = url.protocol
+        }
+        .build()
+    } else {
+      url
+    }
+  }
+
   private suspend fun parseContent(
     response: HttpResponse,
     url: String,
@@ -103,7 +115,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsText(), url)
 
     if (feedUrl != url && !feedUrl.isNullOrBlank()) {
-      return fetch(url = feedUrl, transformUrl = false, redirectCount = redirectCount + 1)
+      return fetch(url = feedUrl, redirectCount = redirectCount + 1)
     }
 
     throw UnsupportedOperationException()
@@ -121,27 +133,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       return FeedFetchResult.Error(Exception("Failed to fetch the feed"))
     }
 
-    return fetch(url = redirectToUrl, transformUrl = true, redirectCount = redirectCount + 1)
-  }
-
-  private fun transformUrl(url: String, transformUrl: Boolean): Url {
-    return if (transformUrl) {
-      // Currently Ktor Url parses relative URLs,
-      // if it fails to properly parse the given URL, it
-      // default to localhost.
-      //
-      // This will cause the network call to fail,
-      // so we are setting the host manually
-      // https://youtrack.jetbrains.com/issue/KTOR-360
-      URLBuilder()
-        .apply {
-          protocol = URLProtocol.HTTPS
-          host = url.replace(Regex("^https?://"), "")
-        }
-        .build()
-    } else {
-      URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
-    }
+    return fetch(url = redirectToUrl, redirectCount = redirectCount + 1)
   }
 
   private fun fetchFeedLinkFromHtmlIfExists(htmlContent: String, originalUrl: String): String? {
@@ -159,9 +151,8 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       }
         ?: return null
     val link = linkElement.attr(ATTR_HREF)
-    val host = URLBuilder(originalUrl).build().host
-    val rootUrl = "https://$host"
+    val host = UrlUtils.extractHost(originalUrl)
 
-    return UrlUtils.safeUrl(rootUrl, link)
+    return UrlUtils.safeUrl(host, link)
   }
 }

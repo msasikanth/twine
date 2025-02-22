@@ -23,9 +23,6 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
-import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
@@ -40,7 +37,7 @@ class FullArticleFetcher(
   suspend fun fetch(link: String): Result<String> {
     return withContext(dispatchersProvider.io) {
       try {
-        val response = httpClient.get(transformUrlToHttps(link))
+        val response = httpClient.get(link)
         if (
           response.status == HttpStatusCode.OK &&
             response.contentType()?.withoutParameters() == ContentType.Text.Html
@@ -54,9 +51,5 @@ class FullArticleFetcher(
 
       return@withContext Result.failure(IllegalArgumentException("Failed to fetch the post"))
     }
-  }
-
-  private fun transformUrlToHttps(url: String): Url {
-    return URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.build()
   }
 }
