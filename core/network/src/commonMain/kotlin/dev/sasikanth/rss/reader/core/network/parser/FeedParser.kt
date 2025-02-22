@@ -19,8 +19,6 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
@@ -110,30 +108,6 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
 
     fun feedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
-    }
-
-    fun safeUrl(host: String?, url: String?): String? {
-      if (host.isNullOrBlank()) return null
-
-      return if (!url.isNullOrBlank()) {
-        if (isAbsoluteUrl(url)) {
-          URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.buildString()
-        } else {
-          URLBuilder(host)
-            .apply {
-              set(path = url)
-              protocol = URLProtocol.HTTPS
-            }
-            .buildString()
-        }
-      } else {
-        null
-      }
-    }
-
-    private fun isAbsoluteUrl(url: String): Boolean {
-      val pattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
-      return pattern.containsMatchIn(url)
     }
   }
 }
