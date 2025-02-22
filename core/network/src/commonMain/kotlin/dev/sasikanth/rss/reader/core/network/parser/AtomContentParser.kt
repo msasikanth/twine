@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUB
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
 import io.ktor.http.Url
@@ -149,7 +150,7 @@ internal object AtomContentParser : ContentParser() {
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
       description = content.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
-      imageUrl = FeedParser.safeUrl(hostLink, image),
+      imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = null
     )

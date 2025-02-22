@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HR
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -73,7 +74,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         HttpStatusCode.SeeOther,
         HttpStatusCode.TemporaryRedirect,
         HttpStatusCode.PermanentRedirect -> {
-          handleHttpRedirect(response, transformedUrl.toString(), redirectCount)
+          handleHttpRedirect(response, transformedUrl, redirectCount)
         }
         else -> {
           FeedFetchResult.HttpStatusError(statusCode = response.status)
@@ -110,15 +111,17 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
   private suspend fun handleHttpRedirect(
     response: HttpResponse,
-    url: String,
+    url: Url,
     redirectCount: Int
   ): FeedFetchResult {
-    val newUrl = response.headers["Location"]
-    return if (newUrl != url && !newUrl.isNullOrBlank()) {
-      fetch(url = newUrl, transformUrl = false, redirectCount = redirectCount + 1)
-    } else {
-      FeedFetchResult.Error(Exception("Failed to fetch the feed"))
+    val headerLocation = response.headers["Location"]
+    val redirectToUrl = UrlUtils.safeUrl(host = url.host, url = headerLocation)
+
+    if (redirectToUrl == url.toString() || redirectToUrl.isNullOrBlank()) {
+      return FeedFetchResult.Error(Exception("Failed to fetch the feed"))
     }
+
+    return fetch(url = redirectToUrl, transformUrl = true, redirectCount = redirectCount + 1)
   }
 
   private fun transformUrl(url: String, transformUrl: Boolean): Url {
@@ -159,6 +162,6 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     val host = URLBuilder(originalUrl).build().host
     val rootUrl = "https://$host"
 
-    return FeedParser.safeUrl(rootUrl, link)
+    return UrlUtils.safeUrl(rootUrl, link)
   }
 }

@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
 import io.ktor.http.Url
@@ -157,7 +158,7 @@ internal object RSSContentParser : ContentParser() {
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
-      imageUrl = FeedParser.safeUrl(hostLink, image),
+      imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
     )
