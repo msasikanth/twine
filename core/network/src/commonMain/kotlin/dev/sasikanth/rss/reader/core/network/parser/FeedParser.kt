@@ -41,7 +41,11 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   ): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val parser = MiniXmlPullParser(source = content.toCharIterator(charset))
+        val parser =
+          MiniXmlPullParser(
+            source = content.toCharIterator(charset),
+            relaxed = true,
+          )
 
         parser.nextTag()
 
