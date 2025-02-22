@@ -35,7 +35,6 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -55,7 +54,7 @@ internal object RSSContentParser : ContentParser() {
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
 
-      when (val name = parser.name) {
+      when (parser.name) {
         TAG_TITLE -> {
           title = parser.nextText()
         }
@@ -70,30 +69,21 @@ internal object RSSContentParser : ContentParser() {
           description = parser.nextText()
         }
         TAG_RSS_ITEM -> {
-          posts.add(readRssItem(parser, link))
+          val host = UrlUtils.extractHost(link ?: feedUrl)
+          posts.add(readRssItem(parser, host))
         }
         else -> parser.skip()
       }
     }
 
-    if (link.isNullOrBlank()) {
-      link = feedUrl
-    }
-
-    val domain = Url(link)
-    val host =
-      if (domain.host != "localhost") {
-        domain.host
-      } else {
-        throw NullPointerException("Unable to get host domain")
-      }
+    val host = UrlUtils.extractHost(link ?: feedUrl)
     val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
       description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
       icon = iconUrl,
-      homepageLink = link,
+      homepageLink = link ?: feedUrl,
       link = feedUrl,
       posts = posts.filterNotNull()
     )
@@ -147,7 +137,7 @@ internal object RSSContentParser : ContentParser() {
       }
     }
 
-    val postPubDateInMillis = date?.let { dateString -> dateString.dateStringToEpochMillis() }
+    val postPubDateInMillis = date?.dateStringToEpochMillis()
 
     if (title.isNullOrBlank() && description.isNullOrBlank()) {
       return null

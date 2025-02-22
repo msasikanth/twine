@@ -18,9 +18,25 @@ package dev.sasikanth.rss.reader.core.network.utils
 
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
+import io.ktor.http.Url
 import io.ktor.http.set
 
 object UrlUtils {
+
+  fun extractHost(urlString: String): String {
+    val host =
+      if (urlString.startsWith("http://") || urlString.startsWith("https://")) {
+        Url(urlString).host
+      } else {
+        urlString
+      }
+
+    return if (host == "localhost") {
+      urlString
+    } else {
+      host
+    }
+  }
 
   fun safeUrl(host: String?, url: String?): String? {
     if (host.isNullOrBlank()) return null
