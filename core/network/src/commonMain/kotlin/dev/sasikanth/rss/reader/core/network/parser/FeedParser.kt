@@ -23,6 +23,7 @@ import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
 import korlibs.io.lang.Charset
+import korlibs.io.lang.Charsets
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
@@ -41,7 +42,11 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   ): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val parser = MiniXmlPullParser(source = content.toCharIterator(charset))
+        val parser =
+          MiniXmlPullParser(
+            source = content.toCharIterator(charset),
+            relaxed = true,
+          )
 
         parser.nextTag()
 
@@ -120,6 +125,7 @@ private fun ByteReadChannel.toCharIterator(
 
     private val DEFAULT_BUFFER_SIZE = 1024L
 
+    private var encodingCharset: Charset? = null
     private var currentIndex = 0
     private var currentBuffer = String()
 
@@ -128,12 +134,33 @@ private fun ByteReadChannel.toCharIterator(
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      currentBuffer = buildString { charset.decode(this, packet.readBytes()) }
+      val bytes = packet.readBytes()
+      val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
+      if (encodingCharset == null) {
+        val encodingContent = buildString { Charsets.UTF8.decode(this, bytes) }
+        encodingCharset = findEncodingCharset(encodingRegex, encodingContent, charset)
+      }
+
+      currentBuffer = buildString { (encodingCharset ?: charset).decode(this, bytes) }
 
       packet.release()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
     }
+
+    private fun findEncodingCharset(
+      encodingRegex: Regex,
+      encodingContent: String,
+      fallbackCharset: Charset,
+    ) =
+      (encodingRegex.find(encodingContent)?.groupValues?.get(1)?.let { encoding ->
+        try {
+          Charset.forName(encoding)
+        } catch (e: Exception) {
+          null
+        }
+      }
+        ?: fallbackCharset)
 
     override fun nextChar(): Char {
       if (!hasNext()) throw NoSuchElementException()

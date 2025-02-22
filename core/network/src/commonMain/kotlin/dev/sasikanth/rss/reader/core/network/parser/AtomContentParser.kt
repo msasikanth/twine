@@ -131,7 +131,7 @@ internal object AtomContentParser : ContentParser() {
 
     val postPubDateInMillis = date?.dateStringToEpochMillis()
 
-    if (title.isNullOrBlank() && content.isNullOrBlank()) {
+    if (link.isNullOrBlank() || (title.isNullOrBlank() && content.isNullOrBlank())) {
       return null
     }
 

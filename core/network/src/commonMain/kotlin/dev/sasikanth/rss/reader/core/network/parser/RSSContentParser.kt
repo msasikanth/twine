@@ -139,7 +139,7 @@ internal object RSSContentParser : ContentParser() {
 
     val postPubDateInMillis = date?.dateStringToEpochMillis()
 
-    if (title.isNullOrBlank() && description.isNullOrBlank()) {
+    if (link.isNullOrBlank() || (title.isNullOrBlank() && description.isNullOrBlank())) {
       return null
     }
 
