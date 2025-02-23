@@ -20,12 +20,22 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import me.tatarka.inject.annotations.Provides
+import okhttp3.Protocol
 
 actual interface NetworkComponent {
 
   @Provides
   @AppScope
   fun providesHttpClient(): HttpClient {
-    return httpClient(engine = OkHttp, config = { config { retryOnConnectionFailure(true) } })
+    return httpClient(
+      engine = OkHttp,
+      config = {
+        config {
+          retryOnConnectionFailure(true)
+
+          protocols(listOf(Protocol.HTTP_1_1, Protocol.HTTP_2))
+        }
+      }
+    )
   }
 }

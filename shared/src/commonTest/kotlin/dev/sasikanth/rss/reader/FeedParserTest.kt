@@ -96,7 +96,7 @@ class FeedParserTest {
               link = "https://example.com/post-with-relative-image",
               description = "Relative image post description.",
               rawContent = "Relative image post description.",
-              imageUrl = "https://example.com/relative-media-url",
+              imageUrl = "http://example.com/relative-media-url",
               date = 1685005200000,
               commentsLink = null
             ),
@@ -228,7 +228,7 @@ class FeedParserTest {
                   <p>Post summary with an image.</p>
                 """
                   .trimIndent(),
-              imageUrl = "https://example.com/resources/image.jpg",
+              imageUrl = "http://example.com/resources/image.jpg",
               date = 1685008800000,
               commentsLink = null
             ),
