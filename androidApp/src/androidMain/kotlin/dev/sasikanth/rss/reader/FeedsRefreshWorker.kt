@@ -25,16 +25,19 @@ import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import java.lang.Exception
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
 
 class FeedsRefreshWorker(
   context: Context,
   workerParameters: WorkerParameters,
   private val rssRepository: RssRepository,
-  private val lastUpdatedAt: LastUpdatedAt
+  private val lastUpdatedAt: LastUpdatedAt,
+  private val settingsRepository: SettingsRepository,
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
@@ -55,6 +58,8 @@ class FeedsRefreshWorker(
   }
 
   override suspend fun doWork(): Result {
+    if (settingsRepository.enableAutoSync.first().not()) return Result.failure()
+
     return if (lastUpdatedAt.hasExpired()) {
       try {
         rssRepository.updateFeeds()

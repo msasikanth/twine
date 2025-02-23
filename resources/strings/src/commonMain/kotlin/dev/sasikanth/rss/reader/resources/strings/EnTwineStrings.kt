@@ -176,4 +176,6 @@ val EnTwineStrings =
     databaseMaintainenceTitle = "Please wait...",
     databaseMaintainenceSubtitle = "Performing database maintainence, don't close the app",
     cdLoadFullArticle = "Load full article",
+    enableAutoSyncTitle = "Enable auto sync",
+    enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
   )
