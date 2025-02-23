@@ -14,6 +14,7 @@ kotlinx_coroutines = "1.10.1"
 kotlinx_date_time = "0.6.2"
 kotlinx_immutable_collections = "0.3.8"
 kotlinx_serialization_json = "1.8.0"
+kotlinx_io = "0.6.0"
 decompose = "3.0.0"
 essenty = "2.4.0"
 androidx_activity = "1.10.0"
@@ -73,6 +74,7 @@ kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
 kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 kotlinx_serialization_json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx_serialization_json" }
+kotlinx_io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx_io" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
@@ -140,6 +142,6 @@ bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
 compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
-kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json" ]
+kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json", "kotlinx_io" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
 xmlutil = [ "xmlutil-core", "xmlutil-serialization" ]

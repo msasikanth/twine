@@ -36,6 +36,7 @@ kotlin {
 
       implementation(libs.kotlinx.datetime)
       implementation(libs.kotlinx.coroutines)
+      implementation(libs.kotlinx.io)
       implementation(libs.kotlininject.runtime)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
