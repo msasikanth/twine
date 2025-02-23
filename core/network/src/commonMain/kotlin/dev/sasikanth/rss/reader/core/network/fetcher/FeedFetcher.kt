@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.core.network.fetcher
 
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parseSource
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
@@ -27,13 +28,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import io.ktor.http.isRelativePath
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.asSource
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
@@ -112,7 +114,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       return FeedFetchResult.Success(feedPayload)
     }
 
-    val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsText(), url)
+    val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
 
     if (feedUrl != url && !feedUrl.isNullOrBlank()) {
       return fetch(url = feedUrl, redirectCount = redirectCount + 1)
@@ -136,10 +138,13 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     return fetch(url = redirectToUrl, redirectCount = redirectCount + 1)
   }
 
-  private fun fetchFeedLinkFromHtmlIfExists(htmlContent: String, originalUrl: String): String? {
+  private fun fetchFeedLinkFromHtmlIfExists(
+    htmlContent: ByteReadChannel,
+    originalUrl: String
+  ): String? {
     val document =
       try {
-        Ksoup.parse(htmlContent)
+        Ksoup.parseSource(htmlContent.asSource())
       } catch (t: Throwable) {
         return null
       }
