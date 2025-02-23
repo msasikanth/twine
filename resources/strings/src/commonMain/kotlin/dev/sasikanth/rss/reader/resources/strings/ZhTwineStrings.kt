@@ -156,4 +156,6 @@ val ZhTwineStrings =
     databaseMaintainenceTitle = "请稍候...",
     databaseMaintainenceSubtitle = "正在进行数据库维护，请勿关闭应用",
     cdLoadFullArticle = "Load full article",
+    enableAutoSyncTitle = "Enable auto sync",
+    enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
   )

@@ -222,6 +222,17 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            AutoSyncSettingItem(
+              enableAutoSync = state.enableAutoSync,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleAutoSync(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
@@ -395,6 +406,43 @@ private fun PostsDeletionPeriodSettingItem(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun AutoSyncSettingItem(enableAutoSync: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(enableAutoSync) { mutableStateOf(enableAutoSync) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!enableAutoSync)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.enableAutoSyncTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.enableAutoSyncDesc,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
