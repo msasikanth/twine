@@ -42,9 +42,10 @@ import coil3.network.NetworkResponseBody
 import coil3.network.httpHeaders
 import coil3.request.Options
 import coil3.util.MimeTypeMap
+import com.fleeksoft.io.okio.asInputStream
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
-import com.fleeksoft.ksoup.ported.BufferReader
+import com.fleeksoft.ksoup.parseInput
 import okio.Buffer
 import okio.FileSystem
 import okio.IOException
@@ -92,8 +93,8 @@ class FavIconFetcher(
         val responseBodyBuffer = responseBody.readBuffer()
 
         val document =
-          Ksoup.parse(
-            bufferReader = BufferReader(responseBodyBuffer),
+          Ksoup.parseInput(
+            input = responseBodyBuffer.asInputStream(),
             baseUri = url,
             charsetName = null
           )
