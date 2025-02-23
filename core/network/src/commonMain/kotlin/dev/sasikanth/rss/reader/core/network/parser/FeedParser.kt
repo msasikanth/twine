@@ -19,7 +19,6 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
@@ -99,20 +98,21 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val TAG_UPDATED = "updated"
     internal const val TAG_FEATURED_IMAGE = "featuredImage"
     internal const val TAG_COMMENTS = "comments"
-    internal const val TAG_IMAGE_URL = "imageUrl"
     internal const val TAG_FEED_IMAGE = "image"
+    internal const val TAG_ICON = "icon"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
     internal const val ATTR_REL = "rel"
     internal const val ATTR_HREF = "href"
+    internal const val ATTR_RDF_RESOURCE = "rdf:resource"
 
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
 
-    fun feedIcon(host: String): String {
+    fun fallbackFeedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
     }
   }

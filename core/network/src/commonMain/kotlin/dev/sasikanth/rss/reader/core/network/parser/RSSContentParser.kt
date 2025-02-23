@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CON
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ENCLOSURE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
@@ -50,6 +51,7 @@ internal object RSSContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var description: String? = null
+    var iconUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -72,12 +74,17 @@ internal object RSSContentParser : ContentParser() {
           val host = UrlUtils.extractHost(link ?: feedUrl)
           posts.add(readRssItem(parser, host))
         }
+        TAG_FEED_IMAGE -> {
+          iconUrl = readFeedIcon(parser)
+        }
         else -> parser.skip()
       }
     }
 
     val host = UrlUtils.extractHost(link ?: feedUrl)
-    val iconUrl = FeedParser.feedIcon(host)
+    if (iconUrl.isNullOrBlank()) {
+      iconUrl = FeedParser.fallbackFeedIcon(host)
+    }
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
@@ -87,6 +94,23 @@ internal object RSSContentParser : ContentParser() {
       link = feedUrl,
       posts = posts.filterNotNull()
     )
+  }
+
+  private fun readFeedIcon(parser: XmlPullParser): String? {
+    parser.require(EventType.START_TAG, parser.namespace, TAG_FEED_IMAGE)
+
+    var imageUrl: String? = null
+
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
+      if (parser.name == TAG_URL) {
+        imageUrl = parser.nextText()
+      } else {
+        parser.skip()
+      }
+    }
+
+    return imageUrl
   }
 
   private fun readRssItem(parser: XmlPullParser, hostLink: String?): PostPayload? {
