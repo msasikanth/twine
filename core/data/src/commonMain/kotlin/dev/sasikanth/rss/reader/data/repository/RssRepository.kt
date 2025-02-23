@@ -241,7 +241,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            pinnedPosition: Double ->
+            pinnedPosition: Double,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -253,7 +254,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition
+              pinnedPosition = pinnedPosition,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -334,7 +336,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -346,7 +349,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              numberOfUnreadPosts = numberOfUnreadPosts
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -372,7 +376,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -384,7 +389,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              numberOfUnreadPosts = numberOfUnreadPosts
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -830,7 +836,8 @@ class RssRepository(
             createdAt: Instant,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -842,6 +849,7 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
