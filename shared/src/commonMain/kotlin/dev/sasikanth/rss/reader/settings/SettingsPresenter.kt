@@ -110,6 +110,7 @@ class SettingsPresenter(
           settingsRepository.postsDeletionPeriod,
           settingsRepository.showReaderView,
           settingsRepository.appThemeMode,
+          settingsRepository.enableAutoSync,
           rssRepository.hasFeeds()
         ) {
           browserType,
@@ -117,6 +118,7 @@ class SettingsPresenter(
           postsDeletionPeriod,
           showReaderView,
           appThemeMode,
+          enableAutoSync,
           hasFeeds ->
           Settings(
             browserType = browserType,
@@ -125,6 +127,7 @@ class SettingsPresenter(
             postsDeletionPeriod = postsDeletionPeriod,
             showReaderView = showReaderView,
             appThemeMode = appThemeMode,
+            enableAutoSync = enableAutoSync,
           )
         }
         .onEach { settings ->
@@ -136,6 +139,7 @@ class SettingsPresenter(
               postsDeletionPeriod = settings.postsDeletionPeriod,
               showReaderView = settings.showReaderView,
               appThemeMode = settings.appThemeMode,
+              enableAutoSync = settings.enableAutoSync
             )
           }
         }
@@ -154,6 +158,7 @@ class SettingsPresenter(
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
         is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
         is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
+        is SettingsEvent.ToggleAutoSync -> toggleAutoSync(event.value)
         SettingsEvent.AboutClicked -> {
           // no-op
         }
@@ -163,6 +168,10 @@ class SettingsPresenter(
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
         is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       }
+    }
+
+    private fun toggleAutoSync(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleAutoSync(value) }
     }
 
     private fun onAppThemeModeChanged(appThemeMode: AppThemeMode) {
@@ -210,4 +219,5 @@ private data class Settings(
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
+  val enableAutoSync: Boolean,
 )
