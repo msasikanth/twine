@@ -74,10 +74,9 @@ class RssRepository(
     feedLink: String,
     title: String? = null,
     feedLastCleanUpAt: Instant? = null,
-    transformUrl: Boolean = true,
   ): FeedAddResult {
     return withContext(ioDispatcher) {
-      when (val feedFetchResult = feedFetcher.fetch(url = feedLink, transformUrl = transformUrl)) {
+      when (val feedFetchResult = feedFetcher.fetch(url = feedLink)) {
         is FeedFetchResult.Success -> {
           return@withContext try {
             val feedPayload = feedFetchResult.feedPayload
@@ -140,13 +139,7 @@ class RssRepository(
         val feedsChunk = feedQueries.feeds().executeAsList().chunked(UPDATE_CHUNKS)
         feedsChunk.map { feeds ->
           feeds.map { feed ->
-            launch {
-              addFeed(
-                feedLink = feed.link,
-                transformUrl = false,
-                feedLastCleanUpAt = feed.lastCleanUpAt
-              )
-            }
+            launch { addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt) }
           }
         }
       }
@@ -158,7 +151,7 @@ class RssRepository(
     withContext(ioDispatcher) {
       val feed = feedQueries.feed(selectedFeedId).executeAsOneOrNull()
       if (feed != null) {
-        addFeed(feedLink = feed.link, transformUrl = false, feedLastCleanUpAt = feed.lastCleanUpAt)
+        addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
       }
     }
   }
@@ -168,11 +161,7 @@ class RssRepository(
       feedIds.forEach { feedId ->
         val feed = feedQueries.feed(feedId).executeAsOneOrNull()
         if (feed != null) {
-          addFeed(
-            feedLink = feed.link,
-            transformUrl = false,
-            feedLastCleanUpAt = feed.lastCleanUpAt
-          )
+          addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
         }
       }
     }

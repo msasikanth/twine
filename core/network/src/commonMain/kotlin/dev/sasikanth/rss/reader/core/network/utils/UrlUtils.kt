@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.core.network.utils
 
 import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import io.ktor.http.set
 
@@ -43,14 +42,9 @@ object UrlUtils {
 
     return if (!url.isNullOrBlank()) {
       if (isAbsoluteUrl(url)) {
-        URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.buildString()
+        URLBuilder(url).buildString()
       } else {
-        URLBuilder()
-          .apply {
-            set(host = host, path = url)
-            protocol = URLProtocol.HTTPS
-          }
-          .buildString()
+        URLBuilder().apply { set(host = host, path = url) }.buildString()
       }
     } else {
       null
