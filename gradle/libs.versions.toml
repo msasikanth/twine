@@ -33,13 +33,12 @@ ktfmt = "0.44"
 kotlininject = "0.7.2"
 ksp = "2.1.10-1.0.30"
 material_color_utilities = "1.0.0-alpha01"
-ksoup = "0.1.2"
+ksoup = "0.2.2"
 sqliteAndroid = "3.45.0"
 windowSizeClass = "0.5.0"
 desugarJdk = "2.1.4"
 lyricist = "1.7.0"
 atomicfu = "0.27.0"
-okio = "3.10.2"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.90.3"
@@ -103,12 +102,13 @@ kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+ksoup-kotlinx-io = { module = "com.fleeksoft.ksoup:ksoup-kotlinx", version.ref = "ksoup" }
+ksoup-okio = { module = "com.fleeksoft.ksoup:ksoup-okio", version.ref = "ksoup" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
 lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
-okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
