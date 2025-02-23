@@ -20,7 +20,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.annotation.ExperimentalCoilApi
 import coil3.network.CacheStrategy
-import coil3.network.ktor2.asNetworkClient
+import coil3.network.ktor3.asNetworkClient
 import io.ktor.client.HttpClient
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.updateAndGet
