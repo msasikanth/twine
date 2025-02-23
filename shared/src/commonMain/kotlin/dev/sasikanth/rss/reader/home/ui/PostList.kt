@@ -93,6 +93,7 @@ internal fun PostsList(
     if (featuredPosts.isNotEmpty()) {
       item {
         FeaturedSection(
+          modifier = Modifier.animateItem(),
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
@@ -110,6 +111,7 @@ internal fun PostsList(
       val post = posts[index]
       if (post != null) {
         PostListItem(
+          modifier = Modifier.animateItem(),
           item = post,
           reduceReadItemAlpha = true,
           onClick = { onPostClicked(post) },
@@ -140,12 +142,14 @@ fun PostListItem(
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
   togglePostReadClick: () -> Unit,
+  modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   Column(
     modifier =
-      Modifier.clickable(onClick = onClick)
+      Modifier.then(modifier)
+        .clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
         .alpha(
