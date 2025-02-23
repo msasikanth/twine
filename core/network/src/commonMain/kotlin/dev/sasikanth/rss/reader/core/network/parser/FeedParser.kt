@@ -21,13 +21,14 @@ import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
@@ -134,7 +135,7 @@ private fun ByteReadChannel.toCharIterator(
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      val bytes = packet.readBytes()
+      val bytes = packet.readByteArray()
       val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
       if (encodingCharset == null) {
         val encodingContent = buildString { Charsets.UTF8.decode(this, bytes) }
@@ -143,7 +144,7 @@ private fun ByteReadChannel.toCharIterator(
 
       currentBuffer = buildString { (encodingCharset ?: charset).decode(this, bytes) }
 
-      packet.release()
+      packet.close()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
     }
