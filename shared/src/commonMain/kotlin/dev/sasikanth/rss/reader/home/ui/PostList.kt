@@ -93,7 +93,6 @@ internal fun PostsList(
     if (featuredPosts.isNotEmpty()) {
       item {
         FeaturedSection(
-          modifier = Modifier.animateItem(),
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
@@ -111,7 +110,6 @@ internal fun PostsList(
       val post = posts[index]
       if (post != null) {
         PostListItem(
-          modifier = Modifier.animateItem(),
           item = post,
           reduceReadItemAlpha = true,
           onClick = { onPostClicked(post) },

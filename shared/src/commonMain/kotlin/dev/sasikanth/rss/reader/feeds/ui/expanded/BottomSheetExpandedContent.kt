@@ -41,6 +41,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -73,6 +74,7 @@ import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
+import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetExpandedBottomBar
@@ -151,14 +153,14 @@ internal fun BottomSheetExpandedContent(
           ) {
             val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
 
-            val label =
+            val pinActionLabel =
               if (areSelectedFeedsPinned) LocalStrings.current.actionUnpin
               else LocalStrings.current.actionPin
 
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Pin,
-              label = label,
+              label = pinActionLabel,
               onClick = {
                 if (areSelectedFeedsPinned) {
                   feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources)
@@ -184,10 +186,23 @@ internal fun BottomSheetExpandedContent(
             )
 
             if (state.selectedSources.size == 1) {
+              val editIcon =
+                if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
+                  Icons.Filled.Edit
+                } else {
+                  Icons.Filled.Tune
+                }
+              val editLabel =
+                if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
+                  LocalStrings.current.edit
+                } else {
+                  LocalStrings.current.settings
+                }
+
               ContextActionItem(
                 modifier = Modifier.weight(1f),
-                icon = Icons.Filled.Edit,
-                label = LocalStrings.current.edit,
+                icon = editIcon,
+                label = editLabel,
                 onClick = {
                   feedsPresenter.dispatch(
                     FeedsEvent.OnEditSourceClicked(state.selectedSources.first())

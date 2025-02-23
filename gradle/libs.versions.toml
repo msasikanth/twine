@@ -9,11 +9,12 @@ android_sdk_target = "35"
 android_sdk_min = "26"
 
 sqldelight = "2.0.2"
-ktor = "2.3.13"
+ktor = "3.1.0"
 kotlinx_coroutines = "1.10.1"
 kotlinx_date_time = "0.6.2"
 kotlinx_immutable_collections = "0.3.8"
 kotlinx_serialization_json = "1.8.0"
+kotlinx_io = "0.6.0"
 decompose = "3.0.0"
 essenty = "2.4.0"
 androidx_activity = "1.10.0"
@@ -32,13 +33,12 @@ ktfmt = "0.44"
 kotlininject = "0.7.2"
 ksp = "2.1.10-1.0.30"
 material_color_utilities = "1.0.0-alpha01"
-ksoup = "0.1.2"
+ksoup = "0.2.2"
 sqliteAndroid = "3.45.0"
 windowSizeClass = "0.5.0"
 desugarJdk = "2.1.4"
 lyricist = "1.7.0"
 atomicfu = "0.27.0"
-okio = "3.10.2"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.90.3"
@@ -73,6 +73,7 @@ kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
 kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 kotlinx_serialization_json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx_serialization_json" }
+kotlinx_io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx_io" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
@@ -95,18 +96,18 @@ androidx_datastore_preferences = { module = "androidx.datastore:datastore-prefer
 androidx_browser = { module = "androidx.browser:browser", version.ref = "androidx_browser" }
 androidx_annotation= { module = "androidx.annotation:annotation", version.ref = "androidx_annotation" }
 coil_compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
-coil_network = { module = "io.coil-kt.coil3:coil-network-ktor2", version.ref = "coil" }
+coil_network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 coil_svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
 material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
+ksoup-kotlinx-io = { module = "com.fleeksoft.ksoup:ksoup-kotlinx", version.ref = "ksoup" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
 lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
 lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
-okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
@@ -140,6 +141,6 @@ bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
 compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
-kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json" ]
+kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json", "kotlinx_io" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
 xmlutil = [ "xmlutil-core", "xmlutil-serialization" ]

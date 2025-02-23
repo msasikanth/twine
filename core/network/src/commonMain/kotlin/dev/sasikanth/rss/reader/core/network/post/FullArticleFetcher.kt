@@ -37,7 +37,8 @@ class FullArticleFetcher(
   suspend fun fetch(link: String): Result<String> {
     return withContext(dispatchersProvider.io) {
       try {
-        val response = httpClient.get(link)
+        val response = httpClient.config { followRedirects = true }.get(link)
+
         if (
           response.status == HttpStatusCode.OK &&
             response.contentType()?.withoutParameters() == ContentType.Text.Html
