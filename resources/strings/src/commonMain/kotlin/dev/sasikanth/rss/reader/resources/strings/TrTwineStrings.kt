@@ -165,4 +165,6 @@ val TrTwineStrings =
     databaseMaintainenceTitle = "Lütfen bekleyin...",
     databaseMaintainenceSubtitle = "Veritabanı bakımı gerçekleştiriliyor, uygulamayı kapatmayın",
     cdLoadFullArticle = "Load full article",
+    enableAutoSyncTitle = "Enable auto sync",
+    enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
   )
