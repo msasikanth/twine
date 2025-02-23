@@ -132,7 +132,9 @@ class AppPresenter(
     // are finished and we can navigate to next screen
     scope.launch {
       withContext(dispatchersProvider.io) { rssRepository.numberOfFeeds().firstOrNull() }
-      navigation.replaceAll(Config.Home)
+      if (screenStack.active.instance is Screen.Placeholder) {
+        navigation.replaceAll(Config.Home)
+      }
     }
   }
 
