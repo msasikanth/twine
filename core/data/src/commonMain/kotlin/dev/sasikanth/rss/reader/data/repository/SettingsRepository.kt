@@ -79,6 +79,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
 
+  suspend fun enableAutoSyncImmediate(): Boolean {
+    return enableAutoSync.first()
+  }
+
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
     dataStore.edit { preferences -> preferences[feedsSortOrderKey] = value.name }
   }
