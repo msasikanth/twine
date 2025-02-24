@@ -158,6 +158,8 @@ data class TwineStrings(
   val cdLoadFullArticle: String,
   val enableAutoSyncTitle: String,
   val enableAutoSyncDesc: String,
+  val showFeedFavIconTitle: String,
+  val showFeedFavIconDesc: String,
 )
 
 object Locales {

@@ -47,8 +47,8 @@ val ZhTwineStrings =
     settings = "设置",
     moreMenuOptions = "更多选项",
     settingsHeaderBehaviour = "行为",
-    settingsHeaderFeedback = "反馈与错误报告",
     settingsHeaderOpml = "OPML",
+    settingsHeaderFeedback = "反馈与错误报告",
     settingsHeaderTheme = "Theme",
     settingsBrowserTypeTitle = "使用内置浏览器",
     settingsBrowserTypeSubtitle = "如果禁用，链接将在默认浏览器中打开。",
@@ -89,8 +89,8 @@ val ZhTwineStrings =
     feedsSearchHint = "筛选",
     allFeeds = "所有订阅",
     pinnedFeeds = "已置顶的订阅",
-    openWebsite = "打开网站",
     markAllAsRead = "全部标记为已读",
+    openWebsite = "打开网站",
     noNewPosts = "暂无新内容",
     noNewPostsSubtitle = "请稍后检查，或下拉以检查是否有新的内容。",
     postsAll = "所有文章",
@@ -158,4 +158,7 @@ val ZhTwineStrings =
     cdLoadFullArticle = "Load full article",
     enableAutoSyncTitle = "Enable auto sync",
     enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
+    showFeedFavIconTitle = "Show feed fav icon",
+    showFeedFavIconDesc =
+      "When turned-off, the feed icon will be displayed instead of the website's favicon"
   )

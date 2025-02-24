@@ -227,6 +227,17 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            ShowFeedFavIconSettingItem(
+              showFeedFavIcon = state.showFeedFavIcon,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
@@ -400,6 +411,46 @@ private fun PostsDeletionPeriodSettingItem(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun ShowFeedFavIconSettingItem(
+  showFeedFavIcon: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  var checked by remember(showFeedFavIcon) { mutableStateOf(showFeedFavIcon) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!showFeedFavIcon)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.showFeedFavIconTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.showFeedFavIconDesc,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
