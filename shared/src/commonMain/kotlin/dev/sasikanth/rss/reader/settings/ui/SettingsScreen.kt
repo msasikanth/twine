@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.settings.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,11 +99,6 @@ internal fun SettingsScreen(
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
-  val isSystemInDarkMode =
-    when (state.appThemeMode) {
-      AppThemeMode.Dark -> true
-      else -> isSystemInDarkTheme()
-    }
 
   Scaffold(
     modifier = modifier,

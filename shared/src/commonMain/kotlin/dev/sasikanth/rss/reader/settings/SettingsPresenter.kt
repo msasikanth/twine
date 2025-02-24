@@ -111,7 +111,7 @@ class SettingsPresenter(
           settingsRepository.showReaderView,
           settingsRepository.appThemeMode,
           settingsRepository.enableAutoSync,
-          rssRepository.hasFeeds()
+          settingsRepository.showFeedFavIcon
         ) {
           browserType,
           showUnreadPostsCount,
@@ -119,15 +119,15 @@ class SettingsPresenter(
           showReaderView,
           appThemeMode,
           enableAutoSync,
-          hasFeeds ->
+          showFeedFavIcon ->
           Settings(
             browserType = browserType,
             showUnreadPostsCount = showUnreadPostsCount,
-            hasFeeds = hasFeeds,
             postsDeletionPeriod = postsDeletionPeriod,
             showReaderView = showReaderView,
             appThemeMode = appThemeMode,
             enableAutoSync = enableAutoSync,
+            showFeedFavIcon = showFeedFavIcon,
           )
         }
         .onEach { settings ->
@@ -135,14 +135,19 @@ class SettingsPresenter(
             it.copy(
               browserType = settings.browserType,
               showUnreadPostsCount = settings.showUnreadPostsCount,
-              hasFeeds = settings.hasFeeds,
               postsDeletionPeriod = settings.postsDeletionPeriod,
               showReaderView = settings.showReaderView,
               appThemeMode = settings.appThemeMode,
-              enableAutoSync = settings.enableAutoSync
+              enableAutoSync = settings.enableAutoSync,
+              showFeedFavIcon = settings.showFeedFavIcon,
             )
           }
         }
+        .launchIn(coroutineScope)
+
+      rssRepository
+        .hasFeeds()
+        .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
         .launchIn(coroutineScope)
 
       opmlManager.result
@@ -159,6 +164,7 @@ class SettingsPresenter(
         is SettingsEvent.ToggleShowUnreadPostsCount -> toggleShowUnreadPostsCount(event.value)
         is SettingsEvent.ToggleShowReaderView -> toggleShowReaderView(event.value)
         is SettingsEvent.ToggleAutoSync -> toggleAutoSync(event.value)
+        is SettingsEvent.ToggleShowFeedFavIcon -> toggleShowFeedFavIcon(event.value)
         SettingsEvent.AboutClicked -> {
           // no-op
         }
@@ -168,6 +174,10 @@ class SettingsPresenter(
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
         is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       }
+    }
+
+    private fun toggleShowFeedFavIcon(value: Boolean) {
+      coroutineScope.launch { settingsRepository.toggleShowFeedFavIcon(value) }
     }
 
     private fun toggleAutoSync(value: Boolean) {
@@ -215,9 +225,9 @@ class SettingsPresenter(
 private data class Settings(
   val browserType: BrowserType,
   val showUnreadPostsCount: Boolean,
-  val hasFeeds: Boolean,
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
   val enableAutoSync: Boolean,
+  val showFeedFavIcon: Boolean,
 )
