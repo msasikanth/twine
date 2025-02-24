@@ -59,6 +59,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
@@ -288,8 +289,15 @@ class AppPresenter(
       )
 
     init {
-      settingsRepository.appThemeMode
-        .onEach { appThemeMode -> _state.update { it.copy(appThemeMode = appThemeMode) } }
+      combine(
+          settingsRepository.appThemeMode,
+          settingsRepository.showFeedFavIcon,
+        ) { appThemeMode, showFeedFavIcon ->
+          Pair(appThemeMode, showFeedFavIcon)
+        }
+        .onEach { (appThemeMode, showFeedFavIcon) ->
+          _state.update { it.copy(appThemeMode = appThemeMode, showFeedFavIcon = showFeedFavIcon) }
+        }
         .launchIn(coroutineScope)
     }
 
