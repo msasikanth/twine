@@ -43,12 +43,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.FeedFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.resources.icons.RadioSelected
 import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -95,8 +96,11 @@ internal fun FeedListItem(
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      FeedFavIcon(
-        url = feed.homepageLink,
+      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+      val icon = if (showFeedFavIcon) feed.homepageLink else feed.icon
+
+      FeedIcon(
+        url = icon,
         contentDescription = null,
         modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),
         contentScale = ContentScale.Crop,

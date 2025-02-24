@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.model.local
+package dev.sasikanth.rss.reader.utils
 
-import kotlinx.datetime.Instant
+import androidx.compose.runtime.compositionLocalOf
 
-data class FeedGroup(
-  override val id: String,
-  val name: String,
-  val feedIds: List<String>,
-  val feedHomepageLinks: List<String>,
-  val feedIconLinks: List<String>,
-  val numberOfUnreadPosts: Long = 0,
-  val createdAt: Instant,
-  val updatedAt: Instant,
-  override val pinnedAt: Instant?,
-  override val sourceType: SourceType = SourceType.FeedGroup,
-  override val pinnedPosition: Double = 0.0,
-) : Source
+internal val LocalShowFeedFavIconSetting = compositionLocalOf { true }

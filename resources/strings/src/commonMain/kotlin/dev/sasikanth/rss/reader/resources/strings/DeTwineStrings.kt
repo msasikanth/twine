@@ -53,8 +53,8 @@ val DeTwineStrings =
     settings = "Einstellungen",
     moreMenuOptions = "Weitere Menüoptionen",
     settingsHeaderBehaviour = "Verhalten",
-    settingsHeaderFeedback = "Feedback und Fehlerberichte",
     settingsHeaderOpml = "OPML",
+    settingsHeaderFeedback = "Feedback und Fehlerberichte",
     settingsHeaderTheme = "Theme",
     settingsBrowserTypeTitle = "Verwende den In-App-Browser",
     settingsBrowserTypeSubtitle =
@@ -99,8 +99,8 @@ val DeTwineStrings =
     feedsSearchHint = "Filter",
     allFeeds = "Feeds",
     pinnedFeeds = "Angepinnt",
-    openWebsite = "Website öffnen",
     markAllAsRead = "Alle als gelesen markieren",
+    openWebsite = "Website öffnen",
     noNewPosts = "Keine neuen Beiträge",
     noNewPostsSubtitle =
       "Schauen Sie später noch einmal vorbei oder ziehen Sie nach unten, um nach neuen Inhalten zu suchen",
@@ -171,4 +171,7 @@ val DeTwineStrings =
     cdLoadFullArticle = "Load full article",
     enableAutoSyncTitle = "Enable auto sync",
     enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
+    showFeedFavIconTitle = "Show feed fav icon",
+    showFeedFavIconDesc =
+      "When turned-off, the feed icon will be displayed instead of the website's favicon"
   )

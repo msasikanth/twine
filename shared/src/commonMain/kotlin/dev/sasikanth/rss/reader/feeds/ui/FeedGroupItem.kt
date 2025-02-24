@@ -51,6 +51,7 @@ import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -98,15 +99,18 @@ internal fun FeedGroupItem(
         .padding(8.dp)
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
+      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+      val icons = if (showFeedFavIcon) feedGroup.feedHomepageLinks else feedGroup.feedIconLinks
+
       val iconSize =
-        if (feedGroup.feedHomepageLinks.size > 2) {
+        if (icons.size > 2) {
           17.dp
         } else {
           19.dp
         }
 
       val iconSpacing =
-        if (feedGroup.feedHomepageLinks.size > 2) {
+        if (icons.size > 2) {
           2.dp
         } else {
           0.dp
@@ -114,7 +118,7 @@ internal fun FeedGroupItem(
 
       FeedGroupIconGrid(
         modifier = Modifier.requiredSize(36.dp),
-        icons = feedGroup.feedHomepageLinks,
+        icons = icons,
         iconSize = iconSize,
         iconShape = CircleShape,
         verticalArrangement = Arrangement.spacedBy(iconSpacing),
