@@ -116,7 +116,12 @@ internal fun ContextActionItem(
 
       Spacer(Modifier.requiredHeight(4.dp))
 
-      Text(text = label, style = MaterialTheme.typography.labelLarge, color = color)
+      Text(
+        text = label,
+        style = MaterialTheme.typography.labelLarge,
+        color = color,
+        maxLines = 1,
+      )
     }
   }
 }
