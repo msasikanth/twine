@@ -186,26 +186,25 @@ internal fun FeaturedSection(
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
         Box {
-          if (useDarkTheme) {
-            FeaturedSectionBackground(
-              modifier =
-                Modifier.matchParentSize().layout { measurable, constraints ->
-                  val topPadding = contentPadding.calculateTopPadding().roundToPx()
-                  val horizontalContentPadding =
-                    contentPadding.calculateStartPadding(layoutDirection) +
-                      contentPadding.calculateEndPadding(layoutDirection)
-                  val fullWidth = constraints.maxWidth + horizontalContentPadding.roundToPx()
-                  val placeable = measurable.measure(constraints.copy(maxWidth = fullWidth))
+          FeaturedSectionBackground(
+            modifier =
+              Modifier.matchParentSize().layout { measurable, constraints ->
+                val topPadding = contentPadding.calculateTopPadding().roundToPx()
+                val horizontalContentPadding =
+                  contentPadding.calculateStartPadding(layoutDirection) +
+                    contentPadding.calculateEndPadding(layoutDirection)
+                val fullWidth = constraints.maxWidth + horizontalContentPadding.roundToPx()
+                val placeable = measurable.measure(constraints.copy(maxWidth = fullWidth))
 
-                  layout(placeable.width, placeable.height) {
-                    placeable.place(0, topPadding.unaryMinus())
-                  }
-                },
-              state = pagerState,
-              page = page,
-              featuredPost = featuredPost,
-            )
-          }
+                layout(placeable.width, placeable.height) {
+                  placeable.place(0, topPadding.unaryMinus())
+                }
+              },
+            state = pagerState,
+            page = page,
+            featuredPost = featuredPost,
+            useDarkTheme = useDarkTheme,
+          )
 
           val postWithMetadata = featuredPost.postWithMetadata
           FeaturedPostItem(
@@ -231,21 +230,27 @@ private fun FeaturedSectionBackground(
   state: PagerState,
   page: Int,
   featuredPost: FeaturedPostItem,
+  useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
 ) {
   Box(modifier) {
     val gradientOverlayModifier =
       Modifier.drawWithCache {
+        val gradientColor = if (useDarkTheme) Color.Black else Color.White
         val radialGradient =
           Brush.radialGradient(
             colors =
-              listOf(Color.Black, Color.Black.copy(alpha = 0.0f), Color.Black.copy(alpha = 0.0f)),
+              listOf(
+                gradientColor,
+                gradientColor.copy(alpha = 0.0f),
+                gradientColor.copy(alpha = 0.0f)
+              ),
             center = Offset(x = this.size.width, y = 40f)
           )
 
         val linearGradient =
           Brush.verticalGradient(
-            colors = listOf(Color.Black, Color.Black.copy(alpha = 0.0f)),
+            colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
           )
 
         onDrawWithContent {
