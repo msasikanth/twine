@@ -272,6 +272,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIconLinks: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -281,6 +282,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIconLinks.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -622,6 +624,7 @@ class RssRepository(
           numberOfUnreadPosts: Long,
           feedIds: List<String>?,
           feedHomepageLinks: String?,
+          feedIcons: String?,
           updatedAt: Instant?,
           pinnedPosition: Double ->
           if (type == "group") {
@@ -631,6 +634,7 @@ class RssRepository(
               feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
               feedHomepageLinks =
                 feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               createdAt = createdAt!!,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
@@ -686,6 +690,7 @@ class RssRepository(
             numberOfUnreadPosts: Long,
             feedIds: List<String>?,
             feedHomepageLinks: String?,
+            feedIcons: String?,
             updatedAt: Instant? ->
             if (type == "group") {
               FeedGroup(
@@ -694,6 +699,7 @@ class RssRepository(
                 feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
                 feedHomepageLinks =
                   feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
@@ -733,6 +739,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -742,6 +749,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -767,6 +775,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant? ->
@@ -775,6 +784,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -794,6 +804,7 @@ class RssRepository(
           name: String,
           feedIds: List<String>,
           feedHomepageLinks: String,
+          feedIcons: String,
           createdAt: Instant,
           updatedAt: Instant,
           pinnedAt: Instant? ->
@@ -802,6 +813,7 @@ class RssRepository(
             name = name,
             feedIds = feedIds.filterNot { it.isBlank() },
             feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+            feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
             createdAt = createdAt,
             updatedAt = updatedAt,
             pinnedAt = pinnedAt,

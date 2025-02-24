@@ -23,6 +23,7 @@ data class FeedGroup(
   val name: String,
   val feedIds: List<String>,
   val feedHomepageLinks: List<String>,
+  val feedIconLinks: List<String>,
   val numberOfUnreadPosts: Long = 0,
   val createdAt: Instant,
   val updatedAt: Instant,
