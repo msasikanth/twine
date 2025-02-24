@@ -30,8 +30,8 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.SourceFetchResult
 import coil3.getExtra
-import coil3.network.CacheResponse
 import coil3.network.CacheStrategy
+import coil3.network.ConnectivityChecker
 import coil3.network.HttpException
 import coil3.network.NetworkClient
 import coil3.network.NetworkFetcher
@@ -44,8 +44,14 @@ import coil3.request.Options
 import coil3.util.MimeTypeMap
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
-import com.fleeksoft.ksoup.ported.BufferReader
-import okio.Buffer
+import com.fleeksoft.ksoup.parseSource
+import kotlin.math.min
+import kotlinx.io.Buffer
+import kotlinx.io.EOFException
+import kotlinx.io.RawSource
+import kotlinx.io.Source
+import kotlinx.io.UnsafeIoApi
+import kotlinx.io.unsafe.UnsafeBufferOperations
 import okio.FileSystem
 import okio.IOException
 
@@ -68,36 +74,31 @@ class FavIconFetcher(
     val snapshot = readFromDiskCache()
     try {
       // Fast path: fetch the fav icon from the disk cache without performing a network request.
-      var output: CacheStrategy.Output? = null
+      var output: CacheStrategy.ReadResult? = null
       if (snapshot != null) {
         var cacheResponse = snapshot.toCacheResponse()
         if (cacheResponse != null) {
-          val input = CacheStrategy.Input(cacheResponse, newRequest(), options)
-          output = cacheStrategy.value.compute(input)
-          cacheResponse = output.cacheResponse
+          output = cacheStrategy.value.read(cacheResponse, newRequest(), options)
+          cacheResponse = output.response
         }
         if (cacheResponse != null) {
           return SourceFetchResult(
             source = snapshot.toImageSource(),
-            mimeType = getMimeType(url, cacheResponse.responseHeaders[CONTENT_TYPE]),
+            mimeType = getMimeType(url, cacheResponse.headers[CONTENT_TYPE]),
             dataSource = DataSource.DISK,
           )
         }
       }
 
       // Slow path: fetch the fav icon by parsing response HTML
-      val networkRequest = output?.networkRequest ?: newRequest()
+      val networkRequest = output?.request ?: newRequest()
       return executeNetworkRequest(networkRequest) { response ->
         // Write the response to the disk cache then open a new snapshot.
         val responseBody = checkNotNull(response.body) { "body == null" }
         val responseBodyBuffer = responseBody.readBuffer()
 
         val document =
-          Ksoup.parse(
-            bufferReader = BufferReader(responseBodyBuffer),
-            baseUri = url,
-            charsetName = null
-          )
+          Ksoup.parseSource(source = responseBodyBuffer, baseUri = url, charsetName = null)
         val favIconUrl = parseFaviconUrl(document) ?: fallbackFaviconUrl(url)
 
         return@executeNetworkRequest networkFetcher(favIconUrl).fetch()
@@ -207,9 +208,9 @@ class FavIconFetcher(
     return contentType?.substringBefore(';')
   }
 
-  private fun DiskCache.Snapshot.toCacheResponse(): CacheResponse? {
+  private fun DiskCache.Snapshot.toCacheResponse(): NetworkResponse? {
     return try {
-      fileSystem.read(metadata) { CacheResponse(this) }
+      fileSystem.read(metadata) { NetworkResponse(body = NetworkResponseBody(this)) }
     } catch (_: IOException) {
       // If we can't parse the metadata, ignore this entry.
       null
@@ -233,10 +234,10 @@ class FavIconFetcher(
     } catch (_: Exception) {}
   }
 
-  private suspend fun NetworkResponseBody.readBuffer(): Buffer = use { body ->
-    val buffer = Buffer()
+  private suspend fun NetworkResponseBody.readBuffer(): RawSource = use { body ->
+    val buffer = okio.Buffer()
     body.writeTo(buffer)
-    return buffer
+    return buffer.asKotlinxIoRawSource()
   }
 
   private val httpMethodKey = Extras.Key(default = HTTP_METHOD_GET)
@@ -283,6 +284,7 @@ class FavIconFetcher(
             networkClient = networkClientLazy,
             diskCache = diskCacheLazy,
             cacheStrategy = cacheStrategyLazy,
+            connectivityChecker = ConnectivityChecker.ONLINE
           )
         }
       )
@@ -291,5 +293,54 @@ class FavIconFetcher(
     private fun isApplicable(data: Uri): Boolean {
       return data.scheme == "http" || data.scheme == "https"
     }
+  }
+}
+
+// TODO: Remove after Okio adapters are available in kotlinx-io library
+/**
+ * Returns a [kotlinx.io.RawSource] backed by this [okio.Source].
+ *
+ * Closing one of these sources will also close another one.
+ */
+public fun okio.Source.asKotlinxIoRawSource(): RawSource =
+  object : RawSource {
+    private val buffer =
+      okio.Buffer() // TODO: optimization - reuse BufferedSource's buffer if possible
+
+    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = withOkio2KxIOExceptionMapping {
+      val readBytes = this@asKotlinxIoRawSource.read(buffer, byteCount)
+      if (readBytes == -1L) return -1L
+
+      var remaining = readBytes
+      while (remaining > 0) {
+        @OptIn(UnsafeIoApi::class)
+        UnsafeBufferOperations.writeToTail(sink, 1) { data, from, to ->
+          val toRead = min((to - from).toLong(), remaining).toInt()
+          val read = buffer.read(data, from, toRead)
+          check(read != -1) { "Buffer was exhausted before reading $toRead bytes from it." }
+          remaining -= read
+          read
+        }
+      }
+
+      return readBytes
+    }
+
+    override fun close() = withOkio2KxIOExceptionMapping { this@asKotlinxIoRawSource.close() }
+  }
+
+internal inline fun <T> withOkio2KxIOExceptionMapping(block: () -> T): T {
+  try {
+    return block()
+  } catch (
+    bypassIOE:
+      kotlinx.io.IOException) { // on JVM, kotlinx.io.IOException and okio.IOException are the same
+    throw bypassIOE
+  } catch (bypassEOF: kotlinx.io.EOFException) { // see above
+    throw bypassEOF
+  } catch (eofe: okio.EOFException) {
+    throw kotlinx.io.IOException(eofe.message, eofe)
+  } catch (ioe: okio.IOException) {
+    throw kotlinx.io.IOException(ioe.message, ioe)
   }
 }

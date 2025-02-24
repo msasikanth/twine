@@ -140,12 +140,14 @@ fun PostListItem(
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
   togglePostReadClick: () -> Unit,
+  modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   Column(
     modifier =
-      Modifier.clickable(onClick = onClick)
+      Modifier.then(modifier)
+        .clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
         .alpha(

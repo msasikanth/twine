@@ -51,9 +51,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -69,7 +69,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -77,7 +76,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
-import dev.sasikanth.rss.reader.components.image.FeedFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
@@ -92,6 +91,7 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -126,7 +126,7 @@ fun FeedInfoBottomSheet(
           .only(WindowInsetsSides.Bottom)
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
-      sheetState = SheetState(skipPartiallyExpanded = true, density = LocalDensity.current),
+      sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
       scrimColor = SYSTEM_SCRIM
     ) {
       Column(
@@ -246,8 +246,11 @@ private fun FeedLabelInput(
       .padding(8.dp)
       .fillMaxWidth()
   ) {
-    FeedFavIcon(
-      url = feed.homepageLink,
+    val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+    val feedIcon = if (showFeedFavIcon) feed.homepageLink else feed.icon
+
+    FeedIcon(
+      url = feedIcon,
       contentDescription = feed.name,
       modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
     )

@@ -40,6 +40,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val feedsViewModeKey = stringPreferencesKey("pref_feeds_view_mode")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
+  private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
+  private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -75,6 +77,16 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
       mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Dark
     }
 
+  val enableAutoSync: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
+
+  val showFeedFavIcon: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[showFeedFavIconKey] ?: true }
+
+  suspend fun enableAutoSyncImmediate(): Boolean {
+    return enableAutoSync.first()
+  }
+
   suspend fun updateFeedsSortOrder(value: FeedsOrderBy) {
     dataStore.edit { preferences -> preferences[feedsSortOrderKey] = value.name }
   }
@@ -109,6 +121,14 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updateAppTheme(value: AppThemeMode) {
     dataStore.edit { preferences -> preferences[appThemeModeKey] = value.name }
+  }
+
+  suspend fun toggleAutoSync(value: Boolean) {
+    dataStore.edit { preferences -> preferences[enableAutoSyncKey] = value }
+  }
+
+  suspend fun toggleShowFeedFavIcon(value: Boolean) {
+    dataStore.edit { preferences -> preferences[showFeedFavIconKey] = value }
   }
 
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {

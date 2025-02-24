@@ -18,9 +18,16 @@ package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 
-data class AppState(val appThemeMode: AppThemeMode) {
+data class AppState(
+  val appThemeMode: AppThemeMode,
+  val showFeedFavIcon: Boolean,
+) {
 
   companion object {
-    val DEFAULT = AppState(appThemeMode = AppThemeMode.Auto)
+    val DEFAULT =
+      AppState(
+        appThemeMode = AppThemeMode.Auto,
+        showFeedFavIcon = true,
+      )
   }
 }

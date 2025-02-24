@@ -142,7 +142,8 @@ class ReaderPresenter(
           )
         }
 
-        if (feed.alwaysFetchSourceArticle) {
+        val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
+        if (feed.alwaysFetchSourceArticle || hasContent.not()) {
           loadSourceArticle()
         } else {
           loadRssContent()

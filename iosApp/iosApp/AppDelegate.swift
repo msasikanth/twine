@@ -94,6 +94,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: 60 * 60)) // 1 hour
         Task(priority: .background) {
             do {
+                let isAutoSyncEnabled = try await applicationComponent.settingsRepository.enableAutoSyncImmediate().boolValue
+                
+                if !isAutoSyncEnabled {
+                    task.setTaskCompleted(success: false)
+                    return
+                }
+                
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastUpdatedAt.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
                     try await applicationComponent.rssRepository.updateFeeds()

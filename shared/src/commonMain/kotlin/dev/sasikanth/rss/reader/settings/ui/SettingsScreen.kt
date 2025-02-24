@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.settings.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -100,11 +99,6 @@ internal fun SettingsScreen(
   val state by settingsPresenter.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
-  val isSystemInDarkMode =
-    when (state.appThemeMode) {
-      AppThemeMode.Dark -> true
-      else -> isSystemInDarkTheme()
-    }
 
   Scaffold(
     modifier = modifier,
@@ -215,6 +209,28 @@ internal fun SettingsScreen(
               showUnreadCountEnabled = state.showUnreadPostsCount,
               onValueChanged = { newValue ->
                 settingsPresenter.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            AutoSyncSettingItem(
+              enableAutoSync = state.enableAutoSync,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleAutoSync(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            ShowFeedFavIconSettingItem(
+              showFeedFavIcon = state.showFeedFavIcon,
+              onValueChanged = { newValue ->
+                settingsPresenter.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
               }
             )
           }
@@ -395,6 +411,83 @@ private fun PostsDeletionPeriodSettingItem(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun ShowFeedFavIconSettingItem(
+  showFeedFavIcon: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  var checked by remember(showFeedFavIcon) { mutableStateOf(showFeedFavIcon) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!showFeedFavIcon)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.showFeedFavIconTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.showFeedFavIconDesc,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun AutoSyncSettingItem(enableAutoSync: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(enableAutoSync) { mutableStateOf(enableAutoSync) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!enableAutoSync)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          LocalStrings.current.enableAutoSyncTitle,
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          LocalStrings.current.enableAutoSyncDesc,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }

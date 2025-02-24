@@ -12,7 +12,8 @@ CREATE TABLE feed(
   pinnedAt INTEGER AS Instant,
   lastCleanUpAt INTEGER AS Instant,
   alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0,
-  pinnedPosition REAL NOT NULL DEFAULT 0.0
+  pinnedPosition REAL NOT NULL DEFAULT 0.0,
+  showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -51,7 +52,8 @@ SELECT
   f.pinnedAt,
   f.lastCleanUpAt,
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
-  f.pinnedPosition
+  f.pinnedPosition,
+  f.showFeedFavIcon
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
 GROUP BY f.id
@@ -80,7 +82,8 @@ SELECT
   f.pinnedAt,
   f.lastCleanUpAt,
   f.alwaysFetchSourceArticle,
-  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+  f.showFeedFavIcon
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
 WHERE f.id = :id
@@ -122,7 +125,8 @@ SELECT
   f.createdAt,
   f.pinnedAt,
   f.lastCleanUpAt,
-  0 AS numberOfUnreadPosts
+  0 AS numberOfUnreadPosts,
+  f.showFeedFavIcon
 FROM feed f
 WHERE f.id IN :feedIds
 ORDER BY

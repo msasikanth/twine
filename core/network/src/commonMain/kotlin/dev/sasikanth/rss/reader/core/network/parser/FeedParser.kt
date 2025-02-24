@@ -19,18 +19,15 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import io.ktor.http.URLBuilder
-import io.ktor.http.URLProtocol
-import io.ktor.http.set
 import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.core.readBytes
-import io.ktor.utils.io.core.release
 import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
+import korlibs.io.lang.Charsets
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
@@ -45,7 +42,11 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
   ): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val parser = MiniXmlPullParser(source = content.toCharIterator(charset))
+        val parser =
+          MiniXmlPullParser(
+            source = content.toCharIterator(charset),
+            relaxed = true,
+          )
 
         parser.nextTag()
 
@@ -97,45 +98,22 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val TAG_UPDATED = "updated"
     internal const val TAG_FEATURED_IMAGE = "featuredImage"
     internal const val TAG_COMMENTS = "comments"
-    internal const val TAG_IMAGE_URL = "imageUrl"
     internal const val TAG_FEED_IMAGE = "image"
+    internal const val TAG_ICON = "icon"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
     internal const val ATTR_REL = "rel"
     internal const val ATTR_HREF = "href"
+    internal const val ATTR_RDF_RESOURCE = "rdf:resource"
 
     internal const val ATTR_VALUE_ALTERNATE = "alternate"
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
 
-    fun feedIcon(host: String): String {
+    fun fallbackFeedIcon(host: String): String {
       return "https://icon.horse/icon/$host"
-    }
-
-    fun safeUrl(host: String?, url: String?): String? {
-      if (host.isNullOrBlank()) return null
-
-      return if (!url.isNullOrBlank()) {
-        if (isAbsoluteUrl(url)) {
-          URLBuilder(url).apply { protocol = URLProtocol.HTTPS }.buildString()
-        } else {
-          URLBuilder(host)
-            .apply {
-              set(path = url)
-              protocol = URLProtocol.HTTPS
-            }
-            .buildString()
-        }
-      } else {
-        null
-      }
-    }
-
-    private fun isAbsoluteUrl(url: String): Boolean {
-      val pattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
-      return pattern.containsMatchIn(url)
     }
   }
 }
@@ -148,6 +126,7 @@ private fun ByteReadChannel.toCharIterator(
 
     private val DEFAULT_BUFFER_SIZE = 1024L
 
+    private var encodingCharset: Charset? = null
     private var currentIndex = 0
     private var currentBuffer = String()
 
@@ -156,12 +135,33 @@ private fun ByteReadChannel.toCharIterator(
       if (this@toCharIterator.isClosedForRead) return false
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
-      currentBuffer = buildString { charset.decode(this, packet.readBytes()) }
+      val bytes = packet.readByteArray()
+      val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
+      if (encodingCharset == null) {
+        val encodingContent = buildString { Charsets.UTF8.decode(this, bytes) }
+        encodingCharset = findEncodingCharset(encodingRegex, encodingContent, charset)
+      }
 
-      packet.release()
+      currentBuffer = buildString { (encodingCharset ?: charset).decode(this, bytes) }
+
+      packet.close()
       currentIndex = 0
       return currentBuffer.isNotEmpty()
     }
+
+    private fun findEncodingCharset(
+      encodingRegex: Regex,
+      encodingContent: String,
+      fallbackCharset: Charset,
+    ) =
+      (encodingRegex.find(encodingContent)?.groupValues?.get(1)?.let { encoding ->
+        try {
+          Charset.forName(encoding)
+        } catch (e: Exception) {
+          null
+        }
+      }
+        ?: fallbackCharset)
 
     override fun nextChar(): Char {
       if (!hasNext()) throw NoSuchElementException()
