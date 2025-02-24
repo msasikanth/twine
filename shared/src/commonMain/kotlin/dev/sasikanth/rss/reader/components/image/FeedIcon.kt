@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.components.image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.RssFeed
 import androidx.compose.material.icons.rounded.RssFeed
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -32,29 +31,40 @@ import coil3.size.Dimension
 import coil3.size.Size
 import dev.sasikanth.rss.reader.favicons.FavIconImageLoader
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
-internal fun FeedFavIcon(
+internal fun FeedIcon(
   url: String,
   contentDescription: String?,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500)
 ) {
+  val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   Box(modifier.background(Color.White)) {
-    val context = LocalPlatformContext.current
-    val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
-    val imageLoader = FavIconImageLoader.get(context)
+    if (showFeedFavIcon) {
+      val context = LocalPlatformContext.current
+      val imageRequest =
+        ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
+      val imageLoader = FavIconImageLoader.get(context)
 
-    SubcomposeAsyncImage(
-      model = imageRequest,
-      contentDescription = contentDescription,
-      modifier = Modifier.matchParentSize(),
-      contentScale = contentScale,
-      imageLoader = imageLoader,
-      error = { PlaceHolderIcon() },
-      loading = { PlaceHolderIcon() }
-    )
+      SubcomposeAsyncImage(
+        model = imageRequest,
+        contentDescription = contentDescription,
+        modifier = Modifier.matchParentSize(),
+        contentScale = contentScale,
+        imageLoader = imageLoader,
+        error = { PlaceHolderIcon() },
+        loading = { PlaceHolderIcon() }
+      )
+    } else {
+      AsyncImage(
+        url = url,
+        contentDescription = contentDescription,
+        backgroundColor = null,
+      )
+    }
   }
 }
 
