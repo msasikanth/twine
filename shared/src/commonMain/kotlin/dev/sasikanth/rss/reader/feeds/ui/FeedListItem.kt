@@ -49,6 +49,7 @@ import dev.sasikanth.rss.reader.resources.icons.RadioSelected
 import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -95,8 +96,11 @@ internal fun FeedListItem(
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+      val icon = if (showFeedFavIcon) feed.homepageLink else feed.icon
+
       FeedIcon(
-        url = feed.homepageLink,
+        url = icon,
         contentDescription = null,
         modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),
         contentScale = ContentScale.Crop,

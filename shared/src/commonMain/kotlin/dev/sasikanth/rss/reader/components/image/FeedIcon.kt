@@ -60,6 +60,7 @@ internal fun FeedIcon(
       )
     } else {
       AsyncImage(
+        modifier = Modifier.matchParentSize(),
         url = url,
         contentDescription = contentDescription,
         backgroundColor = null,
