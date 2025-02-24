@@ -29,6 +29,10 @@ sealed interface SettingsEvent {
 
   data class ToggleShowReaderView(val value: Boolean) : SettingsEvent
 
+  data class ToggleAutoSync(val value: Boolean) : SettingsEvent
+
+  data class ToggleShowFeedFavIcon(val value: Boolean) : SettingsEvent
+
   data object AboutClicked : SettingsEvent
 
   data object ImportOpmlClicked : SettingsEvent

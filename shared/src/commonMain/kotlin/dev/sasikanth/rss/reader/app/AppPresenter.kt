@@ -59,6 +59,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
@@ -132,7 +133,9 @@ class AppPresenter(
     // are finished and we can navigate to next screen
     scope.launch {
       withContext(dispatchersProvider.io) { rssRepository.numberOfFeeds().firstOrNull() }
-      navigation.replaceAll(Config.Home)
+      if (screenStack.active.instance is Screen.Placeholder) {
+        navigation.replaceAll(Config.Home)
+      }
     }
   }
 
@@ -286,8 +289,15 @@ class AppPresenter(
       )
 
     init {
-      settingsRepository.appThemeMode
-        .onEach { appThemeMode -> _state.update { it.copy(appThemeMode = appThemeMode) } }
+      combine(
+          settingsRepository.appThemeMode,
+          settingsRepository.showFeedFavIcon,
+        ) { appThemeMode, showFeedFavIcon ->
+          Pair(appThemeMode, showFeedFavIcon)
+        }
+        .onEach { (appThemeMode, showFeedFavIcon) ->
+          _state.update { it.copy(appThemeMode = appThemeMode, showFeedFavIcon = showFeedFavIcon) }
+        }
         .launchIn(coroutineScope)
     }
 

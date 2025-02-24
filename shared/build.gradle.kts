@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
@@ -28,7 +29,7 @@ plugins {
   alias(libs.plugins.kotlin.compose)
 }
 
-composeCompiler { enableStrongSkippingMode = true }
+composeCompiler { featureFlags = setOf(ComposeFeatureFlag.StrongSkipping) }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
@@ -93,10 +94,10 @@ kotlin {
       implementation(libs.androidx.collection)
       implementation(libs.material.color.utilities)
       implementation(libs.ksoup)
+      implementation(libs.ksoup.kotlinx.io)
       implementation(libs.windowSizeClass)
       api(libs.androidx.datastore.okio)
       api(libs.androidx.datastore.preferences)
-      api(libs.okio)
       implementation(libs.paging.common)
       implementation(libs.paging.compose)
       implementation(libs.stately.isolate)

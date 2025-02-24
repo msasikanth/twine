@@ -26,15 +26,16 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CON
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ENCLOSURE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEATURED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_URL
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -50,11 +51,12 @@ internal object RSSContentParser : ContentParser() {
     var title: String? = null
     var link: String? = null
     var description: String? = null
+    var iconUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
 
-      when (val name = parser.name) {
+      when (parser.name) {
         TAG_TITLE -> {
           title = parser.nextText()
         }
@@ -69,33 +71,46 @@ internal object RSSContentParser : ContentParser() {
           description = parser.nextText()
         }
         TAG_RSS_ITEM -> {
-          posts.add(readRssItem(parser, link))
+          val host = UrlUtils.extractHost(link ?: feedUrl)
+          posts.add(readRssItem(parser, host))
+        }
+        TAG_FEED_IMAGE -> {
+          iconUrl = readFeedIcon(parser)
         }
         else -> parser.skip()
       }
     }
 
-    if (link.isNullOrBlank()) {
-      link = feedUrl
+    val host = UrlUtils.extractHost(link ?: feedUrl)
+    if (iconUrl.isNullOrBlank()) {
+      iconUrl = FeedParser.fallbackFeedIcon(host)
     }
-
-    val domain = Url(link)
-    val host =
-      if (domain.host != "localhost") {
-        domain.host
-      } else {
-        throw NullPointerException("Unable to get host domain")
-      }
-    val iconUrl = FeedParser.feedIcon(host)
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
       description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
       icon = iconUrl,
-      homepageLink = link,
+      homepageLink = link ?: feedUrl,
       link = feedUrl,
       posts = posts.filterNotNull()
     )
+  }
+
+  private fun readFeedIcon(parser: XmlPullParser): String? {
+    parser.require(EventType.START_TAG, parser.namespace, TAG_FEED_IMAGE)
+
+    var imageUrl: String? = null
+
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
+      if (parser.name == TAG_URL) {
+        imageUrl = parser.nextText()
+      } else {
+        parser.skip()
+      }
+    }
+
+    return imageUrl
   }
 
   private fun readRssItem(parser: XmlPullParser, hostLink: String?): PostPayload? {
@@ -146,9 +161,9 @@ internal object RSSContentParser : ContentParser() {
       }
     }
 
-    val postPubDateInMillis = date?.let { dateString -> dateString.dateStringToEpochMillis() }
+    val postPubDateInMillis = date?.dateStringToEpochMillis()
 
-    if (title.isNullOrBlank() && description.isNullOrBlank()) {
+    if (link.isNullOrBlank() || (title.isNullOrBlank() && description.isNullOrBlank())) {
       return null
     }
 
@@ -157,7 +172,7 @@ internal object RSSContentParser : ContentParser() {
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
-      imageUrl = FeedParser.safeUrl(hostLink, image),
+      imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim()
     )

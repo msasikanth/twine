@@ -32,6 +32,8 @@ internal data class SettingsState(
   val postsDeletionPeriod: Period?,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
+  val enableAutoSync: Boolean,
+  val showFeedFavIcon: Boolean,
 ) {
 
   companion object {
@@ -46,6 +48,8 @@ internal data class SettingsState(
         postsDeletionPeriod = null,
         showReaderView = false,
         appThemeMode = AppThemeMode.Auto,
+        enableAutoSync = true,
+        showFeedFavIcon = true,
       )
   }
 }
