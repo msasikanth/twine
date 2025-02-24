@@ -241,7 +241,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            pinnedPosition: Double ->
+            pinnedPosition: Double,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -253,7 +254,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition
+              pinnedPosition = pinnedPosition,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -270,6 +272,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIconLinks: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -279,6 +282,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIconLinks.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -334,7 +338,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -346,7 +351,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              numberOfUnreadPosts = numberOfUnreadPosts
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -372,7 +378,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -384,7 +391,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              numberOfUnreadPosts = numberOfUnreadPosts
+              numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -616,6 +624,7 @@ class RssRepository(
           numberOfUnreadPosts: Long,
           feedIds: List<String>?,
           feedHomepageLinks: String?,
+          feedIcons: String?,
           updatedAt: Instant?,
           pinnedPosition: Double ->
           if (type == "group") {
@@ -625,6 +634,7 @@ class RssRepository(
               feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
               feedHomepageLinks =
                 feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               createdAt = createdAt!!,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
@@ -680,6 +690,7 @@ class RssRepository(
             numberOfUnreadPosts: Long,
             feedIds: List<String>?,
             feedHomepageLinks: String?,
+            feedIcons: String?,
             updatedAt: Instant? ->
             if (type == "group") {
               FeedGroup(
@@ -688,6 +699,7 @@ class RssRepository(
                 feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
                 feedHomepageLinks =
                   feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
@@ -727,6 +739,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -736,6 +749,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -761,6 +775,7 @@ class RssRepository(
             name: String,
             feedIds: List<String>,
             feedHomepageLinks: String,
+            feedIcons: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant? ->
@@ -769,6 +784,7 @@ class RssRepository(
               name = name,
               feedIds = feedIds.filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -788,6 +804,7 @@ class RssRepository(
           name: String,
           feedIds: List<String>,
           feedHomepageLinks: String,
+          feedIcons: String,
           createdAt: Instant,
           updatedAt: Instant,
           pinnedAt: Instant? ->
@@ -796,6 +813,7 @@ class RssRepository(
             name = name,
             feedIds = feedIds.filterNot { it.isBlank() },
             feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
+            feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
             createdAt = createdAt,
             updatedAt = updatedAt,
             pinnedAt = pinnedAt,
@@ -830,7 +848,8 @@ class RssRepository(
             createdAt: Instant,
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
-            numberOfUnreadPosts: Long ->
+            numberOfUnreadPosts: Long,
+            showFeedFavIcon: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -842,6 +861,7 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )

@@ -33,6 +33,7 @@ internal data class SettingsState(
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
   val enableAutoSync: Boolean,
+  val showFeedFavIcon: Boolean,
 ) {
 
   companion object {
@@ -48,6 +49,7 @@ internal data class SettingsState(
         showReaderView = false,
         appThemeMode = AppThemeMode.Auto,
         enableAutoSync = true,
+        showFeedFavIcon = true,
       )
   }
 }

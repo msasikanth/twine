@@ -62,7 +62,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.image.FeedFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
@@ -73,6 +73,7 @@ import dev.sasikanth.rss.reader.resources.icons.Tune
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
@@ -189,24 +190,26 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
       Spacer(Modifier.requiredWidth(16.dp))
     }
 
+    val showFeedFavIcon = LocalShowFeedFavIconSetting.current
     when (source) {
       is FeedGroup -> {
+        val icons = if (showFeedFavIcon) source.feedHomepageLinks else source.feedIconLinks
         val iconSize =
-          if (source.feedHomepageLinks.size > 2) {
+          if (icons.size > 2) {
             18.dp
           } else {
             20.dp
           }
 
         val iconSpacing =
-          if (source.feedHomepageLinks.size > 2) {
+          if (icons.size > 2) {
             4.dp
           } else {
             0.dp
           }
 
         FeedGroupIconGrid(
-          icons = source.feedHomepageLinks,
+          icons = icons,
           iconSize = iconSize,
           iconShape = RoundedCornerShape(percent = 30),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
@@ -214,8 +217,9 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
         )
       }
       is Feed -> {
-        FeedFavIcon(
-          url = source.homepageLink,
+        val icon = if (showFeedFavIcon) source.homepageLink else source.icon
+        FeedIcon(
+          url = icon,
           contentDescription = null,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )

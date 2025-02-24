@@ -33,4 +33,5 @@ data class Feed(
   val alwaysFetchSourceArticle: Boolean = false,
   override val sourceType: SourceType = SourceType.Feed,
   override val pinnedPosition: Double = 0.0,
+  val showFeedFavIcon: Boolean = true,
 ) : Source

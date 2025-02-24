@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VA
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ENTRY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_FEED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ICON
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
@@ -47,6 +48,7 @@ internal object AtomContentParser : ContentParser() {
     var title: String? = null
     var description: String? = null
     var link: String? = null
+    var iconUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -68,12 +70,17 @@ internal object AtomContentParser : ContentParser() {
           val host = UrlUtils.extractHost(link ?: feedUrl)
           posts.add(readAtomEntry(parser, host))
         }
+        TAG_ICON -> {
+          iconUrl = parser.nextText()
+        }
         else -> parser.skip()
       }
     }
 
     val host = UrlUtils.extractHost(link ?: feedUrl)
-    val iconUrl = FeedParser.feedIcon(host)
+    if (iconUrl.isNullOrBlank()) {
+      iconUrl = FeedParser.fallbackFeedIcon(host)
+    }
 
     return FeedPayload(
       name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),

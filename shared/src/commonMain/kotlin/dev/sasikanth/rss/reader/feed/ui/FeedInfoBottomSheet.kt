@@ -76,7 +76,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
-import dev.sasikanth.rss.reader.components.image.FeedFavIcon
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
@@ -91,6 +91,7 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -245,8 +246,11 @@ private fun FeedLabelInput(
       .padding(8.dp)
       .fillMaxWidth()
   ) {
-    FeedFavIcon(
-      url = feed.homepageLink,
+    val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+    val feedIcon = if (showFeedFavIcon) feed.homepageLink else feed.icon
+
+    FeedIcon(
+      url = feedIcon,
       contentDescription = feed.name,
       modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
     )
