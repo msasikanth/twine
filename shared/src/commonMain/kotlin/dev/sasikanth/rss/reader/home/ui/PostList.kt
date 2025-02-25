@@ -77,6 +77,7 @@ internal fun PostsList(
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
   onTogglePostReadClick: (String, Boolean) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
@@ -86,6 +87,7 @@ internal fun PostsList(
     }
 
   LazyColumn(
+    modifier = modifier,
     state = listState,
     contentPadding =
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)

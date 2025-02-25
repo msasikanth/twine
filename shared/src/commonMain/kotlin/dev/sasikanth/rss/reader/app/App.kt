@@ -29,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import coil3.ImageLoader
-import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimation
@@ -63,18 +62,26 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-typealias App = @Composable (onThemeChange: (useDarkTheme: Boolean) -> Unit) -> Unit
+typealias App =
+  @Composable
+  (
+    onThemeChange: (useDarkTheme: Boolean) -> Unit,
+    toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
+    toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
+  ) -> Unit
 
 @Inject
 @Composable
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalCoilApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 fun App(
   appPresenter: AppPresenter,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
   dispatchersProvider: DispatchersProvider,
-  @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit
+  @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
+  @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
+  @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
 ) {
   setSingletonImageLoaderFactory { imageLoader }
 
@@ -127,15 +134,16 @@ fun App(
                   useDarkTheme = useDarkTheme,
                   modifier = fillMaxSizeModifier,
                   onBottomSheetStateChanged = { sheetValue ->
-                    val tempUseDarkTheme =
+                    val showDarkStatusBar =
                       if (sheetValue == SheetValue.Expanded) {
                         true
                       } else {
                         useDarkTheme
                       }
 
-                    onThemeChange(tempUseDarkTheme)
-                  }
+                    toggleLightStatusBar(showDarkStatusBar.not())
+                  },
+                  onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
                 )
               }
               is Screen.Search -> {
