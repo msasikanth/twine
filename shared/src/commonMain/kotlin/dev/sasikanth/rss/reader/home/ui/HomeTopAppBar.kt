@@ -16,12 +16,13 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
@@ -39,15 +41,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -59,7 +62,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.offset
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -68,9 +76,6 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
-import dev.sasikanth.rss.reader.resources.icons.Bookmarks
-import dev.sasikanth.rss.reader.resources.icons.Tune
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -102,9 +107,10 @@ internal fun HomeTopAppBar(
       }
     }
 
-  Column(
+  Row(
     modifier =
       modifier
+        .fillMaxWidth()
         .pointerInput(Unit) {}
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha))
@@ -112,73 +118,123 @@ internal fun HomeTopAppBar(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
         .padding(horizontal = 8.dp, vertical = 16.dp),
-    verticalArrangement = Arrangement.spacedBy(12.dp)
+    verticalAlignment = Alignment.CenterVertically
   ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-      SourceInfo(
-        modifier = Modifier.weight(1f),
-        source = source,
-      )
+    SourceInfo(
+      modifier = Modifier.weight(1f),
+      source = source,
+      postsType = postsType,
+      hasFeeds = hasFeeds,
+      onPostTypeChanged = onPostTypeChanged
+    )
 
-      Spacer(Modifier.requiredWidth(16.dp))
+    Spacer(Modifier.requiredWidth(16.dp))
 
-      IconButton(
-        onClick = onSearchClicked,
-      ) {
-        Icon(
-          imageVector = Icons.Rounded.Search,
-          contentDescription = LocalStrings.current.postsSearchHint,
-          tint = AppTheme.colorScheme.tintedForeground
-        )
-      }
-
-      OverflowMenu(
-        onSettingsClicked = onSettingsClicked,
-        onBookmarksClicked = onBookmarksClicked,
+    IconButton(
+      onClick = onSearchClicked,
+    ) {
+      Icon(
+        imageVector = Icons.Rounded.Search,
+        contentDescription = LocalStrings.current.postsSearchHint,
+        tint = AppTheme.colorScheme.tintedForeground
       )
     }
 
-    if (hasFeeds == true) {
-      Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-      ) {
-        PostsFilterButton(postsType = postsType, onPostTypeChanged = onPostTypeChanged)
-
-        MarkPostsAsReadButton(
-          source = source,
-          onMarkPostsAsRead = onMarkPostsAsRead,
-          enabled = hasUnreadPosts,
-        )
-      }
+    IconButton(
+      onClick = onBookmarksClicked,
+    ) {
+      Icon(
+        imageVector = Icons.Outlined.BookmarkBorder,
+        contentDescription = LocalStrings.current.bookmarks,
+        tint = AppTheme.colorScheme.tintedForeground
+      )
     }
+
+    OverflowMenu(
+      hasUnreadPosts = hasUnreadPosts,
+      onSettingsClicked = onSettingsClicked,
+      onMarkAllAsRead = { onMarkPostsAsRead(source) }
+    )
   }
 }
 
 @Composable
 fun SourceInfo(
   source: Source?,
+  postsType: PostsType,
+  hasFeeds: Boolean?,
   modifier: Modifier = Modifier,
+  onPostTypeChanged: (PostsType) -> Unit,
 ) {
-  Row(
-    modifier = modifier.clip(MaterialTheme.shapes.large),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    SourceIcon(source)
+  val density = LocalDensity.current
+  var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+  var showPostsTypeDropDown by remember { mutableStateOf(false) }
 
-    val sourceLabel =
-      when (source) {
-        is FeedGroup -> source.name
-        is Feed -> source.name
-        else -> LocalStrings.current.appBarAllFeeds
+  Box(modifier) {
+    Row(
+      modifier =
+        Modifier.clip(MaterialTheme.shapes.large).onGloballyPositioned { coordinates ->
+          buttonHeight = with(density) { coordinates.size.height.toDp() }
+        },
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      SourceIcon(source)
+
+      val sourceLabel =
+        when (source) {
+          is FeedGroup -> source.name
+          is Feed -> source.name
+          else -> LocalStrings.current.appName
+        }
+
+      Column(
+        modifier =
+          Modifier.padding(start = 16.dp, end = 8.dp).clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null,
+            enabled = hasFeeds == true
+          ) {
+            showPostsTypeDropDown = true
+          }
+      ) {
+        Text(
+          text = sourceLabel,
+          style = MaterialTheme.typography.titleLarge,
+          color = AppTheme.colorScheme.textEmphasisHigh,
+          maxLines = 1,
+        )
+
+        AnimatedVisibility(visible = hasFeeds == true) {
+          Spacer(Modifier.requiredHeight(8.dp))
+
+          val postsTypeLabel = getPostTypeLabel(postsType)
+
+          Row {
+            Text(
+              text = postsTypeLabel,
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.textEmphasisHigh,
+            )
+
+            Spacer(Modifier.requiredWidth(4.dp))
+
+            Icon(
+              imageVector = Icons.Filled.ExpandMore,
+              contentDescription = null,
+              modifier = Modifier.requiredSize(20.dp),
+              tint = AppTheme.colorScheme.textEmphasisHigh,
+            )
+          }
+        }
       }
+    }
 
-    Text(
-      modifier = Modifier.padding(start = 16.dp, end = 8.dp),
-      text = sourceLabel,
-      style = MaterialTheme.typography.titleLarge,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-      maxLines = 1,
+    PostsFilterDropdown(
+      showDropdown = showPostsTypeDropDown,
+      postsType = postsType,
+      offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
+      onPostTypeChanged = onPostTypeChanged,
+      onDismiss = { showPostsTypeDropDown = false }
     )
   }
 }
@@ -232,104 +288,17 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MarkPostsAsReadButton(
-  source: Source?,
-  onMarkPostsAsRead: (Source?) -> Unit,
-  modifier: Modifier = Modifier,
-  enabled: Boolean = true,
-) {
-  val transition = updateTransition(enabled, "button_enable_state")
-  val backgroundColor by
-    transition.animateColor {
-      if (it) AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f) else Color.Transparent
-    }
-  val contentColor by
-    transition.animateColor {
-      if (it) AppTheme.colorScheme.textEmphasisHigh
-      else AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    }
-
-  Row(
-    modifier =
-      modifier
-        .clip(RoundedCornerShape(8.dp))
-        .clickable(enabled = enabled, onClick = { onMarkPostsAsRead(source) })
-        .background(color = backgroundColor)
-        .padding(vertical = 4.dp)
-        .padding(start = 8.dp, end = 12.dp),
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
-    CompositionLocalProvider(LocalContentColor provides contentColor) {
-      Text(
-        text = LocalStrings.current.markAsRead,
-        style = MaterialTheme.typography.bodyMedium,
-      )
-
-      Icon(
-        imageVector = Icons.Filled.DoneAll,
-        contentDescription = null,
-        modifier = Modifier.requiredSize(20.dp),
-      )
-    }
-  }
-}
-
-@Composable
-private fun PostsFilterButton(
-  postsType: PostsType,
-  onPostTypeChanged: (PostsType) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  var showPostsTypeDropDown by remember { mutableStateOf(false) }
-
-  Box {
-    Row(
-      modifier =
-        modifier
-          .clip(RoundedCornerShape(8.dp))
-          .clickable(onClick = { showPostsTypeDropDown = true })
-          .background(color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f))
-          .padding(vertical = 4.dp)
-          .padding(start = 8.dp, end = 12.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      val postsTypeLabel = getPostTypeLabel(postsType)
-
-      Text(
-        text = postsTypeLabel,
-        style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-      )
-
-      Icon(
-        imageVector = Icons.Filled.ExpandMore,
-        contentDescription = null,
-        modifier = Modifier.requiredSize(20.dp),
-        tint = AppTheme.colorScheme.textEmphasisHigh,
-      )
-    }
-
-    PostsFilterDropdown(
-      showDropdown = showPostsTypeDropDown,
-      postsType = postsType,
-      onPostTypeChanged = onPostTypeChanged,
-      onDismiss = { showPostsTypeDropDown = false }
-    )
-  }
-}
-
-@Composable
 private fun PostsFilterDropdown(
   showDropdown: Boolean,
   postsType: PostsType,
   onPostTypeChanged: (PostsType) -> Unit,
   onDismiss: () -> Unit,
+  offset: DpOffset = DpOffset.Zero,
 ) {
   DropdownMenu(
     modifier = Modifier.requiredWidth(158.dp),
     expanded = showDropdown,
+    offset = offset,
     onDismissRequest = onDismiss,
   ) {
     PostsType.entries.forEach { type ->
@@ -371,11 +340,21 @@ private fun getPostTypeLabel(type: PostsType) =
   }
 
 @Composable
-private fun OverflowMenu(onBookmarksClicked: () -> Unit, onSettingsClicked: () -> Unit) {
-  Box {
+private fun OverflowMenu(
+  hasUnreadPosts: Boolean,
+  onSettingsClicked: () -> Unit,
+  onMarkAllAsRead: () -> Unit,
+) {
+  BoxWithConstraints {
+    val density = LocalDensity.current
+    var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
     IconButton(
+      modifier =
+        Modifier.onGloballyPositioned { coordinates ->
+          buttonHeight = with(density) { coordinates.size.height.toDp() }
+        },
       onClick = { dropdownExpanded = true },
     ) {
       Icon(
@@ -386,25 +365,40 @@ private fun OverflowMenu(onBookmarksClicked: () -> Unit, onSettingsClicked: () -
     }
 
     if (dropdownExpanded) {
-      DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
-        DropdownMenuItem(
-          text = { Text(text = LocalStrings.current.bookmarks) },
-          leadingIcon = {
-            Icon(
-              imageVector = TwineIcons.Bookmarks,
-              contentDescription = LocalStrings.current.bookmarks
-            )
-          },
-          onClick = {
-            dropdownExpanded = false
-            onBookmarksClicked()
-          }
-        )
+      DropdownMenu(
+        offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
+        expanded = dropdownExpanded,
+        onDismissRequest = { dropdownExpanded = false }
+      ) {
+        if (hasUnreadPosts) {
+          DropdownMenuItem(
+            text = { Text(text = LocalStrings.current.markAllAsRead) },
+            leadingIcon = {
+              Icon(
+                imageVector = Icons.Filled.DoneAll,
+                contentDescription = LocalStrings.current.markAllAsRead
+              )
+            },
+            onClick = {
+              dropdownExpanded = false
+              onMarkAllAsRead()
+            }
+          )
+
+          HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            thickness = 2.dp,
+            color = AppTheme.colorScheme.surfaceContainerHighest
+          )
+        }
 
         DropdownMenuItem(
           text = { Text(text = LocalStrings.current.settings) },
           leadingIcon = {
-            Icon(imageVector = TwineIcons.Tune, contentDescription = LocalStrings.current.settings)
+            Icon(
+              imageVector = Icons.Rounded.Settings,
+              contentDescription = LocalStrings.current.settings
+            )
           },
           onClick = {
             dropdownExpanded = false
