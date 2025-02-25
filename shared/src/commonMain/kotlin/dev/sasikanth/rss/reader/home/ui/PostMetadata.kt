@@ -48,10 +48,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
@@ -213,8 +216,14 @@ private fun PostOptionsButtonRow(
     var showDropdown by remember { mutableStateOf(false) }
     Box {
       val coroutineScope = rememberCoroutineScope()
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
 
       PostOptionIconButton(
+        modifier =
+          Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
         icon = Icons.Filled.MoreVert,
         contentDescription = LocalStrings.current.moreMenuOptions,
         onClick = { showDropdown = true }
@@ -224,7 +233,7 @@ private fun PostOptionsButtonRow(
         modifier = Modifier.width(IntrinsicSize.Min),
         expanded = showDropdown,
         onDismissRequest = { showDropdown = false },
-        offset = DpOffset(x = 0.dp, y = (-48).dp),
+        offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
       ) {
         if (config.showToggleReadUnreadOption) {
           DropdownMenuItem(

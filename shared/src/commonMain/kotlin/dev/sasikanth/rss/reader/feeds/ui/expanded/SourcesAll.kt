@@ -40,6 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemKey
@@ -216,7 +220,17 @@ internal fun AllFeedsHeader(
     Spacer(Modifier.requiredWidth(12.dp))
 
     Box {
-      TextButton(onClick = { showSortDropdown = true }, shape = MaterialTheme.shapes.large) {
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+
+      TextButton(
+        modifier =
+          Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
+        onClick = { showSortDropdown = true },
+        shape = MaterialTheme.shapes.large
+      ) {
         val orderText =
           when (feedsSortOrder) {
             FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
@@ -247,6 +261,7 @@ internal fun AllFeedsHeader(
       DropdownMenu(
         modifier = Modifier.requiredWidth(132.dp),
         expanded = showSortDropdown,
+        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         onDismissRequest = { showSortDropdown = false }
       ) {
         FeedsOrderBy.entries

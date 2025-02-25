@@ -38,9 +38,17 @@ fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher): UIVi
       backIcon = null,
       modifier = Modifier.fillMaxSize()
     ) {
-      app {
-        // no-op
-      }
+      app(
+        {
+          // no-op
+        },
+        {
+          // no-op
+        },
+        {
+          // no-op
+        }
+      )
     }
   }
 }

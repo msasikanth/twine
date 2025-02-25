@@ -43,7 +43,8 @@ internal fun DropdownMenu(
   content: @Composable ColumnScope.() -> Unit
 ) {
   MaterialTheme(
-    colorScheme = MaterialTheme.colorScheme.copy(surface = AppTheme.colorScheme.surfaceContainer),
+    colorScheme =
+      MaterialTheme.colorScheme.copy(surface = AppTheme.colorScheme.surfaceContainerLowest),
     shapes = MaterialTheme.shapes.copy(extraSmall = MaterialTheme.shapes.large)
   ) {
     androidx.compose.material3.DropdownMenu(
@@ -53,7 +54,7 @@ internal fun DropdownMenu(
       modifier =
         modifier
           .background(
-            color = AppTheme.colorScheme.surfaceContainer,
+            color = AppTheme.colorScheme.surfaceContainerLowest,
             shape = MaterialTheme.shapes.large
           )
           .border(
