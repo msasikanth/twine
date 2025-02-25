@@ -60,10 +60,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -289,10 +293,16 @@ private fun SearchSortButton(
   onSortOrderChanged: (SearchSortOrder) -> Unit
 ) {
   Box {
+    val density = LocalDensity.current
+    var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var isDropdownExpanded by remember { mutableStateOf(false) }
 
     TextButton(
-      modifier = Modifier.requiredHeight(48.dp),
+      modifier =
+        Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          }
+          .requiredHeight(48.dp),
       onClick = { isDropdownExpanded = true },
       shape = RoundedCornerShape(12.dp),
     ) {
@@ -318,6 +328,7 @@ private fun SearchSortButton(
     if (isDropdownExpanded) {
       SortDropdownMenu(
         isDropdownExpanded = isDropdownExpanded,
+        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         onDismiss = { isDropdownExpanded = false },
         onSortOrderChanged = {
           onSortOrderChanged(it)
@@ -332,10 +343,12 @@ private fun SearchSortButton(
 private fun SortDropdownMenu(
   isDropdownExpanded: Boolean,
   onDismiss: () -> Unit,
-  onSortOrderChanged: (SearchSortOrder) -> Unit
+  onSortOrderChanged: (SearchSortOrder) -> Unit,
+  offset: DpOffset = DpOffset.Zero,
 ) {
   DropdownMenu(
     expanded = isDropdownExpanded,
+    offset = offset,
     onDismissRequest = onDismiss,
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
