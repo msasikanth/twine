@@ -59,8 +59,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.DropdownMenu
@@ -346,7 +349,17 @@ private fun PostsDeletionPeriodSettingItem(
     )
 
     Box {
-      TextButton(onClick = { showDropdown = true }, shape = MaterialTheme.shapes.medium) {
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+
+      TextButton(
+        modifier =
+          Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
+        onClick = { showDropdown = true },
+        shape = MaterialTheme.shapes.medium
+      ) {
         val period =
           when (postsDeletionPeriod) {
             ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
@@ -373,6 +386,7 @@ private fun PostsDeletionPeriodSettingItem(
       }
 
       DropdownMenu(
+        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         expanded = showDropdown,
         onDismissRequest = { showDropdown = false },
       ) {
