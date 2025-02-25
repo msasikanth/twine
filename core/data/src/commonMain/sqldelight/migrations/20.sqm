@@ -1,0 +1,6 @@
+CREATE TABLE blockedWord (
+  id TEXT NOT NULL PRIMARY KEY,
+  content TEXT NOT NULL
+);
+
+CREATE INDEX blocked_word_value_index ON blockedWord(content);
