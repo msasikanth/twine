@@ -312,6 +312,7 @@ fun TextField(
   keyboardActions: KeyboardActions = KeyboardActions(),
   keyboardOptions: KeyboardOptions = KeyboardOptions(),
   enabled: Boolean = true,
+  trailingIcon: @Composable (() -> Unit)? = null,
 ) {
   androidx.compose.material3.TextField(
     modifier = modifier.requiredHeight(56.dp).fillMaxWidth(),
@@ -345,7 +346,8 @@ fun TextField(
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
       )
-    }
+    },
+    trailingIcon = trailingIcon,
   )
 }
 
