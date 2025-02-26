@@ -55,3 +55,15 @@ BEGIN
     rawContent LIKE '%' || new.content || '%') AND
     isHidden = 0;
 END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_BEFORE_DELETE
+BEFORE DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 0
+  WHERE
+    (title LIKE '%' || old.content || '%' OR
+    description LIKE '%' || old.content || '%' OR
+    rawContent LIKE '%' || old.content || '%') AND
+    isHidden = 1;
+END;
