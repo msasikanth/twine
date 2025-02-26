@@ -42,10 +42,12 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.asSource
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 import rhodium.crypto.Nip19Parser
 import rhodium.crypto.tlv.entity.NAddress
+import rhodium.crypto.tlv.entity.NEvent
 import rhodium.crypto.tlv.entity.NProfile
 import rhodium.crypto.tlv.entity.NPub
 import rhodium.net.NostrService
@@ -290,7 +292,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
                 relay = articleIdentifier?.description
               )
 
-            "https://highlighter.com/a/$address"
+            "nostr:$address"
           } else if (articleIdentifier != null) {
             val articleAddress =
               NAddress.create(
@@ -300,8 +302,8 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
                 this?.customContent
               )
 
-            "https://highlighter.com/a/$articleAddress"
-          } else "https://njump.me/${event.id}"
+            "nostr:$articleAddress"
+          } else "nostr:${NEvent.create(event.id, event.pubkey, event.eventKind, null)}"
         }
 
     val articleContent = event.content
@@ -315,10 +317,21 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       description = summary?.description ?: "",
       rawContent = articleContent,
       imageUrl = image?.description,
-      date =
-        Instant.fromEpochSeconds(publishDate?.description?.toLong() ?: event.creationDate)
-          .toEpochMilliseconds(),
+      date = toActualMillis(publishDate?.description?.toLong() ?: event.creationDate),
       commentsLink = null
     )
+  }
+
+
+  // Funny hack to determine if a timestamp is in millis or seconds.
+  private fun toActualMillis(timeStamp: Long): Long {
+    fun isTimestampInMilliseconds(timestamp: Long): Boolean {
+      val generatedMillis = Instant.fromEpochMilliseconds(timestamp).toEpochMilliseconds()
+      println("Converted timestamp : $generatedMillis")
+      return generatedMillis.toString().length == Clock.System.now().toEpochMilliseconds().toString().length
+    }
+
+    return if (isTimestampInMilliseconds(timeStamp)) timeStamp
+    else Instant.fromEpochSeconds(timeStamp).toEpochMilliseconds()
   }
 }
