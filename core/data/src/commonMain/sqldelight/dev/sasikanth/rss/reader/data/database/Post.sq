@@ -21,6 +21,21 @@ CREATE INDEX post_source_id_index ON post(sourceId);
 CREATE INDEX post_date_desc_index ON post (date DESC);
 CREATE INDEX post_is_hidden_index ON post(isHidden);
 
+CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
+AFTER INSERT ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%'
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
 upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
 VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)

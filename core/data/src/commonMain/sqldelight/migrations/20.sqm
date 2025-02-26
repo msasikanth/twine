@@ -10,3 +10,19 @@ CREATE TABLE blockedWord (
 );
 
 CREATE INDEX blocked_word_value_index ON blockedWord(content);
+
+-- Post table triggers
+CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
+AFTER INSERT ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%'
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
