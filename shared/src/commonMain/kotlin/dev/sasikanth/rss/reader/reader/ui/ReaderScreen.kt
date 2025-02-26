@@ -185,7 +185,20 @@ internal fun ReaderScreen(
           }
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
+            IconButton(
+              onClick = {
+                coroutineScope.launch {
+                  if (state.link?.startsWith("nostr:") == true) {
+                    val nostrRef = state.link!!.removePrefix("nostr:")
+                    val modifiedLink = if (nostrRef.startsWith("naddr"))
+                      "https://highlighter.com/a/$nostrRef" else "https://njump.me/$nostrRef"
+                    linkHandler.openLink(modifiedLink)
+                  } else {
+                    linkHandler.openLink(state.link)
+                  }
+                }
+              }
+            ) {
               Icon(
                 modifier = Modifier.requiredSize(24.dp),
                 imageVector = TwineIcons.Website,
