@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.data.repository
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import com.benasher44.uuid.Uuid
+import com.benasher44.uuid.uuidFrom
+import dev.sasikanth.rss.reader.core.model.local.BlockedWord
 import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -46,5 +48,9 @@ class BlockedWordsRepository(
     withContext(ioDispatcher) { blockedWordsQueries.remove(id.toString()) }
   }
 
-  fun words() = blockedWordsQueries.words().asFlow().mapToList(ioDispatcher)
+  fun words() =
+    blockedWordsQueries
+      .words(mapper = { id, content -> BlockedWord(id = uuidFrom(id), content = content) })
+      .asFlow()
+      .mapToList(ioDispatcher)
 }
