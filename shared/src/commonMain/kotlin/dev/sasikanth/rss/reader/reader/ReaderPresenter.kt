@@ -175,13 +175,19 @@ class ReaderPresenter(
     private suspend fun loadSourceArticle() {
       val postLink = _state.value.link
       if (!postLink.isNullOrBlank()) {
-        _state.update { it.copy(postMode = InProgress) }
-        val content = fullArticleFetcher.fetch(postLink)
 
-        if (content.isSuccess) {
-          _state.update { it.copy(content = content.getOrThrow()) }
-        } else {
+        if (postLink.startsWith("nostr:")) {
           loadRssContent()
+        }
+        else {
+          _state.update { it.copy(postMode = InProgress) }
+          val content = fullArticleFetcher.fetch(postLink)
+
+          if (content.isSuccess) {
+            _state.update { it.copy(content = content.getOrThrow()) }
+          } else {
+            loadRssContent()
+          }
         }
 
         _state.update { it.copy(postMode = Source) }
