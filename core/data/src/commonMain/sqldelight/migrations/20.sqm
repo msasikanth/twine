@@ -42,3 +42,16 @@ WHEN (
 BEGIN
   UPDATE post SET isHidden = 1 WHERE id = new.id;
 END;
+
+-- Blocked words triggers
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 1
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%' OR
+    rawContent LIKE '%' || new.content || '%') AND
+    isHidden = 0;
+END;
