@@ -1,3 +1,9 @@
+-- Post table
+ALTER TABLE post ADD COLUMN isHidden INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX post_is_hidden_index ON post(isHidden);
+
+-- Blocked words table
 CREATE TABLE blockedWord (
   id TEXT NOT NULL PRIMARY KEY,
   content TEXT NOT NULL

@@ -13,11 +13,13 @@ CREATE TABLE post(
   commentsLink TEXT DEFAULT NULL,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
+  isHidden INTEGER AS Boolean NOT NULL DEFAULT 0,
   FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
 );
 
 CREATE INDEX post_source_id_index ON post(sourceId);
 CREATE INDEX post_date_desc_index ON post (date DESC);
+CREATE INDEX post_is_hidden_index ON post(isHidden);
 
 upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
