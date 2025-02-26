@@ -172,10 +172,14 @@ internal fun HomeScreen(
 
       val nestedScrollConnection = remember {
         object : NestedScrollConnection {
-          override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            val delta = available.y.toInt()
+          override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+          ): Offset {
+            val delta = consumed.y.toInt()
             val sheetPeekHeightInPx = with(density) { sheetPeekHeight.roundToPx() }
-            val newSheetPeekHeight = sheetPeekHeightInPx + delta
+            val newSheetPeekHeight = sheetPeekHeightInPx + delta * 2
 
             sheetPeekHeight =
               with(density) {
