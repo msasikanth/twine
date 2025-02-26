@@ -151,13 +151,14 @@ internal object RDFContentParser : ContentParser() {
     }
 
     return PostPayload(
-      link = FeedParser.cleanText(link)!!,
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
+      link = FeedParser.cleanText(link)!!,
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-      commentsLink = commentsLink?.trim()
+      commentsLink = commentsLink?.trim(),
+      isDateParsedCorrectly = postPubDateInMillis != null
     )
   }
 }
