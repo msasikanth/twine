@@ -38,4 +38,4 @@ remove:
 DELETE FROM blockedWord WHERE id = :id;
 
 words:
-SELECT * FROM blockedWord;
+SELECT * FROM blockedWord ORDER BY rowid DESC;
