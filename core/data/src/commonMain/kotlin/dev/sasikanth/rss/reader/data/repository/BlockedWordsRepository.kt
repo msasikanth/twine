@@ -40,7 +40,7 @@ class BlockedWordsRepository(
   suspend fun addWord(word: String) {
     withContext(ioDispatcher) {
       val uuid = nameBasedUuidOf(word.lowercase())
-      blockedWordsQueries.upsert(id = uuid.toString(), content = word)
+      blockedWordsQueries.insert(id = uuid.toString(), content = word)
     }
   }
 

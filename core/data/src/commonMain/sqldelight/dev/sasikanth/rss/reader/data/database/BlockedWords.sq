@@ -29,10 +29,9 @@ BEGIN
     isHidden = 1;
 END;
 
-upsert:
-INSERT INTO blockedWord(id, content)
-VALUES (?, ?)
-ON CONFLICT(id) DO UPDATE SET content = excluded.content;
+insert:
+INSERT OR IGNORE INTO blockedWord(id, content)
+VALUES (?, ?);
 
 remove:
 DELETE FROM blockedWord WHERE id = :id;
