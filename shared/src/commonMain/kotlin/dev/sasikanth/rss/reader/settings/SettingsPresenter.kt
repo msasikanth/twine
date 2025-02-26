@@ -46,6 +46,7 @@ internal typealias SettingsPresenterFactory =
     ComponentContext,
     goBack: () -> Unit,
     openAbout: () -> Unit,
+    openBlockedWords: () -> Unit,
   ) -> SettingsPresenter
 
 @Inject
@@ -58,6 +59,7 @@ class SettingsPresenter(
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
+  @Assisted private val openBlockedWords: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -77,6 +79,7 @@ class SettingsPresenter(
     when (event) {
       SettingsEvent.BackClicked -> goBack()
       SettingsEvent.AboutClicked -> openAbout()
+      SettingsEvent.BlockedWordsClicked -> openBlockedWords()
       else -> {
         // no-op
       }
@@ -173,6 +176,9 @@ class SettingsPresenter(
         SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
         is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
         is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
+        SettingsEvent.BlockedWordsClicked -> {
+          // no-op
+        }
       }
     }
 

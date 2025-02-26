@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.addfeed.AddFeedPresenter
+import dev.sasikanth.rss.reader.blockedwords.BlockedWordsPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.group.GroupPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
@@ -43,4 +44,6 @@ internal sealed interface Screen {
   class AddFeed(val presenter: AddFeedPresenter) : Screen
 
   class GroupDetails(val presenter: GroupPresenter) : Screen
+
+  class BlockedWords(val presenter: BlockedWordsPresenter) : Screen
 }

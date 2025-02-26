@@ -44,4 +44,6 @@ sealed interface SettingsEvent {
   data class PostsDeletionPeriodChanged(val newPeriod: Period) : SettingsEvent
 
   data class OnAppThemeModeChanged(val appThemeMode: AppThemeMode) : SettingsEvent
+
+  data object BlockedWordsClicked : SettingsEvent
 }
