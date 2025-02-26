@@ -1,0 +1,69 @@
+-- Post table
+ALTER TABLE post ADD COLUMN isHidden INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX post_is_hidden_index ON post(isHidden);
+
+-- Blocked words table
+CREATE TABLE blockedWord (
+  id TEXT NOT NULL PRIMARY KEY,
+  content TEXT NOT NULL
+);
+
+CREATE INDEX blocked_word_value_index ON blockedWord(content);
+
+-- Post table triggers
+CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
+AFTER INSERT ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%'
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
+CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
+BEFORE UPDATE ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%') AND
+    new.isHidden == 0
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
+-- Blocked words triggers
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 1
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%' OR
+    rawContent LIKE '%' || new.content || '%') AND
+    isHidden = 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 0
+  WHERE
+    (title LIKE '%' || old.content || '%' OR
+    description LIKE '%' || old.content || '%' OR
+    rawContent LIKE '%' || old.content || '%') AND
+    isHidden = 1;
+END;

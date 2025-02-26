@@ -22,6 +22,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.app.App
@@ -40,22 +41,30 @@ class MainActivity : ComponentActivity() {
 
     FileKit.init(this)
 
-    enableEdgeToEdge()
+    enableEdgeToEdge(
+      statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+    )
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 
     setContent {
-      activityComponent.app { useDarkTheme ->
-        enableEdgeToEdge(
-          statusBarStyle =
-            if (useDarkTheme) {
-              SystemBarStyle.dark(Color.TRANSPARENT)
-            } else {
-              SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
-            },
-          navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
-        )
-      }
+      activityComponent.app(
+        { useDarkTheme ->
+          WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            useDarkTheme.not()
+          WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightNavigationBars = false
+        },
+        { isLightStatusBar ->
+          WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            isLightStatusBar
+        },
+        { isLightNavBar ->
+          WindowCompat.getInsetsController(window, window.decorView)
+            .isAppearanceLightNavigationBars = isLightNavBar
+        }
+      )
     }
   }
 }
