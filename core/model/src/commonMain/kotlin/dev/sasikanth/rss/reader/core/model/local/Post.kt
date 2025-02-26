@@ -30,4 +30,5 @@ data class Post(
   val commentsLink: String?,
   val bookmarked: Boolean,
   val read: Boolean,
+  val isHidden: Boolean,
 )
