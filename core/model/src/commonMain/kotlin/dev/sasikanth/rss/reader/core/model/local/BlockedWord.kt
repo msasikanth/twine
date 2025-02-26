@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,9 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
-import kotlinx.datetime.Instant
+import com.benasher44.uuid.Uuid
 
-data class Post(
-  val id: String,
-  val sourceId: String,
-  val title: String,
-  val description: String,
-  val rawContent: String?,
-  val imageUrl: String?,
-  val date: Instant,
-  val link: String,
-  val commentsLink: String?,
-  val bookmarked: Boolean,
-  val read: Boolean,
-  val isHidden: Boolean,
+data class BlockedWord(
+  val id: Uuid,
+  val content: String,
 )

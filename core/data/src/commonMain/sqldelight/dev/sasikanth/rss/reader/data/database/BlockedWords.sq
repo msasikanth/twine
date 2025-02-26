@@ -1,0 +1,40 @@
+CREATE TABLE blockedWord (
+  id TEXT NOT NULL PRIMARY KEY,
+  content TEXT NOT NULL
+);
+
+CREATE INDEX blocked_word_value_index ON blockedWord(content);
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 1
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%' OR
+    rawContent LIKE '%' || new.content || '%') AND
+    isHidden = 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 0
+  WHERE
+    (title LIKE '%' || old.content || '%' OR
+    description LIKE '%' || old.content || '%' OR
+    rawContent LIKE '%' || old.content || '%') AND
+    isHidden = 1;
+END;
+
+insert:
+INSERT OR IGNORE INTO blockedWord(id, content)
+VALUES (?, ?);
+
+remove:
+DELETE FROM blockedWord WHERE id = :id;
+
+words:
+SELECT * FROM blockedWord ORDER BY rowid DESC;

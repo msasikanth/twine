@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -23,10 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -44,6 +41,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
@@ -54,14 +52,22 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMaxBy
@@ -83,13 +89,13 @@ import kotlinx.coroutines.launch
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun HomeScreen(
   homePresenter: HomePresenter,
   useDarkTheme: Boolean = false,
   modifier: Modifier = Modifier,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
+  onBottomSheetHidden: (isHidden: Boolean) -> Unit,
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
@@ -121,9 +127,6 @@ internal fun HomeScreen(
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
-  val sheetPeekHeight =
-    BOTTOM_SHEET_PEEK_HEIGHT +
-      WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
   val featuredPosts = state.featuredPosts
   val dynamicColorState = LocalDynamicColorState.current
 
@@ -143,125 +146,181 @@ internal fun HomeScreen(
   }
 
   AppTheme(useDarkTheme = true) {
-    BottomSheetScaffold(
-      modifier = modifier,
-      scaffoldState = bottomSheetScaffoldState,
-      content = { _ ->
-        AppTheme(useDarkTheme = useDarkTheme) {
-          Box(
-            modifier =
-              Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest)
-          ) {
-            val posts = state.posts?.collectAsLazyPagingItems()
-            val hasFeeds = state.hasFeeds
-            val swipeRefreshState =
-              rememberPullRefreshState(
-                refreshing = state.isRefreshing,
-                onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) }
-              )
-            val canSwipeToRefresh = hasFeeds == true
+    Scaffold(modifier) { scaffoldPadding ->
+      val density = LocalDensity.current
+      val targetSheetPeekHeight = remember {
+        BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding()
+      }
+      var sheetPeekHeight by remember { mutableStateOf(targetSheetPeekHeight) }
 
-            HomeScreenContentLayout(
-              modifier =
-                Modifier.pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh),
-              homeTopAppBar = {
-                HomeTopAppBar(
-                  source = state.activeSource,
-                  postsType = state.postsType,
-                  listState = listState,
-                  hasFeeds = hasFeeds,
-                  hasUnreadPosts = state.hasUnreadPosts,
-                  onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-                  onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-                  onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-                  onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
-                  onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) }
-                )
-              },
-              body = { paddingValues ->
-                Box(modifier = Modifier.fillMaxSize()) {
-                  when {
-                    hasFeeds == null || (posts == null || featuredPosts == null) -> {
-                      // no-op
-                    }
-                    featuredPosts.isNotEmpty() ||
-                      (posts.itemCount > 0 || posts.loadState.refresh == LoadState.Loading) -> {
-                      PostsList(
-                        paddingValues = paddingValues,
-                        featuredPosts = featuredPosts,
-                        posts = posts,
-                        useDarkTheme = useDarkTheme,
-                        listState = listState,
-                        featuredPostsPagerState = featuredPostsPagerState,
-                        onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
-                        onPostBookmarkClick = {
-                          homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
-                        },
-                        onPostCommentsClick = { commentsLink ->
-                          coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                        },
-                        onPostSourceClick = { feedId ->
-                          homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                        },
-                        onTogglePostReadClick = { postId, postRead ->
-                          homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
-                        }
-                      )
-                    }
-                    !hasFeeds -> {
-                      NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
-                    }
-                    featuredPosts.isEmpty() && posts.itemCount == 0 -> {
-                      NoNewPosts()
-                    }
-                  }
+      // Since `animateScrollToItem` doesn't trigger nested scroll connection
+      // we are manually animating the sheet peek height back to target sheet peek height
+      var scrollToTopClicked by remember { mutableStateOf(false) }
+      val scrollToTopAnimatedSheetPeekHeight by
+        animateDpAsState(
+          targetValue = if (scrollToTopClicked) targetSheetPeekHeight else 0.dp,
+          finishedListener = { scrollToTopClicked = false }
+        )
 
-                  PullRefreshIndicator(
-                    refreshing = state.isRefreshing,
-                    state = swipeRefreshState,
-                    modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter)
-                  )
-                }
-              },
-            )
+      LaunchedEffect(scrollToTopAnimatedSheetPeekHeight) {
+        if (scrollToTopClicked) {
+          sheetPeekHeight = scrollToTopAnimatedSheetPeekHeight
+        }
+      }
 
-            CompactFloatingActionButton(
-              label = LocalStrings.current.scrollToTop,
-              visible = showScrollToTop,
-              modifier = Modifier.padding(end = 16.dp, bottom = sheetPeekHeight + 16.dp),
-            ) {
-              listState.animateScrollToItem(0)
-            }
+      LaunchedEffect(sheetPeekHeight) { onBottomSheetHidden(sheetPeekHeight == 0.dp) }
+
+      val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+          override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+          ): Offset {
+            val delta = consumed.y.toInt()
+            val sheetPeekHeightInPx = with(density) { sheetPeekHeight.roundToPx() }
+            val newSheetPeekHeight = sheetPeekHeightInPx + delta * 2
+
+            sheetPeekHeight =
+              with(density) {
+                newSheetPeekHeight.coerceIn(0, targetSheetPeekHeight.roundToPx()).toDp()
+              }
+
+            return Offset.Zero
           }
         }
-      },
-      sheetContent = {
-        FeedsBottomSheet(
-          feedsPresenter = homePresenter.feedsPresenter,
-          bottomSheetProgress = bottomSheetProgress,
-          closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
-          selectedFeedChanged = {
-            coroutineScope.launch {
-              listState.scrollToItem(0)
-              featuredPostsPagerState.scrollToPage(0)
+      }
+
+      BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        content = { bottomSheetScaffoldContentPadding ->
+          AppTheme(useDarkTheme = useDarkTheme) {
+            Box(
+              modifier =
+                Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest)
+            ) {
+              val posts = state.posts?.collectAsLazyPagingItems()
+              val hasFeeds = state.hasFeeds
+              val swipeRefreshState =
+                rememberPullRefreshState(
+                  refreshing = state.isRefreshing,
+                  onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) }
+                )
+              val canSwipeToRefresh = hasFeeds == true
+
+              HomeScreenContentLayout(
+                modifier =
+                  Modifier.pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh),
+                homeTopAppBar = {
+                  HomeTopAppBar(
+                    source = state.activeSource,
+                    postsType = state.postsType,
+                    listState = listState,
+                    hasFeeds = hasFeeds,
+                    hasUnreadPosts = state.hasUnreadPosts,
+                    onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
+                    onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+                    onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
+                    onPostTypeChanged = {
+                      homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it))
+                    },
+                    onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) }
+                  )
+                },
+                body = { paddingValues ->
+                  Box(modifier = Modifier.fillMaxSize()) {
+                    when {
+                      hasFeeds == null || (posts == null || featuredPosts == null) -> {
+                        // no-op
+                      }
+                      featuredPosts.isNotEmpty() ||
+                        (posts.itemCount > 0 || posts.loadState.refresh == LoadState.Loading) -> {
+                        PostsList(
+                          modifier = Modifier.nestedScroll(nestedScrollConnection),
+                          paddingValues = paddingValues,
+                          featuredPosts = featuredPosts,
+                          posts = posts,
+                          useDarkTheme = useDarkTheme,
+                          listState = listState,
+                          featuredPostsPagerState = featuredPostsPagerState,
+                          onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
+                          onPostBookmarkClick = {
+                            homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                          },
+                          onPostCommentsClick = { commentsLink ->
+                            coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                          },
+                          onPostSourceClick = { feedId ->
+                            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                          },
+                          onTogglePostReadClick = { postId, postRead ->
+                            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                          }
+                        )
+                      }
+                      !hasFeeds -> {
+                        NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
+                      }
+                      featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+                        NoNewPosts()
+                      }
+                    }
+
+                    PullRefreshIndicator(
+                      refreshing = state.isRefreshing,
+                      state = swipeRefreshState,
+                      modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter)
+                    )
+                  }
+                },
+              )
+
+              CompactFloatingActionButton(
+                label = LocalStrings.current.scrollToTop,
+                visible = showScrollToTop,
+                modifier =
+                  Modifier.padding(
+                    end = 16.dp,
+                    bottom =
+                      bottomSheetScaffoldContentPadding
+                        .calculateBottomPadding()
+                        .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
+                  ),
+              ) {
+                scrollToTopClicked = true
+                listState.animateScrollToItem(0)
+              }
             }
           }
-        )
-      },
-      containerColor = Color.Transparent,
-      sheetContainerColor = AppTheme.colorScheme.tintedBackground,
-      sheetContentColor = AppTheme.colorScheme.tintedForeground,
-      sheetShadowElevation = 0.dp,
-      sheetTonalElevation = 0.dp,
-      sheetPeekHeight = sheetPeekHeight,
-      sheetShape =
-        RoundedCornerShape(
-          topStart = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse(),
-          topEnd = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-        ),
-      sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
-      sheetDragHandle = null
-    )
+        },
+        sheetContent = {
+          FeedsBottomSheet(
+            feedsPresenter = homePresenter.feedsPresenter,
+            bottomSheetProgress = bottomSheetProgress,
+            closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
+            selectedFeedChanged = {
+              coroutineScope.launch {
+                listState.scrollToItem(0)
+                featuredPostsPagerState.scrollToPage(0)
+              }
+            }
+          )
+        },
+        containerColor = Color.Transparent,
+        sheetContainerColor = AppTheme.colorScheme.tintedBackground,
+        sheetContentColor = AppTheme.colorScheme.tintedForeground,
+        sheetShadowElevation = 0.dp,
+        sheetTonalElevation = 0.dp,
+        sheetPeekHeight = sheetPeekHeight,
+        sheetShape =
+          RoundedCornerShape(
+            topStart = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse(),
+            topEnd = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
+          ),
+        sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
+        sheetDragHandle = null
+      )
+    }
   }
 }
 

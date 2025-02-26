@@ -59,8 +59,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.components.DropdownMenu
@@ -238,6 +241,14 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            BlockedWordsSettingItem {
+              settingsPresenter.dispatch(SettingsEvent.BlockedWordsClicked)
+            }
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
@@ -288,6 +299,21 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun BlockedWordsSettingItem(onClick: () -> Unit) {
+  Row(
+    modifier = Modifier.clickable { onClick() }.padding(horizontal = 24.dp, vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.blockedWords,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
+    )
+  }
 }
 
 @Composable
@@ -346,7 +372,17 @@ private fun PostsDeletionPeriodSettingItem(
     )
 
     Box {
-      TextButton(onClick = { showDropdown = true }, shape = MaterialTheme.shapes.medium) {
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+
+      TextButton(
+        modifier =
+          Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
+        onClick = { showDropdown = true },
+        shape = MaterialTheme.shapes.medium
+      ) {
         val period =
           when (postsDeletionPeriod) {
             ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
@@ -373,6 +409,7 @@ private fun PostsDeletionPeriodSettingItem(
       }
 
       DropdownMenu(
+        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         expanded = showDropdown,
         onDismissRequest = { showDropdown = false },
       ) {

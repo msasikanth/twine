@@ -46,6 +46,7 @@ FROM (
     f.pinnedPosition
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  WHERE p.isHidden == 0
   GROUP BY f.id
 
   UNION ALL
@@ -75,6 +76,7 @@ FROM (
     fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  WHERE p.isHidden == 0
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
@@ -116,6 +118,7 @@ FROM (
     NULL AS updatedAt
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  WHERE p.isHidden == 0
   GROUP BY f.id
 
   UNION ALL
@@ -144,6 +147,7 @@ FROM (
     fg.updatedAt
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  WHERE p.isHidden == 0
   GROUP BY fg.id
 )
 ORDER BY type DESC,
