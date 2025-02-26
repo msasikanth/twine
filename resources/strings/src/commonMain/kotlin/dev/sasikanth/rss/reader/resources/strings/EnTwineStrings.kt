@@ -181,5 +181,9 @@ val EnTwineStrings =
     showFeedFavIconTitle = "Show feed fav icon",
     showFeedFavIconDesc =
       "When turned-off, the feed icon will be displayed instead of the website's favicon",
-    blockedWords = "Blocked words"
+    blockedWords = "Blocked words",
+    blockedWordsHint = "Enter a word",
+    blockedWordsDesc =
+      "Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search & bookmarks.",
+    blockedWordsEmpty = "You haven't blocked any words yet",
   )

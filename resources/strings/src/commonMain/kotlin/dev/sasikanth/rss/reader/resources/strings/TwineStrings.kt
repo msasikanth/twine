@@ -161,6 +161,9 @@ data class TwineStrings(
   val showFeedFavIconTitle: String,
   val showFeedFavIconDesc: String,
   val blockedWords: String,
+  val blockedWordsHint: String,
+  val blockedWordsDesc: String,
+  val blockedWordsEmpty: String,
 )
 
 object Locales {
