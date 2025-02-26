@@ -225,7 +225,8 @@ class AppPresenter(
             settingsPresenter(
               componentContext,
               { navigation.pop() },
-              { navigation.pushNew(Config.About) }
+              { navigation.pushNew(Config.About) },
+              { navigation.pushNew(Config.BlockedWords) }
             )
         )
       }

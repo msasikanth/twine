@@ -160,6 +160,7 @@ data class TwineStrings(
   val enableAutoSyncDesc: String,
   val showFeedFavIconTitle: String,
   val showFeedFavIconDesc: String,
+  val blockedWords: String,
 )
 
 object Locales {

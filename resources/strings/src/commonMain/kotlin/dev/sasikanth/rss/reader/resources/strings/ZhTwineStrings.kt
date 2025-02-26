@@ -160,5 +160,6 @@ val ZhTwineStrings =
     enableAutoSyncDesc = "When turned-on, feeds will be updated in the background",
     showFeedFavIconTitle = "Show feed fav icon",
     showFeedFavIconDesc =
-      "When turned-off, the feed icon will be displayed instead of the website's favicon"
+      "When turned-off, the feed icon will be displayed instead of the website's favicon",
+    blockedWords = "Blocked words"
   )
