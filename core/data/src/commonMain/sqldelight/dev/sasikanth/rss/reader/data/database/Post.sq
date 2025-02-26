@@ -36,6 +36,22 @@ BEGIN
   UPDATE post SET isHidden = 1 WHERE id = new.id;
 END;
 
+CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
+BEFORE UPDATE ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%') AND
+    new.isHidden == 0
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
 upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
 VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
