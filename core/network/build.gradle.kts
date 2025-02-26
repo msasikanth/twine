@@ -47,7 +47,7 @@ kotlin {
       implementation(libs.crashkios.bugsnag)
       api(libs.korlibs.string)
       // Nostr
-      implementation("io.github.kotlingeekdev:rhodium:1.0-beta-16")
+      implementation("io.github.kotlingeekdev:rhodium:1.0-beta-17")
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
