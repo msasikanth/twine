@@ -36,6 +36,7 @@ import com.arkivanov.essenty.lifecycle.doOnStart
 import dev.sasikanth.rss.reader.about.AboutPresenterFactory
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedPresenterFactory
+import dev.sasikanth.rss.reader.blockedwords.BlockedWordsPresenterFactory
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -86,6 +87,7 @@ class AppPresenter(
   private val groupSelectionPresenter: GroupSelectionPresenterFactory,
   private val addFeedPresenter: AddFeedPresenterFactory,
   private val groupPresenter: GroupPresenterFactory,
+  private val blockedWordsPresenter: BlockedWordsPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -256,6 +258,11 @@ class AppPresenter(
             )
         )
       }
+      is Config.BlockedWords -> {
+        Screen.BlockedWords(
+          presenter = blockedWordsPresenter(componentContext, { navigation.pop() })
+        )
+      }
     }
 
   private fun openPost(post: PostWithMetadata) {
@@ -335,6 +342,8 @@ class AppPresenter(
     @Serializable data object AddFeed : Config
 
     @Serializable data class GroupDetails(val groupId: String) : Config
+
+    @Serializable data object BlockedWords : Config
   }
 
   @Serializable
