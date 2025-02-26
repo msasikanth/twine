@@ -62,6 +62,7 @@ count:
 SELECT COUNT(DISTINCT post.id) FROM post
 LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (
     :sourceId IS NULL OR
@@ -90,6 +91,7 @@ FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN  feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (
     :sourceId IS NULL OR
@@ -118,6 +120,7 @@ FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   (
     :sourceId IS NULL OR
@@ -156,6 +159,7 @@ unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
 LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  post.isHidden == 0 AND
   read != 1 AND
   date > :after AND
   (
