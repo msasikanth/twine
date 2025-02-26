@@ -56,8 +56,8 @@ BEGIN
     isHidden = 0;
 END;
 
-CREATE TRIGGER unhide_posts_with_blocked_words_BEFORE_DELETE
-BEFORE DELETE ON blockedWord
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
   SET isHidden = 0
