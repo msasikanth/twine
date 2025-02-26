@@ -241,6 +241,14 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            BlockedWordsSettingItem {
+              settingsPresenter.dispatch(SettingsEvent.BlockedWordsClicked)
+            }
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
@@ -291,6 +299,21 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun BlockedWordsSettingItem(onClick: () -> Unit) {
+  Row(
+    modifier = Modifier.clickable { onClick() }.padding(horizontal = 24.dp, vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.blockedWords,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
+    )
+  }
 }
 
 @Composable

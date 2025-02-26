@@ -36,6 +36,7 @@ import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
+import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
@@ -177,6 +178,12 @@ fun App(
                 AppTheme(useDarkTheme = true) {
                   GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
                 }
+              }
+              is Screen.BlockedWords -> {
+                BlockedWordsScreen(
+                  modifier = fillMaxSizeModifier,
+                  presenter = screen.presenter,
+                )
               }
             }
           }
