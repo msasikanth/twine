@@ -48,7 +48,8 @@ class FeedParserTest {
               rawContent = "First post description.",
               imageUrl = "https://example.com/first-post-media-url",
               date = 1685005200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post without image",
@@ -57,7 +58,8 @@ class FeedParserTest {
               rawContent = "Second post description.",
               imageUrl = null,
               date = 1684999800000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Podcast post",
@@ -66,7 +68,8 @@ class FeedParserTest {
               rawContent = "Third post description.",
               imageUrl = null,
               date = 1684924200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with enclosure image",
@@ -75,7 +78,8 @@ class FeedParserTest {
               rawContent = "Fourth post description.",
               imageUrl = "https://example.com/enclosure-image",
               date = 1684924200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with description and encoded content",
@@ -89,7 +93,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with relative path image",
@@ -98,7 +103,8 @@ class FeedParserTest {
               rawContent = "Relative image post description.",
               imageUrl = "http://example.com/relative-media-url",
               date = 1685005200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with comments",
@@ -107,7 +113,8 @@ class FeedParserTest {
               rawContent = "Really long post with comments.",
               imageUrl = null,
               date = 1685005200000,
-              commentsLink = "https://example/post-with-comments/comments"
+              commentsLink = "https://example/post-with-comments/comments",
+              isDateParsedCorrectly = true
             ),
           )
       )
@@ -139,7 +146,8 @@ class FeedParserTest {
               rawContent = "First post description.",
               imageUrl = null,
               date = 1685005200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with encoded description",
@@ -153,7 +161,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
           )
       )
@@ -190,7 +199,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = "https://example.com/image.jpg",
               date = 1685008800000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Second post",
@@ -203,7 +213,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = null,
               date = 1684917000000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post without image",
@@ -216,7 +227,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = null,
               date = 1684936800000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
             PostPayload(
               title = "Post with relative image",
@@ -230,7 +242,8 @@ class FeedParserTest {
                   .trimIndent(),
               imageUrl = "http://example.com/resources/image.jpg",
               date = 1685008800000,
-              commentsLink = null
+              commentsLink = null,
+              isDateParsedCorrectly = true
             ),
           )
       )

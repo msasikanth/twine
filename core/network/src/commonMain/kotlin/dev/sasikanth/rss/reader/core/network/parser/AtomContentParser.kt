@@ -143,13 +143,14 @@ internal object AtomContentParser : ContentParser() {
     }
 
     return PostPayload(
-      link = FeedParser.cleanText(link)!!,
       title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
+      link = FeedParser.cleanText(link)!!,
       description = content.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-      commentsLink = null
+      commentsLink = null,
+      isDateParsedCorrectly = postPubDateInMillis != null
     )
   }
 
