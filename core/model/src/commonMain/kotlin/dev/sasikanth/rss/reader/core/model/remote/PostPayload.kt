@@ -22,7 +22,8 @@ data class PostPayload(
   val rawContent: String?,
   val imageUrl: String?,
   val date: Long,
-  val commentsLink: String?
+  val commentsLink: String?,
+  val isDateParsedCorrectly: Boolean
 ) {
   companion object
 }

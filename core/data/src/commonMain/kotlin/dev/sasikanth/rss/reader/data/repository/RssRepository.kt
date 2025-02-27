@@ -99,19 +99,20 @@ class RssRepository(
                   ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
               feedPayload.posts.forEach { post ->
-                if (post.date > feedLastCleanUpAtEpochMilli) {
-                  postQueries.upsert(
-                    id = nameBasedUuidOf(post.link).toString(),
-                    sourceId = feedId,
-                    title = post.title,
-                    description = post.description,
-                    imageUrl = post.imageUrl,
-                    date = Instant.fromEpochMilliseconds(post.date),
-                    link = post.link,
-                    commnetsLink = post.commentsLink,
-                    rawContent = post.rawContent
-                  )
-                }
+                if (post.date < feedLastCleanUpAtEpochMilli) return@forEach
+
+                postQueries.upsert(
+                  id = nameBasedUuidOf(post.link).toString(),
+                  sourceId = feedId,
+                  title = post.title,
+                  description = post.description,
+                  imageUrl = post.imageUrl,
+                  date = Instant.fromEpochMilliseconds(post.date),
+                  link = post.link,
+                  commnetsLink = post.commentsLink,
+                  rawContent = post.rawContent,
+                  isDateParsedCorrectly = post.isDateParsedCorrectly,
+                )
               }
             }
 
