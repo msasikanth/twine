@@ -1,0 +1,68 @@
+BEGIN TRANSACTION;
+
+-- 404 Media
+INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link, pinnedAt)
+VALUES (
+    '870e3e13-9e00-5ec4-aed6-c80b7d361541',
+    '404 Media',
+    'https://www.404media.co/favicon.png',
+    '404 Media is a new independent media company founded by technology journalists Jason Koebler, Emanuel Maiberg, Samantha Cole, and Joseph Cox.',
+    'https://www.404media.co/',
+    strftime('%s', 'now') * 1000,
+    'https://www.404media.co/rss/',
+    strftime('%s', 'now') * 1000
+);
+
+-- BBC News
+INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link, pinnedAt)
+VALUES (
+    '140dffc0-2f67-5a97-980a-6f99eec3a6db',
+    'BBC News',
+    'https://news.bbcimg.co.uk/nol/shared/img/bbc_news_120x60.gif',
+    'BBC News - News Front Page',
+    'https://www.bbc.co.uk/news',
+    strftime('%s', 'now') * 1000,
+    'https://feeds.bbci.co.uk/news/rss.xml',
+    strftime('%s', 'now') * 1000
+);
+
+-- Hacker News
+INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link, pinnedAt)
+VALUES (
+    'c90003bd-b1e6-5545-ba59-3d2128d658a7',
+    'Hacker News',
+    'https://icon.horse/icon/news.ycombinator.com',
+    'Links for the intellectually curious, ranked by readers.',
+    'https://news.ycombinator.com/',
+    strftime('%s', 'now') * 1000,
+    'https://news.ycombinator.com/rss',
+    strftime('%s', 'now') * 1000
+);
+
+-- Kottke
+INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link, pinnedAt)
+VALUES (
+    '2693b096-78aa-5652-8f7d-923ecad7ec65',
+    'kottke.org',
+    'https://icon.horse/icon/kottke.org',
+    'Jason Kottke’s weblog, home of fine hypertext products since 1998',
+    'https://kottke.org/',
+    strftime('%s', 'now') * 1000,
+    'http://feeds.kottke.org/main',
+    strftime('%s', 'now') * 1000
+);
+
+-- The Verge
+INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link, pinnedAt)
+VALUES (
+    'e8d31cec-2893-54d0-bcae-7f134713e532',
+    'The Verge',
+    'https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1',
+    'The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.',
+    'https://www.theverge.com',
+    strftime('%s', 'now') * 1000,
+    'https://www.theverge.com/rss/index.xml',
+    strftime('%s', 'now') * 1000
+);
+
+COMMIT;
