@@ -275,15 +275,17 @@ class AppPresenter(
       if (showReaderView) {
         navigation.pushNew(Config.Reader(post.id))
       } else {
-        val actualLink = kotlin.run {
-          if (post.link.isNostrUri()) {
-            val nostrRef = post.link.removePrefix("nostr:")
-            val modifiedLink = if (nostrRef.startsWith("naddr"))
-              "https://highlighter.com/a/$nostrRef" else "https://njump.me/$nostrRef"
+        val actualLink =
+          kotlin.run {
+            if (post.link.isNostrUri()) {
+              val nostrRef = post.link.removePrefix("nostr:")
+              val modifiedLink =
+                if (nostrRef.startsWith("naddr")) "https://highlighter.com/a/$nostrRef"
+                else "https://njump.me/$nostrRef"
 
-            modifiedLink
-          } else post.link
-        }
+              modifiedLink
+            } else post.link
+          }
         linkHandler.openLink(actualLink)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
       }

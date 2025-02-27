@@ -191,8 +191,9 @@ internal fun ReaderScreen(
                 coroutineScope.launch {
                   if (state.link?.isNostrUri() == true) {
                     val nostrRef = state.link!!.removePrefix("nostr:")
-                    val modifiedLink = if (nostrRef.startsWith("naddr"))
-                      "https://highlighter.com/a/$nostrRef" else "https://njump.me/$nostrRef"
+                    val modifiedLink =
+                      if (nostrRef.startsWith("naddr")) "https://highlighter.com/a/$nostrRef"
+                      else "https://njump.me/$nostrRef"
                     linkHandler.openLink(modifiedLink)
                   } else {
                     linkHandler.openLink(state.link)

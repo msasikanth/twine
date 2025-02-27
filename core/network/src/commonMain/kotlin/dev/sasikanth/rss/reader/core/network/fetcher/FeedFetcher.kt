@@ -71,8 +71,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
-    return if (url.isNostrUri()) fetchNostrFeed(url)
-    else fetch(url, redirectCount = 0)
+    return if (url.isNostrUri()) fetchNostrFeed(url) else fetch(url, redirectCount = 0)
   }
 
   private suspend fun fetch(
@@ -226,7 +225,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     val authorInfoEvent =
       nostrService.getMetadataFor(
         profileHex = profilePubKey,
-        preferredRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+        preferredRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
       )
 
     if (authorInfoEvent.content.isBlank()) {
@@ -243,7 +242,10 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
 
       val userPublishRelays =
         nostrService
-          .fetchRelayListFor(profileHex = profilePubKey, fetchRelays = DEFAULT_FETCH_RELAYS)
+          .fetchRelayListFor(
+            profileHex = profilePubKey,
+            fetchRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+          )
           .filter { relay -> relay.writePolicy }
 
       val userArticlesRequest =
@@ -325,13 +327,13 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     )
   }
 
-
   // Funny hack to determine if a timestamp is in millis or seconds.
   private fun toActualMillis(timeStamp: Long): Long {
     fun isTimestampInMilliseconds(timestamp: Long): Boolean {
       val generatedMillis = Instant.fromEpochMilliseconds(timestamp).toEpochMilliseconds()
       println("Converted timestamp : $generatedMillis")
-      return generatedMillis.toString().length == Clock.System.now().toEpochMilliseconds().toString().length
+      return generatedMillis.toString().length ==
+        Clock.System.now().toEpochMilliseconds().toString().length
     }
 
     return if (isTimestampInMilliseconds(timeStamp)) timeStamp

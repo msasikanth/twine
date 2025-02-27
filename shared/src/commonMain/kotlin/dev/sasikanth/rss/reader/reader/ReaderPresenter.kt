@@ -172,9 +172,10 @@ class ReaderPresenter(
     private suspend fun loadRssContent() {
       _state.update { it.copy(postMode = InProgress) }
       val post = rssRepository.post(postId)
-      val postContent = if (post.link.isNostrUri()) {
-        transformMarkdownContent(post.rawContent!!)
-      } else post.rawContent ?: post.description
+      val postContent =
+        if (post.link.isNostrUri()) {
+          transformMarkdownContent(post.rawContent!!)
+        } else post.rawContent ?: post.description
       _state.update { it.copy(content = postContent, postMode = RssContent) }
     }
 
@@ -184,8 +185,7 @@ class ReaderPresenter(
 
         if (postLink.isNostrUri()) {
           loadRssContent()
-        }
-        else {
+        } else {
           _state.update { it.copy(postMode = InProgress) }
           val content = fullArticleFetcher.fetch(postLink)
 
@@ -200,15 +200,12 @@ class ReaderPresenter(
       }
     }
 
+    val markDownParser = MarkdownParser(CommonMarkFlavourDescriptor())
+
     private fun transformMarkdownContent(originalContent: String): String {
-      val markDownParser = MarkdownParser(CommonMarkFlavourDescriptor())
       val parsedMarkdown = markDownParser.buildMarkdownTreeFromString(originalContent)
-      val transformedContent = HtmlGenerator(
-        originalContent,
-        parsedMarkdown,
-        CommonMarkFlavourDescriptor()
-      )
-        .generateHtml()
+      val transformedContent =
+        HtmlGenerator(originalContent, parsedMarkdown, CommonMarkFlavourDescriptor()).generateHtml()
 
       return transformedContent
     }
