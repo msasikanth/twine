@@ -22,6 +22,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.rss.reader.core.network.post.FullArticleFetcher
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
@@ -39,6 +40,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.intellij.markdown.html.HtmlGenerator
+import org.intellij.markdown.parser.MarkdownParser
 
 internal typealias ReaderPresenterFactory =
   (
@@ -168,7 +172,9 @@ class ReaderPresenter(
     private suspend fun loadRssContent() {
       _state.update { it.copy(postMode = InProgress) }
       val post = rssRepository.post(postId)
-      val postContent = post.rawContent ?: post.description
+      val postContent = if (post.link.isNostrUri()) {
+        transformMarkdownContent(post.rawContent!!)
+      } else post.rawContent ?: post.description
       _state.update { it.copy(content = postContent, postMode = RssContent) }
     }
 
@@ -176,7 +182,7 @@ class ReaderPresenter(
       val postLink = _state.value.link
       if (!postLink.isNullOrBlank()) {
 
-        if (postLink.startsWith("nostr:")) {
+        if (postLink.isNostrUri()) {
           loadRssContent()
         }
         else {
@@ -192,6 +198,19 @@ class ReaderPresenter(
 
         _state.update { it.copy(postMode = Source) }
       }
+    }
+
+    private fun transformMarkdownContent(originalContent: String): String {
+      val markDownParser = MarkdownParser(CommonMarkFlavourDescriptor())
+      val parsedMarkdown = markDownParser.buildMarkdownTreeFromString(originalContent)
+      val transformedContent = HtmlGenerator(
+        originalContent,
+        parsedMarkdown,
+        CommonMarkFlavourDescriptor()
+      )
+        .generateHtml()
+
+      return transformedContent
     }
   }
 }

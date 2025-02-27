@@ -56,6 +56,7 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
@@ -188,7 +189,7 @@ internal fun ReaderScreen(
             IconButton(
               onClick = {
                 coroutineScope.launch {
-                  if (state.link?.startsWith("nostr:") == true) {
+                  if (state.link?.isNostrUri() == true) {
                     val nostrRef = state.link!!.removePrefix("nostr:")
                     val modifiedLink = if (nostrRef.startsWith("naddr"))
                       "https://highlighter.com/a/$nostrRef" else "https://njump.me/$nostrRef"

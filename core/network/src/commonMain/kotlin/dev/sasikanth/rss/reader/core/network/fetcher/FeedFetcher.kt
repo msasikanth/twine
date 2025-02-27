@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TY
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.get
@@ -70,7 +71,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   suspend fun fetch(url: String, transformUrl: Boolean = true): FeedFetchResult {
-    return if (url.startsWith("nostr:")) fetchNostrFeed(url)
+    return if (url.isNostrUri()) fetchNostrFeed(url)
     else fetch(url, redirectCount = 0)
   }
 
@@ -318,7 +319,8 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       rawContent = articleContent,
       imageUrl = image?.description,
       date = toActualMillis(publishDate?.description?.toLong() ?: event.creationDate),
-      commentsLink = null
+      commentsLink = null,
+      isDateParsedCorrectly = true
     )
   }
 
