@@ -56,7 +56,13 @@ upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
 VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
 ON CONFLICT(id) DO
-UPDATE SET title = excluded.title, description = excluded.description, rawContent = excluded.rawContent, imageUrl = excluded.imageUrl;
+UPDATE SET
+    title = excluded.title,
+    description = excluded.description,
+    rawContent = excluded.rawContent,
+    imageUrl = excluded.imageUrl,
+    date = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.date ELSE date END,
+    read = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.read ELSE read END;
 
 count:
 SELECT COUNT(DISTINCT post.id) FROM post
