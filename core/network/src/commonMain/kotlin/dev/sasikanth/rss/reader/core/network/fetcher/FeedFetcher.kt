@@ -195,7 +195,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       val profileIdentifier = profileInfo[0]
       val potentialRelays = profileInfo.drop(1)
 
-      return innerFetchNostrFeed(profileIdentifier, potentialRelays, nostrService)
+      return innerFetchNostrFeed(nostrUri, profileIdentifier, potentialRelays, nostrService)
     } else {
       val parsedProfile = Nip19Parser.parse(rawNostrAddress)?.entity
       return if (parsedProfile == null) {
@@ -203,10 +203,10 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       } else {
         when (parsedProfile) {
           is NPub -> {
-            innerFetchNostrFeed(parsedProfile.hex, DEFAULT_METADATA_RELAYS, nostrService)
+            innerFetchNostrFeed(nostrUri, parsedProfile.hex, DEFAULT_METADATA_RELAYS, nostrService)
           }
           is NProfile -> {
-            innerFetchNostrFeed(parsedProfile.hex, parsedProfile.relay, nostrService)
+            innerFetchNostrFeed(nostrUri, parsedProfile.hex, parsedProfile.relay, nostrService)
           }
           else ->
             FeedFetchResult.Error(
@@ -218,6 +218,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
   }
 
   private suspend fun innerFetchNostrFeed(
+    nostrUri: String,
     profilePubKey: String,
     profileRelays: List<String>,
     nostrService: NostrService
@@ -265,7 +266,7 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
             icon = authorInfo.picture ?: "",
             description = authorInfo.about ?: "",
             homepageLink = authorInfo.website ?: "",
-            link = "https://njump.me/$profilePubKey",
+            link = nostrUri,
             articleEvents.map { mapEventToPost(it) }
           )
         )
