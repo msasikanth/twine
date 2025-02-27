@@ -223,10 +223,18 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     nostrService: NostrService
   ): FeedFetchResult {
     val authorInfoEvent =
-      nostrService.getMetadataFor(
-        profileHex = profilePubKey,
-        preferredRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
-      )
+      try {
+        nostrService.getMetadataFor(
+          profileHex = profilePubKey,
+          preferredRelays = profileRelays.ifEmpty { DEFAULT_FETCH_RELAYS }
+        )
+      } catch (e: Exception) {
+        Logger.e("NostrFetcher", e)
+        nostrService.getMetadataFor(
+          profileHex = profilePubKey,
+          preferredRelays = DEFAULT_FETCH_RELAYS
+        )
+      }
 
     if (authorInfoEvent.content.isBlank()) {
       return FeedFetchResult.Error(
@@ -241,12 +249,20 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
       }
 
       val userPublishRelays =
-        nostrService
-          .fetchRelayListFor(
+        try {
+          nostrService
+            .fetchRelayListFor(
+              profileHex = profilePubKey,
+              fetchRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+            )
+            .filter { relay -> relay.writePolicy }
+        } catch (e: Exception) {
+          Logger.e("NostrFetcher", e)
+          nostrService.fetchRelayListFor(
             profileHex = profilePubKey,
-            fetchRelays = profileRelays.ifEmpty { DEFAULT_METADATA_RELAYS }
+            fetchRelays = DEFAULT_METADATA_RELAYS
           )
-          .filter { relay -> relay.writePolicy }
+        }
 
       val userArticlesRequest =
         RequestMessage.singleFilterRequest(
