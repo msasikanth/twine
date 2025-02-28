@@ -56,9 +56,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -178,6 +176,7 @@ class HomePresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    private val scrolledPostItems = mutableSetOf<String>()
 
     private val _state = MutableStateFlow(HomeState.DEFAULT)
     val state: StateFlow<HomeState> =
@@ -215,7 +214,25 @@ class HomePresenter(
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
         is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
         is HomeEvent.MarkPostsAsRead -> markPostsAsRead(event.source)
+        is HomeEvent.OnPostItemsScrolled -> onPostItemsScrolled(event.postIds)
+        HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
+        is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
       }
+    }
+
+    private fun markFeaturedPostAsRead(postId: String) {
+      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, id = postId) }
+    }
+
+    private fun markScrolledPostsAsRead() {
+      coroutineScope.launch {
+        rssRepository.markPostsAsRead(postIds = scrolledPostItems)
+        scrolledPostItems.clear()
+      }
+    }
+
+    private fun onPostItemsScrolled(postIds: List<String>) {
+      scrolledPostItems += postIds
     }
 
     private fun markPostsAsRead(source: Source?) {
