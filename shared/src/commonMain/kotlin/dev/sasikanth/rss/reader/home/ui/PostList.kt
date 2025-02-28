@@ -93,7 +93,7 @@ internal fun PostsList(
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
   ) {
     if (featuredPosts.isNotEmpty()) {
-      item {
+      item(contentType = "featured_items") {
         FeaturedSection(
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
@@ -108,7 +108,11 @@ internal fun PostsList(
       }
     }
 
-    items(posts.itemCount) { index ->
+    items(
+      count = posts.itemCount,
+      key = { index -> posts.peek(index)?.id ?: index },
+      contentType = { "post_item" }
+    ) { index ->
       val post = posts[index]
       if (post != null) {
         PostListItem(
