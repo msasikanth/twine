@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -221,11 +223,21 @@ class HomePresenter(
     }
 
     private fun markFeaturedPostAsRead(postId: String) {
-      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, id = postId) }
+      coroutineScope.launch {
+        val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
+
+        if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
+
+        rssRepository.updatePostReadStatus(read = true, id = postId)
+      }
     }
 
     private fun markScrolledPostsAsRead() {
       coroutineScope.launch {
+        val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
+
+        if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
+
         rssRepository.markPostsAsRead(postIds = scrolledPostItems)
         scrolledPostItems.clear()
       }
