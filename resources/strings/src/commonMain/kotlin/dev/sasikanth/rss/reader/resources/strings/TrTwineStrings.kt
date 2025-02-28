@@ -175,4 +175,7 @@ val TrTwineStrings =
     blockedWordsDesc =
       "Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search & bookmarks.",
     blockedWordsEmpty = "You haven't blocked any words yet",
+    markArticleAsRead = "Mark article as read",
+    markArticleAsReadOnOpen = "On Open",
+    markArticleAsReadOnScroll = "On Scroll",
   )

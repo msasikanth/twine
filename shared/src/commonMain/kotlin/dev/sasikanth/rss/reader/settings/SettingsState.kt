@@ -19,6 +19,7 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.opml.OpmlResult
 
@@ -34,6 +35,7 @@ internal data class SettingsState(
   val appThemeMode: AppThemeMode,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
+  val markAsReadOn: MarkAsReadOn,
 ) {
 
   companion object {
@@ -50,6 +52,7 @@ internal data class SettingsState(
         appThemeMode = AppThemeMode.Auto,
         enableAutoSync = true,
         showFeedFavIcon = true,
+        markAsReadOn = MarkAsReadOn.Open
       )
   }
 }

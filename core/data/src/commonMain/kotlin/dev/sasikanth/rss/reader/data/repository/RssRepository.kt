@@ -496,6 +496,14 @@ class RssRepository(
     withContext(ioDispatcher) { postQueries.markPostsAsRead(sourceId = null, after = postsAfter) }
   }
 
+  suspend fun markPostsAsRead(postIds: Set<String>) {
+    withContext(ioDispatcher) {
+      transactionRunner.invoke {
+        postIds.forEach { postId -> postQueries.updateReadStatus(read = true, id = postId) }
+      }
+    }
+  }
+
   suspend fun markPostsInFeedAsRead(
     feedIds: List<String>,
     postsAfter: Instant = Instant.DISTANT_PAST
