@@ -76,6 +76,7 @@ import dev.sasikanth.rss.reader.components.ToggleableButtonItem
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_MONTH
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
@@ -249,6 +250,14 @@ internal fun SettingsScreen(
           item { Divider(24.dp) }
 
           item {
+            MarkArticleAsReadOnSetting(articleMarkAsReadOn = state.markAsReadOn) {
+              settingsPresenter.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
+            }
+          }
+
+          item { Divider(24.dp) }
+
+          item {
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
@@ -299,6 +308,98 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun MarkArticleAsReadOnSetting(
+  articleMarkAsReadOn: MarkAsReadOn,
+  onMarkAsReadOnChanged: (MarkAsReadOn) -> Unit
+) {
+  var showDropdown by remember { mutableStateOf(false) }
+
+  Row(
+    modifier = Modifier.padding(horizontal = 24.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = LocalStrings.current.markArticleAsRead,
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.textEmphasisHigh
+    )
+
+    Box {
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+
+      TextButton(
+        modifier =
+          Modifier.onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
+        onClick = { showDropdown = true },
+        shape = MaterialTheme.shapes.medium
+      ) {
+        val markAsReadOnLabel =
+          when (articleMarkAsReadOn) {
+            MarkAsReadOn.Open -> LocalStrings.current.markArticleAsReadOnOpen
+            MarkAsReadOn.Scroll -> LocalStrings.current.markArticleAsReadOnScroll
+          }
+
+        Text(
+          text = markAsReadOnLabel,
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.tintedForeground
+        )
+
+        Spacer(Modifier.requiredWidth(8.dp))
+
+        Icon(
+          imageVector = Icons.Filled.ExpandMore,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      }
+
+      DropdownMenu(
+        offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
+        expanded = showDropdown,
+        onDismissRequest = { showDropdown = false },
+      ) {
+        MarkAsReadOn.entries.forEach { markAsReadOn ->
+          val label =
+            when (markAsReadOn) {
+              MarkAsReadOn.Open -> LocalStrings.current.markArticleAsReadOnOpen
+              MarkAsReadOn.Scroll -> LocalStrings.current.markArticleAsReadOnScroll
+            }
+
+          val backgroundColor =
+            if (markAsReadOn == articleMarkAsReadOn) {
+              AppTheme.colorScheme.tintedHighlight
+            } else {
+              Color.Unspecified
+            }
+
+          DropdownMenuItem(
+            onClick = {
+              onMarkAsReadOnChanged(markAsReadOn)
+              showDropdown = false
+            },
+            modifier = Modifier.background(backgroundColor)
+          ) {
+            val textColor =
+              if (markAsReadOn == articleMarkAsReadOn) {
+                AppTheme.colorScheme.onSurface
+              } else {
+                AppTheme.colorScheme.textEmphasisHigh
+              }
+
+            Text(text = label, style = MaterialTheme.typography.bodyLarge, color = textColor)
+          }
+        }
+      }
+    }
+  }
 }
 
 @Composable

@@ -147,7 +147,7 @@ class SettingsPresenter(
               appThemeMode = settings.appThemeMode,
               enableAutoSync = settings.enableAutoSync,
               showFeedFavIcon = settings.showFeedFavIcon,
-              markAsReadOn = settings.markAsReadOn,
+              markAsReadOn = settings.markAsReadOn
             )
           }
         }
@@ -184,7 +184,12 @@ class SettingsPresenter(
         SettingsEvent.BlockedWordsClicked -> {
           // no-op
         }
+        is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       }
+    }
+
+    private fun markAsReadOnChanged(markAsReadOn: MarkAsReadOn) {
+      coroutineScope.launch { settingsRepository.updateMarkAsReadOn(markAsReadOn) }
     }
 
     private fun toggleShowFeedFavIcon(value: Boolean) {

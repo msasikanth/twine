@@ -164,6 +164,9 @@ data class TwineStrings(
   val blockedWordsHint: String,
   val blockedWordsDesc: String,
   val blockedWordsEmpty: String,
+  val markArticleAsRead: String,
+  val markArticleAsReadOnOpen: String,
+  val markArticleAsReadOnScroll: String,
 )
 
 object Locales {
