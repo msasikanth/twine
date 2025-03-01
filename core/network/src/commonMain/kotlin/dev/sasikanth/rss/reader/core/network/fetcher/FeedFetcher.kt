@@ -104,23 +104,35 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    if (response.contentType()?.withoutParameters() != ContentType.Text.Html) {
-      val content = response.bodyAsChannel()
-      val responseCharset = response.contentType()?.parameter("charset")
-      val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
+    val contentType = response.contentType()?.withoutParameters()
 
-      val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
+    when (contentType) {
+      ContentType.Text.Html -> {
+        val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
 
-      return FeedFetchResult.Success(feedPayload)
+        if (feedUrl != url && !feedUrl.isNullOrBlank()) {
+          return fetch(url = feedUrl, redirectCount = redirectCount + 1)
+        }
+      }
+
+      // There are scenarios where a feed doesn't have any content-type, rare, but it's possible
+      // in those scenarios we default to trying to parse them as XML and if it fails, it fails.
+      ContentType.Application.Atom,
+      ContentType.Application.Rss,
+      ContentType.Application.Xml,
+      ContentType.Text.Xml,
+      null -> {
+        val content = response.bodyAsChannel()
+        val responseCharset = response.contentType()?.parameter("charset")
+        val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
+
+        val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
+
+        return FeedFetchResult.Success(feedPayload)
+      }
     }
 
-    val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
-
-    if (feedUrl != url && !feedUrl.isNullOrBlank()) {
-      return fetch(url = feedUrl, redirectCount = redirectCount + 1)
-    }
-
-    throw UnsupportedOperationException()
+    throw UnsupportedOperationException("Unsupported content type: $contentType")
   }
 
   private suspend fun handleHttpRedirect(
