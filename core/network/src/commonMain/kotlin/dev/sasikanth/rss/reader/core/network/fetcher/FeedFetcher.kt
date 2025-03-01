@@ -17,17 +17,16 @@ package dev.sasikanth.rss.reader.core.network.fetcher
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.RSS_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -43,7 +42,7 @@ import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
+class FeedFetcher(private val httpClient: HttpClient, private val xmlFeedParser: XmlFeedParser) {
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
@@ -128,13 +127,13 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         val responseCharset = response.contentType()?.parameter("charset")
         val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
 
-        val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
+        val feedPayload = xmlFeedParser.parse(feedUrl = url, content = content, charset = charset)
 
         return FeedFetchResult.Success(feedPayload)
       }
-
       ContentType.Application.Json -> {
-        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform streaming
+        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform
+        // streaming
         val content = response.bodyAsText()
         // TODO: Parse JSON feed
       }

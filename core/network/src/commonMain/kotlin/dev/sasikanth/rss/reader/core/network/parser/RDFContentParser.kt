@@ -18,16 +18,16 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_RDF_RESOURCE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT_ENCODED
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DC_DATE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_DESCRIPTION
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_FEED_IMAGE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUB_DATE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_CHANNEL
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_RSS_ITEM
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_RDF_RESOURCE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_CONTENT_ENCODED
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_DC_DATE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_DESCRIPTION
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_FEED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_PUB_DATE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_RSS_CHANNEL
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_RSS_ITEM
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
@@ -87,12 +87,12 @@ internal object RDFContentParser : XmlContentParser() {
 
     val host = UrlUtils.extractHost(link ?: feedUrl)
     if (iconUrl.isNullOrBlank()) {
-      iconUrl = FeedParser.fallbackFeedIcon(host)
+      iconUrl = XmlFeedParser.fallbackFeedIcon(host)
     }
 
     return FeedPayload(
-      name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
-      description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
+      name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
+      description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
       icon = iconUrl,
       homepageLink = link ?: feedUrl,
       link = feedUrl,
@@ -151,8 +151,8 @@ internal object RDFContentParser : XmlContentParser() {
     }
 
     return PostPayload(
-      title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = FeedParser.cleanText(link)!!,
+      title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
+      link = XmlFeedParser.cleanText(link)!!,
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = UrlUtils.safeUrl(hostLink, image),

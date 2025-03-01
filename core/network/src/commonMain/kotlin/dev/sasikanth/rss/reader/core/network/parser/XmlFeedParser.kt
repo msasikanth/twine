@@ -33,7 +33,7 @@ import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
-class FeedParser(private val dispatchersProvider: DispatchersProvider) {
+class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
 
   suspend fun parse(
     content: ByteReadChannel,
