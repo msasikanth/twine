@@ -48,6 +48,7 @@ val DeTwineStrings =
       }
     },
     bookmark = "Lesezeichen",
+    unBookmark = "Un-bookmark",
     bookmarks = "Lesezeichen",
     bookmarksPlaceholder = "Mit Lesezeichen versehene Beiträge werden hier angezeigt 🔖",
     settings = "Einstellungen",

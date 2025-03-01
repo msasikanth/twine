@@ -50,6 +50,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
@@ -96,7 +102,7 @@ internal fun PostMetadata(
     verticalAlignment = Alignment.CenterVertically
   ) {
     PostSourcePill(
-      modifier = Modifier.weight(1f),
+      modifier = Modifier.weight(1f).clearAndSetSemantics {},
       config = config,
       onSourceClick = onSourceClick,
       postRead = postRead,
@@ -104,7 +110,7 @@ internal fun PostMetadata(
     )
 
     Text(
-      modifier = Modifier.padding(horizontal = 8.dp),
+      modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
@@ -186,17 +192,33 @@ private fun PostOptionsButtonRow(
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit
 ) {
-  Row {
+  Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
+      val commentsLabel = LocalStrings.current.comments
       PostOptionIconButton(
+        modifier =
+          Modifier.semantics {
+            role = Role.Button
+            contentDescription = commentsLabel
+          },
         icon = TwineIcons.Comments,
         iconTint = AppTheme.colorScheme.textEmphasisHigh,
-        contentDescription = LocalStrings.current.comments,
         onClick = onCommentsClick
       )
     }
 
+    val bookmarkLabel =
+      if (postBookmarked) {
+        LocalStrings.current.unBookmark
+      } else {
+        LocalStrings.current.bookmark
+      }
     PostOptionIconButton(
+      modifier =
+        Modifier.semantics {
+          role = Role.Button
+          contentDescription = bookmarkLabel
+        },
       icon =
         if (postBookmarked) {
           TwineIcons.Bookmarked
@@ -209,7 +231,6 @@ private fun PostOptionsButtonRow(
         } else {
           AppTheme.colorScheme.textEmphasisHigh
         },
-      contentDescription = LocalStrings.current.bookmark,
       onClick = onBookmarkClick
     )
 
@@ -218,14 +239,18 @@ private fun PostOptionsButtonRow(
       val coroutineScope = rememberCoroutineScope()
       val density = LocalDensity.current
       var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
+      val moreMenuOptionsLabel = LocalStrings.current.moreMenuOptions
 
       PostOptionIconButton(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
-            buttonHeight = with(density) { coordinates.size.height.toDp() }
-          },
+              buttonHeight = with(density) { coordinates.size.height.toDp() }
+            }
+            .semantics {
+              role = Role.Button
+              contentDescription = moreMenuOptionsLabel
+            },
         icon = Icons.Filled.MoreVert,
-        contentDescription = LocalStrings.current.moreMenuOptions,
         onClick = { showDropdown = true }
       )
 
@@ -236,18 +261,19 @@ private fun PostOptionsButtonRow(
         offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
       ) {
         if (config.showToggleReadUnreadOption) {
+          val markAsReadLabel =
+            if (postRead) {
+              LocalStrings.current.markAsUnRead
+            } else {
+              LocalStrings.current.markAsRead
+            }
+
           DropdownMenuItem(
             modifier = Modifier.fillMaxWidth(),
+            contentDescription = markAsReadLabel,
             text = {
-              val label =
-                if (postRead) {
-                  LocalStrings.current.markAsUnRead
-                } else {
-                  LocalStrings.current.markAsRead
-                }
-
               Text(
-                text = label,
+                text = markAsReadLabel,
                 color = AppTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Start
               )
@@ -274,11 +300,14 @@ private fun PostOptionsButtonRow(
         }
 
         val linkHandler = LocalLinkHandler.current
+        val openWebsiteLabel = LocalStrings.current.openWebsite
+
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          contentDescription = openWebsiteLabel,
           text = {
             Text(
-              text = LocalStrings.current.openWebsite,
+              text = openWebsiteLabel,
               color = AppTheme.colorScheme.onSurface,
               textAlign = TextAlign.Start
             )
@@ -298,11 +327,14 @@ private fun PostOptionsButtonRow(
         )
 
         val shareHandler = LocalShareHandler.current
+        val shareLabel = LocalStrings.current.share
+
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
+          contentDescription = shareLabel,
           text = {
             Text(
-              text = LocalStrings.current.share,
+              text = shareLabel,
               color = AppTheme.colorScheme.onSurface,
               textAlign = TextAlign.Start
             )
@@ -327,7 +359,6 @@ private fun PostOptionsButtonRow(
 @Composable
 private fun PostOptionIconButton(
   icon: ImageVector,
-  contentDescription: String,
   modifier: Modifier = Modifier,
   iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
   onClick: () -> Unit,
@@ -342,7 +373,7 @@ private fun PostOptionIconButton(
   ) {
     Icon(
       imageVector = icon,
-      contentDescription = contentDescription,
+      contentDescription = null,
       tint = iconTint,
       modifier = Modifier.size(20.dp)
     )
