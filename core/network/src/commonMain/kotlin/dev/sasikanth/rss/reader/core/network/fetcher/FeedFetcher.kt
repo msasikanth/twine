@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR
 import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -42,7 +43,11 @@ import korlibs.io.lang.Charsets
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class FeedFetcher(private val httpClient: HttpClient, private val xmlFeedParser: XmlFeedParser) {
+class FeedFetcher(
+  private val httpClient: HttpClient,
+  private val xmlFeedParser: XmlFeedParser,
+  private val jsonFeedParser: JsonFeedParser,
+) {
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
@@ -133,9 +138,11 @@ class FeedFetcher(private val httpClient: HttpClient, private val xmlFeedParser:
       }
       ContentType.Application.Json -> {
         // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform
-        // streaming
+        //  streaming
         val content = response.bodyAsText()
-        // TODO: Parse JSON feed
+        val feedPayload = jsonFeedParser.parse(content = content, feedUrl = url)
+
+        return FeedFetchResult.Success(feedPayload)
       }
     }
 
