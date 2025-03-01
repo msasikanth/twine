@@ -112,7 +112,7 @@ internal fun SettingsScreen(
           title = { Text(LocalStrings.current.settings) },
           navigationIcon = {
             IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
-              Icon(TwineIcons.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = LocalStrings.current.buttonGoBack)
             }
           },
           colors =

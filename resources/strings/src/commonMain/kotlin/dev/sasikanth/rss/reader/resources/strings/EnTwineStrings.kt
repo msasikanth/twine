@@ -59,6 +59,7 @@ val EnTwineStrings =
       }
     },
     bookmark = "Bookmark",
+    unBookmark = "Un-bookmark",
     bookmarks = "Bookmarks",
     bookmarksPlaceholder = "Bookmarked posts will appear here 🔖",
     settings = "Settings",

@@ -42,6 +42,7 @@ val ZhTwineStrings =
       }
     },
     bookmark = "收藏",
+    unBookmark = "Un-bookmark",
     bookmarks = "收藏夹",
     bookmarksPlaceholder = "收藏的文章将显示在这里 🔖",
     settings = "设置",

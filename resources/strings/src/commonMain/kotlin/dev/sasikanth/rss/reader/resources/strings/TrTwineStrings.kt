@@ -45,6 +45,7 @@ val TrTwineStrings =
       }
     },
     bookmark = "Yer İşareti",
+    unBookmark = "Un-bookmark",
     bookmarks = "Yer İşaretleri",
     bookmarksPlaceholder = "Yer imlerine eklenen gönderiler burada görünecektir 🔖",
     settings = "Ayarlar",
