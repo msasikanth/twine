@@ -33,7 +33,7 @@ import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
-class FeedParser(private val dispatchersProvider: DispatchersProvider) {
+class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
 
   suspend fun parse(
     content: ByteReadChannel,
@@ -111,10 +111,6 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
-
-    fun fallbackFeedIcon(host: String): String {
-      return "https://icon.horse/icon/$host"
-    }
   }
 }
 

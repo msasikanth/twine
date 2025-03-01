@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.toByteArray
 import korlibs.io.lang.Charsets
@@ -25,9 +25,9 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
 
-class FeedParserTest {
+class XmlFeedParserTest {
 
-  private val feedParser = FeedParser(dispatchersProvider = TestDispatchersProvider())
+  private val xmlFeedParser = XmlFeedParser(dispatchersProvider = TestDispatchersProvider())
 
   @Test
   fun parsingRssFeedShouldWorkCorrectly() = runTest {
@@ -121,7 +121,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(rssXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
@@ -169,7 +169,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(rdfXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
@@ -250,7 +250,7 @@ class FeedParserTest {
 
     // when
     val content = ByteReadChannel(atomXmlContent.toByteArray())
-    val payload = feedParser.parse(content, feedUrl, Charsets.UTF8)
+    val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)

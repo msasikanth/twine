@@ -145,3 +145,53 @@ const val atomXmlContent =
     </entry>
   </feed>
   """
+
+// language=JSON
+const val jsonFeed =
+  """
+
+{
+  "title": "Tech Insights Blog",
+  "description": "The latest insights and news from the tech world",
+  "home_page_url": "https://example.com",
+  "feed_url": "https://example.com/feed.json",
+  "icon": "https://example.com/icon.png",
+  "favIcon": "https://example.com/favicon.ico",
+  "items": [
+    {
+      "id": "2025-001",
+      "title": "The Future of Quantum Computing in 2025",
+      "content_html": "<p>Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.</p><p>The new 1000-qubit processor announced last month represents a major milestone in the industry.</p>",
+      "content_text": "Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.\n\nThe new 1000-qubit processor announced last month represents a major milestone in the industry.",
+      "summary": "An overview of recent quantum computing advances and what they mean for the tech industry",
+      "image": "https://example.com/images/quantum-2025.jpg",
+      "date_published": "2025-02-28T09:15:00Z",
+      "url": "https://example.com/posts/quantum-computing-2025"
+    },
+    {
+      "id": "2025-002",
+      "title": "AI Ethics Frameworks: A Comparative Analysis",
+      "content_html": "<p>As AI becomes more integrated into our daily lives, the need for robust ethical frameworks has never been more important.</p><p>This article examines the approaches taken by major tech companies and governments around the world.</p>",
+      "summary": "Comparing different approaches to AI ethics across industry and government",
+      "date_published": "2025-02-15T14:30:00Z",
+      "url": "https://example.com/posts/ai-ethics-frameworks"
+    },
+    {
+      "id": "2025-003",
+      "title": "The Rise of Edge Computing",
+      "content_text": "Edge computing continues to grow as IoT devices proliferate. This shift is changing how we think about network architecture and data processing.\n\nIn this article, we explore the implications for businesses and consumers alike.",
+      "image": "https://example.com/images/edge-computing.jpg",
+      "date_published": "2025-02-01T11:45:00Z",
+      "url": "https://example.com/posts/edge-computing-rise"
+    },
+    {
+      "id": "2025-004",
+      "title": "Sustainable Tech: Green Innovations in Silicon Valley",
+      "content_html": "<p>Silicon Valley companies are leading the charge in sustainable technology development.</p><p>From carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.</p>",
+      "content_text": "Silicon Valley companies are leading the charge in sustainable technology development.\n\nFrom carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.",
+      "date_published": "2025-01-20T16:00:00Z",
+      "url": "https://example.com/posts/sustainable-tech-innovations"
+    }
+  ]
+}
+"""
