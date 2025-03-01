@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -60,6 +62,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -307,6 +310,21 @@ internal fun HomeScreen(
                     )
                   }
                 },
+              )
+
+              val navBarScrimColor =
+                if (useDarkTheme) {
+                  Color.Black
+                } else {
+                  Color.White
+                }
+              Box(
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+                    .navigationBarsPadding()
+                    .padding(top = 24.dp)
+                    .align(Alignment.BottomCenter)
               )
 
               CompactFloatingActionButton(
