@@ -20,7 +20,7 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-abstract class ContentParser {
+abstract class XmlContentParser {
 
   abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 

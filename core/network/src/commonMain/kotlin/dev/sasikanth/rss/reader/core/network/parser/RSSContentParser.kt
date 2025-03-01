@@ -40,7 +40,7 @@ import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal object RSSContentParser : ContentParser() {
+internal object RSSContentParser : XmlContentParser() {
 
   override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
