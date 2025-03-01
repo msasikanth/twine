@@ -18,19 +18,19 @@ package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_REL
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_VALUE_ALTERNATE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_ENTRY
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ATOM_FEED
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_CONTENT
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_ICON
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_PUBLISHED
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUBTITLE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_SUMMARY
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_TITLE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ICON
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_PUBLISHED
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_SUMMARY
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_UPDATED
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
@@ -38,7 +38,7 @@ import kotlinx.datetime.Clock
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal object AtomContentParser : ContentParser() {
+internal object AtomContentParser : XmlContentParser() {
 
   override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
@@ -79,12 +79,12 @@ internal object AtomContentParser : ContentParser() {
 
     val host = UrlUtils.extractHost(link ?: feedUrl)
     if (iconUrl.isNullOrBlank()) {
-      iconUrl = FeedParser.fallbackFeedIcon(host)
+      iconUrl = UrlUtils.fallbackFeedIcon(host)
     }
 
     return FeedPayload(
-      name = FeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
-      description = FeedParser.cleanText(description).orEmpty().decodeHTMLString(),
+      name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
+      description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
       icon = iconUrl,
       homepageLink = link ?: feedUrl,
       link = feedUrl,
@@ -143,8 +143,8 @@ internal object AtomContentParser : ContentParser() {
     }
 
     return PostPayload(
-      title = FeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = FeedParser.cleanText(link)!!,
+      title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
+      link = XmlFeedParser.cleanText(link)!!,
       description = content.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
       imageUrl = UrlUtils.safeUrl(hostLink, image),
