@@ -87,7 +87,7 @@ internal object RDFContentParser : XmlContentParser() {
 
     val host = UrlUtils.extractHost(link ?: feedUrl)
     if (iconUrl.isNullOrBlank()) {
-      iconUrl = XmlFeedParser.fallbackFeedIcon(host)
+      iconUrl = UrlUtils.fallbackFeedIcon(host)
     }
 
     return FeedPayload(

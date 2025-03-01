@@ -20,7 +20,6 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.HtmlContentParser
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
@@ -49,7 +48,7 @@ class JsonFeedParser(private val dispatchersProvider: DispatchersProvider) {
           FeedPayload(
             name = jsonFeedPayload.title,
             icon = jsonFeedPayload.icon
-                ?: jsonFeedPayload.favIcon ?: XmlFeedParser.fallbackFeedIcon(host),
+                ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
