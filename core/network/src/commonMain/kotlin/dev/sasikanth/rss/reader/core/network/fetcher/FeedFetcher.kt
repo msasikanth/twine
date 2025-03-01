@@ -27,7 +27,9 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsBytes
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
@@ -129,6 +131,12 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
         val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
 
         return FeedFetchResult.Success(feedPayload)
+      }
+
+      ContentType.Application.Json -> {
+        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform streaming
+        val content = response.bodyAsText()
+        // TODO: Parse JSON feed
       }
     }
 
