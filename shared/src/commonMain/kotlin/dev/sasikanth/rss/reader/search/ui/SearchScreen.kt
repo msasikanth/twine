@@ -244,7 +244,7 @@ private fun SearchBar(
             IconButton(onClick = onBackClick) {
               Icon(
                 TwineIcons.ArrowBack,
-                contentDescription = null,
+                contentDescription = LocalStrings.current.buttonGoBack,
                 tint = AppTheme.colorScheme.onSurface
               )
             }
