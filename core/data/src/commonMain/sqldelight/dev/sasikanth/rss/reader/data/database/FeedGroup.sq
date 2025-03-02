@@ -18,9 +18,6 @@ CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
 count:
 SELECT COUNT(*) FROM feedGroup;
 
-pinnedGroupsCount:
-SELECT COUNT(*) FROM feedGroup WHERE pinnedAt IS NOT NULL;
-
 groups:
 SELECT
   id,
