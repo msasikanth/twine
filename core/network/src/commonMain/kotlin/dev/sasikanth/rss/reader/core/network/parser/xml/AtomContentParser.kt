@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.network.parser
+package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_REL
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ATOM_ENTRY
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ATOM_FEED
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_CONTENT
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_ICON
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_PUBLISHED
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_SUBTITLE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_SUMMARY
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_TITLE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_REL
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_ENTRY
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_FEED
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_UPDATED
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString

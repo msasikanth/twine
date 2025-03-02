@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.core.network.parser.json
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis

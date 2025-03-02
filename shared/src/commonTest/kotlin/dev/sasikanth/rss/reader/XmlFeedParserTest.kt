@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.toByteArray
 import korlibs.io.lang.Charsets

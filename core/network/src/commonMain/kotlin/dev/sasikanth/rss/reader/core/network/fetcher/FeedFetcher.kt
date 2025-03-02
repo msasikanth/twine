@@ -17,13 +17,13 @@ package dev.sasikanth.rss.reader.core.network.fetcher
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.ATTR_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.RSS_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.RSS_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
