@@ -3,9 +3,7 @@
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
-![banner](./readme_images/banner.png)
-
-Twine is a multiplatform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
+Twine is a cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
 user interface and experience to browse through the feeds, and supports Material 3 content based 
 [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color).
 
@@ -30,10 +28,10 @@ user interface and experience to browse through the feeds, and supports Material
 
 ## Features ✨
 
-- Supports RSS & Atom feeds
-- Feed management: Add, Edit & Pin feeds
+- Supports **RDF**, **RSS**, **Atom** and **JSON** feeds
+- Feed management: Add, Edit, Remove & Pin feeds
 - Feed grouping
-- Access to pinned feeds/groups from bottom bar
+- Access to pinned feeds/groups from bottom bar in the home screen
 - Smart fetching: Twine looks for feeds when given any website homepage
 - Article shortcut to fetch full article in reader view
 - Bookmark posts to read later
@@ -69,7 +67,7 @@ You can contribute bug fixes to the project via PRs, for anything else open an i
 This project uses ktfmt, provided via the spotless gradle plugin, and the bundled project IntelliJ codestyle. Run
 `./gradlew spotlessApply` to format the code before raising a PR.
 
-## Made by ❤️
+## Made with 💖 by
 
 - [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development
 - [Eduardo Pratti](https://twitter.com/edpratti) / Design
