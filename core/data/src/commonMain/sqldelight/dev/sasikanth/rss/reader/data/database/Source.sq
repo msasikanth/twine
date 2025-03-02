@@ -36,7 +36,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -46,7 +46,6 @@ FROM (
     f.pinnedPosition
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
-  WHERE p.isHidden == 0
   GROUP BY f.id
 
   UNION ALL
@@ -60,7 +59,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
     COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
                 FROM feed
@@ -76,7 +75,6 @@ FROM (
     fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
-  WHERE p.isHidden == 0
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
@@ -109,7 +107,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -118,7 +116,6 @@ FROM (
     NULL AS updatedAt
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
-  WHERE p.isHidden == 0
   GROUP BY f.id
 
   UNION ALL
@@ -132,7 +129,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fg.feedIds,
     COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
                 FROM feed
@@ -147,7 +144,6 @@ FROM (
     fg.updatedAt
   FROM feedGroup fg
   LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
-  WHERE p.isHidden == 0
   GROUP BY fg.id
 )
 ORDER BY type DESC,
