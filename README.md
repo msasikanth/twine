@@ -14,16 +14,32 @@ user interface and experience to browse through the feeds, and supports Material
 
 ## Screenshots
 
+### Light
 <p style="text-align: center;">
-  <img src="readme_images/home.png" width="250" alt="Home Screen"/>
-  <img src="readme_images/home_scrolled.png" width="250" alt="Home Screen Scrolled"/>
-  <img src="readme_images/feeds_sheet.png" width="250" alt="Feeds Sheet"/>
-  <img src="readme_images/feeds_sheet_add_feed.png" width="250" alt="Add Feed"/>
-  <img src="readme_images/feeds_sheet_edit.png" width="250" alt="Edit Feeds"/>
-  <img src="readme_images/search.png" width="250" alt="Search Screen"/>
-  <img src="readme_images/bookmarks.png" width="250" alt="Bookmarks Screen"/>
-  <img src="readme_images/settings.png" width="250" alt="Settings Screen"/>
-  <img src="readme_images/reader_screen.png" width="250" alt="Reader Screen"/>
+  <img src="readme_images/light/home_screen.png" width="250" alt="Home screen"/>
+  <img src="readme_images/light/home_screen_filters.png" width="250" alt="Home screen filters"/>
+  <img src="readme_images/light/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
+  <img src="readme_images/light/reader_screen.png" width="250" alt="Reader screen"/>
+  <img src="readme_images/light/search_screen.png" width="250" alt="Search screen"/>
+  <img src="readme_images/light/settings_1.png" width="250" alt="Settings screen 1"/>
+  <img src="readme_images/light/settings_2.png" width="250" alt="Settings screen 2"/>
+  <img src="readme_images/light/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
+  <img src="readme_images/light/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
+  <img src="readme_images/light/add_feed.png" width="250" alt="Add feed screen"/>
+</p>
+
+### Dark
+<p style="text-align: center;">
+  <img src="readme_images/dark/home_screen.png" width="250" alt="Home screen"/>
+  <img src="readme_images/dark/home_screen_filters.png" width="250" alt="Home screen filters"/>
+  <img src="readme_images/dark/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
+  <img src="readme_images/dark/reader_screen.png" width="250" alt="Reader screen"/>
+  <img src="readme_images/dark/search_screen.png" width="250" alt="Search screen"/>
+  <img src="readme_images/dark/settings_1.png" width="250" alt="Settings screen 1"/>
+  <img src="readme_images/dark/settings_2.png" width="250" alt="Settings screen 2"/>
+  <img src="readme_images/dark/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
+  <img src="readme_images/dark/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
+  <img src="readme_images/dark/add_feed.png" width="250" alt="Add feed screen"/>
 </p>
 
 ## Features ✨
