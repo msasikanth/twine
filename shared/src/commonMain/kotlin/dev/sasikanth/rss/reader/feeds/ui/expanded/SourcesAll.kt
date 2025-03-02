@@ -207,7 +207,9 @@ internal fun AllFeedsHeader(
 
     Row(
       modifier =
-        Modifier.clearAndSetSemantics { contentDescription = "${allFeedsLabel}: ${feedsCount}" }
+        Modifier.weight(1f).clearAndSetSemantics {
+          contentDescription = "${allFeedsLabel}: ${feedsCount}"
+        }
     ) {
       Text(
         text = allFeedsLabel,
@@ -218,7 +220,6 @@ internal fun AllFeedsHeader(
       Spacer(Modifier.requiredWidth(8.dp))
 
       Text(
-        modifier = Modifier.weight(1f),
         text = feedsCount.toString(),
         style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.tintedForeground,
