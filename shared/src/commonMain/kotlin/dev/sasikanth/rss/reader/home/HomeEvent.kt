@@ -52,4 +52,10 @@ sealed interface HomeEvent {
   data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : HomeEvent
 
   data class MarkPostsAsRead(val source: Source?) : HomeEvent
+
+  data class OnPostItemsScrolled(val postIds: List<String>) : HomeEvent
+
+  data object MarkScrolledPostsAsRead : HomeEvent
+
+  data class MarkFeaturedPostsAsRead(val postId: String) : HomeEvent
 }

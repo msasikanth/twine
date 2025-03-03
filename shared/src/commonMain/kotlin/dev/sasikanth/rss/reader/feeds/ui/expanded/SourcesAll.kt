@@ -42,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -201,21 +203,28 @@ internal fun AllFeedsHeader(
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
+    val allFeedsLabel = LocalStrings.current.allFeeds
 
-    Text(
-      text = LocalStrings.current.allFeeds,
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
-    )
+    Row(
+      modifier =
+        Modifier.weight(1f).clearAndSetSemantics {
+          contentDescription = "${allFeedsLabel}: ${feedsCount}"
+        }
+    ) {
+      Text(
+        text = allFeedsLabel,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+      )
 
-    Spacer(Modifier.requiredWidth(8.dp))
+      Spacer(Modifier.requiredWidth(8.dp))
 
-    Text(
-      modifier = Modifier.weight(1f),
-      text = feedsCount.toString(),
-      style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.tintedForeground,
-    )
+      Text(
+        text = feedsCount.toString(),
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.tintedForeground,
+      )
+    }
 
     Spacer(Modifier.requiredWidth(12.dp))
 

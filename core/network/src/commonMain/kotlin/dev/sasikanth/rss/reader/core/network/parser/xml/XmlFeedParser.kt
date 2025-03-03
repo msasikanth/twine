@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.core.network.parser
+package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -33,7 +33,7 @@ import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
-class FeedParser(private val dispatchersProvider: DispatchersProvider) {
+class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
 
   suspend fun parse(
     content: ByteReadChannel,
@@ -111,10 +111,6 @@ class FeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val ATTR_VALUE_IMAGE = "image/jpeg"
 
     fun cleanText(text: String?) = text?.replace(htmlTag, "")?.replace(blankLine, "")?.trim()
-
-    fun fallbackFeedIcon(host: String): String {
-      return "https://icon.horse/icon/$host"
-    }
   }
 }
 

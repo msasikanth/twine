@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.core.network.parser
+package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-abstract class ContentParser {
+abstract class XmlContentParser {
 
   abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 

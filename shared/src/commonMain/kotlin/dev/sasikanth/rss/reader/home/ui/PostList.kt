@@ -44,6 +44,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
@@ -93,7 +95,7 @@ internal fun PostsList(
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
   ) {
     if (featuredPosts.isNotEmpty()) {
-      item {
+      item(contentType = "featured_items") {
         FeaturedSection(
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
@@ -108,7 +110,11 @@ internal fun PostsList(
       }
     }
 
-    items(posts.itemCount) { index ->
+    items(
+      count = posts.itemCount,
+      key = { index -> posts.peek(index)?.id ?: index },
+      contentType = { "post_item" }
+    ) { index ->
       val post = posts[index]
       if (post != null) {
         PostListItem(
@@ -156,6 +162,7 @@ fun PostListItem(
           if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
           else Constants.ITEM_UNREAD_ALPHA
         )
+        .semantics { contentDescription = item.title.ifBlank { item.description } }
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp),

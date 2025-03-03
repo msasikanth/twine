@@ -21,6 +21,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -114,7 +115,8 @@ class SettingsPresenter(
           settingsRepository.showReaderView,
           settingsRepository.appThemeMode,
           settingsRepository.enableAutoSync,
-          settingsRepository.showFeedFavIcon
+          settingsRepository.showFeedFavIcon,
+          settingsRepository.markAsReadOn
         ) {
           browserType,
           showUnreadPostsCount,
@@ -122,7 +124,8 @@ class SettingsPresenter(
           showReaderView,
           appThemeMode,
           enableAutoSync,
-          showFeedFavIcon ->
+          showFeedFavIcon,
+          markAsReadOn ->
           Settings(
             browserType = browserType,
             showUnreadPostsCount = showUnreadPostsCount,
@@ -131,6 +134,7 @@ class SettingsPresenter(
             appThemeMode = appThemeMode,
             enableAutoSync = enableAutoSync,
             showFeedFavIcon = showFeedFavIcon,
+            markAsReadOn = markAsReadOn,
           )
         }
         .onEach { settings ->
@@ -143,6 +147,7 @@ class SettingsPresenter(
               appThemeMode = settings.appThemeMode,
               enableAutoSync = settings.enableAutoSync,
               showFeedFavIcon = settings.showFeedFavIcon,
+              markAsReadOn = settings.markAsReadOn
             )
           }
         }
@@ -179,7 +184,12 @@ class SettingsPresenter(
         SettingsEvent.BlockedWordsClicked -> {
           // no-op
         }
+        is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       }
+    }
+
+    private fun markAsReadOnChanged(markAsReadOn: MarkAsReadOn) {
+      coroutineScope.launch { settingsRepository.updateMarkAsReadOn(markAsReadOn) }
     }
 
     private fun toggleShowFeedFavIcon(value: Boolean) {
@@ -236,4 +246,5 @@ private data class Settings(
   val appThemeMode: AppThemeMode,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
+  val markAsReadOn: MarkAsReadOn,
 )
