@@ -92,7 +92,7 @@ internal fun BookmarksScreen(
           title = { Text(LocalStrings.current.bookmarks) },
           navigationIcon = {
             IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
-              Icon(TwineIcons.ArrowBack, contentDescription = null)
+              Icon(TwineIcons.ArrowBack, contentDescription = LocalStrings.current.buttonGoBack)
             }
           },
           colors =

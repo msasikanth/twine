@@ -20,12 +20,13 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATOM_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_HREF
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.ATTR_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.RSS_MEDIA_TYPE
-import dev.sasikanth.rss.reader.core.network.parser.FeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.RSS_MEDIA_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import io.ktor.client.HttpClient
@@ -33,6 +34,7 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
@@ -60,7 +62,11 @@ import rhodium.nostr.client.RequestMessage
 import rhodium.nostr.relay.Relay
 
 @Inject
-class FeedFetcher(private val httpClient: HttpClient, private val feedParser: FeedParser) {
+class FeedFetcher(
+  private val httpClient: HttpClient,
+  private val xmlFeedParser: XmlFeedParser,
+  private val jsonFeedParser: JsonFeedParser,
+) {
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
@@ -127,23 +133,43 @@ class FeedFetcher(private val httpClient: HttpClient, private val feedParser: Fe
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    if (response.contentType()?.withoutParameters() != ContentType.Text.Html) {
-      val content = response.bodyAsChannel()
-      val responseCharset = response.contentType()?.parameter("charset")
-      val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
+    val contentType = response.contentType()?.withoutParameters()
 
-      val feedPayload = feedParser.parse(feedUrl = url, content = content, charset = charset)
+    when (contentType) {
+      ContentType.Text.Html -> {
+        val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
 
-      return FeedFetchResult.Success(feedPayload)
+        if (feedUrl != url && !feedUrl.isNullOrBlank()) {
+          return fetch(url = feedUrl, redirectCount = redirectCount + 1)
+        }
+      }
+
+      // There are scenarios where a feed doesn't have any content-type, rare, but it's possible
+      // in those scenarios we default to trying to parse them as XML and if it fails, it fails.
+      ContentType.Application.Atom,
+      ContentType.Application.Rss,
+      ContentType.Application.Xml,
+      ContentType.Text.Xml,
+      null -> {
+        val content = response.bodyAsChannel()
+        val responseCharset = response.contentType()?.parameter("charset")
+        val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
+
+        val feedPayload = xmlFeedParser.parse(feedUrl = url, content = content, charset = charset)
+
+        return FeedFetchResult.Success(feedPayload)
+      }
+      ContentType.Application.Json -> {
+        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform
+        //  streaming
+        val content = response.bodyAsText()
+        val feedPayload = jsonFeedParser.parse(content = content, feedUrl = url)
+
+        return FeedFetchResult.Success(feedPayload)
+      }
     }
 
-    val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
-
-    if (feedUrl != url && !feedUrl.isNullOrBlank()) {
-      return fetch(url = feedUrl, redirectCount = redirectCount + 1)
-    }
-
-    throw UnsupportedOperationException()
+    throw UnsupportedOperationException("Unsupported content type: $contentType")
   }
 
   private suspend fun handleHttpRedirect(

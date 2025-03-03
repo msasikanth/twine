@@ -48,6 +48,7 @@ data class TwineStrings(
   val searchSortOldestFirst: String,
   val searchResultsCount: (Int) -> String,
   val bookmark: String,
+  val unBookmark: String,
   val bookmarks: String,
   val bookmarksPlaceholder: String,
   val settings: String,
@@ -164,6 +165,9 @@ data class TwineStrings(
   val blockedWordsHint: String,
   val blockedWordsDesc: String,
   val blockedWordsEmpty: String,
+  val markArticleAsRead: String,
+  val markArticleAsReadOnOpen: String,
+  val markArticleAsReadOnScroll: String,
 )
 
 object Locales {

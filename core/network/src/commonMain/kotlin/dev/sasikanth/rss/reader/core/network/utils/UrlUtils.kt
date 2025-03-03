@@ -22,6 +22,10 @@ import io.ktor.http.set
 
 object UrlUtils {
 
+  fun fallbackFeedIcon(host: String): String {
+    return "https://icon.horse/icon/$host"
+  }
+
   fun extractHost(urlString: String): String {
     val host =
       if (urlString.startsWith("http://") || urlString.startsWith("https://")) {

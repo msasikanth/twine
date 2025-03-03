@@ -32,6 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -64,11 +68,17 @@ internal fun BottomSheetCollapsedContent(
             1f to Color.Transparent
           )
 
+        val allFeedsLabel = LocalStrings.current.allFeeds
+
         HomeBottomBarItem(
           selected = activeSource == null,
           onClick = onHomeSelected,
           modifier =
-            Modifier.drawWithCache {
+            Modifier.clearAndSetSemantics {
+                contentDescription = allFeedsLabel
+                role = Role.Button
+              }
+              .drawWithCache {
                 onDrawBehind {
                   val brush =
                     Brush.horizontalGradient(

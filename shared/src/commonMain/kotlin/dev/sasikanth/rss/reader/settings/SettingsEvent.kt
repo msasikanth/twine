@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.settings
 
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 
 sealed interface SettingsEvent {
@@ -46,4 +47,6 @@ sealed interface SettingsEvent {
   data class OnAppThemeModeChanged(val appThemeMode: AppThemeMode) : SettingsEvent
 
   data object BlockedWordsClicked : SettingsEvent
+
+  data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 }

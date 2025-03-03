@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -55,10 +56,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -178,6 +178,7 @@ class HomePresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    private val scrolledPostItems = mutableSetOf<String>()
 
     private val _state = MutableStateFlow(HomeState.DEFAULT)
     val state: StateFlow<HomeState> =
@@ -215,7 +216,35 @@ class HomePresenter(
         is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
         is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
         is HomeEvent.MarkPostsAsRead -> markPostsAsRead(event.source)
+        is HomeEvent.OnPostItemsScrolled -> onPostItemsScrolled(event.postIds)
+        HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
+        is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
       }
+    }
+
+    private fun markFeaturedPostAsRead(postId: String) {
+      coroutineScope.launch {
+        val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
+
+        if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
+
+        rssRepository.updatePostReadStatus(read = true, id = postId)
+      }
+    }
+
+    private fun markScrolledPostsAsRead() {
+      coroutineScope.launch {
+        val markPostsAsReadOn = settingsRepository.markAsReadOn.first()
+
+        if (markPostsAsReadOn != MarkAsReadOn.Scroll) return@launch
+
+        rssRepository.markPostsAsRead(postIds = scrolledPostItems)
+        scrolledPostItems.clear()
+      }
+    }
+
+    private fun onPostItemsScrolled(postIds: List<String>) {
+      scrolledPostItems += postIds
     }
 
     private fun markPostsAsRead(source: Source?) {

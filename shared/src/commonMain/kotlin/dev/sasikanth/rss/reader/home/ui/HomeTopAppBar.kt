@@ -65,6 +65,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -373,14 +377,15 @@ private fun OverflowMenu(
         onDismissRequest = { dropdownExpanded = false }
       ) {
         if (hasUnreadPosts) {
+          val markAllAsReadLabel = LocalStrings.current.markAllAsRead
           DropdownMenuItem(
-            text = { Text(text = LocalStrings.current.markAllAsRead) },
-            leadingIcon = {
-              Icon(
-                imageVector = Icons.Filled.DoneAll,
-                contentDescription = LocalStrings.current.markAllAsRead
-              )
-            },
+            modifier =
+              Modifier.clearAndSetSemantics {
+                role = Role.Button
+                contentDescription = markAllAsReadLabel
+              },
+            text = { Text(text = markAllAsReadLabel) },
+            leadingIcon = { Icon(imageVector = Icons.Filled.DoneAll, contentDescription = null) },
             onClick = {
               dropdownExpanded = false
               onMarkAllAsRead()
@@ -394,14 +399,15 @@ private fun OverflowMenu(
           )
         }
 
+        val settingsLabel = LocalStrings.current.settings
         DropdownMenuItem(
-          text = { Text(text = LocalStrings.current.settings) },
-          leadingIcon = {
-            Icon(
-              imageVector = Icons.Rounded.Settings,
-              contentDescription = LocalStrings.current.settings
-            )
-          },
+          modifier =
+            Modifier.clearAndSetSemantics {
+              role = Role.Button
+              contentDescription = settingsLabel
+            },
+          text = { Text(text = settingsLabel) },
+          leadingIcon = { Icon(imageVector = Icons.Rounded.Settings, contentDescription = null) },
           onClick = {
             dropdownExpanded = false
             onSettingsClicked()

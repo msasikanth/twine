@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
+import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

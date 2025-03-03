@@ -3,9 +3,7 @@
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
-![banner](./readme_images/banner.png)
-
-Twine is a multiplatform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
+Twine is a cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
 user interface and experience to browse through the feeds, and supports Material 3 content based 
 [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color).
 
@@ -16,24 +14,40 @@ user interface and experience to browse through the feeds, and supports Material
 
 ## Screenshots
 
+### Light
 <p style="text-align: center;">
-  <img src="readme_images/home.png" width="250" alt="Home Screen"/>
-  <img src="readme_images/home_scrolled.png" width="250" alt="Home Screen Scrolled"/>
-  <img src="readme_images/feeds_sheet.png" width="250" alt="Feeds Sheet"/>
-  <img src="readme_images/feeds_sheet_add_feed.png" width="250" alt="Add Feed"/>
-  <img src="readme_images/feeds_sheet_edit.png" width="250" alt="Edit Feeds"/>
-  <img src="readme_images/search.png" width="250" alt="Search Screen"/>
-  <img src="readme_images/bookmarks.png" width="250" alt="Bookmarks Screen"/>
-  <img src="readme_images/settings.png" width="250" alt="Settings Screen"/>
-  <img src="readme_images/reader_screen.png" width="250" alt="Reader Screen"/>
+  <img src="readme_images/light/home_screen.png" width="250" alt="Home screen"/>
+  <img src="readme_images/light/home_screen_filters.png" width="250" alt="Home screen filters"/>
+  <img src="readme_images/light/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
+  <img src="readme_images/light/reader_screen.png" width="250" alt="Reader screen"/>
+  <img src="readme_images/light/search_screen.png" width="250" alt="Search screen"/>
+  <img src="readme_images/light/settings_1.png" width="250" alt="Settings screen 1"/>
+  <img src="readme_images/light/settings_2.png" width="250" alt="Settings screen 2"/>
+  <img src="readme_images/light/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
+  <img src="readme_images/light/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
+  <img src="readme_images/light/add_feed.png" width="250" alt="Add feed screen"/>
+</p>
+
+### Dark
+<p style="text-align: center;">
+  <img src="readme_images/dark/home_screen.png" width="250" alt="Home screen"/>
+  <img src="readme_images/dark/home_screen_filters.png" width="250" alt="Home screen filters"/>
+  <img src="readme_images/dark/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
+  <img src="readme_images/dark/reader_screen.png" width="250" alt="Reader screen"/>
+  <img src="readme_images/dark/search_screen.png" width="250" alt="Search screen"/>
+  <img src="readme_images/dark/settings_1.png" width="250" alt="Settings screen 1"/>
+  <img src="readme_images/dark/settings_2.png" width="250" alt="Settings screen 2"/>
+  <img src="readme_images/dark/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
+  <img src="readme_images/dark/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
+  <img src="readme_images/dark/add_feed.png" width="250" alt="Add feed screen"/>
 </p>
 
 ## Features ✨
 
-- Supports RSS & Atom feeds
-- Feed management: Add, Edit & Pin feeds
+- Supports **RDF**, **RSS**, **Atom** and **JSON** feeds
+- Feed management: Add, Edit, Remove & Pin feeds
 - Feed grouping
-- Access to pinned feeds/groups from bottom bar
+- Access to pinned feeds/groups from bottom bar in the home screen
 - Smart fetching: Twine looks for feeds when given any website homepage
 - Article shortcut to fetch full article in reader view
 - Bookmark posts to read later
@@ -69,7 +83,7 @@ You can contribute bug fixes to the project via PRs, for anything else open an i
 This project uses ktfmt, provided via the spotless gradle plugin, and the bundled project IntelliJ codestyle. Run
 `./gradlew spotlessApply` to format the code before raising a PR.
 
-## Made by ❤️
+## Made with 💖 by
 
 - [Sasikanth Miriyampalli](https://www.sasikanth.dev) / Development
 - [Eduardo Pratti](https://twitter.com/edpratti) / Design
