@@ -172,7 +172,7 @@ internal fun HomeScreen(
     snapshotFlow { featuredPostsPagerState.settledPage }
       .debounce(2.seconds)
       .collect {
-        val featuredPost = state.featuredPosts?.get(it) ?: return@collect
+        val featuredPost = state.featuredPosts?.getOrNull(it) ?: return@collect
 
         if (featuredPost.postWithMetadata.read) return@collect
 
