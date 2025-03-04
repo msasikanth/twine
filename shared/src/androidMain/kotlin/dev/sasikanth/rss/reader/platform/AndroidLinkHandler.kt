@@ -32,10 +32,15 @@ import me.tatarka.inject.annotations.Inject
 class AndroidLinkHandler(
   private val activity: ComponentActivity,
   private val settingsRepository: SettingsRepository
-) : LinkHandler {
+) : LinkHandler() {
 
   override suspend fun openLink(link: String?) {
     if (link.isNullOrBlank()) return
+
+    if (isYouTubeLink(link)) {
+      openDefaultBrowserIfExists(link)
+      return
+    }
 
     val browserType = settingsRepository.browserType.first()
     when (browserType) {

@@ -34,13 +34,18 @@ import platform.darwin.dispatch_get_main_queue
 class IOSLinkHandler(
   private val uiViewControllerProvider: () -> UIViewController,
   private val settingsRepository: SettingsRepository,
-) : LinkHandler {
+) : LinkHandler() {
 
   override suspend fun openLink(link: String?) {
     if (link.isNullOrBlank()) return
 
-    val browserType = settingsRepository.browserType.first()
     val url = NSURL(string = link)
+    if (!isYouTubeLink(link)) {
+      openBrowser(url)
+      return
+    }
+
+    val browserType = settingsRepository.browserType.first()
 
     when (browserType) {
       BrowserType.Default -> {

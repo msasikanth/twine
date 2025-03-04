@@ -268,6 +268,11 @@ class AppPresenter(
 
   private fun openPost(post: PostWithMetadata) {
     scope.launch {
+      if (linkHandler.isYouTubeLink(post.link)) {
+        linkHandler.openLink(post.link)
+        return@launch
+      }
+
       val showReaderView =
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 

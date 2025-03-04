@@ -18,8 +18,18 @@ package dev.sasikanth.rss.reader.platform
 
 import androidx.compose.runtime.staticCompositionLocalOf
 
-interface LinkHandler {
-  suspend fun openLink(link: String?)
+abstract class LinkHandler {
+  abstract suspend fun openLink(link: String?)
+
+  fun isYouTubeLink(url: String): Boolean {
+    val youtubeRegex = Regex(
+      "(?:https?:)?(?://)?" +
+          "(?:(?:www|m)\\.)?(?:youtube\\.com|youtu\\.be)" +
+          "(?:/(?:[\\w\\-]+\\?v=|embed/|v/)?([\\w\\-]+)(?:\\S+)?)?"
+    )
+
+    return youtubeRegex.matches(url)
+  }
 }
 
 val LocalLinkHandler =
