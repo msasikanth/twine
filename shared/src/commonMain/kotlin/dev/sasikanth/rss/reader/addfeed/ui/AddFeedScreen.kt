@@ -20,7 +20,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -68,13 +67,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -93,14 +90,12 @@ import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
   val state by presenter.state.collectAsState()
   val strings = LocalStrings.current
   val snackbarHostState = remember { SnackbarHostState() }
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
-  val focusManager = LocalFocusManager.current
 
   LaunchedEffect(Unit) {
     feedLinkFocus.requestFocus()
@@ -304,7 +299,7 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TextField(
+private fun TextField(
   input: TextFieldValue,
   hint: String,
   onValueChange: (TextFieldValue) -> Unit,

@@ -16,6 +16,11 @@
 
 package dev.sasikanth.rss.reader.blockedwords
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,10 +31,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -39,6 +45,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,7 +64,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.addfeed.ui.TextField
 import dev.sasikanth.rss.reader.core.model.local.BlockedWord
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
@@ -113,10 +120,9 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
       }
 
       TextField(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-        input = newBlockedWord,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).requiredHeight(56.dp),
+        value = newBlockedWord,
         onValueChange = { newBlockedWord = it },
-        hint = LocalStrings.current.blockedWordsHint,
         keyboardOptions =
           KeyboardOptions(
             autoCorrectEnabled = false,
@@ -130,20 +136,53 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
               newBlockedWord = TextFieldValue()
             }
           ),
+        singleLine = true,
+        textStyle = MaterialTheme.typography.labelLarge,
+        shape = RoundedCornerShape(16.dp),
+        enabled = true,
+        colors =
+          TextFieldDefaults.colors(
+            unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+            focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+            disabledContainerColor = AppTheme.colorScheme.surfaceContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
+            cursorColor = AppTheme.colorScheme.tintedHighlight,
+            selectionColors =
+              TextSelectionColors(
+                handleColor = AppTheme.colorScheme.tintedHighlight,
+                backgroundColor = AppTheme.colorScheme.tintedHighlight.copy(0.4f)
+              )
+          ),
+        placeholder = {
+          Text(
+            text = LocalStrings.current.blockedWordsHint,
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisHigh
+          )
+        },
         trailingIcon = {
-          IconButton(
-            enabled = newBlockedWord.text.isNotBlank(),
-            onClick = {
-              presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
-              newBlockedWord = TextFieldValue()
-            }
+          val hasContent = newBlockedWord.text.isNotBlank()
+          AnimatedVisibility(
+            visible = hasContent,
+            enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
+            exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start)
           ) {
-            Icon(
-              imageVector = Icons.Rounded.Check,
-              contentDescription = LocalStrings.current.buttonAdd
-            )
+            IconButton(
+              onClick = {
+                presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+                newBlockedWord = TextFieldValue()
+              }
+            ) {
+              Icon(
+                imageVector = Icons.Rounded.Check,
+                contentDescription = LocalStrings.current.buttonAdd
+              )
+            }
           }
-        }
+        },
       )
 
       Spacer(Modifier.requiredHeight(16.dp))
