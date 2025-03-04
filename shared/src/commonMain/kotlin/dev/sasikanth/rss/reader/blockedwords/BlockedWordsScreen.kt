@@ -16,6 +16,11 @@
 
 package dev.sasikanth.rss.reader.blockedwords
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -159,17 +164,23 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           )
         },
         trailingIcon = {
-          IconButton(
-            enabled = newBlockedWord.text.isNotBlank(),
-            onClick = {
-              presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
-              newBlockedWord = TextFieldValue()
-            }
+          val hasContent = newBlockedWord.text.isNotBlank()
+          AnimatedVisibility(
+            visible = hasContent,
+            enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
+            exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start)
           ) {
-            Icon(
-              imageVector = Icons.Rounded.Check,
-              contentDescription = LocalStrings.current.buttonAdd
-            )
+            IconButton(
+              onClick = {
+                presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+                newBlockedWord = TextFieldValue()
+              }
+            ) {
+              Icon(
+                imageVector = Icons.Rounded.Check,
+                contentDescription = LocalStrings.current.buttonAdd
+              )
+            }
           }
         },
       )
