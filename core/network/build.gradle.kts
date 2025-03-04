@@ -48,6 +48,8 @@ kotlin {
       implementation(libs.kermit)
       implementation(libs.crashkios.bugsnag)
       api(libs.korlibs.string)
+      // Nostr
+      implementation("io.github.kotlingeekdev:rhodium:1.0-beta-17")
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
