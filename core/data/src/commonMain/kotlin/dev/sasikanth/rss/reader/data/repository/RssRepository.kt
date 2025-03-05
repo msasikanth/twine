@@ -169,13 +169,14 @@ class RssRepository(
   }
 
   fun featuredPosts(
-    selectedFeedId: String?,
+    activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST
   ): Flow<List<PostWithMetadata>> {
     return postQueries
       .featuredPosts(
-        sourceId = selectedFeedId,
+        isSourceIdsEmpty = activeSourceIds.isEmpty(),
+        sourceIds = activeSourceIds,
         unreadOnly = unreadOnly,
         postsAfter = after,
         limit = NUMBER_OF_FEATURED_POSTS,
@@ -186,7 +187,7 @@ class RssRepository(
   }
 
   fun posts(
-    selectedFeedId: String?,
+    activeSourceIds: List<String>,
     featuredPostsIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
@@ -194,7 +195,8 @@ class RssRepository(
     return QueryPagingSource(
       countQuery =
         postQueries.count(
-          sourceId = selectedFeedId,
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
           featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
@@ -203,7 +205,8 @@ class RssRepository(
       context = ioDispatcher,
       queryProvider = { limit, offset ->
         postQueries.posts(
-          sourceId = selectedFeedId,
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
           featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
@@ -890,11 +893,15 @@ class RssRepository(
   }
 
   fun hasUnreadPostsInSource(
-    sourceId: String?,
+    activeSourceIds: List<String>,
     postsAfter: Instant = Instant.DISTANT_PAST
   ): Flow<Boolean> {
     return postQueries
-      .unreadPostsCountInSource(sourceId = sourceId, after = postsAfter)
+      .unreadPostsCountInSource(
+        isSourceIdsEmpty = activeSourceIds.isEmpty(),
+        sourceIds = activeSourceIds,
+        after = postsAfter
+      )
       .asFlow()
       .mapToOne(ioDispatcher)
       .map { it > 0 }

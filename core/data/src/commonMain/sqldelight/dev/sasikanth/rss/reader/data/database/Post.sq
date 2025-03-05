@@ -65,22 +65,17 @@ UPDATE SET
     read = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.read ELSE read END;
 
 count:
-SELECT COUNT(DISTINCT post.id) FROM post
-LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
+SELECT COUNT(post.id) FROM post
 WHERE
+  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (
-    :sourceId IS NULL OR
-    post.sourceId = :sourceId OR
-    feedGroup.id = :sourceId
-  ) AND
   post.id NOT IN :featuredPosts AND
   post.date > :postsAfter
 ORDER BY post.date DESC;
 
 featuredPosts:
-SELECT DISTINCT
+SELECT
   post.id,
   sourceId,
   post.title,
@@ -95,21 +90,16 @@ SELECT DISTINCT
   feed.icon AS feedIcon
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
-LEFT JOIN  feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (
-    :sourceId IS NULL OR
-    post.sourceId = :sourceId OR
-    feedGroup.id = :sourceId
-  ) AND
   post.imageUrl IS NOT NULL AND
   post.date > :postsAfter
 ORDER BY post.date DESC LIMIT :limit;
 
 posts:
-SELECT DISTINCT
+SELECT
   post.id,
   sourceId,
   post.title,
@@ -124,15 +114,10 @@ SELECT DISTINCT
   feed.icon AS feedIcon
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
-LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  (
-    :sourceId IS NULL OR
-    post.sourceId = :sourceId OR
-    feedGroup.id = :sourceId
-  ) AND
   post.id NOT IN :featuredPosts AND
   post.date > :postsAfter
 ORDER BY post.date DESC
@@ -163,13 +148,8 @@ SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
 
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
-LEFT JOIN feedGroup ON INSTR(feedGroup.feedIds, post.sourceId)
 WHERE
+  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   read != 1 AND
-  date > :after AND
-  (
-    :sourceId IS NULL OR
-    post.sourceId = :sourceId OR
-    feedGroup.id = :sourceId
-  );
+  date > :after;
