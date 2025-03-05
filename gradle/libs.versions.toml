@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.1.10"
-android_gradle_plugin = "8.8.2"
+android_gradle_plugin = "8.9.0"
 compose = "1.8.0-alpha03"
 compose_material_icons_extended = "1.7.3"
 
@@ -47,7 +47,7 @@ ktxml = "0.3.2"
 webview = "1.9.40"
 uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
-bugsnag = "6.12.0"
+bugsnag = "6.12.1"
 crashkios-bugsnag = "0.9.0"
 kermit = "2.0.5"
 reorderable = "2.4.3"
