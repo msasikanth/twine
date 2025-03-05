@@ -100,6 +100,9 @@ class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
     internal const val TAG_COMMENTS = "comments"
     internal const val TAG_FEED_IMAGE = "image"
     internal const val TAG_ICON = "icon"
+    internal const val TAG_MEDIA_GROUP = "media:group"
+    internal const val TAG_MEDIA_CONTENT = "media:description"
+    internal const val TAG_MEDIA_THUMBNAIL = "media:thumbnail"
 
     internal const val ATTR_URL = "url"
     internal const val ATTR_TYPE = "type"
