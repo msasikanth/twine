@@ -70,8 +70,7 @@ class FeedFetcher(
     return try {
       if (url.isNostrUri()) {
         NostrFeedParser.fetchFeed(url, httpClient)
-      }
-      else {
+      } else {
         val transformedUrl = buildFeedUrl(url)
         val response = httpClient.get(transformedUrl.toString())
 
