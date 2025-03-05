@@ -22,6 +22,17 @@ import io.ktor.http.set
 
 object UrlUtils {
 
+  fun isYouTubeLink(url: String): Boolean {
+    val youtubeRegex =
+      Regex(
+        "(?:https?:)?(?://)?" +
+          "(?:(?:www|m)\\.)?(?:youtube\\.com|youtu\\.be)" +
+          "(?:/(?:[\\w\\-]+\\?v=|embed/|v/)?([\\w\\-]+)(?:\\S+)?)?"
+      )
+
+    return youtubeRegex.matches(url)
+  }
+
   fun fallbackFeedIcon(host: String): String {
     return "https://icon.horse/icon/$host"
   }
