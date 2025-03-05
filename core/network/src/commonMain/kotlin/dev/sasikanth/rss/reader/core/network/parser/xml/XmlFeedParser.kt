@@ -33,7 +33,12 @@ import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
 
 @Inject
-class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
+class XmlFeedParser(
+  private val dispatchersProvider: DispatchersProvider,
+  private val rssContentParser: RSSContentParser,
+  private val atomContentParser: AtomContentParser,
+  private val rdfContentParser: RDFContentParser,
+) {
 
   suspend fun parse(
     content: ByteReadChannel,
@@ -51,9 +56,9 @@ class XmlFeedParser(private val dispatchersProvider: DispatchersProvider) {
         parser.nextTag()
 
         return@withContext when (parser.name) {
-          RDF_TAG -> RDFContentParser.parse(feedUrl, parser)
-          RSS_TAG -> RSSContentParser.parse(feedUrl, parser)
-          ATOM_TAG -> AtomContentParser.parse(feedUrl, parser)
+          RDF_TAG -> rdfContentParser.parse(feedUrl, parser)
+          RSS_TAG -> rssContentParser.parse(feedUrl, parser)
+          ATOM_TAG -> atomContentParser.parse(feedUrl, parser)
           HTML_TAG -> throw HtmlContentException()
           else -> throw UnsupportedOperationException("Unknown feed type: ${parser.name}")
         }
