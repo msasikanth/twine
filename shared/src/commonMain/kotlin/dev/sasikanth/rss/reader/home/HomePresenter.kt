@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.SourceType.*
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -312,9 +313,10 @@ class HomePresenter(
         }
         .flatMapLatest { (activeSource, postsType) ->
           val postsAfter = getPostsAfter(postsType)
+          val activeSourceIds = activeSourceIds(activeSource)
 
           rssRepository.hasUnreadPostsInSource(
-            sourceId = activeSource?.id,
+            activeSourceIds = activeSourceIds,
             postsAfter = postsAfter,
           )
         }
@@ -359,10 +361,12 @@ class HomePresenter(
             }
         }
         .onEach { (activeSource, postsAfter, unreadOnly, featuredPosts) ->
+          val activeSourceIds = activeSourceIds(activeSource)
+
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
                 rssRepository.posts(
-                  selectedFeedId = activeSource?.id,
+                  activeSourceIds = activeSourceIds,
                   featuredPostsIds = featuredPosts.map { it.postWithMetadata.id },
                   unreadOnly = unreadOnly,
                   after = postsAfter,
@@ -412,10 +416,12 @@ class HomePresenter(
       activeSource: Source?,
       unreadOnly: Boolean?,
       postsAfter: Instant
-    ) =
-      rssRepository
+    ): Flow<List<FeaturedPostItem>> {
+      val activeSourceIds = activeSourceIds(activeSource)
+
+      return rssRepository
         .featuredPosts(
-          selectedFeedId = activeSource?.id,
+          activeSourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           after = postsAfter
         )
@@ -427,6 +433,14 @@ class HomePresenter(
             )
           }
         }
+    }
+
+    private fun activeSourceIds(activeSource: Source?) =
+      when (activeSource) {
+        is Feed -> listOf(activeSource.id)
+        is FeedGroup -> activeSource.feedIds
+        else -> emptyList()
+      }
 
     private fun feedsSheetStateChanged(feedsSheetState: SheetValue) {
       _state.update {
