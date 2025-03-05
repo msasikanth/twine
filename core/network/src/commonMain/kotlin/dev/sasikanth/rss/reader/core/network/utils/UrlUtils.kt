@@ -59,4 +59,6 @@ object UrlUtils {
     val pattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
     return pattern.containsMatchIn(url)
   }
+
+  fun String.isNostrUri(): Boolean = startsWith("nostr:")
 }
