@@ -52,12 +52,14 @@ class FeedFetcher(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
+  private val networkDispatcher = dispatchersProvider.io.limitedParallelism(10)
+
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
   suspend fun fetch(url: String): FeedFetchResult {
-    return withContext(dispatchersProvider.io) { fetch(url, redirectCount = 0) }
+    return withContext(networkDispatcher) { fetch(url, redirectCount = 0) }
   }
 
   private suspend fun fetch(
