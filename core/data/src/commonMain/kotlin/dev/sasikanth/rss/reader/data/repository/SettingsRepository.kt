@@ -75,7 +75,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val appThemeMode: Flow<AppThemeMode> =
     dataStore.data.map { preferences ->
-      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Dark
+      mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
     }
 
   val enableAutoSync: Flow<Boolean> =
