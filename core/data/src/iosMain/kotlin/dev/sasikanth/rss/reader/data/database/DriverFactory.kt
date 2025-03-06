@@ -20,6 +20,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import app.cash.sqldelight.driver.native.wrapConnection
 import co.touchlab.sqliter.DatabaseConfiguration
+import co.touchlab.sqliter.JournalMode
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Inject
 
@@ -32,6 +33,7 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
       DatabaseConfiguration(
         name = DB_NAME,
         version = ReaderDatabase.Schema.version.toInt(),
+        journalMode = JournalMode.WAL,
         create = { connection -> wrapConnection(connection) { ReaderDatabase.Schema.create(it) } },
         upgrade = { connection, oldVersion, newVersion ->
           wrapConnection(connection) {
