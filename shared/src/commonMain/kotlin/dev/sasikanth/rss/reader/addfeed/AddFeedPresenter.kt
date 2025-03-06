@@ -139,7 +139,7 @@ class AddFeedPresenter(
       coroutineScope.launch {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
         try {
-          when (val feedAddResult = rssRepository.addFeed(feedLink, title)) {
+          when (val feedAddResult = rssRepository.fetchAndAddFeed(feedLink, title)) {
             is FeedAddResult.DatabaseError -> handleDatabaseErrors(feedAddResult, feedLink)
             is FeedAddResult.HttpStatusError -> handleHttpStatusErrors(feedAddResult)
             is FeedAddResult.NetworkError -> handleNetworkErrors(feedAddResult, feedLink)
