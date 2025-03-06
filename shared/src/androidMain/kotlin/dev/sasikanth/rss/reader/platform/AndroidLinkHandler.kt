@@ -37,20 +37,24 @@ class AndroidLinkHandler(
   override suspend fun openLink(link: String?) {
     if (link.isNullOrBlank()) return
 
-    val browserType = settingsRepository.browserType.first()
-    when (browserType) {
-      BrowserType.Default -> {
-        openDefaultBrowserIfExists(link)
+    try {
+      val browserType = settingsRepository.browserType.first()
+      when (browserType) {
+        BrowserType.Default -> {
+          openDefaultBrowserIfExists(link)
+        }
+        BrowserType.InApp -> {
+          openCustomTab(link)
+        }
       }
-      BrowserType.InApp -> {
-        openCustomTab(link)
-      }
+    } catch (e: Exception) {
+      // TODO: Show error if it fails to open URL
     }
   }
 
   private fun openDefaultBrowserIfExists(link: String) {
     val packageManager = activity.packageManager
-    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(link))
+    val intent = Intent(Intent.ACTION_VIEW, link.toUri())
     if (intent.resolveActivity(packageManager) != null) {
       activity.startActivity(intent)
     } else {
