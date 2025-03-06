@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.opml
 
+import androidx.compose.foundation.layout.add
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
@@ -28,6 +29,7 @@ import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +38,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -56,14 +58,14 @@ class OpmlManager(
   private val rssRepository: RssRepository,
 ) {
 
-  private val job = SupervisorJob() + dispatchersProvider.main
-  private val coroutineScope = CoroutineScope(job)
+  private val job = SupervisorJob()
+  private val coroutineScope = CoroutineScope(job + dispatchersProvider.main)
 
   private val _result = MutableSharedFlow<OpmlResult>(replay = 1)
   val result: SharedFlow<OpmlResult> = _result
 
   companion object {
-    private const val IMPORT_CHUNKS = 20
+    private const val IMPORT_CHUNKS = 6
   }
 
   init {
@@ -73,31 +75,29 @@ class OpmlManager(
   suspend fun import() {
     val duration = measureTime {
       try {
-        coroutineScope.launch {
-          val file =
-            FileKit.pickFile(
-              title = "Import OPML",
-              type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
-              mode = PickerMode.Single,
-              initialDirectory = "downloads"
-            )
+        val file =
+          FileKit.pickFile(
+            title = "Import OPML",
+            type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
+            mode = PickerMode.Single,
+            initialDirectory = "downloads"
+          )
 
-          withContext(dispatchersProvider.io) {
-            val opmlXmlContent = file?.readBytes()?.decodeToString()
+        withContext(dispatchersProvider.io + job) {
+          val opmlXmlContent = file?.readBytes()?.decodeToString()
 
-            Logger.i { opmlXmlContent.orEmpty() }
+          Logger.i { opmlXmlContent.orEmpty() }
 
-            if (!opmlXmlContent.isNullOrBlank()) {
-              _result.emit(OpmlResult.InProgress.Importing(0))
-              val opmlSources = sourcesOpml.decode(opmlXmlContent)
+          if (!opmlXmlContent.isNullOrBlank()) {
+            _result.emit(OpmlResult.InProgress.Importing(0))
+            val opmlSources = sourcesOpml.decode(opmlXmlContent)
 
-              addOpmlSources(opmlSources)
-                .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-                .onCompletion { _result.emit(OpmlResult.Idle) }
-                .collect()
-            } else {
-              _result.emit(OpmlResult.Error.NoContentInOpmlFile)
-            }
+            addOpmlSources(opmlSources)
+              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+              .onCompletion { _result.emit(OpmlResult.Idle) }
+              .collect()
+          } else {
+            _result.emit(OpmlResult.Error.NoContentInOpmlFile)
           }
         }
       } catch (e: Exception) {
@@ -115,51 +115,51 @@ class OpmlManager(
 
   suspend fun export() {
     try {
-      coroutineScope.launch {
-        _result.emit(OpmlResult.InProgress.Exporting(0))
+      _result.emit(OpmlResult.InProgress.Exporting(0))
 
-        val opmlString =
-          withContext(dispatchersProvider.io) {
-            val feeds = rssRepository.allFeedsBlocking()
-            val feedGroups = rssRepository.allFeedGroupsBlocking()
-            val opmlSources = mutableListOf<OpmlSource>()
+      val opmlString =
+        withContext(dispatchersProvider.io + job) {
+          val feeds = rssRepository.allFeedsBlocking()
+          val feedGroups = rssRepository.allFeedGroupsBlocking()
+          val opmlSources = mutableListOf<OpmlSource>()
 
-            val feedsById = feeds.associateBy { it.id }
+          val feedsById = feeds.associateBy { it.id }
 
-            feedGroups.forEach { feedGroup ->
-              val feedsInGroup =
-                feedGroup.feedIds.mapNotNull { feedId ->
-                  feedsById[feedId]?.let { feed ->
-                    OpmlFeed(
-                      title = feed.name,
-                      link = feed.link,
-                    )
-                  }
+          feedGroups.forEach { feedGroup ->
+            val feedsInGroup =
+              feedGroup.feedIds.mapNotNull { feedId ->
+                feedsById[feedId]?.let { feed ->
+                  OpmlFeed(
+                    title = feed.name,
+                    link = feed.link,
+                  )
                 }
-
-              val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
-              opmlSources.add(opmlFeedGroup)
-            }
-
-            feeds.forEach { feed ->
-              if (feedGroups.none { it.feedIds.contains(feed.id) }) {
-                opmlSources.add(OpmlFeed(title = feed.name, link = feed.link))
               }
-            }
 
-            sourcesOpml.encode(opmlSources)
+            val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
+            opmlSources.add(opmlFeedGroup)
           }
 
-        _result.emit(OpmlResult.InProgress.Importing(50))
+          feeds.forEach { feed ->
+            if (feedGroups.none { it.feedIds.contains(feed.id) }) {
+              opmlSources.add(OpmlFeed(title = feed.name, link = feed.link))
+            }
+          }
 
+          sourcesOpml.encode(opmlSources)
+        }
+
+      _result.emit(OpmlResult.InProgress.Importing(50))
+
+      coroutineScope.launch {
         FileKit.saveFile(
           bytes = opmlString.encodeToByteArray(),
           baseName = BACKUP_FILE_NAME,
           extension = "xml",
         )
-
-        _result.emit(OpmlResult.Idle)
       }
+
+      _result.emit(OpmlResult.Idle)
     } catch (e: Exception) {
       if (e is CancellationException) {
         return
@@ -178,17 +178,23 @@ class OpmlManager(
   private fun addOpmlSources(sources: List<OpmlSource>): Flow<Int> = channelFlow {
     val feeds = sources.filterIsInstance<OpmlFeed>()
     val groups = sources.filterIsInstance<OpmlFeedGroup>()
-    val totalSourcesCount = feeds.size + groups.flatMap { it.feeds }.size
+    val totalSourcesCount = feeds.size + groups.sumOf { it.feeds.size }
     val processedFeedsCount = AtomicInt(0)
 
     if (feeds.isNotEmpty()) {
-      addFeeds(feeds, processedFeedsCount, totalSourcesCount)
+      addFeeds(this, feeds, processedFeedsCount, totalSourcesCount)
     }
 
     if (groups.isNotEmpty()) {
       // Since groups can contain multiple feeds, we don't want to add them in parallel
       groups.forEach { group ->
-        val feedIds = addFeeds(group.feeds, processedFeedsCount, totalSourcesCount)
+        val feedIds =
+          addFeeds(
+            producerScope = this,
+            feeds = group.feeds,
+            processedFeedsCount,
+            totalFeedsCount = totalSourcesCount
+          )
         val groupId = rssRepository.createGroup(group.title)
 
         rssRepository.addFeedIdsToGroups(groupIds = setOf(groupId), feedIds = feedIds)
@@ -196,35 +202,28 @@ class OpmlManager(
     }
   }
 
-  private suspend fun ProducerScope<Int>.addFeeds(
+  private suspend fun addFeeds(
+    producerScope: ProducerScope<Int>,
     feeds: List<OpmlFeed>,
     processedFeedsCount: AtomicInt,
     totalFeedsCount: Int,
   ): List<String> {
-    return coroutineScope {
-      val ids: List<String> =
-        feeds
-          .reversed()
-          .chunked(IMPORT_CHUNKS)
-          .map { sourcesInChunk ->
-            val ids =
-              sourcesInChunk
-                .map { feed ->
-                  async {
-                    addFeed(feed).also {
-                      val progressIndex = processedFeedsCount.incrementAndGet()
-                      send(calculateProgress(progressIndex, totalFeedsCount))
-                    }
-                  }
-                }
-                .awaitAll()
-                .filterNotNull()
+    return feeds.chunked(IMPORT_CHUNKS).fold(mutableListOf()) { acc, sourcesInChunk ->
+      val results = sourcesInChunk.map { feed -> producerScope.async { addFeed(feed) } }.awaitAll()
 
-            return@map ids
+      results.forEach { result ->
+        val progressIndex = processedFeedsCount.incrementAndGet()
+        producerScope.send(calculateProgress(progressIndex, totalFeedsCount))
+        if (result != null) {
+          if (result.isNotBlank()) {
+            acc.add(result)
           }
-          .flatten()
+        }
+      }
 
-      return@coroutineScope ids
+      delay(1.seconds)
+
+      acc
     }
   }
 

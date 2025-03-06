@@ -39,6 +39,8 @@ import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.joinAll
@@ -133,21 +135,19 @@ class RssRepository(
   }
 
   suspend fun updateFeeds() {
-    val results =
-      withContext(dispatchersProvider.io) {
-        val feedsChunk =
-          withContext(dispatchersProvider.databaseRead) {
-            feedQueries.feeds().executeAsList().chunked(UPDATE_CHUNKS)
-          }
+    withContext(dispatchersProvider.io) {
+      val feedsChunks = allFeedsBlocking().chunked(UPDATE_CHUNKS)
 
-        feedsChunk.map { feeds ->
+      feedsChunks.forEach { feeds ->
+        val jobs =
           feeds.map { feed ->
             launch { addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt) }
           }
-        }
-      }
+        jobs.joinAll()
 
-    results.flatten().joinAll()
+        delay(1.seconds)
+      }
+    }
   }
 
   suspend fun updateFeed(selectedFeedId: String) {
