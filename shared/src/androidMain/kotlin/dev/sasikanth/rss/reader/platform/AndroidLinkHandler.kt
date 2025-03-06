@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.platform
 
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
