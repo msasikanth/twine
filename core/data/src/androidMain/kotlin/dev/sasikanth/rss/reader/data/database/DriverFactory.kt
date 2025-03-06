@@ -38,6 +38,11 @@ actual class DriverFactory(
       name = DB_NAME,
       callback =
         object : AndroidSqliteDriver.Callback(ReaderDatabase.Schema, callbacks = codeMigrations) {
+          override fun onConfigure(db: SupportSQLiteDatabase) {
+            super.onConfigure(db)
+            db.enableWriteAheadLogging()
+          }
+
           override fun onOpen(db: SupportSQLiteDatabase) {
             db.setForeignKeyConstraintsEnabled(true)
           }

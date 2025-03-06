@@ -32,25 +32,23 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class BlockedWordsRepository(
   private val blockedWordsQueries: BlockedWordsQueries,
-  dispatchersProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
 
-  private val ioDispatcher = dispatchersProvider.io
-
   suspend fun addWord(word: String) {
-    withContext(ioDispatcher) {
+    withContext(dispatchersProvider.databaseWrite) {
       val uuid = nameBasedUuidOf(word.lowercase())
       blockedWordsQueries.insert(id = uuid.toString(), content = word)
     }
   }
 
   suspend fun removeWord(id: Uuid) {
-    withContext(ioDispatcher) { blockedWordsQueries.remove(id.toString()) }
+    withContext(dispatchersProvider.databaseWrite) { blockedWordsQueries.remove(id.toString()) }
   }
 
   fun words() =
     blockedWordsQueries
       .words(mapper = { id, content -> BlockedWord(id = uuidFrom(id), content = content) })
       .asFlow()
-      .mapToList(ioDispatcher)
+      .mapToList(dispatchersProvider.databaseRead)
 }

@@ -24,6 +24,8 @@ interface DispatchersProvider {
   val main: CoroutineDispatcher
   val io: CoroutineDispatcher
   val default: CoroutineDispatcher
+  val databaseRead: CoroutineDispatcher
+  val databaseWrite: CoroutineDispatcher
 }
 
 @Inject
@@ -31,4 +33,6 @@ class DefaultDispatchersProvider : DispatchersProvider {
   override val main = Dispatchers.Main
   override val io = Dispatchers.IO
   override val default = Dispatchers.Default
+  override val databaseRead = Dispatchers.IO.limitedParallelism(4)
+  override val databaseWrite = Dispatchers.IO.limitedParallelism(1)
 }

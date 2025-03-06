@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
@@ -40,6 +41,7 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.asSource
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -47,14 +49,17 @@ class FeedFetcher(
   private val httpClient: HttpClient,
   private val xmlFeedParser: XmlFeedParser,
   private val jsonFeedParser: JsonFeedParser,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
+
+  private val networkDispatcher = dispatchersProvider.io.limitedParallelism(10)
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
   suspend fun fetch(url: String): FeedFetchResult {
-    return fetch(url, redirectCount = 0)
+    return withContext(networkDispatcher) { fetch(url, redirectCount = 0) }
   }
 
   private suspend fun fetch(
