@@ -30,4 +30,10 @@ class TestDispatchersProvider : DispatchersProvider {
 
   override val default: CoroutineDispatcher
     get() = UnconfinedTestDispatcher()
+
+  override val databaseRead: CoroutineDispatcher
+    get() = UnconfinedTestDispatcher()
+
+  override val databaseWrite: CoroutineDispatcher
+    get() = UnconfinedTestDispatcher()
 }
