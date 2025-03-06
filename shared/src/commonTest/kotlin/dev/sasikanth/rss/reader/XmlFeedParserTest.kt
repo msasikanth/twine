@@ -17,17 +17,62 @@ package dev.sasikanth.rss.reader
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.toByteArray
 import korlibs.io.lang.Charsets
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 
 class XmlFeedParserTest {
 
-  private val xmlFeedParser = XmlFeedParser(dispatchersProvider = TestDispatchersProvider())
+  private lateinit var httpClient: HttpClient
+  private lateinit var xmlFeedParser: XmlFeedParser
+
+  @BeforeTest
+  fun setup() {
+    httpClient =
+      HttpClient(MockEngine) {
+        engine {
+          dispatcher = UnconfinedTestDispatcher()
+          addHandler { request ->
+            if (UrlUtils.isYouTubeLink(request.url.toString())) {
+              respond(
+                content = ByteReadChannel(youtubeChannelHtml.toByteArray()),
+                status = HttpStatusCode.OK,
+                headers = headersOf(HttpHeaders.ContentType, "html")
+              )
+            } else {
+              respond(
+                content = ByteReadChannel("".toByteArray()),
+                status = HttpStatusCode.InternalServerError,
+                headers = headersOf()
+              )
+            }
+          }
+        }
+      }
+    xmlFeedParser =
+      XmlFeedParser(
+        rdfContentParser = RDFContentParser(),
+        rssContentParser = RSSContentParser(),
+        atomContentParser = AtomContentParser(httpClient),
+        dispatchersProvider = TestDispatchersProvider()
+      )
+  }
 
   @Test
   fun parsingRssFeedShouldWorkCorrectly() = runTest {
@@ -251,6 +296,40 @@ class XmlFeedParserTest {
     // when
     val content = ByteReadChannel(atomXmlContent.toByteArray())
     val payload = xmlFeedParser.parse(content, feedUrl, Charsets.UTF8)
+
+    // then
+    assertEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingYouTubeAtomFeedShouldWorkCorrectly() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Google Developers",
+        icon = "https://youtube.com/img/channel.jpg",
+        description = "",
+        link = youtubeFeedUrl,
+        homepageLink = "https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        posts =
+          listOf(
+            PostPayload(
+              title =
+                "Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23",
+              link = "https://www.youtube.com/watch?v=2QpWq3iQdC4",
+              description = "Subscribe to watch more videos about Android development",
+              rawContent = null,
+              imageUrl = "https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg",
+              date = 1698260988000,
+              commentsLink = null,
+              isDateParsedCorrectly = true
+            ),
+          )
+      )
+
+    // when
+    val content = ByteReadChannel(youtubeAtomFeed.toByteArray())
+    val payload = xmlFeedParser.parse(content, youtubeFeedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)
