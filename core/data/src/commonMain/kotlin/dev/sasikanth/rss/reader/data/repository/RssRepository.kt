@@ -70,7 +70,7 @@ class RssRepository(
     private const val UPDATE_CHUNKS = 6
   }
 
-  suspend fun addFeed(
+  suspend fun fetchAndAddFeed(
     feedLink: String,
     title: String? = null,
     feedLastCleanUpAt: Instant? = null,
@@ -141,7 +141,7 @@ class RssRepository(
       feedsChunks.forEach { feeds ->
         val jobs =
           feeds.map { feed ->
-            launch { addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt) }
+            launch { fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt) }
           }
         jobs.joinAll()
 
@@ -157,7 +157,7 @@ class RssRepository(
       }
 
     if (feed != null) {
-      addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
+      fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
     }
   }
 
@@ -169,7 +169,7 @@ class RssRepository(
         }
 
       if (feed != null) {
-        addFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
+        fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
       }
     }
   }

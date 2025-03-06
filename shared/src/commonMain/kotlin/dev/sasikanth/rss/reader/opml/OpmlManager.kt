@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.opml
 
-import androidx.compose.foundation.layout.add
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
@@ -228,7 +227,7 @@ class OpmlManager(
   }
 
   private suspend fun addFeed(feed: OpmlFeed): String? {
-    val result = rssRepository.addFeed(feedLink = feed.link, title = feed.title)
+    val result = rssRepository.fetchAndAddFeed(feedLink = feed.link, title = feed.title)
     if (result !is FeedAddResult.Success) {
       Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
       return null
