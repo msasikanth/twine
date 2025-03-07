@@ -18,6 +18,9 @@ figcaption {
 .feedName {
   margin-bottom: 8px;
 }
+body #content {
+  line-height: 28px;
+}
 img, figure, video, div, object {
   max-width: 100%;
   height: auto !important;

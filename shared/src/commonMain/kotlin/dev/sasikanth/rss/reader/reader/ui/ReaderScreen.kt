@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -208,25 +209,11 @@ internal fun ReaderScreen(
     var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
 
     if (state.canShowReaderView) {
+      val webViewState = rememberWebViewStateWithHTMLData("")
       val navigator = rememberWebViewNavigator()
       val jsBridge = rememberWebViewJsBridge()
 
-      DisposableEffect(jsBridge) {
-        jsBridge.register(
-          ReaderLinkHandler(
-            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
-          )
-        )
-
-        jsBridge.register(
-          ReaderRenderProgressHandler(
-            renderState = { newRenderingState -> renderingState = newRenderingState }
-          )
-        )
-
-        onDispose { jsBridge.clear() }
-      }
-
+      val backgroundColor = AppTheme.colorScheme.surface
       val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
       val textColor = AppTheme.colorScheme.onSurface.hexString()
       val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
@@ -240,20 +227,20 @@ internal fun ReaderScreen(
           codeBackgroundColor = codeBackgroundColor
         )
 
-      val webViewState = rememberWebViewStateWithHTMLData("")
-      webViewState.webSettings.apply {
-        this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
-        this.supportZoom = false
-      }
+      LaunchedEffect(state.content, backgroundColor) {
+        webViewState.webSettings.apply {
+          this.backgroundColor = backgroundColor
+          this.supportZoom = false
+        }
 
-      LaunchedEffect(state.content) {
         withContext(dispatchersProvider.io) {
           val htmlTemplate =
             ReaderHTML.create(
               title = state.title!!,
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
-              publishedAt = state.publishedAt!!
+              publishedAt = state.publishedAt!!,
+              backgroundColor = backgroundColor
             )
 
           navigator.loadHtml(htmlTemplate, state.link)
@@ -274,7 +261,28 @@ internal fun ReaderScreen(
         }
       }
 
-      Box(Modifier.fillMaxSize().padding(paddingValues).padding(start = 16.dp)) {
+      DisposableEffect(jsBridge) {
+        jsBridge.register(
+          ReaderLinkHandler(
+            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+          )
+        )
+
+        jsBridge.register(
+          ReaderRenderProgressHandler(
+            renderState = { newRenderingState -> renderingState = newRenderingState }
+          )
+        )
+
+        onDispose { jsBridge.clear() }
+      }
+
+      Box(
+        Modifier.fillMaxSize()
+          .background(backgroundColor)
+          .padding(paddingValues)
+          .padding(start = 16.dp)
+      ) {
         WebView(
           modifier = Modifier.fillMaxSize(),
           state = webViewState,

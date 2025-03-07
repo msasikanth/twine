@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.ui.graphics.Color
+import dev.sasikanth.rss.reader.utils.hexString
 import twine.shared.generated.resources.Res
 
 object ReaderHTML {
@@ -24,7 +26,8 @@ object ReaderHTML {
     title: String,
     feedName: String,
     feedHomePageLink: String,
-    publishedAt: String
+    publishedAt: String,
+    backgroundColor: Color
   ): String {
     val mercuryJS = readFile("mercury.web.js")
     val readerJS = readFile("main.js")
@@ -54,7 +57,7 @@ object ReaderHTML {
       <script>$readerJS</script>
       <title>$title</title>
     </head>
-    <body>
+    <body style='background-color:${backgroundColor.hexString()};'>
       <h1 id='title'>$title</h1>
       <div>$postMetadata</div>
       <div id='content'></div>
