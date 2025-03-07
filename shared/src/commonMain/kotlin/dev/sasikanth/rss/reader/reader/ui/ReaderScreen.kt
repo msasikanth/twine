@@ -56,6 +56,7 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewNavigator
 import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
@@ -185,7 +186,21 @@ internal fun ReaderScreen(
           }
 
           Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
+            IconButton(
+              onClick = {
+                coroutineScope.launch {
+                  if (state.link?.isNostrUri() == true) {
+                    val nostrRef = state.link!!.removePrefix("nostr:")
+                    val modifiedLink =
+                      if (nostrRef.startsWith("naddr")) "https://highlighter.com/a/$nostrRef"
+                      else "https://njump.me/$nostrRef"
+                    linkHandler.openLink(modifiedLink)
+                  } else {
+                    linkHandler.openLink(state.link)
+                  }
+                }
+              }
+            ) {
               Icon(
                 modifier = Modifier.requiredSize(24.dp),
                 imageVector = TwineIcons.Website,

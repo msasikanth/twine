@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.core.network.fetcher
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
 import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
+import dev.sasikanth.rss.reader.core.network.parser.nostr.NostrFeedParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
@@ -25,6 +26,7 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.RSS_MEDIA_TYPE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
@@ -71,23 +73,27 @@ class FeedFetcher(
     }
 
     return try {
-      val transformedUrl = buildFeedUrl(url)
-      val response = httpClient.get(transformedUrl.toString())
+      if (url.isNostrUri()) {
+        NostrFeedParser.fetchFeed(url, httpClient)
+      } else {
+        val transformedUrl = buildFeedUrl(url)
+        val response = httpClient.get(transformedUrl.toString())
 
-      when (response.status) {
-        HttpStatusCode.OK -> {
-          parseContent(response, transformedUrl.toString(), redirectCount)
-        }
-        HttpStatusCode.MultipleChoices,
-        HttpStatusCode.MovedPermanently,
-        HttpStatusCode.Found,
-        HttpStatusCode.SeeOther,
-        HttpStatusCode.TemporaryRedirect,
-        HttpStatusCode.PermanentRedirect -> {
-          handleHttpRedirect(response, transformedUrl, redirectCount)
-        }
-        else -> {
-          FeedFetchResult.HttpStatusError(statusCode = response.status)
+        when (response.status) {
+          HttpStatusCode.OK -> {
+            parseContent(response, transformedUrl.toString(), redirectCount)
+          }
+          HttpStatusCode.MultipleChoices,
+          HttpStatusCode.MovedPermanently,
+          HttpStatusCode.Found,
+          HttpStatusCode.SeeOther,
+          HttpStatusCode.TemporaryRedirect,
+          HttpStatusCode.PermanentRedirect -> {
+            handleHttpRedirect(response, transformedUrl, redirectCount)
+          }
+          else -> {
+            FeedFetchResult.HttpStatusError(statusCode = response.status)
+          }
         }
       }
     } catch (e: Exception) {

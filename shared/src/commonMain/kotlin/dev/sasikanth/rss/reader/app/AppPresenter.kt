@@ -39,6 +39,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedPresenterFactory
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsPresenterFactory
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils.isNostrUri
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -274,7 +275,18 @@ class AppPresenter(
       if (showReaderView) {
         navigation.pushNew(Config.Reader(post.id))
       } else {
-        linkHandler.openLink(post.link)
+        val actualLink =
+          kotlin.run {
+            if (post.link.isNostrUri()) {
+              val nostrRef = post.link.removePrefix("nostr:")
+              val modifiedLink =
+                if (nostrRef.startsWith("naddr")) "https://highlighter.com/a/$nostrRef"
+                else "https://njump.me/$nostrRef"
+
+              modifiedLink
+            } else post.link
+          }
+        linkHandler.openLink(actualLink)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
       }
     }

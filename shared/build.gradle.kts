@@ -113,6 +113,7 @@ kotlin {
       implementation(libs.kermit.bugsnag)
       implementation(libs.reorderable)
       api(libs.filekit)
+      implementation(libs.jetbrains.markdown)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
@@ -126,6 +127,11 @@ kotlin {
       api(libs.androidx.browser)
       implementation(libs.ktor.client.okhttp)
     }
+
+    androidUnitTest.dependencies {
+      implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
+    }
+
     val androidInstrumentedTest by getting {
       dependencies {
         implementation(libs.androidx.test.runner)

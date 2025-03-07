@@ -195,3 +195,31 @@ const val jsonFeed =
   ]
 }
 """
+
+// language=JSON
+const val firstNostrArticle =
+  """
+{
+  "kind":30023,
+  "id":"bbbce8d0da989753eb5bdbe1fd60d8728ddd1d6f9244a9ba101a4b978ec85b8a",
+  "pubkey":"3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
+  "created_at":1691690551,
+  "tags":[["d","mea-culpa"],["title","Mea culpa: things I did wrong in Nostr"],["summary",""],["published_at","1691689936"],["t","nostr"]],
+  "content":"Things that we mostly can't fix, but that maybe could have been done better if they were here from the beginning -- or something like that.\n\n- The `NOTICE` message would have been better if it had structure like `OK` messages have. That would have allowed a more direct communication between relays and users, instead of relays being inside a client black box.\n- Choosing secp256k1 felt cool and maybe it still feels cool because it is the Bitcoin curve, but since many people have pointed out that other curves and algorithms are much faster maybe picking those would have been better.\n- Writing a spec for direct messages and implementing them was bad. In my defense, it was an attempt to [please the public](https://t.me/nostr_protocol/307), but still I should have not have done that, or thought more about it before doing it.\n- Thinking that kind 1 should be used for all the things \"text\" just restricted the ability of clients to do different interfaces. If we had different kinds for replies, quotes, comments and \"root\" posts from the beginning that would have been better.\n- For a long time I didn't realize Nostr wasn't useful just for \"social networking\" things. I wonder what else could have been better designed in the relay-client interface if the needs of non-social-networking apps were kept in mind.\n- The querying system is sometimes too generic, it could have been better if it was more restrictive, but more complete. For example: allowing generic querying over tags is weird, can lead to O(n²) issues in some cases and relays are left to fend for themselves -- on the other hand we can't query for the absence of some tags. But I don't know how any of these things could have been better even today, so maybe it wasn't so bad.\n- Making the events be JSON: sometimes I think this was a bad idea and a binary format would have been better, but most of the times I think Nostr wouldn't have become any popular at all if this was the case -- also binary is slower than JSON in JavaScript, so I guess this wasn't a completely bad choice. Perhaps if something like [NSON](https://github.com/nostr-protocol/nips/pull/515) had been adopted from the start, though, that would have been better for everybody.\n\nWhen I decided to write this I had one item in mind, but when I started I forgot what that was. I'll add it here back when I remember.",
+  "sig":"f8bf9e508e00e1cf24498549dc6955d0fb6b13678efe177a909ff7e7fab5f28ce7dc05324a45bc5ca6acb4b5071df4da3e82c4c63296d3fc857f06c79d4d105a"
+}
+"""
+
+// language=JSON
+const val secondNostrArticle =
+  """
+{
+  "kind":30023,
+  "id":"2e950ded426e86b6b358444e207e1eaea46e4fc1e175933b8b3a3fb17ae0ba66",
+  "pubkey":"3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d",
+  "created_at":1705240528,
+  "tags":[["d","33ec0995"],["title","Setting up a handler for `nostr:` links on your Desktop, even if you don't use a native client"],["published_at","1675175880"],["t","nostr"]],
+  "content":"\n# Setting up a handler for `nostr:` links on your Desktop, even if you don't use a native client\n\nThis is the most barebones possible, it will just open a web browser at `https://nostr.guru/` with the contents of the `nostr:` link.\n\nCreate this file at `~/.local/share/applications/nostr-opener.desktop`:\n\n```\n[Desktop Entry]\nExec=/home/youruser/nostr-opener %u\nName=Nostr Browser\nType=Application\nStartupNotify=false\nMimeType=x-scheme-handler/nostr;\n```\n\n(Replace \"youruser\" with your username above.)\n\nThis will create a default handler for `nostr:` links. It will be called with the link as its first argument.\n\nNow you can create the actual program at `~/nostr-opener`. For example:\n\n```python\n#!/usr/bin/env python\n\nimport sys\nimport webbrowser\n\nnip19 = sys.argv[1][len('nostr:'):]\nwebbrowser.open(f'https://nostr.guru/{nip19}')\n```\n\nRemember to make it executable with `chmod +x ~/nostr-opener`.\n",
+  "sig":"59131fd3371427ab49a23f5057d6580ea361abf74d965eb47d249177924e3553693932fe7b7c106a2d99bae73481c42841ce6e86eb6be4a6dac68f3ec150a5b7"
+}
+"""
