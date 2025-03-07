@@ -138,7 +138,9 @@ private fun ByteReadChannel.toCharIterator(
         encodingCharset = findEncodingCharset(encodingRegex, encodingContent, charset)
       }
 
-      currentBuffer = buildString { (encodingCharset ?: charset).decode(this, bytes) }
+      currentBuffer =
+        buildString { (encodingCharset ?: charset).decode(this, bytes) }
+          .replace("&acirc;&#128;&#153;", "&apos;")
 
       packet.close()
       currentIndex = 0
