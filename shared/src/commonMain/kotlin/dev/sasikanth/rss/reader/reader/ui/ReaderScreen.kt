@@ -295,7 +295,7 @@ internal fun ReaderScreen(
         }
       }
       !state.canShowReaderView && state.content.isNullOrBlank() -> {
-        Text("No reader content")
+        Text(LocalStrings.current.noReaderContent)
       }
     }
   }
