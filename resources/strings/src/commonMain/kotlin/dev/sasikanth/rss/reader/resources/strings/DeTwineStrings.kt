@@ -183,4 +183,6 @@ val DeTwineStrings =
     markArticleAsRead = "Beitrag als gelesen markieren",
     markArticleAsReadOnOpen = "Beim Öffnen",
     markArticleAsReadOnScroll = "Beim Scrollen",
+    noReaderContent =
+      "No content to display in the reader, please try fetching article or visiting the website.",
   )
