@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.database.BookmarkQueries
+import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
@@ -61,6 +62,7 @@ class RssRepository(
   private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
   private val feedGroupQueries: FeedGroupQueries,
+  private val feedGroupFeedQueries: FeedGroupFeedQueries,
   private val sourceQueries: SourceQueries,
   private val dispatchersProvider: DispatchersProvider
 ) {
@@ -282,7 +284,7 @@ class RssRepository(
           mapper = {
             id: String,
             name: String,
-            feedIds: List<String>,
+            feedIds: String?,
             feedHomepageLinks: String,
             feedIconLinks: String,
             createdAt: Instant,
@@ -292,7 +294,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
               feedIconLinks = feedIconLinks.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
@@ -414,13 +416,7 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         feedQueries.remove(feedId)
-        val feedGroups = feedGroupQueries.groupByFeedId(feedId).executeAsList()
-        feedGroups.forEach { feedGroup ->
-          feedGroupQueries.updateFeedIds(
-            feedIds = feedGroup.feedIds - setOf(feedId),
-            id = feedGroup.id
-          )
-        }
+        feedGroupFeedQueries.removeFeedFromAllGroups(feedId)
       }
     }
   }
@@ -552,7 +548,6 @@ class RssRepository(
       feedGroupQueries.createGroup(
         id = id,
         name = name,
-        feedIds = emptyList(),
         createdAt = Clock.System.now(),
         updatedAt = Clock.System.now()
       )
@@ -571,10 +566,9 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         groupIds.forEach { groupId ->
-          val group = feedGroupQueries.group(groupId).executeAsOne()
-          val updatedFeedIds = (group.feedIds + feedIds).distinct()
-
-          feedGroupQueries.updateFeedIds(id = groupId, feedIds = updatedFeedIds)
+          feedIds.forEach { feedId ->
+            feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
+          }
         }
       }
     }
@@ -584,9 +578,9 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         groupIds.forEach { groupId ->
-          val group = feedGroupQueries.group(groupId).executeAsOne()
-
-          feedGroupQueries.updateFeedIds(id = groupId, feedIds = group.feedIds - feedIds.toSet())
+          feedIds.forEach { feedId ->
+            feedGroupFeedQueries.removeFeedFromGroup(feedId = feedId, feedGroupId = groupId)
+          }
         }
       }
     }
@@ -620,16 +614,10 @@ class RssRepository(
       transactionRunner.invoke {
         sources.forEach { source ->
           feedQueries.remove(id = source.id)
-          feedGroupQueries.deleteGroup(id = source.id)
+          feedGroupFeedQueries.deleteFeedGroup(feedGroupId = source.id)
 
           if (source is Feed) {
-            val feedGroups = feedGroupQueries.groupByFeedId(feedId = source.id).executeAsList()
-            feedGroups.forEach { feedGroup ->
-              feedGroupQueries.updateFeedIds(
-                feedIds = feedGroup.feedIds - setOf(source.id),
-                id = feedGroup.id
-              )
-            }
+            feedGroupFeedQueries.removeFeedFromAllGroups(source.id)
           }
         }
       }
@@ -652,7 +640,7 @@ class RssRepository(
           pinnedAt: Instant?,
           lastCleanUpAt: Instant?,
           numberOfUnreadPosts: Long,
-          feedIds: List<String>?,
+          feedIds: String?,
           feedHomepageLinks: String?,
           feedIcons: String?,
           updatedAt: Instant?,
@@ -661,7 +649,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks =
                 feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
@@ -718,7 +706,7 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             numberOfUnreadPosts: Long,
-            feedIds: List<String>?,
+            feedIds: String?,
             feedHomepageLinks: String?,
             feedIcons: String?,
             updatedAt: Instant? ->
@@ -726,7 +714,7 @@ class RssRepository(
               FeedGroup(
                 id = id,
                 name = name,
-                feedIds = feedIds?.filterNot { it.isBlank() }.orEmpty(),
+                feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
                 feedHomepageLinks =
                   feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
                 feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
@@ -767,7 +755,7 @@ class RssRepository(
           mapper = {
             id: String,
             name: String,
-            feedIds: List<String>,
+            feedIds: String?,
             feedHomepageLinks: String,
             feedIcons: String,
             createdAt: Instant,
@@ -777,7 +765,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
               feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
@@ -803,7 +791,7 @@ class RssRepository(
           mapper = {
             id: String,
             name: String,
-            feedIds: List<String>,
+            feedIds: String?,
             feedHomepageLinks: String,
             feedIcons: String,
             createdAt: Instant,
@@ -812,7 +800,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.filterNot { it.isBlank() },
+              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
               feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
               createdAt = createdAt,
@@ -832,7 +820,7 @@ class RssRepository(
         mapper = {
           id: String,
           name: String,
-          feedIds: List<String>,
+          feedIds: String?,
           feedHomepageLinks: String,
           feedIcons: String,
           createdAt: Instant,
@@ -841,7 +829,7 @@ class RssRepository(
           FeedGroup(
             id = id,
             name = name,
-            feedIds = feedIds.filterNot { it.isBlank() },
+            feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
             feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
             feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
             createdAt = createdAt,
