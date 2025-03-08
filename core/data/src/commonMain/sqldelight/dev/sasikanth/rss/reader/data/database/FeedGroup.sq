@@ -1,11 +1,8 @@
-import kotlin.String;
-import kotlin.collections.List;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE IF NOT EXISTS feedGroup(
   id TEXT NOT NULL PRIMARY KEY,
   name TEXT NOT NULL,
-  feedIds TEXT AS List<String> NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL,
   pinnedAt INTEGER AS Instant,
@@ -22,59 +19,65 @@ groups:
 SELECT
   id,
   name,
-  feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedHomepageLinks,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIconLinks,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       WHERE gf.feedGroupId = fg.id) AS feedIds,
+  (SELECT GROUP_CONCAT(f.homepageLink)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedHomepageLinks,
+  (SELECT GROUP_CONCAT(f.icon)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
   pinnedPosition
-FROM feedGroup
+FROM feedGroup fg
+LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+GROUP BY fg.id
 LIMIT :limit OFFSET :offset;
 
 groupsBlocking:
 SELECT
   id,
   name,
-  feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedHomepageLinks,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIconLinks,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       WHERE gf.feedGroupId = fg.id) AS feedIds,
+  (SELECT GROUP_CONCAT(f.homepageLink)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedHomepageLinks,
+  (SELECT GROUP_CONCAT(f.icon)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
   pinnedPosition
-FROM feedGroup;
+FROM feedGroup fg
+LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+GROUP BY fg.id;
 
 createGroup:
-INSERT OR IGNORE INTO feedGroup(id, name, feedIds, createdAt, updatedAt)
-VALUES (:id,  :name, :feedIds, :createdAt, :updatedAt);
+INSERT OR IGNORE INTO feedGroup(id, name, createdAt, updatedAt)
+VALUES (:id,  :name, :createdAt, :updatedAt);
 
 updateGroupName:
 UPDATE feedGroup SET name = :name WHERE id = :id;
-
-updateFeedIds:
-UPDATE feedGroup SET feedIds = :feedIds WHERE id = :id;
 
 deleteGroup:
 DELETE FROM feedGroup WHERE id = :id;
 
 updatePinnedAt:
 UPDATE feedGroup SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
-
-groupByFeedId:
-SELECT * FROM feedGroup WHERE INSTR(feedIds, :feedId);
 
 group:
 SELECT * FROM feedGroup WHERE id = :id;
@@ -83,19 +86,24 @@ groupsByIds:
 SELECT
   id,
   name,
-  feedIds,
-  COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedHomepageLinks,
-  COALESCE((SELECT GROUP_CONCAT(feed.icon)
-              FROM feed
-              WHERE INSTR(feedGroup.feedIds, feed.id)
-              LIMIT 4), '') AS feedIconLinks,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       WHERE gf.feedGroupId = fg.id) AS feedIds,
+  (SELECT GROUP_CONCAT(f.homepageLink)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedHomepageLinks,
+  (SELECT GROUP_CONCAT(f.icon)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id
+     LIMIT 4) AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt
-FROM feedGroup
+FROM feedGroup fg
+LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
 WHERE id IN :ids;
 
 updatedPinnedPosition:

@@ -1,3 +1,5 @@
+import kotlinx.datetime.Instant;
+
 CREATE TABLE feedGroupFeed (
     feedGroupId TEXT,
     feedId TEXT,
@@ -8,3 +10,46 @@ CREATE TABLE feedGroupFeed (
 
 CREATE INDEX feed_group_feed_feedGroupId_index ON feedGroupFeed(feedGroupId);
 CREATE INDEX feed_group_feed_feedId_index ON feedGroupFeed(feedId);
+
+WITH RECURSIVE split(feedGroupId, feedId, rest) AS (
+    SELECT
+        id,
+        trim(substr(feedIds, 1, instr(feedIds || ',', ',') - 1)),
+        trim(substr(feedIds, instr(feedIds || ',', ',') + 1))
+    FROM feedGroup
+    WHERE feedIds IS NOT NULL AND feedIds != ''
+
+    UNION ALL
+
+    SELECT
+        feedGroupId,
+        trim(substr(rest, 1, instr(rest || ',', ',') - 1)),
+        trim(substr(rest, instr(rest || ',', ',') + 1))
+    FROM split
+    WHERE rest != ''
+)
+INSERT INTO feedGroupFeed (feedGroupId, feedId)
+SELECT feedGroupId, feedId
+FROM split
+WHERE feedId != '';
+
+CREATE TABLE IF NOT EXISTS feedGroup_new (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT NOT NULL,
+  createdAt INTEGER AS Instant NOT NULL,
+  updatedAt INTEGER AS Instant NOT NULL,
+  pinnedAt INTEGER AS Instant,
+  pinnedPosition REAL NOT NULL DEFAULT 0.0
+);
+
+INSERT INTO feedGroup_new
+SELECT id, name, createdAt, updatedAt, pinnedAt, pinnedPosition
+FROM feedGroup;
+
+DROP INDEX IF EXISTS feed_group_pinned_at;
+DROP INDEX IF EXISTS feed_group_pinned_position;
+DROP TABLE feedGroup;
+ALTER TABLE feedGroup_new RENAME TO feedGroup;
+
+CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
+CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
