@@ -170,4 +170,6 @@ val ZhTwineStrings =
     markArticleAsRead = "Mark article as read",
     markArticleAsReadOnOpen = "On Open",
     markArticleAsReadOnScroll = "On Scroll",
+    noReaderContent =
+      "No content to display in the reader, please try fetching article or visiting the website.",
   )

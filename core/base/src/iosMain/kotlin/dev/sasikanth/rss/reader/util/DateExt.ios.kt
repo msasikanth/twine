@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.data.database.adapter
+package dev.sasikanth.rss.reader.util
 
-import app.cash.sqldelight.ColumnAdapter
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toNSDate
+import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
 
-internal object ListToStringAdapter : ColumnAdapter<List<String>, String> {
+actual fun Instant.readerDateTimestamp(): String {
+  val formatter = NSDateFormatter()
+  formatter.locale = NSLocale.currentLocale()
+  formatter.dateFormat = "MMM dd, yyyy • hh:mm a"
 
-  override fun decode(databaseValue: String): List<String> {
-    return databaseValue.split(", ")
-  }
-
-  override fun encode(value: List<String>): String {
-    return value.joinToString()
-  }
+  return formatter.stringFromDate(this.toNSDate())
 }

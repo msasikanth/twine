@@ -52,10 +52,11 @@ import com.multiplatform.webview.jsbridge.IJsMessageHandler
 import com.multiplatform.webview.jsbridge.JsMessage
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
 import com.multiplatform.webview.web.LoadingState
+import com.multiplatform.webview.web.WebContent
 import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.WebViewNavigator
+import com.multiplatform.webview.web.WebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
@@ -202,58 +203,47 @@ internal fun ReaderScreen(
         }
       }
     },
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.surface,
     contentColor = Color.Unspecified
   ) { paddingValues ->
     var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
 
     if (state.canShowReaderView) {
-      val navigator = rememberWebViewNavigator()
-      val jsBridge = rememberWebViewJsBridge()
-
-      DisposableEffect(jsBridge) {
-        jsBridge.register(
-          ReaderLinkHandler(
-            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
-          )
-        )
-
-        jsBridge.register(
-          ReaderRenderProgressHandler(
-            renderState = { newRenderingState -> renderingState = newRenderingState }
-          )
-        )
-
-        onDispose { jsBridge.clear() }
-      }
-
+      val backgroundColor = AppTheme.colorScheme.surface
       val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
       val textColor = AppTheme.colorScheme.onSurface.hexString()
       val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
       val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
-
-      val colors =
+      val colors = remember {
         ReaderHTMLColors(
           textColor = textColor,
           linkColor = linkColor,
           dividerColor = dividerColor,
           codeBackgroundColor = codeBackgroundColor
         )
-
-      val webViewState = rememberWebViewStateWithHTMLData("")
-      webViewState.webSettings.apply {
-        this.backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
-        this.supportZoom = false
       }
 
-      LaunchedEffect(state.content) {
+      val webViewState =
+        remember(backgroundColor) {
+          WebViewState(WebContent.Data(data = "")).apply {
+            webSettings.apply {
+              this.backgroundColor = backgroundColor
+              this.supportZoom = false
+            }
+          }
+        }
+      val navigator = rememberWebViewNavigator()
+      val jsBridge = rememberWebViewJsBridge()
+
+      LaunchedEffect(state.content, backgroundColor) {
         withContext(dispatchersProvider.io) {
           val htmlTemplate =
             ReaderHTML.create(
               title = state.title!!,
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
-              publishedAt = state.publishedAt!!
+              publishedAt = state.publishedAt!!,
+              backgroundColor = backgroundColor
             )
 
           navigator.loadHtml(htmlTemplate, state.link)
@@ -274,15 +264,29 @@ internal fun ReaderScreen(
         }
       }
 
-      Box(Modifier.fillMaxSize().padding(paddingValues).padding(start = 16.dp)) {
-        WebView(
-          modifier = Modifier.fillMaxSize(),
-          state = webViewState,
-          navigator = navigator,
-          webViewJsBridge = jsBridge,
-          captureBackPresses = false,
+      DisposableEffect(jsBridge) {
+        jsBridge.register(
+          ReaderLinkHandler(
+            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+          )
         )
+
+        jsBridge.register(
+          ReaderRenderProgressHandler(
+            renderState = { newRenderingState -> renderingState = newRenderingState }
+          )
+        )
+
+        onDispose { jsBridge.clear() }
       }
+
+      WebView(
+        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(start = 24.dp),
+        state = webViewState,
+        navigator = navigator,
+        webViewJsBridge = jsBridge,
+        captureBackPresses = false,
+      )
     }
 
     when {
@@ -295,7 +299,7 @@ internal fun ReaderScreen(
         }
       }
       !state.canShowReaderView && state.content.isNullOrBlank() -> {
-        Text("No reader content")
+        Text(LocalStrings.current.noReaderContent)
       }
     }
   }

@@ -9,6 +9,31 @@ SELECT feeds.count + feedGroups.count
 FROM feeds, feedGroups;
 
 pinnedSources:
+WITH feed_group_metadata AS (
+  SELECT
+    distinct_groups.feedGroupId,
+    (
+      SELECT GROUP_CONCAT(gf.feedId)
+      FROM feedGroupFeed gf
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+    ) AS feedIds,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.homepageLink)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedHomepageLinks,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.icon)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedIcons
+  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+)
+
 SELECT
   type,
   id,
@@ -19,7 +44,7 @@ SELECT
   homepageLink,
   createdAt,
   pinnedAt,
-  lastCleanUpAt ,
+  lastCleanUpAt,
   numberOfUnreadPosts,
   feedIds,
   feedHomepageLinks,
@@ -36,7 +61,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -59,28 +84,49 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
-    fg.feedIds,
-    COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
-                FROM feed
-                WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedHomepageLinks,
-    COALESCE((SELECT GROUP_CONCAT(feed.icon)
-                FROM feed
-                WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedIconLinks,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    fgm.feedIds,
+    fgm.feedHomepageLinks,
+    fgm.feedIcons,
     fg.createdAt,
     fg.pinnedAt,
     fg.updatedAt,
     fg.pinnedPosition
   FROM feedGroup fg
-  LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
 ORDER BY pinnedPosition, pinnedAt DESC;
 
 sources:
+WITH feed_group_metadata AS (
+  SELECT
+    distinct_groups.feedGroupId,
+    (
+      SELECT GROUP_CONCAT(gf.feedId)
+      FROM feedGroupFeed gf
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+    ) AS feedIds,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.homepageLink)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedHomepageLinks,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.icon)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedIcons
+  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+)
+
 SELECT
   type,
   id,
@@ -91,7 +137,7 @@ SELECT
   homepageLink,
   createdAt,
   pinnedAt,
-  lastCleanUpAt ,
+  lastCleanUpAt,
   numberOfUnreadPosts,
   feedIds,
   feedHomepageLinks,
@@ -107,7 +153,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -129,21 +175,17 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read == 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
-    fg.feedIds,
-    COALESCE((SELECT GROUP_CONCAT(feed.homepageLink)
-                FROM feed
-                WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedHomepageLinks,
-    COALESCE((SELECT GROUP_CONCAT(feed.icon)
-                FROM feed
-                WHERE INSTR(fg.feedIds, feed.id)
-                LIMIT 4), '') AS feedIconLinks,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    fgm.feedIds,
+    fgm.feedHomepageLinks,
+    fgm.feedIcons,
     fg.createdAt,
     fg.pinnedAt,
     fg.updatedAt
   FROM feedGroup fg
-  LEFT JOIN post p ON INSTR(fg.feedIds, p.sourceId) AND p.date > :postsAfter
+  LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   GROUP BY fg.id
 )
 ORDER BY type DESC,
