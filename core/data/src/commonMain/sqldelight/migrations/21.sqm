@@ -53,3 +53,8 @@ ALTER TABLE feedGroup_new RENAME TO feedGroup;
 
 CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
 CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
+CREATE INDEX feed_group_pinned_name ON feedGroup(pinnedAt DESC, name);
+
+CREATE INDEX feed_pinned_name ON feed(pinnedAt DESC, name);
+
+CREATE INDEX post_sourceId_date_read_hidden_index ON post(sourceId, date, read, isHidden);
