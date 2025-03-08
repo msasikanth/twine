@@ -68,10 +68,10 @@ function updateStyles(colors) {
     overflow-wrap: break-word;
   }
   body:dir(rtl) {
-    padding-inline-start: 16px;
+    padding-inline-start: 24px;
   }
   body:dir(ltr) {
-    padding-inline-end: 16px;
+    padding-inline-end: 24px;
   }
   a {
     color: ${colors.linkColor};
