@@ -105,7 +105,8 @@ SELECT
   pinnedAt
 FROM feedGroup fg
 LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-WHERE id IN :ids;
+WHERE id IN :ids
+GROUP BY fg.id;
 
 updatedPinnedPosition:
 UPDATE feedGroup SET pinnedPosition = :pinnedPosition WHERE id = :id;
