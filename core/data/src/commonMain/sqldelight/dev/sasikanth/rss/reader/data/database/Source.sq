@@ -17,20 +17,20 @@ WITH feed_group_metadata AS (
       FROM feedGroupFeed gf
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
     ) AS feedIds,
-    (
+    COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
       LIMIT 4
-    ) AS feedHomepageLinks,
-    (
+    ), '') AS feedHomepageLinks,
+    COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
       LIMIT 4
-    ) AS feedIcons
+    ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
 
@@ -110,20 +110,20 @@ WITH feed_group_metadata AS (
       FROM feedGroupFeed gf
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
     ) AS feedIds,
-    (
+    COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
       LIMIT 4
-    ) AS feedHomepageLinks,
-    (
+    ), '') AS feedHomepageLinks,
+    COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
       LIMIT 4
-    ) AS feedIcons
+    ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
 

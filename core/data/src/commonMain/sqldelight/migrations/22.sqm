@@ -1,0 +1,18 @@
+CREATE TABLE feedGroupFeed_new (
+    feedGroupId TEXT,
+    feedId TEXT,
+    PRIMARY KEY (feedGroupId, feedId),
+    FOREIGN KEY (feedGroupId) REFERENCES feedGroup(id) ON DELETE CASCADE,
+    FOREIGN KEY (feedId) REFERENCES feed(id) ON DELETE CASCADE
+);
+
+INSERT INTO feedGroupFeed_new SELECT * FROM feedGroupFeed;
+
+DROP INDEX feed_group_feed_feedGroupId_index;
+DROP INDEX feed_group_feed_feedId_index;
+DROP TABLE feedGroupFeed;
+
+ALTER TABLE feedGroupFeed_new RENAME TO feedGroupFeed;
+
+CREATE INDEX feed_group_feed_feedGroupId_index ON feedGroupFeed(feedGroupId);
+CREATE INDEX feed_group_feed_feedId_index ON feedGroupFeed(feedId);

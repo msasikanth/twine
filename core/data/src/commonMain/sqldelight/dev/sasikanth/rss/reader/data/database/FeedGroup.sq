@@ -23,16 +23,16 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -49,16 +49,16 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -90,22 +90,23 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt
 FROM feedGroup fg
 LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-WHERE id IN :ids;
+WHERE id IN :ids
+GROUP BY fg.id;
 
 updatedPinnedPosition:
 UPDATE feedGroup SET pinnedPosition = :pinnedPosition WHERE id = :id;
