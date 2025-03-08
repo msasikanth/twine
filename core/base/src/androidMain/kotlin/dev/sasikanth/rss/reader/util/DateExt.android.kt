@@ -16,11 +16,11 @@
 
 package dev.sasikanth.rss.reader.util
 
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.TimeZone
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 
 actual fun Instant.readerDateTimestamp(): String {
   val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")

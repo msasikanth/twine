@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -58,7 +57,6 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.WebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
@@ -225,16 +223,15 @@ internal fun ReaderScreen(
         )
       }
 
-      val webViewState = remember(backgroundColor) {
-        WebViewState(WebContent.Data(
-          data = ""
-        )).apply {
-          webSettings.apply {
-            this.backgroundColor = backgroundColor
-            this.supportZoom = false
+      val webViewState =
+        remember(backgroundColor) {
+          WebViewState(WebContent.Data(data = "")).apply {
+            webSettings.apply {
+              this.backgroundColor = backgroundColor
+              this.supportZoom = false
+            }
           }
         }
-      }
       val navigator = rememberWebViewNavigator()
       val jsBridge = rememberWebViewJsBridge()
 
@@ -284,9 +281,7 @@ internal fun ReaderScreen(
       }
 
       WebView(
-        modifier = Modifier.fillMaxSize()
-          .padding(paddingValues)
-          .padding(start = 24.dp),
+        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(start = 24.dp),
         state = webViewState,
         navigator = navigator,
         webViewJsBridge = jsBridge,
