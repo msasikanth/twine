@@ -29,7 +29,8 @@ val TrTwineStrings =
     errorServer = {
       "($it): Sunucu hatası. Lütfen daha sonra tekrar deneyin veya web sitesi yöneticisiyle iletişime geçin."
     },
-    errorTooManyRedirects = "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
+    errorTooManyRedirects =
+      "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
     errorUnAuthorized = { "($it): Bu bağlantıdaki içeriğe erişim yetkiniz yok." },
     errorUnknownHttpStatus = { "HTTP koduyla içerik yüklenemedi: ($it)" },
     postsSearchHint = "Gönderileri ara",
@@ -76,7 +77,8 @@ val TrTwineStrings =
     settingsPostsDeletionPeriodSixMonths = "6 ay",
     settingsPostsDeletionPeriodOneYear = "1 yıl",
     settingsShowReaderViewTitle = "Okuma görünümünü etkinleştir",
-    settingsShowReaderViewSubtitle = "Makaleler basitleştirilmiş, okunması kolay bir görünümde gösterilecek",
+    settingsShowReaderViewSubtitle =
+      "Makaleler basitleştirilmiş, okunması kolay bir görünümde gösterilecek",
     settingsThemeAuto = "Otomatik",
     settingsThemeLight = "Açık",
     settingsThemeDark = "Koyu",
