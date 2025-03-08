@@ -1,0 +1,23 @@
+CREATE TABLE feedGroupFeed (
+    feedGroupId TEXT,
+    feedId TEXT,
+    PRIMARY KEY (feedGroupId, feedId),
+    FOREIGN KEY (feedGroupId) REFERENCES feedGroup(id),
+    FOREIGN KEY (feedId) REFERENCES feed(id)
+);
+
+CREATE INDEX feed_group_feed_feedGroupId_index ON feedGroupFeed(feedGroupId);
+CREATE INDEX feed_group_feed_feedId_index ON feedGroupFeed(feedId);
+
+addFeedToGroup:
+INSERT OR REPLACE INTO feedGroupFeed(feedGroupId, feedId)
+VALUES (?, ?);
+
+removeFeedFromGroup:
+DELETE FROM feedGroupFeed WHERE feedId = :feedId AND feedGroupId = :feedGroupId;
+
+removeFeedFromAllGroups:
+DELETE FROM feedGroupFeed WHERE feedId = :feedId;
+
+deleteFeedGroup:
+DELETE FROM feedGroupFeed WHERE feedGroupId = :feedGroupId;

@@ -20,6 +20,7 @@ CREATE TABLE post(
 CREATE INDEX post_source_id_index ON post(sourceId);
 CREATE INDEX post_date_desc_index ON post (date DESC);
 CREATE INDEX post_is_hidden_index ON post(isHidden);
+CREATE INDEX post_sourceId_date_read_hidden_index ON post(sourceId, date, read, isHidden);
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post

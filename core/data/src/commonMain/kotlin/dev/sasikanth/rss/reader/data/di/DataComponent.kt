@@ -23,7 +23,6 @@ import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
-import dev.sasikanth.rss.reader.data.database.adapter.ListToStringAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
@@ -49,7 +48,6 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
       feedGroupAdapter =
         FeedGroup.Adapter(
-          feedIdsAdapter = ListToStringAdapter,
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
           pinnedAtAdapter = DateAdapter
@@ -76,4 +74,7 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
   @Provides fun providesSourceQueries(database: ReaderDatabase) = database.sourceQueries
 
   @Provides fun providesBlockedWordsQueries(database: ReaderDatabase) = database.blockedWordsQueries
+
+  @Provides
+  fun providesFeedGroupFeedQueries(database: ReaderDatabase) = database.feedGroupFeedQueries
 }
