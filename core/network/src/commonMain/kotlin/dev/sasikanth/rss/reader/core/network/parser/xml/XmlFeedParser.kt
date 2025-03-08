@@ -140,6 +140,7 @@ private fun ByteReadChannel.toCharIterator(
 
       currentBuffer =
         buildString { (encodingCharset ?: charset).decode(this, bytes) }
+          .replace("&acirc;&#128;&#148;", "&ndash;")
           .replace("&acirc;&#128;&#153;", "&apos;")
 
       packet.close()
