@@ -23,16 +23,16 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -49,16 +49,16 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -90,16 +90,16 @@ SELECT
   (SELECT GROUP_CONCAT(gf.feedId)
        FROM feedGroupFeed gf
        WHERE gf.feedGroupId = fg.id) AS feedIds,
-  (SELECT GROUP_CONCAT(f.homepageLink)
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedHomepageLinks,
-  (SELECT GROUP_CONCAT(f.icon)
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
      FROM feedGroupFeed gf
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id
-     LIMIT 4) AS feedIconLinks,
+     LIMIT 4), '') AS feedIconLinks,
   createdAt,
   updatedAt,
   pinnedAt

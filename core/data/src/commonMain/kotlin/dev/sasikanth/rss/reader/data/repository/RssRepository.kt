@@ -413,12 +413,7 @@ class RssRepository(
   }
 
   suspend fun removeFeed(feedId: String) {
-    withContext(dispatchersProvider.databaseWrite) {
-      transactionRunner.invoke {
-        feedQueries.remove(feedId)
-        feedGroupFeedQueries.removeFeedFromAllGroups(feedId)
-      }
-    }
+    withContext(dispatchersProvider.databaseWrite) { feedQueries.remove(feedId) }
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
@@ -614,11 +609,7 @@ class RssRepository(
       transactionRunner.invoke {
         sources.forEach { source ->
           feedQueries.remove(id = source.id)
-          feedGroupFeedQueries.deleteFeedGroup(feedGroupId = source.id)
-
-          if (source is Feed) {
-            feedGroupFeedQueries.removeFeedFromAllGroups(source.id)
-          }
+          feedGroupQueries.deleteGroup(id = source.id)
         }
       }
     }
