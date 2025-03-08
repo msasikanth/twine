@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.TimeZone
 
-expect fun Instant.relativeDurationString(): String
-
-expect fun Instant.readerDateTimestamp(): String
+actual fun Instant.readerDateTimestamp(): String {
+  val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")
+  val dateTime = LocalDateTime.ofInstant(toJavaInstant(), TimeZone.getDefault().toZoneId())
+  return dateTimeFormatter.format(dateTime)
+}

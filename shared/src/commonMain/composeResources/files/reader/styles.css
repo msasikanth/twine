@@ -1,5 +1,7 @@
-h1 {
+#title {
   font-size: 24px;
+  line-height: 32px;
+  letter-spacing: 0px;
 }
 body {
   display: none;
@@ -13,13 +15,19 @@ figcaption {
   line-height: 1.6;
 }
 .caption {
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+  font-weight: 400;
 }
 .feedName {
   margin-bottom: 8px;
 }
 body #content {
+  font-size: 16px;
   line-height: 28px;
+  letter-spacing: 0.25px;
+  font-weight: 400;
 }
 img, figure, video, div, object {
   max-width: 100%;

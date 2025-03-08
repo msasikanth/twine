@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toNSDate
+import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
 
-expect fun Instant.relativeDurationString(): String
+actual fun Instant.readerDateTimestamp(): String {
+  val formatter = NSDateFormatter()
+  formatter.locale = NSLocale.currentLocale()
+  formatter.dateFormat = "MMM dd, yyyy • hh:mm a"
 
-expect fun Instant.readerDateTimestamp(): String
+  return formatter.stringFromDate(this.toNSDate())
+}
