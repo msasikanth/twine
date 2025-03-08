@@ -86,6 +86,8 @@ android {
 }
 
 dependencies {
+  debugImplementation(libs.leakcanary)
+
   implementation(project(":shared"))
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
