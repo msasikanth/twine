@@ -279,9 +279,8 @@ internal fun ReaderScreen(
 
       Box(
         Modifier.fillMaxSize()
-          .background(backgroundColor)
           .padding(paddingValues)
-          .padding(start = 16.dp)
+          .padding(start = 24.dp)
       ) {
         WebView(
           modifier = Modifier.fillMaxSize(),
