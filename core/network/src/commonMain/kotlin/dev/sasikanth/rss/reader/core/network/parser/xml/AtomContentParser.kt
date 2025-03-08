@@ -16,6 +16,9 @@
 
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
+import com.fleeksoft.io.kotlinx.asInputStream
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.parseMetaData
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
@@ -27,21 +30,33 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_UPDATED
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.utils.io.asSource
 import kotlinx.datetime.Clock
+import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
-internal object AtomContentParser : XmlContentParser() {
+@Inject
+class AtomContentParser(
+  private val httpClient: HttpClient,
+) : XmlContentParser() {
 
-  override fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
+  override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
 
     val posts = mutableListOf<PostPayload?>()
@@ -78,10 +93,12 @@ internal object AtomContentParser : XmlContentParser() {
       }
     }
 
-    val host = UrlUtils.extractHost(link ?: feedUrl)
-    if (iconUrl.isNullOrBlank()) {
-      iconUrl = UrlUtils.fallbackFeedIcon(host)
-    }
+    iconUrl =
+      if (UrlUtils.isYouTubeLink(feedUrl)) {
+        youtubeChannelImage(link!!)
+      } else {
+        feedDefaultFallbackIcon(link, feedUrl, iconUrl)
+      }
 
     return FeedPayload(
       name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
@@ -91,6 +108,21 @@ internal object AtomContentParser : XmlContentParser() {
       link = feedUrl,
       posts = posts.filterNotNull()
     )
+  }
+
+  private suspend fun youtubeChannelImage(link: String): String {
+    val response = httpClient.get(urlString = link)
+    return Ksoup.parseMetaData(response.bodyAsChannel().asSource().asInputStream(), baseUri = link)
+      .ogImage!!
+  }
+
+  private fun feedDefaultFallbackIcon(link: String?, feedUrl: String, iconUrl: String?): String {
+    var iconUrl1 = iconUrl
+    val host = UrlUtils.extractHost(link ?: feedUrl)
+    if (iconUrl1.isNullOrBlank()) {
+      iconUrl1 = UrlUtils.fallbackFeedIcon(host)
+    }
+    return iconUrl1
   }
 
   private fun readAtomEntry(parser: XmlPullParser, hostLink: String?): PostPayload? {
@@ -131,6 +163,22 @@ internal object AtomContentParser : XmlContentParser() {
             date = parser.nextText()
           } else {
             parser.skip()
+          }
+        }
+        TAG_MEDIA_GROUP -> {
+          while (parser.next() != EventType.END_TAG) {
+            if (parser.eventType != EventType.START_TAG) continue
+
+            when (parser.name) {
+              TAG_MEDIA_THUMBNAIL -> {
+                image = parser.getAttributeValue(parser.namespace, TAG_URL)
+                parser.nextTag()
+              }
+              TAG_MEDIA_CONTENT -> {
+                content = content.orEmpty().ifBlank { parser.nextText() }
+              }
+              else -> parser.skip()
+            }
           }
         }
         else -> parser.skip()

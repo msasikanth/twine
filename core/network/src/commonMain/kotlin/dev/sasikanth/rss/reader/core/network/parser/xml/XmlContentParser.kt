@@ -22,7 +22,7 @@ import org.kobjects.ktxml.api.XmlPullParser
 
 abstract class XmlContentParser {
 
-  abstract fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
+  abstract suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
 
   fun XmlPullParser.attrText(attrName: String): String? {
     return getAttributeValue(namespace, attrName).also { skip() }

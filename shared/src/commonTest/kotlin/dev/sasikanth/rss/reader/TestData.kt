@@ -146,6 +146,47 @@ const val atomXmlContent =
   </feed>
   """
 
+const val youtubeFeedUrl =
+  "https://www.youtube.com/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw"
+const val youtubeAtomFeed =
+  """
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+  <link href="https://www.youtube.com/feeds/videos.xml?channel_id=UC_x5XG1OV2P6uZZ5FSM9Ttw" rel="self"/>
+  <link href="https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw" rel="alternate"/>
+  <id>yt:channel:UC_x5XG1OV2P6uZZ5FSM9Ttw</id>
+  <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+  <title>Google Developers</title>
+  <author>
+    <name>Google Developers</name>
+    <uri>https://www.youtube.com/channel/UC_x5XG1OV2P6uZZ5FSM9Ttw</uri>
+  </author>
+  <published>2007-06-05T18:32:40+00:00</published>
+  <entry>
+    <id>yt:video:2QpWq3iQdC4</id>
+    <yt:videoId>2QpWq3iQdC4</yt:videoId>
+    <yt:channelId>UC_x5XG1OV2P6uZZ5FSM9Ttw</yt:channelId>
+    <title>Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=2QpWq3iQdC4"/>
+    <published>2023-10-25T19:09:48+00:00</published>
+    <media:group>
+      <media:title>Android Beyond Phones: A New Way to Build with Jetpack Compose | Android Dev Summit '23</media:title>
+      <media:description>Subscribe to watch more videos about Android development</media:description>
+      <media:thumbnail url="https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg" />
+    </media:group>
+  </entry>
+</feed>
+"""
+
+const val youtubeChannelHtml =
+  """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta property="og:image" content="https://youtube.com/img/channel.jpg">
+</head>
+</html>
+"""
+
 // language=JSON
 const val jsonFeed =
   """
