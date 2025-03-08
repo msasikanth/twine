@@ -52,6 +52,7 @@ kermit = "2.0.5"
 reorderable = "2.4.3"
 korlibs = "6.0.0"
 filekit = "0.8.8"
+leakcanary = "2.14"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -124,6 +125,7 @@ kermit-bugsnag = { module = "co.touchlab:kermit-bugsnag", version.ref = "kermit"
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable"  }
 korlibs-string = { module = "com.soywiz:korlibs-string", version.ref = "korlibs" }
 filekit = { module = "io.github.vinceglb:filekit-compose", version.ref = "filekit" }
+leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
