@@ -28,7 +28,7 @@ import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
 import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.util.relativeDurationString
+import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,7 +135,7 @@ class ReaderPresenter(
           it.copy(
             link = post.link,
             title = post.title,
-            publishedAt = post.date.relativeDurationString(),
+            publishedAt = post.date.readerDateTimestamp(),
             isBookmarked = post.bookmarked,
             feed = feed,
             postImage = post.imageUrl

@@ -168,6 +168,7 @@ data class TwineStrings(
   val markArticleAsRead: String,
   val markArticleAsReadOnOpen: String,
   val markArticleAsReadOnScroll: String,
+  val noReaderContent: String,
 )
 
 object Locales {
