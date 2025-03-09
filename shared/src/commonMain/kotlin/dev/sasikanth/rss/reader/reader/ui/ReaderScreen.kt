@@ -230,6 +230,8 @@ internal fun ReaderScreen(
               backgroundColor = webViewBackgroundColor
               supportZoom = false
               androidWebSettings.useWideViewPort = true
+              iOSWebSettings.showHorizontalScrollIndicator = false
+              iOSWebSettings.showVerticalScrollIndicator = false
             }
           }
         }
