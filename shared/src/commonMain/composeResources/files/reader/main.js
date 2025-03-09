@@ -62,16 +62,21 @@ function removeTitle() {
 function updateStyles(colors) {
   const styles = `
   body {
-    padding-top: 16px;
+    margin: 0;
+    padding: 16px 0 0 0;
     color: ${colors.textColor};
     font-family: 'Golos Text', sans-serif;
     overflow-wrap: break-word;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
-  body:dir(rtl) {
-    padding-inline-start: 24px;
-  }
-  body:dir(ltr) {
-    padding-inline-end: 24px;
+  #content {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
   a {
     color: ${colors.linkColor};
