@@ -3,17 +3,6 @@
   line-height: 32px;
   letter-spacing: 0px;
 }
-body {
-  display: none;
-}
-figure {
-  margin: 0;
-}
-figcaption {
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.6;
-}
 .caption {
   font-size: 14px;
   line-height: 20px;
@@ -23,16 +12,31 @@ figcaption {
 .feedName {
   margin-bottom: 8px;
 }
+body {
+  display: none;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
 body #content {
   font-size: 16px;
   line-height: 28px;
   letter-spacing: 0.25px;
   font-weight: 400;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 img, figure, video, div, object {
   max-width: 100%;
   height: auto !important;
   margin: 0 auto;
+}
+figcaption {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
 }
 ul {
   list-style: none;
@@ -59,13 +63,11 @@ iframe {
   max-height: 250px;
 }
 table {
-  display: block;
-  overflow-x: auto;
+  width: 100%;
+  table-layout: fixed;
 }
-table img {
-  display: block;
-  height: auto;
-  margin-bottom: 16px;
+td {
+  width: 100%;
 }
 pre {
   display: block;

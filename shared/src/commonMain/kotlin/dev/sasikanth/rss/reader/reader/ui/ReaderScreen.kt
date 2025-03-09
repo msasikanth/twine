@@ -209,7 +209,7 @@ internal fun ReaderScreen(
     var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
 
     if (state.canShowReaderView) {
-      val backgroundColor = AppTheme.colorScheme.surface
+      val webViewBackgroundColor = AppTheme.colorScheme.surface
       val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
       val textColor = AppTheme.colorScheme.onSurface.hexString()
       val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
@@ -224,18 +224,19 @@ internal fun ReaderScreen(
       }
 
       val webViewState =
-        remember(backgroundColor) {
+        remember(webViewBackgroundColor) {
           WebViewState(WebContent.Data(data = "")).apply {
             webSettings.apply {
-              this.backgroundColor = backgroundColor
-              this.supportZoom = false
+              backgroundColor = webViewBackgroundColor
+              supportZoom = false
+              androidWebSettings.useWideViewPort = true
             }
           }
         }
       val navigator = rememberWebViewNavigator()
       val jsBridge = rememberWebViewJsBridge()
 
-      LaunchedEffect(state.content, backgroundColor) {
+      LaunchedEffect(state.content, webViewBackgroundColor) {
         withContext(dispatchersProvider.io) {
           val htmlTemplate =
             ReaderHTML.create(
@@ -243,7 +244,7 @@ internal fun ReaderScreen(
               feedName = state.feed!!.name,
               feedHomePageLink = state.feed!!.homepageLink,
               publishedAt = state.publishedAt!!,
-              backgroundColor = backgroundColor
+              backgroundColor = webViewBackgroundColor
             )
 
           navigator.loadHtml(htmlTemplate, state.link)
@@ -281,7 +282,7 @@ internal fun ReaderScreen(
       }
 
       WebView(
-        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(start = 24.dp),
+        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
         state = webViewState,
         navigator = navigator,
         webViewJsBridge = jsBridge,
