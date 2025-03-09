@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -48,12 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import co.touchlab.kermit.Logger
 import com.multiplatform.webview.jsbridge.IJsMessageHandler
 import com.multiplatform.webview.jsbridge.JsMessage
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
@@ -288,7 +282,7 @@ internal fun ReaderScreen(
       }
 
       WebView(
-        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(start = 24.dp),
+        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
         state = webViewState,
         navigator = navigator,
         webViewJsBridge = jsBridge,
