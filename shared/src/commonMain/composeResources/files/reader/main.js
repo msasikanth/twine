@@ -152,7 +152,7 @@ function formatRedditPost(html) {
     }
   }
 
-  if (!submitterMatch) return "Submitter data not found";
+  if (!submitterMatch) return null;
 
   const userUrl = submitterMatch[1];
   const username = submitterMatch[2].trim();
@@ -198,6 +198,25 @@ function formatRedditPost(html) {
   return result;
 }
 
+async function formatContentUsingMercury(link, sanitizedHtml, html) {
+  //noinspection JSUnresolvedVariable
+  const result = await Mercury.parse(link, {html: sanitizedHtml});
+  return result.content || html;
+}
+
+async function parseContent(link, content) {
+  const sanitizedHtml = `<div>${content}</div>`
+
+  if (isRedditUrl(link)) {
+    const redditContent = formatRedditPost(sanitizedHtml);
+    if (redditContent) {
+      return redditContent;
+    }
+  }
+
+  return await formatContentUsingMercury(link, sanitizedHtml, content);
+}
+
 async function renderReaderView(link, html, colors) {
   console.log('Preparing reader content for rendering');
   //noinspection JSUnresolvedVariable
@@ -207,15 +226,7 @@ async function renderReaderView(link, html, colors) {
     {}
   );
 
-  const sanitizedHtml = `<div>${html}</div>`
-  //noinspection JSUnresolvedVariable
-  const result = await Mercury.parse(link, { html: sanitizedHtml });
-  let content = "";
-  if (isRedditUrl(link)) {
-    content = formatRedditPost(sanitizedHtml)
-  } else {
-    content = result.content || html;
-  }
+  const content = await parseContent(link, html);
 
   document.getElementById("content").innerHTML += content;
   document.querySelectorAll("pre").forEach((element) =>
