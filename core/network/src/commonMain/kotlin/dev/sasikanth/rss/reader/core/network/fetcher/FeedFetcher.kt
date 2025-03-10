@@ -31,6 +31,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.BadContentTypeFormatException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.URLBuilder
@@ -115,7 +116,14 @@ class FeedFetcher(
     url: String,
     redirectCount: Int
   ): FeedFetchResult {
-    val contentType = response.contentType()?.withoutParameters()
+    val contentType =
+      try {
+        response.contentType()?.withoutParameters()
+      } catch (e: BadContentTypeFormatException) {
+        // If Ktor fails to identify content type properly we assume the content type is XML and
+        // move forward with trying to parse the content accordingly.
+        ContentType.Text.Xml
+      }
 
     when (contentType) {
       ContentType.Text.Html -> {
@@ -134,7 +142,12 @@ class FeedFetcher(
       ContentType.Text.Xml,
       null -> {
         val content = response.bodyAsChannel()
-        val responseCharset = response.contentType()?.parameter("charset")
+        val responseCharset =
+          try {
+            response.contentType()?.parameter("charset")
+          } catch (e: BadContentTypeFormatException) {
+            Charsets.UTF8.name
+          }
         val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
 
         val feedPayload = xmlFeedParser.parse(feedUrl = url, content = content, charset = charset)
