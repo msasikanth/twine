@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
@@ -50,7 +50,7 @@ internal fun FeedIcon(
       if (showFeedFavIcon) {
         FavIconImageLoader.get(context)
       } else {
-        ImageLoader(context)
+        SingletonImageLoader.get(context)
       }
 
     SubcomposeAsyncImage(
