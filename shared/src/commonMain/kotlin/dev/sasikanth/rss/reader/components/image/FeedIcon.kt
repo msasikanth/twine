@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
@@ -43,29 +44,24 @@ internal fun FeedIcon(
 ) {
   val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   Box(modifier.background(Color.White)) {
-    if (showFeedFavIcon) {
-      val context = LocalPlatformContext.current
-      val imageRequest =
-        ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
-      val imageLoader = FavIconImageLoader.get(context)
+    val context = LocalPlatformContext.current
+    val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
+    val imageLoader =
+      if (showFeedFavIcon) {
+        FavIconImageLoader.get(context)
+      } else {
+        SingletonImageLoader.get(context)
+      }
 
-      SubcomposeAsyncImage(
-        model = imageRequest,
-        contentDescription = contentDescription,
-        modifier = Modifier.matchParentSize(),
-        contentScale = contentScale,
-        imageLoader = imageLoader,
-        error = { PlaceHolderIcon() },
-        loading = { PlaceHolderIcon() }
-      )
-    } else {
-      AsyncImage(
-        modifier = Modifier.matchParentSize(),
-        url = url,
-        contentDescription = contentDescription,
-        backgroundColor = null,
-      )
-    }
+    SubcomposeAsyncImage(
+      model = imageRequest,
+      contentDescription = contentDescription,
+      modifier = Modifier.matchParentSize(),
+      contentScale = contentScale,
+      imageLoader = imageLoader,
+      error = { PlaceHolderIcon() },
+      loading = { PlaceHolderIcon() }
+    )
   }
 }
 
