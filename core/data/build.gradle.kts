@@ -39,36 +39,55 @@ plugins {
 kotlin {
   jvmToolchain(20)
 
+  jvm()
   androidTarget()
   listOf(iosArm64(), iosSimulatorArm64())
 
-  sourceSets {
-    commonMain.dependencies {
-      api(projects.core.model)
-      api(projects.core.base)
-      api(projects.core.network)
+  applyDefaultHierarchyTemplate()
 
-      implementation(libs.kotlinx.datetime)
-      implementation(libs.kotlinx.coroutines)
-      implementation(libs.kotlininject.runtime)
-      implementation(libs.kermit)
-      implementation(libs.crashkios.bugsnag)
-      api(libs.sqldelight.extensions.coroutines)
-      api(libs.sqldelight.extensions.paging)
-      api(libs.androidx.datastore.preferences)
-      api(libs.androidx.datastore.okio)
-      api(libs.uuid)
-      api(libs.ktor.core)
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        api(projects.core.model)
+        api(projects.core.base)
+        api(projects.core.network)
+
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.kotlinx.coroutines)
+        implementation(libs.kotlininject.runtime)
+        implementation(libs.kermit)
+        api(libs.sqldelight.extensions.coroutines)
+        api(libs.sqldelight.extensions.paging)
+        api(libs.androidx.datastore.preferences)
+        api(libs.androidx.datastore.okio)
+        api(libs.uuid)
+        api(libs.ktor.core)
+      }
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
-    androidMain.dependencies {
-      implementation(libs.androidx.annotation)
-      implementation(libs.sqldelight.driver.android)
-      api(libs.sqliteAndroid)
+    val mobileMain by creating {
+      dependsOn(commonMain)
+
+      dependencies { implementation(libs.crashkios.bugsnag) }
     }
 
-    iosMain.dependencies { implementation(libs.sqldelight.driver.native) }
+    val androidMain by getting {
+      dependsOn(mobileMain)
+
+      dependencies {
+        implementation(libs.androidx.annotation)
+        implementation(libs.sqldelight.driver.android)
+        api(libs.sqliteAndroid)
+      }
+    }
+
+    val iosMain by getting {
+      dependsOn(mobileMain)
+      dependencies { implementation(libs.sqldelight.driver.native) }
+    }
+
+    jvmMain.dependencies { implementation(libs.sqldelight.driver.sqlite) }
   }
 }
 

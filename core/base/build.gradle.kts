@@ -22,6 +22,7 @@ plugins {
 kotlin {
   jvmToolchain(20)
 
+  jvm()
   androidTarget()
   listOf(iosArm64(), iosSimulatorArm64())
 
@@ -36,6 +37,11 @@ kotlin {
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
     androidMain.dependencies { implementation(libs.androidx.annotation) }
+
+    jvmMain.dependencies {
+      implementation(libs.commons.text)
+      implementation(libs.prettytime)
+    }
   }
 }
 

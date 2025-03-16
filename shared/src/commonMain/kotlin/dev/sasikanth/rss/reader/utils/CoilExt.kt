@@ -19,7 +19,5 @@ package dev.sasikanth.rss.reader.utils
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.Image
 import coil3.PlatformContext
-import coil3.annotation.ExperimentalCoilApi
 
-@OptIn(ExperimentalCoilApi::class)
 expect fun Image.toComposeImageBitmap(context: PlatformContext): ImageBitmap

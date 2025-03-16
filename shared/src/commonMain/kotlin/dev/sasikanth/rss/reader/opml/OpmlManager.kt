@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.opml
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
@@ -104,7 +103,6 @@ class OpmlManager(
           return
         }
 
-        BugsnagKotlin.sendHandledException(e)
         _result.emit(OpmlResult.Error.UnknownFailure(e))
       }
     }
@@ -164,7 +162,6 @@ class OpmlManager(
         return
       }
 
-      BugsnagKotlin.sendHandledException(e)
       _result.emit(OpmlResult.Error.UnknownFailure(e))
     }
   }

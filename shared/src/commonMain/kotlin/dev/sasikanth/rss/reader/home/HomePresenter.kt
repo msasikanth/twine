@@ -20,7 +20,6 @@ import androidx.compose.material3.SheetValue
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.backhandler.BackCallback
@@ -467,8 +466,7 @@ class HomePresenter(
             else -> rssRepository.updateFeeds()
           }
         } catch (e: Exception) {
-          BugsnagKotlin.logMessage("RefreshContent")
-          BugsnagKotlin.sendHandledException(e)
+
         } finally {
           _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
         }

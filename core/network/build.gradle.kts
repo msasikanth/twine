@@ -26,37 +26,54 @@ plugins {
 kotlin {
   jvmToolchain(20)
 
+  jvm()
   @Suppress("OPT_IN_USAGE")
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
   listOf(iosArm64(), iosSimulatorArm64())
 
-  sourceSets {
-    commonMain.dependencies {
-      implementation(projects.core.model)
-      implementation(projects.core.base)
+  applyDefaultHierarchyTemplate()
 
-      implementation(libs.kotlinx.datetime)
-      implementation(libs.kotlinx.coroutines)
-      implementation(libs.kotlinx.io)
-      implementation(libs.kotlininject.runtime)
-      implementation(libs.ktor.core)
-      implementation(libs.ktor.client.logging)
-      implementation(libs.kotlinx.serialization.json)
-      implementation(libs.ksoup)
-      implementation(libs.ksoup.kotlinx.io)
-      implementation(libs.ktxml)
-      implementation(libs.kermit)
-      implementation(libs.crashkios.bugsnag)
-      api(libs.korlibs.string)
+  sourceSets {
+    val commonMain by getting {
+      dependencies {
+        implementation(projects.core.model)
+        implementation(projects.core.base)
+
+        implementation(libs.kotlinx.datetime)
+        implementation(libs.kotlinx.coroutines)
+        implementation(libs.kotlinx.io)
+        implementation(libs.kotlininject.runtime)
+        implementation(libs.ktor.core)
+        implementation(libs.ktor.client.logging)
+        implementation(libs.kotlinx.serialization.json)
+        implementation(libs.ksoup)
+        implementation(libs.ksoup.kotlinx.io)
+        implementation(libs.ktxml)
+        implementation(libs.kermit)
+        api(libs.korlibs.string)
+      }
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
-    androidMain.dependencies {
-      implementation(libs.androidx.annotation)
-      implementation(libs.ktor.client.okhttp)
+    val mobileMain by creating {
+      dependsOn(commonMain)
+
+      dependencies { implementation(libs.crashkios.bugsnag) }
+    }
+    val androidMain by getting {
+      dependsOn(mobileMain)
+      dependencies {
+        implementation(libs.androidx.annotation)
+        implementation(libs.ktor.client.okhttp)
+      }
     }
 
-    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    val iosMain by getting {
+      dependsOn(mobileMain)
+      dependencies { implementation(libs.ktor.client.darwin) }
+    }
+
+    jvmMain.dependencies { implementation(libs.ktor.client.okhttp) }
   }
 }
 

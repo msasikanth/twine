@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.addfeed
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
@@ -156,8 +155,6 @@ class AddFeedPresenter(
             }
           }
         } catch (e: Exception) {
-          BugsnagKotlin.setCustomValue(section = "AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(e)
           effects.emit(AddFeedEffect.ShowError(AddFeedErrorType.Unknown(e)))
         } finally {
           _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
@@ -174,8 +171,6 @@ class AddFeedPresenter(
           effects.emit(AddFeedEffect.ShowError(AddFeedErrorType.UnknownFeedType))
         }
         is XmlParsingError -> {
-          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(feedAddResult.exception)
           effects.emit(AddFeedEffect.ShowError(AddFeedErrorType.FailedToParseXML))
         }
         is ConnectTimeoutException,
@@ -183,8 +178,6 @@ class AddFeedPresenter(
           effects.emit(AddFeedEffect.ShowError(AddFeedErrorType.Timeout))
         }
         else -> {
-          BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-          BugsnagKotlin.sendHandledException(feedAddResult.exception)
           effects.emit(AddFeedEffect.ShowError(AddFeedErrorType.Unknown(feedAddResult.exception)))
         }
       }
@@ -215,8 +208,7 @@ class AddFeedPresenter(
     }
 
     private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
-      BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-      BugsnagKotlin.sendHandledException(databaseError.exception)
+
     }
 
     override fun onDestroy() {

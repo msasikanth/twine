@@ -35,6 +35,8 @@ composeCompiler { featureFlags = setOf(ComposeFeatureFlag.StrongSkipping) }
 kotlin {
   jvmToolchain(20)
 
+  jvm()
+
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
 
   // spotless:off
@@ -72,47 +74,47 @@ kotlin {
       languageSettings.optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
     }
 
-    commonMain.dependencies {
-      api(projects.core.base)
-      api(projects.core.model)
-      api(projects.core.network)
-      api(projects.core.data)
+    val commonMain by getting {
+      dependencies {
+        api(projects.core.base)
+        api(projects.core.model)
+        api(projects.core.network)
+        api(projects.core.data)
 
-      implementation(projects.resources.strings)
-      implementation(projects.resources.icons)
+        implementation(projects.resources.strings)
+        implementation(projects.resources.icons)
 
-      implementation(libs.bundles.compose)
-      implementation(libs.bundles.kotlinx)
-      implementation(libs.ktor.core)
-      implementation(libs.ktor.client.logging)
-      api(libs.decompose)
-      implementation(libs.decompose.extensions.compose)
-      api(libs.essenty.lifecycle)
-      implementation(libs.essenty.lifecycle.coroutines)
-      api(libs.essenty.backhandler)
-      implementation(libs.kotlininject.runtime)
-      implementation(libs.androidx.collection)
-      implementation(libs.material.color.utilities)
-      implementation(libs.ksoup)
-      implementation(libs.ksoup.kotlinx.io)
-      implementation(libs.windowSizeClass)
-      api(libs.androidx.datastore.okio)
-      api(libs.androidx.datastore.preferences)
-      implementation(libs.paging.common)
-      implementation(libs.paging.compose)
-      implementation(libs.stately.isolate)
-      implementation(libs.stately.iso.collections)
-      implementation(libs.bundles.xmlutil)
-      api(libs.webview)
-      implementation(libs.uuid)
-      api(libs.coil.compose)
-      api(libs.coil.network)
-      api(libs.coil.svg)
-      api(libs.crashkios.bugsnag)
-      implementation(libs.kermit)
-      implementation(libs.kermit.bugsnag)
-      implementation(libs.reorderable)
-      api(libs.filekit)
+        implementation(libs.bundles.compose)
+        implementation(libs.bundles.kotlinx)
+        implementation(libs.ktor.core)
+        implementation(libs.ktor.client.logging)
+        api(libs.decompose)
+        implementation(libs.decompose.extensions.compose)
+        api(libs.essenty.lifecycle)
+        implementation(libs.essenty.lifecycle.coroutines)
+        api(libs.essenty.backhandler)
+        implementation(libs.kotlininject.runtime)
+        implementation(libs.androidx.collection)
+        implementation(libs.material.color.utilities)
+        implementation(libs.ksoup)
+        implementation(libs.ksoup.kotlinx.io)
+        implementation(libs.windowSizeClass)
+        api(libs.androidx.datastore.okio)
+        api(libs.androidx.datastore.preferences)
+        implementation(libs.paging.common)
+        implementation(libs.paging.compose)
+        implementation(libs.stately.isolate)
+        implementation(libs.stately.iso.collections)
+        implementation(libs.bundles.xmlutil)
+        api(libs.webview)
+        implementation(libs.uuid)
+        api(libs.coil.compose)
+        api(libs.coil.network)
+        api(libs.coil.svg)
+        implementation(libs.kermit)
+        implementation(libs.reorderable)
+        api(libs.filekit)
+      }
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
@@ -120,12 +122,24 @@ kotlin {
       implementation(libs.ktor.client.mock)
     }
 
-    androidMain.dependencies {
-      api(libs.androidx.activity.compose)
-      api(libs.androidx.appcompat)
-      api(libs.androidx.core)
-      api(libs.androidx.browser)
-      implementation(libs.ktor.client.okhttp)
+    val mobileMain by creating {
+      dependsOn(commonMain)
+
+      dependencies {
+        api(libs.crashkios.bugsnag)
+        implementation(libs.kermit.bugsnag)
+      }
+    }
+
+    val androidMain by getting {
+      dependsOn(mobileMain)
+      dependencies {
+        api(libs.androidx.activity.compose)
+        api(libs.androidx.appcompat)
+        api(libs.androidx.core)
+        api(libs.androidx.browser)
+        implementation(libs.ktor.client.okhttp)
+      }
     }
     val androidInstrumentedTest by getting {
       dependencies {
@@ -134,7 +148,10 @@ kotlin {
       }
     }
 
-    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    val iosMain by getting {
+      dependsOn(mobileMain)
+      dependencies { implementation(libs.ktor.client.darwin) }
+    }
   }
 }
 
@@ -168,4 +185,5 @@ dependencies {
   add("kspAndroid", libs.kotlininject.compiler)
   add("kspIosArm64", libs.kotlininject.compiler)
   add("kspIosSimulatorArm64", libs.kotlininject.compiler)
+  add("kspJvm", libs.kotlininject.compiler)
 }

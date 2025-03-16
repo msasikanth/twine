@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.ui
 
-import androidx.compose.ui.text.PlatformTextStyle
-import androidx.compose.ui.text.TextStyle
+package dev.sasikanth.rss.reader.platform
 
-actual fun createDefaultTextStyle(): TextStyle {
-  return TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+import me.tatarka.inject.annotations.Provides
+
+actual interface PlatformComponent {
+
+  @Provides
+  fun providesLinkHandler(): LinkHandler =
+    object : LinkHandler {
+      override suspend fun openLink(link: String?) {
+        // TODO: no-op
+      }
+    }
 }

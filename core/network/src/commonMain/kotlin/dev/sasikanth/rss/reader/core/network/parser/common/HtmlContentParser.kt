@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser.common
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.safety.Safelist
 import io.ktor.utils.io.charsets.MalformedInputException
@@ -55,7 +54,7 @@ internal object HtmlContentParser {
     } catch (e: Exception) {
       null
     } catch (e: MalformedInputException) {
-      BugsnagKotlin.sendHandledException(e)
+      // TODO: Send to BugSnag?
       null
     }
   }

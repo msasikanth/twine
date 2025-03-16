@@ -28,17 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.sasikanth.rss.reader.utils.toSp
 
-expect fun createDefaultTextStyle(): TextStyle
-
 private val figmaLineHeightStyle =
   LineHeightStyle(alignment = LineHeightStyle.Alignment.Center, trim = LineHeightStyle.Trim.None)
 
-@Stable
-private val defaultTextStyle =
-  createDefaultTextStyle()
-    .copy(
-      textDirection = TextDirection.ContentOrLtr,
-    )
+@Stable private val defaultTextStyle = TextStyle(textDirection = TextDirection.ContentOrLtr)
 
 internal fun typography(fontFamily: FontFamily) =
   Typography(

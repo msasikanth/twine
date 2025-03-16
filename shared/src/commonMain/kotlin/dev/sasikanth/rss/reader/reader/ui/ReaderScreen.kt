@@ -13,6 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress(
+  "CANNOT_OVERRIDE_INVISIBLE_MEMBER",
+  "INVISIBLE_MEMBER",
+  "INVISIBLE_REFERENCE",
+)
 
 package dev.sasikanth.rss.reader.reader.ui
 
@@ -232,6 +237,7 @@ internal fun ReaderScreen(
               androidWebSettings.useWideViewPort = true
               iOSWebSettings.showHorizontalScrollIndicator = false
               iOSWebSettings.showVerticalScrollIndicator = false
+              desktopWebSettings.transparent = false
             }
           }
         }
@@ -259,7 +265,7 @@ internal fun ReaderScreen(
             webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
 
           if (hasHtmlTemplateLoaded) {
-            navigator.evaluateJavaScript(
+            webViewState.webView?.evaluateJavaScript(
               script =
                 "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
             )

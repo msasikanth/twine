@@ -53,6 +53,8 @@ reorderable = "2.4.3"
 korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
+commons-text = "1.13.0"
+prettytime = "5.0.6.Final"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -78,6 +80,7 @@ kotlinx_serialization_json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx_io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx_io" }
 sqldelight_driver_android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
+sqldelight_driver_sqlite = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight_extensions_paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect", version.ref = "sqldelight" }
@@ -127,6 +130,8 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 korlibs-string = { module = "com.soywiz:korlibs-string", version.ref = "korlibs" }
 filekit = { module = "io.github.vinceglb:filekit-compose", version.ref = "filekit" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
+prettytime = { module = "org.ocpsoft.prettytime:prettytime", version.ref = "prettytime" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
