@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -63,8 +64,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import coil3.size.Size
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -75,11 +79,13 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.coroutines.launch
 
 @Composable
 internal fun PostMetadata(
   feedName: String,
+  feedIcon: String,
   postRead: Boolean,
   postPublishedAt: String,
   postLink: String,
@@ -95,18 +101,18 @@ internal fun PostMetadata(
   Row(
     modifier =
       Modifier.padding(
-          top = 8.dp,
-          bottom = 8.dp,
-        )
+        top = 8.dp,
+        bottom = 8.dp,
+      )
         .then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     PostSourcePill(
       modifier = Modifier.weight(1f).clearAndSetSemantics {},
+      feedName = feedName,
+      feedIcon = feedIcon,
       config = config,
       onSourceClick = onSourceClick,
-      postRead = postRead,
-      feedName = feedName
     )
 
     Text(
@@ -133,47 +139,47 @@ internal fun PostMetadata(
 
 @Composable
 private fun PostSourcePill(
+  feedIcon: String,
+  feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
-  postRead: Boolean,
-  feedName: String,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
-    val postSourceClickableModifier =
-      if (config.enablePostSource) {
-        Modifier.clip(RoundedCornerShape(50))
-          .clickable(onClick = onSourceClick)
-          .background(color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f))
-          .padding(vertical = 4.dp)
-          .padding(start = 8.dp, end = 12.dp)
-      } else {
-        Modifier
-      }
-
     val postSourceTextColor =
       if (config.enablePostSource) {
-        AppTheme.colorScheme.textEmphasisHigh
+        AppTheme.colorScheme.onSurface
       } else {
         AppTheme.colorScheme.onSurfaceVariant
       }
 
-    Row(modifier = postSourceClickableModifier, verticalAlignment = Alignment.CenterVertically) {
-      if (!postRead && config.showUnreadIndicator) {
-        Box(
-          Modifier.requiredSize(6.dp)
-            .background(AppTheme.colorScheme.tintedForeground, CircleShape)
-            .align(Alignment.CenterVertically)
+    Row(
+      modifier = Modifier
+        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f), RoundedCornerShape(50))
+        .border(
+          1.dp,
+          MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+          RoundedCornerShape(50)
         )
-        Spacer(Modifier.requiredWidth(8.dp))
-      } else {
-        Spacer(Modifier.requiredWidth(4.dp))
-      }
+        .clip(RoundedCornerShape(50))
+        .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
+        .padding(vertical = 6.dp)
+        .padding(start = 8.dp, end = 12.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      FeedIcon(
+        modifier = Modifier.requiredSize(16.dp)
+          .clip(RoundedCornerShape(4.dp)),
+        url = feedIcon,
+        contentDescription = null,
+      )
+
+      Spacer(Modifier.requiredWidth(6.dp))
 
       Text(
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
-        text = feedName.capitalize(Locale.current),
+        text = feedName,
         color = postSourceTextColor,
         overflow = TextOverflow.Ellipsis
       )
@@ -244,8 +250,8 @@ private fun PostOptionsButtonRow(
       PostOptionIconButton(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
-              buttonHeight = with(density) { coordinates.size.height.toDp() }
-            }
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          }
             .semantics {
               role = Role.Button
               contentDescription = moreMenuOptionsLabel
