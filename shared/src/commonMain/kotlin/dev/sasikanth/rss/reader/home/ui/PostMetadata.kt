@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -57,18 +56,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import coil3.size.Size
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -79,7 +74,6 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.coroutines.launch
 
 @Composable
@@ -101,9 +95,9 @@ internal fun PostMetadata(
   Row(
     modifier =
       Modifier.padding(
-        top = 8.dp,
-        bottom = 8.dp,
-      )
+          top = 8.dp,
+          bottom = 8.dp,
+        )
         .then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
@@ -154,22 +148,24 @@ private fun PostSourcePill(
       }
 
     Row(
-      modifier = Modifier
-        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f), RoundedCornerShape(50))
-        .border(
-          1.dp,
-          MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-          RoundedCornerShape(50)
-        )
-        .clip(RoundedCornerShape(50))
-        .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
-        .padding(vertical = 6.dp)
-        .padding(start = 8.dp, end = 12.dp),
+      modifier =
+        Modifier.background(
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+            RoundedCornerShape(50)
+          )
+          .border(
+            1.dp,
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+            RoundedCornerShape(50)
+          )
+          .clip(RoundedCornerShape(50))
+          .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
+          .padding(vertical = 6.dp)
+          .padding(start = 8.dp, end = 12.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       FeedIcon(
-        modifier = Modifier.requiredSize(16.dp)
-          .clip(RoundedCornerShape(4.dp)),
+        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
         url = feedIcon,
         contentDescription = null,
       )
@@ -250,8 +246,8 @@ private fun PostOptionsButtonRow(
       PostOptionIconButton(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
-            buttonHeight = with(density) { coordinates.size.height.toDp() }
-          }
+              buttonHeight = with(density) { coordinates.size.height.toDp() }
+            }
             .semantics {
               role = Role.Button
               contentDescription = moreMenuOptionsLabel
