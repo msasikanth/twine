@@ -135,6 +135,7 @@ class ReaderPresenter(
           it.copy(
             link = post.link,
             title = post.title,
+            description = post.description,
             publishedAt = post.date.readerDateTimestamp(),
             isBookmarked = post.bookmarked,
             feed = feed,

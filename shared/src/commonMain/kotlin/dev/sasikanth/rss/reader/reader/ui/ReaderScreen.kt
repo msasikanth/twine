@@ -16,25 +16,46 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -46,8 +67,32 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlurEffect
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import coil3.size.Size
 import com.multiplatform.webview.jsbridge.IJsMessageHandler
 import com.multiplatform.webview.jsbridge.JsMessage
 import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
@@ -57,19 +102,18 @@ import com.multiplatform.webview.web.WebView
 import com.multiplatform.webview.web.WebViewNavigator
 import com.multiplatform.webview.web.WebViewState
 import com.multiplatform.webview.web.rememberWebViewNavigator
+import dev.sasikanth.rss.reader.components.DropdownMenu
+import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.image.AsyncImage
+import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderHTMLColors
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.reader.ui.ReaderRenderProgressHandler.ReaderRenderLoadingState
-import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
+import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
@@ -77,6 +121,7 @@ import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.asJSString
 import dev.sasikanth.rss.reader.utils.hexString
 import kotlinx.coroutines.launch
@@ -84,6 +129,7 @@ import kotlinx.coroutines.withContext
 
 @Composable
 internal fun ReaderScreen(
+  darkTheme: Boolean,
   presenter: ReaderPresenter,
   dispatchersProvider: DispatchersProvider,
   modifier: Modifier = Modifier
@@ -96,215 +142,432 @@ internal fun ReaderScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      Box {
-        CenterAlignedTopAppBar(
-          title = {},
-          navigationIcon = {
-            IconButton(onClick = { presenter.dispatch(ReaderEvent.BackClicked) }) {
-              Icon(TwineIcons.ArrowBack, contentDescription = LocalStrings.current.buttonGoBack)
+      Box(
+        modifier = Modifier.statusBarsPadding()
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+        ) {
+          IconButton(
+            onClick = {
+              // TODO: Go to previous article
             }
-          },
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = AppTheme.colorScheme.surface,
-              navigationIconContentColor = AppTheme.colorScheme.onSurface,
-              titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
-            ),
-        )
+          ) {
+            Icon(
+              imageVector = Icons.Rounded.ChevronLeft,
+              contentDescription = null
+            )
+          }
 
-        HorizontalDivider(
-          modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
-        )
+          Spacer(Modifier.weight(1f))
+
+          IconButton(
+            onClick = {
+              // TODO: Go to next article
+            }
+          ) {
+            Icon(
+              imageVector = Icons.Rounded.ChevronRight,
+              contentDescription = null
+            )
+          }
+        }
       }
     },
     bottomBar = {
-      Surface(
-        color = AppTheme.colorScheme.surfaceContainerHigh,
-        contentColor = AppTheme.colorScheme.onSurface,
-      ) {
-        Row(
-          modifier =
-            Modifier.fillMaxWidth()
-              .windowInsetsPadding(WindowInsets.navigationBars)
-              .padding(vertical = 8.dp),
-          verticalAlignment = Alignment.CenterVertically
+      val navBarScrimColor = Color.White
+
+      Box(
+        modifier =
+          Modifier.fillMaxWidth()
+            .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+            .navigationBarsPadding()
+            .padding(top = 24.dp)
+      )
+    },
+    containerColor = AppTheme.colorScheme.surface,
+    contentColor = Color.Unspecified
+  ) { paddingValues ->
+    HorizontalPager(
+      state = rememberPagerState { 5 },
+    ) {
+      val layoutDirection = LocalLayoutDirection.current
+      var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
+
+      if (state.canShowReaderView) {
+        LazyColumn(
+          modifier = Modifier.fillMaxSize(),
+          contentPadding = PaddingValues(
+            start = paddingValues.calculateStartPadding(layoutDirection),
+            top = 0.dp,
+            end = paddingValues.calculateEndPadding(layoutDirection),
+            bottom = paddingValues.calculateBottomPadding()
+          )
         ) {
-          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            val bookmarkIcon =
-              if (state.isBookmarked == true) {
-                TwineIcons.Bookmarked
-              } else {
-                TwineIcons.Bookmark
-              }
-            IconButton(onClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }) {
-              Icon(bookmarkIcon, contentDescription = LocalStrings.current.bookmark)
-            }
-          }
+          item(
+            key = "reader-header"
+          ) {
+            val postImage = state.postImage
 
-          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            val iconTint =
-              if (state.postMode == Source) {
-                AppTheme.colorScheme.tintedForeground
-              } else {
-                AppTheme.colorScheme.onSurface
-              }
+            Box {
+              if (!postImage.isNullOrBlank()) {
+                val gradientOverlayModifier =
+                  Modifier.drawWithCache {
+                    val gradientColor = if (darkTheme) Color.Black else Color.White
+                    val radialGradient =
+                      Brush.radialGradient(
+                        colors =
+                          listOf(
+                            gradientColor,
+                            gradientColor.copy(alpha = 0.0f),
+                            gradientColor.copy(alpha = 0.0f)
+                          ),
+                        center = Offset(x = this.size.width, y = 40f)
+                      )
 
-            val iconBackground =
-              if (state.postMode == Source) {
-                AppTheme.colorScheme.tintedSurface
-              } else {
-                Color.Transparent
-              }
+                    val linearGradient =
+                      Brush.verticalGradient(
+                        colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
+                      )
 
-            when {
-              state.content == null ||
-                state.postMode == Idle ||
-                state.postMode == RssContent ||
-                state.postMode == Source -> {
-                IconButton(
-                  colors = IconButtonDefaults.iconButtonColors(containerColor = iconBackground),
-                  onClick = {
-                    coroutineScope.launch { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+                    onDrawWithContent {
+                      drawContent()
+                      drawRect(radialGradient)
+                      drawRect(linearGradient)
+                    }
                   }
-                ) {
-                  Icon(
-                    TwineIcons.ArticleShortcut,
-                    contentDescription = LocalStrings.current.cdLoadFullArticle,
-                    tint = iconTint
-                  )
-                }
+
+                AsyncImage(
+                  url = postImage,
+                  modifier =
+                    Modifier
+                      .requiredHeightIn(max = 400.dp)
+                      .aspectRatio(4f/3f)
+                      .graphicsLayer {
+                        val blurRadiusInPx = 100.dp.toPx()
+                        renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
+                        shape = RectangleShape
+                        clip = false
+                      }
+                      .then(gradientOverlayModifier),
+                  contentDescription = null,
+                  contentScale = ContentScale.Crop,
+                  size = Size(128, 128),
+                  backgroundColor = AppTheme.colorScheme.surface
+                )
               }
-              (state.postMode == InProgress && state.content != null) -> {
-                CircularProgressIndicator(
-                  color = AppTheme.colorScheme.tintedForeground,
-                  modifier = Modifier.requiredSize(24.dp)
+
+              Column(
+                modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+              ) {
+                val title = state.title.orEmpty()
+                val description = state.description.orEmpty()
+
+                if (!postImage.isNullOrBlank()) {
+                  AsyncImage(
+                    url = postImage,
+                    modifier =
+                      Modifier
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .requiredHeightIn(max = 198.dp)
+                        .aspectRatio(ratio = 16f / 9f)
+                        .background(AppTheme.colorScheme.surfaceContainerLowest)
+                        .align(Alignment.CenterHorizontally),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                  )
+
+                  Spacer(modifier = Modifier.requiredHeight(8.dp))
+                }
+
+                Text(
+                  modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .padding(top = 24.dp, bottom = 12.dp),
+                  text = title.ifBlank { description },
+                  style = MaterialTheme.typography.titleLarge,
+                  color = AppTheme.colorScheme.textEmphasisHigh,
+                  maxLines = 3,
+                  overflow = TextOverflow.Ellipsis,
                 )
               }
             }
           }
 
-          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            IconButton(onClick = { coroutineScope.launch { linkHandler.openLink(state.link) } }) {
-              Icon(
-                modifier = Modifier.requiredSize(24.dp),
-                imageVector = TwineIcons.Website,
-                contentDescription = LocalStrings.current.openWebsite
+          item(key = "post-metadata") {
+            Row(
+              modifier =
+                Modifier.padding(horizontal = 32.dp),
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+              val feedIconUrl = if (showFeedFavIcon) state.feed!!.homepageLink else state.feed!!.icon
+
+              PostSourcePill(
+                modifier = Modifier.weight(1f).clearAndSetSemantics {},
+                feedName = state.feed!!.name,
+                feedIcon = feedIconUrl,
+                config = PostMetadataConfig(
+                  showUnreadIndicator = false,
+                  showToggleReadUnreadOption = true,
+                  enablePostSource = false
+                ),
+                onSourceClick = {
+                  // no-op
+                },
+              )
+
+              PostOptionsButtonRow(
+                postBookmarked = state.isBookmarked ?: false,
+                commentsLink = state.link,
+                onBookmarkClick = {
+                  // TODO
+                },
+                onCommentsClick = {
+                  // TODO
+                },
               )
             }
           }
 
-          Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
-            IconButton(onClick = { coroutineScope.launch { sharedHandler.share(state.link!!) } }) {
-              Icon(TwineIcons.Share, contentDescription = LocalStrings.current.share)
-            }
-          }
-        }
-      }
-    },
-    containerColor = AppTheme.colorScheme.surface,
-    contentColor = Color.Unspecified
-  ) { paddingValues ->
-    var renderingState by remember { mutableStateOf(ReaderRenderLoadingState.Loading) }
-
-    if (state.canShowReaderView) {
-      val webViewBackgroundColor = AppTheme.colorScheme.surface
-      val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
-      val textColor = AppTheme.colorScheme.onSurface.hexString()
-      val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
-      val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
-      val colors = remember {
-        ReaderHTMLColors(
-          textColor = textColor,
-          linkColor = linkColor,
-          dividerColor = dividerColor,
-          codeBackgroundColor = codeBackgroundColor
-        )
-      }
-
-      val webViewState =
-        remember(webViewBackgroundColor) {
-          WebViewState(WebContent.Data(data = "")).apply {
-            webSettings.apply {
-              backgroundColor = webViewBackgroundColor
-              supportZoom = false
-              androidWebSettings.useWideViewPort = true
-              iOSWebSettings.showHorizontalScrollIndicator = false
-              iOSWebSettings.showVerticalScrollIndicator = false
-            }
-          }
-        }
-      val navigator = rememberWebViewNavigator()
-      val jsBridge = rememberWebViewJsBridge()
-
-      LaunchedEffect(state.content, webViewBackgroundColor) {
-        withContext(dispatchersProvider.io) {
-          val htmlTemplate =
-            ReaderHTML.create(
-              title = state.title!!,
-              feedName = state.feed!!.name,
-              feedHomePageLink = state.feed!!.homepageLink,
-              publishedAt = state.publishedAt!!,
-              backgroundColor = webViewBackgroundColor
-            )
-
-          navigator.loadHtml(htmlTemplate, state.link)
-        }
-      }
-
-      LaunchedEffect(webViewState.loadingState) {
-        withContext(dispatchersProvider.io) {
-          val hasHtmlTemplateLoaded =
-            webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
-
-          if (hasHtmlTemplateLoaded) {
-            navigator.evaluateJavaScript(
-              script =
-                "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${colors.asJSString})"
+          item(key = "divider") {
+            HorizontalDivider(
+              modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .padding(top = 20.dp, bottom = 24.dp),
+              color = AppTheme.colorScheme.outlineVariant
             )
           }
+
+          item(
+            key = "reader-content",
+          ) {
+            val webViewBackgroundColor = AppTheme.colorScheme.surface
+            val codeBackgroundColor = AppTheme.colorScheme.surfaceContainerHighest.hexString()
+            val textColor = AppTheme.colorScheme.onSurface.hexString()
+            val linkColor = AppTheme.colorScheme.tintedForeground.hexString()
+            val dividerColor = AppTheme.colorScheme.surfaceContainerHigh.hexString()
+            val colors = remember {
+              ReaderHTMLColors(
+                textColor = textColor,
+                linkColor = linkColor,
+                dividerColor = dividerColor,
+                codeBackgroundColor = codeBackgroundColor
+              )
+            }
+
+            val webViewState =
+              remember(webViewBackgroundColor) {
+                WebViewState(WebContent.Data(data = "")).apply {
+                  webSettings.apply {
+                    backgroundColor = webViewBackgroundColor
+                    supportZoom = false
+                    androidWebSettings.useWideViewPort = true
+                    iOSWebSettings.showHorizontalScrollIndicator = false
+                    iOSWebSettings.showVerticalScrollIndicator = false
+                  }
+                }
+              }
+            val navigator = rememberWebViewNavigator()
+            val jsBridge = rememberWebViewJsBridge()
+
+            LaunchedEffect(state.content, webViewBackgroundColor) {
+              withContext(dispatchersProvider.io) {
+                val htmlTemplate =
+                  ReaderHTML.create(
+                    title = state.title!!,
+                    backgroundColor = webViewBackgroundColor
+                  )
+
+                navigator.loadHtml(htmlTemplate, state.link)
+              }
+            }
+
+            LaunchedEffect(webViewState.loadingState) {
+              withContext(dispatchersProvider.io) {
+                val hasHtmlTemplateLoaded =
+                  webViewState.loadingState == LoadingState.Finished && !state.content.isNullOrBlank()
+
+                if (hasHtmlTemplateLoaded) {
+                  navigator.evaluateJavaScript(
+                    script =
+                      "renderReaderView(${state.link.asJSString}, ${state.content.asJSString}, ${state.postImage.asJSString}, ${colors.asJSString})"
+                  )
+                }
+              }
+            }
+
+            DisposableEffect(jsBridge) {
+              jsBridge.register(
+                ReaderLinkHandler(
+                  openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
+                )
+              )
+
+              jsBridge.register(
+                ReaderRenderProgressHandler(
+                  renderState = { newRenderingState -> renderingState = newRenderingState }
+                )
+              )
+
+              onDispose { jsBridge.clear() }
+            }
+
+            WebView(
+              modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
+              state = webViewState,
+              navigator = navigator,
+              webViewJsBridge = jsBridge,
+              captureBackPresses = false,
+            )
+          }
         }
       }
 
-      DisposableEffect(jsBridge) {
-        jsBridge.register(
-          ReaderLinkHandler(
-            openLink = { link -> coroutineScope.launch { linkHandler.openLink(link) } }
-          )
-        )
+      when {
+        renderingState == ReaderRenderLoadingState.Loading -> {
+          Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(
+              color = AppTheme.colorScheme.tintedForeground,
+              strokeWidth = 4.dp
+            )
+          }
+        }
 
-        jsBridge.register(
-          ReaderRenderProgressHandler(
-            renderState = { newRenderingState -> renderingState = newRenderingState }
-          )
-        )
+        !state.canShowReaderView && state.content.isNullOrBlank() -> {
+          Text(LocalStrings.current.noReaderContent)
+        }
+      }
+    }
+  }
+}
 
-        onDispose { jsBridge.clear() }
+@Composable
+private fun PostSourcePill(
+  feedIcon: String,
+  feedName: String,
+  config: PostMetadataConfig,
+  onSourceClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Box(modifier = modifier) {
+    val postSourceTextColor =
+      if (config.enablePostSource) {
+        AppTheme.colorScheme.onSurface
+      } else {
+        AppTheme.colorScheme.onSurfaceVariant
       }
 
-      WebView(
-        modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
-        state = webViewState,
-        navigator = navigator,
-        webViewJsBridge = jsBridge,
-        captureBackPresses = false,
+    Row(
+      modifier =
+        Modifier.background(
+          MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+          RoundedCornerShape(50)
+        )
+          .border(
+            1.dp,
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+            RoundedCornerShape(50)
+          )
+          .clip(RoundedCornerShape(50))
+          .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
+          .padding(vertical = 6.dp)
+          .padding(start = 8.dp, end = 12.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      FeedIcon(
+        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        url = feedIcon,
+        contentDescription = null,
+      )
+
+      Spacer(Modifier.requiredWidth(6.dp))
+
+      Text(
+        style = MaterialTheme.typography.labelMedium,
+        maxLines = 1,
+        text = feedName,
+        color = postSourceTextColor,
+        overflow = TextOverflow.Ellipsis
+      )
+    }
+  }
+}
+
+@Composable
+private fun PostOptionsButtonRow(
+  postBookmarked: Boolean,
+  commentsLink: String?,
+  onBookmarkClick: () -> Unit,
+  onCommentsClick: () -> Unit,
+) {
+  Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
+    if (!commentsLink.isNullOrBlank()) {
+      val commentsLabel = LocalStrings.current.comments
+      PostOptionIconButton(
+        modifier =
+          Modifier.semantics {
+            role = Role.Button
+            contentDescription = commentsLabel
+          },
+        icon = TwineIcons.Comments,
+        iconTint = AppTheme.colorScheme.onSurfaceVariant,
+        onClick = onCommentsClick
       )
     }
 
-    when {
-      renderingState == ReaderRenderLoadingState.Loading -> {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-          CircularProgressIndicator(
-            color = AppTheme.colorScheme.tintedForeground,
-            strokeWidth = 4.dp
-          )
-        }
+    val bookmarkLabel =
+      if (postBookmarked) {
+        LocalStrings.current.unBookmark
+      } else {
+        LocalStrings.current.bookmark
       }
-      !state.canShowReaderView && state.content.isNullOrBlank() -> {
-        Text(LocalStrings.current.noReaderContent)
-      }
-    }
+    PostOptionIconButton(
+      modifier =
+        Modifier.semantics {
+          role = Role.Button
+          contentDescription = bookmarkLabel
+        },
+      icon =
+        if (postBookmarked) {
+          TwineIcons.Bookmarked
+        } else {
+          TwineIcons.Bookmark
+        },
+      iconTint =
+        if (postBookmarked) {
+          AppTheme.colorScheme.tintedForeground
+        } else {
+          AppTheme.colorScheme.onSurfaceVariant
+        },
+      onClick = onBookmarkClick
+    )
+  }
+}
+
+@Composable
+private fun PostOptionIconButton(
+  icon: ImageVector,
+  modifier: Modifier = Modifier,
+  iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
+  onClick: () -> Unit,
+) {
+  Box(
+    modifier =
+      Modifier.requiredSize(40.dp)
+        .clip(MaterialTheme.shapes.small)
+        .clickable(onClick = onClick)
+        .then(modifier),
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      imageVector = icon,
+      contentDescription = null,
+      tint = iconTint,
+      modifier = Modifier.size(20.dp)
+    )
   }
 }
 

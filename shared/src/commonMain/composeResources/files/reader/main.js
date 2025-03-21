@@ -63,7 +63,7 @@ function updateStyles(colors) {
   const styles = `
   body {
     margin: 0;
-    padding: 16px 0 0 0;
+    padding: 0;
     color: ${colors.textColor};
     font-family: 'Golos Text', sans-serif;
     overflow-wrap: break-word;
@@ -198,6 +198,37 @@ function formatRedditPost(html) {
   return result;
 }
 
+async function removeImageTagByUrl(imageUrl) {
+  if (!imageUrl) {
+    return;
+  }
+
+  const allElements = document.querySelectorAll('*');
+
+  for (let i = 0; i < allElements.length; i++) {
+    const element = allElements[i];
+
+    if (element.tagName === 'IMG' && element.src === imageUrl) {
+      element.parentNode.removeChild(element);
+      break;
+    }
+
+    if (element.tagName === 'FIGURE') {
+      const img = element.querySelector('img');
+      if (img && img.src === imageUrl) {
+        element.parentNode.removeChild(element);
+        break;
+      }
+    }
+
+    const backgroundImage = window.getComputedStyle(element).backgroundImage;
+    if (backgroundImage && backgroundImage !== 'none' && backgroundImage.includes(imageUrl)) {
+      element.parentNode.removeChild(element);
+      break;
+    }
+  }
+}
+
 async function formatContentUsingMercury(link, sanitizedHtml, html) {
   //noinspection JSUnresolvedVariable
   const result = await Mercury.parse(link, {html: sanitizedHtml});
@@ -217,7 +248,7 @@ async function parseContent(link, content) {
   return await formatContentUsingMercury(link, sanitizedHtml, content);
 }
 
-async function renderReaderView(link, html, colors) {
+async function renderReaderView(link, html, imageUrl, colors) {
   console.log('Preparing reader content for rendering');
   //noinspection JSUnresolvedVariable
   window.kmpJsBridge.callNative(
@@ -237,6 +268,7 @@ async function renderReaderView(link, html, colors) {
   processLinks();
   processIFrames();
   removeTitle();
+  await removeImageTagByUrl(imageUrl);
 
   document.body.style.display = "block";
 

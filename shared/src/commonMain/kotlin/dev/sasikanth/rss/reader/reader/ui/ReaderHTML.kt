@@ -24,22 +24,11 @@ object ReaderHTML {
 
   internal suspend fun create(
     title: String,
-    feedName: String,
-    feedHomePageLink: String,
-    publishedAt: String,
     backgroundColor: Color
   ): String {
     val mercuryJS = readFile("mercury.web.js")
     val readerJS = readFile("main.js")
     val readerStyles = readFile("styles.css")
-
-    val postMetadata =
-      postMetadata(
-        feedName = feedName,
-        feedHomePageLink = feedHomePageLink,
-        publishedAt = publishedAt,
-        hasTitle = title.isNotBlank()
-      )
 
     // language=HTML
     @Suppress("HtmlRequiredLangAttribute")
@@ -59,36 +48,11 @@ object ReaderHTML {
       <title>$title</title>
     </head>
     <body style='background-color:${backgroundColor.hexString()};'>
-      <h1 id='title'>$title</h1>
-      <div>$postMetadata</div>
       <div id='content'></div>
     </body>
     </html>
         """
       .trimIndent()
-  }
-
-  private fun postMetadata(
-    feedName: String,
-    feedHomePageLink: String,
-    publishedAt: String,
-    hasTitle: Boolean,
-  ): String {
-    return buildString {
-      if (hasTitle) {
-        appendLine("<hr class=\"top-divider\">")
-      }
-
-      // language=HTML
-      appendLine(
-        """
-      <div class ="feedName"><a href='$feedHomePageLink'>$feedName</a></div>
-      <div class="caption">$publishedAt</div>
-      <hr class="top-divider">
-    """
-          .trimIndent()
-      )
-    }
   }
 
   private suspend fun readFile(fileName: String): String {

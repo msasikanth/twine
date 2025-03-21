@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -312,7 +313,9 @@ private fun FeaturedSectionBlurredBackground(
   AsyncImage(
     url = post.postWithMetadata.imageUrl!!,
     modifier =
-      Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+      Modifier
+        .requiredHeightIn(max = 400.dp)
+        .aspectRatio(featuredImageBackgroundAspectRatio)
         .graphicsLayer {
           val blurRadiusInPx = 100.dp.toPx()
           renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)

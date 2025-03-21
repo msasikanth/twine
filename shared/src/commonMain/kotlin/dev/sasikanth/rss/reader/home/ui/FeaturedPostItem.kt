@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -93,6 +94,7 @@ internal fun FeaturedPostItem(
       url = item.imageUrl!!,
       modifier =
         Modifier.clip(MaterialTheme.shapes.extraLarge)
+          .requiredHeightIn(max = 198.dp)
           .aspectRatio(featuredImageAspectRatio)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
           .graphicsLayer {
