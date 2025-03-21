@@ -120,7 +120,7 @@ internal fun PostMetadata(
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
-      color = AppTheme.colorScheme.textEmphasisMed,
+      color = AppTheme.colorScheme.outline,
       textAlign = TextAlign.Start
     )
 
@@ -208,7 +208,7 @@ private fun PostOptionsButtonRow(
             contentDescription = commentsLabel
           },
         icon = TwineIcons.Comments,
-        iconTint = AppTheme.colorScheme.textEmphasisHigh,
+        iconTint = AppTheme.colorScheme.onSurfaceVariant,
         onClick = onCommentsClick
       )
     }
@@ -235,7 +235,7 @@ private fun PostOptionsButtonRow(
         if (postBookmarked) {
           AppTheme.colorScheme.tintedForeground
         } else {
-          AppTheme.colorScheme.textEmphasisHigh
+          AppTheme.colorScheme.onSurfaceVariant
         },
       onClick = onBookmarkClick
     )
@@ -257,6 +257,7 @@ private fun PostOptionsButtonRow(
               contentDescription = moreMenuOptionsLabel
             },
         icon = Icons.Filled.MoreVert,
+        iconTint = AppTheme.colorScheme.onSurfaceVariant,
         onClick = { showDropdown = true }
       )
 
