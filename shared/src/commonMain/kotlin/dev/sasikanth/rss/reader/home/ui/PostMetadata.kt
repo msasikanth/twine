@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -56,8 +56,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -65,6 +63,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -80,6 +79,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun PostMetadata(
   feedName: String,
+  feedIcon: String,
   postRead: Boolean,
   postPublishedAt: String,
   postLink: String,
@@ -103,10 +103,10 @@ internal fun PostMetadata(
   ) {
     PostSourcePill(
       modifier = Modifier.weight(1f).clearAndSetSemantics {},
+      feedName = feedName,
+      feedIcon = feedIcon,
       config = config,
       onSourceClick = onSourceClick,
-      postRead = postRead,
-      feedName = feedName
     )
 
     Text(
@@ -114,7 +114,7 @@ internal fun PostMetadata(
       style = MaterialTheme.typography.bodySmall,
       maxLines = 1,
       text = postPublishedAt,
-      color = AppTheme.colorScheme.textEmphasisMed,
+      color = AppTheme.colorScheme.outline,
       textAlign = TextAlign.Start
     )
 
@@ -133,47 +133,49 @@ internal fun PostMetadata(
 
 @Composable
 private fun PostSourcePill(
+  feedIcon: String,
+  feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
-  postRead: Boolean,
-  feedName: String,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier) {
-    val postSourceClickableModifier =
-      if (config.enablePostSource) {
-        Modifier.clip(RoundedCornerShape(50))
-          .clickable(onClick = onSourceClick)
-          .background(color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = 0.12f))
-          .padding(vertical = 4.dp)
-          .padding(start = 8.dp, end = 12.dp)
-      } else {
-        Modifier
-      }
-
     val postSourceTextColor =
       if (config.enablePostSource) {
-        AppTheme.colorScheme.textEmphasisHigh
+        AppTheme.colorScheme.onSurface
       } else {
         AppTheme.colorScheme.onSurfaceVariant
       }
 
-    Row(modifier = postSourceClickableModifier, verticalAlignment = Alignment.CenterVertically) {
-      if (!postRead && config.showUnreadIndicator) {
-        Box(
-          Modifier.requiredSize(6.dp)
-            .background(AppTheme.colorScheme.tintedForeground, CircleShape)
-            .align(Alignment.CenterVertically)
-        )
-        Spacer(Modifier.requiredWidth(8.dp))
-      } else {
-        Spacer(Modifier.requiredWidth(4.dp))
-      }
+    Row(
+      modifier =
+        Modifier.background(
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+            RoundedCornerShape(50)
+          )
+          .border(
+            1.dp,
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+            RoundedCornerShape(50)
+          )
+          .clip(RoundedCornerShape(50))
+          .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
+          .padding(vertical = 6.dp)
+          .padding(start = 8.dp, end = 12.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      FeedIcon(
+        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        url = feedIcon,
+        contentDescription = null,
+      )
+
+      Spacer(Modifier.requiredWidth(6.dp))
 
       Text(
-        style = MaterialTheme.typography.bodySmall,
+        style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
-        text = feedName.capitalize(Locale.current),
+        text = feedName,
         color = postSourceTextColor,
         overflow = TextOverflow.Ellipsis
       )
@@ -202,7 +204,7 @@ private fun PostOptionsButtonRow(
             contentDescription = commentsLabel
           },
         icon = TwineIcons.Comments,
-        iconTint = AppTheme.colorScheme.textEmphasisHigh,
+        iconTint = AppTheme.colorScheme.onSurfaceVariant,
         onClick = onCommentsClick
       )
     }
@@ -229,7 +231,7 @@ private fun PostOptionsButtonRow(
         if (postBookmarked) {
           AppTheme.colorScheme.tintedForeground
         } else {
-          AppTheme.colorScheme.textEmphasisHigh
+          AppTheme.colorScheme.onSurfaceVariant
         },
       onClick = onBookmarkClick
     )
@@ -251,6 +253,7 @@ private fun PostOptionsButtonRow(
               contentDescription = moreMenuOptionsLabel
             },
         icon = Icons.Filled.MoreVert,
+        iconTint = AppTheme.colorScheme.onSurfaceVariant,
         onClick = { showDropdown = true }
       )
 
