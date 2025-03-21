@@ -1,12 +1,12 @@
-DROP TRIGGER post_unbookmarked;
+DROP TRIGGER post_bookmarked;
 
-ALTER TABLE bookmark ADD COLUMN feedHomepageLink TEXT NOT NULL DEFAULT 'temp';
+ALTER TABLE bookmark ADD COLUMN feedHomepageLink TEXT DEFAULT '' NOT NULL;
 
 UPDATE bookmark
 SET feedHomepageLink = (SELECT homepageLink FROM feed WHERE feed.id = bookmark.sourceId)
-WHERE feedHomepageLink = 'temp';
+WHERE feedHomepageLink = '';
 
-UPDATE bookmark SET feedHomepageLink = bookmark.feedIcon WHERE feedHomepageLink = 'temp';
+UPDATE bookmark SET feedHomepageLink = bookmark.feedIcon WHERE feedHomepageLink = '';
 
 CREATE TRIGGER IF NOT EXISTS
 post_bookmarked

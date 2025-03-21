@@ -14,7 +14,7 @@ CREATE TABLE bookmark (
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
   feedName TEXT NOT NULL,
   feedIcon TEXT NOT NULL,
-  feedHomepageLink TEXT NOT NULL
+  feedHomepageLink TEXT DEFAULT '' NOT NULL
 );
 
 CREATE TRIGGER IF NOT EXISTS
