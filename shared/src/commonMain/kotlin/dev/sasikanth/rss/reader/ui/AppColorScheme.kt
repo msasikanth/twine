@@ -23,10 +23,7 @@ import androidx.compose.ui.graphics.Color
 
 @Immutable
 class AppColorScheme(
-  val tintedBackground: Color,
-  val tintedSurface: Color,
-  val tintedForeground: Color,
-  val tintedHighlight: Color,
+  val secondary: Color,
   val outline: Color,
   val outlineVariant: Color,
   val surface: Color,
@@ -39,13 +36,14 @@ class AppColorScheme(
   val surfaceContainerHighest: Color,
   val textEmphasisHigh: Color,
   val textEmphasisMed: Color,
+  val backdrop: Color,
+  val tintedBackground: Color,
+  val tintedSurface: Color,
+  val tintedForeground: Color,
+  val tintedHighlight: Color,
 ) {
 
   fun copy(
-    tintedBackground: Color = this.tintedBackground,
-    tintedSurface: Color = this.surfaceContainer,
-    tintedForeground: Color = this.tintedForeground,
-    tintedHighlight: Color = this.tintedHighlight,
     outline: Color = this.outline,
     outlineVariant: Color = this.outlineVariant,
     surface: Color = this.surface,
@@ -57,13 +55,15 @@ class AppColorScheme(
     surfaceContainerHigh: Color = this.surfaceContainerHigh,
     surfaceContainerHighest: Color = this.surfaceContainerHighest,
     textEmphasisHigh: Color = this.textEmphasisHigh,
-    textEmphasisMed: Color = this.textEmphasisMed
+    textEmphasisMed: Color = this.textEmphasisMed,
+    backdrop: Color = this.backdrop,
+    tintedBackground: Color = this.tintedBackground,
+    tintedSurface: Color = this.surfaceContainer,
+    tintedForeground: Color = this.tintedForeground,
+    tintedHighlight: Color = this.tintedHighlight,
   ): AppColorScheme =
     AppColorScheme(
-      tintedBackground = tintedBackground,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
-      tintedHighlight = tintedHighlight,
+      secondary = secondary,
       outline = outline,
       outlineVariant = outlineVariant,
       surface = surface,
@@ -75,16 +75,18 @@ class AppColorScheme(
       surfaceContainerHigh = surfaceContainerHigh,
       surfaceContainerHighest = surfaceContainerHighest,
       textEmphasisHigh = textEmphasisHigh,
-      textEmphasisMed = textEmphasisMed
+      textEmphasisMed = textEmphasisMed,
+      backdrop = backdrop,
+      tintedBackground = tintedBackground,
+      tintedSurface = tintedSurface,
+      tintedForeground = tintedForeground,
+      tintedHighlight = tintedHighlight,
     )
 }
 
 fun lightAppColorScheme(): AppColorScheme {
   return AppColorScheme(
-    tintedBackground = Color(0xFFF4FFF8),
-    tintedSurface = Color(0xFFBAFFE4),
-    tintedForeground = Color(0xFF006C53),
-    tintedHighlight = Color(0xFF63DBB5),
+    secondary = Color(0xFF516350),
     outline = Color(0xFF6A7771),
     outlineVariant = Color(0xFFBCCAC2),
     surface = Color(0xFFF5FBF6),
@@ -96,16 +98,18 @@ fun lightAppColorScheme(): AppColorScheme {
     surfaceContainerHigh = Color(0xFFE4EAE5),
     surfaceContainerHighest = Color(0xFFDEE4DF),
     textEmphasisHigh = Color.Black.copy(alpha = 0.9f),
-    textEmphasisMed = Color.Black.copy(alpha = 0.7f)
+    textEmphasisMed = Color.Black.copy(alpha = 0.7f),
+    backdrop = Color(0xFFECF3E7),
+    tintedBackground = Color(0xFFF4FFF8),
+    tintedSurface = Color(0xFFBAFFE4),
+    tintedForeground = Color(0xFF006C53),
+    tintedHighlight = Color(0xFF63DBB5),
   )
 }
 
 fun darkAppColorScheme(): AppColorScheme {
   return AppColorScheme(
-    tintedBackground = Color(0xFF002117),
-    tintedSurface = Color(0xFF00382A),
-    tintedForeground = Color(0xFF63DBB5),
-    tintedHighlight = Color(0xFF006C53),
+    secondary = Color(0xFFB8CCB5),
     outline = Color(0xFF89938E),
     outlineVariant = Color(0xFF3F4944),
     surface = Color(0xFF111412),
@@ -117,7 +121,12 @@ fun darkAppColorScheme(): AppColorScheme {
     surfaceContainerHigh = Color(0xFF272B29),
     surfaceContainerHighest = Color(0xFF323633),
     textEmphasisHigh = Color.White.copy(alpha = 0.9f),
-    textEmphasisMed = Color.White.copy(alpha = 0.7f)
+    textEmphasisMed = Color.White.copy(alpha = 0.7f),
+    backdrop = Color(0xFF0C120C),
+    tintedBackground = Color(0xFF002117),
+    tintedSurface = Color(0xFF00382A),
+    tintedForeground = Color(0xFF63DBB5),
+    tintedHighlight = Color(0xFF006C53),
   )
 }
 

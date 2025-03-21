@@ -38,7 +38,7 @@ BEGIN
 END;
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
-BEFORE UPDATE ON post
+BEFORE UPDATE OF title, description, rawContent ON post
 FOR EACH ROW
 WHEN (
   SELECT 1
@@ -51,6 +51,21 @@ WHEN (
 ) IS NOT NULL
 BEGIN
   UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
+CREATE TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE
+UPDATE OF title, description, rawContent ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%')
+) IS NULL AND old.isHidden == 1
+BEGIN
+  UPDATE post SET isHidden = 0 WHERE id = new.id;
 END;
 
 upsert:
@@ -88,7 +103,8 @@ SELECT
   post.bookmarked,
   post.read,
   feed.name AS feedName,
-  feed.icon AS feedIcon
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
@@ -112,7 +128,8 @@ SELECT
   post.bookmarked,
   post.read,
   feed.name AS feedName,
-  feed.icon AS feedIcon
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE

@@ -128,6 +128,25 @@ internal class DynamicColorState(
       }
 
     return AppColorScheme(
+      secondary = dynamicColors.secondary().toColor(scheme),
+      outline = dynamicColors.outline().toColor(scheme),
+      outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
+      surface = dynamicColors.surface().toColor(scheme),
+      onSurface = dynamicColors.onSurface().toColor(scheme),
+      onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
+      surfaceContainer = dynamicColors.surfaceContainer().toColor(scheme),
+      surfaceContainerLow = dynamicColors.surfaceContainerLow().toColor(scheme),
+      surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
+      surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
+      surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
+      textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
+      textEmphasisMed = defaultColorScheme.textEmphasisMed,
+      backdrop =
+        DynamicColor.fromPalette(
+            palette = { s -> s.neutralPalette },
+            tone = { s -> if (s.isDark) 5.0 else 95.0 },
+          )
+          .toColor(scheme),
       tintedBackground =
         DynamicColor.fromPalette(
             palette = { s -> s.primaryPalette },
@@ -184,18 +203,6 @@ internal class DynamicColorState(
             }
           )
           .toColor(scheme),
-      outline = dynamicColors.outline().toColor(scheme),
-      outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
-      surface = dynamicColors.surface().toColor(scheme),
-      onSurface = dynamicColors.onSurface().toColor(scheme),
-      onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
-      surfaceContainer = dynamicColors.surfaceContainer().toColor(scheme),
-      surfaceContainerLow = dynamicColors.surfaceContainerLow().toColor(scheme),
-      surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
-      surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
-      surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
-      textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
-      textEmphasisMed = defaultColorScheme.textEmphasisMed,
     )
   }
 
@@ -211,12 +218,6 @@ fun AppColorScheme.animate(
   if (to == null) return this
 
   return copy(
-    tintedBackground =
-      lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
-    tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
-    tintedForeground =
-      lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
-    tintedHighlight = lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
     outline = lerp(start = outline, stop = to.outline, fraction = progress),
     outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
     surface = lerp(start = surface, stop = to.surface, fraction = progress),
@@ -233,6 +234,13 @@ fun AppColorScheme.animate(
       lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
     surfaceContainerHighest =
       lerp(start = surfaceContainerHighest, stop = to.surfaceContainerHighest, fraction = progress),
+    backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
+    tintedBackground =
+      lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
+    tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
+    tintedForeground =
+      lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
+    tintedHighlight = lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
   )
 }
 

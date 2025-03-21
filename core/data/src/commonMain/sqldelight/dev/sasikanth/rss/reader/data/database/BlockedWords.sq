@@ -22,11 +22,14 @@ AFTER DELETE ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
   SET isHidden = 0
-  WHERE
-    (title LIKE '%' || old.content || '%' OR
-    description LIKE '%' || old.content || '%' OR
-    rawContent LIKE '%' || old.content || '%') AND
-    isHidden = 1;
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%' OR
+           post.rawContent LIKE '%' || blockedWord.content || '%')
+  )
+  AND isHidden = 1;
 END;
 
 insert:

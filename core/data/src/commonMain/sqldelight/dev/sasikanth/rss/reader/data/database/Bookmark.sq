@@ -13,15 +13,16 @@ CREATE TABLE bookmark (
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
   feedName TEXT NOT NULL,
-  feedIcon TEXT NOT NULL
+  feedIcon TEXT NOT NULL,
+  feedHomepageLink TEXT DEFAULT '' NOT NULL
 );
 
 CREATE TRIGGER IF NOT EXISTS
 post_bookmarked
 AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
 BEGIN
-  INSERT OR REPLACE INTO bookmark(id, sourceId, title, description, imageUrl, date, link, commentsLink, bookmarked, read, feedName, feedIcon)
-  SELECT new.id, new.sourceId, new.title, new.description, new.imageUrl, new.date, new.link, new.commentsLink, new.bookmarked, new.read, feed.name, feed.icon
+  INSERT OR REPLACE INTO bookmark(id, sourceId, title, description, imageUrl, date, link, commentsLink, bookmarked, read, feedName, feedIcon, feedHomepageLink)
+  SELECT new.id, new.sourceId, new.title, new.description, new.imageUrl, new.date, new.link, new.commentsLink, new.bookmarked, new.read, feed.name, feed.icon, feed.homepageLink
   FROM feed WHERE feed.id == new.sourceId;
 END;
 
