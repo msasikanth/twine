@@ -232,10 +232,7 @@ internal fun HomeScreen(
         scaffoldState = bottomSheetScaffoldState,
         content = { bottomSheetScaffoldContentPadding ->
           AppTheme(useDarkTheme = useDarkTheme) {
-            Box(
-              modifier =
-                Modifier.fillMaxSize().background(AppTheme.colorScheme.surfaceContainerLowest)
-            ) {
+            Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
               val posts = state.posts?.collectAsLazyPagingItems()
               val hasFeeds = state.hasFeeds
               val swipeRefreshState =
