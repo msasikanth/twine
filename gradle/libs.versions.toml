@@ -1,7 +1,7 @@
 [versions]
-kotlin = "2.1.10"
+kotlin = "2.1.20"
 android_gradle_plugin = "8.9.0"
-compose = "1.8.0-alpha03"
+compose = "1.8.0-SNAPSHOT+pull-5245"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "35"
@@ -31,7 +31,7 @@ coil = "3.1.0"
 spotless = "7.0.2"
 ktfmt = "0.44"
 kotlininject = "0.7.2"
-ksp = "2.1.10-1.0.30"
+ksp = "2.1.20-1.0.31"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.2.2"
 sqliteAndroid = "3.45.0"
