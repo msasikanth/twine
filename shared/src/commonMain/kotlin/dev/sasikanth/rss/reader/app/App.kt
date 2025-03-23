@@ -165,6 +165,7 @@ fun App(
               is Screen.Reader -> {
                 ReaderScreen(
                   presenter = screen.presenter,
+                  darkTheme = useDarkTheme,
                   dispatchersProvider = dispatchersProvider,
                   modifier = fillMaxSizeModifier
                 )

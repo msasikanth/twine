@@ -1,118 +1,11 @@
-function findHref(node, maxDepth = 4) {
-  let currentDepth = 0;
-
-  while (node && currentDepth < maxDepth) {
-    if (node.tagName && node.tagName.toLowerCase() === 'a' && node.hasAttribute('href')) {
-      return node.getAttribute("href");
-    }
-
-    node = node.parentNode;
-    currentDepth++;
-  }
-
-  return null;
-}
-
-function handleLinkClick(event) {
-  try {
-    event.preventDefault();
-    let href = findHref(event.target);
-    if (href === undefined || href === "/") {
-      href = ""
-    }
-    //noinspection JSUnresolvedVariable
-    window.kmpJsBridge.callNative(
-      "linkHandler",
-      href,
-      {}
-    );
-  } catch (err) {
-    // no-op
-  }
-}
-
-function processLinks() {
-  let links = document.querySelectorAll("a")
-  for (let i = 0, max = links.length; i < max; i++) {
-    let link = links[i];
-    link.addEventListener("click", handleLinkClick);
-  }
-}
-
-function processIFrames() {
-  let iframes = document.querySelectorAll("iframe")
+async function processIFrames(doc) {
+  let iframes = doc.querySelectorAll("iframe")
   for (let i = 0, max = iframes.length; i < max; i++) {
     let iframe = iframes[i];
     if (iframe.hasAttribute("data-runner-src")) {
       iframe.src = String(iframe.getAttribute("data-runner-src"));
     }
   }
-}
-
-// We already display title which are usually h1 tags,
-// so no point keeping the duplicate/next title again in the reader view
-// when we load post source.
-function removeTitle() {
-  const title = document.querySelectorAll("h1")[1];
-  if (title) {
-    title.style.display = 'none';
-  }
-}
-
-function updateStyles(colors) {
-  const styles = `
-  body {
-    margin: 0;
-    padding: 16px 0 0 0;
-    color: ${colors.textColor};
-    font-family: 'Golos Text', sans-serif;
-    overflow-wrap: break-word;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    overflow-x: hidden;
-  }
-  #content {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  a {
-    color: ${colors.linkColor};
-  }
-  ul li::before {
-    content: "\u2022";
-    color: ${colors.textColor};
-    margin-inline-end: 0.25em;
-  }
-  ol li::before {
-    counter-increment: item;
-    content: counters(item, ".") ".";
-    color: ${colors.textColor};
-    margin-inline-end: 0.25em;
-  }
-  code, pre {
-    font-family: 'Source Code Pro', monospace;
-    font-size: 14px;
-    -webkit-hyphens: none;
-    background: ${colors.codeBackgroundColor};
-  }
-  .top-divider {
-    margin-top: 12px;
-    margin-bottom: 12px;
-    border: 1px solid ${colors.dividerColor};
-  }
-  blockquote {
-    margin-inline-start: 8px;
-    padding-left: 8px;
-    border-left: 4px solid ${colors.linkColor}
-  }
-`
-
-  const styleSheet = document.createElement("style");
-  styleSheet.innerText = styles
-  document.head.appendChild(styleSheet)
 }
 
 function isRedditUrl(url) {
@@ -198,53 +91,74 @@ function formatRedditPost(html) {
   return result;
 }
 
-async function formatContentUsingMercury(link, sanitizedHtml, html) {
-  //noinspection JSUnresolvedVariable
-  const result = await Mercury.parse(link, {html: sanitizedHtml});
-  return result.content || html;
+async function removeHeadTag(html) {
+  const headRegex = /<head[^>]*>[\s\S]*?<\/head>/i;
+  return html.replace(headRegex, '');
 }
 
-async function parseContent(link, content) {
-  const sanitizedHtml = `<div>${content}</div>`
+async function removeFirstH1(doc) {
+  const firstH1 = doc.querySelector('h1');
+  if (firstH1) {
+    firstH1.parentNode.removeChild(firstH1);
+  }
+}
 
-  if (isRedditUrl(link)) {
-    const redditContent = formatRedditPost(sanitizedHtml);
-    if (redditContent) {
-      return redditContent;
-    }
+async function removeFirstImageTagByUrl(doc, imageUrl) {
+  if (!imageUrl) {
+    return;
   }
 
-  return await formatContentUsingMercury(link, sanitizedHtml, content);
+  const img = doc.querySelector(`img[src="${imageUrl}"]`);
+  if (img) {
+    img.parentNode.removeChild(img);
+    return;
+  }
+
+  const figure = doc.querySelector(`figure img[src="${imageUrl}"]`);
+  if (figure) {
+    figure.parentNode.parentNode.removeChild(figure.parentNode);
+  }
 }
 
-async function renderReaderView(link, html, colors) {
+async function formatContentUsingMercury(link, content) {
+  //noinspection JSUnresolvedVariable
+  const result = await Mercury.parse(link, {html: content, contentType: 'markdown'});
+  return result;
+}
+
+async function parseReaderContent(link, html, bannerImage) {
   console.log('Preparing reader content for rendering');
+
+  const cleanedHtml = await removeHeadTag(html);
+  let sanitizedHtml;
+  if (isRedditUrl(link)) {
+    sanitizedHtml = formatRedditPost(cleanedHtml);
+  } else {
+    sanitizedHtml = `<body><div>${cleanedHtml}</div></body>`;
+  }
+
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(sanitizedHtml, 'text/html');
+
+  await removeFirstH1(doc);
+  await processIFrames(doc);
+  await removeFirstImageTagByUrl(doc, bannerImage);
+
+  const result = await formatContentUsingMercury(link, doc.body.innerHTML);
+
+  console.log('Reader content rendered')
+
   //noinspection JSUnresolvedVariable
   window.kmpJsBridge.callNative(
     "renderProgress",
-    "Loading",
+    JSON.stringify("Idle"),
     {}
   );
 
-  const content = await parseContent(link, html);
-
-  document.getElementById("content").innerHTML += content;
-  document.querySelectorAll("pre").forEach((element) =>
-    element.dir = "auto"
-  );
-
-  updateStyles(colors)
-  processLinks();
-  processIFrames();
-  removeTitle();
-
-  document.body.style.display = "block";
-
-  console.log('Reader content rendered')
   //noinspection JSUnresolvedVariable
   window.kmpJsBridge.callNative(
-    "renderProgress",
-    "Idle",
+    "parsedContentCallback",
+    JSON.stringify({content: `${result.content}`, excerpt: `${result.excerpt}`}),
     {}
   );
 }
