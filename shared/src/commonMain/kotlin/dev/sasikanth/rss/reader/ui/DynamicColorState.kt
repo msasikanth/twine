@@ -139,6 +139,7 @@ internal class DynamicColorState(
       surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
       surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
       surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
+      inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
       textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
       textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop =
@@ -234,6 +235,7 @@ fun AppColorScheme.animate(
       lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
     surfaceContainerHighest =
       lerp(start = surfaceContainerHighest, stop = to.surfaceContainerHighest, fraction = progress),
+    inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
     backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
     tintedBackground =
       lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
