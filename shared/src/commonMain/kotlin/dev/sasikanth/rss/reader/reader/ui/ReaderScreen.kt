@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.reader.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,9 +35,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,6 +54,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -64,6 +68,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -111,11 +117,13 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.reader.ReaderState
+import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -178,14 +186,9 @@ internal fun ReaderScreen(
         }
       },
       bottomBar = {
-        val navBarScrimColor = AppTheme.colorScheme.backdrop
-
-        Box(
-          modifier =
-            Modifier.fillMaxWidth()
-              .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-              .navigationBarsPadding()
-              .padding(top = 24.dp)
+        BottomBar(
+          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(state.link) } },
+          loadFullArticleClick = { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
         )
       },
       containerColor = Color.Unspecified,
@@ -349,6 +352,78 @@ internal fun ReaderScreen(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun BottomBar(
+  openInBrowserClick: () -> Unit,
+  loadFullArticleClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val navBarScrimColor = AppTheme.colorScheme.backdrop
+
+  Box(
+    modifier =
+      Modifier.fillMaxWidth().wrapContentHeight().navigationBarsPadding().drawBehind {
+        drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+      },
+    contentAlignment = Alignment.Center
+  ) {
+    Row(
+      modifier =
+        Modifier.padding(bottom = 16.dp)
+          .clipToBounds()
+          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+          .border(
+            width = 1.dp,
+            color = AppTheme.colorScheme.bottomSheetBorder,
+            shape = RoundedCornerShape(50)
+          )
+          .padding(all = 12.dp)
+          .then(modifier),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      BottomBarIconButton(
+        label = LocalStrings.current.openWebsite,
+        icon = TwineIcons.Website,
+        onClick = openInBrowserClick
+      )
+
+      BottomBarIconButton(
+        label = LocalStrings.current.cdLoadFullArticle,
+        icon = TwineIcons.ArticleShortcut,
+        onClick = loadFullArticleClick
+      )
+    }
+  }
+}
+
+@Composable
+private fun BottomBarIconButton(label: String, icon: ImageVector, onClick: () -> Unit) {
+  AppTheme(useDarkTheme = true) {
+    Box(
+      modifier =
+        Modifier.requiredSizeIn(minWidth = 64.dp, minHeight = 40.dp)
+          .semantics {
+            role = Role.Button
+            contentDescription = label
+          }
+          .clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = ripple(bounded = false),
+          ) {
+            onClick()
+          },
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        modifier = Modifier.requiredSize(20.dp),
+        imageVector = icon,
+        contentDescription = null,
+        tint = AppTheme.colorScheme.onSurfaceVariant,
+      )
     }
   }
 }
