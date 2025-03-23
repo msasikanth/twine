@@ -103,6 +103,7 @@ import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.multiplatform.webview.jsbridge.IJsMessageHandler
 import com.multiplatform.webview.jsbridge.JsMessage
@@ -341,6 +342,9 @@ internal fun ReaderScreen(
                         textDecoration = TextDecoration.Underline
                       )
                   ),
+                colors = markdownColor(
+                  text = AppTheme.colorScheme.onSurface,
+                ),
                 imageTransformer = Coil3ImageTransformerImpl,
                 components = markdownComponents(
                   codeBlock = {
