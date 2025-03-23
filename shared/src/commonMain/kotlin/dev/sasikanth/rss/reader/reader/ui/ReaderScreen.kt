@@ -114,6 +114,7 @@ import dev.sasikanth.rss.reader.reader.ReaderState
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
@@ -141,9 +142,7 @@ internal fun ReaderScreen(
     containerColor = AppTheme.colorScheme.backdrop,
     dragHandle = null,
     shape = RectangleShape,
-    onDismissRequest = {
-      presenter.dispatch(ReaderEvent.BackClicked)
-    },
+    onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
   ) {
     Scaffold(
       modifier = modifier,
@@ -294,6 +293,7 @@ internal fun ReaderScreen(
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(state.commentsLink) }
                 },
+                onShareClick = { sharedHandler.share(state.link) },
                 onBookmarkClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }
               )
             }
@@ -342,7 +342,6 @@ internal fun ReaderScreen(
                   )
                 }
               }
-
               !state.canShowReaderView && state.content.isNullOrBlank() -> {
                 Text(LocalStrings.current.noReaderContent)
               }
@@ -361,6 +360,7 @@ private fun PostInfo(
   postImage: String?,
   parsedContent: ReaderContent,
   onCommentsClick: () -> Unit,
+  onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -443,8 +443,9 @@ private fun PostInfo(
       PostOptionsButtonRow(
         postBookmarked = state.isBookmarked ?: false,
         commentsLink = state.commentsLink,
-        onBookmarkClick = onBookmarkClick,
         onCommentsClick = onCommentsClick,
+        onShareClick = onShareClick,
+        onBookmarkClick = onBookmarkClick,
       )
     }
   }
@@ -453,49 +454,48 @@ private fun PostInfo(
 @Composable
 private fun BannerImageBlurred(postImage: String?, darkTheme: Boolean) {
   if (!postImage.isNullOrBlank()) {
-    val gradientOverlayModifier = if (darkTheme) {
-      Modifier.drawWithCache {
-        val gradientColor = Color.Black
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(
-                gradientColor,
-                gradientColor.copy(alpha = 0.0f),
-                gradientColor.copy(alpha = 0.0f)
-              ),
-            center = Offset(x = this.size.width, y = 40f)
-          )
+    val gradientOverlayModifier =
+      if (darkTheme) {
+        Modifier.drawWithCache {
+          val gradientColor = Color.Black
+          val radialGradient =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  gradientColor,
+                  gradientColor.copy(alpha = 0.0f),
+                  gradientColor.copy(alpha = 0.0f)
+                ),
+              center = Offset(x = this.size.width, y = 40f)
+            )
 
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-          )
+          val linearGradient =
+            Brush.verticalGradient(
+              colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
+            )
 
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
+          onDrawWithContent {
+            drawContent()
+            drawRect(radialGradient)
+            drawRect(linearGradient)
+          }
         }
+      } else {
+        Modifier
       }
-    } else {
-      Modifier
-    }
 
     val overlayColor = AppTheme.colorScheme.inversePrimary
     val colorMatrix = remember {
-      ColorMatrix()
-        .apply {
-          val sat = if (darkTheme) 1f else 5f
-          setToSaturation(sat)
-        }
+      ColorMatrix().apply {
+        val sat = if (darkTheme) 1f else 5f
+        setToSaturation(sat)
+      }
     }
 
     AsyncImage(
       url = postImage,
       modifier =
-        Modifier
-          .requiredHeightIn(max = 800.dp)
+        Modifier.requiredHeightIn(max = 800.dp)
           .aspectRatio(1f)
           .graphicsLayer {
             val blurRadiusInPx = 100.dp.toPx()
@@ -540,9 +540,9 @@ private fun PostSourcePill(
     Row(
       modifier =
         Modifier.background(
-          MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-          RoundedCornerShape(50)
-        )
+            MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
+            RoundedCornerShape(50)
+          )
           .border(
             1.dp,
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
@@ -577,8 +577,9 @@ private fun PostSourcePill(
 private fun PostOptionsButtonRow(
   postBookmarked: Boolean,
   commentsLink: String?,
-  onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
+  onShareClick: () -> Unit,
+  onBookmarkClick: () -> Unit,
 ) {
   Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
@@ -594,6 +595,18 @@ private fun PostOptionsButtonRow(
         onClick = onCommentsClick
       )
     }
+
+    val sharedLabel = LocalStrings.current.share
+    PostOptionIconButton(
+      modifier =
+        Modifier.semantics {
+          role = Role.Button
+          contentDescription = sharedLabel
+        },
+      icon = TwineIcons.Share,
+      iconTint = AppTheme.colorScheme.onSurfaceVariant,
+      onClick = onShareClick
+    )
 
     val bookmarkLabel =
       if (postBookmarked) {
