@@ -99,6 +99,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.size.Size
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
+import com.mikepenz.markdown.compose.components.markdownComponents
+import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
+import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import com.multiplatform.webview.jsbridge.IJsMessageHandler
@@ -130,6 +133,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.asJSString
+import dev.snipme.highlights.Highlights
+import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -320,6 +325,10 @@ internal fun ReaderScreen(
               }
             }
             CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
+              val highlightsBuilder = remember(darkTheme) {
+                Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+              }
+
               Markdown(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
                 content = parsedContent.content,
@@ -333,6 +342,22 @@ internal fun ReaderScreen(
                       )
                   ),
                 imageTransformer = Coil3ImageTransformerImpl,
+                components = markdownComponents(
+                  codeBlock = {
+                    MarkdownHighlightedCodeBlock(
+                      content = it.content,
+                      node = it.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                  codeFence = {
+                    MarkdownHighlightedCodeFence(
+                      content = it.content,
+                      node = it.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                )
               )
             }
 
