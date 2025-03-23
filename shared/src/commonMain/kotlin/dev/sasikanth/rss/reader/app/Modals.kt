@@ -18,8 +18,11 @@ package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.feed.FeedPresenter
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
+import dev.sasikanth.rss.reader.reader.ReaderPresenter
 
 internal sealed interface Modals {
+  class Reader(val presenter: ReaderPresenter) : Modals
+
   class FeedInfo(val presenter: FeedPresenter) : Modals
 
   class GroupSelection(val presenter: GroupSelectionPresenter) : Modals

@@ -162,14 +162,6 @@ fun App(
               is Screen.About -> {
                 AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
-              is Screen.Reader -> {
-                ReaderScreen(
-                  presenter = screen.presenter,
-                  darkTheme = useDarkTheme,
-                  dispatchersProvider = dispatchersProvider,
-                  modifier = fillMaxSizeModifier
-                )
-              }
               is Screen.AddFeed -> {
                 AppTheme(useDarkTheme = true) {
                   AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
@@ -192,6 +184,13 @@ fun App(
           val modals by appPresenter.modalStack.subscribeAsState()
           modals.child?.instance?.also { modal ->
             when (modal) {
+              is Modals.Reader -> {
+                ReaderScreen(
+                  presenter = modal.presenter,
+                  darkTheme = useDarkTheme,
+                  dispatchersProvider = dispatchersProvider,
+                )
+              }
               is Modals.FeedInfo ->
                 FeedInfoBottomSheet(
                   feedPresenter = modal.presenter,
