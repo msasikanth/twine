@@ -55,7 +55,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -169,10 +168,11 @@ internal fun ReaderScreen(
         CenterAlignedTopAppBar(
           modifier = Modifier.statusBarsPadding(),
           scrollBehavior = topAppBarScrollBehaviour,
-          colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-          ),
+          colors =
+            TopAppBarDefaults.topAppBarColors(
+              containerColor = Color.Transparent,
+              scrolledContainerColor = Color.Transparent,
+            ),
           navigationIcon = {
             IconButton(
               onClick = {
@@ -188,9 +188,12 @@ internal fun ReaderScreen(
           },
           title = {
             Box(
-              modifier = Modifier
-                .background(color = AppTheme.colorScheme.primary.copy(alpha = 0.08f), shape = RoundedCornerShape(50))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+              modifier =
+                Modifier.background(
+                    color = AppTheme.colorScheme.primary.copy(alpha = 0.08f),
+                    shape = RoundedCornerShape(50)
+                  )
+                  .padding(horizontal = 16.dp, vertical = 8.dp),
               contentAlignment = Alignment.Center,
             ) {
               Text(
@@ -294,6 +297,7 @@ internal fun ReaderScreen(
           onDispose { jsBridge.clear() }
         }
 
+        // Dummy view to parse the reader content using JS
         WebView(
           modifier = Modifier.requiredSize(0.dp),
           state = webViewState,
@@ -350,9 +354,10 @@ internal fun ReaderScreen(
               }
             }
             CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
-              val highlightsBuilder = remember(darkTheme) {
-                Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-              }
+              val highlightsBuilder =
+                remember(darkTheme) {
+                  Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+                }
 
               Markdown(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
@@ -366,26 +371,28 @@ internal fun ReaderScreen(
                         textDecoration = TextDecoration.Underline
                       )
                   ),
-                colors = markdownColor(
-                  text = AppTheme.colorScheme.onSurface,
-                ),
+                colors =
+                  markdownColor(
+                    text = AppTheme.colorScheme.onSurface,
+                  ),
                 imageTransformer = Coil3ImageTransformerImpl,
-                components = markdownComponents(
-                  codeBlock = {
-                    MarkdownHighlightedCodeBlock(
-                      content = it.content,
-                      node = it.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                  codeFence = {
-                    MarkdownHighlightedCodeFence(
-                      content = it.content,
-                      node = it.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                )
+                components =
+                  markdownComponents(
+                    codeBlock = {
+                      MarkdownHighlightedCodeBlock(
+                        content = it.content,
+                        node = it.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                    codeFence = {
+                      MarkdownHighlightedCodeFence(
+                        content = it.content,
+                        node = it.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                  )
               )
             }
 
@@ -426,7 +433,7 @@ private fun BottomBar(
   ) {
     Row(
       modifier =
-        Modifier.padding(bottom = 16.dp)
+        Modifier.padding(bottom = 16.dp, top = 16.dp)
           .clipToBounds()
           .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
           .border(
