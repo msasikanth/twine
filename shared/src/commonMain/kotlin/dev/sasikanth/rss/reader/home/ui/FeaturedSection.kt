@@ -240,29 +240,33 @@ private fun FeaturedSectionBackground(
 ) {
   Box(modifier) {
     val gradientOverlayModifier =
-      Modifier.drawWithCache {
-        val gradientColor = if (useDarkTheme) Color.Black else Color.White
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(
-                gradientColor,
-                gradientColor.copy(alpha = 0.0f),
-                gradientColor.copy(alpha = 0.0f)
-              ),
-            center = Offset(x = this.size.width, y = 40f)
-          )
+      if (useDarkTheme) {
+        Modifier.drawWithCache {
+          val gradientColor = if (useDarkTheme) Color.Black else Color.White
+          val radialGradient =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  gradientColor,
+                  gradientColor.copy(alpha = 0.0f),
+                  gradientColor.copy(alpha = 0.0f)
+                ),
+              center = Offset(x = this.size.width, y = 40f)
+            )
 
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-          )
+          val linearGradient =
+            Brush.verticalGradient(
+              colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
+            )
 
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
+          onDrawWithContent {
+            drawContent()
+            drawRect(radialGradient)
+            drawRect(linearGradient)
+          }
         }
+      } else {
+        Modifier
       }
 
     val swipeTransitionModifier =
