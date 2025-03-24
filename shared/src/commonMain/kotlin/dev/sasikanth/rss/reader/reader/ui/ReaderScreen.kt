@@ -45,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,6 +54,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -83,6 +86,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -158,11 +162,18 @@ internal fun ReaderScreen(
     shape = RectangleShape,
     onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
   ) {
+    val topAppBarScrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
-      modifier = modifier,
+      modifier = modifier.nestedScroll(topAppBarScrollBehaviour.nestedScrollConnection),
       topBar = {
-        Box(modifier = Modifier.statusBarsPadding()) {
-          Row(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        CenterAlignedTopAppBar(
+          modifier = Modifier.statusBarsPadding(),
+          scrollBehavior = topAppBarScrollBehaviour,
+          colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent,
+          ),
+          navigationIcon = {
             IconButton(
               onClick = {
                 // TODO: Go to previous article
@@ -174,9 +185,22 @@ internal fun ReaderScreen(
                 tint = AppTheme.colorScheme.onSurface,
               )
             }
-
-            Spacer(Modifier.weight(1f))
-
+          },
+          title = {
+            Box(
+              modifier = Modifier
+                .background(color = AppTheme.colorScheme.primary.copy(alpha = 0.08f), shape = RoundedCornerShape(50))
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(
+                text = LocalStrings.current.pullToClose,
+                style = MaterialTheme.typography.labelSmall,
+                color = AppTheme.colorScheme.onSurfaceVariant
+              )
+            }
+          },
+          actions = {
             IconButton(
               onClick = {
                 // TODO: Go to next article
@@ -189,7 +213,7 @@ internal fun ReaderScreen(
               )
             }
           }
-        }
+        )
       },
       bottomBar = {
         BottomBar(
