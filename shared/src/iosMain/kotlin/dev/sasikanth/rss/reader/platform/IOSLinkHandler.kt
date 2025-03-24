@@ -58,7 +58,9 @@ class IOSLinkHandler(
   }
 
   private fun openBrowser(url: NSURL) {
-    dispatch_async(dispatch_get_main_queue()) { UIApplication.sharedApplication().openURL(url) }
+    dispatch_async(dispatch_get_main_queue()) {
+      UIApplication.sharedApplication().openURL(url, emptyMap<Any?, Any?>(), {})
+    }
   }
 
   private fun inAppBrowser(url: NSURL) {

@@ -147,6 +147,12 @@ class AppPresenter(
 
   private fun createModal(modalConfig: ModalConfig, componentContext: ComponentContext): Modals =
     when (modalConfig) {
+      is ModalConfig.Reader -> {
+        Modals.Reader(
+          presenter =
+            readerPresenter(modalConfig.postId, componentContext) { modalNavigation.dismiss() }
+        )
+      }
       is ModalConfig.FeedInfo -> {
         Modals.FeedInfo(
           presenter =
@@ -233,11 +239,6 @@ class AppPresenter(
       Config.About -> {
         Screen.About(presenter = aboutPresenter(componentContext) { navigation.pop() })
       }
-      is Config.Reader -> {
-        Screen.Reader(
-          presenter = readerPresenter(config.postId, componentContext) { navigation.pop() }
-        )
-      }
       is Config.AddFeed -> {
         Screen.AddFeed(
           presenter =
@@ -272,7 +273,7 @@ class AppPresenter(
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        navigation.pushNew(Config.Reader(post.id))
+        modalNavigation.activate(ModalConfig.Reader(post.id))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
@@ -338,8 +339,6 @@ class AppPresenter(
 
     @Serializable data object About : Config
 
-    @Serializable data class Reader(val postId: String) : Config
-
     @Serializable data object AddFeed : Config
 
     @Serializable data class GroupDetails(val groupId: String) : Config
@@ -349,6 +348,8 @@ class AppPresenter(
 
   @Serializable
   sealed interface ModalConfig {
+    @Serializable data class Reader(val postId: String) : ModalConfig
+
     @Serializable data class FeedInfo(val feedId: String) : ModalConfig
 
     @Serializable data object GroupSelection : ModalConfig

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 
 @Immutable
 class AppColorScheme(
+  val primary: Color,
   val secondary: Color,
   val outline: Color,
   val outlineVariant: Color,
@@ -34,9 +35,12 @@ class AppColorScheme(
   val surfaceContainerLowest: Color,
   val surfaceContainerHigh: Color,
   val surfaceContainerHighest: Color,
+  val inversePrimary: Color,
   val textEmphasisHigh: Color,
   val textEmphasisMed: Color,
   val backdrop: Color,
+  val bottomSheet: Color,
+  val bottomSheetBorder: Color,
   val tintedBackground: Color,
   val tintedSurface: Color,
   val tintedForeground: Color,
@@ -44,6 +48,8 @@ class AppColorScheme(
 ) {
 
   fun copy(
+    primary: Color = this.primary,
+    secondary: Color = this.secondary,
     outline: Color = this.outline,
     outlineVariant: Color = this.outlineVariant,
     surface: Color = this.surface,
@@ -54,15 +60,19 @@ class AppColorScheme(
     surfaceContainerLowest: Color = this.surfaceContainerLowest,
     surfaceContainerHigh: Color = this.surfaceContainerHigh,
     surfaceContainerHighest: Color = this.surfaceContainerHighest,
+    inversePrimary: Color = this.inversePrimary,
     textEmphasisHigh: Color = this.textEmphasisHigh,
     textEmphasisMed: Color = this.textEmphasisMed,
     backdrop: Color = this.backdrop,
+    bottomSheet: Color = this.bottomSheet,
+    bottomSheetBorder: Color = this.bottomSheetBorder,
     tintedBackground: Color = this.tintedBackground,
     tintedSurface: Color = this.surfaceContainer,
     tintedForeground: Color = this.tintedForeground,
     tintedHighlight: Color = this.tintedHighlight,
   ): AppColorScheme =
     AppColorScheme(
+      primary = primary,
       secondary = secondary,
       outline = outline,
       outlineVariant = outlineVariant,
@@ -74,9 +84,12 @@ class AppColorScheme(
       surfaceContainerLowest = surfaceContainerLowest,
       surfaceContainerHigh = surfaceContainerHigh,
       surfaceContainerHighest = surfaceContainerHighest,
+      inversePrimary = inversePrimary,
       textEmphasisHigh = textEmphasisHigh,
       textEmphasisMed = textEmphasisMed,
       backdrop = backdrop,
+      bottomSheet = bottomSheet,
+      bottomSheetBorder = bottomSheetBorder,
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
@@ -86,6 +99,7 @@ class AppColorScheme(
 
 fun lightAppColorScheme(): AppColorScheme {
   return AppColorScheme(
+    primary = Color(0xFF37693C),
     secondary = Color(0xFF516350),
     outline = Color(0xFF6A7771),
     outlineVariant = Color(0xFFBCCAC2),
@@ -97,9 +111,12 @@ fun lightAppColorScheme(): AppColorScheme {
     surfaceContainerLowest = Color(0xFFFFFFFF),
     surfaceContainerHigh = Color(0xFFE4EAE5),
     surfaceContainerHighest = Color(0xFFDEE4DF),
+    inversePrimary = Color(0xFF43E269),
     textEmphasisHigh = Color.Black.copy(alpha = 0.9f),
     textEmphasisMed = Color.Black.copy(alpha = 0.7f),
     backdrop = Color(0xFFECF3E7),
+    bottomSheet = Color(0xFF001503),
+    bottomSheetBorder = Color(0xFF2B322A),
     tintedBackground = Color(0xFFF4FFF8),
     tintedSurface = Color(0xFFBAFFE4),
     tintedForeground = Color(0xFF006C53),
@@ -109,6 +126,7 @@ fun lightAppColorScheme(): AppColorScheme {
 
 fun darkAppColorScheme(): AppColorScheme {
   return AppColorScheme(
+    primary = Color(0xFF9DD49D),
     secondary = Color(0xFFB8CCB5),
     outline = Color(0xFF89938E),
     outlineVariant = Color(0xFF3F4944),
@@ -120,9 +138,12 @@ fun darkAppColorScheme(): AppColorScheme {
     surfaceContainerLowest = Color(0xFF0B0F0D),
     surfaceContainerHigh = Color(0xFF272B29),
     surfaceContainerHighest = Color(0xFF323633),
+    inversePrimary = Color(0xFF006E28),
     textEmphasisHigh = Color.White.copy(alpha = 0.9f),
     textEmphasisMed = Color.White.copy(alpha = 0.7f),
     backdrop = Color(0xFF0C120C),
+    bottomSheet = Color.Black,
+    bottomSheetBorder = Color(0xFF2B322A),
     tintedBackground = Color(0xFF002117),
     tintedSurface = Color(0xFF00382A),
     tintedForeground = Color(0xFF63DBB5),

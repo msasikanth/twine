@@ -20,7 +20,7 @@ essenty = "2.5.0"
 androidx_activity = "1.10.1"
 androidx_appcompat = "1.7.0"
 androidx_core = "1.15.0"
-androidx_collection = "1.4.5"
+androidx_collection = "1.5.0"
 androidx_test_runner = "1.6.2"
 androidx_test_rules = "1.6.1"
 androidx_work = "2.10.0"
@@ -53,6 +53,7 @@ reorderable = "2.4.3"
 korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
+markdown = "0.32.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -127,6 +128,10 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 korlibs-string = { module = "com.soywiz:korlibs-string", version.ref = "korlibs" }
 filekit = { module = "io.github.vinceglb:filekit-compose", version.ref = "filekit" }
 leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
+markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdown"  }
+markdown-material3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown"  }
+markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
+markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

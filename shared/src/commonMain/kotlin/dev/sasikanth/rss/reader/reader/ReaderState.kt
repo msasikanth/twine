@@ -24,12 +24,14 @@ internal data class ReaderState(
   val postId: String,
   val link: String?,
   val title: String?,
+  val description: String?,
   val content: String?,
   val publishedAt: String?,
   val isBookmarked: Boolean?,
   val feed: Feed?,
   val postMode: PostMode,
-  val postImage: String?
+  val postImage: String?,
+  val commentsLink: String?,
 ) {
 
   val canShowReaderView: Boolean
@@ -42,12 +44,14 @@ internal data class ReaderState(
         postId = postId,
         link = null,
         title = null,
+        description = null,
         content = null,
         publishedAt = null,
         isBookmarked = null,
         feed = null,
         postMode = PostMode.Idle,
-        postImage = null
+        postImage = null,
+        commentsLink = null,
       )
   }
 

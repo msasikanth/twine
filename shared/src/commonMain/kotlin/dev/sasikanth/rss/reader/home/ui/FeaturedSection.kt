@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -40,10 +41,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
@@ -235,29 +240,33 @@ private fun FeaturedSectionBackground(
 ) {
   Box(modifier) {
     val gradientOverlayModifier =
-      Modifier.drawWithCache {
-        val gradientColor = if (useDarkTheme) Color.Black else Color.White
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(
-                gradientColor,
-                gradientColor.copy(alpha = 0.0f),
-                gradientColor.copy(alpha = 0.0f)
-              ),
-            center = Offset(x = this.size.width, y = 40f)
-          )
+      if (useDarkTheme) {
+        Modifier.drawWithCache {
+          val gradientColor = if (useDarkTheme) Color.Black else Color.White
+          val radialGradient =
+            Brush.radialGradient(
+              colors =
+                listOf(
+                  gradientColor,
+                  gradientColor.copy(alpha = 0.0f),
+                  gradientColor.copy(alpha = 0.0f)
+                ),
+              center = Offset(x = this.size.width, y = 40f)
+            )
 
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-          )
+          val linearGradient =
+            Brush.verticalGradient(
+              colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
+            )
 
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
+          onDrawWithContent {
+            drawContent()
+            drawRect(radialGradient)
+            drawRect(linearGradient)
+          }
         }
+      } else {
+        Modifier
       }
 
     val swipeTransitionModifier =
@@ -275,7 +284,11 @@ private fun FeaturedSectionBackground(
         .then(gradientOverlayModifier)
 
     if (canBlurImage) {
-      FeaturedSectionBlurredBackground(post = featuredPost, modifier = swipeTransitionModifier)
+      FeaturedSectionBlurredBackground(
+        post = featuredPost,
+        darkTheme = useDarkTheme,
+        modifier = swipeTransitionModifier
+      )
     } else {
       FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)
     }
@@ -307,22 +320,41 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
 @Composable
 private fun FeaturedSectionBlurredBackground(
   post: FeaturedPostItem,
+  darkTheme: Boolean,
   modifier: Modifier = Modifier
 ) {
+  val overlayColor = AppTheme.colorScheme.inversePrimary
+  val colorMatrix = remember {
+    ColorMatrix().apply {
+      val sat = if (darkTheme) 1f else 5f
+      setToSaturation(sat)
+    }
+  }
+
   AsyncImage(
     url = post.postWithMetadata.imageUrl!!,
     modifier =
-      Modifier.aspectRatio(featuredImageBackgroundAspectRatio)
+      Modifier.requiredHeightIn(max = 800.dp)
+        .aspectRatio(1f)
         .graphicsLayer {
           val blurRadiusInPx = 100.dp.toPx()
           renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
           shape = RectangleShape
           clip = false
         }
+        .drawWithContent {
+          drawContent()
+
+          drawRect(
+            color = overlayColor,
+            blendMode = BlendMode.Luminosity,
+          )
+        }
         .then(modifier),
     contentDescription = null,
     contentScale = ContentScale.Crop,
     size = Size(128, 128),
-    backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+    backgroundColor = AppTheme.colorScheme.surface,
+    colorFilter = ColorFilter.colorMatrix(colorMatrix)
   )
 }

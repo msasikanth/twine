@@ -113,6 +113,10 @@ kotlin {
       implementation(libs.kermit.bugsnag)
       implementation(libs.reorderable)
       api(libs.filekit)
+      implementation(libs.markdown.renderer)
+      implementation(libs.markdown.material3)
+      implementation(libs.markdown.coil)
+      implementation(libs.markdown.code)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
