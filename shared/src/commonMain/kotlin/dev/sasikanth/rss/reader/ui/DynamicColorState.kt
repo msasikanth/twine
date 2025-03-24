@@ -128,6 +128,7 @@ internal class DynamicColorState(
       }
 
     return AppColorScheme(
+      primary = dynamicColors.primary().toColor(scheme),
       secondary = dynamicColors.secondary().toColor(scheme),
       outline = dynamicColors.outline().toColor(scheme),
       outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
@@ -139,12 +140,37 @@ internal class DynamicColorState(
       surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
       surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
       surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
+      inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
       textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
       textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop =
         DynamicColor.fromPalette(
             palette = { s -> s.neutralPalette },
             tone = { s -> if (s.isDark) 5.0 else 95.0 },
+          )
+          .toColor(scheme),
+      bottomSheet =
+        if (useDarkTheme) {
+          Color.Black
+        } else {
+          DynamicColor.fromPalette(
+              palette = { s -> s.primaryPalette },
+              tone = { s -> 5.0 },
+              background = { s -> dynamicColors.highestSurface(s) },
+              toneDeltaConstraint = { s ->
+                ToneDeltaConstraint(
+                  MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
+                  dynamicColors.primaryContainer(),
+                  if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
+                )
+              }
+            )
+            .toColor(scheme)
+        },
+      bottomSheetBorder =
+        DynamicColor.fromPalette(
+            palette = { s -> s.neutralPalette },
+            tone = { s -> 20.0 },
           )
           .toColor(scheme),
       tintedBackground =
@@ -218,6 +244,8 @@ fun AppColorScheme.animate(
   if (to == null) return this
 
   return copy(
+    primary = lerp(start = primary, stop = to.primary, fraction = progress),
+    secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
     outline = lerp(start = outline, stop = to.outline, fraction = progress),
     outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
     surface = lerp(start = surface, stop = to.surface, fraction = progress),
@@ -234,7 +262,11 @@ fun AppColorScheme.animate(
       lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
     surfaceContainerHighest =
       lerp(start = surfaceContainerHighest, stop = to.surfaceContainerHighest, fraction = progress),
+    inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
     backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
+    bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
+    bottomSheetBorder =
+      lerp(start = bottomSheetBorder, stop = to.bottomSheetBorder, fraction = progress),
     tintedBackground =
       lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
     tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),

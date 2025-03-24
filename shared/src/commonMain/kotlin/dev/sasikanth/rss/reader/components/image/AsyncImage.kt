@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -33,7 +34,8 @@ internal fun AsyncImage(
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500),
-  backgroundColor: Color? = null
+  backgroundColor: Color? = null,
+  colorFilter: ColorFilter? = null,
 ) {
   val backgroundColorModifier =
     if (backgroundColor != null) {
@@ -50,7 +52,8 @@ internal fun AsyncImage(
       model = imageRequest,
       contentDescription = contentDescription,
       modifier = Modifier.matchParentSize(),
-      contentScale = contentScale
+      contentScale = contentScale,
+      colorFilter = colorFilter,
     )
   }
 }
