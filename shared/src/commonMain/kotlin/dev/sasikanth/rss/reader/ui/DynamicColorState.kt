@@ -128,6 +128,7 @@ internal class DynamicColorState(
       }
 
     return AppColorScheme(
+      primary = dynamicColors.primary().toColor(scheme),
       secondary = dynamicColors.secondary().toColor(scheme),
       outline = dynamicColors.outline().toColor(scheme),
       outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
@@ -243,6 +244,8 @@ fun AppColorScheme.animate(
   if (to == null) return this
 
   return copy(
+    primary = lerp(start = primary, stop = to.primary, fraction = progress),
+    secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
     outline = lerp(start = outline, stop = to.outline, fraction = progress),
     outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
     surface = lerp(start = surface, stop = to.surface, fraction = progress),

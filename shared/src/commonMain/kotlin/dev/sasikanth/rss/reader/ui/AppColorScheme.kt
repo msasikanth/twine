@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 
 @Immutable
 class AppColorScheme(
+  val primary: Color,
   val secondary: Color,
   val outline: Color,
   val outlineVariant: Color,
@@ -47,6 +48,8 @@ class AppColorScheme(
 ) {
 
   fun copy(
+    primary: Color = this.primary,
+    secondary: Color = this.secondary,
     outline: Color = this.outline,
     outlineVariant: Color = this.outlineVariant,
     surface: Color = this.surface,
@@ -69,6 +72,7 @@ class AppColorScheme(
     tintedHighlight: Color = this.tintedHighlight,
   ): AppColorScheme =
     AppColorScheme(
+      primary = primary,
       secondary = secondary,
       outline = outline,
       outlineVariant = outlineVariant,
@@ -95,6 +99,7 @@ class AppColorScheme(
 
 fun lightAppColorScheme(): AppColorScheme {
   return AppColorScheme(
+    primary = Color(0xFF37693C),
     secondary = Color(0xFF516350),
     outline = Color(0xFF6A7771),
     outlineVariant = Color(0xFFBCCAC2),
@@ -121,6 +126,7 @@ fun lightAppColorScheme(): AppColorScheme {
 
 fun darkAppColorScheme(): AppColorScheme {
   return AppColorScheme(
+    primary = Color(0xFF9DD49D),
     secondary = Color(0xFFB8CCB5),
     outline = Color(0xFF89938E),
     outlineVariant = Color(0xFF3F4944),
