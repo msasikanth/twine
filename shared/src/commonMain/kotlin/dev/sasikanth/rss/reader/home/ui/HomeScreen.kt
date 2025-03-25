@@ -75,9 +75,10 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMaxBy
-import androidx.paging.LoadState
+import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
@@ -87,10 +88,17 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -109,7 +117,14 @@ internal fun HomeScreen(
   val coroutineScope = rememberCoroutineScope()
   val state by homePresenter.state.collectAsState()
   val feedsState by homePresenter.feedsPresenter.state.collectAsState()
+  val linkHandler = LocalLinkHandler.current
+  val dynamicColorState = LocalDynamicColorState.current
 
+  val posts = state.posts?.collectAsLazyPagingItems()
+  val featuredPosts by featuredPosts(posts).collectAsState(initial = persistentListOf())
+
+  val listState = rememberLazyListState()
+  val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val bottomSheetState =
     rememberStandardBottomSheetState(
       initialValue = state.feedsSheetState,
@@ -128,16 +143,8 @@ internal fun HomeScreen(
   val bottomSheetScaffoldState =
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
-  val listState = rememberLazyListState()
-  val featuredPostsPagerState = rememberPagerState(pageCount = { state.featuredPosts?.size ?: 0 })
-
-  val linkHandler = LocalLinkHandler.current
-
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-
-  val featuredPosts = state.featuredPosts
-  val dynamicColorState = LocalDynamicColorState.current
 
   LaunchedEffect(state.feedsSheetState) {
     if (
@@ -149,7 +156,7 @@ internal fun HomeScreen(
   }
 
   LaunchedEffect(featuredPosts) {
-    if (featuredPosts.isNullOrEmpty()) {
+    if (featuredPosts.isEmpty()) {
       dynamicColorState.reset()
     }
   }
@@ -172,7 +179,7 @@ internal fun HomeScreen(
     snapshotFlow { featuredPostsPagerState.settledPage }
       .debounce(2.seconds)
       .collect {
-        val featuredPost = state.featuredPosts?.getOrNull(it) ?: return@collect
+        val featuredPost = featuredPosts.getOrNull(it) ?: return@collect
 
         if (featuredPost.postWithMetadata.read) return@collect
 
@@ -233,7 +240,6 @@ internal fun HomeScreen(
         content = { bottomSheetScaffoldContentPadding ->
           AppTheme(useDarkTheme = useDarkTheme) {
             Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
-              val posts = state.posts?.collectAsLazyPagingItems()
               val hasFeeds = state.hasFeeds
               val swipeRefreshState =
                 rememberPullRefreshState(
@@ -264,11 +270,10 @@ internal fun HomeScreen(
                 body = { paddingValues ->
                   Box(modifier = Modifier.fillMaxSize()) {
                     when {
-                      hasFeeds == null || (posts == null || featuredPosts == null) -> {
+                      hasFeeds == null || posts == null -> {
                         // no-op
                       }
-                      featuredPosts.isNotEmpty() ||
-                        (posts.itemCount > 0 || posts.loadState.refresh == LoadState.Loading) -> {
+                      posts.itemCount > 0 -> {
                         PostsList(
                           modifier = Modifier.nestedScroll(nestedScrollConnection),
                           paddingValues = paddingValues,
@@ -490,6 +495,47 @@ private fun SheetState.progressAsState(): State<Float> {
       currentValue == SheetValue.PartiallyExpanded && targetValue == SheetValue.Expanded ->
         anchoredDraggableState.progress
       else -> 0f
+    }
+  }
+}
+
+@Composable
+fun featuredPosts(
+  posts: LazyPagingItems<PostWithMetadata>?
+): Flow<ImmutableList<FeaturedPostItem>> {
+  val seedColorExtractor = LocalSeedColorExtractor.current
+  return remember(posts?.itemCount) {
+    flow {
+      if (posts == null || posts.itemCount == 0) {
+        emit(persistentListOf())
+        return@flow
+      }
+
+      val size = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
+      val mutablePostsList =
+        MutableList(size) { index ->
+          posts[index]?.let {
+            FeaturedPostItem(
+              postWithMetadata = it,
+              seedColor = null,
+            )
+          }
+        }
+
+      emit(mutablePostsList.filterNotNull().toImmutableList())
+
+      mutablePostsList.forEachIndexed { index, post ->
+        post?.let {
+          if (it.seedColor == null) {
+            mutablePostsList[index] =
+              it.copy(
+                seedColor = seedColorExtractor.calculateSeedColor(it.postWithMetadata.imageUrl)
+              )
+          }
+        }
+      }
+
+      emit(mutablePostsList.filterNotNull().toImmutableList())
     }
   }
 }

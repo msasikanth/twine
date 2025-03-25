@@ -32,20 +32,15 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
-import dev.sasikanth.rss.reader.core.model.local.SourceType.*
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.home.ui.FeaturedPostItem
-import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -56,17 +51,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -94,12 +85,11 @@ class HomePresenter(
       openGroupSelectionSheet: () -> Unit,
       openFeedInfoSheet: (feedId: String) -> Unit,
       openAddFeedScreen: () -> Unit,
-      openGroupScreen: (groupId: String) -> Unit,
+      openGroupScreen: (groupId: String) -> Unit
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
-  private val seedColorExtractor: SeedColorExtractor,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
@@ -140,7 +130,6 @@ class HomePresenter(
         observableActiveSource = observableActiveSource,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter,
-        seedColorExtractor = seedColorExtractor,
       )
     }
 
@@ -170,12 +159,11 @@ class HomePresenter(
   }
 
   private class PresenterInstance(
-    private val dispatchersProvider: DispatchersProvider,
+    dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
-    private val seedColorExtractor: SeedColorExtractor,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -338,36 +326,15 @@ class HomePresenter(
             )
           }
         }
-        .flatMapLatest { (activeSource, postsType) ->
+        .onEach { (activeSource, postsType) ->
           val unreadOnly = getUnreadOnly(postsType)
           val postsAfter = getPostsAfter(postsType)
-
-          loadFeaturedPostsItems(
-              activeSource = activeSource,
-              unreadOnly = unreadOnly,
-              postsAfter = postsAfter
-            )
-            .transformLatest { featuredPosts ->
-              _state.update { it.copy(featuredPosts = featuredPosts.toImmutableList()) }
-
-              emit(NTuple4(activeSource, postsAfter, unreadOnly, featuredPosts))
-
-              val postsWithSeedColors = calculateSeedColors(featuredPosts)
-
-              _state.update { it.copy(featuredPosts = postsWithSeedColors) }
-            }
-            .distinctUntilChangedBy { (_, _, _, featuredPosts) ->
-              featuredPosts.map { it.postWithMetadata.id }
-            }
-        }
-        .onEach { (activeSource, postsAfter, unreadOnly, featuredPosts) ->
           val activeSourceIds = activeSourceIds(activeSource)
 
           val posts =
             createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
-                rssRepository.posts(
+                rssRepository.allPosts(
                   activeSourceIds = activeSourceIds,
-                  featuredPostsIds = featuredPosts.map { it.postWithMetadata.id },
                   unreadOnly = unreadOnly,
                   after = postsAfter,
                 )
@@ -379,18 +346,6 @@ class HomePresenter(
         }
         .launchIn(coroutineScope)
     }
-
-    private suspend fun calculateSeedColors(featuredPosts: List<FeaturedPostItem>) =
-      featuredPosts
-        .map { post ->
-          post.copy(
-            seedColor =
-              withContext(dispatchersProvider.default) {
-                seedColorExtractor.calculateSeedColor(post.postWithMetadata.imageUrl)
-              }
-          )
-        }
-        .toImmutableList()
 
     private fun getPostsAfter(postsType: PostsType) =
       when (postsType) {
@@ -411,29 +366,6 @@ class HomePresenter(
         PostsType.LAST_24_HOURS -> null
         PostsType.UNREAD -> true
       }
-
-    private fun loadFeaturedPostsItems(
-      activeSource: Source?,
-      unreadOnly: Boolean?,
-      postsAfter: Instant
-    ): Flow<List<FeaturedPostItem>> {
-      val activeSourceIds = activeSourceIds(activeSource)
-
-      return rssRepository
-        .featuredPosts(
-          activeSourceIds = activeSourceIds,
-          unreadOnly = unreadOnly,
-          after = postsAfter
-        )
-        .mapLatest { featuredPosts ->
-          featuredPosts.map { postWithMetadata ->
-            FeaturedPostItem(
-              postWithMetadata = postWithMetadata,
-              seedColor = null,
-            )
-          }
-        }
-    }
 
     private fun activeSourceIds(activeSource: Source?) =
       when (activeSource) {

@@ -80,17 +80,47 @@ UPDATE SET
     date = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.date ELSE date END,
     read = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.read ELSE read END;
 
-count:
+allPostsCount:
 SELECT COUNT(post.id) FROM post
 WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  post.id NOT IN :featuredPosts AND
-  post.date > :postsAfter
-ORDER BY post.date DESC;
+  post.date > :postsAfter;
 
-featuredPosts:
+allPosts:
+WITH featuredPosts AS (
+  SELECT
+    post.id,
+    sourceId,
+    post.title,
+    post.description,
+    post.imageUrl,
+    post.date,
+    post.link,
+    post.commentsLink,
+    post.bookmarked,
+    post.read,
+    feed.name AS feedName,
+    feed.icon AS feedIcon,
+    feed.homepageLink AS feedHomepageLink,
+    1 AS isFeatured
+  FROM post
+  INNER JOIN feed ON post.sourceId == feed.id
+  WHERE
+    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+    post.isHidden == 0 AND
+    (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+    post.imageUrl IS NOT NULL AND
+    post.date > :postsAfter
+  ORDER BY post.date DESC
+  LIMIT :numberOfFeaturedPosts
+)
+
+SELECT * FROM featuredPosts
+
+UNION ALL
+
 SELECT
   post.id,
   sourceId,
@@ -104,41 +134,17 @@ SELECT
   post.read,
   feed.name AS feedName,
   feed.icon AS feedIcon,
-  feed.homepageLink AS feedHomepageLink
+  feed.homepageLink AS feedHomepageLink,
+  0 AS isFeatured
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  post.imageUrl IS NOT NULL AND
+  post.id NOT IN (SELECT id FROM featuredPosts) AND
   post.date > :postsAfter
-ORDER BY post.date DESC LIMIT :limit;
-
-posts:
-SELECT
-  post.id,
-  sourceId,
-  post.title,
-  post.description,
-  post.imageUrl,
-  post.date,
-  post.link,
-  post.commentsLink,
-  post.bookmarked,
-  post.read,
-  feed.name AS feedName,
-  feed.icon AS feedIcon,
-  feed.homepageLink AS feedHomepageLink
-FROM post
-INNER JOIN feed ON post.sourceId == feed.id
-WHERE
-  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  post.isHidden == 0 AND
-  (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  post.id NOT IN :featuredPosts AND
-  post.date > :postsAfter
-ORDER BY post.date DESC
+ORDER BY isFeatured DESC, date DESC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:

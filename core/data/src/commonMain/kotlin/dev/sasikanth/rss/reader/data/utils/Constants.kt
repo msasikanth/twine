@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.data.utils
 
-internal object Constants {
+object Constants {
   const val DATA_STORE_FILE_NAME = "twine.preferences_pb"
+  const val NUMBER_OF_FEATURED_POSTS = 6L
 }
