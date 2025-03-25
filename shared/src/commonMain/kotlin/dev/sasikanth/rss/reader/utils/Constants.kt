@@ -15,6 +15,8 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import dev.sasikanth.rss.reader.data.utils.Constants
+
 internal object Constants {
   const val BACKUP_FILE_NAME = "twine_backup"
   const val BACKUP_FILE_EXTENSION = "xml"
@@ -44,4 +46,6 @@ internal object Constants {
 
   const val ITEM_READ_ALPHA = 0.65f
   const val ITEM_UNREAD_ALPHA = 1f
+
+  const val NUMBER_OF_FEATURED_POSTS = Constants.NUMBER_OF_FEATURED_POSTS
 }
