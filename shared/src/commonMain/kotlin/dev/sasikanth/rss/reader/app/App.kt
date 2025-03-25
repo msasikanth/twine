@@ -54,6 +54,8 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
@@ -79,6 +81,7 @@ fun App(
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
+  seedColorExtractor: SeedColorExtractor,
   dispatchersProvider: DispatchersProvider,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
@@ -98,7 +101,8 @@ fun App(
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
-    LocalShowFeedFavIconSetting provides appState.showFeedFavIcon
+    LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
+    LocalSeedColorExtractor provides seedColorExtractor,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
