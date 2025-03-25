@@ -21,56 +21,53 @@ import androidx.collection.lruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
 import coil3.PlatformContext
-import coil3.annotation.ExperimentalCoilApi
 import coil3.request.ImageRequest
 import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
 import dev.sasikanth.material.color.utilities.score.Score
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class SeedColorExtractor(
   private val imageLoader: Lazy<ImageLoader>,
   private val platformContext: Lazy<PlatformContext>,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
   private val lruCache: LruCache<String, Int> = lruCache(maxSize = 100)
 
-  @OptIn(ExperimentalCoilApi::class)
-  suspend fun calculateSeedColor(url: String?): Int? {
-    if (url.isNullOrBlank()) return null
+  suspend fun calculateSeedColor(url: String?) =
+    withContext(dispatchersProvider.io) {
+      if (url.isNullOrBlank()) return@withContext null
 
-    val cache = lruCache[url]
-    if (cache != null) return cache
+      val cache = lruCache[url]
+      if (cache != null) return@withContext cache
 
-    val bitmap: ImageBitmap? = suspendCancellableCoroutine { cont ->
-      val request =
-        ImageRequest.Builder(platformContext.value)
-          .data(url)
-          .size(DEFAULT_REQUEST_SIZE)
-          .target(
-            onSuccess = { result ->
-              cont.resume(result.toComposeImageBitmap(platformContext.value))
-            },
-            onError = { cont.resume(null) },
-          )
-          .build()
+      val bitmap: ImageBitmap? = suspendCancellableCoroutine { cont ->
+        val request =
+          ImageRequest.Builder(platformContext.value)
+            .data(url)
+            .size(DEFAULT_REQUEST_SIZE)
+            .target(
+              onSuccess = { result ->
+                cont.resume(result.toComposeImageBitmap(platformContext.value))
+              },
+              onError = { cont.resume(null) },
+            )
+            .build()
 
-      imageLoader.value.enqueue(request)
-    }
+        imageLoader.value.enqueue(request)
+      }
 
-    return bitmap?.seedColor().also { seedColor ->
-      if (seedColor != null) {
-        lruCache.put(url, seedColor)
+      return@withContext bitmap?.seedColor().also { seedColor ->
+        if (seedColor != null) {
+          lruCache.put(url, seedColor)
+        }
       }
     }
-  }
-
-  fun cached(url: String?): Int? {
-    if (url.isNullOrBlank()) return null
-    return lruCache[url]
-  }
 
   private fun ImageBitmap.seedColor(): Int {
     val bitmapPixels = IntArray(width * height)
