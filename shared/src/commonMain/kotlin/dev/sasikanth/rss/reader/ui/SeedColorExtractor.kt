@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.ui
 
 import androidx.collection.LruCache
 import androidx.collection.lruCache
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -80,3 +81,8 @@ class SeedColorExtractor(
     const val DEFAULT_REQUEST_SIZE = 64
   }
 }
+
+internal val LocalSeedColorExtractor =
+  staticCompositionLocalOf<SeedColorExtractor> {
+    throw IllegalStateException("Provide a seed color extractor")
+  }
