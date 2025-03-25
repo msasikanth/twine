@@ -37,6 +37,7 @@ import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
+import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
@@ -68,7 +69,6 @@ class RssRepository(
 ) {
 
   companion object {
-    private const val NUMBER_OF_FEATURED_POSTS = 6L
     private const val UPDATE_CHUNKS = 6
   }
 
@@ -176,51 +176,61 @@ class RssRepository(
     }
   }
 
-  fun featuredPosts(
+  fun allPosts(
     activeSourceIds: List<String>,
-    unreadOnly: Boolean? = null,
-    after: Instant = Instant.DISTANT_PAST
-  ): Flow<List<PostWithMetadata>> {
-    return postQueries
-      .featuredPosts(
-        isSourceIdsEmpty = activeSourceIds.isEmpty(),
-        sourceIds = activeSourceIds,
-        unreadOnly = unreadOnly,
-        postsAfter = after,
-        limit = NUMBER_OF_FEATURED_POSTS,
-        mapper = ::PostWithMetadata
-      )
-      .asFlow()
-      .mapToList(dispatchersProvider.databaseRead)
-  }
-
-  fun posts(
-    activeSourceIds: List<String>,
-    featuredPostsIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
-        postQueries.count(
+        postQueries.allPostsCount(
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
           sourceIds = activeSourceIds,
-          featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        postQueries.posts(
+        postQueries.allPosts(
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
           sourceIds = activeSourceIds,
-          featuredPosts = featuredPostsIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
+          numberOfFeaturedPosts = Constants.NUMBER_OF_FEATURED_POSTS,
           limit = limit,
           offset = offset,
-          mapper = ::PostWithMetadata
+          mapper = {
+            id,
+            sourceId,
+            title,
+            description,
+            imageUrl,
+            date,
+            link,
+            commentsLink,
+            bookmarked,
+            read,
+            feedName,
+            feedIcon,
+            feedHomepageLink,
+            _ ->
+            PostWithMetadata(
+              id = id,
+              sourceId = sourceId,
+              title = title,
+              description = description,
+              imageUrl = imageUrl,
+              date = date,
+              link = link,
+              commentsLink = commentsLink,
+              bookmarked = bookmarked,
+              read = read,
+              feedName = feedName,
+              feedIcon = feedIcon,
+              feedHomepageLink = feedHomepageLink,
+            )
+          }
         )
       }
     )
