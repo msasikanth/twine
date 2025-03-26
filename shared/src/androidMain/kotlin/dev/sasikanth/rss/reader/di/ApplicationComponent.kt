@@ -19,7 +19,6 @@ import android.content.Context
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
-import dev.sasikanth.rss.reader.core.network.post.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -34,8 +33,6 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   abstract val rssRepository: RssRepository
 
   abstract val settingsRepository: SettingsRepository
-
-  abstract val fullArticleFetcher: FullArticleFetcher
 
   @Provides
   @AppScope

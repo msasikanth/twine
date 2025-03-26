@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-plugins { alias(libs.plugins.kotlin.multiplatform) }
+plugins {
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.kotlin.serialization)
+}
 
 kotlin {
   jvm()
@@ -23,6 +26,7 @@ kotlin {
   sourceSets {
     commonMain.dependencies {
       implementation(libs.kotlinx.datetime)
+      implementation(libs.kotlinx.serialization.json)
       // Require this for `@Immutable` annotation for models
       implementation(libs.compose.runtime)
       implementation(libs.uuid)
