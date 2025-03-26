@@ -514,11 +514,14 @@ fun featuredPosts(
       val size = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
       val mutablePostsList =
         MutableList(size) { index ->
-          posts[index]?.let {
+          val post = posts[index]
+          if (post != null && post.imageUrl.isNullOrBlank().not()) {
             FeaturedPostItem(
-              postWithMetadata = it,
+              postWithMetadata = post,
               seedColor = null,
             )
+          } else {
+            null
           }
         }
 
