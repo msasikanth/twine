@@ -87,6 +87,7 @@ kotlin {
       implementation(libs.ktor.client.logging)
       api(libs.decompose)
       implementation(libs.decompose.extensions.compose)
+      implementation(libs.decompose.extensions.compose.experimental)
       api(libs.essenty.lifecycle)
       implementation(libs.essenty.lifecycle.coroutines)
       api(libs.essenty.backhandler)
