@@ -16,7 +16,6 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -30,7 +29,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
-import com.arkivanov.decompose.extensions.compose.stack.Children
+import com.arkivanov.decompose.ExperimentalDecomposeApi
+import com.arkivanov.decompose.extensions.compose.experimental.stack.ChildStack
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.PredictiveBackParams
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.plus
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.scale
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
@@ -75,7 +80,7 @@ typealias App =
 
 @Inject
 @Composable
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalDecomposeApi::class)
 fun App(
   appPresenter: AppPresenter,
   shareHandler: ShareHandler,
@@ -118,89 +123,89 @@ fun App(
 
     AppTheme(useDarkTheme = useDarkTheme) {
       ProvideStrings {
-        Box {
-          Children(
-            modifier = Modifier.fillMaxSize(),
-            stack = appPresenter.screenStack,
-            animation =
-              backAnimation(
-                backHandler = appPresenter.backHandler,
-                onBack = appPresenter::onBackClicked
-              )
-          ) { child ->
-            val fillMaxSizeModifier = Modifier.fillMaxSize()
-            when (val screen = child.instance) {
-              Screen.Placeholder -> {
-                PlaceholderScreen(modifier = fillMaxSizeModifier)
-              }
-              is Screen.Home -> {
-                HomeScreen(
-                  homePresenter = screen.presenter,
-                  useDarkTheme = useDarkTheme,
-                  modifier = fillMaxSizeModifier,
-                  onBottomSheetStateChanged = { sheetValue ->
-                    val showDarkStatusBar =
-                      if (sheetValue == SheetValue.Expanded) {
-                        true
-                      } else {
-                        useDarkTheme
-                      }
+        ChildStack(
+          modifier = Modifier.fillMaxSize(),
+          stack = appPresenter.screenStack,
+          animation =
+            stackAnimation(
+              animator = fade() + scale(),
+              predictiveBackParams = {
+                PredictiveBackParams(
+                  backHandler = appPresenter.backHandler,
+                  onBack = appPresenter::onBackClicked,
+                )
+              },
+            )
+        ) { child ->
+          val fillMaxSizeModifier = Modifier.fillMaxSize()
+          when (val screen = child.instance) {
+            Screen.Placeholder -> {
+              PlaceholderScreen(modifier = fillMaxSizeModifier)
+            }
+            is Screen.Home -> {
+              HomeScreen(
+                homePresenter = screen.presenter,
+                useDarkTheme = useDarkTheme,
+                modifier = fillMaxSizeModifier,
+                onBottomSheetStateChanged = { sheetValue ->
+                  val showDarkStatusBar =
+                    if (sheetValue == SheetValue.Expanded) {
+                      true
+                    } else {
+                      useDarkTheme
+                    }
 
-                    toggleLightStatusBar(showDarkStatusBar.not())
-                  },
-                  onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
-                )
+                  toggleLightStatusBar(showDarkStatusBar.not())
+                },
+                onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
+              )
+            }
+            is Screen.Search -> {
+              SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Bookmarks -> {
+              BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.Settings -> {
+              SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.About -> {
+              AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.AddFeed -> {
+              AppTheme(useDarkTheme = true) {
+                AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
-              is Screen.Search -> {
-                SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
+            }
+            is Screen.GroupDetails -> {
+              AppTheme(useDarkTheme = true) {
+                GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
-              is Screen.Bookmarks -> {
-                BookmarksScreen(
-                  bookmarksPresenter = screen.presenter,
-                  modifier = fillMaxSizeModifier
-                )
-              }
-              is Screen.Settings -> {
-                SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-              }
-              is Screen.About -> {
-                AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-              }
-              is Screen.AddFeed -> {
-                AppTheme(useDarkTheme = true) {
-                  AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-                }
-              }
-              is Screen.GroupDetails -> {
-                AppTheme(useDarkTheme = true) {
-                  GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-                }
-              }
-              is Screen.BlockedWords -> {
-                BlockedWordsScreen(
-                  modifier = fillMaxSizeModifier,
-                  presenter = screen.presenter,
-                )
-              }
+            }
+            is Screen.BlockedWords -> {
+              BlockedWordsScreen(
+                modifier = fillMaxSizeModifier,
+                presenter = screen.presenter,
+              )
             }
           }
+        }
 
-          val modals by appPresenter.modalStack.subscribeAsState()
-          modals.child?.instance?.also { modal ->
-            when (modal) {
-              is Modals.Reader -> {
-                ReaderScreen(
-                  presenter = modal.presenter,
-                  darkTheme = useDarkTheme,
-                  dispatchersProvider = dispatchersProvider,
-                )
-              }
-              is Modals.FeedInfo ->
-                FeedInfoBottomSheet(
-                  feedPresenter = modal.presenter,
-                )
-              is Modals.GroupSelection -> GroupSelectionSheet(presenter = modal.presenter)
+        val modals by appPresenter.modalStack.subscribeAsState()
+        modals.child?.instance?.also { modal ->
+          when (modal) {
+            is Modals.Reader -> {
+              ReaderScreen(
+                presenter = modal.presenter,
+                darkTheme = useDarkTheme,
+                dispatchersProvider = dispatchersProvider,
+              )
             }
+            is Modals.FeedInfo ->
+              FeedInfoBottomSheet(
+                feedPresenter = modal.presenter,
+              )
+            is Modals.GroupSelection -> GroupSelectionSheet(presenter = modal.presenter)
           }
         }
       }
