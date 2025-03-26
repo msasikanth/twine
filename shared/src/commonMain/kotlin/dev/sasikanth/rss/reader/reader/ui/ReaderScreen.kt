@@ -50,6 +50,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -407,9 +408,9 @@ internal fun ReaderScreen(
             when {
               readerProcessingProgress == ReaderProcessingProgress.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                  CircularProgressIndicator(
+                  LinearProgressIndicator(
+                    trackColor = AppTheme.colorScheme.tintedSurface,
                     color = AppTheme.colorScheme.tintedForeground,
-                    strokeWidth = 4.dp
                   )
                 }
               }
