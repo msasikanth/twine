@@ -17,8 +17,10 @@ package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.Instant
+import kotlinx.serialization.Serializable
 
 @Immutable
+@Serializable
 data class PostWithMetadata(
   val id: String,
   val sourceId: String,

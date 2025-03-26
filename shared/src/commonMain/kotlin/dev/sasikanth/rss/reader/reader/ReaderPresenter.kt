@@ -21,6 +21,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
@@ -32,21 +33,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-
-internal typealias ReaderPresenterFactory =
-  (
-    postId: String,
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> ReaderPresenter
 
 @Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
-  @Assisted private val postId: String,
+  @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
 ) : ComponentContext by componentContext {
@@ -55,13 +50,13 @@ class ReaderPresenter(
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
+        readerScreenArgs = readerScreenArgs,
         rssRepository = rssRepository,
-        postId = postId
       )
     }
 
   init {
-    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(postId)) }
+    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(readerScreenArgs.post.id)) }
     lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
   }
 
@@ -81,10 +76,11 @@ class ReaderPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val postId: String,
+    private val readerScreenArgs: ReaderScreenArgs,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    private val postId = readerScreenArgs.post.id
 
     private val _state = MutableStateFlow(ReaderState.default(postId))
     val state: StateFlow<ReaderState> =
@@ -144,5 +140,26 @@ class ReaderPresenter(
         }
       }
     }
+  }
+}
+
+internal typealias ReaderPresenterFactory =
+  (
+    args: ReaderScreenArgs,
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> ReaderPresenter
+
+data class ReaderScreenArgs(
+  val postIndex: Int,
+  val post: PostWithMetadata,
+  val fromScreen: FromScreen,
+) {
+
+  @Serializable
+  enum class FromScreen {
+    Home,
+    Search,
+    Bookmarks
   }
 }
