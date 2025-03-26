@@ -41,6 +41,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -150,6 +151,7 @@ internal fun ReaderScreen(
   modifier: Modifier = Modifier
 ) {
   val state by presenter.state.collectAsState()
+  val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -159,6 +161,7 @@ internal fun ReaderScreen(
     containerColor = AppTheme.colorScheme.backdrop,
     dragHandle = null,
     shape = RectangleShape,
+    sheetGesturesEnabled = listState.firstVisibleItemScrollOffset == 0,
     onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
   ) {
     val topAppBarScrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -315,6 +318,7 @@ internal fun ReaderScreen(
 
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        state = listState,
         contentPadding =
           PaddingValues(
             start = paddingValues.calculateStartPadding(layoutDirection),
