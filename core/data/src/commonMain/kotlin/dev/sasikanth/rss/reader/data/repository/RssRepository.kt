@@ -461,7 +461,10 @@ class RssRepository(
       transacter = bookmarkQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(limit, offset, mapper = {
+        bookmarkQueries.bookmarks(
+          limit,
+          offset,
+          mapper = {
             id,
             sourceId,
             title,
@@ -474,26 +477,26 @@ class RssRepository(
             read,
             feedName,
             feedIcon,
-            feedHomepageLink
-          ->
-          PostWithMetadata(
-            id = id,
-            sourceId = sourceId,
-            title = title,
-            description = description,
-            rawContent = description,
-            imageUrl = imageUrl,
-            date = date,
-            link = link,
-            commentsLink = commentsLink,
-            bookmarked = bookmarked,
-            read = read,
-            feedName = feedName,
-            feedIcon = feedIcon,
-            feedHomepageLink = feedHomepageLink,
-            alwaysFetchFullArticle = true,
-          )
-        })
+            feedHomepageLink ->
+            PostWithMetadata(
+              id = id,
+              sourceId = sourceId,
+              title = title,
+              description = description,
+              rawContent = description,
+              imageUrl = imageUrl,
+              date = date,
+              link = link,
+              commentsLink = commentsLink,
+              bookmarked = bookmarked,
+              read = read,
+              feedName = feedName,
+              feedIcon = feedIcon,
+              feedHomepageLink = feedHomepageLink,
+              alwaysFetchFullArticle = true,
+            )
+          }
+        )
       }
     )
   }

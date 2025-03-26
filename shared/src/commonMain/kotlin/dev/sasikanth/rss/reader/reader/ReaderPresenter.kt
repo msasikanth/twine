@@ -21,12 +21,7 @@ import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import dev.sasikanth.rss.reader.core.network.post.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import kotlinx.coroutines.CoroutineScope
@@ -51,7 +46,6 @@ internal typealias ReaderPresenterFactory =
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
-  private val fullArticleFetcher: FullArticleFetcher,
   @Assisted private val postId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
@@ -62,8 +56,7 @@ class ReaderPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
-        postId = postId,
-        fullArticleFetcher = fullArticleFetcher
+        postId = postId
       )
     }
 
@@ -86,10 +79,9 @@ class ReaderPresenter(
   }
 
   private class PresenterInstance(
-    private val dispatchersProvider: DispatchersProvider,
+    dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val postId: String,
-    private val fullArticleFetcher: FullArticleFetcher,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -115,9 +107,7 @@ class ReaderPresenter(
     }
 
     private fun articleShortcutClicked() {
-      _state.update {
-        it.copy(fetchFullArticle = !it.fetchFullArticle)
-      }
+      _state.update { it.copy(fetchFullArticle = !it.fetchFullArticle) }
     }
 
     private fun markPostAsRead(postId: String) {
