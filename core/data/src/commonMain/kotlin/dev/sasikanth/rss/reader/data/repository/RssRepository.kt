@@ -205,6 +205,7 @@ class RssRepository(
             sourceId,
             title,
             description,
+            rawContent,
             imageUrl,
             date,
             link,
@@ -214,12 +215,14 @@ class RssRepository(
             feedName,
             feedIcon,
             feedHomepageLink,
+            alwaysFetchSourceArticle,
             _ ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
               title = title,
               description = description,
+              rawContent = rawContent,
               imageUrl = imageUrl,
               date = date,
               link = link,
@@ -229,6 +232,7 @@ class RssRepository(
               feedName = feedName,
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,
+              alwaysFetchFullArticle = alwaysFetchSourceArticle,
             )
           }
         )
@@ -457,7 +461,39 @@ class RssRepository(
       transacter = bookmarkQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        bookmarkQueries.bookmarks(limit, offset, ::PostWithMetadata)
+        bookmarkQueries.bookmarks(limit, offset, mapper = {
+            id,
+            sourceId,
+            title,
+            description,
+            imageUrl,
+            date,
+            link,
+            commentsLink,
+            bookmarked,
+            read,
+            feedName,
+            feedIcon,
+            feedHomepageLink
+          ->
+          PostWithMetadata(
+            id = id,
+            sourceId = sourceId,
+            title = title,
+            description = description,
+            rawContent = description,
+            imageUrl = imageUrl,
+            date = date,
+            link = link,
+            commentsLink = commentsLink,
+            bookmarked = bookmarked,
+            read = read,
+            feedName = feedName,
+            feedIcon = feedIcon,
+            feedHomepageLink = feedHomepageLink,
+            alwaysFetchFullArticle = true,
+          )
+        })
       }
     )
   }

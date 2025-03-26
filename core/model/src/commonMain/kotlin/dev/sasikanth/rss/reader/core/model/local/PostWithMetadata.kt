@@ -24,6 +24,7 @@ data class PostWithMetadata(
   val sourceId: String,
   val title: String,
   val description: String,
+  val rawContent: String?,
   val imageUrl: String?,
   val date: Instant,
   val link: String,
@@ -33,4 +34,5 @@ data class PostWithMetadata(
   val feedName: String,
   val feedIcon: String,
   val feedHomepageLink: String,
+  val alwaysFetchFullArticle: Boolean,
 )

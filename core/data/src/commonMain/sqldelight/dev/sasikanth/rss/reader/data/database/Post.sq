@@ -95,6 +95,7 @@ WITH featuredPosts AS (
     sourceId,
     post.title,
     post.description,
+    post.rawContent,
     post.imageUrl,
     post.date,
     post.link,
@@ -104,6 +105,7 @@ WITH featuredPosts AS (
     feed.name AS feedName,
     feed.icon AS feedIcon,
     feed.homepageLink AS feedHomepageLink,
+    feed.alwaysFetchSourceArticle,
     1 AS isFeatured
   FROM post
   INNER JOIN feed ON post.sourceId == feed.id
@@ -126,6 +128,7 @@ SELECT
   sourceId,
   post.title,
   post.description,
+  post.rawContent,
   post.imageUrl,
   post.date,
   post.link,
@@ -135,6 +138,7 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle,
   0 AS isFeatured
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
