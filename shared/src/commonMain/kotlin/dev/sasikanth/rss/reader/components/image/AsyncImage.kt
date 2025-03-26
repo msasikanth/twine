@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.components.image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -45,8 +46,9 @@ internal fun AsyncImage(
     }
 
   Box(modifier.then(backgroundColorModifier)) {
+    val context = LocalPlatformContext.current
     val imageRequest =
-      ImageRequest.Builder(LocalPlatformContext.current).data(url).size(size).build()
+      remember(url, context) { ImageRequest.Builder(context).data(url).size(size).build() }
 
     coil3.compose.AsyncImage(
       model = imageRequest,
