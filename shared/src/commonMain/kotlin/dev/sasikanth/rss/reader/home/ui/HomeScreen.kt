@@ -102,7 +102,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @OptIn(FlowPreview::class)
