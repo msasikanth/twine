@@ -221,7 +221,9 @@ internal fun ReaderScreen(
       bottomBar = {
         BottomBar(
           openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(state.link) } },
-          loadFullArticleClick = { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+          loadFullArticleClick = {
+            presenter.dispatch(ReaderEvent.ArticleShortcutClicked)
+          }
         )
       },
       containerColor = Color.Unspecified,
@@ -248,11 +250,17 @@ internal fun ReaderScreen(
           }
         }
 
-        LaunchedEffect(webViewState.loadingState) {
+        LaunchedEffect(webViewState.loadingState, state.fetchFullArticle) {
           if (webViewState.loadingState == LoadingState.Finished) {
             navigator.evaluateJavaScript(
-              script =
-                "parseReaderContent(${state.link.asJSString}, ${state.content.asJSString}, ${state.postImage.orEmpty().asJSString})"
+              script = """
+                parseReaderContent(
+                  ${state.link.asJSString}, 
+                  ${state.content.asJSString}, 
+                  ${state.postImage.orEmpty().asJSString},
+                  ${state.fetchFullArticle}
+                )
+              """.trimIndent()
             )
           }
         }

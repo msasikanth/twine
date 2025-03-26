@@ -32,6 +32,7 @@ internal data class ReaderState(
   val postMode: PostMode,
   val postImage: String?,
   val commentsLink: String?,
+  val fetchFullArticle: Boolean,
 ) {
 
   val canShowReaderView: Boolean
@@ -52,6 +53,7 @@ internal data class ReaderState(
         postMode = PostMode.Idle,
         postImage = null,
         commentsLink = null,
+        fetchFullArticle = false,
       )
   }
 

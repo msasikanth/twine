@@ -109,8 +109,14 @@ class ReaderPresenter(
           /* no-op */
         }
         ReaderEvent.TogglePostBookmark -> togglePostBookmark(postId)
-        ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
         ReaderEvent.MarkPostAsRead -> markPostAsRead(postId)
+        ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
+      }
+    }
+
+    private fun articleShortcutClicked() {
+      _state.update {
+        it.copy(fetchFullArticle = !it.fetchFullArticle)
       }
     }
 
@@ -130,63 +136,22 @@ class ReaderPresenter(
       coroutineScope.launch {
         val post = rssRepository.post(postId)
         val feed = rssRepository.feedBlocking(post.sourceId)
+        val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
 
         _state.update {
           it.copy(
             link = post.link,
             title = post.title,
             description = post.description,
+            content = post.rawContent,
             publishedAt = post.date.readerDateTimestamp(),
             isBookmarked = post.bookmarked,
             feed = feed,
             postImage = post.imageUrl,
             commentsLink = post.commentsLink,
+            fetchFullArticle = feed.alwaysFetchSourceArticle || !hasContent
           )
         }
-
-        val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
-        if (feed.alwaysFetchSourceArticle || hasContent.not()) {
-          loadSourceArticle()
-        } else {
-          loadRssContent()
-        }
-      }
-    }
-
-    private fun articleShortcutClicked() {
-      coroutineScope.launch {
-        val currentPostMode = _state.value.postMode
-        when (currentPostMode) {
-          RssContent -> loadSourceArticle()
-          Source -> loadRssContent()
-          InProgress,
-          Idle -> {
-            // no-op
-          }
-        }
-      }
-    }
-
-    private suspend fun loadRssContent() {
-      _state.update { it.copy(postMode = InProgress) }
-      val post = rssRepository.post(postId)
-      val postContent = post.rawContent ?: post.description
-      _state.update { it.copy(content = postContent, postMode = RssContent) }
-    }
-
-    private suspend fun loadSourceArticle() {
-      val postLink = _state.value.link
-      if (!postLink.isNullOrBlank()) {
-        _state.update { it.copy(postMode = InProgress) }
-        val content = fullArticleFetcher.fetch(postLink)
-
-        if (content.isSuccess) {
-          _state.update { it.copy(content = content.getOrThrow()) }
-        } else {
-          loadRssContent()
-        }
-
-        _state.update { it.copy(postMode = Source) }
       }
     }
   }
