@@ -17,50 +17,43 @@
 package dev.sasikanth.rss.reader.reader
 
 import androidx.compose.runtime.Immutable
-import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.util.readerDateTimestamp
 
 @Immutable
 internal data class ReaderState(
-  val postId: String,
   val link: String?,
   val title: String?,
   val description: String?,
   val content: String?,
   val publishedAt: String?,
   val isBookmarked: Boolean?,
-  val feed: Feed?,
-  val postMode: PostMode,
   val postImage: String?,
   val commentsLink: String?,
   val fetchFullArticle: Boolean,
+  val feedIcon: String,
+  val feedHomePageLink: String,
+  val feedName: String,
 ) {
-
-  val canShowReaderView: Boolean
-    get() = feed != null && !publishedAt.isNullOrBlank()
 
   companion object {
 
-    fun default(postId: String) =
-      ReaderState(
-        postId = postId,
-        link = null,
-        title = null,
-        description = null,
-        content = null,
-        publishedAt = null,
-        isBookmarked = null,
-        feed = null,
-        postMode = PostMode.Idle,
-        postImage = null,
-        commentsLink = null,
-        fetchFullArticle = false,
+    fun default(post: PostWithMetadata): ReaderState {
+      val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
+      return ReaderState(
+        link = post.link,
+        title = post.title,
+        description = post.description,
+        content = post.rawContent ?: post.description,
+        publishedAt = post.date.readerDateTimestamp(),
+        isBookmarked = post.bookmarked,
+        postImage = post.imageUrl,
+        commentsLink = post.commentsLink,
+        fetchFullArticle = post.alwaysFetchFullArticle || hasContent.not(),
+        feedIcon = post.feedIcon,
+        feedHomePageLink = post.feedHomepageLink,
+        feedName = post.feedName,
       )
-  }
-
-  enum class PostMode {
-    RssContent,
-    Source,
-    InProgress,
-    Idle,
+    }
   }
 }

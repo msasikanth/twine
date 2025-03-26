@@ -19,12 +19,10 @@ package dev.sasikanth.rss.reader.reader
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +54,6 @@ class ReaderPresenter(
     }
 
   init {
-    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(readerScreenArgs.post.id)) }
     lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
   }
 
@@ -80,24 +77,22 @@ class ReaderPresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
-    private val postId = readerScreenArgs.post.id
 
-    private val _state = MutableStateFlow(ReaderState.default(postId))
+    private val _state = MutableStateFlow(ReaderState.default(readerScreenArgs.post))
     val state: StateFlow<ReaderState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReaderState.default(postId)
+        initialValue = ReaderState.default(readerScreenArgs.post)
       )
 
     fun dispatch(event: ReaderEvent) {
       when (event) {
-        is ReaderEvent.Init -> init(event.postId)
         ReaderEvent.BackClicked -> {
           /* no-op */
         }
-        ReaderEvent.TogglePostBookmark -> togglePostBookmark(postId)
-        ReaderEvent.MarkPostAsRead -> markPostAsRead(postId)
+        ReaderEvent.TogglePostBookmark -> togglePostBookmark(readerScreenArgs.post.id)
+        ReaderEvent.MarkPostAsRead -> markPostAsRead(readerScreenArgs.post.id)
         ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
       }
     }
@@ -115,29 +110,6 @@ class ReaderPresenter(
         val isBookmarked = state.value.isBookmarked ?: false
         rssRepository.updateBookmarkStatus(bookmarked = !isBookmarked, id = postId)
         _state.update { it.copy(isBookmarked = !isBookmarked) }
-      }
-    }
-
-    private fun init(postId: String) {
-      coroutineScope.launch {
-        val post = rssRepository.post(postId)
-        val feed = rssRepository.feedBlocking(post.sourceId)
-        val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
-
-        _state.update {
-          it.copy(
-            link = post.link,
-            title = post.title,
-            description = post.description,
-            content = post.rawContent,
-            publishedAt = post.date.readerDateTimestamp(),
-            isBookmarked = post.bookmarked,
-            feed = feed,
-            postImage = post.imageUrl,
-            commentsLink = post.commentsLink,
-            fetchFullArticle = feed.alwaysFetchSourceArticle || !hasContent
-          )
-        }
       }
     }
   }
