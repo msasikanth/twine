@@ -19,16 +19,10 @@ package dev.sasikanth.rss.reader.reader
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import dev.sasikanth.rss.reader.core.network.post.FullArticleFetcher
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Idle
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.InProgress
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.RssContent
-import dev.sasikanth.rss.reader.reader.ReaderState.PostMode.Source
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,22 +31,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-
-internal typealias ReaderPresenterFactory =
-  (
-    postId: String,
-    ComponentContext,
-    goBack: () -> Unit,
-  ) -> ReaderPresenter
 
 @Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
-  private val fullArticleFetcher: FullArticleFetcher,
-  @Assisted private val postId: String,
+  @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
 ) : ComponentContext by componentContext {
@@ -61,14 +48,12 @@ class ReaderPresenter(
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
+        readerScreenArgs = readerScreenArgs,
         rssRepository = rssRepository,
-        postId = postId,
-        fullArticleFetcher = fullArticleFetcher
       )
     }
 
   init {
-    lifecycle.doOnCreate { presenterInstance.dispatch(ReaderEvent.Init(postId)) }
     lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
   }
 
@@ -86,32 +71,34 @@ class ReaderPresenter(
   }
 
   private class PresenterInstance(
-    private val dispatchersProvider: DispatchersProvider,
+    dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
-    private val postId: String,
-    private val fullArticleFetcher: FullArticleFetcher,
+    private val readerScreenArgs: ReaderScreenArgs,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
 
-    private val _state = MutableStateFlow(ReaderState.default(postId))
+    private val _state = MutableStateFlow(ReaderState.default(readerScreenArgs.post))
     val state: StateFlow<ReaderState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReaderState.default(postId)
+        initialValue = ReaderState.default(readerScreenArgs.post)
       )
 
     fun dispatch(event: ReaderEvent) {
       when (event) {
-        is ReaderEvent.Init -> init(event.postId)
         ReaderEvent.BackClicked -> {
           /* no-op */
         }
-        ReaderEvent.TogglePostBookmark -> togglePostBookmark(postId)
+        ReaderEvent.TogglePostBookmark -> togglePostBookmark(readerScreenArgs.post.id)
+        ReaderEvent.MarkPostAsRead -> markPostAsRead(readerScreenArgs.post.id)
         ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
-        ReaderEvent.MarkPostAsRead -> markPostAsRead(postId)
       }
+    }
+
+    private fun articleShortcutClicked() {
+      _state.update { it.copy(fetchFullArticle = !it.fetchFullArticle) }
     }
 
     private fun markPostAsRead(postId: String) {
@@ -125,69 +112,26 @@ class ReaderPresenter(
         _state.update { it.copy(isBookmarked = !isBookmarked) }
       }
     }
+  }
+}
 
-    private fun init(postId: String) {
-      coroutineScope.launch {
-        val post = rssRepository.post(postId)
-        val feed = rssRepository.feedBlocking(post.sourceId)
+internal typealias ReaderPresenterFactory =
+  (
+    args: ReaderScreenArgs,
+    ComponentContext,
+    goBack: () -> Unit,
+  ) -> ReaderPresenter
 
-        _state.update {
-          it.copy(
-            link = post.link,
-            title = post.title,
-            description = post.description,
-            publishedAt = post.date.readerDateTimestamp(),
-            isBookmarked = post.bookmarked,
-            feed = feed,
-            postImage = post.imageUrl,
-            commentsLink = post.commentsLink,
-          )
-        }
+data class ReaderScreenArgs(
+  val postIndex: Int,
+  val post: PostWithMetadata,
+  val fromScreen: FromScreen,
+) {
 
-        val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
-        if (feed.alwaysFetchSourceArticle || hasContent.not()) {
-          loadSourceArticle()
-        } else {
-          loadRssContent()
-        }
-      }
-    }
-
-    private fun articleShortcutClicked() {
-      coroutineScope.launch {
-        val currentPostMode = _state.value.postMode
-        when (currentPostMode) {
-          RssContent -> loadSourceArticle()
-          Source -> loadRssContent()
-          InProgress,
-          Idle -> {
-            // no-op
-          }
-        }
-      }
-    }
-
-    private suspend fun loadRssContent() {
-      _state.update { it.copy(postMode = InProgress) }
-      val post = rssRepository.post(postId)
-      val postContent = post.rawContent ?: post.description
-      _state.update { it.copy(content = postContent, postMode = RssContent) }
-    }
-
-    private suspend fun loadSourceArticle() {
-      val postLink = _state.value.link
-      if (!postLink.isNullOrBlank()) {
-        _state.update { it.copy(postMode = InProgress) }
-        val content = fullArticleFetcher.fetch(postLink)
-
-        if (content.isSuccess) {
-          _state.update { it.copy(content = content.getOrThrow()) }
-        } else {
-          loadRssContent()
-        }
-
-        _state.update { it.copy(postMode = Source) }
-      }
-    }
+  @Serializable
+  enum class FromScreen {
+    Home,
+    Search,
+    Bookmarks
   }
 }

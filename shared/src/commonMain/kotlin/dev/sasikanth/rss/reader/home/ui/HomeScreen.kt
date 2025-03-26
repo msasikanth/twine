@@ -102,7 +102,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 112.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
 @OptIn(FlowPreview::class)
@@ -504,7 +504,7 @@ fun featuredPosts(
   posts: LazyPagingItems<PostWithMetadata>?
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
-  return remember(posts?.itemCount) {
+  return remember(posts?.loadState) {
     flow {
       if (posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
@@ -514,11 +514,14 @@ fun featuredPosts(
       val size = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
       val mutablePostsList =
         MutableList(size) { index ->
-          posts[index]?.let {
+          val post = posts[index]
+          if (post != null && post.imageUrl.isNullOrBlank().not()) {
             FeaturedPostItem(
-              postWithMetadata = it,
+              postWithMetadata = post,
               seedColor = null,
             )
+          } else {
+            null
           }
         }
 

@@ -18,8 +18,6 @@ package dev.sasikanth.rss.reader.reader
 
 sealed interface ReaderEvent {
 
-  data class Init(val postId: String) : ReaderEvent
-
   data object BackClicked : ReaderEvent
 
   data object TogglePostBookmark : ReaderEvent

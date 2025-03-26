@@ -46,10 +46,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -230,184 +230,190 @@ internal fun ReaderScreen(
       var readerProcessingProgress by remember { mutableStateOf(ReaderProcessingProgress.Loading) }
       var parsedContent by remember { mutableStateOf(ReaderContent("", "")) }
 
-      if (state.canShowReaderView) {
-        val layoutDirection = LocalLayoutDirection.current
+      val layoutDirection = LocalLayoutDirection.current
 
-        val webViewState = rememberWebViewStateWithHTMLData("")
-        val navigator = rememberWebViewNavigator()
-        val jsBridge = rememberWebViewJsBridge()
+      val webViewState = rememberWebViewStateWithHTMLData("")
+      val navigator = rememberWebViewNavigator()
+      val jsBridge = rememberWebViewJsBridge()
 
-        LaunchedEffect(state.content) {
-          if (!state.content.isNullOrBlank()) {
-            launch(dispatchersProvider.io) {
-              navigator.loadHtml(
-                html = ReaderHTML.create(),
-                baseUrl = state.link,
-              )
-            }
-          }
-        }
-
-        LaunchedEffect(webViewState.loadingState) {
-          if (webViewState.loadingState == LoadingState.Finished) {
-            navigator.evaluateJavaScript(
-              script =
-                "parseReaderContent(${state.link.asJSString}, ${state.content.asJSString}, ${state.postImage.orEmpty().asJSString})"
+      LaunchedEffect(state.content) {
+        if (!state.content.isNullOrBlank()) {
+          launch(dispatchersProvider.io) {
+            navigator.loadHtml(
+              html = ReaderHTML.create(),
+              baseUrl = state.link,
             )
           }
         }
+      }
 
-        DisposableEffect(jsBridge) {
-          jsBridge.register(
-            object : IJsMessageHandler {
-              override fun handle(
-                message: JsMessage,
-                navigator: WebViewNavigator?,
-                callback: (String) -> Unit
-              ) {
-                if (message.params.isNotBlank()) {
-                  readerProcessingProgress = processParams<ReaderProcessingProgress>(message)
-                }
-              }
-
-              override fun methodName(): String {
-                return "renderProgress"
-              }
-            }
+      LaunchedEffect(webViewState.loadingState, state.fetchFullArticle) {
+        if (webViewState.loadingState == LoadingState.Finished) {
+          navigator.evaluateJavaScript(
+            script =
+              """
+                parseReaderContent(
+                  ${state.link.asJSString}, 
+                  ${state.content.asJSString}, 
+                  ${state.postImage.orEmpty().asJSString},
+                  ${state.fetchFullArticle}
+                )
+              """
+                .trimIndent()
           )
-
-          jsBridge.register(
-            object : IJsMessageHandler {
-              override fun handle(
-                message: JsMessage,
-                navigator: WebViewNavigator?,
-                callback: (String) -> Unit
-              ) {
-                if (message.params.isNotBlank()) {
-                  parsedContent = processParams(message)
-                }
-              }
-
-              override fun methodName(): String {
-                return "parsedContentCallback"
-              }
-            }
-          )
-
-          onDispose { jsBridge.clear() }
         }
+      }
 
-        // Dummy view to parse the reader content using JS
-        WebView(
-          modifier = Modifier.requiredSize(0.dp),
-          state = webViewState,
-          navigator = navigator,
-          webViewJsBridge = jsBridge,
-          captureBackPresses = false,
+      DisposableEffect(jsBridge) {
+        jsBridge.register(
+          object : IJsMessageHandler {
+            override fun handle(
+              message: JsMessage,
+              navigator: WebViewNavigator?,
+              callback: (String) -> Unit
+            ) {
+              if (message.params.isNotBlank()) {
+                readerProcessingProgress = processParams<ReaderProcessingProgress>(message)
+              }
+            }
+
+            override fun methodName(): String {
+              return "renderProgress"
+            }
+          }
         )
 
-        LazyColumn(
-          modifier = Modifier.fillMaxSize(),
-          contentPadding =
-            PaddingValues(
-              start = paddingValues.calculateStartPadding(layoutDirection),
-              top = 0.dp,
-              end = paddingValues.calculateEndPadding(layoutDirection),
-              bottom = paddingValues.calculateBottomPadding()
+        jsBridge.register(
+          object : IJsMessageHandler {
+            override fun handle(
+              message: JsMessage,
+              navigator: WebViewNavigator?,
+              callback: (String) -> Unit
+            ) {
+              if (message.params.isNotBlank()) {
+                parsedContent = processParams(message)
+              }
+            }
+
+            override fun methodName(): String {
+              return "parsedContentCallback"
+            }
+          }
+        )
+
+        onDispose { jsBridge.clear() }
+      }
+
+      // Dummy view to parse the reader content using JS
+      WebView(
+        modifier = Modifier.requiredSize(0.dp),
+        state = webViewState,
+        navigator = navigator,
+        webViewJsBridge = jsBridge,
+        captureBackPresses = false,
+      )
+
+      LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding =
+          PaddingValues(
+            start = paddingValues.calculateStartPadding(layoutDirection),
+            top = 0.dp,
+            end = paddingValues.calculateEndPadding(layoutDirection),
+            bottom = paddingValues.calculateBottomPadding()
+          )
+      ) {
+        item(key = "reader-header") {
+          val postImage = state.postImage
+
+          Box {
+            BannerImageBlurred(postImage = postImage, darkTheme = darkTheme)
+
+            PostInfo(
+              paddingValues = paddingValues,
+              state = state,
+              postImage = postImage,
+              parsedContent = parsedContent,
+              onCommentsClick = {
+                coroutineScope.launch { linkHandler.openLink(state.commentsLink) }
+              },
+              onShareClick = { sharedHandler.share(state.link) },
+              onBookmarkClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }
             )
+          }
+        }
+
+        item(key = "divider") {
+          HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+            color = AppTheme.colorScheme.outlineVariant
+          )
+        }
+
+        item(
+          key = "reader-content",
         ) {
-          item(key = "reader-header") {
-            val postImage = state.postImage
-
-            Box {
-              BannerImageBlurred(postImage = postImage, darkTheme = darkTheme)
-
-              PostInfo(
-                paddingValues = paddingValues,
-                state = state,
-                postImage = postImage,
-                parsedContent = parsedContent,
-                onCommentsClick = {
-                  coroutineScope.launch { linkHandler.openLink(state.commentsLink) }
-                },
-                onShareClick = { sharedHandler.share(state.link) },
-                onBookmarkClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }
-              )
+          val readerLinkHandler = remember {
+            object : UriHandler {
+              override fun openUri(uri: String) {
+                coroutineScope.launch { linkHandler.openLink(uri) }
+              }
             }
           }
+          CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
+            val highlightsBuilder =
+              remember(darkTheme) {
+                Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+              }
 
-          item(key = "divider") {
-            HorizontalDivider(
-              modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
-              color = AppTheme.colorScheme.outlineVariant
+            Markdown(
+              modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
+              content = parsedContent.content,
+              typography =
+                markdownTypography(
+                  link =
+                    MaterialTheme.typography.bodyLarge.copy(
+                      color = AppTheme.colorScheme.tintedForeground,
+                      fontWeight = FontWeight.Bold,
+                      textDecoration = TextDecoration.Underline
+                    )
+                ),
+              colors =
+                markdownColor(
+                  text = AppTheme.colorScheme.onSurface,
+                ),
+              imageTransformer = Coil3ImageTransformerImpl,
+              components =
+                markdownComponents(
+                  codeBlock = {
+                    MarkdownHighlightedCodeBlock(
+                      content = it.content,
+                      node = it.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                  codeFence = {
+                    MarkdownHighlightedCodeFence(
+                      content = it.content,
+                      node = it.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                )
             )
           }
 
-          item(
-            key = "reader-content",
-          ) {
-            val readerLinkHandler = remember {
-              object : UriHandler {
-                override fun openUri(uri: String) {
-                  coroutineScope.launch { linkHandler.openLink(uri) }
-                }
+          when {
+            readerProcessingProgress == ReaderProcessingProgress.Loading -> {
+              Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LinearProgressIndicator(
+                  trackColor = AppTheme.colorScheme.tintedSurface,
+                  color = AppTheme.colorScheme.tintedForeground,
+                )
               }
             }
-            CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
-              val highlightsBuilder =
-                remember(darkTheme) {
-                  Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-                }
-
-              Markdown(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
-                content = parsedContent.content,
-                typography =
-                  markdownTypography(
-                    link =
-                      MaterialTheme.typography.bodyLarge.copy(
-                        color = AppTheme.colorScheme.tintedForeground,
-                        fontWeight = FontWeight.Bold,
-                        textDecoration = TextDecoration.Underline
-                      )
-                  ),
-                colors =
-                  markdownColor(
-                    text = AppTheme.colorScheme.onSurface,
-                  ),
-                imageTransformer = Coil3ImageTransformerImpl,
-                components =
-                  markdownComponents(
-                    codeBlock = {
-                      MarkdownHighlightedCodeBlock(
-                        content = it.content,
-                        node = it.node,
-                        highlights = highlightsBuilder
-                      )
-                    },
-                    codeFence = {
-                      MarkdownHighlightedCodeFence(
-                        content = it.content,
-                        node = it.node,
-                        highlights = highlightsBuilder
-                      )
-                    },
-                  )
-              )
-            }
-
-            when {
-              readerProcessingProgress == ReaderProcessingProgress.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                  CircularProgressIndicator(
-                    color = AppTheme.colorScheme.tintedForeground,
-                    strokeWidth = 4.dp
-                  )
-                }
-              }
-              !state.canShowReaderView && state.content.isNullOrBlank() -> {
-                Text(LocalStrings.current.noReaderContent)
-              }
+            state.content.isNullOrBlank() -> {
+              Text(LocalStrings.current.noReaderContent)
             }
           }
         }
@@ -558,11 +564,11 @@ private fun PostInfo(
 
     Row(verticalAlignment = Alignment.CenterVertically) {
       val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val feedIconUrl = if (showFeedFavIcon) state.feed!!.homepageLink else state.feed!!.icon
+      val feedIconUrl = if (showFeedFavIcon) state.feedHomePageLink else state.feedIcon
 
       PostSourcePill(
         modifier = Modifier.weight(1f).clearAndSetSemantics {},
-        feedName = state.feed.name,
+        feedName = state.feedName,
         feedIcon = feedIconUrl,
         config =
           PostMetadataConfig(

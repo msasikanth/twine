@@ -50,6 +50,7 @@ import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.search.SearchPresentFactory
 import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
@@ -150,7 +151,16 @@ class AppPresenter(
       is ModalConfig.Reader -> {
         Modals.Reader(
           presenter =
-            readerPresenter(modalConfig.postId, componentContext) { modalNavigation.dismiss() }
+            readerPresenter(
+              ReaderScreenArgs(
+                postIndex = 0,
+                post = modalConfig.post,
+                fromScreen = modalConfig.fromScreen,
+              ),
+              componentContext
+            ) {
+              modalNavigation.dismiss()
+            }
         )
       }
       is ModalConfig.FeedInfo -> {
@@ -207,7 +217,7 @@ class AppPresenter(
               { navigation.pushNew(Config.Search) },
               { navigation.pushNew(Config.Bookmarks) },
               { navigation.pushNew(Config.Settings) },
-              { openPost(it) },
+              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Home) },
               { modalNavigation.activate(ModalConfig.GroupSelection) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
               { navigation.pushNew(Config.AddFeed) },
@@ -217,12 +227,22 @@ class AppPresenter(
       }
       Config.Search -> {
         Screen.Search(
-          presenter = searchPresenter(componentContext, { navigation.pop() }, { openPost(it) })
+          presenter =
+            searchPresenter(
+              componentContext,
+              { navigation.pop() },
+              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Search) }
+            )
         )
       }
       Config.Bookmarks -> {
         Screen.Bookmarks(
-          presenter = bookmarksPresenter(componentContext, { navigation.pop() }, { openPost(it) })
+          presenter =
+            bookmarksPresenter(
+              componentContext,
+              { navigation.pop() },
+              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Bookmarks) }
+            )
         )
       }
       Config.Settings -> {
@@ -267,13 +287,13 @@ class AppPresenter(
       }
     }
 
-  private fun openPost(post: PostWithMetadata) {
+  private fun openPost(post: PostWithMetadata, fromScreen: ReaderScreenArgs.FromScreen) {
     scope.launch {
       val showReaderView =
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        modalNavigation.activate(ModalConfig.Reader(post.id))
+        modalNavigation.activate(ModalConfig.Reader(post, fromScreen))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
@@ -348,7 +368,9 @@ class AppPresenter(
 
   @Serializable
   sealed interface ModalConfig {
-    @Serializable data class Reader(val postId: String) : ModalConfig
+    @Serializable
+    data class Reader(val post: PostWithMetadata, val fromScreen: ReaderScreenArgs.FromScreen) :
+      ModalConfig
 
     @Serializable data class FeedInfo(val feedId: String) : ModalConfig
 
