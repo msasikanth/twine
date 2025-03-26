@@ -1,3 +1,8 @@
+@file:Suppress(
+  "CANNOT_OVERRIDE_INVISIBLE_MEMBER",
+  "INVISIBLE_MEMBER",
+  "INVISIBLE_REFERENCE",
+)
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
@@ -56,7 +61,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -153,18 +158,25 @@ internal fun ReaderScreen(
   val state by presenter.state.collectAsState()
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
+  val topAppBarScrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
 
   ModalBottomSheet(
-    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    sheetState =
+      rememberSheetState(
+        skipPartiallyExpanded = true,
+        velocityThreshold = Float.POSITIVE_INFINITY.dp
+      ),
     containerColor = AppTheme.colorScheme.backdrop,
     dragHandle = null,
     shape = RectangleShape,
-    sheetGesturesEnabled = listState.firstVisibleItemScrollOffset == 0,
+    sheetGesturesEnabled =
+      listState.firstVisibleItemScrollOffset == 0 &&
+        topAppBarScrollBehaviour.state.heightOffset == 0f,
     onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
   ) {
-    val topAppBarScrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
       modifier = modifier.nestedScroll(topAppBarScrollBehaviour.nestedScrollConnection),
       topBar = {
