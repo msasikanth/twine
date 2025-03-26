@@ -504,7 +504,7 @@ fun featuredPosts(
   posts: LazyPagingItems<PostWithMetadata>?
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
-  return remember(posts?.itemCount) {
+  return remember(posts?.loadState) {
     flow {
       if (posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
