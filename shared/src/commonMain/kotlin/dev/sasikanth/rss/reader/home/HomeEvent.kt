@@ -29,7 +29,7 @@ sealed interface HomeEvent {
 
   data object OnSwipeToRefresh : HomeEvent
 
-  data class OnPostClicked(val post: PostWithMetadata) : HomeEvent
+  data class OnPostClicked(val post: PostWithMetadata, val postIndex: Int) : HomeEvent
 
   data class OnPostSourceClicked(val feedId: String) : HomeEvent
 

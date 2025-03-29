@@ -1,4 +1,4 @@
-async function processIFrames(doc) {
+function processIFrames(doc) {
   let iframes = doc.querySelectorAll("iframe")
   for (let i = 0, max = iframes.length; i < max; i++) {
     let iframe = iframes[i];
@@ -91,19 +91,19 @@ function formatRedditPost(html) {
   return result;
 }
 
-async function removeHeadTag(html) {
+function removeHeadTag(html) {
   const headRegex = /<head[^>]*>[\s\S]*?<\/head>/i;
   return html.replace(headRegex, '');
 }
 
-async function removeFirstH1(doc) {
+function removeFirstH1(doc) {
   const firstH1 = doc.querySelector('h1');
   if (firstH1) {
     firstH1.parentNode.removeChild(firstH1);
   }
 }
 
-async function removeFirstImageTagByUrl(doc, imageUrl) {
+function removeFirstImageTagByUrl(doc, imageUrl) {
   if (!imageUrl) {
     return;
   }
@@ -123,8 +123,7 @@ async function removeFirstImageTagByUrl(doc, imageUrl) {
 async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   console.log('Preparing reader content for rendering');
 
-  const canFetchFullArticle = fetchFullArticle || !html || (typeof html === 'string' && html.trim() === '');
-  const cleanedHtml = await removeHeadTag(html);
+  const cleanedHtml = removeHeadTag(html);
   let sanitizedHtml;
   if (isRedditUrl(link)) {
     sanitizedHtml = formatRedditPost(cleanedHtml);
@@ -135,12 +134,12 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(sanitizedHtml, 'text/html');
 
-  await removeFirstH1(doc);
-  await processIFrames(doc);
-  await removeFirstImageTagByUrl(doc, bannerImage);
+  removeFirstH1(doc);
+  processIFrames(doc);
+  removeFirstImageTagByUrl(doc, bannerImage);
 
   let opts;
-  if (canFetchFullArticle) {
+  if (fetchFullArticle) {
     opts = {contentType: 'markdown'};
   } else {
     opts = {html: doc.body.innerHTML, contentType: 'markdown'};
@@ -148,19 +147,6 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   // noinspection JSUnresolvedReference
   const result = await Mercury.parse(link, opts);
 
-  console.log('Reader content rendered')
-
-  //noinspection JSUnresolvedVariable
-  window.kmpJsBridge.callNative(
-    "renderProgress",
-    JSON.stringify("Idle"),
-    {}
-  );
-
-  //noinspection JSUnresolvedVariable
-  window.kmpJsBridge.callNative(
-    "parsedContentCallback",
-    JSON.stringify({content: `${result.content}`, excerpt: `${result.excerpt}`}),
-    {}
-  );
+  console.log('Reader content processed');
+  return JSON.stringify({content: result.content, excerpt: result.excerpt})
 }

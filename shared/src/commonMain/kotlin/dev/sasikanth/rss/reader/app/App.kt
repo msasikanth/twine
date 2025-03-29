@@ -198,7 +198,6 @@ fun App(
               ReaderScreen(
                 presenter = modal.presenter,
                 darkTheme = useDarkTheme,
-                dispatchersProvider = dispatchersProvider,
               )
             }
             is Modals.FeedInfo ->

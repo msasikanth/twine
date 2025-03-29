@@ -35,7 +35,7 @@ internal sealed interface SearchEvent {
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : SearchEvent
 
-  data class OnPostClicked(val post: PostWithMetadata) : SearchEvent
+  data class OnPostClicked(val postIndex: Int, val post: PostWithMetadata) : SearchEvent
 
   data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : SearchEvent
 }

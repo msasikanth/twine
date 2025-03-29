@@ -17,43 +17,21 @@
 package dev.sasikanth.rss.reader.reader
 
 import androidx.compose.runtime.Immutable
+import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-import dev.sasikanth.rss.reader.util.readerDateTimestamp
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
 internal data class ReaderState(
-  val link: String?,
-  val title: String?,
-  val description: String?,
-  val content: String?,
-  val publishedAt: String?,
-  val isBookmarked: Boolean?,
-  val postImage: String?,
-  val commentsLink: String?,
-  val fetchFullArticle: Boolean,
-  val feedIcon: String,
-  val feedHomePageLink: String,
-  val feedName: String,
+  val initialIndex: Int,
+  val posts: Flow<PagingData<PostWithMetadata>>
 ) {
 
   companion object {
 
-    fun default(post: PostWithMetadata): ReaderState {
-      val hasContent = post.description.isNotBlank() || post.rawContent.isNullOrBlank().not()
-      return ReaderState(
-        link = post.link,
-        title = post.title,
-        description = post.description,
-        content = post.rawContent ?: post.description,
-        publishedAt = post.date.readerDateTimestamp(),
-        isBookmarked = post.bookmarked,
-        postImage = post.imageUrl,
-        commentsLink = post.commentsLink,
-        fetchFullArticle = post.alwaysFetchFullArticle || hasContent.not(),
-        feedIcon = post.feedIcon,
-        feedHomePageLink = post.feedHomepageLink,
-        feedName = post.feedName,
-      )
+    fun default(initialIndex: Int): ReaderState {
+      return ReaderState(initialIndex = initialIndex, posts = emptyFlow())
     }
   }
 }
