@@ -75,7 +75,7 @@ internal fun PostsList(
   useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
-  onPostClicked: (post: PostWithMetadata) -> Unit,
+  onPostClicked: (post: PostWithMetadata, postIndex: Int) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
@@ -126,7 +126,7 @@ internal fun PostsList(
         PostListItem(
           item = post,
           reduceReadItemAlpha = true,
-          onClick = { onPostClicked(post) },
+          onClick = { onPostClicked(post, adjustedIndex) },
           onPostBookmarkClick = { onPostBookmarkClick(post) },
           onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
           onPostSourceClick = { onPostSourceClick(post.sourceId) },

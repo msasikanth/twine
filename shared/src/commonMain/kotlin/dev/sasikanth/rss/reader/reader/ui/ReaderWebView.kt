@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.reader
+package dev.sasikanth.rss.reader.reader.ui
 
-sealed interface ReaderEvent {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
-  data object BackClicked : ReaderEvent
-
-  data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
-    ReaderEvent
-
-  data class PostPageChanged(val postId: String) : ReaderEvent
-
-  data object MarkOpenedPostsAsRead : ReaderEvent
-}
+/** Need this to parse the HTML content of the post using Postlight parser using JS */
+@Composable
+expect fun ReaderWebView(
+  link: String?,
+  content: String?,
+  postImage: String?,
+  fetchFullArticle: Boolean,
+  contentLoaded: (String) -> Unit,
+  modifier: Modifier = Modifier,
+)

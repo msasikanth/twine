@@ -51,20 +51,13 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-internal typealias SearchPresentFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openPost: (PostWithMetadata) -> Unit,
-  ) -> SearchPresenter
-
 @Inject
 class SearchPresenter(
   rssRepository: RssRepository,
   dispatchersProvider: DispatchersProvider,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
+  @Assisted private val openPost: OpenPost,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -86,7 +79,13 @@ class SearchPresenter(
 
   internal fun dispatch(event: SearchEvent) {
     when (event) {
-      is SearchEvent.OnPostClicked -> openPost(event.post)
+      is SearchEvent.OnPostClicked ->
+        openPost(
+          searchQuery.text,
+          state.value.searchSortOrder,
+          event.postIndex,
+          event.post,
+        )
       SearchEvent.BackClicked -> goBack()
       else -> {
         /* no-op */
@@ -189,3 +188,13 @@ class SearchPresenter(
     }
   }
 }
+
+internal typealias SearchPresentFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openPost: OpenPost,
+  ) -> SearchPresenter
+
+private typealias OpenPost =
+  (searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: PostWithMetadata) -> Unit

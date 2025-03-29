@@ -140,7 +140,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
                 item = post,
                 postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
                 reduceReadItemAlpha = true,
-                onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(post)) },
+                onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(index, post)) },
                 onPostBookmarkClick = {
                   searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
                 },
