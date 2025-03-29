@@ -216,7 +216,7 @@ class AppPresenter(
               { navigation.pushNew(Config.Search) },
               { navigation.pushNew(Config.Bookmarks) },
               { navigation.pushNew(Config.Settings) },
-              { post, postIndex ->
+              { postIndex, post ->
                 openPost(
                   post = post,
                   postIndex = postIndex,
@@ -299,7 +299,7 @@ class AppPresenter(
       }
       is Config.BlockedWords -> {
         Screen.BlockedWords(
-          presenter = blockedWordsPresenter(componentContext, { navigation.pop() })
+          presenter = blockedWordsPresenter(componentContext) { navigation.pop() }
         )
       }
     }
@@ -324,9 +324,9 @@ class AppPresenter(
 
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
+    settingsRepository: SettingsRepository,
     private val lastUpdatedAt: LastUpdatedAt,
     private val rssRepository: RssRepository,
-    private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)

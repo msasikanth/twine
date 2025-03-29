@@ -20,9 +20,10 @@ sealed interface ReaderEvent {
 
   data object BackClicked : ReaderEvent
 
-  data object TogglePostBookmark : ReaderEvent
+  data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
+    ReaderEvent
 
-  data object ArticleShortcutClicked : ReaderEvent
+  data class PostPageChanged(val postId: String) : ReaderEvent
 
-  data object MarkPostAsRead : ReaderEvent
+  data object MarkOpenedPostsAsRead : ReaderEvent
 }

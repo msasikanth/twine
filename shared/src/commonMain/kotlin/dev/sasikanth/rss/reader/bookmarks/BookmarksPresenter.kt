@@ -60,7 +60,9 @@ class BookmarksPresenter(
   fun dispatch(event: BookmarksEvent) {
     when (event) {
       BookmarksEvent.BackClicked -> goBack()
-      is BookmarksEvent.OnPostClicked -> openPost::invoke
+      is BookmarksEvent.OnPostClicked -> {
+        openPost.invoke(event.postIndex, event.post)
+      }
       else -> {
         // no-op
       }

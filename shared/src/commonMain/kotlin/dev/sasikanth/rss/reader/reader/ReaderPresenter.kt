@@ -16,21 +16,36 @@
 
 package dev.sasikanth.rss.reader.reader
 
+import app.cash.paging.cachedIn
+import app.cash.paging.createPager
+import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.*
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.getLast24HourStart
+import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -39,6 +54,8 @@ import me.tatarka.inject.annotations.Inject
 class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val settingsRepository: SettingsRepository,
+  private val observableActiveSource: ObservableActiveSource,
   @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit
@@ -50,14 +67,16 @@ class ReaderPresenter(
         dispatchersProvider = dispatchersProvider,
         readerScreenArgs = readerScreenArgs,
         rssRepository = rssRepository,
+        settingsRepository = settingsRepository,
+        observableActiveSource = observableActiveSource,
       )
     }
 
-  init {
-    lifecycle.doOnDestroy { presenterInstance.dispatch(ReaderEvent.MarkPostAsRead) }
-  }
-
   internal val state = presenterInstance.state
+
+  init {
+    lifecycle.doOnDestroy { dispatch(ReaderEvent.MarkOpenedPostsAsRead) }
+  }
 
   fun dispatch(event: ReaderEvent) {
     when (event) {
@@ -74,42 +93,117 @@ class ReaderPresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val readerScreenArgs: ReaderScreenArgs,
+    private val settingsRepository: SettingsRepository,
+    private val observableActiveSource: ObservableActiveSource,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
+    private val openedPostItems = mutableSetOf<String>()
 
-    private val _state = MutableStateFlow(ReaderState.default(readerScreenArgs.post))
+    private val _state = MutableStateFlow(ReaderState.default(readerScreenArgs.postIndex))
     val state: StateFlow<ReaderState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReaderState.default(readerScreenArgs.post)
+        initialValue = ReaderState.default(readerScreenArgs.postIndex)
       )
+
+    init {
+      init()
+    }
 
     fun dispatch(event: ReaderEvent) {
       when (event) {
         ReaderEvent.BackClicked -> {
           /* no-op */
         }
-        ReaderEvent.TogglePostBookmark -> togglePostBookmark(readerScreenArgs.post.id)
-        ReaderEvent.MarkPostAsRead -> markPostAsRead(readerScreenArgs.post.id)
-        ReaderEvent.ArticleShortcutClicked -> articleShortcutClicked()
+        is ReaderEvent.TogglePostBookmark ->
+          togglePostBookmark(event.postId, event.currentBookmarkStatus)
+        is ReaderEvent.PostPageChanged -> {
+          openedPostItems += event.postId
+        }
+        ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
       }
     }
 
-    private fun articleShortcutClicked() {
-      _state.update { it.copy(fetchFullArticle = !it.fetchFullArticle) }
+    private fun markPostsAsRead() {
+      coroutineScope.launch { rssRepository.markPostsAsRead(openedPostItems) }
     }
 
-    private fun markPostAsRead(postId: String) {
-      coroutineScope.launch { rssRepository.updatePostReadStatus(read = true, id = postId) }
-    }
-
-    private fun togglePostBookmark(postId: String) {
+    private fun init() {
       coroutineScope.launch {
-        val isBookmarked = state.value.isBookmarked ?: false
-        rssRepository.updateBookmarkStatus(bookmarked = !isBookmarked, id = postId)
-        _state.update { it.copy(isBookmarked = !isBookmarked) }
+        val activeSource = observableActiveSource.activeSource.firstOrNull()
+        val postsType = settingsRepository.postsType.first()
+
+        val unreadOnly = getUnreadOnly(postsType)
+        val postsAfter = getPostsAfter(postsType)
+        val activeSourceIds = activeSourceIds(activeSource)
+
+        val posts =
+          createPager(
+              config =
+                createPagingConfig(
+                  pageSize = 4,
+                  enablePlaceholders = false,
+                ),
+              initialKey = readerScreenArgs.postIndex
+            ) {
+              when (readerScreenArgs.fromScreen) {
+                Home -> {
+                  rssRepository.allPosts(
+                    activeSourceIds = activeSourceIds,
+                    unreadOnly = unreadOnly,
+                    after = postsAfter,
+                  )
+                }
+                is Search -> {
+                  rssRepository.search(
+                    searchQuery = readerScreenArgs.fromScreen.searchQuery,
+                    sortOrder = readerScreenArgs.fromScreen.sortOrder,
+                  )
+                }
+                Bookmarks -> {
+                  rssRepository.bookmarks()
+                }
+              }
+            }
+            .flow
+            .cachedIn(coroutineScope)
+
+        _state.update { it.copy(posts = posts) }
+      }
+    }
+
+    private fun getPostsAfter(postsType: PostsType) =
+      when (postsType) {
+        PostsType.ALL,
+        PostsType.UNREAD -> Instant.DISTANT_PAST
+        PostsType.TODAY -> {
+          getTodayStartInstant()
+        }
+        PostsType.LAST_24_HOURS -> {
+          getLast24HourStart()
+        }
+      }
+
+    private fun getUnreadOnly(postsType: PostsType) =
+      when (postsType) {
+        PostsType.ALL,
+        PostsType.TODAY,
+        PostsType.LAST_24_HOURS -> null
+        PostsType.UNREAD -> true
+      }
+
+    private fun activeSourceIds(activeSource: Source?) =
+      when (activeSource) {
+        is Feed -> listOf(activeSource.id)
+        is FeedGroup -> activeSource.feedIds
+        else -> emptyList()
+      }
+
+    private fun togglePostBookmark(postId: String, currentBookmarkStatus: Boolean) {
+      coroutineScope.launch {
+        rssRepository.updateBookmarkStatus(bookmarked = !currentBookmarkStatus, id = postId)
       }
     }
   }
@@ -122,16 +216,19 @@ internal typealias ReaderPresenterFactory =
     goBack: () -> Unit,
   ) -> ReaderPresenter
 
+@Serializable
 data class ReaderScreenArgs(
   val postIndex: Int,
-  val post: PostWithMetadata,
   val fromScreen: FromScreen,
 ) {
 
-  @Serializable
-  enum class FromScreen {
-    Home,
-    Search,
-    Bookmarks
+  sealed interface FromScreen {
+
+    @Serializable data object Home : FromScreen
+
+    @Serializable
+    data class Search(val searchQuery: String, val sortOrder: SearchSortOrder) : FromScreen
+
+    @Serializable data object Bookmarks : FromScreen
   }
 }

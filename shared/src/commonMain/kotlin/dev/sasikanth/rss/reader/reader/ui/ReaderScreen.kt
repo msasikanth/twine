@@ -21,6 +21,7 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,10 +44,12 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
@@ -65,7 +68,6 @@ import androidx.compose.material3.rememberSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -73,6 +75,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,7 +94,6 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
@@ -106,30 +108,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.util.lerp
+import app.cash.paging.compose.collectAsLazyPagingItems
+import app.cash.paging.compose.itemKey
 import coil3.size.Size
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
+import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
-import com.multiplatform.webview.jsbridge.IJsMessageHandler
-import com.multiplatform.webview.jsbridge.JsMessage
-import com.multiplatform.webview.jsbridge.processParams
-import com.multiplatform.webview.jsbridge.rememberWebViewJsBridge
-import com.multiplatform.webview.web.LoadingState
-import com.multiplatform.webview.web.WebView
-import com.multiplatform.webview.web.WebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewNavigator
-import com.multiplatform.webview.web.rememberWebViewStateWithHTMLData
+import com.mikepenz.markdown.utils.findChildOfTypeRecursive
+import com.mikepenz.markdown.utils.getUnescapedTextInNode
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
-import dev.sasikanth.rss.reader.reader.ReaderState
 import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -140,197 +140,160 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.util.canBlurImage
+import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
-import dev.sasikanth.rss.reader.utils.asJSString
+import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
+import kotlin.math.absoluteValue
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import org.intellij.markdown.MarkdownElementTypes
 
+private val json = Json {
+  ignoreUnknownKeys = true
+  isLenient = true
+  explicitNulls = false
+}
+
+@OptIn(FlowPreview::class)
 @Composable
 internal fun ReaderScreen(
   darkTheme: Boolean,
   presenter: ReaderPresenter,
-  dispatchersProvider: DispatchersProvider,
   modifier: Modifier = Modifier
 ) {
   val state by presenter.state.collectAsState()
-  val listState = rememberLazyListState()
-  val coroutineScope = rememberCoroutineScope()
-  val topAppBarScrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
-  val linkHandler = LocalLinkHandler.current
-  val sharedHandler = LocalShareHandler.current
+  val posts = state.posts.collectAsLazyPagingItems()
+  val pagerState = rememberPagerState { posts.itemCount }
+  val sheetState =
+    rememberSheetState(skipPartiallyExpanded = true, velocityThreshold = Float.POSITIVE_INFINITY.dp)
+  var sheetGesturesEnabled by remember { mutableStateOf(true) }
 
   ModalBottomSheet(
-    sheetState =
-      rememberSheetState(
-        skipPartiallyExpanded = true,
-        velocityThreshold = Float.POSITIVE_INFINITY.dp
-      ),
+    modifier = modifier,
+    sheetState = sheetState,
     containerColor = AppTheme.colorScheme.backdrop,
     dragHandle = null,
     shape = RectangleShape,
-    sheetGesturesEnabled =
-      listState.firstVisibleItemScrollOffset == 0 &&
-        topAppBarScrollBehaviour.state.heightOffset == 0f,
+    sheetGesturesEnabled = sheetGesturesEnabled,
     onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
   ) {
-    Scaffold(
-      modifier = modifier.nestedScroll(topAppBarScrollBehaviour.nestedScrollConnection),
-      topBar = {
-        CenterAlignedTopAppBar(
-          modifier = Modifier.statusBarsPadding(),
-          scrollBehavior = topAppBarScrollBehaviour,
-          colors =
-            TopAppBarDefaults.topAppBarColors(
-              containerColor = Color.Transparent,
-              scrolledContainerColor = Color.Transparent,
-            ),
-          navigationIcon = {
-            IconButton(
-              onClick = {
-                // TODO: Go to previous article
-              }
-            ) {
-              Icon(
-                imageVector = Icons.Rounded.ChevronLeft,
-                contentDescription = null,
-                tint = AppTheme.colorScheme.onSurface,
-              )
-            }
+    HorizontalPager(
+      state = pagerState,
+      key = posts.itemKey { it.id },
+      overscrollEffect = null,
+    ) { page ->
+      val readerPost = posts[page]
+      val coroutineScope = rememberCoroutineScope()
+      val listState = rememberLazyListState()
+
+      LaunchedEffect(page) {
+        val postId = readerPost?.id
+        if (!postId.isNullOrBlank()) {
+          presenter.dispatch(ReaderEvent.PostPageChanged(postId))
+        }
+      }
+
+      if (readerPost != null) {
+        LaunchedEffect(listState, pagerState) {
+          snapshotFlow { listState.firstVisibleItemIndex }
+            .filter { !pagerState.isScrollInProgress }
+            .debounce(500)
+            .collectLatest { index -> sheetGesturesEnabled = index == 0 }
+        }
+
+        val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
+        ReaderPage(
+          modifier =
+            Modifier.graphicsLayer {
+              val scale = lerp(1f, 0.75f, pageOffset)
+              scaleX = scale
+              scaleY = scale
+            },
+          listState = listState,
+          readerPost = readerPost,
+          presenter = presenter,
+          darkTheme = darkTheme,
+          canNavigateNext = pagerState.canScrollForward,
+          canNavigatePrev = pagerState.canScrollBackward,
+          goNext = {
+            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
           },
-          title = {
-            Box(
-              modifier =
-                Modifier.background(
-                    color = AppTheme.colorScheme.primary.copy(alpha = 0.08f),
-                    shape = RoundedCornerShape(50)
-                  )
-                  .padding(horizontal = 16.dp, vertical = 8.dp),
-              contentAlignment = Alignment.Center,
-            ) {
-              Text(
-                text = LocalStrings.current.pullToClose,
-                style = MaterialTheme.typography.labelSmall,
-                color = AppTheme.colorScheme.onSurfaceVariant
-              )
-            }
+          goPrev = {
+            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
           },
-          actions = {
-            IconButton(
-              onClick = {
-                // TODO: Go to next article
-              }
-            ) {
-              Icon(
-                imageVector = Icons.Rounded.ChevronRight,
-                contentDescription = null,
-                tint = AppTheme.colorScheme.onSurface,
-              )
-            }
-          }
         )
+      }
+    }
+  }
+}
+
+@Composable
+private fun ReaderPage(
+  listState: LazyListState,
+  readerPost: PostWithMetadata,
+  presenter: ReaderPresenter,
+  darkTheme: Boolean,
+  canNavigateNext: Boolean,
+  canNavigatePrev: Boolean,
+  goNext: () -> Unit,
+  goPrev: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val linkHandler = LocalLinkHandler.current
+  val sharedHandler = LocalShareHandler.current
+  val coroutineScope = rememberCoroutineScope()
+
+  var readerProcessingProgress by
+    remember(readerPost.id) { mutableStateOf(ReaderProcessingProgress.Loading) }
+  var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
+  var loadFullArticleClicked by remember(readerPost.id) { mutableStateOf(false) }
+
+  val content = readerPost.rawContent ?: readerPost.description
+  val fetchFullArticle =
+    readerPost.alwaysFetchFullArticle ||
+      content.isBlank() ||
+      loadFullArticleClicked ||
+      (parsedContent.content.isNullOrBlank() &&
+        readerProcessingProgress != ReaderProcessingProgress.Loading)
+
+  Box {
+    // Dummy view to parse the reader content using JS
+    ReaderWebView(
+      modifier = Modifier.requiredSize(0.dp),
+      link = readerPost.link,
+      content = content,
+      postImage = readerPost.imageUrl,
+      fetchFullArticle = fetchFullArticle,
+      contentLoaded = {
+        readerProcessingProgress = ReaderProcessingProgress.Idle
+        parsedContent = json.decodeFromString(it)
       },
+    )
+
+    Scaffold(
+      modifier = modifier.fillMaxSize(),
       bottomBar = {
         BottomBar(
-          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(state.link) } },
-          loadFullArticleClick = { presenter.dispatch(ReaderEvent.ArticleShortcutClicked) }
+          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(readerPost.link) } },
+          loadFullArticleClick = { loadFullArticleClicked = true }
         )
       },
-      containerColor = Color.Unspecified,
+      containerColor = AppTheme.colorScheme.backdrop,
       contentColor = Color.Unspecified
     ) { paddingValues ->
-      var readerProcessingProgress by remember { mutableStateOf(ReaderProcessingProgress.Loading) }
-      var parsedContent by remember { mutableStateOf(ReaderContent("", "")) }
-
       val layoutDirection = LocalLayoutDirection.current
-
-      val webViewState = rememberWebViewStateWithHTMLData("")
-      val navigator = rememberWebViewNavigator()
-      val jsBridge = rememberWebViewJsBridge()
-
-      LaunchedEffect(state.content) {
-        if (!state.content.isNullOrBlank()) {
-          launch(dispatchersProvider.io) {
-            navigator.loadHtml(
-              html = ReaderHTML.create(),
-              baseUrl = state.link,
-            )
-          }
-        }
-      }
-
-      LaunchedEffect(webViewState.loadingState, state.fetchFullArticle) {
-        if (webViewState.loadingState == LoadingState.Finished) {
-          navigator.evaluateJavaScript(
-            script =
-              """
-                parseReaderContent(
-                  ${state.link.asJSString}, 
-                  ${state.content.asJSString}, 
-                  ${state.postImage.orEmpty().asJSString},
-                  ${state.fetchFullArticle}
-                )
-              """
-                .trimIndent()
-          )
-        }
-      }
-
-      DisposableEffect(jsBridge) {
-        jsBridge.register(
-          object : IJsMessageHandler {
-            override fun handle(
-              message: JsMessage,
-              navigator: WebViewNavigator?,
-              callback: (String) -> Unit
-            ) {
-              if (message.params.isNotBlank()) {
-                readerProcessingProgress = processParams<ReaderProcessingProgress>(message)
-              }
-            }
-
-            override fun methodName(): String {
-              return "renderProgress"
-            }
-          }
-        )
-
-        jsBridge.register(
-          object : IJsMessageHandler {
-            override fun handle(
-              message: JsMessage,
-              navigator: WebViewNavigator?,
-              callback: (String) -> Unit
-            ) {
-              if (message.params.isNotBlank()) {
-                parsedContent = processParams(message)
-              }
-            }
-
-            override fun methodName(): String {
-              return "parsedContentCallback"
-            }
-          }
-        )
-
-        onDispose { jsBridge.clear() }
-      }
-
-      // Dummy view to parse the reader content using JS
-      WebView(
-        modifier = Modifier.requiredSize(0.dp),
-        state = webViewState,
-        navigator = navigator,
-        webViewJsBridge = jsBridge,
-        captureBackPresses = false,
-      )
-
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
+        overscrollEffect = null,
         contentPadding =
           PaddingValues(
             start = paddingValues.calculateStartPadding(layoutDirection),
@@ -339,22 +302,74 @@ internal fun ReaderScreen(
             bottom = paddingValues.calculateBottomPadding()
           )
       ) {
+        item(key = "top-bar") {
+          CenterAlignedTopAppBar(
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+              ),
+            navigationIcon = {
+              IconButton(enabled = canNavigatePrev, onClick = goPrev) {
+                Icon(
+                  imageVector = Icons.Rounded.ChevronLeft,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
+              }
+            },
+            title = {
+              Box(
+                modifier =
+                  Modifier.background(
+                      color = AppTheme.colorScheme.primary.copy(alpha = 0.08f),
+                      shape = RoundedCornerShape(50)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center,
+              ) {
+                Text(
+                  text = LocalStrings.current.pullToClose,
+                  style = MaterialTheme.typography.labelSmall,
+                  color = AppTheme.colorScheme.onSurfaceVariant
+                )
+              }
+            },
+            actions = {
+              IconButton(enabled = canNavigateNext, onClick = goNext) {
+                Icon(
+                  imageVector = Icons.Rounded.ChevronRight,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
+              }
+            }
+          )
+        }
+
         item(key = "reader-header") {
-          val postImage = state.postImage
+          val postImage = readerPost.imageUrl
 
           Box {
-            BannerImageBlurred(postImage = postImage, darkTheme = darkTheme)
+            if (canBlurImage) {
+              BannerImageBlurred(postImage = postImage, darkTheme = darkTheme)
+            }
 
             PostInfo(
-              paddingValues = paddingValues,
-              state = state,
-              postImage = postImage,
+              readerPost = readerPost,
               parsedContent = parsedContent,
               onCommentsClick = {
-                coroutineScope.launch { linkHandler.openLink(state.commentsLink) }
+                coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
               },
-              onShareClick = { sharedHandler.share(state.link) },
-              onBookmarkClick = { presenter.dispatch(ReaderEvent.TogglePostBookmark) }
+              onShareClick = { sharedHandler.share(readerPost.link) },
+              onBookmarkClick = {
+                presenter.dispatch(
+                  ReaderEvent.TogglePostBookmark(
+                    postId = readerPost.id,
+                    currentBookmarkStatus = readerPost.bookmarked
+                  )
+                )
+              }
             )
           }
         }
@@ -382,53 +397,74 @@ internal fun ReaderScreen(
                 Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
               }
 
-            Markdown(
-              modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
-              content = parsedContent.content,
-              typography =
-                markdownTypography(
-                  link =
-                    MaterialTheme.typography.bodyLarge.copy(
-                      color = AppTheme.colorScheme.tintedForeground,
-                      fontWeight = FontWeight.Bold,
-                      textDecoration = TextDecoration.Underline
-                    )
-                ),
-              colors =
-                markdownColor(
-                  text = AppTheme.colorScheme.onSurface,
-                ),
-              imageTransformer = Coil3ImageTransformerImpl,
-              components =
-                markdownComponents(
-                  codeBlock = {
-                    MarkdownHighlightedCodeBlock(
-                      content = it.content,
-                      node = it.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                  codeFence = {
-                    MarkdownHighlightedCodeFence(
-                      content = it.content,
-                      node = it.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                )
-            )
+            parsedContent.content?.let {
+              Markdown(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
+                content = it,
+                typography =
+                  markdownTypography(
+                    link =
+                      MaterialTheme.typography.bodyLarge.copy(
+                        color = AppTheme.colorScheme.tintedForeground,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline
+                      )
+                  ),
+                colors =
+                  markdownColor(
+                    text = AppTheme.colorScheme.onSurface,
+                  ),
+                imageTransformer = Coil3ImageTransformerImpl,
+                components =
+                  markdownComponents(
+                    codeBlock = { cm ->
+                      MarkdownHighlightedCodeBlock(
+                        content = cm.content,
+                        node = cm.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                    codeFence = { cm ->
+                      MarkdownHighlightedCodeFence(
+                        content = cm.content,
+                        node = cm.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                    image = {
+                      val link =
+                        it.node
+                          .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
+                          ?.getUnescapedTextInNode(it.content)
+                          ?: return@markdownComponents
+
+                      LocalImageTransformer.current.transform(link)?.let { imageData ->
+                        Image(
+                          painter = imageData.painter,
+                          contentDescription = imageData.contentDescription,
+                          modifier = imageData.modifier.clip(MaterialTheme.shapes.extraLarge),
+                          alignment = imageData.alignment,
+                          contentScale = imageData.contentScale,
+                          alpha = imageData.alpha,
+                          colorFilter = imageData.colorFilter
+                        )
+                      }
+                    }
+                  )
+              )
+            }
           }
 
           when {
             readerProcessingProgress == ReaderProcessingProgress.Loading -> {
-              Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LinearProgressIndicator(
                   trackColor = AppTheme.colorScheme.tintedSurface,
                   color = AppTheme.colorScheme.tintedForeground,
                 )
               }
             }
-            state.content.isNullOrBlank() -> {
+            content.isBlank() -> {
               Text(LocalStrings.current.noReaderContent)
             }
           }
@@ -512,9 +548,7 @@ private fun BottomBarIconButton(label: String, icon: ImageVector, onClick: () ->
 
 @Composable
 private fun PostInfo(
-  paddingValues: PaddingValues,
-  state: ReaderState,
-  postImage: String?,
+  readerPost: PostWithMetadata,
   parsedContent: ReaderContent,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
@@ -522,14 +556,11 @@ private fun PostInfo(
   modifier: Modifier = Modifier,
 ) {
   Column(
-    modifier =
-      Modifier.fillMaxWidth()
-        .padding(top = paddingValues.calculateTopPadding())
-        .padding(horizontal = 32.dp)
-        .then(modifier),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).then(modifier),
   ) {
-    val title = state.title.orEmpty()
-    val description = state.description.orEmpty()
+    val title = readerPost.title
+    val description = readerPost.description
+    val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
       AsyncImage(
@@ -549,7 +580,7 @@ private fun PostInfo(
 
     Text(
       modifier = Modifier.padding(top = 20.dp),
-      text = state.publishedAt.orEmpty(),
+      text = readerPost.date.readerDateTimestamp(),
       style = MaterialTheme.typography.bodyMedium,
       color = AppTheme.colorScheme.outline,
       maxLines = 1,
@@ -564,7 +595,7 @@ private fun PostInfo(
       overflow = TextOverflow.Ellipsis,
     )
 
-    if (parsedContent.excerpt.isNotBlank()) {
+    if (!parsedContent.excerpt.isNullOrBlank()) {
       Spacer(Modifier.requiredHeight(8.dp))
 
       Text(
@@ -580,11 +611,11 @@ private fun PostInfo(
 
     Row(verticalAlignment = Alignment.CenterVertically) {
       val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val feedIconUrl = if (showFeedFavIcon) state.feedHomePageLink else state.feedIcon
+      val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
 
       PostSourcePill(
         modifier = Modifier.weight(1f).clearAndSetSemantics {},
-        feedName = state.feedName,
+        feedName = readerPost.feedName,
         feedIcon = feedIconUrl,
         config =
           PostMetadataConfig(
@@ -598,8 +629,8 @@ private fun PostInfo(
       )
 
       PostOptionsButtonRow(
-        postBookmarked = state.isBookmarked ?: false,
-        commentsLink = state.commentsLink,
+        postBookmarked = readerPost.bookmarked,
+        commentsLink = readerPost.commentsLink,
         onCommentsClick = onCommentsClick,
         onShareClick = onShareClick,
         onBookmarkClick = onBookmarkClick,
@@ -649,17 +680,23 @@ private fun BannerImageBlurred(postImage: String?, darkTheme: Boolean) {
       }
     }
 
-    AsyncImage(
-      url = postImage,
+    val blurModifier =
+      if (canBlurImage) {
+        Modifier.graphicsLayer {
+          val blurRadiusInPx = 100.dp.toPx()
+          renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
+          shape = RectangleShape
+          clip = false
+        }
+      } else {
+        Modifier
+      }
+
+    Box(
       modifier =
         Modifier.requiredHeightIn(max = 800.dp)
           .aspectRatio(1f)
-          .graphicsLayer {
-            val blurRadiusInPx = 100.dp.toPx()
-            renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-            shape = RectangleShape
-            clip = false
-          }
+          .then(blurModifier)
           .drawWithContent {
             drawContent()
 
@@ -668,13 +705,18 @@ private fun BannerImageBlurred(postImage: String?, darkTheme: Boolean) {
               blendMode = BlendMode.Luminosity,
             )
           }
-          .then(gradientOverlayModifier),
-      contentDescription = null,
-      contentScale = ContentScale.Crop,
-      size = Size(128, 128),
-      backgroundColor = AppTheme.colorScheme.surface,
-      colorFilter = ColorFilter.colorMatrix(colorMatrix)
-    )
+          .then(gradientOverlayModifier)
+    ) {
+      AsyncImage(
+        modifier = Modifier.matchParentSize(),
+        url = postImage,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        size = Size(128, 128),
+        backgroundColor = AppTheme.colorScheme.surface,
+        colorFilter = ColorFilter.colorMatrix(colorMatrix)
+      )
+    }
   }
 }
 
@@ -826,6 +868,6 @@ enum class ReaderProcessingProgress {
 
 @Serializable
 data class ReaderContent(
-  val excerpt: String,
-  val content: String,
+  val excerpt: String?,
+  val content: String?,
 )
