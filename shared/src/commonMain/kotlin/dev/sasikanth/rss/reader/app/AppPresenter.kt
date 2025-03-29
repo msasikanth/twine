@@ -153,8 +153,7 @@ class AppPresenter(
           presenter =
             readerPresenter(
               ReaderScreenArgs(
-                postIndex = 0,
-                post = modalConfig.post,
+                postIndex = modalConfig.postIndex,
                 fromScreen = modalConfig.fromScreen,
               ),
               componentContext
@@ -217,7 +216,13 @@ class AppPresenter(
               { navigation.pushNew(Config.Search) },
               { navigation.pushNew(Config.Bookmarks) },
               { navigation.pushNew(Config.Settings) },
-              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Home) },
+              { post, postIndex ->
+                openPost(
+                  post = post,
+                  postIndex = postIndex,
+                  fromScreen = ReaderScreenArgs.FromScreen.Home
+                )
+              },
               { modalNavigation.activate(ModalConfig.GroupSelection) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
               { navigation.pushNew(Config.AddFeed) },
@@ -231,7 +236,13 @@ class AppPresenter(
             searchPresenter(
               componentContext,
               { navigation.pop() },
-              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Search) }
+              { searchQuery, sortOrder, postIndex, post ->
+                openPost(
+                  post = post,
+                  postIndex = postIndex,
+                  fromScreen = ReaderScreenArgs.FromScreen.Search(searchQuery, sortOrder)
+                )
+              }
             )
         )
       }
@@ -241,7 +252,13 @@ class AppPresenter(
             bookmarksPresenter(
               componentContext,
               { navigation.pop() },
-              { openPost(it, fromScreen = ReaderScreenArgs.FromScreen.Bookmarks) }
+              { postIndex, post ->
+                openPost(
+                  post = post,
+                  postIndex = postIndex,
+                  fromScreen = ReaderScreenArgs.FromScreen.Bookmarks
+                )
+              }
             )
         )
       }
@@ -287,13 +304,17 @@ class AppPresenter(
       }
     }
 
-  private fun openPost(post: PostWithMetadata, fromScreen: ReaderScreenArgs.FromScreen) {
+  private fun openPost(
+    post: PostWithMetadata,
+    postIndex: Int,
+    fromScreen: ReaderScreenArgs.FromScreen
+  ) {
     scope.launch {
       val showReaderView =
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        modalNavigation.activate(ModalConfig.Reader(post, fromScreen))
+        modalNavigation.activate(ModalConfig.Reader(post, postIndex, fromScreen))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
@@ -369,8 +390,11 @@ class AppPresenter(
   @Serializable
   sealed interface ModalConfig {
     @Serializable
-    data class Reader(val post: PostWithMetadata, val fromScreen: ReaderScreenArgs.FromScreen) :
-      ModalConfig
+    data class Reader(
+      val post: PostWithMetadata,
+      val postIndex: Int,
+      val fromScreen: ReaderScreenArgs.FromScreen
+    ) : ModalConfig
 
     @Serializable data class FeedInfo(val feedId: String) : ModalConfig
 

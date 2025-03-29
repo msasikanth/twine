@@ -28,23 +28,14 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-
-internal typealias BookmarksPresenterFactory =
-  (
-    ComponentContext,
-    goBack: () -> Unit,
-    openReaderView: (PostWithMetadata) -> Unit,
-  ) -> BookmarksPresenter
 
 @Inject
 class BookmarksPresenter(
@@ -52,7 +43,7 @@ class BookmarksPresenter(
   private val rssRepository: RssRepository,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openReaderView: (post: PostWithMetadata) -> Unit,
+  @Assisted private val openPost: OpenPost,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -65,17 +56,11 @@ class BookmarksPresenter(
   }
 
   internal val state = presenterInstance.state
-  internal val effects = presenterInstance.effects.asSharedFlow()
 
   fun dispatch(event: BookmarksEvent) {
     when (event) {
       BookmarksEvent.BackClicked -> goBack()
-      is BookmarksEvent.OnPostClicked ->
-        presenterInstance.onPostClicked(
-          post = event.post,
-          openReaderView = { openReaderView(it) },
-          openLink = { presenterInstance.openLink(it) }
-        )
+      is BookmarksEvent.OnPostClicked -> openPost::invoke
       else -> {
         // no-op
       }
@@ -90,7 +75,6 @@ class BookmarksPresenter(
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
-    val effects = MutableSharedFlow<BookmarksEffect>()
 
     private val _state = MutableStateFlow(BookmarksState.DEFAULT)
     val state: StateFlow<BookmarksState> =
@@ -118,23 +102,6 @@ class BookmarksPresenter(
       coroutineScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
     }
 
-    fun onPostClicked(
-      post: PostWithMetadata,
-      openReaderView: (post: PostWithMetadata) -> Unit,
-      openLink: (postLink: String) -> Unit
-    ) {
-      coroutineScope.launch {
-        val hasPost = rssRepository.hasPost(post.id)
-        val hasFeed = rssRepository.hasFeed(post.sourceId)
-
-        if (hasPost && hasFeed) {
-          openReaderView(post)
-        } else {
-          openLink(post.link)
-        }
-      }
-    }
-
     private fun onPostBookmarkClicked(post: PostWithMetadata) {
       coroutineScope.launch {
         if (rssRepository.hasFeed(post.sourceId)) {
@@ -157,9 +124,14 @@ class BookmarksPresenter(
     override fun onDestroy() {
       coroutineScope.cancel()
     }
-
-    fun openLink(link: String) {
-      coroutineScope.launch { effects.emit(OpenLink(link)) }
-    }
   }
 }
+
+internal typealias BookmarksPresenterFactory =
+  (
+    ComponentContext,
+    goBack: () -> Unit,
+    openPost: OpenPost,
+  ) -> BookmarksPresenter
+
+private typealias OpenPost = (postIndex: Int, post: PostWithMetadata) -> Unit

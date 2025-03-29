@@ -62,19 +62,6 @@ import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
-internal typealias HomePresenterFactory =
-  (
-    ComponentContext,
-    openSearch: () -> Unit,
-    openBookmarks: () -> Unit,
-    openSettings: () -> Unit,
-    openPost: (PostWithMetadata) -> Unit,
-    openGroupSelectionSheet: () -> Unit,
-    openFeedInfoSheet: (feedId: String) -> Unit,
-    openAddFeedScreen: () -> Unit,
-    openGroupScreen: (groupId: String) -> Unit,
-  ) -> HomePresenter
-
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(
@@ -94,7 +81,7 @@ class HomePresenter(
   @Assisted private val openSearch: () -> Unit,
   @Assisted private val openBookmarks: () -> Unit,
   @Assisted private val openSettings: () -> Unit,
-  @Assisted private val openPost: (post: PostWithMetadata) -> Unit,
+  @Assisted private val openPost: OpenPost,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
@@ -150,7 +137,7 @@ class HomePresenter(
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
       is HomeEvent.SettingsClicked -> openSettings()
-      is HomeEvent.OnPostClicked -> openPost(event.post)
+      is HomeEvent.OnPostClicked -> openPost(event.postIndex, event.post)
       else -> {
         // no-op
       }
@@ -412,3 +399,18 @@ class HomePresenter(
     }
   }
 }
+
+internal typealias HomePresenterFactory =
+  (
+    ComponentContext,
+    openSearch: () -> Unit,
+    openBookmarks: () -> Unit,
+    openSettings: () -> Unit,
+    openPost: OpenPost,
+    openGroupSelectionSheet: () -> Unit,
+    openFeedInfoSheet: (feedId: String) -> Unit,
+    openAddFeedScreen: () -> Unit,
+    openGroupScreen: (groupId: String) -> Unit,
+  ) -> HomePresenter
+
+private typealias OpenPost = (postIndex: Int, post: PostWithMetadata) -> Unit

@@ -282,7 +282,9 @@ internal fun HomeScreen(
                           useDarkTheme = useDarkTheme,
                           listState = listState,
                           featuredPostsPagerState = featuredPostsPagerState,
-                          onPostClicked = { homePresenter.dispatch(HomeEvent.OnPostClicked(it)) },
+                          onPostClicked = { post, postIndex ->
+                            homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
+                          },
                           onPostBookmarkClick = {
                             homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
                           },
