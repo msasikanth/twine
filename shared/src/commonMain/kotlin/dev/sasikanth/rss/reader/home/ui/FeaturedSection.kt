@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -26,16 +27,15 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -64,32 +64,9 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
-
-private val featuredImageBackgroundAspectRatio: Float
-  @Composable
-  @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Compact -> 1.1f
-      WindowWidthSizeClass.Medium -> 1.55f
-      WindowWidthSizeClass.Expanded -> 3.1f
-      else -> 1.1f
-    }
-
-private val featuredGradientBackgroundAspectRatio: Float
-  @Composable
-  @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Compact -> 0.8f
-      WindowWidthSizeClass.Medium -> 1.11f
-      WindowWidthSizeClass.Expanded -> 2.3f
-      else -> 0.8f
-    }
 
 @Composable
 internal fun FeaturedSection(
@@ -193,11 +170,12 @@ internal fun FeaturedSection(
         Box {
           FeaturedSectionBackground(
             modifier =
-              Modifier.matchParentSize().layout { measurable, constraints ->
+              Modifier.fillMaxWidth().layout { measurable, constraints ->
                 val topPadding = contentPadding.calculateTopPadding().roundToPx()
-                val horizontalContentPadding =
-                  contentPadding.calculateStartPadding(layoutDirection) +
-                    contentPadding.calculateEndPadding(layoutDirection)
+                val startPadding = contentPadding.calculateStartPadding(layoutDirection)
+                val endPadding = contentPadding.calculateEndPadding(layoutDirection)
+                val horizontalContentPadding = startPadding + endPadding
+
                 val fullWidth = constraints.maxWidth + horizontalContentPadding.roundToPx()
                 val placeable = measurable.measure(constraints.copy(maxWidth = fullWidth))
 
@@ -271,15 +249,13 @@ private fun FeaturedSectionBackground(
 
     val swipeTransitionModifier =
       Modifier.graphicsLayer {
-          val pageOffset =
-            if (page in 0..state.pageCount) {
-              state.getOffsetFractionForPage(page)
-            } else {
-              0f
-            }
+          val pageOffset = state.getOffsetFractionForPage(page)
+          val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
+          val backgroundAlpha =
+            CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f).transform(1f - offsetAbsolute)
 
+          alpha = backgroundAlpha
           translationX = size.width * pageOffset
-          alpha = (1f - pageOffset.absoluteValue)
         }
         .then(gradientOverlayModifier)
 
@@ -299,21 +275,22 @@ private fun FeaturedSectionBackground(
 private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
   val colorStops =
     listOf(
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.50f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.70f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.60f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.33f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.10f),
-      AppTheme.colorScheme.tintedHighlight.copy(alpha = 0.0f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.33f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.50f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.70f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.60f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.33f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.10f),
+      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
     )
 
   Box(
     modifier =
-      Modifier.aspectRatio(featuredGradientBackgroundAspectRatio)
+      Modifier.then(modifier)
+        .requiredHeightIn(max = 800.dp)
+        .aspectRatio(1f)
         .background(Brush.verticalGradient(colorStops))
-        .then(modifier)
   )
 }
 
@@ -334,7 +311,8 @@ private fun FeaturedSectionBlurredBackground(
   AsyncImage(
     url = post.postWithMetadata.imageUrl!!,
     modifier =
-      Modifier.requiredHeightIn(max = 800.dp)
+      Modifier.then(modifier)
+        .requiredHeightIn(max = 800.dp)
         .aspectRatio(1f)
         .graphicsLayer {
           val blurRadiusInPx = 100.dp.toPx()
@@ -349,8 +327,7 @@ private fun FeaturedSectionBlurredBackground(
             color = overlayColor,
             blendMode = BlendMode.Luminosity,
           )
-        }
-        .then(modifier),
+        },
     contentDescription = null,
     contentScale = ContentScale.Crop,
     size = Size(128, 128),

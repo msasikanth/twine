@@ -31,6 +31,7 @@ import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
 import dev.sasikanth.material.color.utilities.dynamiccolor.ToneDeltaConstraint
 import dev.sasikanth.material.color.utilities.dynamiccolor.TonePolarity
 import dev.sasikanth.material.color.utilities.hct.Hct
+import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.inverse
@@ -132,6 +133,14 @@ internal class DynamicColorState(
       secondary = dynamicColors.secondary().toColor(scheme),
       outline = dynamicColors.outline().toColor(scheme),
       outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
+      primaryContainer =
+        DynamicColor.fromPalette(
+            { s -> s.primaryPalette },
+            { s -> if (s.isDark) 40.0 else 90.0 }
+          ) { s: DynamicScheme ->
+            dynamicColors.highestSurface(s)
+          }
+          .toColor(scheme),
       surface = dynamicColors.surface().toColor(scheme),
       onSurface = dynamicColors.onSurface().toColor(scheme),
       onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
@@ -248,6 +257,8 @@ fun AppColorScheme.animate(
     secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
     outline = lerp(start = outline, stop = to.outline, fraction = progress),
     outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
+    primaryContainer =
+      lerp(start = primaryContainer, stop = to.primaryContainer, fraction = progress),
     surface = lerp(start = surface, stop = to.surface, fraction = progress),
     onSurface = lerp(start = onSurface, stop = to.onSurface, fraction = progress),
     onSurfaceVariant =

@@ -316,12 +316,7 @@ internal fun HomeScreen(
                 },
               )
 
-              val navBarScrimColor =
-                if (useDarkTheme) {
-                  Color.Black
-                } else {
-                  Color.White
-                }
+              val navBarScrimColor = AppTheme.colorScheme.backdrop
               Box(
                 modifier =
                   Modifier.fillMaxWidth()
