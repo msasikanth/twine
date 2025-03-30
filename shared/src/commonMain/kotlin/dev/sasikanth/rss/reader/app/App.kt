@@ -160,6 +160,13 @@ fun App(
                 onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
               )
             }
+            is Screen.Reader -> {
+              ReaderScreen(
+                darkTheme = useDarkTheme,
+                presenter = screen.presenter,
+                modifier = fillMaxSizeModifier
+              )
+            }
             is Screen.Search -> {
               SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
             }
@@ -194,17 +201,12 @@ fun App(
         val modals by appPresenter.modalStack.subscribeAsState()
         modals.child?.instance?.also { modal ->
           when (modal) {
-            is Modals.Reader -> {
-              ReaderScreen(
-                presenter = modal.presenter,
-                darkTheme = useDarkTheme,
-              )
+            is Modals.FeedInfo -> {
+              FeedInfoBottomSheet(feedPresenter = modal.presenter)
             }
-            is Modals.FeedInfo ->
-              FeedInfoBottomSheet(
-                feedPresenter = modal.presenter,
-              )
-            is Modals.GroupSelection -> GroupSelectionSheet(presenter = modal.presenter)
+            is Modals.GroupSelection -> {
+              GroupSelectionSheet(presenter = modal.presenter)
+            }
           }
         }
       }

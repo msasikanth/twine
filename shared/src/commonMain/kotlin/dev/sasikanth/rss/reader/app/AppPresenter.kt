@@ -27,6 +27,7 @@ import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
+import com.arkivanov.decompose.router.stack.pushToFront
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
@@ -148,20 +149,6 @@ class AppPresenter(
 
   private fun createModal(modalConfig: ModalConfig, componentContext: ComponentContext): Modals =
     when (modalConfig) {
-      is ModalConfig.Reader -> {
-        Modals.Reader(
-          presenter =
-            readerPresenter(
-              ReaderScreenArgs(
-                postIndex = modalConfig.postIndex,
-                fromScreen = modalConfig.fromScreen,
-              ),
-              componentContext
-            ) {
-              modalNavigation.dismiss()
-            }
-        )
-      }
       is ModalConfig.FeedInfo -> {
         Modals.FeedInfo(
           presenter =
@@ -228,6 +215,20 @@ class AppPresenter(
               { navigation.pushNew(Config.AddFeed) },
               { navigation.pushNew(Config.GroupDetails(it)) }
             )
+        )
+      }
+      is Config.Reader -> {
+        Screen.Reader(
+          presenter =
+            readerPresenter(
+              ReaderScreenArgs(
+                postIndex = config.postIndex,
+                fromScreen = config.fromScreen,
+              ),
+              componentContext
+            ) {
+              navigation.pop()
+            }
         )
       }
       Config.Search -> {
@@ -314,7 +315,7 @@ class AppPresenter(
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        modalNavigation.activate(ModalConfig.Reader(post, postIndex, fromScreen))
+        navigation.pushToFront(Config.Reader(post, postIndex, fromScreen))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)
@@ -372,6 +373,13 @@ class AppPresenter(
 
     @Serializable data object Home : Config
 
+    @Serializable
+    data class Reader(
+      val post: PostWithMetadata,
+      val postIndex: Int,
+      val fromScreen: ReaderScreenArgs.FromScreen
+    ) : Config
+
     @Serializable data object Search : Config
 
     @Serializable data object Bookmarks : Config
@@ -389,13 +397,6 @@ class AppPresenter(
 
   @Serializable
   sealed interface ModalConfig {
-    @Serializable
-    data class Reader(
-      val post: PostWithMetadata,
-      val postIndex: Int,
-      val fromScreen: ReaderScreenArgs.FromScreen
-    ) : ModalConfig
-
     @Serializable data class FeedInfo(val feedId: String) : ModalConfig
 
     @Serializable data object GroupSelection : ModalConfig
