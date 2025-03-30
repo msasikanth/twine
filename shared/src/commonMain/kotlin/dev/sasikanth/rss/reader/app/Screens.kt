@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsPresenter
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
 import dev.sasikanth.rss.reader.group.GroupPresenter
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.reader.ReaderPresenter
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 
@@ -29,6 +30,8 @@ internal sealed interface Screen {
   data object Placeholder : Screen
 
   class Home(val presenter: HomePresenter) : Screen
+
+  class Reader(val presenter: ReaderPresenter) : Screen
 
   class Search(val presenter: SearchPresenter) : Screen
 
