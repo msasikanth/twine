@@ -60,11 +60,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberSheetState
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -75,7 +73,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -147,10 +144,6 @@ import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlin.math.absoluteValue
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -162,7 +155,6 @@ private val json = Json {
   explicitNulls = false
 }
 
-@OptIn(FlowPreview::class)
 @Composable
 internal fun ReaderScreen(
   darkTheme: Boolean,
@@ -172,65 +164,47 @@ internal fun ReaderScreen(
   val state by presenter.state.collectAsState()
   val posts = state.posts.collectAsLazyPagingItems()
   val pagerState = rememberPagerState { posts.itemCount }
-  val sheetState =
-    rememberSheetState(skipPartiallyExpanded = true, velocityThreshold = Float.POSITIVE_INFINITY.dp)
-  var sheetGesturesEnabled by remember { mutableStateOf(true) }
 
-  ModalBottomSheet(
+  HorizontalPager(
     modifier = modifier,
-    sheetState = sheetState,
-    containerColor = AppTheme.colorScheme.backdrop,
-    dragHandle = null,
-    shape = RectangleShape,
-    sheetGesturesEnabled = sheetGesturesEnabled,
-    onDismissRequest = { presenter.dispatch(ReaderEvent.BackClicked) },
-  ) {
-    HorizontalPager(
-      state = pagerState,
-      key = posts.itemKey { it.id },
-      overscrollEffect = null,
-    ) { page ->
-      val readerPost = posts[page]
-      val coroutineScope = rememberCoroutineScope()
-      val listState = rememberLazyListState()
+    state = pagerState,
+    key = posts.itemKey { it.id },
+    overscrollEffect = null,
+  ) { page ->
+    val readerPost = posts[page]
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
 
-      LaunchedEffect(page) {
-        val postId = readerPost?.id
-        if (!postId.isNullOrBlank()) {
-          presenter.dispatch(ReaderEvent.PostPageChanged(postId))
-        }
+    LaunchedEffect(page) {
+      val postId = readerPost?.id
+      if (!postId.isNullOrBlank()) {
+        presenter.dispatch(ReaderEvent.PostPageChanged(postId))
       }
+    }
 
-      if (readerPost != null) {
-        LaunchedEffect(listState, pagerState) {
-          snapshotFlow { listState.firstVisibleItemIndex }
-            .filter { !pagerState.isScrollInProgress }
-            .debounce(500)
-            .collectLatest { index -> sheetGesturesEnabled = index == 0 }
-        }
+    if (readerPost != null) {
+      val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
 
-        val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
-        ReaderPage(
-          modifier =
-            Modifier.graphicsLayer {
-              val scale = lerp(1f, 0.75f, pageOffset)
-              scaleX = scale
-              scaleY = scale
-            },
-          listState = listState,
-          readerPost = readerPost,
-          presenter = presenter,
-          darkTheme = darkTheme,
-          canNavigateNext = pagerState.canScrollForward,
-          canNavigatePrev = pagerState.canScrollBackward,
-          goNext = {
-            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+      ReaderPage(
+        modifier =
+          Modifier.graphicsLayer {
+            val scale = lerp(1f, 0.75f, pageOffset)
+            scaleX = scale
+            scaleY = scale
           },
-          goPrev = {
-            coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
-          },
-        )
-      }
+        listState = listState,
+        readerPost = readerPost,
+        presenter = presenter,
+        darkTheme = darkTheme,
+        canNavigateNext = pagerState.canScrollForward,
+        canNavigatePrev = pagerState.canScrollBackward,
+        goNext = {
+          coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+        },
+        goPrev = {
+          coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+        },
+      )
     }
   }
 }
