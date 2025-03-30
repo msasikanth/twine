@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -65,6 +65,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
 
@@ -251,8 +252,7 @@ private fun FeaturedSectionBackground(
       Modifier.graphicsLayer {
           val pageOffset = state.getOffsetFractionForPage(page)
           val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
-          val backgroundAlpha =
-            CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f).transform(1f - offsetAbsolute)
+          val backgroundAlpha = FastOutSlowInEasing.transform(offsetAbsolute.inverse())
 
           alpha = backgroundAlpha
           translationX = size.width * pageOffset
@@ -287,9 +287,9 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
 
   Box(
     modifier =
-      Modifier.then(modifier)
-        .requiredHeightIn(max = 800.dp)
+      Modifier.requiredHeightIn(max = 800.dp)
         .aspectRatio(1f)
+        .then(modifier)
         .background(Brush.verticalGradient(colorStops))
   )
 }
@@ -311,8 +311,7 @@ private fun FeaturedSectionBlurredBackground(
   AsyncImage(
     url = post.postWithMetadata.imageUrl!!,
     modifier =
-      Modifier.then(modifier)
-        .requiredHeightIn(max = 800.dp)
+      Modifier.requiredHeightIn(max = 800.dp)
         .aspectRatio(1f)
         .graphicsLayer {
           val blurRadiusInPx = 100.dp.toPx()
@@ -327,7 +326,8 @@ private fun FeaturedSectionBlurredBackground(
             color = overlayColor,
             blendMode = BlendMode.Luminosity,
           )
-        },
+        }
+        .then(modifier),
     contentDescription = null,
     contentScale = ContentScale.Crop,
     size = Size(128, 128),
