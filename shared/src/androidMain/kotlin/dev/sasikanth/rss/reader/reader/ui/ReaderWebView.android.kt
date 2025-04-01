@@ -55,7 +55,7 @@ actual fun ReaderWebView(
   }
 
   val webViewClient =
-    remember(link) {
+    remember(link, fetchFullArticle) {
       object : WebViewClient() {
         override fun onPageFinished(view: WebView, url: String) {
           val script =
@@ -80,11 +80,12 @@ actual fun ReaderWebView(
         settings.javaScriptEnabled = true
         setBackgroundColor(Color.TRANSPARENT)
         addJavascriptInterface(ReaderJSInterface(), "ReaderJSInterface")
-        this.webViewClient = webViewClient
       }
     },
     modifier = modifier,
     update = { webView ->
+      webView.webViewClient = webViewClient
+
       if (html.isNotBlank()) {
         webView.loadDataWithBaseURL(
           /* baseUrl = */ link ?: "",

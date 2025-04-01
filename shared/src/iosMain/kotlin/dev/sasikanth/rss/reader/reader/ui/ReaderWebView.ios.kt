@@ -59,7 +59,7 @@ actual fun ReaderWebView(
   LaunchedEffect(link) { html = withContext(Dispatchers.Default) { ReaderHTML.create() } }
 
   val navigationDelegate =
-    remember(link) {
+    remember(link, fetchFullArticle) {
       @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
       object : NSObject(), WKNavigationDelegateProtocol {
         override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
@@ -111,13 +111,14 @@ actual fun ReaderWebView(
   UIKitView(
     factory = {
       WKWebView(frame = CGRectZero.readValue(), configuration = configuration).apply {
-        setNavigationDelegate(navigationDelegate)
         setOpaque(false)
         backgroundColor = UIColor.clearColor
       }
     },
     modifier = modifier,
     update = {
+      it.setNavigationDelegate(navigationDelegate)
+
       if (html.isNotBlank()) {
         it.loadHTMLString(html, NSURL.URLWithString(link ?: ""))
       }
