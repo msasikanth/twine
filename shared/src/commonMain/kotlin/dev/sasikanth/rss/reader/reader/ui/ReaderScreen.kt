@@ -22,7 +22,9 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -470,14 +472,6 @@ private fun BottomBar(
   ) {
     AppTheme(useDarkTheme = true) {
       val transition = updateTransition(loadFullArticle)
-      val verticalPadding by
-        transition.animateDp {
-          if (it) {
-            8.dp
-          } else {
-            12.dp
-          }
-        }
       val buttonMinWidth by
         transition.animateDp {
           if (it) {
@@ -487,11 +481,33 @@ private fun BottomBar(
           }
         }
       val readerViewToggleWidth by
-        transition.animateDp {
+        transition.animateDp(
+          transitionSpec = {
+            spring(
+              stiffness = Spring.StiffnessMedium,
+              dampingRatio = Spring.DampingRatioMediumBouncy
+            )
+          }
+        ) {
           if (it) {
             88.dp
           } else {
             72.dp
+          }
+        }
+      val readerViewToggleVerticalPadding by
+        transition.animateDp(
+          transitionSpec = {
+            spring(
+              stiffness = Spring.StiffnessMedium,
+              dampingRatio = Spring.DampingRatioMediumBouncy
+            )
+          }
+        ) {
+          if (it) {
+            8.dp
+          } else {
+            12.dp
           }
         }
       val readerViewToggleBackgroundColor by
@@ -536,7 +552,7 @@ private fun BottomBar(
         )
 
         BottomBarToggleIconButton(
-          modifier = Modifier.fillMaxHeight().padding(vertical = verticalPadding),
+          modifier = Modifier.fillMaxHeight().padding(vertical = readerViewToggleVerticalPadding),
           label = LocalStrings.current.cdLoadFullArticle,
           icon = TwineIcons.ArticleShortcut,
           onClick = loadFullArticleClick,
