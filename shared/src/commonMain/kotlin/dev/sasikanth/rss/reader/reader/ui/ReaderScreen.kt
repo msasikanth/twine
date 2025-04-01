@@ -21,22 +21,27 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredHeightIn
@@ -52,18 +57,18 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ChevronLeft
-import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -91,7 +96,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -104,8 +111,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
@@ -164,47 +171,103 @@ internal fun ReaderScreen(
   val state by presenter.state.collectAsState()
   val posts = state.posts.collectAsLazyPagingItems()
   val pagerState = rememberPagerState { posts.itemCount }
+  val coroutineScope = rememberCoroutineScope()
+  val linkHandler = LocalLinkHandler.current
+  val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-  HorizontalPager(
-    modifier = modifier,
-    state = pagerState,
-    key = posts.itemKey { it.id },
-    overscrollEffect = null,
-  ) { page ->
-    val readerPost = posts[page]
-    val coroutineScope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
-
-    LaunchedEffect(page) {
-      val postId = readerPost?.id
-      if (!postId.isNullOrBlank()) {
-        presenter.dispatch(ReaderEvent.PostPageChanged(postId))
-      }
-    }
-
-    if (readerPost != null) {
-      val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
-
-      ReaderPage(
-        modifier =
-          Modifier.graphicsLayer {
-            val scale = lerp(1f, 0.75f, pageOffset)
-            scaleX = scale
-            scaleY = scale
-          },
-        listState = listState,
-        readerPost = readerPost,
-        presenter = presenter,
-        darkTheme = darkTheme,
-        canNavigateNext = pagerState.canScrollForward,
-        canNavigatePrev = pagerState.canScrollBackward,
-        goNext = {
-          coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+  Scaffold(
+    modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+    topBar = {
+      CenterAlignedTopAppBar(
+        expandedHeight = 72.dp,
+        scrollBehavior = scrollBehaviour,
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent,
+          ),
+        navigationIcon = {
+          FilledIconButton(
+            modifier = Modifier.padding(start = 24.dp),
+            colors =
+              IconButtonDefaults.filledIconButtonColors(
+                containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
+              ),
+            shape = RoundedCornerShape(50),
+            onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
+          ) {
+            Icon(
+              imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurface,
+            )
+          }
         },
-        goPrev = {
-          coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+        title = {
+          // TODO: Show page indicators
         },
       )
+    },
+    bottomBar = {
+      BottomBar(
+        loadFullArticle = state.loadFullArticle,
+        openInBrowserClick = {
+          val post = posts[pagerState.settledPage]
+          coroutineScope.launch { linkHandler.openLink(post?.link) }
+        },
+        loadFullArticleClick = { presenter.dispatch(ReaderEvent.LoadFullArticleClicked) },
+        openReaderViewSettings = {
+          // TODO: Open reader view settings
+        }
+      )
+    },
+    containerColor = AppTheme.colorScheme.backdrop,
+    contentColor = Color.Unspecified
+  ) { paddingValues ->
+    val layoutDirection = LocalLayoutDirection.current
+
+    HorizontalPager(
+      modifier = modifier,
+      state = pagerState,
+      key = posts.itemKey { it.id },
+      overscrollEffect = null,
+      contentPadding =
+        PaddingValues(
+          start = paddingValues.calculateStartPadding(layoutDirection),
+          end = paddingValues.calculateEndPadding(layoutDirection),
+        )
+    ) { page ->
+      val readerPost = posts[page]
+      val listState = rememberLazyListState()
+
+      LaunchedEffect(page) {
+        if (readerPost != null) {
+          presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+        }
+      }
+
+      if (readerPost != null) {
+        ReaderPage(
+          modifier =
+            Modifier.graphicsLayer {
+              val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
+
+              scaleX = lerp(1f, 0.735f, pageOffset)
+              scaleY = lerp(1f, 0.75f, pageOffset)
+            },
+          listState = listState,
+          readerPost = readerPost,
+          darkTheme = darkTheme,
+          loadFullArticle = state.loadFullArticle,
+          contentPaddingValues = paddingValues,
+          onBookmarkClick = {
+            ReaderEvent.TogglePostBookmark(
+              postId = readerPost.id,
+              currentBookmarkStatus = readerPost.bookmarked
+            )
+          }
+        )
+      }
     }
   }
 }
@@ -213,13 +276,11 @@ internal fun ReaderScreen(
 private fun ReaderPage(
   listState: LazyListState,
   readerPost: PostWithMetadata,
-  presenter: ReaderPresenter,
   darkTheme: Boolean,
-  canNavigateNext: Boolean,
-  canNavigatePrev: Boolean,
-  goNext: () -> Unit,
-  goPrev: () -> Unit,
+  loadFullArticle: Boolean,
+  onBookmarkClick: () -> Unit,
   modifier: Modifier = Modifier,
+  contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -228,219 +289,158 @@ private fun ReaderPage(
   var readerProcessingProgress by
     remember(readerPost.id) { mutableStateOf(ReaderProcessingProgress.Loading) }
   var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
-  var loadFullArticleClicked by remember(readerPost.id) { mutableStateOf(false) }
 
   val content = readerPost.rawContent ?: readerPost.description
-  val fetchFullArticle =
-    readerPost.alwaysFetchFullArticle ||
-      content.isBlank() ||
-      loadFullArticleClicked ||
-      (parsedContent.content.isNullOrBlank() &&
-        readerProcessingProgress != ReaderProcessingProgress.Loading)
 
-  Box {
+  Box(modifier) {
     // Dummy view to parse the reader content using JS
     ReaderWebView(
       modifier = Modifier.requiredSize(0.dp),
       link = readerPost.link,
       content = content,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = fetchFullArticle,
+      fetchFullArticle = loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
       },
     )
 
-    Scaffold(
-      modifier = modifier.fillMaxSize(),
-      bottomBar = {
-        BottomBar(
-          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(readerPost.link) } },
-          loadFullArticleClick = { loadFullArticleClicked = true }
+    LazyColumn(
+      modifier = Modifier.fillMaxSize(),
+      state = listState,
+      overscrollEffect = null,
+      contentPadding =
+        PaddingValues(
+          top = contentPaddingValues.calculateTopPadding(),
+          bottom = contentPaddingValues.calculateBottomPadding()
         )
-      },
-      containerColor = AppTheme.colorScheme.backdrop,
-      contentColor = Color.Unspecified
-    ) { paddingValues ->
-      val layoutDirection = LocalLayoutDirection.current
-      LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = listState,
-        overscrollEffect = null,
-        contentPadding =
-          PaddingValues(
-            start = paddingValues.calculateStartPadding(layoutDirection),
-            top = 0.dp,
-            end = paddingValues.calculateEndPadding(layoutDirection),
-            bottom = paddingValues.calculateBottomPadding()
-          )
-      ) {
-        item(key = "top-bar") {
-          CenterAlignedTopAppBar(
-            colors =
-              TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-                scrolledContainerColor = Color.Transparent,
-              ),
-            navigationIcon = {
-              IconButton(enabled = canNavigatePrev, onClick = goPrev) {
-                Icon(
-                  imageVector = Icons.Rounded.ChevronLeft,
-                  contentDescription = null,
-                  tint = AppTheme.colorScheme.onSurface,
-                )
-              }
+    ) {
+      item(key = "reader-header") {
+        val postImage = readerPost.imageUrl
+
+        Box {
+          if (canBlurImage) {
+            BannerImageBlurred(
+              modifier =
+                Modifier.layout { measurable, constraints ->
+                  val topPadding = contentPaddingValues.calculateTopPadding().roundToPx()
+                  val fullHeight = constraints.maxHeight + topPadding
+                  val placeable = measurable.measure(constraints.copy(maxHeight = fullHeight))
+
+                  layout(placeable.width, placeable.height) {
+                    placeable.place(x = 0, y = topPadding.unaryMinus())
+                  }
+                },
+              postImage = postImage,
+              darkTheme = darkTheme
+            )
+          }
+
+          PostInfo(
+            readerPost = readerPost,
+            parsedContent = parsedContent,
+            onCommentsClick = {
+              coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
             },
-            title = {
-              Box(
-                modifier =
-                  Modifier.background(
-                      color = AppTheme.colorScheme.primary.copy(alpha = 0.08f),
-                      shape = RoundedCornerShape(50)
-                    )
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center,
-              ) {
-                Text(
-                  text = LocalStrings.current.pullToClose,
-                  style = MaterialTheme.typography.labelSmall,
-                  color = AppTheme.colorScheme.onSurfaceVariant
-                )
-              }
-            },
-            actions = {
-              IconButton(enabled = canNavigateNext, onClick = goNext) {
-                Icon(
-                  imageVector = Icons.Rounded.ChevronRight,
-                  contentDescription = null,
-                  tint = AppTheme.colorScheme.onSurface,
-                )
-              }
-            }
+            onShareClick = { sharedHandler.share(readerPost.link) },
+            onBookmarkClick = onBookmarkClick
           )
         }
+      }
 
-        item(key = "reader-header") {
-          val postImage = readerPost.imageUrl
+      item(key = "divider") {
+        HorizontalDivider(
+          modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+          color = AppTheme.colorScheme.outlineVariant
+        )
+      }
 
-          Box {
-            if (canBlurImage) {
-              BannerImageBlurred(postImage = postImage, darkTheme = darkTheme)
+      item(
+        key = "reader-content",
+      ) {
+        val readerLinkHandler = remember {
+          object : UriHandler {
+            override fun openUri(uri: String) {
+              coroutineScope.launch { linkHandler.openLink(uri) }
+            }
+          }
+        }
+        CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
+          val highlightsBuilder =
+            remember(darkTheme) {
+              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
             }
 
-            PostInfo(
-              readerPost = readerPost,
-              parsedContent = parsedContent,
-              onCommentsClick = {
-                coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
-              },
-              onShareClick = { sharedHandler.share(readerPost.link) },
-              onBookmarkClick = {
-                presenter.dispatch(
-                  ReaderEvent.TogglePostBookmark(
-                    postId = readerPost.id,
-                    currentBookmarkStatus = readerPost.bookmarked
-                  )
+          parsedContent.content?.let {
+            Markdown(
+              modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
+              content = it,
+              typography =
+                markdownTypography(
+                  link =
+                    MaterialTheme.typography.bodyLarge.copy(
+                      color = AppTheme.colorScheme.tintedForeground,
+                      fontWeight = FontWeight.Bold,
+                      textDecoration = TextDecoration.Underline
+                    )
+                ),
+              colors =
+                markdownColor(
+                  text = AppTheme.colorScheme.onSurface,
+                ),
+              imageTransformer = Coil3ImageTransformerImpl,
+              components =
+                markdownComponents(
+                  codeBlock = { cm ->
+                    MarkdownHighlightedCodeBlock(
+                      content = cm.content,
+                      node = cm.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                  codeFence = { cm ->
+                    MarkdownHighlightedCodeFence(
+                      content = cm.content,
+                      node = cm.node,
+                      highlights = highlightsBuilder
+                    )
+                  },
+                  image = {
+                    val link =
+                      it.node
+                        .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
+                        ?.getUnescapedTextInNode(it.content)
+                        ?: return@markdownComponents
+
+                    LocalImageTransformer.current.transform(link)?.let { imageData ->
+                      Image(
+                        painter = imageData.painter,
+                        contentDescription = imageData.contentDescription,
+                        modifier = imageData.modifier.clip(MaterialTheme.shapes.extraLarge),
+                        alignment = imageData.alignment,
+                        contentScale = imageData.contentScale,
+                        alpha = imageData.alpha,
+                        colorFilter = imageData.colorFilter
+                      )
+                    }
+                  }
                 )
-              }
             )
           }
         }
 
-        item(key = "divider") {
-          HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
-            color = AppTheme.colorScheme.outlineVariant
-          )
-        }
-
-        item(
-          key = "reader-content",
-        ) {
-          val readerLinkHandler = remember {
-            object : UriHandler {
-              override fun openUri(uri: String) {
-                coroutineScope.launch { linkHandler.openLink(uri) }
-              }
-            }
-          }
-          CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
-            val highlightsBuilder =
-              remember(darkTheme) {
-                Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-              }
-
-            parsedContent.content?.let {
-              Markdown(
-                modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
-                content = it,
-                typography =
-                  markdownTypography(
-                    link =
-                      MaterialTheme.typography.bodyLarge.copy(
-                        color = AppTheme.colorScheme.tintedForeground,
-                        fontWeight = FontWeight.Bold,
-                        textDecoration = TextDecoration.Underline
-                      )
-                  ),
-                colors =
-                  markdownColor(
-                    text = AppTheme.colorScheme.onSurface,
-                  ),
-                imageTransformer = Coil3ImageTransformerImpl,
-                components =
-                  markdownComponents(
-                    codeBlock = { cm ->
-                      MarkdownHighlightedCodeBlock(
-                        content = cm.content,
-                        node = cm.node,
-                        highlights = highlightsBuilder
-                      )
-                    },
-                    codeFence = { cm ->
-                      MarkdownHighlightedCodeFence(
-                        content = cm.content,
-                        node = cm.node,
-                        highlights = highlightsBuilder
-                      )
-                    },
-                    image = {
-                      val link =
-                        it.node
-                          .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
-                          ?.getUnescapedTextInNode(it.content)
-                          ?: return@markdownComponents
-
-                      LocalImageTransformer.current.transform(link)?.let { imageData ->
-                        Image(
-                          painter = imageData.painter,
-                          contentDescription = imageData.contentDescription,
-                          modifier = imageData.modifier.clip(MaterialTheme.shapes.extraLarge),
-                          alignment = imageData.alignment,
-                          contentScale = imageData.contentScale,
-                          alpha = imageData.alpha,
-                          colorFilter = imageData.colorFilter
-                        )
-                      }
-                    }
-                  )
+        when {
+          readerProcessingProgress == ReaderProcessingProgress.Loading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+              LinearProgressIndicator(
+                trackColor = AppTheme.colorScheme.tintedSurface,
+                color = AppTheme.colorScheme.tintedForeground,
               )
             }
           }
-
-          when {
-            readerProcessingProgress == ReaderProcessingProgress.Loading -> {
-              Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LinearProgressIndicator(
-                  trackColor = AppTheme.colorScheme.tintedSurface,
-                  color = AppTheme.colorScheme.tintedForeground,
-                )
-              }
-            }
-            content.isBlank() -> {
-              Text(LocalStrings.current.noReaderContent)
-            }
+          content.isBlank() -> {
+            Text(LocalStrings.current.noReaderContent)
           }
         }
       }
@@ -450,73 +450,172 @@ private fun ReaderPage(
 
 @Composable
 private fun BottomBar(
+  loadFullArticle: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val navBarScrimColor = AppTheme.colorScheme.backdrop
 
   Box(
     modifier =
-      Modifier.fillMaxWidth().wrapContentHeight().navigationBarsPadding().drawBehind {
-        drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-      },
+      Modifier.fillMaxWidth()
+        .wrapContentHeight()
+        .drawBehind {
+          drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+        }
+        .padding(bottom = 16.dp),
     contentAlignment = Alignment.Center
   ) {
-    Row(
-      modifier =
-        Modifier.padding(bottom = 16.dp, top = 16.dp)
-          .clipToBounds()
-          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
-          .border(
-            width = 1.dp,
-            color = AppTheme.colorScheme.bottomSheetBorder,
-            shape = RoundedCornerShape(50)
-          )
-          .padding(all = 12.dp)
-          .then(modifier),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      BottomBarIconButton(
-        label = LocalStrings.current.openWebsite,
-        icon = TwineIcons.OpenBrowser,
-        onClick = openInBrowserClick
-      )
+    AppTheme(useDarkTheme = true) {
+      val transition = updateTransition(loadFullArticle)
+      val verticalPadding by
+        transition.animateDp {
+          if (it) {
+            8.dp
+          } else {
+            12.dp
+          }
+        }
+      val buttonMinWidth by
+        transition.animateDp {
+          if (it) {
+            52.dp
+          } else {
+            56.dp
+          }
+        }
+      val readerViewToggleWidth by
+        transition.animateDp {
+          if (it) {
+            88.dp
+          } else {
+            72.dp
+          }
+        }
+      val readerViewToggleBackgroundColor by
+        transition.animateColor {
+          if (it) {
+            AppTheme.colorScheme.primaryContainer
+          } else {
+            AppTheme.colorScheme.surfaceContainerHighest
+          }
+        }
+      val readerViewToggleContentColor by
+        transition.animateColor {
+          if (it) {
+            AppTheme.colorScheme.onPrimaryContainer
+          } else {
+            AppTheme.colorScheme.onSurface
+          }
+        }
 
-      BottomBarIconButton(
-        label = LocalStrings.current.cdLoadFullArticle,
-        icon = TwineIcons.ArticleShortcut,
-        onClick = loadFullArticleClick
-      )
+      Row(
+        modifier =
+          Modifier.padding(bottom = 16.dp, top = 16.dp)
+            .clipToBounds()
+            .height(IntrinsicSize.Min)
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+            .border(
+              width = 1.dp,
+              color = AppTheme.colorScheme.bottomSheetBorder,
+              shape = RoundedCornerShape(50)
+            )
+            .padding(horizontal = 12.dp)
+            .then(modifier),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        BottomBarIconButton(
+          modifier = Modifier.padding(vertical = 12.dp),
+          label = LocalStrings.current.openWebsite,
+          icon = TwineIcons.OpenBrowser,
+          onClick = openInBrowserClick,
+          minWidth = buttonMinWidth
+        )
+
+        BottomBarToggleIconButton(
+          modifier = Modifier.fillMaxHeight().padding(vertical = verticalPadding),
+          label = LocalStrings.current.cdLoadFullArticle,
+          icon = TwineIcons.ArticleShortcut,
+          onClick = loadFullArticleClick,
+          backgroundColor = readerViewToggleBackgroundColor,
+          contentColor = readerViewToggleContentColor,
+          minWidth = readerViewToggleWidth
+        )
+
+        BottomBarIconButton(
+          modifier = Modifier.padding(vertical = 12.dp),
+          label = LocalStrings.current.readerSettings,
+          icon = Icons.Rounded.Settings,
+          onClick = openReaderViewSettings,
+          minWidth = buttonMinWidth
+        )
+      }
     }
   }
 }
 
 @Composable
-private fun BottomBarIconButton(label: String, icon: ImageVector, onClick: () -> Unit) {
-  AppTheme(useDarkTheme = true) {
-    Box(
-      modifier =
-        Modifier.requiredSizeIn(minWidth = 64.dp, minHeight = 40.dp)
-          .semantics {
-            role = Role.Button
-            contentDescription = label
-          }
-          .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = ripple(bounded = false),
-          ) {
-            onClick()
-          },
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        modifier = Modifier.requiredSize(20.dp),
-        imageVector = icon,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurfaceVariant,
-      )
-    }
+private fun BottomBarIconButton(
+  label: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  contentColor: Color = AppTheme.colorScheme.onSurfaceVariant,
+  minWidth: Dp = 56.dp,
+) {
+  Box(
+    modifier =
+      Modifier.then(modifier)
+        .requiredSizeIn(minWidth = minWidth)
+        .clip(RoundedCornerShape(50))
+        .semantics {
+          role = Role.Button
+          contentDescription = label
+        }
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
+  ) {
+    Icon(
+      modifier = Modifier.padding(vertical = 10.dp).requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = null,
+      tint = contentColor,
+    )
+  }
+}
+
+@Composable
+private fun BottomBarToggleIconButton(
+  label: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  backgroundColor: Color = Color.Transparent,
+  contentColor: Color = AppTheme.colorScheme.onSurfaceVariant,
+  minWidth: Dp = 72.dp,
+) {
+  Box(
+    modifier =
+      Modifier.requiredSizeIn(minHeight = 40.dp, minWidth = minWidth)
+        .then(modifier)
+        .clip(RoundedCornerShape(50))
+        .background(backgroundColor, RoundedCornerShape(50))
+        .semantics {
+          role = Role.Button
+          contentDescription = label
+        }
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = null,
+      tint = contentColor,
+    )
   }
 }
 
@@ -614,7 +713,11 @@ private fun PostInfo(
 }
 
 @Composable
-private fun BannerImageBlurred(postImage: String?, darkTheme: Boolean) {
+private fun BannerImageBlurred(
+  postImage: String?,
+  darkTheme: Boolean,
+  modifier: Modifier = Modifier,
+) {
   if (!postImage.isNullOrBlank()) {
     val gradientOverlayModifier =
       if (darkTheme) {
@@ -680,6 +783,7 @@ private fun BannerImageBlurred(postImage: String?, darkTheme: Boolean) {
             )
           }
           .then(gradientOverlayModifier)
+          .then(modifier)
     ) {
       AsyncImage(
         modifier = Modifier.matchParentSize(),

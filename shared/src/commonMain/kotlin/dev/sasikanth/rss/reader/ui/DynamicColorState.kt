@@ -133,13 +133,14 @@ internal class DynamicColorState(
       secondary = dynamicColors.secondary().toColor(scheme),
       outline = dynamicColors.outline().toColor(scheme),
       outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
-      primaryContainer =
+      primaryContainer = primaryContainer(dynamicColors).toColor(scheme),
+      onPrimaryContainer =
         DynamicColor.fromPalette(
             { s -> s.primaryPalette },
-            { s -> if (s.isDark) 40.0 else 90.0 }
-          ) { s: DynamicScheme ->
-            dynamicColors.highestSurface(s)
-          }
+            { s -> if (s.isDark) 90.0 else 10.0 },
+            { primaryContainer(dynamicColors) },
+            null
+          )
           .toColor(scheme),
       surface = dynamicColors.surface().toColor(scheme),
       onSurface = dynamicColors.onSurface().toColor(scheme),
@@ -241,6 +242,12 @@ internal class DynamicColorState(
     )
   }
 
+  private fun primaryContainer(dynamicColors: MaterialDynamicColors) =
+    DynamicColor.fromPalette({ s -> s.primaryPalette }, { s -> if (s.isDark) 40.0 else 90.0 }) {
+      s: DynamicScheme ->
+      dynamicColors.highestSurface(s)
+    }
+
   private fun DynamicColor.toColor(scheme: SchemeContent): Color {
     return Color(getArgb(scheme))
   }
@@ -259,6 +266,8 @@ fun AppColorScheme.animate(
     outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
     primaryContainer =
       lerp(start = primaryContainer, stop = to.primaryContainer, fraction = progress),
+    onPrimaryContainer =
+      lerp(start = onPrimaryContainer, stop = to.onPrimaryContainer, fraction = progress),
     surface = lerp(start = surface, stop = to.surface, fraction = progress),
     onSurface = lerp(start = onSurface, stop = to.onSurface, fraction = progress),
     onSurfaceVariant =

@@ -25,13 +25,14 @@ import kotlinx.coroutines.flow.emptyFlow
 @Immutable
 internal data class ReaderState(
   val initialIndex: Int,
+  val loadFullArticle: Boolean,
   val posts: Flow<PagingData<PostWithMetadata>>
 ) {
 
   companion object {
 
     fun default(initialIndex: Int): ReaderState {
-      return ReaderState(initialIndex = initialIndex, posts = emptyFlow())
+      return ReaderState(initialIndex = initialIndex, loadFullArticle = false, posts = emptyFlow())
     }
   }
 }
