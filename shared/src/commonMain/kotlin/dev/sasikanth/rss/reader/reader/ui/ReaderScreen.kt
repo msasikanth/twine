@@ -78,6 +78,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -151,6 +152,9 @@ import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -162,6 +166,7 @@ private val json = Json {
   explicitNulls = false
 }
 
+@OptIn(FlowPreview::class)
 @Composable
 internal fun ReaderScreen(
   darkTheme: Boolean,
@@ -225,6 +230,22 @@ internal fun ReaderScreen(
     contentColor = Color.Unspecified
   ) { paddingValues ->
     val layoutDirection = LocalLayoutDirection.current
+    LaunchedEffect(pagerState, posts.loadState) {
+      snapshotFlow { pagerState.settledPage }
+        .debounce(500)
+        .collectLatest { page ->
+          val readerPost =
+            try {
+              posts[page]
+            } catch (e: IndexOutOfBoundsException) {
+              null
+            }
+
+          if (readerPost != null) {
+            presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+          }
+        }
+    }
 
     HorizontalPager(
       modifier = modifier,
@@ -239,12 +260,6 @@ internal fun ReaderScreen(
     ) { page ->
       val readerPost = posts[page]
       val listState = rememberLazyListState()
-
-      LaunchedEffect(page) {
-        if (readerPost != null) {
-          presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
-        }
-      }
 
       if (readerPost != null) {
         ReaderPage(

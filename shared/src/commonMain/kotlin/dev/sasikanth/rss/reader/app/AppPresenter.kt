@@ -27,7 +27,6 @@ import com.arkivanov.decompose.router.stack.active
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.pushNew
-import com.arkivanov.decompose.router.stack.pushToFront
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
@@ -48,6 +47,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupPresenterFactory
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
+import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
@@ -226,8 +226,12 @@ class AppPresenter(
                 fromScreen = config.fromScreen,
               ),
               componentContext
-            ) {
-              navigation.pop()
+            ) { currentPage ->
+              navigation.pop {
+                (screenStack.active.instance as? Screen.Home)
+                  ?.presenter
+                  ?.dispatch(HomeEvent.ScrollToItem(currentPage))
+              }
             }
         )
       }
@@ -315,7 +319,7 @@ class AppPresenter(
         withContext(dispatchersProvider.io) { settingsRepository.showReaderView.first() }
 
       if (showReaderView) {
-        navigation.pushToFront(Config.Reader(post, postIndex, fromScreen))
+        navigation.pushNew(Config.Reader(post, postIndex, fromScreen))
       } else {
         linkHandler.openLink(post.link)
         rssRepository.updatePostReadStatus(read = true, id = post.id)

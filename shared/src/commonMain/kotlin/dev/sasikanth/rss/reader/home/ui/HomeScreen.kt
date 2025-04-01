@@ -75,6 +75,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMaxBy
+import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -145,6 +146,16 @@ internal fun HomeScreen(
 
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+
+  LaunchedEffect(state.lastScrollIndex, posts?.loadState?.refresh) {
+    if (posts?.loadState?.refresh !is LoadState.NotLoading) return@LaunchedEffect
+
+    if (state.lastScrollIndex <= Constants.NUMBER_OF_FEATURED_POSTS) {
+      featuredPostsPagerState.scrollToPage(state.lastScrollIndex)
+    } else {
+      listState.scrollToItem(state.lastScrollIndex)
+    }
+  }
 
   LaunchedEffect(state.feedsSheetState) {
     if (
