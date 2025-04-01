@@ -234,6 +234,7 @@ data class ReaderScreenArgs(
   val fromScreen: FromScreen,
 ) {
 
+  @Serializable
   sealed interface FromScreen {
 
     @Serializable data object Home : FromScreen
