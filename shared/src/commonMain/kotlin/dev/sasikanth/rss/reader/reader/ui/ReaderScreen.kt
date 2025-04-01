@@ -86,7 +86,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
@@ -791,14 +790,6 @@ private fun BannerImageBlurred(
         Modifier.requiredHeightIn(max = 800.dp)
           .aspectRatio(1f)
           .then(blurModifier)
-          .drawWithContent {
-            drawContent()
-
-            drawRect(
-              color = overlayColor,
-              blendMode = BlendMode.Luminosity,
-            )
-          }
           .then(gradientOverlayModifier)
           .then(modifier)
     ) {
@@ -810,6 +801,13 @@ private fun BannerImageBlurred(
         size = Size(128, 128),
         backgroundColor = AppTheme.colorScheme.surface,
         colorFilter = ColorFilter.colorMatrix(colorMatrix)
+      )
+
+      Box(
+        modifier =
+          Modifier.matchParentSize().drawBehind {
+            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+          }
       )
     }
   }
