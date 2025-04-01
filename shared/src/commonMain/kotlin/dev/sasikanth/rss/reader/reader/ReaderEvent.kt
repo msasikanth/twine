@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.reader
 
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+
 sealed interface ReaderEvent {
 
   data object BackClicked : ReaderEvent
@@ -23,7 +25,9 @@ sealed interface ReaderEvent {
   data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
     ReaderEvent
 
-  data class PostPageChanged(val postId: String) : ReaderEvent
+  data class PostPageChanged(val post: PostWithMetadata) : ReaderEvent
 
   data object MarkOpenedPostsAsRead : ReaderEvent
+
+  data object LoadFullArticleClicked : ReaderEvent
 }
