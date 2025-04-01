@@ -21,21 +21,27 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredHeightIn
@@ -52,6 +58,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
@@ -62,7 +69,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -105,8 +111,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
@@ -204,12 +210,14 @@ internal fun ReaderScreen(
     },
     bottomBar = {
       BottomBar(
+        loadFullArticle = state.loadFullArticle,
         openInBrowserClick = {
           val post = posts[pagerState.settledPage]
           coroutineScope.launch { linkHandler.openLink(post?.link) }
         },
-        loadFullArticleClick = {
-          // TODO: Load full article
+        loadFullArticleClick = { presenter.dispatch(ReaderEvent.LoadFullArticleClicked) },
+        openReaderViewSettings = {
+          // TODO: Open reader view settings
         }
       )
     },
@@ -233,9 +241,8 @@ internal fun ReaderScreen(
       val listState = rememberLazyListState()
 
       LaunchedEffect(page) {
-        val postId = readerPost?.id
-        if (!postId.isNullOrBlank()) {
-          presenter.dispatch(ReaderEvent.PostPageChanged(postId))
+        if (readerPost != null) {
+          presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
         }
       }
 
@@ -250,9 +257,15 @@ internal fun ReaderScreen(
             },
           listState = listState,
           readerPost = readerPost,
-          presenter = presenter,
           darkTheme = darkTheme,
+          loadFullArticle = state.loadFullArticle,
           contentPaddingValues = paddingValues,
+          onBookmarkClick = {
+            ReaderEvent.TogglePostBookmark(
+              postId = readerPost.id,
+              currentBookmarkStatus = readerPost.bookmarked
+            )
+          }
         )
       }
     }
@@ -263,8 +276,9 @@ internal fun ReaderScreen(
 private fun ReaderPage(
   listState: LazyListState,
   readerPost: PostWithMetadata,
-  presenter: ReaderPresenter,
   darkTheme: Boolean,
+  loadFullArticle: Boolean,
+  onBookmarkClick: () -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -277,11 +291,6 @@ private fun ReaderPage(
   var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
 
   val content = readerPost.rawContent ?: readerPost.description
-  val fetchFullArticle =
-    readerPost.alwaysFetchFullArticle ||
-      content.isBlank() ||
-      (parsedContent.content.isNullOrBlank() &&
-        readerProcessingProgress != ReaderProcessingProgress.Loading)
 
   Box(modifier) {
     // Dummy view to parse the reader content using JS
@@ -290,7 +299,7 @@ private fun ReaderPage(
       link = readerPost.link,
       content = content,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = fetchFullArticle,
+      fetchFullArticle = loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
@@ -335,14 +344,7 @@ private fun ReaderPage(
               coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
             },
             onShareClick = { sharedHandler.share(readerPost.link) },
-            onBookmarkClick = {
-              presenter.dispatch(
-                ReaderEvent.TogglePostBookmark(
-                  postId = readerPost.id,
-                  currentBookmarkStatus = readerPost.bookmarked
-                )
-              )
-            }
+            onBookmarkClick = onBookmarkClick
           )
         }
       }
@@ -448,8 +450,10 @@ private fun ReaderPage(
 
 @Composable
 private fun BottomBar(
+  loadFullArticle: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
+  openReaderViewSettings: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val navBarScrimColor = AppTheme.colorScheme.backdrop
@@ -464,60 +468,154 @@ private fun BottomBar(
         .padding(bottom = 16.dp),
     contentAlignment = Alignment.Center
   ) {
-    Row(
-      modifier =
-        Modifier.padding(bottom = 16.dp, top = 16.dp)
-          .clipToBounds()
-          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
-          .border(
-            width = 1.dp,
-            color = AppTheme.colorScheme.bottomSheetBorder,
-            shape = RoundedCornerShape(50)
-          )
-          .padding(all = 12.dp)
-          .then(modifier),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      BottomBarIconButton(
-        label = LocalStrings.current.openWebsite,
-        icon = TwineIcons.OpenBrowser,
-        onClick = openInBrowserClick
-      )
+    AppTheme(useDarkTheme = true) {
+      val transition = updateTransition(loadFullArticle)
+      val verticalPadding by
+        transition.animateDp {
+          if (it) {
+            8.dp
+          } else {
+            12.dp
+          }
+        }
+      val buttonMinWidth by
+        transition.animateDp {
+          if (it) {
+            52.dp
+          } else {
+            56.dp
+          }
+        }
+      val readerViewToggleWidth by
+        transition.animateDp {
+          if (it) {
+            88.dp
+          } else {
+            72.dp
+          }
+        }
+      val readerViewToggleBackgroundColor by
+        transition.animateColor {
+          if (it) {
+            AppTheme.colorScheme.primaryContainer
+          } else {
+            AppTheme.colorScheme.surfaceContainerHighest
+          }
+        }
+      val readerViewToggleContentColor by
+        transition.animateColor {
+          if (it) {
+            AppTheme.colorScheme.onPrimaryContainer
+          } else {
+            AppTheme.colorScheme.onSurface
+          }
+        }
 
-      BottomBarIconButton(
-        label = LocalStrings.current.cdLoadFullArticle,
-        icon = TwineIcons.ArticleShortcut,
-        onClick = loadFullArticleClick
-      )
+      Row(
+        modifier =
+          Modifier.padding(bottom = 16.dp, top = 16.dp)
+            .clipToBounds()
+            .height(IntrinsicSize.Min)
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+            .border(
+              width = 1.dp,
+              color = AppTheme.colorScheme.bottomSheetBorder,
+              shape = RoundedCornerShape(50)
+            )
+            .padding(horizontal = 12.dp)
+            .then(modifier),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        BottomBarIconButton(
+          modifier = Modifier.padding(vertical = 12.dp),
+          label = LocalStrings.current.openWebsite,
+          icon = TwineIcons.OpenBrowser,
+          onClick = openInBrowserClick,
+          minWidth = buttonMinWidth
+        )
+
+        BottomBarToggleIconButton(
+          modifier = Modifier.fillMaxHeight().padding(vertical = verticalPadding),
+          label = LocalStrings.current.cdLoadFullArticle,
+          icon = TwineIcons.ArticleShortcut,
+          onClick = loadFullArticleClick,
+          backgroundColor = readerViewToggleBackgroundColor,
+          contentColor = readerViewToggleContentColor,
+          minWidth = readerViewToggleWidth
+        )
+
+        BottomBarIconButton(
+          modifier = Modifier.padding(vertical = 12.dp),
+          label = LocalStrings.current.readerSettings,
+          icon = Icons.Rounded.Settings,
+          onClick = openReaderViewSettings,
+          minWidth = buttonMinWidth
+        )
+      }
     }
   }
 }
 
 @Composable
-private fun BottomBarIconButton(label: String, icon: ImageVector, onClick: () -> Unit) {
-  AppTheme(useDarkTheme = true) {
-    Box(
-      modifier =
-        Modifier.requiredSizeIn(minWidth = 64.dp, minHeight = 40.dp)
-          .semantics {
-            role = Role.Button
-            contentDescription = label
-          }
-          .clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = ripple(bounded = false),
-          ) {
-            onClick()
-          },
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        modifier = Modifier.requiredSize(20.dp),
-        imageVector = icon,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.onSurfaceVariant,
-      )
-    }
+private fun BottomBarIconButton(
+  label: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  contentColor: Color = AppTheme.colorScheme.onSurfaceVariant,
+  minWidth: Dp = 56.dp,
+) {
+  Box(
+    modifier =
+      Modifier.then(modifier)
+        .requiredSizeIn(minWidth = minWidth)
+        .clip(RoundedCornerShape(50))
+        .semantics {
+          role = Role.Button
+          contentDescription = label
+        }
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
+  ) {
+    Icon(
+      modifier = Modifier.padding(vertical = 10.dp).requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = null,
+      tint = contentColor,
+    )
+  }
+}
+
+@Composable
+private fun BottomBarToggleIconButton(
+  label: String,
+  icon: ImageVector,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+  backgroundColor: Color = Color.Transparent,
+  contentColor: Color = AppTheme.colorScheme.onSurfaceVariant,
+  minWidth: Dp = 72.dp,
+) {
+  Box(
+    modifier =
+      Modifier.requiredSizeIn(minHeight = 40.dp, minWidth = minWidth)
+        .then(modifier)
+        .clip(RoundedCornerShape(50))
+        .background(backgroundColor, RoundedCornerShape(50))
+        .semantics {
+          role = Role.Button
+          contentDescription = label
+        }
+        .clickable { onClick() },
+    contentAlignment = Alignment.Center,
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = null,
+      tint = contentColor,
+    )
   }
 }
 

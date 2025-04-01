@@ -193,4 +193,5 @@ val EnTwineStrings =
     noReaderContent =
       "No content to display in the reader, please try fetching article or visiting the website.",
     pullToClose = "Pull down to close",
+    readerSettings = "Reader screen settings",
   )

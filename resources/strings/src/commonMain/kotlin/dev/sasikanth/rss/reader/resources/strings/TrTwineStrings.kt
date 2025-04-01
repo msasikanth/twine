@@ -178,5 +178,6 @@ val TrTwineStrings =
     markArticleAsReadOnScroll = "Kaydırıldığında",
     noReaderContent =
       "Okuyucuda gösterilecek içerik yok, lütfen makaleyi getirmeyi deneyin veya web sitesini ziyaret edin.",
-    pullToClose = "Pull down to close"
+    pullToClose = "Pull down to close",
+    readerSettings = "Reader screen settings"
   )
