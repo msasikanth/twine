@@ -232,6 +232,7 @@ internal fun ReaderScreen(
       modifier = modifier,
       state = pagerState,
       key = posts.itemKey { it.id },
+      beyondViewportPageCount = 3,
       overscrollEffect = null,
       contentPadding =
         PaddingValues(
