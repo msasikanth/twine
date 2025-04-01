@@ -195,7 +195,12 @@ class HomePresenter(
         is HomeEvent.OnPostItemsScrolled -> onPostItemsScrolled(event.postIds)
         HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
+        is HomeEvent.UpdateLastScrollIndex -> scrollToItem(event.index)
       }
+    }
+
+    private fun scrollToItem(index: Int) {
+      _state.update { it.copy(lastScrollIndex = index) }
     }
 
     private fun markFeaturedPostAsRead(postId: String) {

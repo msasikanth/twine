@@ -59,7 +59,7 @@ class ReaderPresenter(
   private val observableActiveSource: ObservableActiveSource,
   @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val goBack: () -> Unit
+  @Assisted private val goBack: (currentIndex: Int) -> Unit
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -81,7 +81,7 @@ class ReaderPresenter(
 
   fun dispatch(event: ReaderEvent) {
     when (event) {
-      ReaderEvent.BackClicked -> goBack()
+      ReaderEvent.BackClicked -> goBack(state.value.currentPage)
       else -> {
         // no-op
       }
@@ -225,7 +225,7 @@ internal typealias ReaderPresenterFactory =
   (
     args: ReaderScreenArgs,
     ComponentContext,
-    goBack: () -> Unit,
+    goBack: (currentIndex: Int) -> Unit,
   ) -> ReaderPresenter
 
 @Serializable

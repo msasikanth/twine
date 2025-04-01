@@ -50,6 +50,7 @@ import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
@@ -144,7 +145,12 @@ class AppPresenter(
   }
 
   fun onBackClicked() {
-    navigation.pop()
+    val isReaderScreen = screenStack.active.instance is Screen.Reader
+    if (isReaderScreen) {
+      (screenStack.active.instance as? Screen.Reader)?.presenter?.dispatch(ReaderEvent.BackClicked)
+    } else {
+      navigation.pop()
+    }
   }
 
   private fun createModal(modalConfig: ModalConfig, componentContext: ComponentContext): Modals =
@@ -230,7 +236,7 @@ class AppPresenter(
               navigation.pop {
                 (screenStack.active.instance as? Screen.Home)
                   ?.presenter
-                  ?.dispatch(HomeEvent.ScrollToItem(currentPage))
+                  ?.dispatch(HomeEvent.UpdateLastScrollIndex(currentPage))
               }
             }
         )

@@ -35,7 +35,8 @@ internal data class HomeState(
   val activeSource: Source?,
   val hasFeeds: Boolean?,
   val postsType: PostsType,
-  val hasUnreadPosts: Boolean
+  val hasUnreadPosts: Boolean,
+  val lastScrollIndex: Int,
 ) {
 
   companion object {
@@ -49,6 +50,7 @@ internal data class HomeState(
         hasFeeds = null,
         postsType = PostsType.ALL,
         hasUnreadPosts = false,
+        lastScrollIndex = 0,
       )
   }
 

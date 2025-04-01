@@ -58,4 +58,6 @@ sealed interface HomeEvent {
   data object MarkScrolledPostsAsRead : HomeEvent
 
   data class MarkFeaturedPostsAsRead(val postId: String) : HomeEvent
+
+  data class UpdateLastScrollIndex(val index: Int) : HomeEvent
 }

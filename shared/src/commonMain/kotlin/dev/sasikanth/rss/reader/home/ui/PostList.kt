@@ -38,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +70,7 @@ private val postListPadding
 
 @Composable
 internal fun PostsList(
+  lastScrollIndex: Int,
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   posts: LazyPagingItems<PostWithMetadata>,
@@ -88,6 +90,21 @@ internal fun PostsList(
     } else {
       0.dp
     }
+
+  LaunchedEffect(lastScrollIndex) {
+    if (lastScrollIndex <= Constants.NUMBER_OF_FEATURED_POSTS) {
+      featuredPostsPagerState.scrollToPage(lastScrollIndex)
+    } else {
+      val adjustedIndex =
+        if (featuredPosts.size > 0) {
+          (lastScrollIndex - featuredPosts.size).coerceAtLeast(0)
+        } else {
+          lastScrollIndex
+        }
+
+      listState.scrollToItem(adjustedIndex)
+    }
+  }
 
   LazyColumn(
     modifier = modifier,
