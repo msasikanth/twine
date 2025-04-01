@@ -128,10 +128,7 @@ class ReaderPresenter(
 
     private fun postPageChange(post: PostWithMetadata) {
       openedPostItems += post.id
-      _state.update {
-        val fetchFullArticle = post.alwaysFetchFullArticle || it.loadFullArticle
-        it.copy(loadFullArticle = fetchFullArticle)
-      }
+      _state.update { it.copy(loadFullArticle = post.alwaysFetchFullArticle) }
     }
 
     private fun loadFullArticleClicked() {
