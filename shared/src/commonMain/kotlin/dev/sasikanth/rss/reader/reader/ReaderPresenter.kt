@@ -25,6 +25,7 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -119,11 +120,22 @@ class ReaderPresenter(
         }
         is ReaderEvent.TogglePostBookmark ->
           togglePostBookmark(event.postId, event.currentBookmarkStatus)
-        is ReaderEvent.PostPageChanged -> {
-          openedPostItems += event.postId
-        }
+        is ReaderEvent.PostPageChanged -> postPageChange(event.post)
         ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
+        ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked()
       }
+    }
+
+    private fun postPageChange(post: PostWithMetadata) {
+      openedPostItems += post.id
+      _state.update {
+        val fetchFullArticle = post.alwaysFetchFullArticle || it.loadFullArticle
+        it.copy(loadFullArticle = fetchFullArticle)
+      }
+    }
+
+    private fun loadFullArticleClicked() {
+      coroutineScope.launch { _state.update { it.copy(loadFullArticle = !it.loadFullArticle) } }
     }
 
     private fun markPostsAsRead() {
