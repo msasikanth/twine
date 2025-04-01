@@ -242,7 +242,7 @@ internal fun ReaderScreen(
             }
 
           if (readerPost != null) {
-            presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+            presenter.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
           }
         }
     }

@@ -120,17 +120,17 @@ class ReaderPresenter(
         }
         is ReaderEvent.TogglePostBookmark ->
           togglePostBookmark(event.postId, event.currentBookmarkStatus)
-        is ReaderEvent.PostPageChanged -> postPageChange(event.post)
+        is ReaderEvent.PostPageChanged -> postPageChange(event.currentPage, event.post)
         ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
         ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked()
       }
     }
 
-    private fun postPageChange(post: PostWithMetadata) {
+    private fun postPageChange(currentPage: Int, post: PostWithMetadata) {
       openedPostItems += post.id
       _state.update {
         val fetchFullArticle = post.alwaysFetchFullArticle || it.loadFullArticle
-        it.copy(loadFullArticle = fetchFullArticle)
+        it.copy(currentPage = currentPage, loadFullArticle = fetchFullArticle)
       }
     }
 
