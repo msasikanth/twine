@@ -80,6 +80,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -152,6 +153,8 @@ import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -175,6 +178,22 @@ internal fun ReaderScreen(
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+  LaunchedEffect(pagerState, posts.loadState) {
+    snapshotFlow { pagerState.settledPage }
+      .distinctUntilChanged()
+      .collectLatest { page ->
+        val readerPost =
+          try {
+            posts[page]
+          } catch (e: IndexOutOfBoundsException) {
+            null
+          }
+        if (readerPost != null) {
+          presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+        }
+      }
+  }
 
   Scaffold(
     modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
@@ -241,12 +260,6 @@ internal fun ReaderScreen(
     ) { page ->
       val readerPost = posts[page]
       val listState = rememberLazyListState()
-
-      LaunchedEffect(page) {
-        if (readerPost != null) {
-          presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
-        }
-      }
 
       if (readerPost != null) {
         ReaderPage(
