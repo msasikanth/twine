@@ -32,6 +32,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScopeInstance.align
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,8 +54,6 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -229,17 +228,27 @@ internal fun ReaderScreen(
       )
     },
     bottomBar = {
-      BottomBar(
-        loadFullArticle = state.loadFullArticle,
-        openInBrowserClick = {
-          val post = posts[pagerState.settledPage]
-          coroutineScope.launch { linkHandler.openLink(post?.link) }
-        },
-        loadFullArticleClick = { presenter.dispatch(ReaderEvent.LoadFullArticleClicked) },
-        openReaderViewSettings = {
-          // TODO: Open reader view settings
+      val readerPost =
+        if (posts.itemCount > 0) {
+          posts[pagerState.settledPage]
+        } else {
+          null
         }
-      )
+
+      if (readerPost != null) {
+        BottomBar(
+          modifier = Modifier.align(Alignment.BottomEnd),
+          loadFullArticle =
+            readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
+          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(readerPost.link) } },
+          loadFullArticleClick = {
+            presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+          },
+          openReaderViewSettings = {
+            // TODO: Open reader view settings
+          }
+        )
+      }
     },
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified
@@ -259,21 +268,20 @@ internal fun ReaderScreen(
         )
     ) { page ->
       val readerPost = posts[page]
-      val listState = rememberLazyListState()
 
       if (readerPost != null) {
         ReaderPage(
           modifier =
             Modifier.graphicsLayer {
               val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
+              val scale = lerp(1f, 0.75f, pageOffset)
 
-              scaleX = lerp(1f, 0.735f, pageOffset)
-              scaleY = lerp(1f, 0.75f, pageOffset)
+              scaleX = scale
+              scaleY = scale
             },
-          listState = listState,
           readerPost = readerPost,
           darkTheme = darkTheme,
-          loadFullArticle = state.loadFullArticle,
+          loadFullArticle = state.canLoadFullPost(readerPost.id),
           contentPaddingValues = paddingValues,
           onBookmarkClick = {
             ReaderEvent.TogglePostBookmark(
@@ -289,7 +297,6 @@ internal fun ReaderScreen(
 
 @Composable
 private fun ReaderPage(
-  listState: LazyListState,
   readerPost: PostWithMetadata,
   darkTheme: Boolean,
   loadFullArticle: Boolean,
@@ -305,16 +312,14 @@ private fun ReaderPage(
     remember(readerPost.id) { mutableStateOf(ReaderProcessingProgress.Loading) }
   var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
 
-  val content = readerPost.rawContent ?: readerPost.description
-
   Box(modifier) {
     // Dummy view to parse the reader content using JS
     ReaderWebView(
       modifier = Modifier.requiredSize(0.dp),
       link = readerPost.link,
-      content = content,
+      content = readerPost.rawContent ?: readerPost.description,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = loadFullArticle,
+      fetchFullArticle = readerPost.alwaysFetchFullArticle || loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
@@ -323,7 +328,6 @@ private fun ReaderPage(
 
     LazyColumn(
       modifier = Modifier.fillMaxSize(),
-      state = listState,
       overscrollEffect = null,
       contentPadding =
         PaddingValues(
@@ -454,7 +458,7 @@ private fun ReaderPage(
               )
             }
           }
-          content.isBlank() -> {
+          parsedContent.content.isNullOrBlank() -> {
             Text(LocalStrings.current.noReaderContent)
           }
         }
@@ -480,7 +484,8 @@ private fun BottomBar(
         .drawBehind {
           drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
         }
-        .padding(bottom = 16.dp),
+        .padding(bottom = 16.dp)
+        .then(modifier),
     contentAlignment = Alignment.Center
   ) {
     AppTheme(useDarkTheme = true) {
@@ -551,8 +556,7 @@ private fun BottomBar(
               color = AppTheme.colorScheme.bottomSheetBorder,
               shape = RoundedCornerShape(50)
             )
-            .padding(horizontal = 12.dp)
-            .then(modifier),
+            .padding(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {

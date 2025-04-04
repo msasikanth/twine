@@ -122,17 +122,27 @@ class ReaderPresenter(
           togglePostBookmark(event.postId, event.currentBookmarkStatus)
         is ReaderEvent.PostPageChanged -> postPageChange(event.post)
         ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
-        ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked()
+        is ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked(event.postId)
       }
     }
 
     private fun postPageChange(post: PostWithMetadata) {
       openedPostItems += post.id
-      _state.update { it.copy(loadFullArticle = post.alwaysFetchFullArticle) }
     }
 
-    private fun loadFullArticleClicked() {
-      coroutineScope.launch { _state.update { it.copy(loadFullArticle = !it.loadFullArticle) } }
+    private fun loadFullArticleClicked(postId: String) {
+      coroutineScope.launch {
+        _state.update {
+          val newLoadFullArticleMap =
+            if (it.loadFullArticleMap.containsKey(postId)) {
+              it.loadFullArticleMap - postId
+            } else {
+              it.loadFullArticleMap + Pair(postId, true)
+            }
+
+          it.copy(loadFullArticleMap = newLoadFullArticleMap)
+        }
+      }
     }
 
     private fun markPostsAsRead() {
