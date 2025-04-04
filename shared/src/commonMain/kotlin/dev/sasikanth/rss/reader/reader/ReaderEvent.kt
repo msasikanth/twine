@@ -29,5 +29,5 @@ sealed interface ReaderEvent {
 
   data object MarkOpenedPostsAsRead : ReaderEvent
 
-  data object LoadFullArticleClicked : ReaderEvent
+  data class LoadFullArticleClicked(val postId: String) : ReaderEvent
 }
