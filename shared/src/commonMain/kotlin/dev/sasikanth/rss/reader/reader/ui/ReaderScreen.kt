@@ -128,6 +128,8 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.utils.findChildOfTypeRecursive
 import com.mikepenz.markdown.utils.getUnescapedTextInNode
+import dev.sasikanth.rss.reader.components.HorizontalPageIndicator
+import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -223,7 +225,24 @@ internal fun ReaderScreen(
           }
         },
         title = {
-          // TODO: Show page indicators
+          if (posts.itemCount > 0) {
+            val pageIndicatorState = remember {
+              object : PageIndicatorState {
+                override val pageOffset: Float
+                  get() = pagerState.currentPageOffsetFraction
+
+                override val selectedPage: Int
+                  get() = pagerState.currentPage
+
+                override val pageCount: Int
+                  get() = pagerState.pageCount
+              }
+            }
+
+            HorizontalPageIndicator(
+              pageIndicatorState = pageIndicatorState,
+            )
+          }
         },
       )
     },
