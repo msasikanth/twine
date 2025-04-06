@@ -404,81 +404,83 @@ private fun ReaderPage(
             }
           }
         }
-        CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
-          val highlightsBuilder =
-            remember(darkTheme) {
-              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-            }
+        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp)) {
+          CompositionLocalProvider(LocalUriHandler provides readerLinkHandler) {
+            val highlightsBuilder =
+              remember(darkTheme) {
+                Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+              }
 
-          parsedContent.content?.let {
-            Markdown(
-              modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
-              content = it,
-              typography =
-                markdownTypography(
-                  link =
-                    MaterialTheme.typography.bodyLarge.copy(
-                      color = AppTheme.colorScheme.tintedForeground,
-                      fontWeight = FontWeight.Bold,
-                      textDecoration = TextDecoration.Underline
-                    )
-                ),
-              colors =
-                markdownColor(
-                  text = AppTheme.colorScheme.onSurface,
-                ),
-              imageTransformer = Coil3ImageTransformerImpl,
-              components =
-                markdownComponents(
-                  codeBlock = { cm ->
-                    MarkdownHighlightedCodeBlock(
-                      content = cm.content,
-                      node = cm.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                  codeFence = { cm ->
-                    MarkdownHighlightedCodeFence(
-                      content = cm.content,
-                      node = cm.node,
-                      highlights = highlightsBuilder
-                    )
-                  },
-                  image = {
-                    val link =
-                      it.node
-                        .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
-                        ?.getUnescapedTextInNode(it.content)
-                        ?: return@markdownComponents
-
-                    LocalImageTransformer.current.transform(link)?.let { imageData ->
-                      Image(
-                        painter = imageData.painter,
-                        contentDescription = imageData.contentDescription,
-                        modifier = imageData.modifier.clip(MaterialTheme.shapes.extraLarge),
-                        alignment = imageData.alignment,
-                        contentScale = imageData.contentScale,
-                        alpha = imageData.alpha,
-                        colorFilter = imageData.colorFilter
+            parsedContent.content?.let {
+              Markdown(
+                modifier = Modifier.fillMaxSize(),
+                content = it,
+                typography =
+                  markdownTypography(
+                    link =
+                      MaterialTheme.typography.bodyLarge.copy(
+                        color = AppTheme.colorScheme.tintedForeground,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline
                       )
-                    }
-                  }
-                )
-            )
-          }
-        }
+                  ),
+                colors =
+                  markdownColor(
+                    text = AppTheme.colorScheme.onSurface,
+                  ),
+                imageTransformer = Coil3ImageTransformerImpl,
+                components =
+                  markdownComponents(
+                    codeBlock = { cm ->
+                      MarkdownHighlightedCodeBlock(
+                        content = cm.content,
+                        node = cm.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                    codeFence = { cm ->
+                      MarkdownHighlightedCodeFence(
+                        content = cm.content,
+                        node = cm.node,
+                        highlights = highlightsBuilder
+                      )
+                    },
+                    image = {
+                      val link =
+                        it.node
+                          .findChildOfTypeRecursive(MarkdownElementTypes.LINK_DESTINATION)
+                          ?.getUnescapedTextInNode(it.content)
+                          ?: return@markdownComponents
 
-        when {
-          readerProcessingProgress == ReaderProcessingProgress.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-              LinearProgressIndicator(
-                trackColor = AppTheme.colorScheme.tintedSurface,
-                color = AppTheme.colorScheme.tintedForeground,
+                      LocalImageTransformer.current.transform(link)?.let { imageData ->
+                        Image(
+                          painter = imageData.painter,
+                          contentDescription = imageData.contentDescription,
+                          modifier = imageData.modifier.clip(MaterialTheme.shapes.extraLarge),
+                          alignment = imageData.alignment,
+                          contentScale = imageData.contentScale,
+                          alpha = imageData.alpha,
+                          colorFilter = imageData.colorFilter
+                        )
+                      }
+                    }
+                  )
               )
             }
-          }
-          parsedContent.content.isNullOrBlank() -> {
-            Text(LocalStrings.current.noReaderContent)
+
+            when {
+              readerProcessingProgress == ReaderProcessingProgress.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                  LinearProgressIndicator(
+                    trackColor = AppTheme.colorScheme.tintedSurface,
+                    color = AppTheme.colorScheme.tintedForeground,
+                  )
+                }
+              }
+              parsedContent.content.isNullOrBlank() -> {
+                Text(LocalStrings.current.noReaderContent)
+              }
+            }
           }
         }
       }
