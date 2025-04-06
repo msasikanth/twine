@@ -31,12 +31,8 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.experimental.stack.ChildStack
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.PredictiveBackParams
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.fade
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.StackAnimation
 import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.plus
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.scale
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.stackAnimation
-import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
@@ -127,14 +123,9 @@ fun App(
           modifier = Modifier.fillMaxSize(),
           stack = appPresenter.screenStack,
           animation =
-            stackAnimation(
-              animator = fade() + scale(),
-              predictiveBackParams = {
-                PredictiveBackParams(
-                  backHandler = appPresenter.backHandler,
-                  onBack = appPresenter::onBackClicked,
-                )
-              },
+            backAnimation(
+              backHandler = appPresenter.backHandler,
+              onBack = appPresenter::onBackClicked
             )
         ) { child ->
           val fillMaxSizeModifier = Modifier.fillMaxSize()
@@ -214,6 +205,7 @@ fun App(
   }
 }
 
+@OptIn(ExperimentalDecomposeApi::class)
 internal expect fun <C : Any, T : Any> backAnimation(
   backHandler: BackHandler,
   onBack: () -> Unit,

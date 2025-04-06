@@ -22,13 +22,12 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimation
-import com.arkivanov.decompose.extensions.compose.stack.animation.StackAnimator
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.PredictiveBackParams
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.StackAnimation
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.StackAnimator
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.stackAnimator
 import com.arkivanov.decompose.extensions.compose.stack.animation.isFront
-import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.predictiveBackAnimatable
-import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.predictiveBackAnimation
-import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
-import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimator
 import com.arkivanov.essenty.backhandler.BackHandler
 
 @OptIn(ExperimentalDecomposeApi::class)
@@ -36,31 +35,22 @@ internal actual fun <C : Any, T : Any> backAnimation(
   backHandler: BackHandler,
   onBack: () -> Unit,
 ): StackAnimation<C, T> =
-  predictiveBackAnimation(
-    backHandler = backHandler,
-    fallbackAnimation = stackAnimation(iosLikeSlide()),
-    selector = { initialBackEvent, _, _ ->
-      predictiveBackAnimatable(
-        initialBackEvent = initialBackEvent,
-        exitModifier = { progress, _ -> Modifier.slideExitModifier(progress = progress) },
-        enterModifier = { progress, _ -> Modifier.slideEnterModifier(progress = progress) },
+  stackAnimation<C, T>(
+    animator = iosLikeSlide(),
+    predictiveBackParams = {
+      PredictiveBackParams(
+        backHandler = backHandler,
+        onBack = onBack,
       )
-    },
-    onBack = onBack,
+    }
   )
 
+@OptIn(ExperimentalDecomposeApi::class)
 private fun iosLikeSlide(animationSpec: FiniteAnimationSpec<Float> = tween()): StackAnimator =
-  stackAnimator(animationSpec = animationSpec) { factor, direction, content ->
-    content(
-      Modifier.then(if (direction.isFront) Modifier else Modifier.fade(factor + 1F))
-        .offsetXFactor(factor = if (direction.isFront) factor else factor * 0.5F)
-    )
+  stackAnimator(animationSpec = animationSpec) { factor, direction ->
+    Modifier.then(if (direction.isFront) Modifier else Modifier.fade(factor + 1F))
+      .offsetXFactor(factor = if (direction.isFront) factor else factor * 0.5F)
   }
-
-private fun Modifier.slideExitModifier(progress: Float): Modifier = offsetXFactor(progress)
-
-private fun Modifier.slideEnterModifier(progress: Float): Modifier =
-  fade(progress).offsetXFactor((progress - 1f) * 0.5f)
 
 private fun Modifier.fade(factor: Float) = drawWithContent {
   drawContent()
