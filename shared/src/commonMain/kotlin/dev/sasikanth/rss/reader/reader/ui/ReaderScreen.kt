@@ -55,6 +55,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -87,6 +88,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -334,6 +336,8 @@ internal fun ReaderScreen(
           if (readerPost != null) {
             ReaderPage(
               readerPost = readerPost,
+              page = page,
+              pagerState = pagerState,
               darkTheme = darkTheme,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
               contentPaddingValues = paddingValues,
@@ -354,6 +358,8 @@ internal fun ReaderScreen(
 @Composable
 private fun ReaderPage(
   readerPost: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   darkTheme: Boolean,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
@@ -394,6 +400,8 @@ private fun ReaderPage(
       item(key = "reader-header") {
         PostInfo(
           readerPost = readerPost,
+          page = page,
+          pagerState = pagerState,
           parsedContent = parsedContent,
           onCommentsClick = {
             coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
@@ -690,6 +698,8 @@ private fun BottomBarToggleIconButton(
 @Composable
 private fun PostInfo(
   readerPost: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   parsedContent: ReaderContent,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
@@ -711,6 +721,16 @@ private fun PostInfo(
             .requiredHeightIn(max = 198.dp)
             .aspectRatio(ratio = 16f / 9f)
             .background(AppTheme.colorScheme.surfaceContainerLowest)
+            .graphicsLayer {
+              translationX =
+                if (page in 0..pagerState.pageCount) {
+                  pagerState.getOffsetFractionForPage(page) * 250f
+                } else {
+                  0f
+                }
+              scaleX = 1.08f
+              scaleY = 1.08f
+            }
             .align(Alignment.CenterHorizontally),
         contentDescription = null,
         contentScale = ContentScale.Crop,
