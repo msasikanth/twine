@@ -85,21 +85,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -117,7 +108,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import coil3.size.Size
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -145,7 +135,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
@@ -336,36 +325,15 @@ private fun ReaderPage(
         )
     ) {
       item(key = "reader-header") {
-        val postImage = readerPost.imageUrl
-
-        Box {
-          if (canBlurImage) {
-            BannerImageBlurred(
-              modifier =
-                Modifier.layout { measurable, constraints ->
-                  val topPadding = contentPaddingValues.calculateTopPadding().roundToPx()
-                  val fullHeight = constraints.maxHeight + topPadding
-                  val placeable = measurable.measure(constraints.copy(maxHeight = fullHeight))
-
-                  layout(placeable.width, placeable.height) {
-                    placeable.place(x = 0, y = topPadding.unaryMinus())
-                  }
-                },
-              postImage = postImage,
-              darkTheme = darkTheme
-            )
-          }
-
-          PostInfo(
-            readerPost = readerPost,
-            parsedContent = parsedContent,
-            onCommentsClick = {
-              coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
-            },
-            onShareClick = { sharedHandler.share(readerPost.link) },
-            onBookmarkClick = onBookmarkClick
-          )
-        }
+        PostInfo(
+          readerPost = readerPost,
+          parsedContent = parsedContent,
+          onCommentsClick = {
+            coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
+          },
+          onShareClick = { sharedHandler.share(readerPost.link) },
+          onBookmarkClick = onBookmarkClick
+        )
       }
 
       item(key = "divider") {
@@ -740,91 +708,6 @@ private fun PostInfo(
         onCommentsClick = onCommentsClick,
         onShareClick = onShareClick,
         onBookmarkClick = onBookmarkClick,
-      )
-    }
-  }
-}
-
-@Composable
-private fun BannerImageBlurred(
-  postImage: String?,
-  darkTheme: Boolean,
-  modifier: Modifier = Modifier,
-) {
-  if (!postImage.isNullOrBlank()) {
-    val gradientOverlayModifier =
-      if (darkTheme) {
-        Modifier.drawWithCache {
-          val gradientColor = Color.Black
-          val radialGradient =
-            Brush.radialGradient(
-              colors =
-                listOf(
-                  gradientColor,
-                  gradientColor.copy(alpha = 0.0f),
-                  gradientColor.copy(alpha = 0.0f)
-                ),
-              center = Offset(x = this.size.width, y = 40f)
-            )
-
-          val linearGradient =
-            Brush.verticalGradient(
-              colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-            )
-
-          onDrawWithContent {
-            drawContent()
-            drawRect(radialGradient)
-            drawRect(linearGradient)
-          }
-        }
-      } else {
-        Modifier
-      }
-
-    val overlayColor = AppTheme.colorScheme.inversePrimary
-    val colorMatrix = remember {
-      ColorMatrix().apply {
-        val sat = if (darkTheme) 1f else 5f
-        setToSaturation(sat)
-      }
-    }
-
-    val blurModifier =
-      if (canBlurImage) {
-        Modifier.graphicsLayer {
-          val blurRadiusInPx = 100.dp.toPx()
-          renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-          shape = RectangleShape
-          clip = false
-        }
-      } else {
-        Modifier
-      }
-
-    Box(
-      modifier =
-        Modifier.requiredHeightIn(max = 800.dp)
-          .aspectRatio(1f)
-          .then(blurModifier)
-          .then(gradientOverlayModifier)
-          .then(modifier)
-    ) {
-      AsyncImage(
-        modifier = Modifier.matchParentSize(),
-        url = postImage,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        size = Size(128, 128),
-        backgroundColor = AppTheme.colorScheme.surface,
-        colorFilter = ColorFilter.colorMatrix(colorMatrix)
-      )
-
-      Box(
-        modifier =
-          Modifier.matchParentSize().drawBehind {
-            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-          }
       )
     }
   }
