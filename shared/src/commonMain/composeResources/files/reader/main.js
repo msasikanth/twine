@@ -121,9 +121,23 @@ function removeFirstImageTagByUrl(doc, imageUrl) {
 }
 
 async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
-  console.log('Preparing reader content for rendering');
+  let processedHtml;
 
-  const cleanedHtml = removeHeadTag(html);
+  if (fetchFullArticle) {
+    try {
+      const response = await fetch(link);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      processedHtml = await response.text();
+    } catch (error) {
+      console.error("Error fetching full article:", error);
+    }
+  } else {
+    processedHtml = html;
+  }
+
+  const cleanedHtml = removeHeadTag(processedHtml);
   let sanitizedHtml;
   if (isRedditUrl(link)) {
     sanitizedHtml = formatRedditPost(cleanedHtml);
@@ -138,15 +152,9 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   processIFrames(doc);
   removeFirstImageTagByUrl(doc, bannerImage);
 
-  let opts;
-  if (fetchFullArticle) {
-    opts = {contentType: 'markdown'};
-  } else {
-    opts = {html: doc.body.innerHTML, contentType: 'markdown'};
-  }
+  const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
+
   // noinspection JSUnresolvedReference
   const result = await Mercury.parse(link, opts);
-
-  console.log('Reader content processed');
-  return JSON.stringify({content: result.content, excerpt: result.excerpt})
+  return JSON.stringify({ content: result.content, excerpt: result.excerpt })
 }
