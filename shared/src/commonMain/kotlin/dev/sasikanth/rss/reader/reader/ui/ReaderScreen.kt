@@ -87,7 +87,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
@@ -105,7 +104,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
@@ -137,10 +135,8 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
-import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -260,14 +256,6 @@ internal fun ReaderScreen(
 
       if (readerPost != null) {
         ReaderPage(
-          modifier =
-            Modifier.graphicsLayer {
-              val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
-              val scale = lerp(1f, 0.75f, pageOffset)
-
-              scaleX = scale
-              scaleY = scale
-            },
           readerPost = readerPost,
           darkTheme = darkTheme,
           loadFullArticle = state.canLoadFullPost(readerPost.id),
