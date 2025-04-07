@@ -55,6 +55,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -85,21 +86,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -114,10 +106,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
-import coil3.size.Size
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -140,18 +130,23 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
+import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.util.canBlurImage
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.darkAppColorScheme
+import dev.sasikanth.rss.reader.ui.lightAppColorScheme
+import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -177,6 +172,13 @@ internal fun ReaderScreen(
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+  val seedColorExtractor = LocalSeedColorExtractor.current
+  val dynamicColorState =
+    rememberDynamicColorState(
+      defaultLightAppColorScheme = lightAppColorScheme(),
+      defaultDarkAppColorScheme = darkAppColorScheme()
+    )
+  val defaultSeedColor = AppTheme.colorScheme.primary
 
   LaunchedEffect(pagerState, posts.loadState) {
     snapshotFlow { pagerState.settledPage }
@@ -194,102 +196,160 @@ internal fun ReaderScreen(
       }
   }
 
-  Scaffold(
-    modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
-    topBar = {
-      CenterAlignedTopAppBar(
-        expandedHeight = 72.dp,
-        scrollBehavior = scrollBehaviour,
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-          ),
-        navigationIcon = {
-          FilledIconButton(
-            modifier = Modifier.padding(start = 24.dp),
-            colors =
-              IconButtonDefaults.filledIconButtonColors(
-                containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
-              ),
-            shape = RoundedCornerShape(50),
-            onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
-          }
-        },
-        title = {
-          // TODO: Show page indicators
-        },
-      )
-    },
-    bottomBar = {
-      val readerPost =
-        if (posts.itemCount > 0) {
-          posts[pagerState.settledPage]
-        } else {
-          null
+  LaunchedEffect(pagerState, posts.loadState) {
+    snapshotFlow {
+        val settledPage = pagerState.settledPage
+        try {
+          pagerState.getOffsetFractionForPage(settledPage)
+        } catch (e: Throwable) {
+          0f
         }
-
-      if (readerPost != null) {
-        BottomBar(
-          modifier = Modifier.align(Alignment.BottomEnd),
-          loadFullArticle =
-            readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
-          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(readerPost.link) } },
-          loadFullArticleClick = {
-            presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
-          },
-          openReaderViewSettings = {
-            // TODO: Open reader view settings
-          }
-        )
       }
-    },
-    containerColor = AppTheme.colorScheme.backdrop,
-    contentColor = Color.Unspecified
-  ) { paddingValues ->
-    val layoutDirection = LocalLayoutDirection.current
+      .collect { offset ->
+        val readerPost =
+          try {
+            posts[pagerState.settledPage]
+          } catch (e: IndexOutOfBoundsException) {
+            null
+          }
 
-    HorizontalPager(
-      modifier = modifier,
-      state = pagerState,
-      key = posts.itemKey { it.id },
-      beyondViewportPageCount = 3,
-      overscrollEffect = null,
-      contentPadding =
-        PaddingValues(
-          start = paddingValues.calculateStartPadding(layoutDirection),
-          end = paddingValues.calculateEndPadding(layoutDirection),
-        )
-    ) { page ->
-      val readerPost = posts[page]
+        if (readerPost != null) {
+          // The default snap position of the pager is 0.5f, that means the targetPage
+          // state only changes after reaching half way point. We instead want it to scale
+          // as we start swiping.
+          //
+          // Instead of using EPSILON for snap threshold, we are doing that calculation
+          // as the page offset changes
+          //
+          val currentItem = readerPost
+          val fromItem =
+            if (offset < -EPSILON) {
+              posts[pagerState.settledPage - 1]
+            } else {
+              currentItem
+            }
 
-      if (readerPost != null) {
-        ReaderPage(
-          modifier =
-            Modifier.graphicsLayer {
-              val pageOffset = pagerState.getOffsetFractionForPage(page).absoluteValue
-              val scale = lerp(1f, 0.75f, pageOffset)
+          val toItem =
+            if (offset > EPSILON) {
+              posts[pagerState.settledPage + 1]
+            } else {
+              currentItem
+            }
 
-              scaleX = scale
-              scaleY = scale
+          val fromSeedColor =
+            seedColorExtractor.calculateSeedColor(fromItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+          val toSeedColor =
+            seedColorExtractor.calculateSeedColor(toItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+
+          dynamicColorState.animate(
+            fromSeedColor = fromSeedColor,
+            toSeedColor = toSeedColor,
+            progress = offset
+          )
+        }
+      }
+  }
+
+  CompositionLocalProvider(LocalDynamicColorState provides dynamicColorState) {
+    AppTheme(useDarkTheme = darkTheme) {
+      Scaffold(
+        modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+        topBar = {
+          CenterAlignedTopAppBar(
+            expandedHeight = 72.dp,
+            scrollBehavior = scrollBehaviour,
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+              ),
+            navigationIcon = {
+              FilledIconButton(
+                modifier = Modifier.padding(start = 24.dp),
+                colors =
+                  IconButtonDefaults.filledIconButtonColors(
+                    containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
+                  ),
+                shape = RoundedCornerShape(50),
+                onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
+              ) {
+                Icon(
+                  imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
+              }
             },
-          readerPost = readerPost,
-          darkTheme = darkTheme,
-          loadFullArticle = state.canLoadFullPost(readerPost.id),
-          contentPaddingValues = paddingValues,
-          onBookmarkClick = {
-            ReaderEvent.TogglePostBookmark(
-              postId = readerPost.id,
-              currentBookmarkStatus = readerPost.bookmarked
+            title = {
+              // TODO: Show page indicators
+            },
+          )
+        },
+        bottomBar = {
+          val readerPost =
+            if (posts.itemCount > 0) {
+              posts[pagerState.settledPage]
+            } else {
+              null
+            }
+
+          if (readerPost != null) {
+            BottomBar(
+              modifier = Modifier.align(Alignment.BottomEnd),
+              loadFullArticle =
+                readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
+              openInBrowserClick = {
+                coroutineScope.launch { linkHandler.openLink(readerPost.link) }
+              },
+              loadFullArticleClick = {
+                presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+              },
+              openReaderViewSettings = {
+                // TODO: Open reader view settings
+              }
             )
           }
-        )
+        },
+        containerColor = AppTheme.colorScheme.backdrop,
+        contentColor = Color.Unspecified
+      ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+
+        HorizontalPager(
+          modifier = modifier,
+          state = pagerState,
+          key = posts.itemKey { it.id },
+          beyondViewportPageCount = 3,
+          overscrollEffect = null,
+          contentPadding =
+            PaddingValues(
+              start = paddingValues.calculateStartPadding(layoutDirection),
+              end = paddingValues.calculateEndPadding(layoutDirection),
+            )
+        ) { page ->
+          val readerPost = posts[page]
+
+          if (readerPost != null) {
+            ReaderPage(
+              readerPost = readerPost,
+              page = page,
+              pagerState = pagerState,
+              darkTheme = darkTheme,
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              contentPaddingValues = paddingValues,
+              onBookmarkClick = {
+                ReaderEvent.TogglePostBookmark(
+                  postId = readerPost.id,
+                  currentBookmarkStatus = readerPost.bookmarked
+                )
+              }
+            )
+          }
+        }
       }
     }
   }
@@ -298,6 +358,8 @@ internal fun ReaderScreen(
 @Composable
 private fun ReaderPage(
   readerPost: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   darkTheme: Boolean,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
@@ -336,36 +398,17 @@ private fun ReaderPage(
         )
     ) {
       item(key = "reader-header") {
-        val postImage = readerPost.imageUrl
-
-        Box {
-          if (canBlurImage) {
-            BannerImageBlurred(
-              modifier =
-                Modifier.layout { measurable, constraints ->
-                  val topPadding = contentPaddingValues.calculateTopPadding().roundToPx()
-                  val fullHeight = constraints.maxHeight + topPadding
-                  val placeable = measurable.measure(constraints.copy(maxHeight = fullHeight))
-
-                  layout(placeable.width, placeable.height) {
-                    placeable.place(x = 0, y = topPadding.unaryMinus())
-                  }
-                },
-              postImage = postImage,
-              darkTheme = darkTheme
-            )
-          }
-
-          PostInfo(
-            readerPost = readerPost,
-            parsedContent = parsedContent,
-            onCommentsClick = {
-              coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
-            },
-            onShareClick = { sharedHandler.share(readerPost.link) },
-            onBookmarkClick = onBookmarkClick
-          )
-        }
+        PostInfo(
+          readerPost = readerPost,
+          page = page,
+          pagerState = pagerState,
+          parsedContent = parsedContent,
+          onCommentsClick = {
+            coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
+          },
+          onShareClick = { sharedHandler.share(readerPost.link) },
+          onBookmarkClick = onBookmarkClick
+        )
       }
 
       item(key = "divider") {
@@ -581,7 +624,7 @@ private fun BottomBar(
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
           label = LocalStrings.current.readerSettings,
-          icon = Icons.Rounded.Settings,
+          icon = TwineIcons.Settings,
           onClick = openReaderViewSettings,
           minWidth = buttonMinWidth
         )
@@ -655,6 +698,8 @@ private fun BottomBarToggleIconButton(
 @Composable
 private fun PostInfo(
   readerPost: PostWithMetadata,
+  page: Int,
+  pagerState: PagerState,
   parsedContent: ReaderContent,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
@@ -676,6 +721,16 @@ private fun PostInfo(
             .requiredHeightIn(max = 198.dp)
             .aspectRatio(ratio = 16f / 9f)
             .background(AppTheme.colorScheme.surfaceContainerLowest)
+            .graphicsLayer {
+              translationX =
+                if (page in 0..pagerState.pageCount) {
+                  pagerState.getOffsetFractionForPage(page) * 250f
+                } else {
+                  0f
+                }
+              scaleX = 1.08f
+              scaleY = 1.08f
+            }
             .align(Alignment.CenterHorizontally),
         contentDescription = null,
         contentScale = ContentScale.Crop,
@@ -740,91 +795,6 @@ private fun PostInfo(
         onCommentsClick = onCommentsClick,
         onShareClick = onShareClick,
         onBookmarkClick = onBookmarkClick,
-      )
-    }
-  }
-}
-
-@Composable
-private fun BannerImageBlurred(
-  postImage: String?,
-  darkTheme: Boolean,
-  modifier: Modifier = Modifier,
-) {
-  if (!postImage.isNullOrBlank()) {
-    val gradientOverlayModifier =
-      if (darkTheme) {
-        Modifier.drawWithCache {
-          val gradientColor = Color.Black
-          val radialGradient =
-            Brush.radialGradient(
-              colors =
-                listOf(
-                  gradientColor,
-                  gradientColor.copy(alpha = 0.0f),
-                  gradientColor.copy(alpha = 0.0f)
-                ),
-              center = Offset(x = this.size.width, y = 40f)
-            )
-
-          val linearGradient =
-            Brush.verticalGradient(
-              colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-            )
-
-          onDrawWithContent {
-            drawContent()
-            drawRect(radialGradient)
-            drawRect(linearGradient)
-          }
-        }
-      } else {
-        Modifier
-      }
-
-    val overlayColor = AppTheme.colorScheme.inversePrimary
-    val colorMatrix = remember {
-      ColorMatrix().apply {
-        val sat = if (darkTheme) 1f else 5f
-        setToSaturation(sat)
-      }
-    }
-
-    val blurModifier =
-      if (canBlurImage) {
-        Modifier.graphicsLayer {
-          val blurRadiusInPx = 100.dp.toPx()
-          renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-          shape = RectangleShape
-          clip = false
-        }
-      } else {
-        Modifier
-      }
-
-    Box(
-      modifier =
-        Modifier.requiredHeightIn(max = 800.dp)
-          .aspectRatio(1f)
-          .then(blurModifier)
-          .then(gradientOverlayModifier)
-          .then(modifier)
-    ) {
-      AsyncImage(
-        modifier = Modifier.matchParentSize(),
-        url = postImage,
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        size = Size(128, 128),
-        backgroundColor = AppTheme.colorScheme.surface,
-        colorFilter = ColorFilter.colorMatrix(colorMatrix)
-      )
-
-      Box(
-        modifier =
-          Modifier.matchParentSize().drawBehind {
-            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-          }
       )
     }
   }
