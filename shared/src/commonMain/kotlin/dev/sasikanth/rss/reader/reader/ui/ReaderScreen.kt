@@ -134,8 +134,15 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.darkAppColorScheme
+import dev.sasikanth.rss.reader.ui.lightAppColorScheme
+import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.flow.collectLatest
@@ -163,6 +170,13 @@ internal fun ReaderScreen(
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+  val seedColorExtractor = LocalSeedColorExtractor.current
+  val dynamicColorState =
+    rememberDynamicColorState(
+      defaultLightAppColorScheme = lightAppColorScheme(),
+      defaultDarkAppColorScheme = darkAppColorScheme()
+    )
+  val defaultSeedColor = AppTheme.colorScheme.primary
 
   LaunchedEffect(pagerState, posts.loadState) {
     snapshotFlow { pagerState.settledPage }
@@ -180,94 +194,158 @@ internal fun ReaderScreen(
       }
   }
 
-  Scaffold(
-    modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
-    topBar = {
-      CenterAlignedTopAppBar(
-        expandedHeight = 72.dp,
-        scrollBehavior = scrollBehaviour,
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            scrolledContainerColor = Color.Transparent,
-          ),
-        navigationIcon = {
-          FilledIconButton(
-            modifier = Modifier.padding(start = 24.dp),
-            colors =
-              IconButtonDefaults.filledIconButtonColors(
-                containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
-              ),
-            shape = RoundedCornerShape(50),
-            onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
-          ) {
-            Icon(
-              imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
-          }
-        },
-        title = {
-          // TODO: Show page indicators
-        },
-      )
-    },
-    bottomBar = {
-      val readerPost =
-        if (posts.itemCount > 0) {
-          posts[pagerState.settledPage]
-        } else {
-          null
+  LaunchedEffect(pagerState, posts.loadState) {
+    snapshotFlow {
+        val settledPage = pagerState.settledPage
+        try {
+          pagerState.getOffsetFractionForPage(settledPage)
+        } catch (e: Throwable) {
+          0f
         }
-
-      if (readerPost != null) {
-        BottomBar(
-          modifier = Modifier.align(Alignment.BottomEnd),
-          loadFullArticle =
-            readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
-          openInBrowserClick = { coroutineScope.launch { linkHandler.openLink(readerPost.link) } },
-          loadFullArticleClick = {
-            presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
-          },
-          openReaderViewSettings = {
-            // TODO: Open reader view settings
-          }
-        )
       }
-    },
-    containerColor = AppTheme.colorScheme.backdrop,
-    contentColor = Color.Unspecified
-  ) { paddingValues ->
-    val layoutDirection = LocalLayoutDirection.current
+      .collect { offset ->
+        val readerPost =
+          try {
+            posts[pagerState.settledPage]
+          } catch (e: IndexOutOfBoundsException) {
+            null
+          }
 
-    HorizontalPager(
-      modifier = modifier,
-      state = pagerState,
-      key = posts.itemKey { it.id },
-      beyondViewportPageCount = 3,
-      overscrollEffect = null,
-      contentPadding =
-        PaddingValues(
-          start = paddingValues.calculateStartPadding(layoutDirection),
-          end = paddingValues.calculateEndPadding(layoutDirection),
-        )
-    ) { page ->
-      val readerPost = posts[page]
+        if (readerPost != null) {
+          // The default snap position of the pager is 0.5f, that means the targetPage
+          // state only changes after reaching half way point. We instead want it to scale
+          // as we start swiping.
+          //
+          // Instead of using EPSILON for snap threshold, we are doing that calculation
+          // as the page offset changes
+          //
+          val currentItem = readerPost
+          val fromItem =
+            if (offset < -EPSILON) {
+              posts[pagerState.settledPage - 1]
+            } else {
+              currentItem
+            }
 
-      if (readerPost != null) {
-        ReaderPage(
-          readerPost = readerPost,
-          darkTheme = darkTheme,
-          loadFullArticle = state.canLoadFullPost(readerPost.id),
-          contentPaddingValues = paddingValues,
-          onBookmarkClick = {
-            ReaderEvent.TogglePostBookmark(
-              postId = readerPost.id,
-              currentBookmarkStatus = readerPost.bookmarked
+          val toItem =
+            if (offset > EPSILON) {
+              posts[pagerState.settledPage + 1]
+            } else {
+              currentItem
+            }
+
+          val fromSeedColor =
+            seedColorExtractor.calculateSeedColor(fromItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+          val toSeedColor =
+            seedColorExtractor.calculateSeedColor(toItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+
+          dynamicColorState.animate(
+            fromSeedColor = fromSeedColor,
+            toSeedColor = toSeedColor,
+            progress = offset
+          )
+        }
+      }
+  }
+
+  CompositionLocalProvider(LocalDynamicColorState provides dynamicColorState) {
+    AppTheme(useDarkTheme = darkTheme) {
+      Scaffold(
+        modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+        topBar = {
+          CenterAlignedTopAppBar(
+            expandedHeight = 72.dp,
+            scrollBehavior = scrollBehaviour,
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+              ),
+            navigationIcon = {
+              FilledIconButton(
+                modifier = Modifier.padding(start = 24.dp),
+                colors =
+                  IconButtonDefaults.filledIconButtonColors(
+                    containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
+                  ),
+                shape = RoundedCornerShape(50),
+                onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
+              ) {
+                Icon(
+                  imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
+              }
+            },
+            title = {
+              // TODO: Show page indicators
+            },
+          )
+        },
+        bottomBar = {
+          val readerPost =
+            if (posts.itemCount > 0) {
+              posts[pagerState.settledPage]
+            } else {
+              null
+            }
+
+          if (readerPost != null) {
+            BottomBar(
+              modifier = Modifier.align(Alignment.BottomEnd),
+              loadFullArticle =
+                readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
+              openInBrowserClick = {
+                coroutineScope.launch { linkHandler.openLink(readerPost.link) }
+              },
+              loadFullArticleClick = {
+                presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+              },
+              openReaderViewSettings = {
+                // TODO: Open reader view settings
+              }
             )
           }
-        )
+        },
+        containerColor = AppTheme.colorScheme.backdrop,
+        contentColor = Color.Unspecified
+      ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+
+        HorizontalPager(
+          modifier = modifier,
+          state = pagerState,
+          key = posts.itemKey { it.id },
+          beyondViewportPageCount = 3,
+          overscrollEffect = null,
+          contentPadding =
+            PaddingValues(
+              start = paddingValues.calculateStartPadding(layoutDirection),
+              end = paddingValues.calculateEndPadding(layoutDirection),
+            )
+        ) { page ->
+          val readerPost = posts[page]
+
+          if (readerPost != null) {
+            ReaderPage(
+              readerPost = readerPost,
+              darkTheme = darkTheme,
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              contentPaddingValues = paddingValues,
+              onBookmarkClick = {
+                ReaderEvent.TogglePostBookmark(
+                  postId = readerPost.id,
+                  currentBookmarkStatus = readerPost.bookmarked
+                )
+              }
+            )
+          }
+        }
       }
     }
   }
