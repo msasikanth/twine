@@ -128,6 +128,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
+import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
@@ -537,7 +538,7 @@ private fun BottomBar(
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
           label = LocalStrings.current.readerSettings,
-          icon = Icons.Rounded.Settings,
+          icon = TwineIcons.Settings,
           onClick = openReaderViewSettings,
           minWidth = buttonMinWidth
         )
