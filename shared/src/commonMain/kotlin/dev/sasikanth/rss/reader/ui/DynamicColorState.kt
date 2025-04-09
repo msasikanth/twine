@@ -34,6 +34,7 @@ import dev.sasikanth.material.color.utilities.dynamiccolor.TonePolarity
 import dev.sasikanth.material.color.utilities.hct.Hct
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
+import dev.sasikanth.material.color.utilities.scheme.SchemeTonalSpot
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
@@ -42,11 +43,13 @@ import kotlin.math.absoluteValue
 internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
+  useTonalSpotScheme: Boolean = false,
 ): DynamicColorState {
   return remember {
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
+      useTonalSpotScheme = useTonalSpotScheme
     )
   }
 }
@@ -55,6 +58,7 @@ internal fun rememberDynamicColorState(
 internal class DynamicColorState(
   private val defaultLightAppColorScheme: AppColorScheme,
   private val defaultDarkAppColorScheme: AppColorScheme,
+  private val useTonalSpotScheme: Boolean,
 ) {
   var lightAppColorScheme by mutableStateOf(defaultLightAppColorScheme)
     private set
@@ -115,14 +119,15 @@ internal class DynamicColorState(
 
   private fun generateDynamicColorsFromSeedColor(
     useDarkTheme: Boolean,
-    seedColor: Color
+    seedColor: Color,
   ): AppColorScheme {
+    val sourceColorHct = Hct.fromInt(seedColor.toArgb())
     val scheme =
-      SchemeContent(
-        sourceColorHct = Hct.fromInt(seedColor.toArgb()),
-        isDark = useDarkTheme,
-        contrastLevel = 0.0
-      )
+      if (useTonalSpotScheme) {
+        SchemeTonalSpot(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+      } else {
+        SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+      }
     val dynamicColors = MaterialDynamicColors()
     val defaultColorScheme =
       if (useDarkTheme) {
@@ -251,7 +256,7 @@ internal class DynamicColorState(
       dynamicColors.highestSurface(s)
     }
 
-  private fun DynamicColor.toColor(scheme: SchemeContent): Color {
+  private fun DynamicColor.toColor(scheme: DynamicScheme): Color {
     return Color(getArgb(scheme))
   }
 
@@ -283,7 +288,11 @@ internal class DynamicColorState(
       surfaceContainerHigh =
         lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
       surfaceContainerHighest =
-        lerp(start = surfaceContainerHighest, stop = to.surfaceContainerHighest, fraction = progress),
+        lerp(
+          start = surfaceContainerHighest,
+          stop = to.surfaceContainerHighest,
+          fraction = progress
+        ),
       inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
       backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
       bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
@@ -294,7 +303,8 @@ internal class DynamicColorState(
       tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
       tintedForeground =
         lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
-      tintedHighlight = lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
+      tintedHighlight =
+        lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
     )
   }
 
