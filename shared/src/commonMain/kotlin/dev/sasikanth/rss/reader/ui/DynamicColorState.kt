@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.ui
 
 import androidx.collection.lruCache
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -33,6 +34,7 @@ import dev.sasikanth.material.color.utilities.dynamiccolor.TonePolarity
 import dev.sasikanth.material.color.utilities.hct.Hct
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
+import dev.sasikanth.material.color.utilities.scheme.SchemeTonalSpot
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
@@ -41,11 +43,13 @@ import kotlin.math.absoluteValue
 internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
+  useTonalSpotScheme: Boolean = false,
 ): DynamicColorState {
   return remember {
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
+      useTonalSpotScheme = useTonalSpotScheme
     )
   }
 }
@@ -54,6 +58,7 @@ internal fun rememberDynamicColorState(
 internal class DynamicColorState(
   private val defaultLightAppColorScheme: AppColorScheme,
   private val defaultDarkAppColorScheme: AppColorScheme,
+  private val useTonalSpotScheme: Boolean,
 ) {
   var lightAppColorScheme by mutableStateOf(defaultLightAppColorScheme)
     private set
@@ -65,11 +70,13 @@ internal class DynamicColorState(
 
   fun animate(fromSeedColor: Color, toSeedColor: Color, progress: Float) {
     val normalizedProgress =
-      if (progress < -EPSILON) {
-        progress.absoluteValue.inverse()
-      } else {
-        progress
-      }
+      ease(
+        if (progress < -EPSILON) {
+          progress.absoluteValue.inverse()
+        } else {
+          progress
+        }
+      )
 
     val startLightColors =
       cache["light_$fromSeedColor"]
@@ -112,14 +119,15 @@ internal class DynamicColorState(
 
   private fun generateDynamicColorsFromSeedColor(
     useDarkTheme: Boolean,
-    seedColor: Color
+    seedColor: Color,
   ): AppColorScheme {
+    val sourceColorHct = Hct.fromInt(seedColor.toArgb())
     val scheme =
-      SchemeContent(
-        sourceColorHct = Hct.fromInt(seedColor.toArgb()),
-        isDark = useDarkTheme,
-        contrastLevel = 0.0
-      )
+      if (useTonalSpotScheme) {
+        SchemeTonalSpot(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+      } else {
+        SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+      }
     val dynamicColors = MaterialDynamicColors()
     val defaultColorScheme =
       if (useDarkTheme) {
@@ -248,52 +256,61 @@ internal class DynamicColorState(
       dynamicColors.highestSurface(s)
     }
 
-  private fun DynamicColor.toColor(scheme: SchemeContent): Color {
+  private fun DynamicColor.toColor(scheme: DynamicScheme): Color {
     return Color(getArgb(scheme))
   }
-}
 
-fun AppColorScheme.animate(
-  to: AppColorScheme?,
-  progress: Float,
-): AppColorScheme {
-  if (to == null) return this
+  private fun AppColorScheme.animate(
+    to: AppColorScheme?,
+    progress: Float,
+  ): AppColorScheme {
+    if (to == null) return this
 
-  return copy(
-    primary = lerp(start = primary, stop = to.primary, fraction = progress),
-    secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
-    outline = lerp(start = outline, stop = to.outline, fraction = progress),
-    outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
-    primaryContainer =
-      lerp(start = primaryContainer, stop = to.primaryContainer, fraction = progress),
-    onPrimaryContainer =
-      lerp(start = onPrimaryContainer, stop = to.onPrimaryContainer, fraction = progress),
-    surface = lerp(start = surface, stop = to.surface, fraction = progress),
-    onSurface = lerp(start = onSurface, stop = to.onSurface, fraction = progress),
-    onSurfaceVariant =
-      lerp(start = onSurfaceVariant, stop = to.onSurfaceVariant, fraction = progress),
-    surfaceContainer =
-      lerp(start = surfaceContainer, stop = to.surfaceContainer, fraction = progress),
-    surfaceContainerLow =
-      lerp(start = surfaceContainerLow, stop = to.surfaceContainerLow, fraction = progress),
-    surfaceContainerLowest =
-      lerp(start = surfaceContainerLowest, stop = to.surfaceContainerLowest, fraction = progress),
-    surfaceContainerHigh =
-      lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
-    surfaceContainerHighest =
-      lerp(start = surfaceContainerHighest, stop = to.surfaceContainerHighest, fraction = progress),
-    inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
-    backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
-    bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
-    bottomSheetBorder =
-      lerp(start = bottomSheetBorder, stop = to.bottomSheetBorder, fraction = progress),
-    tintedBackground =
-      lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
-    tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
-    tintedForeground =
-      lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
-    tintedHighlight = lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
-  )
+    return copy(
+      primary = lerp(start = primary, stop = to.primary, fraction = progress),
+      secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
+      outline = lerp(start = outline, stop = to.outline, fraction = progress),
+      outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
+      primaryContainer =
+        lerp(start = primaryContainer, stop = to.primaryContainer, fraction = progress),
+      onPrimaryContainer =
+        lerp(start = onPrimaryContainer, stop = to.onPrimaryContainer, fraction = progress),
+      surface = lerp(start = surface, stop = to.surface, fraction = progress),
+      onSurface = lerp(start = onSurface, stop = to.onSurface, fraction = progress),
+      onSurfaceVariant =
+        lerp(start = onSurfaceVariant, stop = to.onSurfaceVariant, fraction = progress),
+      surfaceContainer =
+        lerp(start = surfaceContainer, stop = to.surfaceContainer, fraction = progress),
+      surfaceContainerLow =
+        lerp(start = surfaceContainerLow, stop = to.surfaceContainerLow, fraction = progress),
+      surfaceContainerLowest =
+        lerp(start = surfaceContainerLowest, stop = to.surfaceContainerLowest, fraction = progress),
+      surfaceContainerHigh =
+        lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
+      surfaceContainerHighest =
+        lerp(
+          start = surfaceContainerHighest,
+          stop = to.surfaceContainerHighest,
+          fraction = progress
+        ),
+      inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
+      backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
+      bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
+      bottomSheetBorder =
+        lerp(start = bottomSheetBorder, stop = to.bottomSheetBorder, fraction = progress),
+      tintedBackground =
+        lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
+      tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
+      tintedForeground =
+        lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
+      tintedHighlight =
+        lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
+    )
+  }
+
+  private fun ease(progress: Float): Float {
+    return FastOutSlowInEasing.transform(progress)
+  }
 }
 
 internal val LocalDynamicColorState =
