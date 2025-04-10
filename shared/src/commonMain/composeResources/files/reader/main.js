@@ -1,28 +1,15 @@
 function processIFrames(doc) {
-  let iframes = doc.querySelectorAll("iframe")
-  for (let i = 0, max = iframes.length; i < max; i++) {
-    let iframe = iframes[i];
+  const iframes = doc.querySelectorAll("iframe");
+  iframes.forEach((iframe) => {
     if (iframe.hasAttribute("data-runner-src")) {
-      iframe.src = String(iframe.getAttribute("data-runner-src"));
+      iframe.src = iframe.getAttribute("data-runner-src");
     }
-  }
+  });
 }
 
 function isRedditUrl(url) {
   const redditDomainPattern = /^https?:\/\/(?:www\.|old\.|new\.|i\.)?reddit\.com|redd\.it/i;
-
-  try {
-    const urlPattern = /^https?:\/\/([^/]+)/i;
-    const match = url.match(urlPattern);
-
-    if (match) {
-      const domain = match[1];
-      return redditDomainPattern.test(`https://${domain}`);
-    }
-    return false;
-  } catch (e) {
-    return false;
-  }
+  return redditDomainPattern.test(url);
 }
 
 function formatRedditPost(html) {
@@ -31,19 +18,7 @@ function formatRedditPost(html) {
   const divMdPattern = /(?:<!-- SC_OFF -->)?\s*<div class="md">([\s\S]*?)<\/div>\s*(?:<!-- SC_ON -->)?/;
 
   const imageMatch = html.match(imagePattern);
-  let submitterMatch = html.match(submitterPattern);
-  const divMdMatch = html.match(divMdPattern);
-
-  if (!submitterMatch) {
-    const altSubmitterPattern = /user\/([^"]+)[^<]*<\/a>/;
-    const altMatch = html.match(altSubmitterPattern);
-
-    if (altMatch) {
-      const username = altMatch[1].trim();
-      const userUrl = `https://www.reddit.com/user/${username}`;
-      submitterMatch = [null, userUrl, username];
-    }
-  }
+  let submitterMatch = html.match(submitterPattern) || html.match(/user\/([^"]+)[^<]*<\/a>/);
 
   if (!submitterMatch) return null;
 
@@ -54,99 +29,81 @@ function formatRedditPost(html) {
   let result = "<table>\n";
 
   if (imageMatch) {
-    const postUrl = imageMatch[1];
-    const imageUrl = imageMatch[2];
-    const imageAlt = imageMatch[3];
-    const imageTitle = imageMatch[4];
-
+    const [_, postUrl, imageUrl, imageAlt, imageTitle] = imageMatch;
     result += `
-  <tr>
-    <td>
-      <a href="${postUrl}">
-        <img style="max-width: 100%; height: auto !important; display: block; margin-bottom: 8px;" src="${imageUrl}" alt="${imageAlt}" title="${imageTitle}" />
-      </a>
-    </td>
-  </tr>
-`;
+      <tr>
+        <td>
+          <a href="${postUrl}">
+            <img style="max-width: 100%; height: auto !important; display: block; margin-bottom: 8px;"
+                 src="${imageUrl}" alt="${imageAlt}" title="${imageTitle}" />
+          </a>
+        </td>
+      </tr>`;
   }
 
   if (divContent) {
     result += `
-  <tr>
-    <td class="content">
-      ${divContent}
-    </td>
-  </tr>
-`;
+      <tr>
+        <td class="content">
+          ${divContent}
+        </td>
+      </tr>`;
   }
 
   result += `
-  <tr>
-    <td>
-      <div style="margin-top: 8px;"><a href="${userUrl}">/u/${username}</a></div>
-    </td>
-  </tr>
-</table>`;
+    <tr>
+      <td>
+        <div style="margin-top: 8px;"><a href="${userUrl}">/u/${username}</a></div>
+      </td>
+    </tr>
+  </table>`;
 
   return result;
 }
 
 function removeHeadTag(html) {
-  const headRegex = /<head[^>]*>[\s\S]*?<\/head>/i;
-  return html.replace(headRegex, '');
+  return html.replace(/<head[^>]*>[\s\S]*?<\/head>/i, '');
 }
 
 function removeFirstH1(doc) {
-  const firstH1 = doc.querySelector('h1');
-  if (firstH1) {
-    firstH1.parentNode.removeChild(firstH1);
-  }
+  doc.querySelector('h1')?.remove();
 }
 
 function removeFirstImageTagByUrl(doc, imageUrl) {
-  if (!imageUrl) {
-    return;
-  }
+  if (!imageUrl) return;
 
   const img = doc.querySelector(`img[src="${imageUrl}"]`);
   if (img) {
-    img.parentNode.removeChild(img);
-    return;
-  }
-
-  const figure = doc.querySelector(`figure img[src="${imageUrl}"]`);
-  if (figure) {
-    figure.parentNode.parentNode.removeChild(figure.parentNode);
+    img.closest('figure')?.remove() || img.remove();
   }
 }
 
 async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
-  let processedHtml;
+  let processedHtml = html;
 
   if (fetchFullArticle) {
     try {
       const response = await fetch(link);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       processedHtml = await response.text();
     } catch (error) {
       console.error("Error fetching full article:", error);
     }
-  } else {
-    processedHtml = html;
   }
 
   const cleanedHtml = removeHeadTag(processedHtml);
-  let sanitizedHtml;
-  if (isRedditUrl(link)) {
-    sanitizedHtml = formatRedditPost(cleanedHtml);
-  } else {
-    sanitizedHtml = `<body><div>${cleanedHtml}</div></body>`;
-  }
+  const sanitizedHtml = isRedditUrl(link)
+    ? formatRedditPost(cleanedHtml)
+    : `<body><div>${cleanedHtml}</div></body>`;
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(sanitizedHtml, 'text/html');
+  let doc;
+  try {
+    const parser = new DOMParser();
+    doc = parser.parseFromString(sanitizedHtml, 'text/html');
+  } catch (error) {
+    console.error("Error parsing HTML:", error);
+    return null;
+  }
 
   removeFirstH1(doc);
   processIFrames(doc);
@@ -154,7 +111,6 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
 
   const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
 
-  // noinspection JSUnresolvedReference
   const result = await Mercury.parse(link, opts);
-  return JSON.stringify({ content: result.content, excerpt: result.excerpt })
+  return JSON.stringify({ content: result.content, excerpt: result.excerpt });
 }
