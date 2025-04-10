@@ -18,21 +18,17 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,29 +37,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
-import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-
-private val featuredImageAspectRatio: Float
-  @Composable
-  @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Compact -> 1.77f
-      WindowWidthSizeClass.Medium -> 2.5f
-      WindowWidthSizeClass.Expanded -> 1.9f
-      else -> 1.77f
-    }
 
 @Immutable data class FeaturedPostItem(val postWithMetadata: PostWithMetadata, val seedColor: Int?)
 
@@ -89,24 +71,19 @@ internal fun FeaturedPostItem(
     val density = LocalDensity.current
     var descriptionBottomPadding by remember(item.link) { mutableStateOf(0.dp) }
 
-    AsyncImage(
-      url = item.imageUrl!!,
+    FeaturedImage(
       modifier =
-        Modifier.clip(MaterialTheme.shapes.extraLarge)
-          .aspectRatio(featuredImageAspectRatio)
-          .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .graphicsLayer {
-            translationX =
-              if (page in 0..pagerState.pageCount) {
-                pagerState.getOffsetFractionForPage(page) * 250f
-              } else {
-                0f
-              }
-            scaleX = 1.08f
-            scaleY = 1.08f
-          },
-      contentDescription = null,
-      contentScale = ContentScale.Crop,
+        Modifier.graphicsLayer {
+          translationX =
+            if (page in 0..pagerState.pageCount) {
+              pagerState.getOffsetFractionForPage(page) * 250f
+            } else {
+              0f
+            }
+          scaleX = 1.08f
+          scaleY = 1.08f
+        },
+      image = item.imageUrl,
     )
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))

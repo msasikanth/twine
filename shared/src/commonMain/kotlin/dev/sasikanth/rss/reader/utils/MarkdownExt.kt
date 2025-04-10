@@ -79,9 +79,15 @@ internal fun handleElement(
   if (includeSpacer) Spacer(Modifier.height(LocalMarkdownPadding.current.block))
 
   val linkContentColor = AppTheme.colorScheme.primary
+  val squigglyUnderlineAnimator = rememberSquigglyUnderlineAnimator()
   val extendedSpans =
     remember(linkContentColor) {
-      ExtendedSpans(SquigglyUnderlineSpanPainter(contentColor = linkContentColor))
+      ExtendedSpans(
+        SquigglyUnderlineSpanPainter(
+          contentColor = linkContentColor,
+          animator = squigglyUnderlineAnimator
+        )
+      )
     }
 
   CompositionLocalProvider(
