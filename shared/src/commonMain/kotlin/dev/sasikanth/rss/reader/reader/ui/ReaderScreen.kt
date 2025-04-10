@@ -36,7 +36,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,7 +44,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
@@ -89,7 +87,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -129,9 +126,9 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.markdownPadding
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
@@ -742,14 +739,9 @@ private fun PostInfo(
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
-      AsyncImage(
-        url = postImage,
+      FeaturedImage(
         modifier =
-          Modifier.clip(MaterialTheme.shapes.extraLarge)
-            .requiredHeightIn(max = 198.dp)
-            .aspectRatio(ratio = 16f / 9f)
-            .background(AppTheme.colorScheme.surfaceContainerLowest)
-            .graphicsLayer {
+          Modifier.graphicsLayer {
               translationX =
                 if (page in 0..pagerState.pageCount) {
                   pagerState.getOffsetFractionForPage(page) * 250f
@@ -760,8 +752,7 @@ private fun PostInfo(
               scaleY = 1.08f
             }
             .align(Alignment.CenterHorizontally),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
+        image = postImage
       )
 
       Spacer(modifier = Modifier.requiredHeight(8.dp))
