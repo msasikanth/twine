@@ -464,41 +464,41 @@ private fun ReaderPage(
       LocalMarkdownColors provides markdownColor(),
       LocalMarkdownTypography provides markdownTypography(),
     ) {
-      if (readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent) {
-        LazyColumn(
-          modifier = Modifier.fillMaxSize(),
-          overscrollEffect = null,
-          contentPadding =
-            PaddingValues(
-              top = contentPaddingValues.calculateTopPadding(),
-              bottom = contentPaddingValues.calculateBottomPadding()
-            )
-        ) {
-          item(key = "reader-header") {
-            PostInfo(
-              readerPost = readerPost,
-              page = page,
-              pagerState = pagerState,
-              parsedContent = parsedContent,
-              onCommentsClick = {
-                coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
-              },
-              onShareClick = { sharedHandler.share(readerPost.link) },
-              onBookmarkClick = onBookmarkClick
-            )
-          }
+      LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        overscrollEffect = null,
+        contentPadding =
+          PaddingValues(
+            top = contentPaddingValues.calculateTopPadding(),
+            bottom = contentPaddingValues.calculateBottomPadding()
+          )
+      ) {
+        item(key = "reader-header") {
+          PostInfo(
+            readerPost = readerPost,
+            page = page,
+            pagerState = pagerState,
+            parsedContent = parsedContent,
+            onCommentsClick = {
+              coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
+            },
+            onShareClick = { sharedHandler.share(readerPost.link) },
+            onBookmarkClick = onBookmarkClick
+          )
+        }
 
-          item(key = "divider") {
-            HorizontalDivider(
-              modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
-              color = AppTheme.colorScheme.outlineVariant
-            )
-          }
+        item(key = "divider") {
+          HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+            color = AppTheme.colorScheme.outlineVariant
+          )
+        }
 
-          if (readerProcessingProgress != ReaderProcessingProgress.Idle) {
-            item(key = "progress-indicator") { ProgressIndicator() }
-          }
+        if (readerProcessingProgress != ReaderProcessingProgress.Idle) {
+          item(key = "progress-indicator") { ProgressIndicator() }
+        }
 
+        if (readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent) {
           if (parsedContent.hasContent) {
             when (val state = markdownState) {
               is State.Success -> {
