@@ -80,8 +80,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -126,6 +126,8 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.markdownPadding
+import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
+import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
@@ -306,7 +308,24 @@ internal fun ReaderScreen(
               }
             },
             title = {
-              // TODO: Show page indicators
+              val pageIndicatorState = remember {
+                object : PageIndicatorState {
+                  override val pageOffset: Float
+                    get() = pagerState.currentPageOffsetFraction
+
+                  override val selectedPage: Int
+                    get() = pagerState.currentPage
+
+                  override val pageCount: Int
+                    get() = pagerState.pageCount
+                }
+              }
+
+              if (pagerState.pageCount > 1) {
+                HorizontalPageIndicators(
+                  pageIndicatorState = pageIndicatorState,
+                )
+              }
             },
           )
         },
@@ -616,9 +635,9 @@ private fun BottomBar(
       Row(
         modifier =
           Modifier.padding(bottom = 16.dp, top = 16.dp)
-            .clipToBounds()
             .height(IntrinsicSize.Min)
             .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+            .shadow(elevation = 32.dp)
             .border(
               width = 1.dp,
               color = AppTheme.colorScheme.bottomSheetBorder,
