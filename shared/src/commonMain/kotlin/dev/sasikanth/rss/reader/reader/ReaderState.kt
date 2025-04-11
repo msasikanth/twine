@@ -30,7 +30,7 @@ internal data class ReaderState(
 ) {
 
   fun canLoadFullPost(postId: String): Boolean {
-    return loadFullArticleMap.containsKey(postId)
+    return loadFullArticleMap[postId] ?: false
   }
 
   companion object {
