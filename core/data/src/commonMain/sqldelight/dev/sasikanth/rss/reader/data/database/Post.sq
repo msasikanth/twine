@@ -9,6 +9,7 @@ CREATE TABLE post(
   rawContent TEXT,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
+  syncedAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
@@ -69,8 +70,8 @@ BEGIN
 END;
 
 upsert:
-INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
+INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, syncedAt, link, commentsLink)
+VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :syncedAt, :link, :commnetsLink)
 ON CONFLICT(id) DO
 UPDATE SET
     title = excluded.title,

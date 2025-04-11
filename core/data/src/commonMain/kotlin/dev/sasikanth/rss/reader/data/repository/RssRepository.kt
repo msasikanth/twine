@@ -110,6 +110,7 @@ class RssRepository(
                   description = post.description,
                   imageUrl = post.imageUrl,
                   date = Instant.fromEpochMilliseconds(post.date),
+                  syncedAt = Clock.System.now(),
                   link = post.link,
                   commnetsLink = post.commentsLink,
                   rawContent = post.rawContent,
