@@ -123,6 +123,22 @@ class ReaderPresenter(
         is ReaderEvent.PostPageChanged -> postPageChange(event.post)
         ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
         is ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked(event.postId)
+        is ReaderEvent.PostLoaded -> postLoaded(event.post)
+      }
+    }
+
+    private fun postLoaded(post: PostWithMetadata) {
+      coroutineScope.launch {
+        _state.update {
+          val newLoadFullArticleMap =
+            if (it.loadFullArticleMap.containsKey(post.id)) {
+              it.loadFullArticleMap
+            } else {
+              it.loadFullArticleMap + Pair(post.id, post.alwaysFetchFullArticle)
+            }
+
+          it.copy(loadFullArticleMap = newLoadFullArticleMap)
+        }
       }
     }
 

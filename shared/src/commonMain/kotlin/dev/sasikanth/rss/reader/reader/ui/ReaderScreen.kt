@@ -339,8 +339,7 @@ internal fun ReaderScreen(
 
           if (readerPost != null) {
             BottomBar(
-              loadFullArticle =
-                readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
@@ -377,6 +376,8 @@ internal fun ReaderScreen(
           val readerPost = posts[page]
 
           if (readerPost != null) {
+            LaunchedEffect(readerPost.id) { presenter.dispatch(ReaderEvent.PostLoaded(readerPost)) }
+
             ReaderPage(
               readerPost = readerPost,
               page = page,
@@ -465,7 +466,7 @@ private fun ReaderPage(
       link = readerPost.link,
       content = readerPost.rawContent ?: readerPost.description,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = readerPost.alwaysFetchFullArticle || loadFullArticle,
+      fetchFullArticle = loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
