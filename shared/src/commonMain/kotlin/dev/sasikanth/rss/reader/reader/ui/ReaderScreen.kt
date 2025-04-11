@@ -80,8 +80,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -101,6 +101,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
+import com.adamglin.composeshadow.dropShadow
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
@@ -466,7 +467,7 @@ private fun ReaderPage(
       link = readerPost.link,
       content = readerPost.rawContent ?: readerPost.description,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = loadFullArticle,
+      fetchFullArticle = readerPost.alwaysFetchFullArticle || loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
@@ -576,78 +577,89 @@ private fun BottomBar(
         .then(modifier),
     contentAlignment = Alignment.Center
   ) {
-    AppTheme(useDarkTheme = true) {
-      val transition = updateTransition(loadFullArticle)
-      val buttonMinWidth by
-        transition.animateDp {
-          if (it) {
-            52.dp
-          } else {
-            56.dp
+    Row(
+      modifier =
+        Modifier.padding(bottom = 16.dp, top = 16.dp)
+          .height(IntrinsicSize.Min)
+          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+          .border(
+            width = 1.dp,
+            color = AppTheme.colorScheme.bottomSheetBorder,
+            shape = RoundedCornerShape(50)
+          )
+          .dropShadow(
+            shape = RoundedCornerShape(50),
+            offsetY = 16.dp,
+            blur = 32.dp,
+            color = Color.Black.copy(alpha = 0.4f)
+          )
+          .dropShadow(
+            shape = RoundedCornerShape(50),
+            offsetY = 4.dp,
+            blur = 8.dp,
+            color = Color.Black.copy(alpha = 0.16f)
+          )
+          .padding(horizontal = 12.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      AppTheme(useDarkTheme = true) {
+        val transition = updateTransition(loadFullArticle)
+        val buttonMinWidth by
+          transition.animateDp {
+            if (it) {
+              52.dp
+            } else {
+              56.dp
+            }
           }
-        }
-      val readerViewToggleWidth by
-        transition.animateDp(
-          transitionSpec = {
-            spring(
-              stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy
-            )
+        val readerViewToggleWidth by
+          transition.animateDp(
+            transitionSpec = {
+              spring(
+                stiffness = Spring.StiffnessMedium,
+                dampingRatio = Spring.DampingRatioMediumBouncy
+              )
+            }
+          ) {
+            if (it) {
+              88.dp
+            } else {
+              72.dp
+            }
           }
-        ) {
-          if (it) {
-            88.dp
-          } else {
-            72.dp
+        val readerViewToggleVerticalPadding by
+          transition.animateDp(
+            transitionSpec = {
+              spring(
+                stiffness = Spring.StiffnessMedium,
+                dampingRatio = Spring.DampingRatioMediumBouncy
+              )
+            }
+          ) {
+            if (it) {
+              8.dp
+            } else {
+              12.dp
+            }
           }
-        }
-      val readerViewToggleVerticalPadding by
-        transition.animateDp(
-          transitionSpec = {
-            spring(
-              stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy
-            )
+        val readerViewToggleBackgroundColor by
+          transition.animateColor {
+            if (it) {
+              AppTheme.colorScheme.primaryContainer
+            } else {
+              AppTheme.colorScheme.surfaceContainerHighest
+            }
           }
-        ) {
-          if (it) {
-            8.dp
-          } else {
-            12.dp
+        val readerViewToggleContentColor by
+          transition.animateColor {
+            if (it) {
+              AppTheme.colorScheme.onPrimaryContainer
+            } else {
+              AppTheme.colorScheme.onSurface
+            }
           }
-        }
-      val readerViewToggleBackgroundColor by
-        transition.animateColor {
-          if (it) {
-            AppTheme.colorScheme.primaryContainer
-          } else {
-            AppTheme.colorScheme.surfaceContainerHighest
-          }
-        }
-      val readerViewToggleContentColor by
-        transition.animateColor {
-          if (it) {
-            AppTheme.colorScheme.onPrimaryContainer
-          } else {
-            AppTheme.colorScheme.onSurface
-          }
-        }
 
-      Row(
-        modifier =
-          Modifier.padding(bottom = 16.dp, top = 16.dp)
-            .height(IntrinsicSize.Min)
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
-            .shadow(elevation = 32.dp)
-            .border(
-              width = 1.dp,
-              color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = RoundedCornerShape(50)
-            )
-            .padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
           label = LocalStrings.current.openWebsite,
