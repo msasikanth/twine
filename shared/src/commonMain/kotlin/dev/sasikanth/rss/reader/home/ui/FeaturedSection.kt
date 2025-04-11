@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
@@ -56,8 +57,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import coil3.size.Size
+import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
+import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -206,6 +208,26 @@ internal fun FeaturedSection(
         }
       }
     }
+
+    if (pagerState.pageCount > 1) {
+      val pageIndicatorState = remember {
+        object : PageIndicatorState {
+          override val pageOffset: Float
+            get() = pagerState.currentPageOffsetFraction
+
+          override val selectedPage: Int
+            get() = pagerState.currentPage
+
+          override val pageCount: Int
+            get() = pagerState.pageCount
+        }
+      }
+
+      HorizontalPageIndicators(
+        modifier = Modifier.padding(vertical = 8.dp).align(Alignment.BottomCenter),
+        pageIndicatorState = pageIndicatorState
+      )
+    }
   }
 }
 
@@ -249,7 +271,9 @@ private fun FeaturedSectionBackground(
       }
 
     val swipeTransitionModifier =
-      Modifier.graphicsLayer {
+      Modifier.requiredHeightIn(max = 600.dp)
+        .aspectRatio(1f)
+        .graphicsLayer {
           val pageOffset = state.getOffsetFractionForPage(page)
           val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
           val backgroundAlpha = FastOutSlowInEasing.transform(offsetAbsolute.inverse())
@@ -285,13 +309,7 @@ private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
       AppTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
     )
 
-  Box(
-    modifier =
-      Modifier.requiredHeightIn(max = 800.dp)
-        .aspectRatio(1f)
-        .then(modifier)
-        .background(Brush.verticalGradient(colorStops))
-  )
+  Box(modifier = Modifier.then(modifier).background(Brush.verticalGradient(colorStops)))
 }
 
 @Composable
@@ -311,9 +329,7 @@ private fun FeaturedSectionBlurredBackground(
   AsyncImage(
     url = post.postWithMetadata.imageUrl!!,
     modifier =
-      Modifier.requiredHeightIn(max = 800.dp)
-        .aspectRatio(1f)
-        .graphicsLayer {
+      Modifier.graphicsLayer {
           val blurRadiusInPx = 100.dp.toPx()
           renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
           shape = RectangleShape
