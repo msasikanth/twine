@@ -467,7 +467,7 @@ private fun ReaderPage(
       link = readerPost.link,
       content = readerPost.rawContent ?: readerPost.description,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = readerPost.alwaysFetchFullArticle || loadFullArticle,
+      fetchFullArticle = loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
