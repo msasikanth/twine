@@ -80,7 +80,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -340,6 +339,7 @@ internal fun ReaderScreen(
 
           if (readerPost != null) {
             BottomBar(
+              darkTheme = darkTheme,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
@@ -558,6 +558,7 @@ private fun ProgressIndicator() {
 
 @Composable
 private fun BottomBar(
+  darkTheme: Boolean,
   loadFullArticle: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
@@ -577,6 +578,13 @@ private fun BottomBar(
         .then(modifier),
     contentAlignment = Alignment.Center
   ) {
+    val (shadowColor1, shadowColor2) =
+      if (darkTheme) {
+        Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+      } else {
+        Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+      }
+
     Row(
       modifier =
         Modifier.padding(bottom = 16.dp, top = 16.dp)
@@ -591,13 +599,13 @@ private fun BottomBar(
             shape = RoundedCornerShape(50),
             offsetY = 16.dp,
             blur = 32.dp,
-            color = Color.Black.copy(alpha = 0.4f)
+            color = shadowColor1
           )
           .dropShadow(
             shape = RoundedCornerShape(50),
             offsetY = 4.dp,
             blur = 8.dp,
-            color = Color.Black.copy(alpha = 0.16f)
+            color = shadowColor2
           )
           .padding(horizontal = 12.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
