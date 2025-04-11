@@ -80,7 +80,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -101,6 +100,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
+import com.adamglin.composeshadow.dropShadow
 import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
@@ -126,6 +126,8 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.markdownPadding
+import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
+import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
@@ -306,7 +308,24 @@ internal fun ReaderScreen(
               }
             },
             title = {
-              // TODO: Show page indicators
+              val pageIndicatorState = remember {
+                object : PageIndicatorState {
+                  override val pageOffset: Float
+                    get() = pagerState.currentPageOffsetFraction
+
+                  override val selectedPage: Int
+                    get() = pagerState.currentPage
+
+                  override val pageCount: Int
+                    get() = pagerState.pageCount
+                }
+              }
+
+              if (pagerState.pageCount > 1) {
+                HorizontalPageIndicators(
+                  pageIndicatorState = pageIndicatorState,
+                )
+              }
             },
           )
         },
@@ -320,8 +339,8 @@ internal fun ReaderScreen(
 
           if (readerPost != null) {
             BottomBar(
-              loadFullArticle =
-                readerPost.alwaysFetchFullArticle || state.canLoadFullPost(readerPost.id),
+              darkTheme = darkTheme,
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
@@ -358,6 +377,8 @@ internal fun ReaderScreen(
           val readerPost = posts[page]
 
           if (readerPost != null) {
+            LaunchedEffect(readerPost.id) { presenter.dispatch(ReaderEvent.PostLoaded(readerPost)) }
+
             ReaderPage(
               readerPost = readerPost,
               page = page,
@@ -446,7 +467,7 @@ private fun ReaderPage(
       link = readerPost.link,
       content = readerPost.rawContent ?: readerPost.description,
       postImage = readerPost.imageUrl,
-      fetchFullArticle = readerPost.alwaysFetchFullArticle || loadFullArticle,
+      fetchFullArticle = loadFullArticle,
       contentLoaded = {
         readerProcessingProgress = ReaderProcessingProgress.Idle
         parsedContent = json.decodeFromString(it)
@@ -537,6 +558,7 @@ private fun ProgressIndicator() {
 
 @Composable
 private fun BottomBar(
+  darkTheme: Boolean,
   loadFullArticle: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
@@ -556,78 +578,96 @@ private fun BottomBar(
         .then(modifier),
     contentAlignment = Alignment.Center
   ) {
-    AppTheme(useDarkTheme = true) {
-      val transition = updateTransition(loadFullArticle)
-      val buttonMinWidth by
-        transition.animateDp {
-          if (it) {
-            52.dp
-          } else {
-            56.dp
-          }
-        }
-      val readerViewToggleWidth by
-        transition.animateDp(
-          transitionSpec = {
-            spring(
-              stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy
-            )
-          }
-        ) {
-          if (it) {
-            88.dp
-          } else {
-            72.dp
-          }
-        }
-      val readerViewToggleVerticalPadding by
-        transition.animateDp(
-          transitionSpec = {
-            spring(
-              stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy
-            )
-          }
-        ) {
-          if (it) {
-            8.dp
-          } else {
-            12.dp
-          }
-        }
-      val readerViewToggleBackgroundColor by
-        transition.animateColor {
-          if (it) {
-            AppTheme.colorScheme.primaryContainer
-          } else {
-            AppTheme.colorScheme.surfaceContainerHighest
-          }
-        }
-      val readerViewToggleContentColor by
-        transition.animateColor {
-          if (it) {
-            AppTheme.colorScheme.onPrimaryContainer
-          } else {
-            AppTheme.colorScheme.onSurface
-          }
-        }
+    val (shadowColor1, shadowColor2) =
+      if (darkTheme) {
+        Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+      } else {
+        Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+      }
 
-      Row(
-        modifier =
-          Modifier.padding(bottom = 16.dp, top = 16.dp)
-            .clipToBounds()
-            .height(IntrinsicSize.Min)
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
-            .border(
-              width = 1.dp,
-              color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = RoundedCornerShape(50)
-            )
-            .padding(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-      ) {
+    Row(
+      modifier =
+        Modifier.padding(bottom = 16.dp, top = 16.dp)
+          .height(IntrinsicSize.Min)
+          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
+          .border(
+            width = 1.dp,
+            color = AppTheme.colorScheme.bottomSheetBorder,
+            shape = RoundedCornerShape(50)
+          )
+          .dropShadow(
+            shape = RoundedCornerShape(50),
+            offsetY = 16.dp,
+            blur = 32.dp,
+            color = shadowColor1
+          )
+          .dropShadow(
+            shape = RoundedCornerShape(50),
+            offsetY = 4.dp,
+            blur = 8.dp,
+            color = shadowColor2
+          )
+          .padding(horizontal = 12.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      AppTheme(useDarkTheme = true) {
+        val transition = updateTransition(loadFullArticle)
+        val buttonMinWidth by
+          transition.animateDp {
+            if (it) {
+              52.dp
+            } else {
+              56.dp
+            }
+          }
+        val readerViewToggleWidth by
+          transition.animateDp(
+            transitionSpec = {
+              spring(
+                stiffness = Spring.StiffnessMedium,
+                dampingRatio = Spring.DampingRatioMediumBouncy
+              )
+            }
+          ) {
+            if (it) {
+              88.dp
+            } else {
+              72.dp
+            }
+          }
+        val readerViewToggleVerticalPadding by
+          transition.animateDp(
+            transitionSpec = {
+              spring(
+                stiffness = Spring.StiffnessMedium,
+                dampingRatio = Spring.DampingRatioMediumBouncy
+              )
+            }
+          ) {
+            if (it) {
+              8.dp
+            } else {
+              12.dp
+            }
+          }
+        val readerViewToggleBackgroundColor by
+          transition.animateColor {
+            if (it) {
+              AppTheme.colorScheme.primaryContainer
+            } else {
+              AppTheme.colorScheme.surfaceContainerHighest
+            }
+          }
+        val readerViewToggleContentColor by
+          transition.animateColor {
+            if (it) {
+              AppTheme.colorScheme.onPrimaryContainer
+            } else {
+              AppTheme.colorScheme.onSurface
+            }
+          }
+
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
           label = LocalStrings.current.openWebsite,

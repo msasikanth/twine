@@ -192,10 +192,11 @@ internal fun HomeScreen(
   AppTheme(useDarkTheme = true) {
     Scaffold(modifier) { scaffoldPadding ->
       val density = LocalDensity.current
-      val targetSheetPeekHeight = remember {
-        BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding()
-      }
-      var sheetPeekHeight by remember { mutableStateOf(targetSheetPeekHeight) }
+      val bottomPadding = scaffoldPadding.calculateBottomPadding()
+      val targetSheetPeekHeight =
+        remember(bottomPadding) { BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding }
+      var sheetPeekHeight by
+        remember(targetSheetPeekHeight) { mutableStateOf(targetSheetPeekHeight) }
 
       // Since `animateScrollToItem` doesn't trigger nested scroll connection
       // we are manually animating the sheet peek height back to target sheet peek height
