@@ -172,9 +172,6 @@ post:
 SELECT * FROM post
 WHERE post.id = :id;
 
-hasPost:
-SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
-
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
 WHERE
