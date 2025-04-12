@@ -150,7 +150,7 @@ class ReaderPresenter(
       coroutineScope.launch {
         _state.update {
           val newLoadFullArticleMap =
-            if (it.loadFullArticleMap.containsKey(postId)) {
+            if (it.loadFullArticleMap[postId] == true) {
               it.loadFullArticleMap - postId
             } else {
               it.loadFullArticleMap + Pair(postId, true)
