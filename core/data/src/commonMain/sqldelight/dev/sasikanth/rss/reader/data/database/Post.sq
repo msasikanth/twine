@@ -88,7 +88,7 @@ WHERE
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   post.date > :postsAfter AND
-  post.syncedAt > :lastSyncedAt;
+  post.syncedAt < :lastSyncedAt;
 
 allPosts:
 WITH featuredPosts AS (
@@ -117,7 +117,7 @@ WITH featuredPosts AS (
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     post.imageUrl IS NOT NULL AND
     post.date > :postsAfter AND
-    post.syncedAt > :lastSyncedAt
+    post.syncedAt < :lastSyncedAt
   ORDER BY post.date DESC
   LIMIT :numberOfFeaturedPosts
 )
@@ -151,7 +151,7 @@ WHERE
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   post.id NOT IN (SELECT id FROM featuredPosts) AND
   post.date > :postsAfter AND
-  post.syncedAt > :lastSyncedAt
+  post.syncedAt < :lastSyncedAt
 ORDER BY isFeatured DESC, date DESC
 LIMIT :limit OFFSET :offset;
 

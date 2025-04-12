@@ -181,7 +181,7 @@ class RssRepository(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
