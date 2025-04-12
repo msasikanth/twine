@@ -21,7 +21,6 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,7 +57,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -68,13 +66,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMaxBy
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -87,25 +82,19 @@ import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
-@OptIn(FlowPreview::class)
 @Composable
 internal fun HomeScreen(
   homePresenter: HomePresenter,
@@ -118,7 +107,6 @@ internal fun HomeScreen(
   val state by homePresenter.state.collectAsState()
   val feedsState by homePresenter.feedsPresenter.state.collectAsState()
   val linkHandler = LocalLinkHandler.current
-  val dynamicColorState = LocalDynamicColorState.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
   val featuredPosts by featuredPosts(posts).collectAsState(initial = persistentListOf())
@@ -145,49 +133,6 @@ internal fun HomeScreen(
 
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
-
-  LaunchedEffect(state.feedsSheetState) {
-    if (
-      state.feedsSheetState == SheetValue.PartiallyExpanded &&
-        bottomSheetState.currentValue == SheetValue.Expanded
-    ) {
-      bottomSheetState.partialExpand()
-    }
-  }
-
-  LaunchedEffect(featuredPosts) {
-    if (featuredPosts.isEmpty()) {
-      dynamicColorState.reset()
-    }
-  }
-
-  LaunchedEffect(listState) {
-    snapshotFlow { listState.layoutInfo.visibleItemsInfo }
-      .onEach { items ->
-        val postIds =
-          items
-            .filter { it.contentType == "post_item" && it.key is String }
-            .map { it.key as String }
-
-        homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(postIds))
-      }
-      .debounce(2.seconds)
-      .collect { homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead) }
-  }
-
-  LaunchedEffect(featuredPostsPagerState) {
-    snapshotFlow { featuredPostsPagerState.settledPage }
-      .debounce(2.seconds)
-      .collect {
-        val featuredPost = featuredPosts.getOrNull(it) ?: return@collect
-
-        if (featuredPost.postWithMetadata.read) return@collect
-
-        homePresenter.dispatch(
-          HomeEvent.MarkFeaturedPostsAsRead(postId = featuredPost.postWithMetadata.id)
-        )
-      }
-  }
 
   AppTheme(useDarkTheme = true) {
     Scaffold(modifier) { scaffoldPadding ->
@@ -249,7 +194,7 @@ internal fun HomeScreen(
                 )
               val canSwipeToRefresh = hasFeeds == true
 
-              HomeScreenContentLayout(
+              HomeScreenContentScaffold(
                 modifier =
                   Modifier.pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh),
                 homeTopAppBar = {
@@ -283,6 +228,15 @@ internal fun HomeScreen(
                           useDarkTheme = useDarkTheme,
                           listState = listState,
                           featuredPostsPagerState = featuredPostsPagerState,
+                          markPostAsRead = {
+                            homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                          },
+                          postsScrolled = {
+                            homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
+                          },
+                          markScrolledPostsAsRead = {
+                            homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                          },
                           onPostClicked = { post, postIndex ->
                             homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
                           },
@@ -372,35 +326,6 @@ internal fun HomeScreen(
         sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
         sheetDragHandle = null
       )
-    }
-  }
-}
-
-@Composable
-private fun HomeScreenContentLayout(
-  homeTopAppBar: @Composable () -> Unit,
-  body: @Composable (PaddingValues) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  SubcomposeLayout(
-    modifier = Modifier.fillMaxSize().then(modifier),
-  ) { constraints ->
-    val layoutWidth = constraints.maxWidth
-    val layoutHeight = constraints.maxHeight
-    val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-
-    val topBarPlaceables =
-      subcompose("topBar") { homeTopAppBar() }.map { it.measure(looseConstraints) }
-    val topBarHeight = topBarPlaceables.fastMaxBy { it.height }?.height ?: 0
-
-    val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight)
-    val bodyPlaceables =
-      subcompose("body") { body(PaddingValues(top = topBarHeight.toDp())) }
-        .map { it.measure(bodyConstraints) }
-
-    layout(layoutWidth, layoutHeight) {
-      bodyPlaceables.fastForEach { it.placeRelative(0, 0) }
-      topBarPlaceables.fastForEach { it.placeRelative(0, 0) }
     }
   }
 }

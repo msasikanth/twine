@@ -38,7 +38,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -52,11 +54,16 @@ import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.onEach
 
 private val postListPadding
   @Composable
@@ -67,6 +74,7 @@ private val postListPadding
       else -> PaddingValues(0.dp)
     }
 
+@OptIn(FlowPreview::class)
 @Composable
 internal fun PostsList(
   paddingValues: PaddingValues,
@@ -75,6 +83,9 @@ internal fun PostsList(
   useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
+  markPostAsRead: (String) -> Unit,
+  postsScrolled: (List<String>) -> Unit,
+  markScrolledPostsAsRead: () -> Unit,
   onPostClicked: (post: PostWithMetadata, postIndex: Int) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
@@ -82,12 +93,45 @@ internal fun PostsList(
   onTogglePostReadClick: (String, Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val dynamicColorState = LocalDynamicColorState.current
   val topContentPadding =
     if (featuredPosts.isEmpty()) {
       paddingValues.calculateTopPadding()
     } else {
       0.dp
     }
+
+  LaunchedEffect(listState) {
+    snapshotFlow { listState.layoutInfo.visibleItemsInfo }
+      .onEach { items ->
+        val postIds =
+          items
+            .filter { it.contentType == "post_item" && it.key is String }
+            .map { it.key as String }
+
+        postsScrolled(postIds)
+      }
+      .debounce(2.seconds)
+      .collect { markScrolledPostsAsRead() }
+  }
+
+  LaunchedEffect(featuredPostsPagerState) {
+    snapshotFlow { featuredPostsPagerState.settledPage }
+      .debounce(2.seconds)
+      .collect {
+        val featuredPost = featuredPosts.getOrNull(it) ?: return@collect
+
+        if (featuredPost.postWithMetadata.read) return@collect
+
+        markPostAsRead(featuredPost.postWithMetadata.id)
+      }
+  }
+
+  LaunchedEffect(featuredPosts) {
+    if (featuredPosts.isEmpty()) {
+      dynamicColorState.reset()
+    }
+  }
 
   LazyColumn(
     modifier = modifier,
@@ -106,7 +150,7 @@ internal fun PostsList(
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
           onPostSourceClick = onPostSourceClick,
-          onTogglePostReadClick = onTogglePostReadClick
+          onTogglePostReadClick = onTogglePostReadClick,
         )
       }
     }
