@@ -110,6 +110,7 @@ class RssRepository(
                   description = post.description,
                   imageUrl = post.imageUrl,
                   date = Instant.fromEpochMilliseconds(post.date),
+                  syncedAt = Clock.System.now(),
                   link = post.link,
                   commnetsLink = post.commentsLink,
                   rawContent = post.rawContent,
@@ -180,6 +181,7 @@ class RssRepository(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
   ): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
       countQuery =
@@ -188,6 +190,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
@@ -198,6 +201,7 @@ class RssRepository(
           unreadOnly = unreadOnly,
           postsAfter = after,
           numberOfFeaturedPosts = Constants.NUMBER_OF_FEATURED_POSTS,
+          lastSyncedAt = lastSyncedAt,
           limit = limit,
           offset = offset,
           mapper = {
@@ -499,10 +503,6 @@ class RssRepository(
         )
       }
     )
-  }
-
-  suspend fun hasPost(id: String): Boolean {
-    return withContext(dispatchersProvider.databaseRead) { postQueries.hasPost(id).executeAsOne() }
   }
 
   suspend fun hasFeed(id: String): Boolean {

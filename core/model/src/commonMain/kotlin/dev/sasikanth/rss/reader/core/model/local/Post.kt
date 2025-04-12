@@ -26,6 +26,7 @@ data class Post(
   val rawContent: String?,
   val imageUrl: String?,
   val date: Instant,
+  val syncedAt: Instant,
   val link: String,
   val commentsLink: String?,
   val bookmarked: Boolean,

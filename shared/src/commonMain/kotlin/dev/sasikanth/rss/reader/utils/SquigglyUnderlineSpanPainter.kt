@@ -207,7 +207,7 @@ class SquigglyUnderlineSpanPainter(
       val lineBottom = box.bottom + bottomOffset.toPx()
 
       val segmentWidth = wavelength.toPx() / SEGMENTS_PER_WAVELENGTH
-      val numOfPoints = ceil((lineEnd - lineStart) / segmentWidth).toInt() + 1
+      val numOfPoints = (ceil((lineEnd - lineStart) / segmentWidth).toInt() + 1).coerceAtLeast(0)
 
       var pointX = lineStart
       fastMapRange(0, numOfPoints) { point ->
@@ -255,10 +255,6 @@ class SquigglyUnderlineAnimator internal constructor(internal val animationProgr
 
 private fun Color?.serialize(): String {
   return if (this == null || isUnspecified) "null" else "${toArgb()}"
-}
-
-private fun String.deserializeToColor(): Color? {
-  return if (this == "null") null else Color(this.toInt())
 }
 
 private fun Color?.colorOrNull(): Color? {

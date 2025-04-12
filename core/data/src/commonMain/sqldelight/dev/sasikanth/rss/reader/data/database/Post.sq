@@ -9,6 +9,7 @@ CREATE TABLE post(
   rawContent TEXT,
   imageUrl TEXT,
   date INTEGER AS Instant NOT NULL,
+  syncedAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
@@ -69,8 +70,8 @@ BEGIN
 END;
 
 upsert:
-INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :link, :commnetsLink)
+INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, syncedAt, link, commentsLink)
+VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :syncedAt, :link, :commnetsLink)
 ON CONFLICT(id) DO
 UPDATE SET
     title = excluded.title,
@@ -86,7 +87,8 @@ WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  post.date > :postsAfter;
+  post.date > :postsAfter AND
+  post.syncedAt < :lastSyncedAt;
 
 allPosts:
 WITH featuredPosts AS (
@@ -114,7 +116,8 @@ WITH featuredPosts AS (
     post.isHidden == 0 AND
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     post.imageUrl IS NOT NULL AND
-    post.date > :postsAfter
+    post.date > :postsAfter AND
+    post.syncedAt < :lastSyncedAt
   ORDER BY post.date DESC
   LIMIT :numberOfFeaturedPosts
 )
@@ -147,7 +150,8 @@ WHERE
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   post.id NOT IN (SELECT id FROM featuredPosts) AND
-  post.date > :postsAfter
+  post.date > :postsAfter AND
+  post.syncedAt < :lastSyncedAt
 ORDER BY isFeatured DESC, date DESC
 LIMIT :limit OFFSET :offset;
 
@@ -170,9 +174,6 @@ WHERE (sourceId = :sourceId OR :sourceId IS NULL) AND date > :after;
 post:
 SELECT * FROM post
 WHERE post.id = :id;
-
-hasPost:
-SELECT EXISTS(SELECT 1 FROM post WHERE id = :id);
 
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post

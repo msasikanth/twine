@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import me.tatarka.inject.annotations.Assisted
@@ -150,7 +151,7 @@ class ReaderPresenter(
       coroutineScope.launch {
         _state.update {
           val newLoadFullArticleMap =
-            if (it.loadFullArticleMap.containsKey(postId)) {
+            if (it.loadFullArticleMap[postId] == true) {
               it.loadFullArticleMap - postId
             } else {
               it.loadFullArticleMap + Pair(postId, true)
@@ -167,6 +168,7 @@ class ReaderPresenter(
 
     private fun init() {
       coroutineScope.launch {
+        val currentTime = Clock.System.now()
         val activeSource = observableActiveSource.activeSource.firstOrNull()
         val postsType = settingsRepository.postsType.first()
 
@@ -189,6 +191,7 @@ class ReaderPresenter(
                     activeSourceIds = activeSourceIds,
                     unreadOnly = unreadOnly,
                     after = postsAfter,
+                    lastSyncedAt = currentTime,
                   )
                 }
                 is Search -> {

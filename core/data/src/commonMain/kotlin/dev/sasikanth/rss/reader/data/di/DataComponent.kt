@@ -38,7 +38,7 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
   fun providesDatabase(driver: SqlDriver): ReaderDatabase {
     return ReaderDatabase(
       driver = driver,
-      postAdapter = Post.Adapter(dateAdapter = DateAdapter),
+      postAdapter = Post.Adapter(dateAdapter = DateAdapter, syncedAtAdapter = DateAdapter),
       feedAdapter =
         Feed.Adapter(
           createdAtAdapter = DateAdapter,
