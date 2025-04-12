@@ -386,9 +386,11 @@ internal fun ReaderScreen(
               highlightsBuilder = highlightsBuilder,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
               onBookmarkClick = {
-                ReaderEvent.TogglePostBookmark(
-                  postId = readerPost.id,
-                  currentBookmarkStatus = readerPost.bookmarked
+                presenter.dispatch(
+                  ReaderEvent.TogglePostBookmark(
+                    postId = readerPost.id,
+                    currentBookmarkStatus = readerPost.bookmarked
+                  )
                 )
               },
               modifier = Modifier.fillMaxSize(),
