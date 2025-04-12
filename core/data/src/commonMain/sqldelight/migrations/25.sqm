@@ -1,0 +1,168 @@
+import kotlin.Boolean;
+import kotlinx.datetime.Instant;
+
+CREATE TABLE post_new (
+  id TEXT NOT NULL PRIMARY KEY,
+  sourceId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  rawContent TEXT,
+  imageUrl TEXT,
+  date INTEGER AS Instant NOT NULL,
+  syncedAt INTEGER AS Instant NOT NULL,
+  link TEXT NOT NULL,
+  commentsLink TEXT DEFAULT NULL,
+  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
+  read INTEGER AS Boolean NOT NULL DEFAULT 0,
+  isHidden INTEGER AS Boolean NOT NULL DEFAULT 0,
+  FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
+);
+
+INSERT INTO post_new (
+  id, sourceId, title, description, rawContent, imageUrl, date, syncedAt,
+  link, commentsLink, bookmarked, read, isHidden
+)
+SELECT
+  id, sourceId, title, description, rawContent, imageUrl, date, date,
+  link, commentsLink, bookmarked, read, isHidden
+FROM post;
+
+DROP INDEX post_source_id_index;
+DROP INDEX post_date_desc_index;
+DROP INDEX post_is_hidden_index;
+DROP INDEX post_sourceId_date_read_hidden_index;
+
+DROP TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT;
+DROP TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE;
+DROP TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE;
+DROP TRIGGER hide_posts_with_blocked_words_AFTER_INSERT;
+DROP TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE;
+DROP TRIGGER post_bookmarked;
+DROP TRIGGER post_unbookmarked;
+DROP TRIGGER post_content_update;
+DROP TRIGGER post_search_fts_BEFORE_DELETE;
+DROP TRIGGER post_search_fts_AFTER_UPDATE;
+DROP TRIGGER post_search_fts_AFTER_INSERT;
+
+DROP TABLE post;
+
+ALTER TABLE post_new RENAME TO post;
+
+CREATE INDEX post_source_id_index ON post(sourceId);
+CREATE INDEX post_date_desc_index ON post (date DESC);
+CREATE INDEX post_is_hidden_index ON post(isHidden);
+CREATE INDEX post_sourceId_date_read_hidden_index ON post(sourceId, date, read, isHidden);
+
+CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
+AFTER INSERT ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%'
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
+CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
+BEFORE UPDATE OF title, description, rawContent ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%') AND
+    new.isHidden == 0
+) IS NOT NULL
+BEGIN
+  UPDATE post SET isHidden = 1 WHERE id = new.id;
+END;
+
+CREATE TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE
+UPDATE OF title, description, rawContent ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%' OR
+    new.rawContent LIKE '%' || blockedWord.content || '%')
+) IS NULL AND old.isHidden == 1
+BEGIN
+  UPDATE post SET isHidden = 0 WHERE id = new.id;
+END;
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 1
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%' OR
+    rawContent LIKE '%' || new.content || '%') AND
+    isHidden = 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET isHidden = 0
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%' OR
+           post.rawContent LIKE '%' || blockedWord.content || '%')
+  )
+  AND isHidden = 1;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_bookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
+BEGIN
+  INSERT OR REPLACE INTO bookmark(id, sourceId, title, description, imageUrl, date, link, commentsLink, bookmarked, read, feedName, feedIcon, feedHomepageLink)
+  SELECT new.id, new.sourceId, new.title, new.description, new.imageUrl, new.date, new.link, new.commentsLink, new.bookmarked, new.read, feed.name, feed.icon, feed.homepageLink
+  FROM feed WHERE feed.id == new.sourceId;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_unbookmarked
+AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 0
+BEGIN DELETE FROM bookmark WHERE id = new.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_content_update
+AFTER UPDATE OF title, description, imageUrl, date, read ON post WHEN new.bookmarked == 1
+BEGIN
+  UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.date, commentsLink = new.commentsLink, read = new.read
+  WHERE id = new.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+BEGIN DELETE FROM post_search WHERE id = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS
+post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (new.id, new.title, new.description, new.link);
+END;
