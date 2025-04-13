@@ -131,7 +131,7 @@ internal fun PostsList(
     modifier = modifier,
     state = listState,
     contentPadding =
-      PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
+      PaddingValues(top = topContentPadding, bottom = paddingValues.calculateBottomPadding())
   ) {
     if (featuredPosts.isNotEmpty()) {
       item(contentType = "featured_items") {
