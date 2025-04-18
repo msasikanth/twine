@@ -20,7 +20,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,7 +31,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.util.lerp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
@@ -42,16 +45,30 @@ import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 internal fun FeedGroupBottomBarItem(
   feedGroup: FeedGroup,
   canShowUnreadPostsCount: Boolean,
+  dragProgress: () -> Float,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
 ) {
   Box(modifier = modifier) {
     Box(contentAlignment = Alignment.Center) {
+      val density = LocalDensity.current
       SelectionIndicator(selected = selected, animationProgress = 1f)
       Box(
         modifier =
-          Modifier.requiredSize(56.dp)
+          Modifier.layout { measurable, constraints ->
+              val size = lerp(48.dp.roundToPx(), 40.dp.roundToPx(), dragProgress.invoke())
+              val wrapperConstraints =
+                constraints.copy(
+                  minWidth = size,
+                  minHeight = size,
+                  maxWidth = size,
+                  maxHeight = size,
+                )
+              val placeable = measurable.measure(wrapperConstraints)
+
+              layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
+            }
             .clip(RoundedCornerShape(16.dp))
             .clickable { onClick() }
             .background(AppTheme.colorScheme.tintedSurface)

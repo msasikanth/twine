@@ -59,10 +59,6 @@ class MainActivity : ComponentActivity() {
         { isLightStatusBar ->
           WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
             isLightStatusBar
-        },
-        { isLightNavBar ->
-          WindowCompat.getInsetsController(window, window.decorView)
-            .isAppearanceLightNavigationBars = isLightNavBar
         }
       )
     }
