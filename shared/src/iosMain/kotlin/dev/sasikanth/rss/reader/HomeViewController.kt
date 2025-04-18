@@ -44,9 +44,6 @@ fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher): UIVi
         },
         {
           // no-op
-        },
-        {
-          // no-op
         }
       )
     }

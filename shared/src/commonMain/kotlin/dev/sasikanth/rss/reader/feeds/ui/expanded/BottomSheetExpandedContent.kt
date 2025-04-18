@@ -16,17 +16,12 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
@@ -39,9 +34,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
@@ -70,19 +63,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.ContextActionItem
-import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
-import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
-import dev.sasikanth.rss.reader.feeds.ui.BottomSheetExpandedBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
-import dev.sasikanth.rss.reader.resources.icons.Delete
-import dev.sasikanth.rss.reader.resources.icons.NewGroup
-import dev.sasikanth.rss.reader.resources.icons.Pin
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
@@ -109,7 +93,7 @@ internal fun BottomSheetExpandedContent(
   }
 
   Scaffold(
-    modifier = Modifier.fillMaxSize().consumeWindowInsets(WindowInsets.statusBars).then(modifier),
+    modifier = Modifier.consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
       SearchBar(
         query = searchQuery,
@@ -121,100 +105,7 @@ internal fun BottomSheetExpandedContent(
         }
       )
     },
-    bottomBar = {
-      Box(contentAlignment = Alignment.BottomCenter) {
-        AnimatedVisibility(
-          visible = !state.isInMultiSelectMode,
-          enter = slideInVertically { it },
-          exit = slideOutVertically { it }
-        ) {
-          BottomSheetExpandedBottomBar(
-            onNewGroupClick = { showNewGroupDialog = true },
-            onNewFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnNewFeedClicked) }
-          )
-        }
-
-        AnimatedVisibility(
-          visible = state.isInMultiSelectMode,
-          enter = slideInVertically { it },
-          exit = slideOutVertically { it }
-        ) {
-          val areGroupsSelected = state.selectedSources.any { it is FeedGroup }
-          val tooltip: @Composable (() -> Unit)? =
-            if (areGroupsSelected) {
-              { Text(text = LocalStrings.current.actionGroupsTooltip) }
-            } else {
-              null
-            }
-
-          ContextActionsBottomBar(
-            tooltip = tooltip,
-            onCancel = { feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection) }
-          ) {
-            val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
-
-            val pinActionLabel =
-              if (areSelectedFeedsPinned) LocalStrings.current.actionUnpin
-              else LocalStrings.current.actionPin
-
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.Pin,
-              label = pinActionLabel,
-              onClick = {
-                if (areSelectedFeedsPinned) {
-                  feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources)
-                } else {
-                  feedsPresenter.dispatch(FeedsEvent.PinSelectedSources)
-                }
-              }
-            )
-
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.NewGroup,
-              label = LocalStrings.current.actionAddTo,
-              enabled = !areGroupsSelected,
-              onClick = { feedsPresenter.dispatch(FeedsEvent.OnAddToGroupClicked) }
-            )
-
-            ContextActionItem(
-              modifier = Modifier.weight(1f),
-              icon = TwineIcons.Delete,
-              label = LocalStrings.current.actionDelete,
-              onClick = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
-            )
-
-            if (state.selectedSources.size == 1) {
-              val editIcon =
-                if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
-                  Icons.Filled.Edit
-                } else {
-                  Icons.Filled.Tune
-                }
-              val editLabel =
-                if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
-                  LocalStrings.current.edit
-                } else {
-                  LocalStrings.current.settings
-                }
-
-              ContextActionItem(
-                modifier = Modifier.weight(1f),
-                icon = editIcon,
-                label = editLabel,
-                onClick = {
-                  feedsPresenter.dispatch(
-                    FeedsEvent.OnEditSourceClicked(state.selectedSources.first())
-                  )
-                }
-              )
-            }
-          }
-        }
-      }
-    },
-    containerColor = AppTheme.colorScheme.tintedBackground
+    containerColor = Color.Transparent,
   ) { padding ->
     val allSources = state.sources.collectAsLazyPagingItems()
     val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()

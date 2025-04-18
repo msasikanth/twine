@@ -15,6 +15,11 @@
  */
 package dev.sasikanth.rss.reader.utils
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.gestures.AnchoredDraggableState
+import androidx.compose.foundation.gestures.DraggableAnchors
+import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.pager.PagerState
@@ -27,6 +32,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import co.touchlab.kermit.Logger
+import kotlin.math.abs
 
 @Composable
 @ReadOnlyComposable
@@ -65,4 +71,51 @@ internal fun LogCompositions(tag: String, msg: String) {
 
 fun PagerState.getOffsetFractionForPage(page: Int): Float {
   return (currentPage - page) + currentPageOffsetFraction
+}
+
+suspend fun <T> AnchoredDraggableState<T>.flingSettle(
+  velocity: Float,
+  positionalThreshold: (Float) -> Float,
+  velocityThreshold: () -> Float,
+) {
+  val targetValue =
+    anchors.computeTarget(
+      currentOffset = requireOffset(),
+      velocity = velocity,
+      positionalThreshold,
+      velocityThreshold
+    )
+
+  animateTo(targetValue, spring(stiffness = Spring.StiffnessMedium))
+}
+
+private fun <T> DraggableAnchors<T>.computeTarget(
+  currentOffset: Float,
+  velocity: Float,
+  positionalThreshold: (totalDistance: Float) -> Float,
+  velocityThreshold: () -> Float
+): T {
+  val currentAnchors = this
+  require(!currentOffset.isNaN()) { "The offset provided to computeTarget must not be NaN." }
+  val isMoving = abs(velocity) > 0.0f
+  val isMovingForward = isMoving && velocity > 0f
+  // When we're not moving, pick the closest anchor and don't consider directionality
+  return if (!isMoving) {
+    currentAnchors.closestAnchor(currentOffset)!!
+  } else if (abs(velocity) >= abs(velocityThreshold())) {
+    currentAnchors.closestAnchor(currentOffset, searchUpwards = isMovingForward)!!
+  } else {
+    val left = currentAnchors.closestAnchor(currentOffset, false)!!
+    val leftAnchorPosition = currentAnchors.positionOf(left)
+    val right = currentAnchors.closestAnchor(currentOffset, true)!!
+    val rightAnchorPosition = currentAnchors.positionOf(right)
+    val distance = abs(leftAnchorPosition - rightAnchorPosition)
+    val relativeThreshold = abs(positionalThreshold(distance))
+    val closestAnchorFromStart = if (isMovingForward) leftAnchorPosition else rightAnchorPosition
+    val relativePosition = abs(closestAnchorFromStart - currentOffset)
+    when (relativePosition >= relativeThreshold) {
+      true -> if (isMovingForward) right else left
+      false -> if (isMovingForward) left else right
+    }
+  }
 }
