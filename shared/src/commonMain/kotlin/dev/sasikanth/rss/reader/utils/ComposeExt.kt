@@ -89,7 +89,7 @@ suspend fun <T> AnchoredDraggableState<T>.flingSettle(
   animateTo(targetValue, spring(stiffness = Spring.StiffnessMedium))
 }
 
-private fun <T> DraggableAnchors<T>.computeTarget(
+internal fun <T> DraggableAnchors<T>.computeTarget(
   currentOffset: Float,
   velocity: Float,
   positionalThreshold: (totalDistance: Float) -> Float,

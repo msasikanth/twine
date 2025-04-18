@@ -22,12 +22,13 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.gestures.animateTo
+import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
+import androidx.compose.foundation.gestures.snapping.snapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -71,17 +72,17 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
-import co.touchlab.kermit.Logger
 import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.utils.computeTarget
 import dev.sasikanth.rss.reader.utils.flingSettle
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 
@@ -119,10 +120,6 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           FeedsSheetDragValue.Collapsed at 0f
           FeedsSheetDragValue.Expanded at with(density) { targetSheetHeight.toPx() }
         },
-      positionalThreshold = { totalDistance: Float ->  totalDistance * 0.5f },
-      velocityThreshold = { with(density) { 200.dp.toPx() } },
-      snapAnimationSpec = spring(stiffness = Spring.StiffnessMedium),
-      decayAnimationSpec = decayAnimationSpec
     )
   }
   val dragProgress =
@@ -176,10 +173,23 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
       distance * 0.25f
     }
   }
-  val velocityThreshold = { with(density) { 125.dp.toPx() } }
+  val velocityThreshold = { with(density) { 64.dp.toPx() } }
 
   val bottomSheetColor = AppTheme.colorScheme.bottomSheet
   val bottomSheetBorderColor = AppTheme.colorScheme.bottomSheetBorder
+  val snapFlingBehavior =
+    remember(density) {
+      snapFlingBehavior(
+        decayAnimationSpec = decayAnimationSpec,
+        snapAnimationSpec = spring(stiffness = Spring.StiffnessMedium),
+        snapLayoutInfoProvider =
+          AnchoredDraggableLayoutInfoProvider(
+            state = dragState,
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+          )
+      )
+    }
 
   Box(
     modifier =
@@ -222,6 +232,7 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           state = dragState,
           reverseDirection = true,
           orientation = Orientation.Vertical,
+          flingBehavior = snapFlingBehavior,
         )
         .semantics {
           if (dragState.anchors.size > 1) {
@@ -239,18 +250,12 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           }
         }
         .then(modifier)
+        .align(Alignment.BottomCenter)
         .graphicsLayer {
-          shape =
-            RoundedCornerShape(
-              BOTTOM_SHEET_CORNER_SIZE * EaseInCirc.transform(dragProgress.inverse())
-            )
-          clip = true
-
           val overshootScale = overshootAnimation.value.second
           scaleX = overshootScale
           scaleY = overshootScale
         }
-        .align(Alignment.BottomCenter)
         .dropShadow(
           shape = RoundedCornerShape(50),
           offsetY = 16.dp,
@@ -263,6 +268,13 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           blur = 8.dp,
           color = shadowColor2
         )
+        .graphicsLayer {
+          shape =
+            RoundedCornerShape(
+              BOTTOM_SHEET_CORNER_SIZE * EaseInCirc.transform(dragProgress.inverse())
+            )
+          clip = true
+        }
         .drawBehind {
           val cornerRadiusDp =
             BOTTOM_SHEET_CORNER_SIZE * EaseInCirc.transform(dragProgress.inverse())
@@ -398,3 +410,24 @@ private val OvershootToVector: TwoWayConverter<Pair<Dp, Float>, AnimationVector2
     convertToVector = { AnimationVector2D(it.first.value, it.second) },
     convertFromVector = { Pair(Dp(it.v1), it.v2) }
   )
+
+@Suppress("FunctionName")
+private fun <T> AnchoredDraggableLayoutInfoProvider(
+  state: AnchoredDraggableState<T>,
+  positionalThreshold: (totalDistance: Float) -> Float,
+  velocityThreshold: () -> Float
+): SnapLayoutInfoProvider =
+  object : SnapLayoutInfoProvider {
+
+    override fun calculateSnapOffset(velocity: Float): Float {
+      val currentOffset = state.requireOffset()
+      val target =
+        state.anchors.computeTarget(
+          currentOffset = currentOffset,
+          velocity = velocity,
+          positionalThreshold = positionalThreshold,
+          velocityThreshold = velocityThreshold
+        )
+      return state.anchors.positionOf(target) - currentOffset
+    }
+  }
