@@ -122,15 +122,17 @@ internal fun HomeScreen(
         )
       },
       bottomBar = {
-        FeedsBottomBar(
-          darkTheme = darkTheme,
-          feedsPresenter = homePresenter.feedsPresenter,
-          feedsSheetDragValue = state.feedsSheetState,
-          onBottomBarStateChanged = {
-            onBottomSheetStateChanged.invoke(it)
-            homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
-          },
-        )
+        AppTheme(useDarkTheme = true) {
+          FeedsBottomBar(
+            darkTheme = darkTheme,
+            feedsPresenter = homePresenter.feedsPresenter,
+            feedsSheetDragValue = state.feedsSheetState,
+            onBottomBarStateChanged = {
+              onBottomSheetStateChanged.invoke(it)
+              homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+            },
+          )
+        }
       }
     ) { innerPadding ->
       Box(modifier = Modifier.fillMaxSize()) {
