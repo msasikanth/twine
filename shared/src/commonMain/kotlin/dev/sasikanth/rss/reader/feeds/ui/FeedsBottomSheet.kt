@@ -72,11 +72,13 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
+import androidx.compose.ui.util.lerp
 import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.computeTarget
 import dev.sasikanth.rss.reader.utils.flingSettle
@@ -118,7 +120,7 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
       anchors =
         DraggableAnchors {
           FeedsSheetDragValue.Collapsed at 0f
-          FeedsSheetDragValue.Expanded at with(density) { targetSheetHeight.toPx() }
+          FeedsSheetDragValue.Expanded at with(density) { targetSheetHeight.toPx().unaryMinus() }
         },
     )
   }
@@ -193,9 +195,10 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
 
   Box(
     modifier =
-      Modifier.fillMaxWidth()
-        .layout { measurable, constraints ->
-          val sheetHeight = dragState.requireOffset().coerceAtLeast(collapsedSheetHeight.toPx())
+      Modifier.layout { measurable, constraints ->
+          val sheetHeight =
+            lerp(start = collapsedSheetHeight, stop = targetSheetHeight, fraction = dragProgress)
+              .toPx()
           val sheetHorizontalPadding =
             lerp(
               start = 32.dp,
@@ -205,6 +208,7 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
 
           val overshootHeight = overshootAnimation.value.first
           val minTargetHeight = sheetHeight.roundToInt()
+
           val paddedConstraints =
             constraints
               .offset(
@@ -214,7 +218,12 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
               .copy(minHeight = minTargetHeight, maxHeight = minTargetHeight)
 
           val placeable = measurable.measure(paddedConstraints)
-          val layoutWidth = placeable.width + sheetHorizontalPadding.roundToPx() * 2
+          val layoutWidth =
+            lerp(
+              start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
+              stop = constraints.maxWidth,
+              fraction = dragProgress,
+            ) + sheetHorizontalPadding.roundToPx() * 2
           val layoutHeight = placeable.height + overshootHeight.roundToPx()
 
           layout(layoutWidth, layoutHeight) {
@@ -230,7 +239,6 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
         )
         .anchoredDraggable(
           state = dragState,
-          reverseDirection = true,
           orientation = Orientation.Vertical,
           flingBehavior = snapFlingBehavior,
         )
@@ -302,10 +310,10 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
     Column {
       BottomSheetHandle(progress = dragProgress)
 
-      //      BottomSheetExpandedContent(
-      //        modifier = Modifier.graphicsLayer { alpha = dragProgress },
-      //        feedsPresenter = feedsPresenter
-      //      )
+      BottomSheetExpandedContent(
+        modifier = Modifier.graphicsLayer { alpha = dragProgress },
+        feedsPresenter = feedsPresenter
+      )
     }
 
     val contentBottomPadding = lerp(24.dp, 32.dp, dragProgress)
