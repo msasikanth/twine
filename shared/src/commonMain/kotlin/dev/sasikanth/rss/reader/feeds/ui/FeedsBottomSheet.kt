@@ -45,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.collapse
@@ -307,11 +309,23 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           )
         },
   ) {
-    Column {
-      BottomSheetHandle(progress = dragProgress)
+    Column(modifier = Modifier.fillMaxWidth()) {
+      BottomSheetHandle(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        progress = dragProgress
+      )
 
+      val touchInterceptor by derivedStateOf {
+        if (dragProgress >= 0f && dragProgress < 1f) {
+          Modifier.pointerInput(Unit) {
+            // Consume any touches
+          }
+        } else {
+          Modifier
+        }
+      }
       BottomSheetExpandedContent(
-        modifier = Modifier.graphicsLayer { alpha = dragProgress },
+        modifier = Modifier.then(touchInterceptor).graphicsLayer { alpha = dragProgress },
         feedsPresenter = feedsPresenter
       )
     }
