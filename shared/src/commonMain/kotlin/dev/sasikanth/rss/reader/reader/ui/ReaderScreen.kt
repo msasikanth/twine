@@ -517,7 +517,7 @@ private fun ReaderPage(
           )
         }
 
-        if (readerProcessingProgress != ReaderProcessingProgress.Idle) {
+        if (readerProcessingProgress == ReaderProcessingProgress.Loading) {
           item(key = "progress-indicator") { ProgressIndicator() }
         }
 
