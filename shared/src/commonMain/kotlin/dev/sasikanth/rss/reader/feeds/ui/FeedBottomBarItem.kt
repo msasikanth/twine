@@ -55,7 +55,7 @@ internal fun FeedBottomBarItem(
 ) {
   Box(modifier = modifier) {
     Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected, animationProgress = 1f)
+      SelectionIndicator(selected = selected, animationProgress = dragProgress.invoke())
       val showFeedFavIcon = LocalShowFeedFavIconSetting.current
       val feedIcon = if (showFeedFavIcon) homePageUrl else feedIconUrl
 

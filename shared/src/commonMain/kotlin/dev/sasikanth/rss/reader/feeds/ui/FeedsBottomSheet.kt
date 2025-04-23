@@ -85,8 +85,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.computeTarget
 import dev.sasikanth.rss.reader.utils.flingSettle
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 
@@ -147,8 +147,8 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
       isOvershootAnimationTriggered = false
     } else if (
       dragState.targetValue == FeedsSheetDragValue.Collapsed &&
-        dragProgress < 0.1f &&
-        !isOvershootAnimationTriggered
+      dragProgress < 0.1f &&
+      !isOvershootAnimationTriggered
     ) {
       overshootAnimation.snapTo(targetValue = Pair(0.dp, dragProgress.coerceAtLeast(0.8f)))
 
@@ -198,40 +198,40 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
   Box(
     modifier =
       Modifier.layout { measurable, constraints ->
-          val sheetHeight =
-            lerp(start = collapsedSheetHeight, stop = targetSheetHeight, fraction = dragProgress)
-              .toPx()
-          val sheetHorizontalPadding =
-            lerp(
-              start = 32.dp,
-              stop = 0.dp,
-              fraction = dragProgress,
+        val sheetHeight =
+          lerp(start = collapsedSheetHeight, stop = targetSheetHeight, fraction = dragProgress)
+            .toPx()
+        val sheetHorizontalPadding =
+          lerp(
+            start = 32.dp,
+            stop = 0.dp,
+            fraction = dragProgress,
+          )
+
+        val overshootHeight = overshootAnimation.value.first
+        val minTargetHeight = sheetHeight.roundToInt()
+
+        val paddedConstraints =
+          constraints
+            .offset(
+              horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
+              vertical = overshootAnimation.value.first.roundToPx().unaryMinus()
             )
+            .copy(minHeight = minTargetHeight, maxHeight = minTargetHeight)
 
-          val overshootHeight = overshootAnimation.value.first
-          val minTargetHeight = sheetHeight.roundToInt()
+        val placeable = measurable.measure(paddedConstraints)
+        val layoutWidth =
+          lerp(
+            start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
+            stop = constraints.maxWidth,
+            fraction = dragProgress,
+          ) + sheetHorizontalPadding.roundToPx() * 2
+        val layoutHeight = placeable.height + overshootHeight.roundToPx()
 
-          val paddedConstraints =
-            constraints
-              .offset(
-                horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
-                vertical = overshootAnimation.value.first.roundToPx().unaryMinus()
-              )
-              .copy(minHeight = minTargetHeight, maxHeight = minTargetHeight)
-
-          val placeable = measurable.measure(paddedConstraints)
-          val layoutWidth =
-            lerp(
-              start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
-              stop = constraints.maxWidth,
-              fraction = dragProgress,
-            ) + sheetHorizontalPadding.roundToPx() * 2
-          val layoutHeight = placeable.height + overshootHeight.roundToPx()
-
-          layout(layoutWidth, layoutHeight) {
-            placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
-          }
+        layout(layoutWidth, layoutHeight) {
+          placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
         }
+      }
         .nestedScroll(
           ConsumeBottomSheetContentNestedScrollConnection(
             dragState = dragState,
@@ -324,6 +324,7 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
           Modifier
         }
       }
+      
       BottomSheetExpandedContent(
         modifier = Modifier.then(touchInterceptor).graphicsLayer { alpha = dragProgress },
         feedsPresenter = feedsPresenter
@@ -348,9 +349,16 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
               selected = feedsState.activeSource?.id == source.id,
               dragProgress = { dragProgress },
-              onClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(source)) }
+              onClick = {
+                if (dragState.settledValue == FeedsSheetDragValue.Expanded) {
+//                  feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(source))
+                } else {
+                  feedsPresenter.dispatch(FeedsEvent.OnSourceClick(source))
+                }
+              }
             )
           }
+
           is Feed -> {
             FeedBottomBarItem(
               badgeCount = source.numberOfUnreadPosts,
@@ -358,7 +366,13 @@ internal fun BoxWithConstraintsScope.FeedsBottomBar(
               feedIconUrl = source.icon,
               canShowUnreadPostsCount = feedsState.canShowUnreadPostsCount,
               dragProgress = { dragProgress },
-              onClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(source)) },
+              onClick = {
+                if (dragState.settledValue == FeedsSheetDragValue.Expanded) {
+                  feedsPresenter.dispatch(FeedsEvent.OnFeedPinClicked(source))
+                } else {
+                  feedsPresenter.dispatch(FeedsEvent.OnSourceClick(source))
+                }
+              },
               selected = feedsState.activeSource?.id == source.id
             )
           }

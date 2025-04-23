@@ -114,6 +114,7 @@ internal fun HomeScreen(
           listState = listState,
           hasFeeds = hasFeeds,
           hasUnreadPosts = state.hasUnreadPosts,
+          currentDateTime = state.currentDateTime,
           onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
           onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
           onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },

@@ -32,7 +32,6 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
@@ -82,7 +81,6 @@ class FeedsPresenter(
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
-  @Assisted private val openGroupScreen: (groupId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -112,7 +110,9 @@ class FeedsPresenter(
       is FeedsEvent.OnEditSourceClicked -> {
         when (val source = event.source) {
           is Feed -> openFeedInfoSheet(source.id)
-          is FeedGroup -> openGroupScreen(source.id)
+          is FeedGroup -> {
+            // TODO
+          }
           else -> {
             throw IllegalArgumentException("Unknown source: $source")
           }
@@ -162,7 +162,6 @@ class FeedsPresenter(
         is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
-        FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
         FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
         FeedsEvent.DeleteSelectedSourcesClicked -> onDeleteSelectedSourcesClicked()
@@ -226,6 +225,8 @@ class FeedsPresenter(
       coroutineScope.launch {
         if (_state.value.activeSource?.id != source.id) {
           observableActiveSource.changeActiveSource(source)
+        } else {
+          observableActiveSource.clearSelection()
         }
 
         effects.emit(FeedsEffect.SelectedFeedChanged)
@@ -255,20 +256,6 @@ class FeedsPresenter(
 
     private fun onHomeSelected() {
       coroutineScope.launch { observableActiveSource.clearSelection() }
-    }
-
-    private fun onChangeFeedsViewModeClick() {
-      val newFeedsViewMode =
-        when (_state.value.feedsViewMode) {
-          FeedsViewMode.Grid -> FeedsViewMode.List
-          FeedsViewMode.List -> FeedsViewMode.Grid
-        }
-
-      coroutineScope.launch {
-        withContext(dispatchersProvider.io) {
-          settingsRepository.updateFeedsViewMode(newFeedsViewMode)
-        }
-      }
     }
 
     private fun onFeedSortOrderChanged(feedsOrderBy: FeedsOrderBy) {
@@ -358,10 +345,6 @@ class FeedsPresenter(
     }
 
     private fun observePreferences() {
-      settingsRepository.feedsViewMode
-        .onEach { feedsViewMode -> _state.update { it.copy(feedsViewMode = feedsViewMode) } }
-        .launchIn(coroutineScope)
-
       settingsRepository.feedsSortOrder
         .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
         .launchIn(coroutineScope)
