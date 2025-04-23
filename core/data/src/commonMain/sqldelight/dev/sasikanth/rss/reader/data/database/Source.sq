@@ -115,14 +115,12 @@ WITH feed_group_metadata AS (
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
-      LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
-      LIMIT 4
     ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
