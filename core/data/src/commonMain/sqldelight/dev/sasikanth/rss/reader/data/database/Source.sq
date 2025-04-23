@@ -111,6 +111,12 @@ WITH feed_group_metadata AS (
       WHERE gf.feedGroupId = distinct_groups.feedGroupId
     ) AS feedIds,
     COALESCE((
+      SELECT GROUP_CONCAT(f.name)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+    ), '') AS feedNames,
+    COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
@@ -138,6 +144,7 @@ SELECT
   lastCleanUpAt,
   numberOfUnreadPosts,
   feedIds,
+  feedNames,
   feedHomepageLinks,
   feedIcons,
   updatedAt
@@ -153,6 +160,7 @@ FROM (
     f.lastCleanUpAt,
     COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
+    NULL AS feedNames,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
     f.createdAt,
@@ -175,6 +183,7 @@ FROM (
     NULL AS lastCleanUpAt,
     COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fgm.feedIds,
+    fgm.feedNames,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
     fg.createdAt,
@@ -186,6 +195,7 @@ FROM (
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   GROUP BY fg.id
 )
+-- Order by groups first and then followed by feeds --
 ORDER BY type DESC,
   CASE WHEN :orderBy = 'latest' THEN createdAt END DESC,
   CASE WHEN :orderBy = 'oldest' THEN createdAt END ASC,
