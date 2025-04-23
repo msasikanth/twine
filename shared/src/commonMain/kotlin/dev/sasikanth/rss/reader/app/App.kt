@@ -40,7 +40,6 @@ import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetDragValue
-import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
@@ -169,11 +168,6 @@ fun App(
             is Screen.AddFeed -> {
               AppTheme(useDarkTheme = true) {
                 AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-              }
-            }
-            is Screen.GroupDetails -> {
-              AppTheme(useDarkTheme = true) {
-                GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
             is Screen.BlockedWords -> {

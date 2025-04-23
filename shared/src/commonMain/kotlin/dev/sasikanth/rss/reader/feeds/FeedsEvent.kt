@@ -42,8 +42,6 @@ sealed interface FeedsEvent {
 
   data class OnFeedSortOrderChanged(val feedsOrderBy: FeedsOrderBy) : FeedsEvent
 
-  data object OnChangeFeedsViewModeClick : FeedsEvent
-
   data object TogglePinnedSection : FeedsEvent
 
   data object OnHomeSelected : FeedsEvent
