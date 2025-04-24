@@ -12,34 +12,14 @@ user interface and experience to browse through the feeds, and supports Material
 <a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
 <a href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us;releaseDate=1694390400" alt="Download on the App Store" width="200px"></a>
 
-## Screenshots
+## Images
+<img src="readme_images/banner.png" alt="banner" />
 
-### Light
 <p style="text-align: center;">
-  <img src="readme_images/light/home_screen.png" width="250" alt="Home screen"/>
-  <img src="readme_images/light/home_screen_filters.png" width="250" alt="Home screen filters"/>
-  <img src="readme_images/light/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
-  <img src="readme_images/light/reader_screen.png" width="250" alt="Reader screen"/>
-  <img src="readme_images/light/search_screen.png" width="250" alt="Search screen"/>
-  <img src="readme_images/light/settings_1.png" width="250" alt="Settings screen 1"/>
-  <img src="readme_images/light/settings_2.png" width="250" alt="Settings screen 2"/>
-  <img src="readme_images/light/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
-  <img src="readme_images/light/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
-  <img src="readme_images/light/add_feed.png" width="250" alt="Add feed screen"/>
-</p>
-
-### Dark
-<p style="text-align: center;">
-  <img src="readme_images/dark/home_screen.png" width="250" alt="Home screen"/>
-  <img src="readme_images/dark/home_screen_filters.png" width="250" alt="Home screen filters"/>
-  <img src="readme_images/dark/home_screen_scrolled.png" width="250" alt="Home screen scrolled"/>
-  <img src="readme_images/dark/reader_screen.png" width="250" alt="Reader screen"/>
-  <img src="readme_images/dark/search_screen.png" width="250" alt="Search screen"/>
-  <img src="readme_images/dark/settings_1.png" width="250" alt="Settings screen 1"/>
-  <img src="readme_images/dark/settings_2.png" width="250" alt="Settings screen 2"/>
-  <img src="readme_images/dark/expanded_bottom_sheet_feed_1.png" width="250" alt="Expanded feeds sheet 1"/>
-  <img src="readme_images/dark/expanded_bottom_sheet_feed_2.png" width="250" alt="Expanded feeds sheet 2"/>
-  <img src="readme_images/dark/add_feed.png" width="250" alt="Add feed screen"/>
+  <img src="readme_images/home.png" width="250" alt="Home screen"/>
+  <img src="readme_images/reader.png" width="250" alt="Reader screen"/>
+  <img src="readme_images/search.png" width="250" alt="Search screen"/>
+  <img src="readme_images/feed_management.png" width="250" alt="Feed management screen"/>
 </p>
 
 ## Features ✨
