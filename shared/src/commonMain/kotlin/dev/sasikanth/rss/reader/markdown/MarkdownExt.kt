@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.markdown
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -133,6 +134,7 @@ internal fun handleElement(
         }
 
         MarkdownText(
+          modifier = Modifier.fillMaxWidth(),
           content = styledText,
           style = bodyTextStyle.copy(color = AppTheme.colorScheme.onSurface)
         )

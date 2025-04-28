@@ -101,7 +101,6 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemKey
 import com.adamglin.composeshadow.dropShadow
-import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
@@ -114,7 +113,6 @@ import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
-import com.mikepenz.markdown.compose.elements.MarkdownImage
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.Input
@@ -132,6 +130,8 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
+import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
+import dev.sasikanth.rss.reader.markdown.handleElement
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenter
@@ -155,7 +155,6 @@ import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-import dev.sasikanth.rss.reader.utils.handleElement
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.flow.collectLatest
@@ -454,11 +453,6 @@ private fun ReaderPage(
           highlights = highlightsBuilder
         )
       },
-      image = { im ->
-        Box(modifier = Modifier.clip(MaterialTheme.shapes.extraLarge)) {
-          MarkdownImage(im.content, im.node)
-        }
-      }
     )
   }
 
@@ -480,7 +474,7 @@ private fun ReaderPage(
       LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
       LocalMarkdownPadding provides markdownPadding(),
       LocalMarkdownDimens provides markdownDimens(),
-      LocalImageTransformer provides Coil3ImageTransformerImpl,
+      LocalImageTransformer provides CoilMarkdownTransformer,
       LocalMarkdownAnnotator provides markdownAnnotator(),
       LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
       LocalMarkdownAnimations provides markdownAnimations(),
