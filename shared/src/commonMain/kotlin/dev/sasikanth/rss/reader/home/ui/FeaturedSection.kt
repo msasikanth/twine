@@ -335,6 +335,7 @@ private fun FeaturedSectionBlurredBackground(
           shape = RectangleShape
           clip = false
         }
+        .then(modifier)
         .drawWithContent {
           drawContent()
 
@@ -342,8 +343,7 @@ private fun FeaturedSectionBlurredBackground(
             color = overlayColor,
             blendMode = BlendMode.Luminosity,
           )
-        }
-        .then(modifier),
+        },
     contentDescription = null,
     contentScale = ContentScale.Crop,
     size = Size(128, 128),
