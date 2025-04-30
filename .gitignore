@@ -25,5 +25,6 @@ androidApp/release
 .idea/assetWizardSettings.xml
 .idea/modules.xml
 .idea/appInsightsSettings.xml
+.idea/shelf
 gradle.xml
 *.iml
