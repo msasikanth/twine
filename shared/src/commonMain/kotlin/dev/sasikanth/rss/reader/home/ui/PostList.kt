@@ -127,12 +127,6 @@ internal fun PostsList(
       }
   }
 
-  LaunchedEffect(featuredPosts) {
-    if (featuredPosts.isEmpty()) {
-      dynamicColorState.reset()
-    }
-  }
-
   LazyColumn(
     modifier = modifier,
     state = listState,

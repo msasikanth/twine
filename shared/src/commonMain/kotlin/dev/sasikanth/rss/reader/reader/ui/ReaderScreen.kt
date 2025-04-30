@@ -146,10 +146,9 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
-import dev.sasikanth.rss.reader.ui.darkAppColorScheme
-import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
@@ -184,10 +183,12 @@ internal fun ReaderScreen(
   val linkHandler = LocalLinkHandler.current
   val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
   val seedColorExtractor = LocalSeedColorExtractor.current
+  // Using theme colors as default from the home screen
+  // before we create dynamic content theme
   val dynamicColorState =
     rememberDynamicColorState(
-      defaultLightAppColorScheme = lightAppColorScheme(),
-      defaultDarkAppColorScheme = darkAppColorScheme(),
+      defaultLightAppColorScheme = LocalAppColorScheme.current,
+      defaultDarkAppColorScheme = LocalAppColorScheme.current,
       useTonalSpotScheme = true,
     )
   val defaultSeedColor = AppTheme.colorScheme.tintedForeground
@@ -330,9 +331,9 @@ internal fun ReaderScreen(
         },
         bottomBar = {
           val readerPost =
-            if (posts.itemCount > 0) {
+            try {
               posts[pagerState.settledPage]
-            } else {
+            } catch (e: IndexOutOfBoundsException) {
               null
             }
 
