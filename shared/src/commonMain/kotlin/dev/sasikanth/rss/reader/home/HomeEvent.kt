@@ -18,10 +18,10 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.SheetValue
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetDragValue
 
 sealed interface HomeEvent {
 
@@ -33,7 +33,7 @@ sealed interface HomeEvent {
 
   data class OnPostSourceClicked(val feedId: String) : HomeEvent
 
-  data class FeedsSheetStateChanged(val feedsSheetState: SheetValue) : HomeEvent
+  data class FeedsSheetStateChanged(val feedsSheetState: FeedsSheetDragValue) : HomeEvent
 
   data object OnHomeSelected : HomeEvent
 
