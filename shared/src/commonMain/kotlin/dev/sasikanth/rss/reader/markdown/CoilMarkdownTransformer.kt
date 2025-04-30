@@ -38,9 +38,9 @@ object CoilMarkdownTransformer : ImageTransformer {
         ImageData(
           painter = it,
           modifier =
-            Modifier.fillMaxWidth().padding(vertical = 8.dp).clip(MaterialTheme.shapes.small),
+            Modifier.fillMaxWidth().padding(vertical = 8.dp).clip(MaterialTheme.shapes.large),
           alignment = Alignment.Center,
-          contentScale = ContentScale.FillWidth,
+          contentScale = ContentScale.Crop,
         )
       }
   }
