@@ -27,6 +27,7 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -39,8 +40,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.getLast24HourStart
-import dev.sasikanth.rss.reader.utils.getTodayStartInstant
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -58,7 +58,13 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -127,6 +133,11 @@ class HomePresenter(
       backHandler.register(backCallback)
       backCallback.isEnabled = false
     }
+
+    lifecycle.doOnResume {
+      val currentDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+      dispatch(HomeEvent.UpdateCurrentDateTime(currentDateTime))
+    }
   }
 
   fun dispatch(event: HomeEvent) {
@@ -156,12 +167,16 @@ class HomePresenter(
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
     private val scrolledPostItems = mutableSetOf<String>()
 
-    private val _state = MutableStateFlow(HomeState.DEFAULT)
+    private val defaultState =
+      HomeState.default(
+        currentDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+      )
+    private val _state = MutableStateFlow(defaultState)
     val state: StateFlow<HomeState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = HomeState.DEFAULT
+        initialValue = defaultState
       )
 
     init {
@@ -195,7 +210,12 @@ class HomePresenter(
         is HomeEvent.OnPostItemsScrolled -> onPostItemsScrolled(event.postIds)
         HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
+        is HomeEvent.UpdateCurrentDateTime -> updateCurrentDateTime(event.dateTime)
       }
+    }
+
+    private fun updateCurrentDateTime(dateTime: LocalDateTime) {
+      coroutineScope.launch { _state.update { it.copy(currentDateTime = dateTime) } }
     }
 
     private fun markFeaturedPostAsRead(postId: String) {
@@ -225,7 +245,7 @@ class HomePresenter(
 
     private fun markPostsAsRead(source: Source?) {
       coroutineScope.launch {
-        val postsAfter = getPostsAfter(_state.value.postsType)
+        val postsAfter = postsThresholdTime(_state.value.postsType)
 
         when (source) {
           is Feed -> {
@@ -287,7 +307,7 @@ class HomePresenter(
           Pair(activeSource, postsType)
         }
         .flatMapLatest { (activeSource, postsType) ->
-          val postsAfter = getPostsAfter(postsType)
+          val postsAfter = postsThresholdTime(postsType)
           val activeSourceIds = activeSourceIds(activeSource)
 
           rssRepository.hasUnreadPostsInSource(
@@ -314,8 +334,8 @@ class HomePresenter(
           }
         }
         .onEach { (activeSource, postsType) ->
-          val unreadOnly = getUnreadOnly(postsType)
-          val postsAfter = getPostsAfter(postsType)
+          val unreadOnly = shouldGetUnreadPostsOnly(postsType)
+          val postsAfter = postsThresholdTime(postsType)
           val activeSourceIds = activeSourceIds(activeSource)
 
           val posts =
@@ -334,25 +354,28 @@ class HomePresenter(
         .launchIn(coroutineScope)
     }
 
-    private fun getPostsAfter(postsType: PostsType) =
-      when (postsType) {
+    private fun postsThresholdTime(postsType: PostsType): Instant {
+      val currentDateTime = _state.value.currentDateTime
+      return when (postsType) {
         PostsType.ALL,
         PostsType.UNREAD -> Instant.DISTANT_PAST
         PostsType.TODAY -> {
-          getTodayStartInstant()
+          currentDateTime.date.atStartOfDayIn(TimeZone.currentSystemDefault())
         }
         PostsType.LAST_24_HOURS -> {
-          getLast24HourStart()
+          currentDateTime.toInstant(TimeZone.currentSystemDefault()).minus(24.hours)
         }
       }
+    }
 
-    private fun getUnreadOnly(postsType: PostsType) =
-      when (postsType) {
+    private fun shouldGetUnreadPostsOnly(postsType: PostsType): Boolean? {
+      return when (postsType) {
+        PostsType.UNREAD -> true
         PostsType.ALL,
         PostsType.TODAY,
         PostsType.LAST_24_HOURS -> null
-        PostsType.UNREAD -> true
       }
+    }
 
     private fun activeSourceIds(activeSource: Source?) =
       when (activeSource) {
