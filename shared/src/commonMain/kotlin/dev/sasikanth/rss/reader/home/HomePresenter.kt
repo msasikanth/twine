@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -295,7 +296,10 @@ class HomePresenter(
       val activeSourceFlow = observableActiveSource.activeSource
       val postsTypeFlow = settingsRepository.postsType
 
-      observePosts(activeSourceFlow, postsTypeFlow)
+      _state
+        .distinctUntilChangedBy { it.currentDateTime }
+        .onEach { observePosts(activeSourceFlow, postsTypeFlow) }
+        .launchIn(coroutineScope)
 
       rssRepository
         .hasFeeds()
