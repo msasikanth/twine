@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -30,7 +29,6 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
@@ -41,30 +39,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import coil3.size.Size
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
-import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
@@ -150,9 +151,9 @@ internal fun FeaturedSection(
     val contentPadding =
       remember(systemBarsHorizontalPadding, paddingValues) {
         PaddingValues(
-          start = systemBarsHorizontalPadding + 24.dp,
+          start = systemBarsHorizontalPadding,
           top = 8.dp + paddingValues.calculateTopPadding(),
-          end = systemBarsHorizontalPadding + 24.dp,
+          end = systemBarsHorizontalPadding,
           bottom = 24.dp
         )
       }
@@ -161,7 +162,6 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      pageSpacing = 16.dp,
       flingBehavior =
         PagerDefaults.flingBehavior(
           state = pagerState,
@@ -186,7 +186,7 @@ internal fun FeaturedSection(
                   placeable.place(0, topPadding.unaryMinus())
                 }
               },
-            state = pagerState,
+            pagerState = pagerState,
             page = page,
             featuredPost = featuredPost,
             useDarkTheme = useDarkTheme,
@@ -194,6 +194,7 @@ internal fun FeaturedSection(
 
           val postWithMetadata = featuredPost.postWithMetadata
           FeaturedPostItem(
+            modifier = Modifier.padding(horizontal = 24.dp),
             item = postWithMetadata,
             page = page,
             pagerState = pagerState,
@@ -231,9 +232,10 @@ internal fun FeaturedSection(
   }
 }
 
+@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 private fun FeaturedSectionBackground(
-  state: PagerState,
+  pagerState: PagerState,
   page: Int,
   featuredPost: FeaturedPostItem,
   useDarkTheme: Boolean,
@@ -270,84 +272,51 @@ private fun FeaturedSectionBackground(
         Modifier
       }
 
-    val swipeTransitionModifier =
-      Modifier.requiredHeightIn(max = 600.dp)
-        .aspectRatio(1f)
-        .graphicsLayer {
-          val pageOffset = state.getOffsetFractionForPage(page)
-          val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
-          val backgroundAlpha = FastOutSlowInEasing.transform(offsetAbsolute.inverse())
-
-          alpha = backgroundAlpha
-          translationX = size.width * pageOffset
+    val overlayColor = AppTheme.colorScheme.inversePrimary
+    val colorMatrix =
+      remember(useDarkTheme) {
+        ColorMatrix().apply {
+          val sat = if (useDarkTheme) 1f else 5f
+          setToSaturation(sat)
         }
-        .then(gradientOverlayModifier)
+      }
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    if (canBlurImage) {
-      FeaturedSectionBlurredBackground(
-        post = featuredPost,
-        darkTheme = useDarkTheme,
-        modifier = swipeTransitionModifier
-      )
-    } else {
-      FeaturedSectionGradientBackground(modifier = swipeTransitionModifier)
-    }
-  }
-}
+    AsyncImage(
+      url = featuredPost.postWithMetadata.imageUrl!!,
+      modifier =
+        Modifier.fillMaxWidth()
+          .aspectRatio(1f)
+          .graphicsLayer {
+            val pageOffset = pagerState.getOffsetFractionForPage(page)
+            val fraction = if (pagerState.currentPage != page) -pageOffset else 1f - pageOffset
+            val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
 
-@Composable
-private fun FeaturedSectionGradientBackground(modifier: Modifier = Modifier) {
-  val colorStops =
-    listOf(
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.33f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.50f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.70f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.60f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.33f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.10f),
-      AppTheme.colorScheme.primaryContainer.copy(alpha = 0.0f),
+            compositingStrategy = CompositingStrategy.ModulateAlpha
+            alpha = FastOutSlowInEasing.transform(offsetAbsolute.inverse())
+
+            translationX =
+              lerp(
+                start = size.width,
+                stop = 0f,
+                fraction = if (isRtl) 2f - fraction else fraction,
+              )
+          }
+          .hazeEffect(style = HazeMaterials.ultraThin(containerColor = Color.Transparent)) {
+            blurEnabled = true
+            blurRadius = 100.dp
+            blurredEdgeTreatment = BlurredEdgeTreatment.Unbounded
+          }
+          .drawWithContent {
+            drawContent()
+            drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+          }
+          .then(gradientOverlayModifier),
+      contentDescription = null,
+      contentScale = ContentScale.Crop,
+      size = Size(128, 128),
+      backgroundColor = AppTheme.colorScheme.surface,
+      colorFilter = ColorFilter.colorMatrix(colorMatrix)
     )
-
-  Box(modifier = Modifier.then(modifier).background(Brush.verticalGradient(colorStops)))
-}
-
-@Composable
-private fun FeaturedSectionBlurredBackground(
-  post: FeaturedPostItem,
-  darkTheme: Boolean,
-  modifier: Modifier = Modifier
-) {
-  val overlayColor = AppTheme.colorScheme.inversePrimary
-  val colorMatrix = remember {
-    ColorMatrix().apply {
-      val sat = if (darkTheme) 1f else 5f
-      setToSaturation(sat)
-    }
   }
-
-  AsyncImage(
-    url = post.postWithMetadata.imageUrl!!,
-    modifier =
-      Modifier.graphicsLayer {
-          val blurRadiusInPx = 100.dp.toPx()
-          renderEffect = BlurEffect(blurRadiusInPx, blurRadiusInPx, TileMode.Decal)
-          shape = RectangleShape
-          clip = false
-        }
-        .then(modifier)
-        .drawWithContent {
-          drawContent()
-
-          drawRect(
-            color = overlayColor,
-            blendMode = BlendMode.Luminosity,
-          )
-        },
-    contentDescription = null,
-    contentScale = ContentScale.Crop,
-    size = Size(128, 128),
-    backgroundColor = AppTheme.colorScheme.surface,
-    colorFilter = ColorFilter.colorMatrix(colorMatrix)
-  )
 }
