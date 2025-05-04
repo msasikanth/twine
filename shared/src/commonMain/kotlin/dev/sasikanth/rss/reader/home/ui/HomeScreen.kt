@@ -200,6 +200,7 @@ internal fun HomeScreen(
                 homeTopAppBar = {
                   HomeTopAppBar(
                     source = state.activeSource,
+                    currentDateTime = state.currentDateTime,
                     postsType = state.postsType,
                     listState = listState,
                     hasFeeds = hasFeeds,

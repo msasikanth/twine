@@ -24,7 +24,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 
 fun Period.calculateInstantBeforePeriod(): Instant {
   val period =
@@ -40,10 +40,11 @@ fun Period.calculateInstantBeforePeriod(): Instant {
   return currentMoment.minus(period, TimeZone.currentSystemDefault())
 }
 
-internal fun getTodayStartInstant() =
-  Clock.System.now()
-    .toLocalDateTime(TimeZone.currentSystemDefault())
-    .date
+internal fun getTodayStartInstant(): Instant {
+  return Clock.System.todayIn(TimeZone.currentSystemDefault())
     .atStartOfDayIn(TimeZone.currentSystemDefault())
+}
 
-internal fun getLast24HourStart() = Clock.System.now().minus(24.hours)
+internal fun getLast24HourStart(): Instant {
+  return Clock.System.now().minus(24.hours)
+}
