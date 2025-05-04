@@ -216,7 +216,12 @@ class HomePresenter(
     }
 
     private fun updateCurrentDateTime(dateTime: LocalDateTime) {
-      coroutineScope.launch { _state.update { it.copy(currentDateTime = dateTime) } }
+      coroutineScope.launch {
+        val currentDateTime = _state.value.currentDateTime
+        if (dateTime.date > currentDateTime.date) {
+          _state.update { it.copy(currentDateTime = dateTime) }
+        }
+      }
     }
 
     private fun markFeaturedPostAsRead(postId: String) {
