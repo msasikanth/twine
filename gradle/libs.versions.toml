@@ -56,6 +56,7 @@ filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.34.0-rc02"
 shadow = "2.0.3"
+haze = "1.6.0-beta03"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -136,6 +137,8 @@ markdown-material3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3
 markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
 markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
 shadow = { module = "com.adamglin:compose-shadow", version.ref = "shadow" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
