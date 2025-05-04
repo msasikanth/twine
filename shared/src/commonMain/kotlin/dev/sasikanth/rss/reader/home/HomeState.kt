@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDateTime
 
 @Immutable
 internal data class HomeState(
@@ -35,12 +36,13 @@ internal data class HomeState(
   val activeSource: Source?,
   val hasFeeds: Boolean?,
   val postsType: PostsType,
-  val hasUnreadPosts: Boolean
+  val hasUnreadPosts: Boolean,
+  val currentDateTime: LocalDateTime,
 ) {
 
   companion object {
 
-    val DEFAULT =
+    fun default(currentDateTime: LocalDateTime) =
       HomeState(
         posts = null,
         loadingState = HomeLoadingState.Idle,
@@ -49,6 +51,7 @@ internal data class HomeState(
         hasFeeds = null,
         postsType = PostsType.ALL,
         hasUnreadPosts = false,
+        currentDateTime = currentDateTime,
       )
   }
 
