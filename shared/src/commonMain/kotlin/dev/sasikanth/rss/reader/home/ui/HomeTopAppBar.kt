@@ -20,7 +20,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -32,7 +31,6 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
@@ -41,7 +39,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DoneAll
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
@@ -72,7 +69,6 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.offset
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -81,15 +77,20 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
+import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.util.homeAppBarTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import kotlinx.datetime.LocalDateTime
 
 private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
 @Composable
 internal fun HomeTopAppBar(
   source: Source?,
+  currentDateTime: LocalDateTime,
   postsType: PostsType,
   listState: LazyListState,
   hasFeeds: Boolean?,
@@ -128,6 +129,7 @@ internal fun HomeTopAppBar(
     SourceInfo(
       modifier = Modifier.weight(1f),
       source = source,
+      currentDateTime = currentDateTime,
       postsType = postsType,
       hasFeeds = hasFeeds,
       onPostTypeChanged = onPostTypeChanged
@@ -166,6 +168,7 @@ internal fun HomeTopAppBar(
 @Composable
 fun SourceInfo(
   source: Source?,
+  currentDateTime: LocalDateTime,
   postsType: PostsType,
   hasFeeds: Boolean?,
   modifier: Modifier = Modifier,
@@ -178,9 +181,11 @@ fun SourceInfo(
   Box(modifier) {
     Row(
       modifier =
-        Modifier.clip(MaterialTheme.shapes.large).onGloballyPositioned { coordinates ->
-          buttonHeight = with(density) { coordinates.size.height.toDp() }
-        },
+        Modifier.clip(MaterialTheme.shapes.small)
+          .clickable(enabled = hasFeeds == true) { showPostsTypeDropDown = true }
+          .onGloballyPositioned { coordinates ->
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
       verticalAlignment = Alignment.CenterVertically
     ) {
       SourceIcon(source)
@@ -189,43 +194,32 @@ fun SourceInfo(
         when (source) {
           is FeedGroup -> source.name
           is Feed -> source.name
-          else -> LocalStrings.current.appName
+          else -> currentDateTime.homeAppBarTimestamp()
         }
 
-      Column(
-        modifier =
-          Modifier.padding(start = 16.dp, end = 8.dp).clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = null,
-            enabled = hasFeeds == true
-          ) {
-            showPostsTypeDropDown = true
-          }
-      ) {
+      Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
         Text(
           modifier = Modifier.basicMarquee(),
           text = sourceLabel,
-          style = MaterialTheme.typography.titleLarge,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurface,
           maxLines = 1,
         )
 
         AnimatedVisibility(visible = hasFeeds == true) {
-          Spacer(Modifier.requiredHeight(8.dp))
-
           val postsTypeLabel = getPostTypeLabel(postsType)
 
-          Row {
+          Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = postsTypeLabel,
-              style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.textEmphasisHigh,
+              style = MaterialTheme.typography.titleMedium,
+              color = AppTheme.colorScheme.onSurface,
             )
 
             Spacer(Modifier.requiredWidth(4.dp))
 
             Icon(
-              imageVector = Icons.Filled.ExpandMore,
+              imageVector = TwineIcons.DropdownIcon,
               contentDescription = null,
               modifier = Modifier.requiredSize(20.dp),
               tint = AppTheme.colorScheme.textEmphasisHigh,

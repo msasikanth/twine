@@ -17,7 +17,9 @@
 package dev.sasikanth.rss.reader.util
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toNSDate
+import kotlinx.datetime.toNSDateComponents
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
 import platform.Foundation.currentLocale
@@ -28,4 +30,13 @@ actual fun Instant.readerDateTimestamp(): String {
   formatter.dateFormat = "MMM dd, yyyy • hh:mm a"
 
   return formatter.stringFromDate(this.toNSDate())
+}
+
+actual fun LocalDateTime.homeAppBarTimestamp(): String {
+  val formatter = NSDateFormatter()
+  formatter.locale = NSLocale.currentLocale()
+  formatter.dateFormat = "EEE, MMM dd"
+
+  val date = this.toNSDateComponents().date ?: return ""
+  return formatter.stringFromDate(date)
 }
