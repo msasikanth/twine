@@ -119,6 +119,8 @@ kotlin {
       implementation(libs.markdown.coil)
       implementation(libs.markdown.code)
       implementation(libs.shadow)
+      implementation(libs.haze)
+      implementation(libs.haze.materials)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
