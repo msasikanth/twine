@@ -132,6 +132,13 @@ class SquigglyUnderlineSpanPainter(
     if (defaultStyle == null || textDecoration == null || Underline !in textDecoration)
       return linkAnnotation
 
+    val imageRegex = Regex("(?i)\\.(jpg|jpeg|png|gif|bmp|webp|svg)$")
+    val url =
+      (linkAnnotation as? LinkAnnotation.Url)?.url
+        ?: (linkAnnotation as? LinkAnnotation.Clickable)?.tag ?: return linkAnnotation
+
+    if (imageRegex.containsMatchIn(url)) return linkAnnotation
+
     val textColor =
       defaultStyle.color.colorOrNull()
         ?: text.spanStyles
