@@ -111,6 +111,8 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
 
   const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
 
-  const result = await Mercury.parse(link, opts);
-  return JSON.stringify({ content: result.content, excerpt: result.excerpt });
+  const parseResult = await parse(doc.body.innerHTML, link);
+  const turndownService = new TurndownService()
+  const markdown = turndownService.turndown(parseResult.content)
+  return JSON.stringify({ content: markdown, excerpt: parseResult.excerpt });
 }
