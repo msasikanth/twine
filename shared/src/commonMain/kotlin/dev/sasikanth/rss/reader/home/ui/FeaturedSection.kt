@@ -281,6 +281,7 @@ private fun FeaturedSectionBackground(
         }
       }
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val hazeStyle = HazeMaterials.ultraThin(containerColor = AppTheme.colorScheme.backdrop)
 
     AsyncImage(
       url = featuredPost.postWithMetadata.imageUrl!!,
@@ -302,7 +303,7 @@ private fun FeaturedSectionBackground(
                 fraction = if (isRtl) 2f - fraction else fraction,
               )
           }
-          .hazeEffect(style = HazeMaterials.ultraThin(containerColor = Color.Transparent)) {
+          .hazeEffect(style = hazeStyle) {
             blurEnabled = true
             blurRadius = 100.dp
             blurredEdgeTreatment = BlurredEdgeTreatment.Unbounded
