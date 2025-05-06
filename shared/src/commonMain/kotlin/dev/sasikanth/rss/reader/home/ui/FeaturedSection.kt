@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -53,9 +54,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.lerp
 import coil3.size.Size
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
@@ -71,6 +70,7 @@ import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 internal fun FeaturedSection(
@@ -101,6 +101,7 @@ internal fun FeaturedSection(
     }
 
   val defaultSeedColor = AppTheme.colorScheme.tintedForeground
+  val featuredBackgroundPagerState = rememberPagerState { pagerState.pageCount }
 
   LaunchedEffect(pagerState, featuredPosts) {
     snapshotFlow {
@@ -147,6 +148,25 @@ internal fun FeaturedSection(
       }
   }
 
+  LaunchedEffect(Unit) {
+    snapshotFlow {
+        val (scrollingState, followingState) =
+          if (pagerState.isScrollInProgress) {
+            pagerState to featuredBackgroundPagerState
+          } else {
+            return@snapshotFlow null
+          }
+        Triple(followingState, scrollingState.currentPage, scrollingState.currentPageOffsetFraction)
+      }
+      .filterNotNull()
+      .collect { (followingState, currentPage, currentPageOffsetFraction) ->
+        followingState.scrollToPage(
+          page = currentPage,
+          pageOffsetFraction = currentPageOffsetFraction
+        )
+      }
+  }
+
   Box(modifier) {
     val contentPadding =
       remember(systemBarsHorizontalPadding, paddingValues) {
@@ -158,19 +178,19 @@ internal fun FeaturedSection(
         )
       }
 
-    HorizontalPager(
-      state = pagerState,
-      verticalAlignment = Alignment.Top,
-      contentPadding = contentPadding,
-      flingBehavior =
-        PagerDefaults.flingBehavior(
-          state = pagerState,
-          snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-        ),
-    ) { page ->
-      val featuredPost = featuredPosts.getOrNull(page)
-      if (featuredPost != null) {
-        Box {
+    Box {
+      HorizontalPager(
+        state = featuredBackgroundPagerState,
+        verticalAlignment = Alignment.Top,
+        contentPadding = contentPadding,
+        flingBehavior =
+          PagerDefaults.flingBehavior(
+            state = pagerState,
+            snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+          ),
+      ) { page ->
+        val featuredPost = featuredPosts.getOrNull(page)
+        if (featuredPost != null) {
           FeaturedSectionBackground(
             modifier =
               Modifier.fillMaxWidth().layout { measurable, constraints ->
@@ -191,7 +211,21 @@ internal fun FeaturedSection(
             featuredPost = featuredPost,
             useDarkTheme = useDarkTheme,
           )
+        }
+      }
 
+      HorizontalPager(
+        state = pagerState,
+        verticalAlignment = Alignment.Top,
+        contentPadding = contentPadding,
+        flingBehavior =
+          PagerDefaults.flingBehavior(
+            state = pagerState,
+            snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
+          ),
+      ) { page ->
+        val featuredPost = featuredPosts.getOrNull(page)
+        if (featuredPost != null) {
           val postWithMetadata = featuredPost.postWithMetadata
           FeaturedPostItem(
             modifier = Modifier.padding(horizontal = 24.dp),
@@ -280,7 +314,6 @@ private fun FeaturedSectionBackground(
           setToSaturation(sat)
         }
       }
-    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val hazeStyle = HazeMaterials.ultraThin(containerColor = AppTheme.colorScheme.backdrop)
 
     AsyncImage(
@@ -290,18 +323,12 @@ private fun FeaturedSectionBackground(
           .aspectRatio(1f)
           .graphicsLayer {
             val pageOffset = pagerState.getOffsetFractionForPage(page)
-            val fraction = if (pagerState.currentPage != page) -pageOffset else 1f - pageOffset
             val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
 
             compositingStrategy = CompositingStrategy.ModulateAlpha
             alpha = FastOutSlowInEasing.transform(offsetAbsolute.inverse())
 
-            translationX =
-              lerp(
-                start = size.width,
-                stop = 0f,
-                fraction = if (isRtl) 2f - fraction else fraction,
-              )
+            translationX = size.width * pageOffset
           }
           .hazeEffect(style = hazeStyle) {
             blurEnabled = true
