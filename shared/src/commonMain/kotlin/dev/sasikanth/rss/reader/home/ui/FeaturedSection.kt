@@ -150,13 +150,7 @@ internal fun FeaturedSection(
 
   LaunchedEffect(Unit) {
     snapshotFlow {
-        val (scrollingState, followingState) =
-          if (pagerState.isScrollInProgress) {
-            pagerState to featuredBackgroundPagerState
-          } else {
-            return@snapshotFlow null
-          }
-        Triple(followingState, scrollingState.currentPage, scrollingState.currentPageOffsetFraction)
+        Triple(featuredBackgroundPagerState, pagerState.currentPage, pagerState.currentPageOffsetFraction)
       }
       .filterNotNull()
       .collect { (followingState, currentPage, currentPageOffsetFraction) ->
@@ -183,6 +177,7 @@ internal fun FeaturedSection(
         state = featuredBackgroundPagerState,
         verticalAlignment = Alignment.Top,
         contentPadding = contentPadding,
+        userScrollEnabled = false,
         flingBehavior =
           PagerDefaults.flingBehavior(
             state = pagerState,
