@@ -22,6 +22,7 @@ object ReaderHTML {
 
   internal suspend fun create(): String {
     val mercuryJS = readFile("mercury.web.js")
+    val readabilityJS = readFile("readability.bundle.min.js")
     val readerJS = readFile("main.js")
 
     // language=HTML
@@ -30,7 +31,8 @@ object ReaderHTML {
     <html dir='auto'>
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-      <script>$mercuryJS</script>
+      <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+      <script>$readabilityJS</script>
       <script>$readerJS</script>
     </head>
     <body />
