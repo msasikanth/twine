@@ -65,6 +65,9 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -278,6 +281,7 @@ internal fun ReaderScreen(
     LocalDynamicColorState provides dynamicColorState,
     LocalUriHandler provides readerLinkHandler
   ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     AppTheme(useDarkTheme = darkTheme) {
       Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
@@ -336,6 +340,7 @@ internal fun ReaderScreen(
             } catch (e: IndexOutOfBoundsException) {
               null
             }
+          val comingSoonString = LocalStrings.current.comingSoon
 
           if (readerPost != null) {
             BottomBar(
@@ -349,10 +354,17 @@ internal fun ReaderScreen(
               },
               openReaderViewSettings = {
                 // TODO: Open reader view settings
+                coroutineScope.launch {
+                  snackbarHostState.showSnackbar(
+                    message = comingSoonString,
+                    duration = SnackbarDuration.Short,
+                  )
+                }
               }
             )
           }
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = AppTheme.colorScheme.backdrop,
         contentColor = Color.Unspecified
       ) { paddingValues ->
