@@ -48,7 +48,9 @@ internal fun AsyncImage(
   Box(modifier.then(backgroundColorModifier)) {
     val context = LocalPlatformContext.current
     val imageRequest =
-      remember(url, context) { ImageRequest.Builder(context).data(url).size(size).build() }
+      remember(url, context) {
+        ImageRequest.Builder(context).data(url).size(size).diskCacheKey(url).build()
+      }
 
     coil3.compose.AsyncImage(
       model = imageRequest,
