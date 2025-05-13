@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.core.EaseInSine
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -43,22 +42,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
-import coil3.size.Size
+import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
-import dev.chrisbanes.haze.materials.HazeMaterials
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -162,7 +159,7 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      beyondViewportPageCount = 1,
+      key = { featuredPosts[it].postWithMetadata.id },
       flingBehavior =
         PagerDefaults.flingBehavior(
           state = pagerState,
@@ -174,11 +171,17 @@ internal fun FeaturedSection(
         val postWithMetadata = featuredPost.postWithMetadata
 
         Box {
-          val hazeStyle = HazeMaterials.ultraThin(containerColor = AppTheme.colorScheme.backdrop)
-
+          val blurRadius = 100.dp
+          val hazeStyle =
+            HazeStyle(
+              blurRadius = blurRadius,
+              backgroundColor = AppTheme.colorScheme.backdrop,
+              tint = null,
+            )
           FeaturedSectionBackground(
             featuredPost = featuredPost,
             useDarkTheme = useDarkTheme,
+            pageOffset = { pagerState.getOffsetFractionForPage(page) },
             modifier =
               Modifier.layout { measurable, constraints ->
                   val topPadding = contentPadding.calculateTopPadding().roundToPx()
@@ -190,21 +193,13 @@ internal fun FeaturedSection(
                   val placeable = measurable.measure(constraints.copy(maxWidth = fullWidth))
 
                   layout(placeable.width, placeable.height) {
-                    placeable.place(0, topPadding.unaryMinus())
+                    placeable.placeRelative(x = 0, y = topPadding.unaryMinus())
                   }
                 }
-                .graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
-                  val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
-
-                  compositingStrategy = CompositingStrategy.ModulateAlpha
-                  alpha = EaseInSine.transform(offsetAbsolute.inverse())
-
-                  translationX = size.width * pageOffset
-                }
                 .hazeEffect(style = hazeStyle) {
+                  alpha = calculateAlpha(pagerState, page)
                   blurEnabled = true
-                  blurRadius = 100.dp
+                  this.blurRadius = blurRadius
                   blurredEdgeTreatment = BlurredEdgeTreatment.Unbounded
                 },
           )
@@ -248,10 +243,21 @@ internal fun FeaturedSection(
   }
 }
 
+private fun calculateAlpha(
+  pagerState: PagerState,
+  page: Int,
+): Float {
+  val pageOffset = pagerState.getOffsetFractionForPage(page)
+  val offsetAbsolute = minOf(1f, pageOffset.absoluteValue)
+
+  return EaseInSine.transform(offsetAbsolute.inverse())
+}
+
 @Composable
 private fun FeaturedSectionBackground(
   featuredPost: FeaturedPostItem,
   useDarkTheme: Boolean,
+  pageOffset: () -> Float,
   modifier: Modifier = Modifier,
 ) {
   val gradientOverlayModifier =
@@ -293,20 +299,24 @@ private fun FeaturedSectionBackground(
       }
     }
 
-  Box(modifier = Modifier.then(gradientOverlayModifier).then(modifier)) {
+  Box(modifier = Modifier.then(modifier).then(gradientOverlayModifier)) {
     AsyncImage(
       url = featuredPost.postWithMetadata.imageUrl!!,
-      modifier = Modifier.fillMaxWidth().requiredHeightIn(max = 600.dp).aspectRatio(1f),
+      modifier =
+        Modifier.graphicsLayer { translationX = size.width * pageOffset.invoke() }
+          .fillMaxWidth()
+          .requiredHeightIn(max = 600.dp)
+          .aspectRatio(1f)
+          .drawWithContent {
+            drawContent()
+            drawRect(
+              color = overlayColor,
+              blendMode = BlendMode.Luminosity,
+            )
+          },
       contentDescription = null,
-      contentScale = ContentScale.Crop,
-      size = Size(128, 128),
       backgroundColor = AppTheme.colorScheme.surface,
       colorFilter = ColorFilter.colorMatrix(colorMatrix)
-    )
-
-    Canvas(
-      modifier = Modifier.matchParentSize(),
-      onDraw = { drawRect(color = overlayColor, blendMode = BlendMode.Luminosity) }
     )
   }
 }
