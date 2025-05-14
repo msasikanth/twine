@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.1.20"
-android_gradle_plugin = "8.9.2"
+android_gradle_plugin = "8.10.0"
 compose = "1.8.0"
 compose-material = "1.8.0-alpha03"
 compose_material_icons_extended = "1.7.3"
