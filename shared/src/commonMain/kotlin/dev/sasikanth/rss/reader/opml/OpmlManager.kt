@@ -154,7 +154,7 @@ class OpmlManager(
         FileKit.saveFile(
           bytes = opmlString.encodeToByteArray(),
           baseName = BACKUP_FILE_NAME,
-          extension = "xml",
+          extension = "opml",
         )
       }
 
