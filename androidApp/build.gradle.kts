@@ -77,7 +77,14 @@ android {
 
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
     }
-    debug { applicationIdSuffix = ".debug" }
+    debug {
+      applicationIdSuffix = ".debug"
+      isMinifyEnabled = true
+      isShrinkResources = true
+      isDebuggable = false
+
+      proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+    }
   }
 
   packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
@@ -86,7 +93,7 @@ android {
 }
 
 dependencies {
-  debugImplementation(libs.leakcanary)
+  //  debugImplementation(libs.leakcanary)
 
   implementation(project(":shared"))
   implementation(libs.kotlininject.runtime)

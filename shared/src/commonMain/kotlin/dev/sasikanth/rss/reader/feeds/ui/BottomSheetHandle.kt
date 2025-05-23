@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
@@ -38,7 +37,10 @@ private val COLLAPSED_HANDLE_SIZE = 32.dp
 private val EXPANDED_HANDLE_SIZE = 64.dp
 
 @Composable
-internal fun BottomSheetHandle(progress: Float) {
+internal fun BottomSheetHandle(
+  progress: Float,
+  modifier: Modifier = Modifier,
+) {
   val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
   val targetHandleSize =
     min(COLLAPSED_HANDLE_SIZE * progress + COLLAPSED_HANDLE_SIZE, EXPANDED_HANDLE_SIZE)
@@ -47,7 +49,7 @@ internal fun BottomSheetHandle(progress: Float) {
   val targetTopPadding =
     (collapsedTopPadding * (progress * 2) + collapsedTopPadding) + (statusBarPadding * progress)
 
-  Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(modifier = Modifier.then(modifier), horizontalAlignment = Alignment.CenterHorizontally) {
     Spacer(Modifier.requiredHeight(targetTopPadding))
     Box(
       Modifier.background(AppTheme.colorScheme.tintedForeground, shape = RoundedCornerShape(50))

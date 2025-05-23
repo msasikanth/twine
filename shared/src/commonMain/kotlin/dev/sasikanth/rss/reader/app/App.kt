@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -32,7 +31,6 @@ import coil3.compose.setSingletonImageLoaderFactory
 import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.experimental.stack.ChildStack
 import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.StackAnimation
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.plus
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
@@ -41,7 +39,7 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
-import dev.sasikanth.rss.reader.group.ui.GroupScreen
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetDragValue
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
@@ -71,7 +69,6 @@ typealias App =
   (
     onThemeChange: (useDarkTheme: Boolean) -> Unit,
     toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
-    toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
   ) -> Unit
 
 @Inject
@@ -86,7 +83,6 @@ fun App(
   dispatchersProvider: DispatchersProvider,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
-  @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
 ) {
   setSingletonImageLoaderFactory { imageLoader }
 
@@ -136,11 +132,11 @@ fun App(
             is Screen.Home -> {
               HomeScreen(
                 homePresenter = screen.presenter,
-                useDarkTheme = useDarkTheme,
+                darkTheme = useDarkTheme,
                 modifier = fillMaxSizeModifier,
                 onBottomSheetStateChanged = { sheetValue ->
                   val showDarkStatusBar =
-                    if (sheetValue == SheetValue.Expanded) {
+                    if (sheetValue == FeedsSheetDragValue.Expanded) {
                       true
                     } else {
                       useDarkTheme
@@ -148,7 +144,6 @@ fun App(
 
                   toggleLightStatusBar(showDarkStatusBar.not())
                 },
-                onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
               )
             }
             is Screen.Reader -> {
@@ -173,11 +168,6 @@ fun App(
             is Screen.AddFeed -> {
               AppTheme(useDarkTheme = true) {
                 AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-              }
-            }
-            is Screen.GroupDetails -> {
-              AppTheme(useDarkTheme = true) {
-                GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
               }
             }
             is Screen.BlockedWords -> {
