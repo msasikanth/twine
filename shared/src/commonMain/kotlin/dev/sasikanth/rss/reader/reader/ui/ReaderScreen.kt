@@ -1,8 +1,3 @@
-@file:Suppress(
-  "CANNOT_OVERRIDE_INVISIBLE_MEMBER",
-  "INVISIBLE_MEMBER",
-  "INVISIBLE_REFERENCE",
-)
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
@@ -820,7 +815,6 @@ private fun PostInfo(
       text = title.ifBlank { description },
       style = MaterialTheme.typography.headlineSmall,
       color = AppTheme.colorScheme.onSurface,
-      maxLines = 3,
       overflow = TextOverflow.Ellipsis,
     )
 
