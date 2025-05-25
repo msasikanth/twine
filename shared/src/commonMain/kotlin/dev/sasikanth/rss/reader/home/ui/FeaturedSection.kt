@@ -109,6 +109,8 @@ internal fun FeaturedSection(
         }
       }
       .collect { offset ->
+        if (featuredPosts.isEmpty()) return@collect
+
         // The default snap position of the pager is 0.5f, that means the targetPage
         // state only changes after reaching half way point. We instead want it to scale
         // as we start swiping.
@@ -159,7 +161,7 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      key = { featuredPosts[it].postWithMetadata.id },
+      key = { page -> featuredPosts.getOrNull(page)?.postWithMetadata?.id ?: page },
       flingBehavior =
         PagerDefaults.flingBehavior(
           state = pagerState,
