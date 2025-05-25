@@ -54,7 +54,7 @@ reorderable = "2.4.3"
 korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
-markdown = "0.34.0"
+markdown = "0.35.0"
 shadow = "2.0.3"
 haze = "1.6.2"
 
