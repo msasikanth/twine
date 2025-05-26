@@ -3,7 +3,10 @@ DROP TRIGGER post_bookmarked;
 ALTER TABLE bookmark ADD COLUMN feedHomepageLink TEXT DEFAULT '' NOT NULL;
 
 UPDATE bookmark
-SET feedHomepageLink = (SELECT homepageLink FROM feed WHERE feed.id = bookmark.sourceId)
+SET feedHomepageLink = COALESCE(
+  (SELECT COALESCE(homepageLink, bookmark.feedIcon) FROM feed WHERE feed.id = bookmark.sourceId),
+  ''
+)
 WHERE feedHomepageLink = '';
 
 UPDATE bookmark SET feedHomepageLink = bookmark.feedIcon WHERE feedHomepageLink = '';
