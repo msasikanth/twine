@@ -179,7 +179,6 @@ class ReaderPresenter(
                   pageSize = 4,
                   enablePlaceholders = false,
                 ),
-              initialKey = readerScreenArgs.postIndex
             ) {
               when (readerScreenArgs.fromScreen) {
                 Home -> {
