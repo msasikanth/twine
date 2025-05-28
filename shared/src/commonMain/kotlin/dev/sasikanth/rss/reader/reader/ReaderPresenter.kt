@@ -22,7 +22,6 @@ import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnDestroy
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -37,7 +36,9 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -75,10 +76,6 @@ class ReaderPresenter(
     }
 
   internal val state = presenterInstance.state
-
-  init {
-    lifecycle.doOnDestroy { dispatch(ReaderEvent.MarkOpenedPostsAsRead) }
-  }
 
   fun dispatch(event: ReaderEvent) {
     when (event) {
@@ -122,7 +119,6 @@ class ReaderPresenter(
         is ReaderEvent.TogglePostBookmark ->
           togglePostBookmark(event.postId, event.currentBookmarkStatus)
         is ReaderEvent.PostPageChanged -> postPageChange(event.post)
-        ReaderEvent.MarkOpenedPostsAsRead -> markPostsAsRead()
         is ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked(event.postId)
         is ReaderEvent.PostLoaded -> postLoaded(event.post)
       }
@@ -162,8 +158,8 @@ class ReaderPresenter(
       }
     }
 
-    private fun markPostsAsRead() {
-      coroutineScope.launch { rssRepository.markPostsAsRead(openedPostItems) }
+    private fun markPostsAsRead(): Job {
+      return coroutineScope.launch { rssRepository.markPostsAsRead(openedPostItems) }
     }
 
     private fun init() {
@@ -243,6 +239,10 @@ class ReaderPresenter(
       coroutineScope.launch {
         rssRepository.updateBookmarkStatus(bookmarked = !currentBookmarkStatus, id = postId)
       }
+    }
+
+    override fun onDestroy() {
+      markPostsAsRead().invokeOnCompletion { coroutineScope.cancel() }
     }
   }
 }

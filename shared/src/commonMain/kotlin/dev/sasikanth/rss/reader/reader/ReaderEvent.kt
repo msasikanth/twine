@@ -27,8 +27,6 @@ sealed interface ReaderEvent {
 
   data class PostPageChanged(val post: PostWithMetadata) : ReaderEvent
 
-  data object MarkOpenedPostsAsRead : ReaderEvent
-
   data class LoadFullArticleClicked(val postId: String) : ReaderEvent
 
   data class PostLoaded(val post: PostWithMetadata) : ReaderEvent
