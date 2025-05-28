@@ -747,6 +747,7 @@ class RssRepository(
             lastCleanUpAt: Instant?,
             numberOfUnreadPosts: Long,
             feedIds: String?,
+            feedNames: String?,
             feedHomepageLinks: String?,
             feedIcons: String?,
             updatedAt: Instant? ->

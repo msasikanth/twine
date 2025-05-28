@@ -18,12 +18,12 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetDragValue
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
@@ -32,7 +32,7 @@ import kotlinx.datetime.LocalDateTime
 internal data class HomeState(
   val posts: Flow<PagingData<PostWithMetadata>>?,
   val loadingState: HomeLoadingState,
-  val feedsSheetState: SheetValue,
+  val feedsSheetState: FeedsSheetDragValue,
   val activeSource: Source?,
   val hasFeeds: Boolean?,
   val postsType: PostsType,
@@ -46,7 +46,7 @@ internal data class HomeState(
       HomeState(
         posts = null,
         loadingState = HomeLoadingState.Idle,
-        feedsSheetState = SheetValue.PartiallyExpanded,
+        feedsSheetState = FeedsSheetDragValue.Collapsed,
         activeSource = null,
         hasFeeds = null,
         postsType = PostsType.ALL,

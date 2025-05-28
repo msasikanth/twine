@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.home
 
-import androidx.compose.material3.SheetValue
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
@@ -39,6 +38,7 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.ui.FeedsSheetDragValue
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
@@ -78,8 +78,7 @@ class HomePresenter(
       ComponentContext,
       openGroupSelectionSheet: () -> Unit,
       openFeedInfoSheet: (feedId: String) -> Unit,
-      openAddFeedScreen: () -> Unit,
-      openGroupScreen: (groupId: String) -> Unit
+      openAddFeedScreen: () -> Unit
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
@@ -92,7 +91,6 @@ class HomePresenter(
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
-  @Assisted private val openGroupScreen: (groupId: String) -> Unit,
 ) : ComponentContext by componentContext {
 
   internal val feedsPresenter =
@@ -101,7 +99,6 @@ class HomePresenter(
       openGroupSelectionSheet,
       openFeedInfoSheet,
       openAddFeedScreen,
-      openGroupScreen,
     )
 
   private val backCallback = BackCallback {
@@ -110,7 +107,7 @@ class HomePresenter(
       return@BackCallback
     }
 
-    if (state.value.feedsSheetState == SheetValue.Expanded) {
+    if (state.value.feedsSheetState == FeedsSheetDragValue.Expanded) {
       dispatch(HomeEvent.BackClicked)
       return@BackCallback
     }
@@ -144,7 +141,7 @@ class HomePresenter(
   fun dispatch(event: HomeEvent) {
     when (event) {
       is HomeEvent.FeedsSheetStateChanged -> {
-        backCallback.isEnabled = event.feedsSheetState == SheetValue.Expanded
+        backCallback.isEnabled = event.feedsSheetState == FeedsSheetDragValue.Expanded
       }
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
@@ -293,7 +290,7 @@ class HomePresenter(
 
     private fun backClicked() {
       coroutineScope.launch {
-        _state.update { it.copy(feedsSheetState = SheetValue.PartiallyExpanded) }
+        _state.update { it.copy(feedsSheetState = FeedsSheetDragValue.Collapsed) }
       }
     }
 
@@ -393,10 +390,10 @@ class HomePresenter(
         else -> emptyList()
       }
 
-    private fun feedsSheetStateChanged(feedsSheetState: SheetValue) {
+    private fun feedsSheetStateChanged(feedsSheetState: FeedsSheetDragValue) {
       _state.update {
         // Clear search query once feeds sheet is collapsed
-        if (feedsSheetState == SheetValue.PartiallyExpanded) {
+        if (feedsSheetState == FeedsSheetDragValue.Collapsed) {
           feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery)
         }
 
@@ -442,7 +439,6 @@ internal typealias HomePresenterFactory =
     openGroupSelectionSheet: () -> Unit,
     openFeedInfoSheet: (feedId: String) -> Unit,
     openAddFeedScreen: () -> Unit,
-    openGroupScreen: (groupId: String) -> Unit,
   ) -> HomePresenter
 
 private typealias OpenPost = (postIndex: Int, post: PostWithMetadata) -> Unit
