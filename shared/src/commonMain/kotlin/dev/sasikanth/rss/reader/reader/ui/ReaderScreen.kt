@@ -176,7 +176,7 @@ internal fun ReaderScreen(
 ) {
   val state by presenter.state.collectAsState()
   val posts = state.posts.collectAsLazyPagingItems()
-  val pagerState = rememberPagerState { posts.itemCount }
+  val pagerState = rememberPagerState(initialPage = state.initialIndex) { posts.itemCount }
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
   val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
