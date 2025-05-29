@@ -207,13 +207,17 @@ internal fun HomeScreen(
                     listState = listState,
                     hasFeeds = hasFeeds,
                     hasUnreadPosts = state.hasUnreadPosts,
+                    homeViewMode = state.homeViewMode,
                     onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
                     onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
                     onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
                     onPostTypeChanged = {
                       homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it))
                     },
-                    onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) }
+                    onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) },
+                    onChangeHomeViewMode = {
+                      homePresenter.dispatch(HomeEvent.ChangeHomeViewMode(it))
+                    }
                   )
                 },
                 body = { paddingValues ->

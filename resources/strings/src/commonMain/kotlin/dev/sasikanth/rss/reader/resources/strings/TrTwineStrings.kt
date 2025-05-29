@@ -180,5 +180,9 @@ val TrTwineStrings =
       "Okuyucuda gösterilecek içerik yok, lütfen makaleyi getirmeyi deneyin veya web sitesini ziyaret edin.",
     pullToClose = "Pull down to close",
     readerSettings = "Reader screen settings",
-    comingSoon = "Coming soon"
+    comingSoon = "Coming soon",
+    homeViewMode = "View modes",
+    homeViewModeDefault = "Default",
+    homeViewModeSimple = "Simple",
+    homeViewModeCompact = "Compact",
   )
