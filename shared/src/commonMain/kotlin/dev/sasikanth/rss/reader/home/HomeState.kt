@@ -24,6 +24,7 @@ import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
@@ -38,6 +39,7 @@ internal data class HomeState(
   val postsType: PostsType,
   val hasUnreadPosts: Boolean,
   val currentDateTime: LocalDateTime,
+  val homeViewMode: HomeViewMode,
 ) {
 
   companion object {
@@ -52,6 +54,7 @@ internal data class HomeState(
         postsType = PostsType.ALL,
         hasUnreadPosts = false,
         currentDateTime = currentDateTime,
+        homeViewMode = HomeViewMode.Default,
       )
   }
 
