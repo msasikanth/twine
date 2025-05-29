@@ -487,7 +487,15 @@ private fun ReaderPage(
       LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
       LocalMarkdownAnimations provides markdownAnimations(),
       LocalMarkdownColors provides markdownColor(),
-      LocalMarkdownTypography provides markdownTypography(),
+      LocalMarkdownTypography provides
+        markdownTypography(
+          h1 = MaterialTheme.typography.displaySmall,
+          h2 = MaterialTheme.typography.headlineLarge,
+          h3 = MaterialTheme.typography.headlineMedium,
+          h4 = MaterialTheme.typography.headlineSmall,
+          h5 = MaterialTheme.typography.titleLarge,
+          h6 = MaterialTheme.typography.titleMedium,
+        ),
     ) {
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
