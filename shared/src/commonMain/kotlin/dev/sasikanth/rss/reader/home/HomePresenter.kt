@@ -301,6 +301,10 @@ class HomePresenter(
       val activeSourceFlow = observableActiveSource.activeSource
       val postsTypeFlow = settingsRepository.postsType
 
+      settingsRepository.homeViewMode
+        .onEach { homeViewMode -> _state.update { it.copy(homeViewMode = homeViewMode) } }
+        .launchIn(coroutineScope)
+
       _state
         .distinctUntilChangedBy { it.currentDateTime }
         .onEach { observePosts(activeSourceFlow, postsTypeFlow) }
