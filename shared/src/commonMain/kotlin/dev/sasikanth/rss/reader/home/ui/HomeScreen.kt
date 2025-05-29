@@ -74,6 +74,7 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
@@ -109,7 +110,8 @@ internal fun HomeScreen(
   val linkHandler = LocalLinkHandler.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
-  val featuredPosts by featuredPosts(posts).collectAsState(initial = persistentListOf())
+  val featuredPosts by
+    featuredPosts(posts, state.homeViewMode).collectAsState(initial = persistentListOf())
 
   val listState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
@@ -229,6 +231,7 @@ internal fun HomeScreen(
                           useDarkTheme = useDarkTheme,
                           listState = listState,
                           featuredPostsPagerState = featuredPostsPagerState,
+                          homeViewMode = state.homeViewMode,
                           markPostAsRead = {
                             homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                           },
@@ -425,11 +428,17 @@ private fun SheetState.progressAsState(): State<Float> {
 
 @Composable
 fun featuredPosts(
-  posts: LazyPagingItems<PostWithMetadata>?
+  posts: LazyPagingItems<PostWithMetadata>?,
+  homeViewMode: HomeViewMode
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
-  return remember(posts?.loadState) {
+  return remember(posts?.loadState, homeViewMode) {
     flow {
+      if (homeViewMode != HomeViewMode.Default) {
+        emit(persistentListOf())
+        return@flow
+      }
+
       if (posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
         return@flow

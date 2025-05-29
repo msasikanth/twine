@@ -184,7 +184,7 @@ private fun PostSourcePill(
 }
 
 @Composable
-private fun PostOptionsButtonRow(
+internal fun PostOptionsButtonRow(
   postLink: String,
   postBookmarked: Boolean,
   postRead: Boolean,
