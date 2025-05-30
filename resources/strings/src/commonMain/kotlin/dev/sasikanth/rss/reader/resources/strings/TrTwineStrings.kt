@@ -29,7 +29,8 @@ val TrTwineStrings =
     errorServer = {
       "($it): Sunucu hatası. Lütfen daha sonra tekrar deneyin veya web sitesi yöneticisiyle iletişime geçin."
     },
-    errorTooManyRedirects = "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
+    errorTooManyRedirects =
+      "Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.",
     errorUnAuthorized = { "($it): Bu bağlantıdaki içeriğe erişim yetkiniz yok." },
     errorUnknownHttpStatus = { "İçerik yüklenemedi, HTTP kodu: ($it)" },
     postsSearchHint = "Gönderilerde ara",
