@@ -222,6 +222,7 @@ class AppPresenter(
           presenter =
             readerPresenter(
               ReaderScreenArgs(
+                postId = config.post.id,
                 postIndex = config.postIndex,
                 fromScreen = config.fromScreen,
               ),
