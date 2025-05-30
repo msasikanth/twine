@@ -83,6 +83,11 @@ android {
   packaging { resources { excludes.add("/META-INF/{AL2.0,LGPL2.1}") } }
 
   buildFeatures { buildConfig = true }
+
+  dependenciesInfo {
+    includeInApk = false
+    includeInBundle = false
+  }
 }
 
 dependencies {
