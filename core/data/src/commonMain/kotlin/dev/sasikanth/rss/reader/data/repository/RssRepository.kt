@@ -20,6 +20,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
@@ -129,6 +130,7 @@ class RssRepository(
         FeedAddResult.HttpStatusError(feedFetchResult.statusCode)
       }
       is FeedFetchResult.Error -> {
+        Logger.e("FeedFetchException", feedFetchResult.exception)
         FeedAddResult.NetworkError(feedFetchResult.exception)
       }
       FeedFetchResult.TooManyRedirects -> {
