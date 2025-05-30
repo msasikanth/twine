@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -42,26 +41,16 @@ internal fun DropdownMenu(
   offset: DpOffset = DpOffset.Zero,
   content: @Composable ColumnScope.() -> Unit
 ) {
-  MaterialTheme(
-    colorScheme =
-      MaterialTheme.colorScheme.copy(surface = AppTheme.colorScheme.surfaceContainerLowest),
-    shapes = MaterialTheme.shapes.copy(extraSmall = MaterialTheme.shapes.large)
-  ) {
+  MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = MaterialTheme.shapes.large)) {
     androidx.compose.material3.DropdownMenu(
       expanded = expanded,
       onDismissRequest = onDismissRequest,
       offset = offset,
       modifier =
-        modifier
-          .background(
-            color = AppTheme.colorScheme.surfaceContainerLowest,
-            shape = MaterialTheme.shapes.large
-          )
-          .border(
-            width = 1.dp,
-            color = AppTheme.colorScheme.outlineVariant,
-            shape = MaterialTheme.shapes.large
-          ),
+        modifier.background(
+          color = AppTheme.colorScheme.surface,
+          shape = MaterialTheme.shapes.large
+        ),
       content = content
     )
   }
