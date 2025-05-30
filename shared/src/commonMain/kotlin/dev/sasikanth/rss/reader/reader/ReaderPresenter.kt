@@ -99,12 +99,13 @@ class ReaderPresenter(
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
     private val openedPostItems = mutableSetOf<String>()
 
-    private val _state = MutableStateFlow(ReaderState.default(readerScreenArgs.postIndex))
+    private val defaultReaderState = ReaderState.default(initialPostId = readerScreenArgs.postId)
+    private val _state = MutableStateFlow(defaultReaderState)
     val state: StateFlow<ReaderState> =
       _state.stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(5000),
-        initialValue = ReaderState.default(readerScreenArgs.postIndex)
+        initialValue = defaultReaderState
       )
 
     init {
@@ -179,6 +180,7 @@ class ReaderPresenter(
                   pageSize = 4,
                   enablePlaceholders = false,
                 ),
+              initialKey = readerScreenArgs.postIndex,
             ) {
               when (readerScreenArgs.fromScreen) {
                 Home -> {
@@ -256,6 +258,7 @@ internal typealias ReaderPresenterFactory =
 @Serializable
 data class ReaderScreenArgs(
   val postIndex: Int,
+  val postId: String,
   val fromScreen: FromScreen,
 ) {
 

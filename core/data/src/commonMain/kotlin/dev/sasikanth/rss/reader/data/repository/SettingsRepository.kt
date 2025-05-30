@@ -43,6 +43,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
+  private val homeViewModeKey = stringPreferencesKey("home_view_mode")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -86,6 +87,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val markAsReadOn: Flow<MarkAsReadOn> =
     dataStore.data.map { preferences -> mapToMarkAsReadOnType(preferences[markPostsAsReadOnKey]) }
+
+  val homeViewMode: Flow<HomeViewMode> =
+    dataStore.data.map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -139,6 +143,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[markPostsAsReadOnKey] = value.name }
   }
 
+  suspend fun updateHomeViewMode(value: HomeViewMode) {
+    dataStore.edit { preferences -> preferences[homeViewModeKey] = value.name }
+  }
+
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
     if (pref.isNullOrBlank()) return null
     return AppThemeMode.valueOf(pref)
@@ -173,6 +181,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     if (pref.isNullOrBlank()) return MarkAsReadOn.Open
     return MarkAsReadOn.valueOf(pref)
   }
+
+  private fun mapToHomeViewMode(pref: String?): HomeViewMode {
+    if (pref.isNullOrBlank()) return HomeViewMode.Default
+    return HomeViewMode.valueOf(pref)
+  }
 }
 
 enum class AppThemeMode {
@@ -197,4 +210,10 @@ enum class Period {
 enum class MarkAsReadOn {
   Open,
   Scroll
+}
+
+enum class HomeViewMode {
+  Default,
+  Simple,
+  Compact
 }

@@ -172,6 +172,10 @@ data class TwineStrings(
   val pullToClose: String,
   val readerSettings: String,
   val comingSoon: String,
+  val homeViewMode: String,
+  val homeViewModeDefault: String,
+  val homeViewModeSimple: String,
+  val homeViewModeCompact: String,
 )
 
 object Locales {

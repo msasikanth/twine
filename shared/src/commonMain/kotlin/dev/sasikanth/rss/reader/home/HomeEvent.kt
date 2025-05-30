@@ -22,6 +22,7 @@ import androidx.compose.material3.SheetValue
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import kotlinx.datetime.LocalDateTime
 
 sealed interface HomeEvent {
@@ -61,4 +62,6 @@ sealed interface HomeEvent {
   data class MarkFeaturedPostsAsRead(val postId: String) : HomeEvent
 
   data class UpdateCurrentDateTime(val dateTime: LocalDateTime) : HomeEvent
+
+  data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : HomeEvent
 }
