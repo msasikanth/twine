@@ -140,6 +140,8 @@ class FeedFetcher(
       ContentType.Application.Rss,
       ContentType.Application.Xml,
       ContentType.Text.Xml,
+      ContentType("text", "atom+xml"),
+      ContentType("text", "rss+xml"),
       null -> {
         val content = response.bodyAsChannel()
         val responseCharset =
