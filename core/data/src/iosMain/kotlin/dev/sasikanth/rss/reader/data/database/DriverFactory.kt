@@ -26,7 +26,10 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
+actual class DriverFactory(
+  private val codeMigrations: Array<AfterVersion>,
+  private val prePopulateFeedQueries: Array<String>,
+) {
 
   actual fun createDriver(): SqlDriver {
     return NativeSqliteDriver(
@@ -34,7 +37,11 @@ actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
         name = DB_NAME,
         version = ReaderDatabase.Schema.version.toInt(),
         journalMode = JournalMode.WAL,
-        create = { connection -> wrapConnection(connection) { ReaderDatabase.Schema.create(it) } },
+        create = { connection ->
+          wrapConnection(connection) { ReaderDatabase.Schema.create(it) }
+
+          prePopulateFeedQueries.forEach { query -> connection.rawExecSql(query) }
+        },
         upgrade = { connection, oldVersion, newVersion ->
           wrapConnection(connection) {
             ReaderDatabase.Schema.migrate(
