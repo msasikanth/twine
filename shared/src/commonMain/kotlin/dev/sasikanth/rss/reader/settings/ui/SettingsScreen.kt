@@ -78,6 +78,7 @@ import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
+import dev.sasikanth.rss.reader.data.repository.Period.NEVER
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_MONTH
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
@@ -491,6 +492,7 @@ private fun PostsDeletionPeriodSettingItem(
             THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
             SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
             ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+            NEVER -> LocalStrings.current.settingsPostsDeletionPeriodNever
             null -> ""
           }
 
@@ -522,6 +524,7 @@ private fun PostsDeletionPeriodSettingItem(
               THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
               SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
               ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
+              NEVER -> LocalStrings.current.settingsPostsDeletionPeriodNever
             }
 
           val backgroundColor =

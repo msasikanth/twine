@@ -80,6 +80,7 @@ val DeTwineStrings =
     settingsPostsDeletionPeriodThreeMonths = "3 Monate",
     settingsPostsDeletionPeriodSixMonths = "6 Monate",
     settingsPostsDeletionPeriodOneYear = "1 Jahr",
+    settingsPostsDeletionPeriodNever = "Never",
     settingsShowReaderViewTitle = "Leseansicht aktivieren",
     settingsShowReaderViewSubtitle =
       "Beiträge werden in einer vereinfachten, leicht lesbaren Ansicht angezeigt.",

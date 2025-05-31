@@ -76,6 +76,7 @@ val TrTwineStrings =
     settingsPostsDeletionPeriodThreeMonths = "3 ay",
     settingsPostsDeletionPeriodSixMonths = "6 ay",
     settingsPostsDeletionPeriodOneYear = "1 yıl",
+    settingsPostsDeletionPeriodNever = "Never",
     settingsShowReaderViewTitle = "Okuyucu görünümünü etkinleştir",
     settingsShowReaderViewSubtitle = "Makaleler, sade ve okunması kolay bir görünümde gösterilir",
     settingsThemeAuto = "Otomatik",
