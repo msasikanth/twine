@@ -16,11 +16,9 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
@@ -29,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
-import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
@@ -139,18 +136,12 @@ internal fun PostsList(
           CompactPostListItem(
             item = post,
             reduceReadItemAlpha = true,
+            showDivider = index != posts.itemCount - 1,
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             togglePostReadClick = { onTogglePostReadClick(post.id, post.read) }
           )
-
-          if (index != posts.itemCount - 1) {
-            HorizontalDivider(
-              modifier = Modifier.fillMaxWidth(),
-              color = AppTheme.colorScheme.outlineVariant
-            )
-          }
         }
       }
     }
