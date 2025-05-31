@@ -29,6 +29,7 @@ import me.tatarka.inject.annotations.Inject
 actual class DriverFactory(
   private val context: Context,
   private val codeMigrations: Array<AfterVersion>,
+  private val prePopulateFeedQueries: Array<String>,
 ) {
 
   actual fun createDriver(): SqlDriver {
@@ -41,6 +42,11 @@ actual class DriverFactory(
           override fun onConfigure(db: SupportSQLiteDatabase) {
             super.onConfigure(db)
             db.enableWriteAheadLogging()
+          }
+
+          override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            prePopulateFeedQueries.forEach { query -> db.execSQL(query) }
           }
 
           override fun onOpen(db: SupportSQLiteDatabase) {

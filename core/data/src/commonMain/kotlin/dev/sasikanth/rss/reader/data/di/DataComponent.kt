@@ -57,6 +57,69 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
 
   @Provides @AppScope fun providesMigrations(): Array<AfterVersion> = SQLCodeMigrations.migrations()
 
+  @Provides
+  @AppScope
+  fun providesPrePopulateFeedQueries(): Array<String> {
+    return arrayOf(
+      // Kottke
+      """
+        INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link)
+        VALUES (
+            'ba2ba021-2f69-55ad-9c21-cdf1a555e9bf',
+            'kottke.org',
+            'https://icon.horse/icon/kottke.org',
+            "Jason Kottke's weblog, home of fine hypertext products since 1998",
+            'https://kottke.org/',
+            (strftime('%s', 'now') * 1000),
+            'https://feeds.kottke.org/main'
+        );
+      """
+        .trimIndent(),
+      // HackerNews
+      """
+        INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link)
+        VALUES (
+            'c90003bd-b1e6-5545-ba59-3d2128d658a7',
+            'HN',
+            'https://icon.horse/icon/news.ycombinator.com',
+            'Links for the intellectually curious, ranked by readers.',
+            'https://news.ycombinator.com/',
+            (strftime('%s', 'now') * 1000),
+            'https://news.ycombinator.com/rss'
+        );
+      """
+        .trimIndent(),
+      // TheVerge
+      """
+        INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link)
+        VALUES (
+            'e8d31cec-2893-54d0-bcae-7f134713e532',
+            'The Verge',
+            'https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1',
+            'The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.',
+            'https://www.theverge.com',
+            (strftime('%s', 'now') * 1000),
+            'https://www.theverge.com/rss/index.xml'
+        );
+      """
+        .trimIndent(),
+      // New York Times > World News
+      """
+        INSERT OR IGNORE INTO feed(id, name, icon, description, homepageLink, createdAt, link)
+        VALUES (
+            '9ef86906-12bd-573a-bc19-ca1f2381793a',
+            'NYT > World News',
+            'https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png',
+            '',
+            'https://www.nytimes.com/section/world',
+            (strftime('%s', 'now') * 1000),
+            'https://rss.nytimes.com/services/xml/rss/nyt/World.xml'
+        );
+      """
+        .trimIndent()
+    )
+  }
+
   @Provides fun providesFeedQueries(database: ReaderDatabase) = database.feedQueries
 
   @Provides fun providesPostQueries(database: ReaderDatabase) = database.postQueries
