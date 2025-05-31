@@ -72,6 +72,7 @@ val ZhTwineStrings =
     settingsPostsDeletionPeriodThreeMonths = "三个月",
     settingsPostsDeletionPeriodSixMonths = "六个月",
     settingsPostsDeletionPeriodOneYear = "一年",
+    settingsPostsDeletionPeriodNever = "Never",
     settingsShowReaderViewTitle = "启用阅读视图",
     settingsShowReaderViewSubtitle = "文章将以简化、易读的视图显示",
     settingsThemeAuto = "Auto",

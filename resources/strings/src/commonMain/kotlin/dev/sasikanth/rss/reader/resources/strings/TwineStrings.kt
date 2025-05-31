@@ -78,6 +78,7 @@ data class TwineStrings(
   val settingsPostsDeletionPeriodThreeMonths: String,
   val settingsPostsDeletionPeriodSixMonths: String,
   val settingsPostsDeletionPeriodOneYear: String,
+  val settingsPostsDeletionPeriodNever: String,
   val settingsShowReaderViewTitle: String,
   val settingsShowReaderViewSubtitle: String,
   val settingsThemeAuto: String,

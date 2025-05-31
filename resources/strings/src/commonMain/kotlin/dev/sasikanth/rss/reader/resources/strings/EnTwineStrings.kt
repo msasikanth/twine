@@ -90,6 +90,7 @@ val EnTwineStrings =
     settingsPostsDeletionPeriodThreeMonths = "3 months",
     settingsPostsDeletionPeriodSixMonths = "6 months",
     settingsPostsDeletionPeriodOneYear = "1 year",
+    settingsPostsDeletionPeriodNever = "Never",
     settingsShowReaderViewTitle = "Enable reader view",
     settingsShowReaderViewSubtitle = "Articles will be shown in a simplified, easy-to-read view",
     settingsThemeAuto = "Auto",
