@@ -184,6 +184,7 @@ object Locales {
   const val DE = "de"
   const val ZH = "zh"
   const val TR = "tr"
+  const val FR = "fr"
 }
 
 expect fun String.fmt(vararg args: Any?): String
