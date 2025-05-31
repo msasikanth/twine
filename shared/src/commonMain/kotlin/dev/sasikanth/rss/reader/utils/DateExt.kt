@@ -27,6 +27,8 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 
 fun Period.calculateInstantBeforePeriod(): Instant {
+  if (this == Period.NEVER) return Instant.DISTANT_PAST
+
   val period =
     when (this) {
       Period.ONE_WEEK -> DateTimePeriod(days = 7)
@@ -34,6 +36,7 @@ fun Period.calculateInstantBeforePeriod(): Instant {
       Period.THREE_MONTHS -> DateTimePeriod(months = 3)
       Period.SIX_MONTHS -> DateTimePeriod(months = 6)
       Period.ONE_YEAR -> DateTimePeriod(years = 1)
+      Period.NEVER -> throw IllegalArgumentException("Period.NEVER should've been returned early")
     }
   val currentMoment = Clock.System.now()
 

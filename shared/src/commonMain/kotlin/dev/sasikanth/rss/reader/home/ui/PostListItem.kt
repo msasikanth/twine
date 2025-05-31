@@ -18,12 +18,14 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -31,13 +33,12 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -63,6 +64,15 @@ private val postListPadding
     when (LocalWindowSizeClass.current.widthSizeClass) {
       WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
       else -> PaddingValues(0.dp)
+    }
+
+private val compactPostListPadding
+  @Composable
+  @ReadOnlyComposable
+  get() =
+    when (LocalWindowSizeClass.current.widthSizeClass) {
+      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
+      else -> PaddingValues(start = 24.dp, end = 12.dp)
     }
 
 @Composable
@@ -139,6 +149,7 @@ internal fun PostListItem(
 @Composable
 internal fun CompactPostListItem(
   item: PostWithMetadata,
+  showDivider: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
@@ -150,46 +161,55 @@ internal fun CompactPostListItem(
   val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
 
-  Row(
-    verticalAlignment = Alignment.CenterVertically,
-    modifier =
-      Modifier.then(modifier)
-        .clickable { onClick() }
-        .padding(vertical = 12.dp)
-        .padding(start = 24.dp, end = 12.dp)
-        .alpha(
-          if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-          else Constants.ITEM_UNREAD_ALPHA
-        )
-  ) {
-    FeedIcon(
-      url = feedIconUrl,
-      contentDescription = null,
-      modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
-    )
+  Box {
+    Row(
+      verticalAlignment = Alignment.CenterVertically,
+      modifier =
+        Modifier.then(modifier)
+          .clickable { onClick() }
+          .padding(vertical = 12.dp)
+          .padding(compactPostListPadding)
+          .alpha(
+            if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+            else Constants.ITEM_UNREAD_ALPHA
+          )
+    ) {
+      FeedIcon(
+        url = feedIconUrl,
+        contentDescription = null,
+        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+      )
 
-    Spacer(Modifier.requiredWidth(16.dp))
+      Spacer(Modifier.requiredWidth(16.dp))
 
-    Text(
-      text = item.title.ifBlank { item.description },
-      style = MaterialTheme.typography.titleSmall,
-      color = AppTheme.colorScheme.onSurface,
-      maxLines = 2,
-      overflow = TextOverflow.Ellipsis,
-      modifier = Modifier.weight(1f)
-    )
+      Text(
+        text = item.title.ifBlank { item.description },
+        style = MaterialTheme.typography.titleSmall,
+        color = AppTheme.colorScheme.onSurface,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.weight(1f)
+      )
 
-    Spacer(Modifier.requiredWidth(16.dp))
+      Spacer(Modifier.requiredWidth(16.dp))
 
-    PostOptionsButtonRow(
-      postLink = item.link,
-      postBookmarked = item.bookmarked,
-      postRead = item.read,
-      config = postMetadataConfig,
-      commentsLink = item.commentsLink,
-      onBookmarkClick = onPostBookmarkClick,
-      onCommentsClick = onPostCommentsClick,
-      togglePostReadClick = togglePostReadClick,
-    )
+      PostOptionsButtonRow(
+        postLink = item.link,
+        postBookmarked = item.bookmarked,
+        postRead = item.read,
+        config = postMetadataConfig,
+        commentsLink = item.commentsLink,
+        onBookmarkClick = onPostBookmarkClick,
+        onCommentsClick = onPostCommentsClick,
+        togglePostReadClick = togglePostReadClick,
+      )
+    }
+
+    if (showDivider) {
+      HorizontalDivider(
+        modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(postListPadding),
+        color = AppTheme.colorScheme.outlineVariant
+      )
+    }
   }
 }
