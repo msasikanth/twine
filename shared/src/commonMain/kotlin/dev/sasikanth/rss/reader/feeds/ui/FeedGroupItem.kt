@@ -49,9 +49,13 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.resources.icons.RadioSelected
 import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.feedGroupFeeds
+import twine.shared.generated.resources.feedGroupNoFeeds
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -138,9 +142,13 @@ internal fun FeedGroupItem(
 
         val text =
           if (feedGroup.feedIds.isEmpty()) {
-            LocalStrings.current.feedGroupNoFeeds
+            stringResource(Res.string.feedGroupNoFeeds)
           } else {
-            LocalStrings.current.feedGroupFeeds(feedGroup.feedIds.size)
+            pluralStringResource(
+              Res.plurals.feedGroupFeeds,
+              feedGroup.feedIds.size,
+              feedGroup.feedIds.size
+            )
           }
 
         Text(

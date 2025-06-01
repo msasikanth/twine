@@ -61,9 +61,13 @@ import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonConfirm
+import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.groupAddNew
 
 @Composable
 fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier = Modifier) {
@@ -119,7 +123,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
               Spacer(Modifier.requiredWidth(8.dp))
 
               Text(
-                text = LocalStrings.current.groupAddNew,
+                text = stringResource(Res.string.groupAddNew),
                 style = MaterialTheme.typography.labelLarge,
                 color = AppTheme.colorScheme.tintedForeground,
               )
@@ -160,7 +164,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
           border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
           onClick = { presenter.dispatch(GroupSelectionEvent.BackClicked) }
         ) {
-          Text(text = LocalStrings.current.buttonGoBack)
+          Text(text = stringResource(Res.string.buttonGoBack))
         }
 
         Spacer(Modifier.requiredWidth(16.dp))
@@ -170,7 +174,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
           enabled = state.areGroupsSelected,
           onClick = { presenter.dispatch(GroupSelectionEvent.OnConfirmGroupSelectionClicked) }
         ) {
-          Text(text = LocalStrings.current.buttonConfirm)
+          Text(text = stringResource(Res.string.buttonConfirm))
         }
       }
     }

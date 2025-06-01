@@ -1,6 +1,7 @@
 # Twine - RSS Reader
 
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
+[![Crowdin](https://badges.crowdin.net/twine-rss-reader/localized.svg)](https://crowdin.com/project/twine-rss-reader)
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
 Twine is a cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
@@ -62,6 +63,11 @@ You can contribute bug fixes to the project via PRs, for anything else open an i
 
 This project uses ktfmt, provided via the spotless gradle plugin, and the bundled project IntelliJ codestyle. Run
 `./gradlew spotlessApply` to format the code before raising a PR.
+
+### Translations
+
+You can help translate project on [Crowdin](https://crowdin.com/project/twine-rss-reader). We use Compose resources
+for strings, you can read more about it [here](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-usage.html#strings).
 
 ## Made with 💖 by
 

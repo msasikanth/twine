@@ -71,10 +71,19 @@ import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.bookmark
+import twine.shared.generated.resources.comments
+import twine.shared.generated.resources.markAsRead
+import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.moreMenuOptions
+import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.share
+import twine.shared.generated.resources.unBookmark
 
 @Composable
 internal fun PostMetadata(
@@ -196,7 +205,7 @@ internal fun PostOptionsButtonRow(
 ) {
   Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
-      val commentsLabel = LocalStrings.current.comments
+      val commentsLabel = stringResource(Res.string.comments)
       PostOptionIconButton(
         modifier =
           Modifier.semantics {
@@ -211,9 +220,9 @@ internal fun PostOptionsButtonRow(
 
     val bookmarkLabel =
       if (postBookmarked) {
-        LocalStrings.current.unBookmark
+        stringResource(Res.string.unBookmark)
       } else {
-        LocalStrings.current.bookmark
+        stringResource(Res.string.bookmark)
       }
     PostOptionIconButton(
       modifier =
@@ -241,7 +250,7 @@ internal fun PostOptionsButtonRow(
       val coroutineScope = rememberCoroutineScope()
       val density = LocalDensity.current
       var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
-      val moreMenuOptionsLabel = LocalStrings.current.moreMenuOptions
+      val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
       PostOptionIconButton(
         modifier =
@@ -266,9 +275,9 @@ internal fun PostOptionsButtonRow(
         if (config.showToggleReadUnreadOption) {
           val markAsReadLabel =
             if (postRead) {
-              LocalStrings.current.markAsUnRead
+              stringResource(Res.string.markAsUnRead)
             } else {
-              LocalStrings.current.markAsRead
+              stringResource(Res.string.markAsRead)
             }
 
           DropdownMenuItem(
@@ -303,7 +312,7 @@ internal fun PostOptionsButtonRow(
         }
 
         val linkHandler = LocalLinkHandler.current
-        val openWebsiteLabel = LocalStrings.current.openWebsite
+        val openWebsiteLabel = stringResource(Res.string.openWebsite)
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),
@@ -330,7 +339,7 @@ internal fun PostOptionsButtonRow(
         )
 
         val shareHandler = LocalShareHandler.current
-        val shareLabel = LocalStrings.current.share
+        val shareLabel = stringResource(Res.string.share)
 
         DropdownMenuItem(
           modifier = Modifier.fillMaxWidth(),

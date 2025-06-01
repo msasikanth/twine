@@ -19,7 +19,6 @@ package dev.sasikanth.rss.reader.about.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -66,40 +65,54 @@ import dev.sasikanth.rss.reader.resources.icons.Threads
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Twitter
 import dev.sasikanth.rss.reader.resources.icons.Website
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.about
+import twine.shared.generated.resources.aboutRoleDesigner
+import twine.shared.generated.resources.aboutRoleDeveloper
+import twine.shared.generated.resources.aboutSocialGitHub
+import twine.shared.generated.resources.aboutSocialThreads
+import twine.shared.generated.resources.aboutSocialTwitter
+import twine.shared.generated.resources.aboutSocialWebsite
 
 @Composable
 internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Modifier) {
   val layoutDirection = LocalLayoutDirection.current
-  val strings = LocalStrings.current
+  val aboutRoleDeveloper = stringResource(Res.string.aboutRoleDeveloper)
+  val aboutRoleDesigner = stringResource(Res.string.aboutRoleDesigner)
+  val aboutSocialThreads = stringResource(Res.string.aboutSocialThreads)
+  val aboutSocialTwitter = stringResource(Res.string.aboutSocialTwitter)
+  val aboutSocialGitHub = stringResource(Res.string.aboutSocialGitHub)
+  val aboutSocialWebsite = stringResource(Res.string.aboutSocialWebsite)
+
   val persons: List<Person> = remember {
     listOf(
       Person(
         name = Constants.ABOUT_SASI_NAME,
-        role = strings.aboutRoleDeveloper,
+        role = aboutRoleDeveloper,
         profilePicture = Constants.ABOUT_SASI_PIC,
         socials =
           listOf(
             Social(
-              service = strings.aboutSocialThreads,
+              service = aboutSocialThreads,
               link = Constants.ABOUT_SASI_THREADS,
               icon = TwineIcons.Threads
             ),
             Social(
-              service = strings.aboutSocialTwitter,
+              service = aboutSocialTwitter,
               link = Constants.ABOUT_SASI_TWITTER,
               icon = TwineIcons.Twitter
             ),
             Social(
-              service = strings.aboutSocialGitHub,
+              service = aboutSocialGitHub,
               link = Constants.ABOUT_SASI_GITHUB,
               icon = TwineIcons.GitHub
             ),
             Social(
-              service = strings.aboutSocialWebsite,
+              service = aboutSocialWebsite,
               link = Constants.ABOUT_SASI_WEBSITE,
               icon = TwineIcons.Website
             ),
@@ -107,17 +120,17 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
       ),
       Person(
         name = Constants.ABOUT_ED_NAME,
-        role = strings.aboutRoleDesigner,
+        role = aboutRoleDesigner,
         profilePicture = Constants.ABOUT_ED_PIC,
         socials =
           listOf(
             Social(
-              service = strings.aboutSocialThreads,
+              service = aboutSocialThreads,
               link = Constants.ABOUT_ED_THREADS,
               icon = TwineIcons.Threads
             ),
             Social(
-              service = strings.aboutSocialTwitter,
+              service = aboutSocialTwitter,
               link = Constants.ABOUT_ED_TWITTER,
               icon = TwineIcons.Twitter
             ),
@@ -131,7 +144,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(strings.about) },
+          title = { Text(stringResource(Res.string.about)) },
           navigationIcon = {
             IconButton(onClick = { aboutPresenter.dispatch(AboutEvent.BackClicked) }) {
               Icon(TwineIcons.ArrowBack, contentDescription = null)
@@ -172,7 +185,6 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
   )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
   val coroutineScope = rememberCoroutineScope()

@@ -78,7 +78,6 @@ kotlin {
       api(projects.core.network)
       api(projects.core.data)
 
-      implementation(projects.resources.strings)
       implementation(projects.resources.icons)
 
       implementation(libs.bundles.compose)

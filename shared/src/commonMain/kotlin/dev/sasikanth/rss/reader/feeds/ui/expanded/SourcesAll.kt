@@ -59,8 +59,14 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.allFeeds
+import twine.shared.generated.resources.editFeeds
+import twine.shared.generated.resources.feedsSortAlphabetical
+import twine.shared.generated.resources.feedsSortLatest
+import twine.shared.generated.resources.feedsSortOldest
 
 internal fun LazyGridScope.allSources(
   numberOfFeeds: Int,
@@ -203,7 +209,7 @@ internal fun AllFeedsHeader(
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
-    val allFeedsLabel = LocalStrings.current.allFeeds
+    val allFeedsLabel = stringResource(Res.string.allFeeds)
 
     Row(
       modifier =
@@ -242,9 +248,9 @@ internal fun AllFeedsHeader(
       ) {
         val orderText =
           when (feedsSortOrder) {
-            FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
-            FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
-            FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+            FeedsOrderBy.Latest -> stringResource(Res.string.feedsSortLatest)
+            FeedsOrderBy.Oldest -> stringResource(Res.string.feedsSortOldest)
+            FeedsOrderBy.Alphabetical -> stringResource(Res.string.feedsSortAlphabetical)
             FeedsOrderBy.Pinned -> {
               throw IllegalStateException(
                 "Cannot use the following feed sort order here: $feedsSortOrder"
@@ -262,7 +268,7 @@ internal fun AllFeedsHeader(
 
         Icon(
           imageVector = Icons.Filled.ExpandMore,
-          contentDescription = LocalStrings.current.editFeeds,
+          contentDescription = stringResource(Res.string.editFeeds),
           tint = AppTheme.colorScheme.tintedForeground
         )
       }
@@ -278,9 +284,9 @@ internal fun AllFeedsHeader(
           .forEach { sortOrder ->
             val label =
               when (sortOrder) {
-                FeedsOrderBy.Latest -> LocalStrings.current.feedsSortLatest
-                FeedsOrderBy.Oldest -> LocalStrings.current.feedsSortOldest
-                FeedsOrderBy.Alphabetical -> LocalStrings.current.feedsSortAlphabetical
+                FeedsOrderBy.Latest -> stringResource(Res.string.feedsSortLatest)
+                FeedsOrderBy.Oldest -> stringResource(Res.string.feedsSortOldest)
+                FeedsOrderBy.Alphabetical -> stringResource(Res.string.feedsSortAlphabetical)
                 FeedsOrderBy.Pinned -> {
                   throw IllegalStateException(
                     "Cannot use the following feed sort order here: $feedsSortOrder"

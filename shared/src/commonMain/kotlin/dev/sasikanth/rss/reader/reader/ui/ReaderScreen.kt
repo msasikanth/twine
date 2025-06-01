@@ -142,7 +142,6 @@ import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
@@ -162,6 +161,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.parser.MarkdownParser
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.bookmark
+import twine.shared.generated.resources.cdLoadFullArticle
+import twine.shared.generated.resources.comingSoon
+import twine.shared.generated.resources.comments
+import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.readerSettings
+import twine.shared.generated.resources.share
+import twine.shared.generated.resources.unBookmark
 
 private val json = Json {
   ignoreUnknownKeys = true
@@ -343,7 +352,7 @@ internal fun ReaderScreen(
               } catch (e: IndexOutOfBoundsException) {
                 null
               }
-            val comingSoonString = LocalStrings.current.comingSoon
+            val comingSoonString = stringResource(Res.string.comingSoon)
 
             if (readerPost != null) {
               BottomBar(
@@ -692,7 +701,7 @@ private fun BottomBar(
 
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
-          label = LocalStrings.current.openWebsite,
+          label = stringResource(Res.string.openWebsite),
           icon = TwineIcons.OpenBrowser,
           onClick = openInBrowserClick,
           minWidth = buttonMinWidth
@@ -700,7 +709,7 @@ private fun BottomBar(
 
         BottomBarToggleIconButton(
           modifier = Modifier.fillMaxHeight().padding(vertical = readerViewToggleVerticalPadding),
-          label = LocalStrings.current.cdLoadFullArticle,
+          label = stringResource(Res.string.cdLoadFullArticle),
           icon = TwineIcons.ArticleShortcut,
           onClick = loadFullArticleClick,
           backgroundColor = readerViewToggleBackgroundColor,
@@ -710,7 +719,7 @@ private fun BottomBar(
 
         BottomBarIconButton(
           modifier = Modifier.padding(vertical = 12.dp),
-          label = LocalStrings.current.readerSettings,
+          label = stringResource(Res.string.readerSettings),
           icon = TwineIcons.Settings,
           onClick = openReaderViewSettings,
           minWidth = buttonMinWidth
@@ -942,7 +951,7 @@ private fun PostOptionsButtonRow(
 ) {
   Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
-      val commentsLabel = LocalStrings.current.comments
+      val commentsLabel = stringResource(Res.string.comments)
       PostOptionIconButton(
         modifier =
           Modifier.semantics {
@@ -955,7 +964,7 @@ private fun PostOptionsButtonRow(
       )
     }
 
-    val sharedLabel = LocalStrings.current.share
+    val sharedLabel = stringResource(Res.string.share)
     PostOptionIconButton(
       modifier =
         Modifier.semantics {
@@ -969,9 +978,9 @@ private fun PostOptionsButtonRow(
 
     val bookmarkLabel =
       if (postBookmarked) {
-        LocalStrings.current.unBookmark
+        stringResource(Res.string.unBookmark)
       } else {
-        LocalStrings.current.bookmark
+        stringResource(Res.string.bookmark)
       }
     PostOptionIconButton(
       modifier =

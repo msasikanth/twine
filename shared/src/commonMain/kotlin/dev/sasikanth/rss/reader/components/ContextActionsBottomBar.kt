@@ -42,8 +42,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonCancel
 
 @Composable
 internal fun ContextActionsBottomBar(
@@ -79,7 +81,10 @@ internal fun ContextActionsBottomBar(
         border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
         onClick = onCancel
       ) {
-        Text(text = LocalStrings.current.buttonCancel, style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = stringResource(Res.string.buttonCancel),
+          style = MaterialTheme.typography.labelLarge
+        )
       }
     }
   }

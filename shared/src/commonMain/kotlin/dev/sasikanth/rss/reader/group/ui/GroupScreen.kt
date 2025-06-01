@@ -67,10 +67,14 @@ import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.UnGroup
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.actionMoveTo
+import twine.shared.generated.resources.actionUngroup
+import twine.shared.generated.resources.groupNameHint
 
 @Composable
 fun GroupScreen(presenter: GroupPresenter, modifier: Modifier = Modifier) {
@@ -130,14 +134,14 @@ fun GroupScreen(presenter: GroupPresenter, modifier: Modifier = Modifier) {
           ContextActionItem(
             modifier = Modifier.weight(1f),
             icon = TwineIcons.NewGroup,
-            label = LocalStrings.current.actionMoveTo,
+            label = stringResource(Res.string.actionMoveTo),
             onClick = { presenter.dispatch(GroupEvent.OnMoveFeedsToClicked) }
           )
 
           ContextActionItem(
             modifier = Modifier.weight(1f),
             icon = TwineIcons.UnGroup,
-            label = LocalStrings.current.actionUngroup,
+            label = stringResource(Res.string.actionUngroup),
             onClick = { presenter.dispatch(GroupEvent.OnUngroupClicked) }
           )
         }
@@ -202,7 +206,7 @@ fun GroupNameTextField(
       onValueChange = { input = it },
       placeholder = {
         Text(
-          text = LocalStrings.current.groupNameHint,
+          text = stringResource(Res.string.groupNameHint),
           color = AppTheme.colorScheme.tintedForeground,
           style = MaterialTheme.typography.bodyLarge
         )

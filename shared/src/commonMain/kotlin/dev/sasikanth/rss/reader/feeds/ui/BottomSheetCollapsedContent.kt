@@ -40,8 +40,11 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.allFeeds
+import twine.shared.generated.resources.noPinnedSources
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -68,7 +71,7 @@ internal fun BottomSheetCollapsedContent(
             1f to Color.Transparent
           )
 
-        val allFeedsLabel = LocalStrings.current.allFeeds
+        val allFeedsLabel = stringResource(Res.string.allFeeds)
 
         HomeBottomBarItem(
           selected = activeSource == null,
@@ -124,7 +127,7 @@ internal fun BottomSheetCollapsedContent(
       ) {
         Text(
           modifier = Modifier.padding(start = 24.dp),
-          text = LocalStrings.current.noPinnedSources,
+          text = stringResource(Res.string.noPinnedSources),
           color = AppTheme.colorScheme.onSurfaceVariant,
           style = MaterialTheme.typography.bodyMedium
         )

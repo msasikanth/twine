@@ -40,10 +40,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.databaseMaintainenceSubtitle
+import twine.shared.generated.resources.databaseMaintainenceTitle
 
 @Composable
 fun PlaceholderScreen(modifier: Modifier = Modifier) {
@@ -77,14 +80,14 @@ fun PlaceholderScreen(modifier: Modifier = Modifier) {
         Spacer(Modifier.requiredHeight(4.dp))
 
         Text(
-          text = LocalStrings.current.databaseMaintainenceTitle,
+          text = stringResource(Res.string.databaseMaintainenceTitle),
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.titleLarge,
           color = AppTheme.colorScheme.textEmphasisHigh,
         )
 
         Text(
-          text = LocalStrings.current.databaseMaintainenceSubtitle,
+          text = stringResource(Res.string.databaseMaintainenceSubtitle),
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.bodySmall,
           color = AppTheme.colorScheme.textEmphasisHigh,

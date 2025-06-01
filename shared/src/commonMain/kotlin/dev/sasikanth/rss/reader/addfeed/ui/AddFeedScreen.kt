@@ -85,15 +85,27 @@ import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
-import dev.sasikanth.rss.reader.resources.strings.TwineStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.flow.collectLatest
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonAddFeed
+import twine.shared.generated.resources.buttonAddToGroup
+import twine.shared.generated.resources.errorFeedNotFound
+import twine.shared.generated.resources.errorMalformedXml
+import twine.shared.generated.resources.errorRequestTimeout
+import twine.shared.generated.resources.errorServer
+import twine.shared.generated.resources.errorTooManyRedirects
+import twine.shared.generated.resources.errorUnAuthorized
+import twine.shared.generated.resources.errorUnknownHttpStatus
+import twine.shared.generated.resources.errorUnsupportedFeed
+import twine.shared.generated.resources.feedEntryLinkHint
+import twine.shared.generated.resources.feedEntryTitleHint
 
 @Composable
 fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
   val state by presenter.state.collectAsState()
-  val strings = LocalStrings.current
   val snackbarHostState = remember { SnackbarHostState() }
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
 
@@ -103,7 +115,7 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
     presenter.effects.collectLatest { effect ->
       when (effect) {
         is AddFeedEffect.ShowError -> {
-          val errorMessage = errorMessageForErrorType(effect.addFeedErrorType, strings)
+          val errorMessage = errorMessageForErrorType(effect.addFeedErrorType)
           if (errorMessage != null) {
             snackbarHostState.showSnackbar(message = errorMessage)
           }
@@ -180,7 +192,7 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
           )
         } else {
           Text(
-            text = LocalStrings.current.buttonAddFeed,
+            text = stringResource(Res.string.buttonAddFeed),
             style = MaterialTheme.typography.labelLarge
           )
         }
@@ -204,7 +216,7 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
             },
           input = feedLink,
           onValueChange = { feedLink = it },
-          hint = LocalStrings.current.feedEntryLinkHint,
+          hint = stringResource(Res.string.feedEntryLinkHint),
           keyboardOptions =
             KeyboardOptions(
               autoCorrectEnabled = false,
@@ -220,7 +232,7 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
             },
           input = feedTitle,
           onValueChange = { feedTitle = it },
-          hint = LocalStrings.current.feedEntryTitleHint,
+          hint = stringResource(Res.string.feedEntryTitleHint),
           keyboardOptions =
             KeyboardOptions(
               autoCorrectEnabled = false,
@@ -282,7 +294,10 @@ fun AddFeedScreen(presenter: AddFeedPresenter, modifier: Modifier = Modifier) {
               ),
             onClick = { presenter.dispatch(AddFeedEvent.OnGroupDropdownClicked) },
             content = {
-              Text(modifier = Modifier.weight(1f), text = LocalStrings.current.buttonAddToGroup)
+              Text(
+                modifier = Modifier.weight(1f),
+                text = stringResource(Res.string.buttonAddToGroup)
+              )
 
               Icon(imageVector = Icons.AutoMirrored.Filled.ArrowRight, contentDescription = null)
             }
@@ -346,20 +361,19 @@ private fun TextField(
   )
 }
 
-private fun errorMessageForErrorType(
-  errorType: AddFeedErrorType,
-  twineStrings: TwineStrings
-): String? {
+private suspend fun errorMessageForErrorType(errorType: AddFeedErrorType): String? {
   return when (errorType) {
-    AddFeedErrorType.UnknownFeedType -> twineStrings.errorUnsupportedFeed
-    AddFeedErrorType.FailedToParseXML -> twineStrings.errorMalformedXml
-    AddFeedErrorType.Timeout -> twineStrings.errorRequestTimeout
+    AddFeedErrorType.UnknownFeedType -> getString(Res.string.errorUnsupportedFeed)
+    AddFeedErrorType.FailedToParseXML -> getString(Res.string.errorMalformedXml)
+    AddFeedErrorType.Timeout -> getString(Res.string.errorRequestTimeout)
     is AddFeedErrorType.Unknown -> errorType.e.message
-    is AddFeedErrorType.FeedNotFound -> twineStrings.errorFeedNotFound(errorType.statusCode.value)
-    is AddFeedErrorType.ServerError -> twineStrings.errorServer(errorType.statusCode.value)
-    AddFeedErrorType.TooManyRedirects -> twineStrings.errorTooManyRedirects
-    is AddFeedErrorType.UnAuthorized -> twineStrings.errorUnAuthorized(errorType.statusCode.value)
+    is AddFeedErrorType.FeedNotFound ->
+      getString(Res.string.errorFeedNotFound, errorType.statusCode.value)
+    is AddFeedErrorType.ServerError -> getString(Res.string.errorServer, errorType.statusCode.value)
+    AddFeedErrorType.TooManyRedirects -> getString(Res.string.errorTooManyRedirects)
+    is AddFeedErrorType.UnAuthorized ->
+      getString(Res.string.errorUnAuthorized, errorType.statusCode.value)
     is AddFeedErrorType.UnknownHttpStatusError ->
-      twineStrings.errorUnknownHttpStatus(errorType.statusCode.value)
+      getString(Res.string.errorUnknownHttpStatus, errorType.statusCode.value)
   }
 }

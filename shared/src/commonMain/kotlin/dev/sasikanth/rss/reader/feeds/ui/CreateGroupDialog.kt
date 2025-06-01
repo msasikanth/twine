@@ -39,8 +39,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonAdd
+import twine.shared.generated.resources.buttonCancel
+import twine.shared.generated.resources.createGroup
+import twine.shared.generated.resources.groupNameHint
 
 @Composable
 internal fun CreateGroupDialog(
@@ -70,20 +75,26 @@ internal fun CreateGroupDialog(
             disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
           )
       ) {
-        Text(text = LocalStrings.current.buttonAdd, style = MaterialTheme.typography.labelLarge)
+        Text(
+          text = stringResource(Res.string.buttonAdd),
+          style = MaterialTheme.typography.labelLarge
+        )
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss, shape = MaterialTheme.shapes.large) {
         Text(
-          text = LocalStrings.current.buttonCancel,
+          text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
       }
     },
     title = {
-      Text(text = LocalStrings.current.createGroup, color = AppTheme.colorScheme.textEmphasisHigh)
+      Text(
+        text = stringResource(Res.string.createGroup),
+        color = AppTheme.colorScheme.textEmphasisHigh
+      )
     },
     text = {
       TextField(
@@ -105,7 +116,7 @@ internal fun CreateGroupDialog(
           ),
         placeholder = {
           Text(
-            text = LocalStrings.current.groupNameHint,
+            text = stringResource(Res.string.groupNameHint),
             color = AppTheme.colorScheme.textEmphasisMed,
             style = MaterialTheme.typography.bodyLarge
           )
