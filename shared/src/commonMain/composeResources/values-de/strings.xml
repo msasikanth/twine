@@ -22,7 +22,7 @@
     <string name="errorFeedNotFound">(%1$s): Unter dem angegebenen Link wurde kein Inhalt gefunden.</string>
     <string name="errorServer">(%1$s): Serverfehler. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Website-Administrator.</string>
     <string name="errorTooManyRedirects">Die angegebene URL enthält zu viele Weiterleitungen. Bitte verwenden Sie eine andere URL.</string>
-    <string name="errorUnauthorized">(%1$s): Sie sind nicht berechtigt, auf Inhalte unter diesem Link zuzugreifen.</string>
+    <string name="errorUnAuthorized">(%1$s): Sie sind nicht berechtigt, auf Inhalte unter diesem Link zuzugreifen.</string>
     <string name="errorUnknownHttpStatus">Inhalt konnte nicht mit HTTP-Code geladen werden: (%1$s)</string>
     <string name="postsSearchHint">Beiträge durchsuchen</string>
     <string name="searchSortNewest">Neueste</string>
@@ -74,7 +74,7 @@
     <string name="aboutRoleDesigner">Designer</string>
     <string name="aboutSocialTwitter">Twitter</string>
     <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGithub">GitHub</string>
+    <string name="aboutSocialGitHub">GitHub</string>
     <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
@@ -91,7 +91,7 @@
     <string name="markAsUnRead">Als ungelesen markieren</string>
     <string name="removeFeed">Feed entfernen</string>
     <string name="delete">Löschen</string>
-    <string name="removeFeedDesc">Möchten Sie "%1$s" entfernen?</string>
+    <string name="removeFeedDesc">Möchten Sie \"%1$s\" entfernen?</string>
     <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
     <string name="getFeedInfo">Informationen bekommen</string>
     <string name="newTag">Neuer Tag</string>
@@ -151,18 +151,15 @@
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
-
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%d Ergebnis</item>
         <item quantity="other">%d Ergebnisse</item>
     </plurals>
-
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d ungelesener Beitrag</item>
         <item quantity="other">%d ungelesene Beiträge</item>
     </plurals>
-
     <plurals name="feedGroupFeeds">
         <item quantity="one">%d Feed</item>
         <item quantity="other">%d Feeds</item>

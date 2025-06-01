@@ -151,18 +151,15 @@
     <string name="homeViewModeDefault">Varsayılan</string>
     <string name="homeViewModeSimple">Basit</string>
     <string name="homeViewModeCompact">Kompakt</string>
-
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%d sonuç</item>
         <item quantity="other">%d sonuç</item>
     </plurals>
-
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d okunmamış makale</item>
         <item quantity="other">%d okunmamış makale</item>
     </plurals>
-
     <plurals name="feedGroupFeeds">
         <item quantity="one">%d akış</item>
         <item quantity="other">%d akış</item>

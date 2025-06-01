@@ -91,7 +91,7 @@
     <string name="markAsUnRead">标记为未读</string>
     <string name="removeFeed">移除订阅</string>
     <string name="delete">删除</string>
-    <string name="removeFeedDesc">您确定要移除 "%1$s"?</string>
+    <string name="removeFeedDesc">您确定要移除 \"%1$s\"?</string>
     <string name="alwaysFetchSourceArticle">始终在阅读视图中获取完整文章</string>
     <string name="getFeedInfo">获取信息</string>
     <string name="newTag">新标签</string>
@@ -135,11 +135,11 @@
     <string name="enableAutoSyncTitle">Enable auto sync</string>
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
     <string name="showFeedFavIconTitle">Show feed fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website\'s favicon</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
-    <string name="blockedWordsEmpty">You haven't blocked any words yet</string>
+    <string name="blockedWordsEmpty">You haven\'t blocked any words yet</string>
     <string name="markArticleAsRead">标记文章为已读</string>
     <string name="markArticleAsReadOnOpen">打开时</string>
     <string name="markArticleAsReadOnScroll">滚动时</string>
@@ -151,16 +151,13 @@
     <string name="homeViewModeDefault">默认</string>
     <string name="homeViewModeSimple">简单</string>
     <string name="homeViewModeCompact">紧凑</string>
-
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%d 个结果</item>
     </plurals>
-
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="other">%1$d 篇未读文章</item>
     </plurals>
-
     <plurals name="feedGroupFeeds">
         <item quantity="other">%1$d 个订阅</item>
     </plurals>
