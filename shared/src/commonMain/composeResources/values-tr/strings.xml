@@ -91,7 +91,7 @@
     <string name="markAsUnRead">Okunmamış olarak işaretle</string>
     <string name="removeFeed">Akışı kaldır</string>
     <string name="delete">Sil</string>
-    <string name="removeFeedDesc">\"%1$s\" akışını kaldırmak istiyor musunuz?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>\"%1$s\"</b>?</string>
     <string name="alwaysFetchSourceArticle">Okuyucu görünümünde her zaman tam makaleleri al</string>
     <string name="getFeedInfo">Bilgi al</string>
     <string name="newTag">Yeni etiket</string>
@@ -153,8 +153,8 @@
     <string name="homeViewModeCompact">Kompakt</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%d sonuç</item>
-        <item quantity="other">%d sonuç</item>
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d okunmamış makale</item>
