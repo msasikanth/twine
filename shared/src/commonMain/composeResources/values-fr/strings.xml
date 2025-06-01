@@ -154,7 +154,7 @@
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>
-        <item quantity="other">%1$d results</item>
+        <item quantity="other">%1$d résultats</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%1$d unread article</item>
