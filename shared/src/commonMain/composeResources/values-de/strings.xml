@@ -22,7 +22,7 @@
     <string name="errorFeedNotFound">(%1$s): Unter dem angegebenen Link wurde kein Inhalt gefunden.</string>
     <string name="errorServer">(%1$s): Serverfehler. Bitte versuchen Sie es später erneut oder kontaktieren Sie den Website-Administrator.</string>
     <string name="errorTooManyRedirects">Die angegebene URL enthält zu viele Weiterleitungen. Bitte verwenden Sie eine andere URL.</string>
-    <string name="errorUnAuthorized">(%1$s): You are not authorized to access content at this link.</string>
+    <string name="errorUnAuthorized">(%1$s): Sie sind nicht berechtigt, auf Inhalte unter diesem Link zuzugreifen.</string>
     <string name="errorUnknownHttpStatus">Inhalt konnte nicht mit HTTP-Code geladen werden: (%1$s)</string>
     <string name="postsSearchHint">Beiträge durchsuchen</string>
     <string name="searchSortNewest">Neueste</string>
