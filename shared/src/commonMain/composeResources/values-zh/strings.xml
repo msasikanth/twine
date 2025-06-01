@@ -91,7 +91,7 @@
     <string name="markAsUnRead">标记为未读</string>
     <string name="removeFeed">移除订阅</string>
     <string name="delete">删除</string>
-    <string name="removeFeedDesc">您确定要移除 \"%1$s\"?</string>
+    <string name="removeFeedDesc">您确定要移除 <b>%1$s</b>?</string>
     <string name="alwaysFetchSourceArticle">始终在阅读视图中获取完整文章</string>
     <string name="getFeedInfo">获取信息</string>
     <string name="newTag">新标签</string>
