@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="appName">Twine</string>
     <string name="postSourceUnknown">Unbekannt</string>
     <string name="buttonAll">ALLE</string>
     <string name="buttonAddFeed">Feed hinzufügen</string>
