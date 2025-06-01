@@ -86,7 +86,6 @@ import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
@@ -97,6 +96,17 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.actionDelete
+import twine.shared.generated.resources.alwaysFetchSourceArticle
+import twine.shared.generated.resources.feedOptionShare
+import twine.shared.generated.resources.feedOptionWebsite
+import twine.shared.generated.resources.feedTitleHint
+import twine.shared.generated.resources.markAsRead
+import twine.shared.generated.resources.noUnreadPostsInFeed
+import twine.shared.generated.resources.numberOfUnreadPostsInFeed
 
 private val HORIZONTAL_PADDING = 24.dp
 
@@ -197,9 +207,13 @@ private fun FeedUnreadCount(
     val hasUnreadPosts = numberOfUnreadPosts > 0
     val text =
       if (hasUnreadPosts) {
-        LocalStrings.current.numberOfUnreadPostsInFeed(numberOfUnreadPosts)
+        pluralStringResource(
+          Res.plurals.numberOfUnreadPostsInFeed,
+          numberOfUnreadPosts.toInt(),
+          numberOfUnreadPosts
+        )
       } else {
-        LocalStrings.current.noUnreadPostsInFeed
+        stringResource(Res.string.noUnreadPostsInFeed)
       }
 
     Text(
@@ -228,7 +242,10 @@ private fun FeedUnreadCount(
 
       Spacer(Modifier.requiredWidth(8.dp))
 
-      Text(text = LocalStrings.current.markAsRead, style = MaterialTheme.typography.labelLarge)
+      Text(
+        text = stringResource(Res.string.markAsRead),
+        style = MaterialTheme.typography.labelLarge
+      )
     }
   }
 }
@@ -259,7 +276,7 @@ private fun FeedLabelInput(
 
     Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
       Text(
-        text = LocalStrings.current.feedTitleHint,
+        text = stringResource(Res.string.feedTitleHint),
         style = MaterialTheme.typography.labelSmall,
         color = AppTheme.colorScheme.textEmphasisMed
       )
@@ -325,21 +342,21 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
   Row(modifier = modifier) {
     FeedOptionItem(
       icon = TwineIcons.Share,
-      text = LocalStrings.current.feedOptionShare,
+      text = stringResource(Res.string.feedOptionShare),
       modifier = Modifier.weight(1f),
       onOptionClick = { shareHandler.share(feed.link) }
     )
 
     FeedOptionItem(
       icon = TwineIcons.Website,
-      text = LocalStrings.current.feedOptionWebsite,
+      text = stringResource(Res.string.feedOptionWebsite),
       modifier = Modifier.weight(1f),
       onOptionClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
     )
 
     FeedOptionItem(
       icon = TwineIcons.DeleteOutline,
-      text = LocalStrings.current.actionDelete,
+      text = stringResource(Res.string.actionDelete),
       modifier = Modifier.weight(1f),
       onOptionClick = { showConfirmDialog = true }
     )
@@ -374,7 +391,7 @@ private fun AlwaysFetchSourceArticleSwitch(
   ) {
     Text(
       modifier = Modifier.weight(1f),
-      text = LocalStrings.current.alwaysFetchSourceArticle,
+      text = stringResource(Res.string.alwaysFetchSourceArticle),
       color = AppTheme.colorScheme.textEmphasisHigh,
       style = MaterialTheme.typography.titleMedium
     )

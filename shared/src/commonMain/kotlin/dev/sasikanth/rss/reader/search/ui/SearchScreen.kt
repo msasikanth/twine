@@ -75,20 +75,31 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
-import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.*
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Newest
+import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Oldest
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.search.SearchEvent
 import dev.sasikanth.rss.reader.search.SearchPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.postsSearchHint
+import twine.shared.generated.resources.scrollToTop
+import twine.shared.generated.resources.searchResultsCount
+import twine.shared.generated.resources.searchSortNewest
+import twine.shared.generated.resources.searchSortNewestFirst
+import twine.shared.generated.resources.searchSortOldest
+import twine.shared.generated.resources.searchSortOldestFirst
 
 @Composable
 internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier = Modifier) {
@@ -127,7 +138,8 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
           if (searchResults.itemCount > 0) {
             item {
               SubHeader(
-                text = LocalStrings.current.searchResultsCount(searchResults.itemCount),
+                text =
+                  pluralStringResource(Res.plurals.searchResultsCount, searchResults.itemCount),
                 modifier = Modifier.padding(top = 8.dp)
               )
             }
@@ -166,7 +178,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
         }
 
         CompactFloatingActionButton(
-          label = LocalStrings.current.scrollToTop,
+          label = stringResource(Res.string.scrollToTop),
           visible = showScrollToTop,
           modifier =
             Modifier.padding(
@@ -235,7 +247,7 @@ private fun SearchBar(
           onValueChange = onQueryChange,
           placeholder = {
             Text(
-              text = LocalStrings.current.postsSearchHint,
+              text = stringResource(Res.string.postsSearchHint),
               color = AppTheme.colorScheme.textEmphasisHigh,
               style = MaterialTheme.typography.bodyLarge
             )
@@ -244,7 +256,7 @@ private fun SearchBar(
             IconButton(onClick = onBackClick) {
               Icon(
                 TwineIcons.ArrowBack,
-                contentDescription = LocalStrings.current.buttonGoBack,
+                contentDescription = stringResource(Res.string.buttonGoBack),
                 tint = AppTheme.colorScheme.onSurface
               )
             }
@@ -310,8 +322,8 @@ private fun SearchSortButton(
       Text(
         text =
           when (sortOrder) {
-            Newest -> LocalStrings.current.searchSortNewest
-            Oldest -> LocalStrings.current.searchSortOldest
+            Newest -> stringResource(Res.string.searchSortNewest)
+            Oldest -> stringResource(Res.string.searchSortOldest)
           },
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.onSurface
@@ -353,13 +365,13 @@ private fun SortDropdownMenu(
   ) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(
-        text = LocalStrings.current.searchSortNewestFirst,
+        text = stringResource(Res.string.searchSortNewestFirst),
         style = MaterialTheme.typography.bodyLarge
       )
     }
     DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
       Text(
-        text = LocalStrings.current.searchSortOldestFirst,
+        text = stringResource(Res.string.searchSortOldestFirst),
         style = MaterialTheme.typography.bodyLarge
       )
     }

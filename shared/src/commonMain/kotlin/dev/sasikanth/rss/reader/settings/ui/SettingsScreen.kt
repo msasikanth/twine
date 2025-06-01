@@ -88,12 +88,52 @@ import dev.sasikanth.rss.reader.opml.OpmlResult
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsPresenter
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.blockedWords
+import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.enableAutoSyncDesc
+import twine.shared.generated.resources.enableAutoSyncTitle
+import twine.shared.generated.resources.markArticleAsRead
+import twine.shared.generated.resources.markArticleAsReadOnOpen
+import twine.shared.generated.resources.markArticleAsReadOnScroll
+import twine.shared.generated.resources.settings
+import twine.shared.generated.resources.settingsAboutSubtitle
+import twine.shared.generated.resources.settingsAboutTitle
+import twine.shared.generated.resources.settingsBrowserTypeSubtitle
+import twine.shared.generated.resources.settingsBrowserTypeTitle
+import twine.shared.generated.resources.settingsHeaderBehaviour
+import twine.shared.generated.resources.settingsHeaderFeedback
+import twine.shared.generated.resources.settingsHeaderOpml
+import twine.shared.generated.resources.settingsHeaderTheme
+import twine.shared.generated.resources.settingsOpmlCancel
+import twine.shared.generated.resources.settingsOpmlExport
+import twine.shared.generated.resources.settingsOpmlExporting
+import twine.shared.generated.resources.settingsOpmlImport
+import twine.shared.generated.resources.settingsOpmlImporting
+import twine.shared.generated.resources.settingsPostsDeletionPeriodNever
+import twine.shared.generated.resources.settingsPostsDeletionPeriodOneMonth
+import twine.shared.generated.resources.settingsPostsDeletionPeriodOneWeek
+import twine.shared.generated.resources.settingsPostsDeletionPeriodOneYear
+import twine.shared.generated.resources.settingsPostsDeletionPeriodSixMonths
+import twine.shared.generated.resources.settingsPostsDeletionPeriodThreeMonths
+import twine.shared.generated.resources.settingsPostsDeletionPeriodTitle
+import twine.shared.generated.resources.settingsReportIssue
+import twine.shared.generated.resources.settingsShowReaderViewSubtitle
+import twine.shared.generated.resources.settingsShowReaderViewTitle
+import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
+import twine.shared.generated.resources.settingsShowUnreadCountTitle
+import twine.shared.generated.resources.settingsThemeAuto
+import twine.shared.generated.resources.settingsThemeDark
+import twine.shared.generated.resources.settingsThemeLight
+import twine.shared.generated.resources.settingsVersion
+import twine.shared.generated.resources.showFeedFavIconDesc
+import twine.shared.generated.resources.showFeedFavIconTitle
 
 @Composable
 internal fun SettingsScreen(
@@ -110,10 +150,13 @@ internal fun SettingsScreen(
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(LocalStrings.current.settings) },
+          title = { Text(stringResource(Res.string.settings)) },
           navigationIcon = {
             IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
-              Icon(TwineIcons.ArrowBack, contentDescription = LocalStrings.current.buttonGoBack)
+              Icon(
+                TwineIcons.ArrowBack,
+                contentDescription = stringResource(Res.string.buttonGoBack)
+              )
             }
           },
           colors =
@@ -144,7 +187,7 @@ internal fun SettingsScreen(
         ) {
           item {
             SubHeader(
-              text = LocalStrings.current.settingsHeaderTheme,
+              text = stringResource(Res.string.settingsHeaderTheme),
             )
           }
 
@@ -156,17 +199,17 @@ internal fun SettingsScreen(
               items =
                 listOf(
                   ToggleableButtonItem(
-                    label = LocalStrings.current.settingsThemeAuto,
+                    label = stringResource(Res.string.settingsThemeAuto),
                     isSelected = appThemeMode == AppThemeMode.Auto,
                     identifier = AppThemeMode.Auto,
                   ),
                   ToggleableButtonItem(
-                    label = LocalStrings.current.settingsThemeLight,
+                    label = stringResource(Res.string.settingsThemeLight),
                     isSelected = appThemeMode == AppThemeMode.Light,
                     identifier = AppThemeMode.Light
                   ),
                   ToggleableButtonItem(
-                    label = LocalStrings.current.settingsThemeDark,
+                    label = stringResource(Res.string.settingsThemeDark),
                     isSelected = appThemeMode == AppThemeMode.Dark,
                     identifier = AppThemeMode.Dark
                   )
@@ -183,7 +226,7 @@ internal fun SettingsScreen(
 
           item {
             SubHeader(
-              text = LocalStrings.current.settingsHeaderBehaviour,
+              text = stringResource(Res.string.settingsHeaderBehaviour),
             )
           }
 
@@ -285,7 +328,7 @@ internal fun SettingsScreen(
 
           item {
             SubHeader(
-              text = LocalStrings.current.settingsHeaderFeedback,
+              text = stringResource(Res.string.settingsHeaderFeedback),
             )
           }
 
@@ -324,7 +367,7 @@ private fun MarkArticleAsReadOnSetting(
   ) {
     Text(
       modifier = Modifier.weight(1f),
-      text = LocalStrings.current.markArticleAsRead,
+      text = stringResource(Res.string.markArticleAsRead),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
@@ -343,8 +386,8 @@ private fun MarkArticleAsReadOnSetting(
       ) {
         val markAsReadOnLabel =
           when (articleMarkAsReadOn) {
-            MarkAsReadOn.Open -> LocalStrings.current.markArticleAsReadOnOpen
-            MarkAsReadOn.Scroll -> LocalStrings.current.markArticleAsReadOnScroll
+            MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
+            MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
           }
 
         Text(
@@ -370,8 +413,8 @@ private fun MarkArticleAsReadOnSetting(
         MarkAsReadOn.entries.forEach { markAsReadOn ->
           val label =
             when (markAsReadOn) {
-              MarkAsReadOn.Open -> LocalStrings.current.markArticleAsReadOnOpen
-              MarkAsReadOn.Scroll -> LocalStrings.current.markArticleAsReadOnScroll
+              MarkAsReadOn.Open -> stringResource(Res.string.markArticleAsReadOnOpen)
+              MarkAsReadOn.Scroll -> stringResource(Res.string.markArticleAsReadOnScroll)
             }
 
           val backgroundColor =
@@ -411,7 +454,7 @@ private fun BlockedWordsSettingItem(onClick: () -> Unit) {
   ) {
     Text(
       modifier = Modifier.weight(1f),
-      text = LocalStrings.current.blockedWords,
+      text = stringResource(Res.string.blockedWords),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
@@ -434,12 +477,12 @@ private fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: (
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.settingsShowReaderViewTitle,
+          stringResource(Res.string.settingsShowReaderViewTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.settingsShowReaderViewSubtitle,
+          stringResource(Res.string.settingsShowReaderViewSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -468,7 +511,7 @@ private fun PostsDeletionPeriodSettingItem(
   ) {
     Text(
       modifier = Modifier.weight(1f),
-      text = LocalStrings.current.settingsPostsDeletionPeriodTitle,
+      text = stringResource(Res.string.settingsPostsDeletionPeriodTitle),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.textEmphasisHigh
     )
@@ -487,12 +530,12 @@ private fun PostsDeletionPeriodSettingItem(
       ) {
         val period =
           when (postsDeletionPeriod) {
-            ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
-            ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
-            THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
-            SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
-            ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
-            NEVER -> LocalStrings.current.settingsPostsDeletionPeriodNever
+            ONE_WEEK -> stringResource(Res.string.settingsPostsDeletionPeriodOneWeek)
+            ONE_MONTH -> stringResource(Res.string.settingsPostsDeletionPeriodOneMonth)
+            THREE_MONTHS -> stringResource(Res.string.settingsPostsDeletionPeriodThreeMonths)
+            SIX_MONTHS -> stringResource(Res.string.settingsPostsDeletionPeriodSixMonths)
+            ONE_YEAR -> stringResource(Res.string.settingsPostsDeletionPeriodOneYear)
+            NEVER -> stringResource(Res.string.settingsPostsDeletionPeriodNever)
             null -> ""
           }
 
@@ -519,12 +562,12 @@ private fun PostsDeletionPeriodSettingItem(
         Period.entries.forEach { period ->
           val periodString =
             when (period) {
-              ONE_WEEK -> LocalStrings.current.settingsPostsDeletionPeriodOneWeek
-              ONE_MONTH -> LocalStrings.current.settingsPostsDeletionPeriodOneMonth
-              THREE_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodThreeMonths
-              SIX_MONTHS -> LocalStrings.current.settingsPostsDeletionPeriodSixMonths
-              ONE_YEAR -> LocalStrings.current.settingsPostsDeletionPeriodOneYear
-              NEVER -> LocalStrings.current.settingsPostsDeletionPeriodNever
+              ONE_WEEK -> stringResource(Res.string.settingsPostsDeletionPeriodOneWeek)
+              ONE_MONTH -> stringResource(Res.string.settingsPostsDeletionPeriodOneMonth)
+              THREE_MONTHS -> stringResource(Res.string.settingsPostsDeletionPeriodThreeMonths)
+              SIX_MONTHS -> stringResource(Res.string.settingsPostsDeletionPeriodSixMonths)
+              ONE_YEAR -> stringResource(Res.string.settingsPostsDeletionPeriodOneYear)
+              NEVER -> stringResource(Res.string.settingsPostsDeletionPeriodNever)
             }
 
           val backgroundColor =
@@ -575,12 +618,12 @@ private fun ShowFeedFavIconSettingItem(
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.showFeedFavIconTitle,
+          stringResource(Res.string.showFeedFavIconTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.showFeedFavIconDesc,
+          stringResource(Res.string.showFeedFavIconDesc),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -612,12 +655,12 @@ private fun AutoSyncSettingItem(enableAutoSync: Boolean, onValueChanged: (Boolea
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.enableAutoSyncTitle,
+          stringResource(Res.string.enableAutoSyncTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.enableAutoSyncDesc,
+          stringResource(Res.string.enableAutoSyncDesc),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -652,12 +695,12 @@ private fun UnreadPostsCountSettingItem(
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.settingsShowUnreadCountTitle,
+          stringResource(Res.string.settingsShowUnreadCountTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.settingsShowUnreadCountSubtitle,
+          stringResource(Res.string.settingsShowUnreadCountSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -700,12 +743,12 @@ private fun BrowserTypeSettingItem(
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.settingsBrowserTypeTitle,
+          stringResource(Res.string.settingsBrowserTypeTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.settingsBrowserTypeSubtitle,
+          stringResource(Res.string.settingsBrowserTypeSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -739,7 +782,7 @@ private fun OPMLSettingItem(
   onCancelClicked: () -> Unit
 ) {
   Column {
-    SubHeader(text = LocalStrings.current.settingsHeaderOpml)
+    SubHeader(text = stringResource(Res.string.settingsHeaderOpml))
 
     when (opmlResult) {
       is OpmlResult.InProgress.Importing,
@@ -766,10 +809,10 @@ private fun OPMLSettingItem(
             val string =
               when (opmlResult) {
                 is OpmlResult.InProgress.Importing -> {
-                  LocalStrings.current.settingsOpmlImporting(opmlResult.progress)
+                  stringResource(Res.string.settingsOpmlImporting, opmlResult.progress)
                 }
                 is OpmlResult.InProgress.Exporting -> {
-                  LocalStrings.current.settingsOpmlExporting(opmlResult.progress)
+                  stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
                 }
                 else -> {
                   ""
@@ -788,7 +831,7 @@ private fun OPMLSettingItem(
                 contentColor = AppTheme.colorScheme.tintedForeground,
               ),
           ) {
-            Text(LocalStrings.current.settingsOpmlCancel)
+            Text(stringResource(Res.string.settingsOpmlCancel))
           }
         }
       }
@@ -805,7 +848,7 @@ private fun OPMLSettingItem(
             modifier = Modifier.weight(1f),
             onClick = onImportClicked,
           ) {
-            Text(LocalStrings.current.settingsOpmlImport)
+            Text(stringResource(Res.string.settingsOpmlImport))
           }
 
           OutlinedButton(
@@ -813,7 +856,7 @@ private fun OPMLSettingItem(
             enabled = hasFeeds,
             onClick = onExportClicked,
           ) {
-            Text(LocalStrings.current.settingsOpmlExport)
+            Text(stringResource(Res.string.settingsOpmlExport))
           }
         }
       }
@@ -833,12 +876,12 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.settingsReportIssue,
+          stringResource(Res.string.settingsReportIssue),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.settingsVersion(appInfo.versionName, appInfo.versionCode),
+          stringResource(Res.string.settingsVersion, appInfo.versionName, appInfo.versionCode),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
@@ -856,12 +899,12 @@ private fun AboutItem(onClick: () -> Unit) {
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
-          LocalStrings.current.settingsAboutTitle,
+          stringResource(Res.string.settingsAboutTitle),
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.textEmphasisHigh
         )
         Text(
-          LocalStrings.current.settingsAboutSubtitle,
+          stringResource(Res.string.settingsAboutSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )

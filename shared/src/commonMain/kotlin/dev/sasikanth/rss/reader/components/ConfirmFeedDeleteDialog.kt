@@ -22,8 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonCancel
+import twine.shared.generated.resources.delete
+import twine.shared.generated.resources.removeFeed
+import twine.shared.generated.resources.removeFeedDesc
 
 @Composable
 internal fun ConfirmFeedDeleteDialog(
@@ -44,7 +49,7 @@ internal fun ConfirmFeedDeleteDialog(
         shape = MaterialTheme.shapes.large
       ) {
         Text(
-          text = LocalStrings.current.delete,
+          text = stringResource(Res.string.delete),
           style = MaterialTheme.typography.labelLarge,
           color = MaterialTheme.colorScheme.error
         )
@@ -53,18 +58,21 @@ internal fun ConfirmFeedDeleteDialog(
     dismissButton = {
       TextButton(onClick = dismiss, shape = MaterialTheme.shapes.large) {
         Text(
-          text = LocalStrings.current.buttonCancel,
+          text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
       }
     },
     title = {
-      Text(text = LocalStrings.current.removeFeed, color = AppTheme.colorScheme.textEmphasisMed)
+      Text(
+        text = stringResource(Res.string.removeFeed),
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
     },
     text = {
       Text(
-        text = LocalStrings.current.removeFeedDesc(feedName),
+        text = stringResource(Res.string.removeFeedDesc, feedName),
         color = AppTheme.colorScheme.textEmphasisMed
       )
     },

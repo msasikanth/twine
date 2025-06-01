@@ -51,7 +51,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,11 +83,25 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.homeAppBarTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.datetime.LocalDateTime
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.bookmarks
+import twine.shared.generated.resources.homeViewMode
+import twine.shared.generated.resources.homeViewModeCompact
+import twine.shared.generated.resources.homeViewModeDefault
+import twine.shared.generated.resources.homeViewModeSimple
+import twine.shared.generated.resources.markAllAsRead
+import twine.shared.generated.resources.moreMenuOptions
+import twine.shared.generated.resources.postsAll
+import twine.shared.generated.resources.postsLast24Hours
+import twine.shared.generated.resources.postsSearchHint
+import twine.shared.generated.resources.postsToday
+import twine.shared.generated.resources.postsUnread
+import twine.shared.generated.resources.settings
 
 private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 
@@ -149,7 +162,7 @@ internal fun HomeTopAppBar(
     ) {
       Icon(
         imageVector = Icons.Rounded.Search,
-        contentDescription = LocalStrings.current.postsSearchHint,
+        contentDescription = stringResource(Res.string.postsSearchHint),
         tint = AppTheme.colorScheme.tintedForeground
       )
     }
@@ -159,7 +172,7 @@ internal fun HomeTopAppBar(
     ) {
       Icon(
         imageVector = Icons.Outlined.BookmarkBorder,
-        contentDescription = LocalStrings.current.bookmarks,
+        contentDescription = stringResource(Res.string.bookmarks),
         tint = AppTheme.colorScheme.tintedForeground
       )
     }
@@ -339,13 +352,12 @@ private fun PostsFilterDropdown(
 }
 
 @Composable
-@ReadOnlyComposable
 private fun getPostTypeLabel(type: PostsType) =
   when (type) {
-    PostsType.ALL -> LocalStrings.current.postsAll
-    PostsType.UNREAD -> LocalStrings.current.postsUnread
-    PostsType.TODAY -> LocalStrings.current.postsToday
-    PostsType.LAST_24_HOURS -> LocalStrings.current.postsLast24Hours
+    PostsType.ALL -> stringResource(Res.string.postsAll)
+    PostsType.UNREAD -> stringResource(Res.string.postsUnread)
+    PostsType.TODAY -> stringResource(Res.string.postsToday)
+    PostsType.LAST_24_HOURS -> stringResource(Res.string.postsLast24Hours)
   }
 
 @Composable
@@ -370,7 +382,7 @@ private fun OverflowMenu(
     ) {
       Icon(
         imageVector = Icons.Rounded.MoreVert,
-        contentDescription = LocalStrings.current.moreMenuOptions,
+        contentDescription = stringResource(Res.string.moreMenuOptions),
         tint = AppTheme.colorScheme.tintedForeground
       )
     }
@@ -383,7 +395,7 @@ private fun OverflowMenu(
       ) {
         if (hasUnreadPosts) {
           OverflowMenuItem(
-            label = LocalStrings.current.markAllAsRead,
+            label = stringResource(Res.string.markAllAsRead),
             icon = Icons.Rounded.DoneOutline,
             onClick = {
               dropdownExpanded = false
@@ -401,13 +413,13 @@ private fun OverflowMenu(
         // TODO: Change menu design and icons once Ed finalises the menu for view modes
         Text(
           modifier = Modifier.padding(vertical = 8.dp, horizontal = 20.dp),
-          text = LocalStrings.current.homeViewMode,
+          text = stringResource(Res.string.homeViewMode),
           style = MaterialTheme.typography.labelMedium,
           color = AppTheme.colorScheme.onSurfaceVariant,
         )
 
         OverflowMenuItem(
-          label = LocalStrings.current.homeViewModeDefault,
+          label = stringResource(Res.string.homeViewModeDefault),
           icon = TwineIcons.DropdownIcon,
           selected = homeViewMode == HomeViewMode.Default,
           padding = PaddingValues(horizontal = 8.dp),
@@ -415,7 +427,7 @@ private fun OverflowMenu(
         )
 
         OverflowMenuItem(
-          label = LocalStrings.current.homeViewModeSimple,
+          label = stringResource(Res.string.homeViewModeSimple),
           icon = TwineIcons.DropdownIcon,
           selected = homeViewMode == HomeViewMode.Simple,
           padding = PaddingValues(horizontal = 8.dp),
@@ -423,7 +435,7 @@ private fun OverflowMenu(
         )
 
         OverflowMenuItem(
-          label = LocalStrings.current.homeViewModeCompact,
+          label = stringResource(Res.string.homeViewModeCompact),
           icon = TwineIcons.DropdownIcon,
           selected = homeViewMode == HomeViewMode.Compact,
           padding = PaddingValues(horizontal = 8.dp),
@@ -437,7 +449,7 @@ private fun OverflowMenu(
         )
 
         OverflowMenuItem(
-          label = LocalStrings.current.settings,
+          label = stringResource(Res.string.settings),
           icon = TwineIcons.Settings,
           onClick = {
             dropdownExpanded = false

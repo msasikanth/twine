@@ -68,10 +68,17 @@ import dev.sasikanth.rss.reader.core.model.local.BlockedWord
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.blockedWords
+import twine.shared.generated.resources.blockedWordsDesc
+import twine.shared.generated.resources.blockedWordsEmpty
+import twine.shared.generated.resources.blockedWordsHint
+import twine.shared.generated.resources.buttonAdd
+import twine.shared.generated.resources.delete
 
 @Composable
 fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Modifier) {
@@ -82,7 +89,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(LocalStrings.current.blockedWords) },
+          title = { Text(stringResource(Res.string.blockedWords)) },
           navigationIcon = {
             IconButton(onClick = { presenter.dispatch(BlockedWordsEvent.BackClicked) }) {
               Icon(TwineIcons.ArrowBack, contentDescription = null)
@@ -158,7 +165,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           ),
         placeholder = {
           Text(
-            text = LocalStrings.current.blockedWordsHint,
+            text = stringResource(Res.string.blockedWordsHint),
             style = MaterialTheme.typography.labelLarge,
             color = AppTheme.colorScheme.textEmphasisHigh
           )
@@ -178,7 +185,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
             ) {
               Icon(
                 imageVector = Icons.Rounded.Check,
-                contentDescription = LocalStrings.current.buttonAdd
+                contentDescription = stringResource(Res.string.buttonAdd)
               )
             }
           }
@@ -192,7 +199,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           Column {
             Text(
               modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
-              text = LocalStrings.current.blockedWordsDesc,
+              text = stringResource(Res.string.blockedWordsDesc),
               style = MaterialTheme.typography.labelLarge,
               color = AppTheme.colorScheme.textEmphasisMed
             )
@@ -208,7 +215,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           item {
             Text(
               modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
-              text = LocalStrings.current.blockedWordsEmpty,
+              text = stringResource(Res.string.blockedWordsEmpty),
               style = MaterialTheme.typography.labelLarge,
               color = AppTheme.colorScheme.textEmphasisMed,
               textAlign = TextAlign.Center,
@@ -258,7 +265,10 @@ private fun BlockedWordItem(
     )
 
     IconButton(onClick = removeClicked) {
-      Icon(imageVector = TwineIcons.DeleteOutline, contentDescription = LocalStrings.current.delete)
+      Icon(
+        imageVector = TwineIcons.DeleteOutline,
+        contentDescription = stringResource(Res.string.delete)
+      )
     }
   }
 }
