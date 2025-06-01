@@ -83,12 +83,25 @@ import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.rememberReorderableLazyGridState
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.actionAddTo
+import twine.shared.generated.resources.actionDelete
+import twine.shared.generated.resources.actionGroupsTooltip
+import twine.shared.generated.resources.actionPin
+import twine.shared.generated.resources.actionUnpin
+import twine.shared.generated.resources.buttonCancel
+import twine.shared.generated.resources.delete
+import twine.shared.generated.resources.edit
+import twine.shared.generated.resources.feedsSearchHint
+import twine.shared.generated.resources.removeSources
+import twine.shared.generated.resources.removeSourcesDesc
+import twine.shared.generated.resources.settings
 
 @Composable
 internal fun BottomSheetExpandedContent(
@@ -142,7 +155,7 @@ internal fun BottomSheetExpandedContent(
           val areGroupsSelected = state.selectedSources.any { it is FeedGroup }
           val tooltip: @Composable (() -> Unit)? =
             if (areGroupsSelected) {
-              { Text(text = LocalStrings.current.actionGroupsTooltip) }
+              { Text(text = stringResource(Res.string.actionGroupsTooltip)) }
             } else {
               null
             }
@@ -154,8 +167,8 @@ internal fun BottomSheetExpandedContent(
             val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
 
             val pinActionLabel =
-              if (areSelectedFeedsPinned) LocalStrings.current.actionUnpin
-              else LocalStrings.current.actionPin
+              if (areSelectedFeedsPinned) stringResource(Res.string.actionUnpin)
+              else stringResource(Res.string.actionPin)
 
             ContextActionItem(
               modifier = Modifier.weight(1f),
@@ -173,7 +186,7 @@ internal fun BottomSheetExpandedContent(
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.NewGroup,
-              label = LocalStrings.current.actionAddTo,
+              label = stringResource(Res.string.actionAddTo),
               enabled = !areGroupsSelected,
               onClick = { feedsPresenter.dispatch(FeedsEvent.OnAddToGroupClicked) }
             )
@@ -181,7 +194,7 @@ internal fun BottomSheetExpandedContent(
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Delete,
-              label = LocalStrings.current.actionDelete,
+              label = stringResource(Res.string.actionDelete),
               onClick = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
             )
 
@@ -194,9 +207,9 @@ internal fun BottomSheetExpandedContent(
                 }
               val editLabel =
                 if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
-                  LocalStrings.current.edit
+                  stringResource(Res.string.edit)
                 } else {
-                  LocalStrings.current.settings
+                  stringResource(Res.string.settings)
                 }
 
               ContextActionItem(
@@ -343,7 +356,7 @@ private fun SearchBar(
         onValueChange = onQueryChange,
         placeholder = {
           Text(
-            text = LocalStrings.current.feedsSearchHint,
+            text = stringResource(Res.string.feedsSearchHint),
             color = AppTheme.colorScheme.tintedForeground,
             style = MaterialTheme.typography.bodyLarge
           )
@@ -418,7 +431,7 @@ fun DeleteConfirmationDialog(
         shape = MaterialTheme.shapes.large
       ) {
         Text(
-          text = LocalStrings.current.delete,
+          text = stringResource(Res.string.delete),
           style = MaterialTheme.typography.labelLarge,
           color = MaterialTheme.colorScheme.error
         )
@@ -427,18 +440,21 @@ fun DeleteConfirmationDialog(
     dismissButton = {
       TextButton(onClick = dismiss, shape = MaterialTheme.shapes.large) {
         Text(
-          text = LocalStrings.current.buttonCancel,
+          text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
       }
     },
     title = {
-      Text(text = LocalStrings.current.removeSources, color = AppTheme.colorScheme.textEmphasisMed)
+      Text(
+        text = stringResource(Res.string.removeSources),
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
     },
     text = {
       Text(
-        text = LocalStrings.current.removeSourcesDesc,
+        text = stringResource(Res.string.removeSourcesDesc),
         color = AppTheme.colorScheme.textEmphasisMed
       )
     },

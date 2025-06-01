@@ -39,8 +39,11 @@ import dev.sasikanth.rss.reader.components.BottomBarWithGradientShadow
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.feedsBottomBarNewFeed
+import twine.shared.generated.resources.feedsBottomBarNewGroup
 
 @Composable
 internal fun BottomSheetExpandedBottomBar(
@@ -52,7 +55,7 @@ internal fun BottomSheetExpandedBottomBar(
     Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
       BottomBarItem(
         icon = TwineIcons.NewGroup,
-        label = LocalStrings.current.feedsBottomBarNewGroup,
+        label = stringResource(Res.string.feedsBottomBarNewGroup),
         modifier = Modifier.weight(1f),
         onClick = onNewGroupClick
       )
@@ -69,7 +72,7 @@ internal fun BottomSheetExpandedBottomBar(
 
       BottomBarItem(
         icon = TwineIcons.RSS,
-        label = LocalStrings.current.feedsBottomBarNewFeed,
+        label = stringResource(Res.string.feedsBottomBarNewFeed),
         modifier = Modifier.weight(1f),
         onClick = onNewFeedClick
       )

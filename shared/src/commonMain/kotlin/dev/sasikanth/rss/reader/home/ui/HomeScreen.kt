@@ -81,7 +81,6 @@ import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
-import dev.sasikanth.rss.reader.resources.strings.LocalStrings
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
@@ -92,6 +91,13 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.noFeeds
+import twine.shared.generated.resources.noNewPosts
+import twine.shared.generated.resources.noNewPostsSubtitle
+import twine.shared.generated.resources.scrollToTop
+import twine.shared.generated.resources.swipeUpGetStarted
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
@@ -290,7 +296,7 @@ internal fun HomeScreen(
               )
 
               CompactFloatingActionButton(
-                label = LocalStrings.current.scrollToTop,
+                label = stringResource(Res.string.scrollToTop),
                 visible = showScrollToTop,
                 modifier =
                   Modifier.padding(
@@ -354,7 +360,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     verticalArrangement = Arrangement.Center
   ) {
     Text(
-      text = LocalStrings.current.noFeeds,
+      text = stringResource(Res.string.noFeeds),
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh,
       textAlign = TextAlign.Center
@@ -363,7 +369,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Spacer(Modifier.requiredHeight(8.dp))
 
     Text(
-      text = LocalStrings.current.swipeUpGetStarted,
+      text = stringResource(Res.string.swipeUpGetStarted),
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed,
       textAlign = TextAlign.Center
@@ -397,7 +403,7 @@ private fun NoNewPosts() {
     Spacer(Modifier.requiredHeight(12.dp))
 
     Text(
-      text = LocalStrings.current.noNewPosts,
+      text = stringResource(Res.string.noNewPosts),
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh,
       textAlign = TextAlign.Center
@@ -406,7 +412,7 @@ private fun NoNewPosts() {
     Spacer(Modifier.requiredHeight(8.dp))
 
     Text(
-      text = LocalStrings.current.noNewPostsSubtitle,
+      text = stringResource(Res.string.noNewPostsSubtitle),
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed,
       textAlign = TextAlign.Center
