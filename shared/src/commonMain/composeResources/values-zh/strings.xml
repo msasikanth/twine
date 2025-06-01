@@ -91,7 +91,7 @@
     <string name="markAsUnRead">标记为未读</string>
     <string name="removeFeed">移除订阅</string>
     <string name="delete">删除</string>
-    <string name="removeFeedDesc">您确定要移除 <b>%1$s</b>?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>\"%1$s\"</b>?</string>
     <string name="alwaysFetchSourceArticle">始终在阅读视图中获取完整文章</string>
     <string name="getFeedInfo">获取信息</string>
     <string name="newTag">新标签</string>
@@ -153,7 +153,7 @@
     <string name="homeViewModeCompact">紧凑</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="other">%d 个结果</item>
+        <item quantity="other">%1$d results</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="other">%1$d 篇未读文章</item>
