@@ -91,7 +91,7 @@
     <string name="markAsUnRead">Als ungelesen markieren</string>
     <string name="removeFeed">Feed entfernen</string>
     <string name="delete">Löschen</string>
-    <string name="removeFeedDesc">Möchten Sie <b>%1$s</b> entfernen?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>\"%1$s\"</b>?</string>
     <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
     <string name="getFeedInfo">Informationen bekommen</string>
     <string name="newTag">Neuer Tag</string>
@@ -153,8 +153,8 @@
     <string name="homeViewModeCompact">Kompakt</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%d Ergebnis</item>
-        <item quantity="other">%d Ergebnisse</item>
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d ungelesener Beitrag</item>
