@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="appName">Twine</string>
     <string name="postSourceUnknown">未知</string>
     <string name="buttonAll">全部</string>
     <string name="buttonAddFeed">添加订阅</string>
