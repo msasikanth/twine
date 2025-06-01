@@ -2,6 +2,7 @@
   {
     "source": "/shared/src/commonMain/composeResources/values/strings.xml",
     "translation": "/shared/src/commonMain/composeResources/values-%two_letters_code%/strings.xml",
-    "escape_special_characters": 0
+    "escape_special_characters": 0,
+    "escape_quotes": 0
   }
 ]
