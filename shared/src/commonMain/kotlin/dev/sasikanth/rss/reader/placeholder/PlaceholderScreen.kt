@@ -41,12 +41,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.databaseMaintainenceSubtitle
 import twine.shared.generated.resources.databaseMaintainenceTitle
-import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun PlaceholderScreen(modifier: Modifier = Modifier) {
