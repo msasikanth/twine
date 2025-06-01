@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="appName">Twine</string>
     <string name="postSourceUnknown">Bilinmiyor</string>
     <string name="buttonAll">TÜMÜ</string>
     <string name="buttonAddFeed">Akış ekle</string>
