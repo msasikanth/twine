@@ -91,7 +91,7 @@
     <string name="markAsUnRead">Mark as unread</string>
     <string name="removeFeed">Remove feed</string>
     <string name="delete">Delete</string>
-    <string name="removeFeedDesc">Do you want to remove "%1$s"?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
     <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
     <string name="getFeedInfo">Get Info</string>
     <string name="newTag">New tag</string>
@@ -154,8 +154,8 @@
 
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%d result</item>
-        <item quantity="other">%d results</item>
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
     </plurals>
 
     <plurals name="numberOfUnreadPostsInFeed">
