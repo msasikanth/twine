@@ -22,7 +22,7 @@
     <string name="errorRequestTimeout">Zaman aşımı, ağ bağlantınızı kontrol edin ve daha sonra tekrar deneyin.</string>
     <string name="errorFeedNotFound">(%1$s): Verilen bağlantıda içerik bulunamadı.</string>
     <string name="errorServer">(%1$s): Sunucu hatası. Lütfen daha sonra tekrar deneyin veya web sitesi yöneticisiyle iletişime geçin.</string>
-    <string name="errorTooManyRedirects">Verilen URL\'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.</string>
+    <string name="errorTooManyRedirects">Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.</string>
     <string name="errorUnAuthorized">(%1$s): Bu bağlantıdaki içeriğe erişim yetkiniz yok.</string>
     <string name="errorUnknownHttpStatus">İçerik yüklenemedi, HTTP kodu: (%1$s)</string>
     <string name="postsSearchHint">Gönderilerde ara</string>
@@ -92,7 +92,7 @@
     <string name="markAsUnRead">Okunmamış olarak işaretle</string>
     <string name="removeFeed">Akışı kaldır</string>
     <string name="delete">Sil</string>
-    <string name="removeFeedDesc">Do you want to remove <b>\"%1$s\"</b>?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
     <string name="alwaysFetchSourceArticle">Okuyucu görünümünde her zaman tam makaleleri al</string>
     <string name="getFeedInfo">Bilgi al</string>
     <string name="newTag">Yeni etiket</string>
@@ -135,8 +135,8 @@
     <string name="cdLoadFullArticle">Tam makaleyi yükle</string>
     <string name="enableAutoSyncTitle">Otomatik senkronizasyonu etkinleştir</string>
     <string name="enableAutoSyncDesc">Açıldığında, akışlar arka planda güncellenir</string>
-    <string name="showFeedFavIconTitle">Akış favicon\'unu göster</string>
-    <string name="showFeedFavIconDesc">Kapalı olduğunda, web sitesinin favicon\'u yerine akış simgesi gösterilir</string>
+    <string name="showFeedFavIconTitle">Akış favicon'unu göster</string>
+    <string name="showFeedFavIconDesc">Kapalı olduğunda, web sitesinin favicon'u yerine akış simgesi gösterilir</string>
     <string name="blockedWords">Engellenen kelimeler</string>
     <string name="blockedWordsHint">Bir kelime girin</string>
     <string name="blockedWordsDesc">Gönderiler, metinlerine göre ana ekrandan gizlenebilir. Çok yaygın kelimeler kullanmaktan kaçınmanızı öneririz, çünkü bu, hiçbir gönderinin gösterilmemesine veya uygulamanın performansının olumsuz etkilenmesine neden olabilir. \n\nGizlenen gönderiler arama ve yer işaretlerinde hâlâ görünecektir.</string>
