@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="appName">Twine</string>
     <string name="postSourceUnknown">Unknown</string>
     <string name="buttonAll">ALL</string>
     <string name="buttonAddFeed">Add feed</string>
@@ -16,8 +17,8 @@
     <string name="swipeUpGetStarted">Swipe up to get started</string>
     <string name="feedNameHint">Feed name</string>
     <string name="editFeedName">Edit</string>
-    <string name="errorUnsupportedFeed">Link doesn\'t contain any RSS/Atom feed.</string>
-    <string name="errorMalformedXml">Provided link doesn\'t contain valid RSS/Atom feed</string>
+    <string name="errorUnsupportedFeed">Link doesn't contain any RSS/Atom feed.</string>
+    <string name="errorMalformedXml">Provided link doesn't contain valid RSS/Atom feed</string>
     <string name="errorRequestTimeout">Timeout, check your network connection and try again later</string>
     <string name="errorFeedNotFound">(%1$s): No content found at the given link.</string>
     <string name="errorServer">(%1$s): Server error. Please try again later or contact the website administrator.</string>
@@ -91,7 +92,7 @@
     <string name="markAsUnRead">Mark as unread</string>
     <string name="removeFeed">Remove feed</string>
     <string name="delete">Delete</string>
-    <string name="removeFeedDesc">Do you want to remove \"%1$s\"?</string>
+    <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
     <string name="alwaysFetchSourceArticle">Always fetch full articles in reader view</string>
     <string name="getFeedInfo">Get Info</string>
     <string name="newTag">New tag</string>
@@ -100,7 +101,7 @@
     <string name="tagNameHint">Name</string>
     <string name="tagSaveButton">Save</string>
     <string name="deleteTagTitle">Delete tag?</string>
-    <string name="deleteTagDesc">Tag will be deleted and removed from all the assigned feeds. Your feeds won\'t be deleted</string>
+    <string name="deleteTagDesc">Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted</string>
     <string name="feedOptionShare">Share</string>
     <string name="feedOptionWebsite">Website</string>
     <string name="feedOptionRemove">Remove</string>
@@ -130,16 +131,16 @@
     <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
     <string name="noPinnedSources">No pinned feeds/groups</string>
     <string name="databaseMaintainenceTitle">Please wait...</string>
-    <string name="databaseMaintainenceSubtitle">Performing database maintainence, don\'t close the app</string>
+    <string name="databaseMaintainenceSubtitle">Performing database maintainence, don't close the app</string>
     <string name="cdLoadFullArticle">Load full article</string>
     <string name="enableAutoSyncTitle">Enable auto sync</string>
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
     <string name="showFeedFavIconTitle">Show feed fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website\'s favicon</string>
+    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
-    <string name="blockedWordsEmpty">You haven\'t blocked any words yet</string>
+    <string name="blockedWordsEmpty">You haven't blocked any words yet</string>
     <string name="markArticleAsRead">Mark article as read</string>
     <string name="markArticleAsReadOnOpen">On Open</string>
     <string name="markArticleAsReadOnScroll">On Scroll</string>
@@ -153,8 +154,8 @@
     <string name="homeViewModeCompact">Compact</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%d result</item>
-        <item quantity="other">%d results</item>
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%1$d unread article</item>

@@ -40,11 +40,9 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.DoneOutline
 import androidx.compose.material.icons.rounded.DoneOutline
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -410,43 +408,46 @@ private fun OverflowMenu(
           )
         }
 
-        // TODO: Change menu design and icons once Ed finalises the menu for view modes
-        Text(
-          modifier = Modifier.padding(vertical = 8.dp, horizontal = 20.dp),
-          text = stringResource(Res.string.homeViewMode),
-          style = MaterialTheme.typography.labelMedium,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
+        val homeViewModesFeatureFlag = false
+        if (homeViewModesFeatureFlag) {
+          // TODO: Change menu design and icons once Ed finalises the menu for view modes
+          Text(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 20.dp),
+            text = stringResource(Res.string.homeViewMode),
+            style = MaterialTheme.typography.labelMedium,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+          )
 
-        OverflowMenuItem(
-          label = stringResource(Res.string.homeViewModeDefault),
-          icon = TwineIcons.DropdownIcon,
-          selected = homeViewMode == HomeViewMode.Default,
-          padding = PaddingValues(horizontal = 8.dp),
-          onClick = { onChangeHomeViewMode(HomeViewMode.Default) }
-        )
+          OverflowMenuItem(
+            label = stringResource(Res.string.homeViewModeDefault),
+            icon = TwineIcons.DropdownIcon,
+            selected = homeViewMode == HomeViewMode.Default,
+            padding = PaddingValues(horizontal = 8.dp),
+            onClick = { onChangeHomeViewMode(HomeViewMode.Default) }
+          )
 
-        OverflowMenuItem(
-          label = stringResource(Res.string.homeViewModeSimple),
-          icon = TwineIcons.DropdownIcon,
-          selected = homeViewMode == HomeViewMode.Simple,
-          padding = PaddingValues(horizontal = 8.dp),
-          onClick = { onChangeHomeViewMode(HomeViewMode.Simple) }
-        )
+          OverflowMenuItem(
+            label = stringResource(Res.string.homeViewModeSimple),
+            icon = TwineIcons.DropdownIcon,
+            selected = homeViewMode == HomeViewMode.Simple,
+            padding = PaddingValues(horizontal = 8.dp),
+            onClick = { onChangeHomeViewMode(HomeViewMode.Simple) }
+          )
 
-        OverflowMenuItem(
-          label = stringResource(Res.string.homeViewModeCompact),
-          icon = TwineIcons.DropdownIcon,
-          selected = homeViewMode == HomeViewMode.Compact,
-          padding = PaddingValues(horizontal = 8.dp),
-          onClick = { onChangeHomeViewMode(HomeViewMode.Compact) }
-        )
+          OverflowMenuItem(
+            label = stringResource(Res.string.homeViewModeCompact),
+            icon = TwineIcons.DropdownIcon,
+            selected = homeViewMode == HomeViewMode.Compact,
+            padding = PaddingValues(horizontal = 8.dp),
+            onClick = { onChangeHomeViewMode(HomeViewMode.Compact) }
+          )
 
-        HorizontalDivider(
-          modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-          thickness = 2.dp,
-          color = AppTheme.colorScheme.surfaceContainerHigh
-        )
+          HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            thickness = 2.dp,
+            color = AppTheme.colorScheme.surfaceContainerHigh
+          )
+        }
 
         OverflowMenuItem(
           label = stringResource(Res.string.settings),
