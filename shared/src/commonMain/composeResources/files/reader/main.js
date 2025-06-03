@@ -14,16 +14,17 @@ function isRedditUrl(url) {
 
 function formatRedditPost(html) {
   const imagePattern = /<a href="([^"]+)">\s*<img src="([^"]+)"\s*alt="([^"]+)" title="([^"]+)"\s*\/>\s*<\/a>/;
-  const submitterPattern = /submitted by\s*<a href="([^"]+)">\s*\/u\/([^<\s]+)/;
+  const submitterPattern = /(?:submitted by\s*<a href="([^"]+)">|user\/([^"]+)[^<]*<\/a>)/;
   const divMdPattern = /(?:<!-- SC_OFF -->)?\s*<div class="md">([\s\S]*?)<\/div>\s*(?:<!-- SC_ON -->)?/;
 
   const imageMatch = html.match(imagePattern);
-  let submitterMatch = html.match(submitterPattern) || html.match(/user\/([^"]+)[^<]*<\/a>/);
+  let submitterMatch = html.match(submitterPattern);
+  let divMdMatch = html.match(divMdPattern);
 
   if (!submitterMatch) return null;
 
   const userUrl = submitterMatch[1];
-  const username = submitterMatch[2].trim();
+  const username = submitterMatch[2] ? submitterMatch[2].trim() : '';
   const divContent = divMdMatch ? divMdMatch[1].trim() : null;
 
   let result = "<table>\n";
