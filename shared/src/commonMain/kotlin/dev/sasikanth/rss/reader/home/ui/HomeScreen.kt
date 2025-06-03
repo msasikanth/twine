@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
@@ -197,7 +198,7 @@ internal fun HomeScreen(
               val hasFeeds = state.hasFeeds
               val swipeRefreshState =
                 rememberPullRefreshState(
-                  refreshing = state.isRefreshing,
+                  refreshing = state.isRefreshing || posts?.loadState?.refresh is LoadState.Loading,
                   onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) }
                 )
               val canSwipeToRefresh = hasFeeds == true
@@ -232,7 +233,15 @@ internal fun HomeScreen(
                       hasFeeds == null || posts == null -> {
                         // no-op
                       }
-                      posts.itemCount > 0 -> {
+                      !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
+                        NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
+                      }
+                      featuredPosts.isEmpty() &&
+                        posts.itemCount == 0 &&
+                        posts.loadState.refresh is LoadState.NotLoading -> {
+                        NoNewPosts()
+                      }
+                      else -> {
                         PostsList(
                           modifier = Modifier.nestedScroll(nestedScrollConnection),
                           paddingValues = paddingValues,
@@ -268,18 +277,13 @@ internal fun HomeScreen(
                           }
                         )
                       }
-                      !hasFeeds -> {
-                        NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
-                      }
-                      featuredPosts.isEmpty() && posts.itemCount == 0 -> {
-                        NoNewPosts()
-                      }
                     }
 
                     PullRefreshIndicator(
-                      refreshing = state.isRefreshing,
+                      modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
+                      refreshing =
+                        state.isRefreshing || posts?.loadState?.refresh is LoadState.Loading,
                       state = swipeRefreshState,
-                      modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter)
                     )
                   }
                 },
