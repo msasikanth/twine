@@ -442,14 +442,9 @@ fun featuredPosts(
   homeViewMode: HomeViewMode
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
-  return remember(posts?.loadState, homeViewMode) {
+  return remember(posts?.itemSnapshotList?.items, homeViewMode) {
     flow {
-      if (homeViewMode != HomeViewMode.Default) {
-        emit(persistentListOf())
-        return@flow
-      }
-
-      if (posts == null || posts.itemCount == 0) {
+      if (homeViewMode != HomeViewMode.Default || posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
         return@flow
       }
