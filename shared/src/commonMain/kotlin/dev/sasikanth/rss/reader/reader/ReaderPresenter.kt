@@ -31,7 +31,9 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.*
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.getLast24HourStart
 import dev.sasikanth.rss.reader.utils.getTodayStartInstant
@@ -142,6 +144,7 @@ class ReaderPresenter(
 
     private fun postPageChange(post: PostWithMetadata) {
       openedPostItems += post.id
+      _state.update { it.copy(activePostId = post.id) }
     }
 
     private fun loadFullArticleClicked(postId: String) {
