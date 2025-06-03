@@ -98,7 +98,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
-import app.cash.paging.compose.itemKey
 import com.adamglin.composeshadow.dropShadow
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
@@ -184,146 +183,121 @@ internal fun ReaderScreen(
   presenter: ReaderPresenter,
   modifier: Modifier = Modifier
 ) {
+  val coroutineScope = rememberCoroutineScope()
   val state by presenter.state.collectAsState()
   val posts = state.posts.collectAsLazyPagingItems()
+  val linkHandler = LocalLinkHandler.current
+  val seedColorExtractor = LocalSeedColorExtractor.current
+  // Using theme colors as default from the home screen
+  // before we create dynamic content theme
+  val dynamicColorState =
+    rememberDynamicColorState(
+      defaultLightAppColorScheme = LocalAppColorScheme.current,
+      defaultDarkAppColorScheme = LocalAppColorScheme.current,
+      useTonalSpotScheme = true,
+    )
+  val defaultSeedColor = AppTheme.colorScheme.tintedForeground
+  val readerLinkHandler = remember {
+    object : UriHandler {
+      override fun openUri(uri: String) {
+        coroutineScope.launch { linkHandler.openLink(uri) }
+      }
+    }
+  }
+  val pagerState = rememberPagerState { posts.itemCount }
 
-  if (posts.loadState.refresh is LoadState.NotLoading) {
-    val coroutineScope = rememberCoroutineScope()
+  // Dynamic theme animator
+  LaunchedEffect(pagerState, posts.loadState) {
+    snapshotFlow {
+        val settledPage = pagerState.settledPage
+        try {
+          pagerState.getOffsetFractionForPage(settledPage)
+        } catch (e: Throwable) {
+          0f
+        }
+      }
+      .collect { offset ->
+        val settledPage = pagerState.settledPage
+        val activePost = runCatching { posts.peek(settledPage) }.getOrNull()
+
+        if (activePost != null) {
+          // The default snap position of the pager is 0.5f, that means the targetPage
+          // state only changes after reaching half way point. We instead want it to scale
+          // as we start swiping.
+          //
+          // Instead of using EPSILON for snap threshold, we are doing that calculation
+          // as the page offset changes
+          //
+          val fromItem =
+            if (offset < -EPSILON) {
+              runCatching { posts.peek(settledPage - 1) }.getOrNull()
+            } else {
+              activePost
+            }
+
+          val toItem =
+            if (offset > EPSILON) {
+              runCatching { posts.peek(settledPage + 1) }.getOrNull()
+            } else {
+              activePost
+            }
+
+          val fromSeedColor =
+            seedColorExtractor.calculateSeedColor(fromItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+          val toSeedColor =
+            seedColorExtractor.calculateSeedColor(toItem?.imageUrl).run {
+              if (this != null) Color(this) else defaultSeedColor
+            }
+
+          dynamicColorState.animate(
+            fromSeedColor = fromSeedColor,
+            toSeedColor = toSeedColor,
+            progress = offset
+          )
+        }
+      }
+  }
+
+  CompositionLocalProvider(
+    LocalDynamicColorState provides dynamicColorState,
+    LocalUriHandler provides readerLinkHandler
+  ) {
+    val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val linkHandler = LocalLinkHandler.current
-    val seedColorExtractor = LocalSeedColorExtractor.current
-    // Using theme colors as default from the home screen
-    // before we create dynamic content theme
-    val dynamicColorState =
-      rememberDynamicColorState(
-        defaultLightAppColorScheme = LocalAppColorScheme.current,
-        defaultDarkAppColorScheme = LocalAppColorScheme.current,
-        useTonalSpotScheme = true,
-      )
-    val defaultSeedColor = AppTheme.colorScheme.tintedForeground
-    val readerLinkHandler = remember {
-      object : UriHandler {
-        override fun openUri(uri: String) {
-          coroutineScope.launch { linkHandler.openLink(uri) }
-        }
-      }
-    }
-    val adjustedInitialPage =
-      remember(state.initialPostId) {
-        posts.itemSnapshotList.indexOfFirst { it?.id == state.initialPostId }
-      }
-    val pagerState = rememberPagerState(initialPage = adjustedInitialPage) { posts.itemCount }
 
-    LaunchedEffect(pagerState, posts.loadState) {
-      snapshotFlow { pagerState.settledPage }
-        .distinctUntilChanged()
-        .collectLatest { page ->
-          val readerPost =
-            try {
-              posts.peek(page)
-            } catch (e: IndexOutOfBoundsException) {
-              null
-            }
-          if (readerPost != null) {
-            presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
-          }
-        }
-    }
-
-    LaunchedEffect(pagerState, posts.loadState) {
-      snapshotFlow {
-          val settledPage = pagerState.settledPage
-          try {
-            pagerState.getOffsetFractionForPage(settledPage)
-          } catch (e: Throwable) {
-            0f
-          }
-        }
-        .collect { offset ->
-          val settledPage = pagerState.settledPage
-          val readerPost =
-            try {
-              posts.peek(settledPage)
-            } catch (e: IndexOutOfBoundsException) {
-              null
-            }
-
-          if (readerPost != null) {
-            // The default snap position of the pager is 0.5f, that means the targetPage
-            // state only changes after reaching half way point. We instead want it to scale
-            // as we start swiping.
-            //
-            // Instead of using EPSILON for snap threshold, we are doing that calculation
-            // as the page offset changes
-            //
-            val currentItem = readerPost
-            val fromItem =
-              if (offset < -EPSILON) {
-                posts.peek(settledPage - 1)
-              } else {
-                currentItem
+    AppTheme(useDarkTheme = darkTheme) {
+      Scaffold(
+        modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+        topBar = {
+          CenterAlignedTopAppBar(
+            expandedHeight = 72.dp,
+            scrollBehavior = scrollBehaviour,
+            colors =
+              TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent,
+                scrolledContainerColor = Color.Transparent,
+              ),
+            navigationIcon = {
+              FilledIconButton(
+                modifier = Modifier.padding(start = 24.dp),
+                colors =
+                  IconButtonDefaults.filledIconButtonColors(
+                    containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
+                  ),
+                shape = RoundedCornerShape(50),
+                onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
+              ) {
+                Icon(
+                  imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
               }
-
-            val toItem =
-              if (offset > EPSILON) {
-                posts.peek(settledPage + 1)
-              } else {
-                currentItem
-              }
-
-            val fromSeedColor =
-              seedColorExtractor.calculateSeedColor(fromItem?.imageUrl).run {
-                if (this != null) Color(this) else defaultSeedColor
-              }
-            val toSeedColor =
-              seedColorExtractor.calculateSeedColor(toItem?.imageUrl).run {
-                if (this != null) Color(this) else defaultSeedColor
-              }
-
-            dynamicColorState.animate(
-              fromSeedColor = fromSeedColor,
-              toSeedColor = toSeedColor,
-              progress = offset
-            )
-          }
-        }
-    }
-
-    CompositionLocalProvider(
-      LocalDynamicColorState provides dynamicColorState,
-      LocalUriHandler provides readerLinkHandler
-    ) {
-      val snackbarHostState = remember { SnackbarHostState() }
-      AppTheme(useDarkTheme = darkTheme) {
-        Scaffold(
-          modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
-          topBar = {
-            CenterAlignedTopAppBar(
-              expandedHeight = 72.dp,
-              scrollBehavior = scrollBehaviour,
-              colors =
-                TopAppBarDefaults.topAppBarColors(
-                  containerColor = Color.Transparent,
-                  scrolledContainerColor = Color.Transparent,
-                ),
-              navigationIcon = {
-                FilledIconButton(
-                  modifier = Modifier.padding(start = 24.dp),
-                  colors =
-                    IconButtonDefaults.filledIconButtonColors(
-                      containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
-                    ),
-                  shape = RoundedCornerShape(50),
-                  onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
-                ) {
-                  Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = null,
-                    tint = AppTheme.colorScheme.onSurface,
-                  )
-                }
-              },
-              title = {
+            },
+            title = {
+              if (pagerState.pageCount > 1) {
                 val pageIndicatorState = remember {
                   object : PageIndicatorState {
                     override val pageOffset: Float
@@ -337,91 +311,117 @@ internal fun ReaderScreen(
                   }
                 }
 
-                if (pagerState.pageCount > 1) {
-                  HorizontalPageIndicators(
-                    pageIndicatorState = pageIndicatorState,
-                  )
-                }
+                HorizontalPageIndicators(
+                  pageIndicatorState = pageIndicatorState,
+                )
+              }
+            },
+          )
+        },
+        bottomBar = {
+          val readerPost =
+            try {
+              posts.peek(pagerState.settledPage)
+            } catch (e: IndexOutOfBoundsException) {
+              null
+            }
+          val comingSoonString = stringResource(Res.string.comingSoon)
+
+          if (readerPost != null) {
+            BottomBar(
+              darkTheme = darkTheme,
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              openInBrowserClick = {
+                coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
-            )
-          },
-          bottomBar = {
-            val readerPost =
-              try {
-                posts.peek(pagerState.settledPage)
-              } catch (e: IndexOutOfBoundsException) {
-                null
-              }
-            val comingSoonString = stringResource(Res.string.comingSoon)
-
-            if (readerPost != null) {
-              BottomBar(
-                darkTheme = darkTheme,
-                loadFullArticle = state.canLoadFullPost(readerPost.id),
-                openInBrowserClick = {
-                  coroutineScope.launch { linkHandler.openLink(readerPost.link) }
-                },
-                loadFullArticleClick = {
-                  presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
-                },
-                openReaderViewSettings = {
-                  // TODO: Open reader view settings
-                  coroutineScope.launch {
-                    snackbarHostState.showSnackbar(
-                      message = comingSoonString,
-                      duration = SnackbarDuration.Short,
-                    )
-                  }
-                }
-              )
-            }
-          },
-          snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-          containerColor = AppTheme.colorScheme.backdrop,
-          contentColor = Color.Unspecified
-        ) { paddingValues ->
-          val layoutDirection = LocalLayoutDirection.current
-          val highlightsBuilder =
-            remember(darkTheme) {
-              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-            }
-
-          HorizontalPager(
-            modifier = modifier,
-            state = pagerState,
-            key = posts.itemKey { it.id },
-            overscrollEffect = null,
-            contentPadding =
-              PaddingValues(
-                start = paddingValues.calculateStartPadding(layoutDirection),
-                end = paddingValues.calculateEndPadding(layoutDirection),
-              )
-          ) { page ->
-            val readerPost = posts[page]
-
-            if (readerPost != null) {
-              LaunchedEffect(readerPost.id) {
-                presenter.dispatch(ReaderEvent.PostLoaded(readerPost))
-              }
-
-              ReaderPage(
-                readerPost = readerPost,
-                page = page,
-                pagerState = pagerState,
-                highlightsBuilder = highlightsBuilder,
-                loadFullArticle = state.canLoadFullPost(readerPost.id),
-                onBookmarkClick = {
-                  presenter.dispatch(
-                    ReaderEvent.TogglePostBookmark(
-                      postId = readerPost.id,
-                      currentBookmarkStatus = readerPost.bookmarked
-                    )
+              loadFullArticleClick = {
+                presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+              },
+              openReaderViewSettings = {
+                // TODO: Open reader view settings
+                coroutineScope.launch {
+                  snackbarHostState.showSnackbar(
+                    message = comingSoonString,
+                    duration = SnackbarDuration.Short,
                   )
-                },
-                modifier = Modifier.fillMaxSize(),
-                contentPaddingValues = paddingValues
-              )
+                }
+              }
+            )
+          }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        containerColor = AppTheme.colorScheme.backdrop,
+        contentColor = Color.Unspecified
+      ) { paddingValues ->
+        val layoutDirection = LocalLayoutDirection.current
+        val highlightsBuilder =
+          remember(darkTheme) {
+            Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+          }
+        val adjustedInitialPage =
+          remember(posts.itemSnapshotList, state.activePostId, posts.loadState) {
+            if (posts.loadState.refresh is LoadState.NotLoading) {
+              posts.itemSnapshotList.indexOfFirst { it?.id == state.activePostId }
+            } else {
+              -1
             }
+          }
+
+        LaunchedEffect(adjustedInitialPage) {
+          if (adjustedInitialPage != -1) {
+            pagerState.scrollToPage(adjustedInitialPage)
+          }
+        }
+
+        LaunchedEffect(pagerState, posts.loadState) {
+          snapshotFlow { pagerState.settledPage }
+            .distinctUntilChanged()
+            .collectLatest { page ->
+              val readerPost = runCatching { posts.peek(page) }.getOrNull()
+
+              if (readerPost != null) {
+                presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+              }
+            }
+        }
+
+        HorizontalPager(
+          modifier = modifier,
+          state = pagerState,
+          key = { page ->
+            val post = posts.peek(page)
+            post?.id ?: page
+          },
+          overscrollEffect = null,
+          beyondViewportPageCount = 1,
+          contentPadding =
+            PaddingValues(
+              start = paddingValues.calculateStartPadding(layoutDirection),
+              end = paddingValues.calculateEndPadding(layoutDirection),
+            )
+        ) { page ->
+          val readerPost = posts[page]
+
+          if (readerPost != null) {
+            LaunchedEffect(readerPost.id) { presenter.dispatch(ReaderEvent.PostLoaded(readerPost)) }
+
+            ReaderPage(
+              readerPost = readerPost,
+              page = page,
+              pagerState = pagerState,
+              highlightsBuilder = highlightsBuilder,
+              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              onBookmarkClick = {
+                presenter.dispatch(
+                  ReaderEvent.TogglePostBookmark(
+                    postId = readerPost.id,
+                    currentBookmarkStatus = readerPost.bookmarked
+                  )
+                )
+              },
+              modifier = Modifier.fillMaxSize(),
+              contentPaddingValues = paddingValues
+            )
           }
         }
       }
