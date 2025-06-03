@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
     <string name="settingsHeaderTheme">Тема</string>
     <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
-    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию.</string>
+    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию</string>
     <string name="settingsEnableBlurTitle">Включить размытие на главной странице</string>
     <string name="settingsEnableBlurSubtitle">Если функция отключена, вместо размытых изображений будут отображаться градиенты. Это может повысить производительность.</string>
     <string name="settingsShowUnreadCountTitle">Показывать количество непрочитанных сообщений</string>
@@ -70,7 +70,7 @@
     <string name="feeds">Новостные ленты</string>
     <string name="editFeeds">Редактировать новостные ленты</string>
     <string name="comments">Комментарии</string>
-    <string name="about">О</string>
+    <string name="about">О приложении</string>
     <string name="aboutRoleDeveloper">Разработчик</string>
     <string name="aboutRoleDesigner">Дизайнер</string>
     <string name="aboutSocialTwitter">Twitter</string>
@@ -82,8 +82,8 @@
     <string name="pinnedFeeds">Закреплённые</string>
     <string name="markAllAsRead">Отметить все как прочитанные</string>
     <string name="openWebsite">Открыть веб-сайт</string>
-    <string name="noNewPosts">Никакого нового контента</string>
-    <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие нового контента сейчас</string>
+    <string name="noNewPosts">Свежих новостей нет</string>
+    <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие свежих новостей</string>
     <string name="postsAll">Все статьи</string>
     <string name="postsUnread">Непрочитанные</string>
     <string name="postsToday">За сегодня</string>
