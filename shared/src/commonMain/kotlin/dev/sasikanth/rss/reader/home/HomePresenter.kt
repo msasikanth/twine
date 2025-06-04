@@ -209,7 +209,12 @@ class HomePresenter(
         HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
         is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
+        is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
       }
+    }
+
+    private fun updateVisibleItemIndex(index: Int) {
+      _state.update { it.copy(visibleItemIndex = index) }
     }
 
     private fun changeHomeViewMode(homeViewMode: HomeViewMode) {
