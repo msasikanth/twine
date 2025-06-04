@@ -96,7 +96,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import app.cash.paging.compose.collectAsLazyPagingItems
 import com.adamglin.composeshadow.dropShadow
 import com.mikepenz.markdown.compose.LocalImageTransformer
@@ -204,7 +203,7 @@ internal fun ReaderScreen(
       }
     }
   }
-  val pagerState = rememberPagerState { posts.itemCount }
+  val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
 
   // Dynamic theme animator
   LaunchedEffect(pagerState, posts.loadState) {
@@ -358,20 +357,6 @@ internal fun ReaderScreen(
           remember(darkTheme) {
             Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
           }
-        val adjustedInitialPage =
-          remember(posts.itemSnapshotList, state.activePostId, posts.loadState) {
-            if (posts.loadState.refresh is LoadState.NotLoading) {
-              posts.itemSnapshotList.indexOfFirst { it?.id == state.activePostId }
-            } else {
-              -1
-            }
-          }
-
-        LaunchedEffect(adjustedInitialPage) {
-          if (adjustedInitialPage != -1) {
-            pagerState.scrollToPage(adjustedInitialPage)
-          }
-        }
 
         LaunchedEffect(pagerState, posts.loadState) {
           snapshotFlow { pagerState.settledPage }
@@ -380,7 +365,7 @@ internal fun ReaderScreen(
               val readerPost = runCatching { posts.peek(page) }.getOrNull()
 
               if (readerPost != null) {
-                presenter.dispatch(ReaderEvent.PostPageChanged(readerPost))
+                presenter.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
               }
             }
         }
@@ -388,10 +373,6 @@ internal fun ReaderScreen(
         HorizontalPager(
           modifier = modifier,
           state = pagerState,
-          key = { page ->
-            val post = posts.peek(page)
-            post?.id ?: page
-          },
           overscrollEffect = null,
           beyondViewportPageCount = 1,
           contentPadding =
