@@ -25,7 +25,7 @@ sealed interface ReaderEvent {
   data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
     ReaderEvent
 
-  data class PostPageChanged(val post: PostWithMetadata) : ReaderEvent
+  data class PostPageChanged(val postIndex: Int, val post: PostWithMetadata) : ReaderEvent
 
   data class LoadFullArticleClicked(val postId: String) : ReaderEvent
 
