@@ -110,8 +110,10 @@ internal fun CreateGroupDialog(
         keyboardActions =
           KeyboardActions(
             onDone = {
-              onCreateGroup(groupName)
-              onDismiss()
+              if (groupName.isNotBlank()) {
+                onCreateGroup(groupName)
+                onDismiss()
+              }
             }
           ),
         placeholder = {
