@@ -154,8 +154,8 @@
     <string name="homeViewModeCompact">Kompakt</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%1$d result</item>
-        <item quantity="other">%1$d results</item>
+        <item quantity="one">%1$d Ergebnis</item>
+        <item quantity="other">%1$d Ergebnisse</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d ungelesener Beitrag</item>
