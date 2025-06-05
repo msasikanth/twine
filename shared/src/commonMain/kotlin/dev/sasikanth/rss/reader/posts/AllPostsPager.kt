@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -70,8 +71,10 @@ class AllPostsPager(
     get() = _hasUnreadPosts
 
   init {
-    observeAllPosts()
-    observeHasUnreadPosts()
+    coroutineScope.launch {
+      observeAllPosts()
+      observeHasUnreadPosts()
+    }
   }
 
   private fun observeHasUnreadPosts() {
