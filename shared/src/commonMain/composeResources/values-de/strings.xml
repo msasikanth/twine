@@ -92,7 +92,7 @@
     <string name="markAsUnRead">Als ungelesen markieren</string>
     <string name="removeFeed">Feed entfernen</string>
     <string name="delete">Löschen</string>
-    <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
+    <string name="removeFeedDesc">Möchten Sie <b>"%1$s"</b> entfernen?</string>
     <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
     <string name="getFeedInfo">Informationen bekommen</string>
     <string name="newTag">Neuer Tag</string>
