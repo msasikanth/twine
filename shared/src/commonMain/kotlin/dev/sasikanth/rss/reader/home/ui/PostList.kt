@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.utils.Constants
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
@@ -43,6 +44,7 @@ internal fun PostsList(
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
+  visibleItemIndex: Int,
   markPostAsRead: (String) -> Unit,
   postsScrolled: (List<String>) -> Unit,
   markScrolledPostsAsRead: () -> Unit,
@@ -59,6 +61,21 @@ internal fun PostsList(
     } else {
       0.dp
     }
+
+  LaunchedEffect(visibleItemIndex) {
+    if (visibleItemIndex <= Constants.NUMBER_OF_FEATURED_POSTS) {
+      featuredPostsPagerState.scrollToPage(visibleItemIndex)
+    } else {
+      val adjustedIndex =
+        if (featuredPosts.size > 0) {
+          (visibleItemIndex - featuredPosts.size).coerceAtLeast(0)
+        } else {
+          visibleItemIndex
+        }
+
+      listState.scrollToItem(adjustedIndex)
+    }
+  }
 
   LaunchedEffect(listState) {
     snapshotFlow { listState.layoutInfo.visibleItemsInfo }

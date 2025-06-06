@@ -40,6 +40,7 @@ internal data class HomeState(
   val hasUnreadPosts: Boolean,
   val currentDateTime: LocalDateTime,
   val homeViewMode: HomeViewMode,
+  val visibleItemIndex: Int,
 ) {
 
   companion object {
@@ -55,6 +56,7 @@ internal data class HomeState(
         hasUnreadPosts = false,
         currentDateTime = currentDateTime,
         homeViewMode = HomeViewMode.Default,
+        visibleItemIndex = 0,
       )
   }
 
