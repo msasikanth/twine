@@ -77,6 +77,7 @@ import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
+import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -89,7 +90,9 @@ import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -103,6 +106,7 @@ import twine.shared.generated.resources.swipeUpGetStarted
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
+@OptIn(FlowPreview::class)
 @Composable
 internal fun HomeScreen(
   homePresenter: HomePresenter,
@@ -120,7 +124,7 @@ internal fun HomeScreen(
   val featuredPosts by
     featuredPosts(posts, state.homeViewMode).collectAsState(initial = persistentListOf())
 
-  val listState = rememberLazyListState()
+  val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val bottomSheetState =
     rememberStandardBottomSheetState(
@@ -141,7 +145,28 @@ internal fun HomeScreen(
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
   val bottomSheetProgress by bottomSheetState.progressAsState()
-  val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
+  val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
+
+  LaunchedEffect(Unit) {
+    homePresenter.effects.collectLatest { effect ->
+      when (effect) {
+        is HomeEffect.ScrollPostListTo -> {
+          if (effect.index <= Constants.NUMBER_OF_FEATURED_POSTS) {
+            featuredPostsPagerState.scrollToPage(effect.index)
+          } else {
+            val adjustedIndex =
+              if (featuredPosts.size > 0) {
+                (effect.index - featuredPosts.size).coerceAtLeast(0)
+              } else {
+                effect.index
+              }
+
+            postsListState.scrollToItem(adjustedIndex)
+          }
+        }
+      }
+    }
+  }
 
   AppTheme(useDarkTheme = true) {
     Scaffold(modifier) { scaffoldPadding ->
@@ -211,7 +236,7 @@ internal fun HomeScreen(
                     source = state.activeSource,
                     currentDateTime = state.currentDateTime,
                     postsType = state.postsType,
-                    listState = listState,
+                    listState = postsListState,
                     hasFeeds = hasFeeds,
                     hasUnreadPosts = state.hasUnreadPosts,
                     homeViewMode = state.homeViewMode,
@@ -248,7 +273,7 @@ internal fun HomeScreen(
                           featuredPosts = featuredPosts,
                           posts = posts,
                           useDarkTheme = useDarkTheme,
-                          listState = listState,
+                          listState = postsListState,
                           featuredPostsPagerState = featuredPostsPagerState,
                           homeViewMode = state.homeViewMode,
                           markPostAsRead = {
@@ -312,7 +337,7 @@ internal fun HomeScreen(
                   ),
               ) {
                 scrollToTopClicked = true
-                listState.animateScrollToItem(0)
+                postsListState.animateScrollToItem(0)
               }
             }
           }
@@ -324,7 +349,7 @@ internal fun HomeScreen(
             closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
             selectedFeedChanged = {
               coroutineScope.launch {
-                listState.scrollToItem(0)
+                postsListState.scrollToItem(0)
                 featuredPostsPagerState.scrollToPage(0)
               }
             }

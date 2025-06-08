@@ -40,15 +40,16 @@ import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.utils.NTuple4
-import dev.sasikanth.rss.reader.utils.ObservableDate
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -129,6 +130,7 @@ class HomePresenter(
     }
 
   internal val state = presenterInstance.state
+  internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
     lifecycle.doOnCreate {
@@ -178,6 +180,8 @@ class HomePresenter(
         initialValue = defaultState
       )
 
+    val effects = MutableSharedFlow<HomeEffect>()
+
     init {
       dispatch(HomeEvent.Init)
     }
@@ -210,7 +214,12 @@ class HomePresenter(
         HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
         is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
+        is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
       }
+    }
+
+    private fun updateVisibleItemIndex(index: Int) {
+      coroutineScope.launch { effects.emit(HomeEffect.ScrollPostListTo(index)) }
     }
 
     private fun changeHomeViewMode(homeViewMode: HomeViewMode) {
@@ -367,6 +376,7 @@ class HomePresenter(
     private fun refreshContent() {
       coroutineScope.launch {
         _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
+
         try {
           when (val selectedSource = _state.value.activeSource) {
             is FeedGroup -> rssRepository.updateGroup(selectedSource.feedIds)
