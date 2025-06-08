@@ -23,15 +23,13 @@ import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
-import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.ObservableDate
-import kotlin.time.Duration.Companion.hours
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -43,10 +41,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
 
@@ -54,7 +49,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class AllPostsPager(
   private val observableActiveSource: ObservableActiveSource,
-  private val observableDate: ObservableDate,
+  private val currentDateTimeSource: CurrentDateTimeSource,
   private val settingsRepository: SettingsRepository,
   private val rssRepository: RssRepository,
   dispatchersProvider: DispatchersProvider,
@@ -81,12 +76,12 @@ class AllPostsPager(
     combine(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
-        observableDate.dateTimeFlow
+        currentDateTimeSource.dateTimeFlow
       ) { activeSource, postsType, dateTime ->
         Triple(activeSource, postsType, dateTime)
       }
       .flatMapLatest { (activeSource, postsType, dateTime) ->
-        val postsAfter = postsThresholdTime(postsType, dateTime)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
         val activeSourceIds = activeSourceIds(activeSource)
 
         rssRepository.hasUnreadPostsInSource(
@@ -102,7 +97,7 @@ class AllPostsPager(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(activeSourceFlow, postsTypeFlow, observableDate.dateTimeFlow) {
+    combine(activeSourceFlow, postsTypeFlow, currentDateTimeSource.dateTimeFlow) {
         activeSource,
         postsType,
         currentDateTime ->
@@ -110,8 +105,8 @@ class AllPostsPager(
       }
       .distinctUntilChanged()
       .onEach { (activeSource, postsType, dateTime) ->
-        val unreadOnly = shouldGetUnreadPostsOnly(postsType)
-        val postsAfter = postsThresholdTime(postsType, dateTime)
+        val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
         val activeSourceIds = activeSourceIds(activeSource)
 
         val postsPagingDataFlow =
@@ -129,28 +124,6 @@ class AllPostsPager(
         _allPostsPagingData.value = postsPagingDataFlow
       }
       .launchIn(coroutineScope)
-  }
-
-  private fun postsThresholdTime(postsType: PostsType, dateTime: LocalDateTime): Instant {
-    return when (postsType) {
-      PostsType.ALL,
-      PostsType.UNREAD -> Instant.DISTANT_PAST
-      PostsType.TODAY -> {
-        dateTime.date.atStartOfDayIn(TimeZone.currentSystemDefault())
-      }
-      PostsType.LAST_24_HOURS -> {
-        dateTime.toInstant(TimeZone.currentSystemDefault()).minus(24.hours)
-      }
-    }
-  }
-
-  private fun shouldGetUnreadPostsOnly(postsType: PostsType): Boolean? {
-    return when (postsType) {
-      PostsType.UNREAD -> true
-      PostsType.ALL,
-      PostsType.TODAY,
-      PostsType.LAST_24_HOURS -> null
-    }
   }
 
   private fun activeSourceIds(activeSource: Source?) =

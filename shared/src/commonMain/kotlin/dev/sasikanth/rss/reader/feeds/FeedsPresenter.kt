@@ -33,17 +33,16 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
-import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
-import dev.sasikanth.rss.reader.utils.getLast24HourStart
-import dev.sasikanth.rss.reader.utils.getTodayStartInstant
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -78,6 +77,7 @@ class FeedsPresenter(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
+  private val dateTimeSource: CurrentDateTimeSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
@@ -91,7 +91,8 @@ class FeedsPresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
-        observableActiveSource = observableActiveSource
+        observableActiveSource = observableActiveSource,
+        dateTimeSource = dateTimeSource,
       )
     }
 
@@ -131,7 +132,8 @@ class FeedsPresenter(
     private val dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
-    private val observableActiveSource: ObservableActiveSource
+    private val observableActiveSource: ObservableActiveSource,
+    private val dateTimeSource: CurrentDateTimeSource
   ) : InstanceKeeper.Instance {
 
     var searchQuery by mutableStateOf(TextFieldValue())
@@ -337,11 +339,15 @@ class FeedsPresenter(
       val searchQueryFlow =
         snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
 
-      combine(searchQueryFlow, settingsRepository.postsType) { searchQuery, postsType ->
-          Pair(searchQuery, postsType)
+      combine(
+          searchQueryFlow,
+          settingsRepository.postsType,
+          dateTimeSource.dateTimeFlow,
+        ) { searchQuery, postsType, dateTime ->
+          Triple(searchQuery, postsType, dateTime)
         }
-        .onEach { (searchQuery, postsType) ->
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
+        .onEach { (searchQuery, postsType, dateTime) ->
+          val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
           val searchResults =
             if (searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
               feedsSearchResultsPager(
@@ -388,19 +394,27 @@ class FeedsPresenter(
         .launchIn(coroutineScope)
 
       val pinnedSourcesFlow =
-        settingsRepository.postsType.flatMapLatest { postsType ->
-          val postsAfter = postsAfterInstantFromPostsType(postsType)
-          rssRepository.pinnedSources(postsAfter)
-        }
+        combine(
+            settingsRepository.postsType,
+            dateTimeSource.dateTimeFlow,
+          ) { postsType, dateTime ->
+            Pair(postsType, dateTime)
+          }
+          .flatMapLatest { (postsType, dateTime) ->
+            val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+            rssRepository.pinnedSources(postsAfter)
+          }
 
       val allSourcesFlow =
-        combine(settingsRepository.postsType, settingsRepository.feedsSortOrder) {
-            postsType,
-            feedsSortOrder ->
-            Pair(postsType, feedsSortOrder)
+        combine(
+            settingsRepository.postsType,
+            settingsRepository.feedsSortOrder,
+            dateTimeSource.dateTimeFlow
+          ) { postsType, feedsSortOrder, dateTime ->
+            Triple(postsType, feedsSortOrder, dateTime)
           }
-          .map { (postsType, feedsSortOrder) ->
-            val postsAfter = postsAfterInstantFromPostsType(postsType)
+          .map { (postsType, feedsSortOrder, dateTime) ->
+            val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
             val sources =
               sources(
                 postsAfter = postsAfter,
@@ -461,18 +475,6 @@ class FeedsPresenter(
           }
       }
     }
-
-    private fun postsAfterInstantFromPostsType(postsType: PostsType) =
-      when (postsType) {
-        PostsType.ALL,
-        PostsType.UNREAD -> Instant.DISTANT_PAST
-        PostsType.TODAY -> {
-          getTodayStartInstant()
-        }
-        PostsType.LAST_24_HOURS -> {
-          getLast24HourStart()
-        }
-      }
 
     override fun onDestroy() {
       coroutineScope.cancel()

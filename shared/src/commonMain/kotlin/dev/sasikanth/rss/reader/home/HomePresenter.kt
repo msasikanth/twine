@@ -38,6 +38,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.ObservableDate
 import kotlin.time.Duration.Companion.hours
@@ -79,7 +80,7 @@ class HomePresenter(
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val observableDate: ObservableDate,
+  private val currentDateTimeSource: CurrentDateTimeSource,
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   @Assisted componentContext: ComponentContext,
@@ -120,7 +121,7 @@ class HomePresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         observableActiveSource = observableActiveSource,
-        observableDate = observableDate,
+        currentDateTimeSource = currentDateTimeSource,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter,
         allPostsPager = allPostsPager,
@@ -156,7 +157,7 @@ class HomePresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val observableDate: ObservableDate,
+    private val currentDateTimeSource: CurrentDateTimeSource,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
     private val allPostsPager: AllPostsPager,
@@ -301,7 +302,7 @@ class HomePresenter(
 
       combine(
           allPostsPager.allPostsPagingData,
-          observableDate.dateTimeFlow,
+          currentDateTimeSource.dateTimeFlow,
         ) { postsPagingData, dateTime ->
           Pair(dateTime, postsPagingData)
         }
@@ -376,7 +377,7 @@ class HomePresenter(
           BugsnagKotlin.logMessage("RefreshContent")
           BugsnagKotlin.sendHandledException(e)
         } finally {
-          observableDate.refresh()
+          currentDateTimeSource.refresh()
           _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
         }
       }

@@ -56,7 +56,7 @@ import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.search.SearchPresentFactory
 import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.ObservableDate
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -92,7 +92,7 @@ class AppPresenter(
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
-  private val observableDate: ObservableDate,
+  private val currentDateTimeSource: CurrentDateTimeSource,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val linkHandler: LinkHandler,
@@ -103,7 +103,7 @@ class AppPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         lastUpdatedAt = lastUpdatedAt,
-        observableDate = observableDate,
+        currentDateTimeSource = currentDateTimeSource,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
       )
@@ -331,7 +331,7 @@ class AppPresenter(
     dispatchersProvider: DispatchersProvider,
     settingsRepository: SettingsRepository,
     private val lastUpdatedAt: LastUpdatedAt,
-    private val observableDate: ObservableDate,
+    private val currentDateTimeSource: CurrentDateTimeSource,
     private val rssRepository: RssRepository,
   ) : InstanceKeeper.Instance {
 
@@ -362,7 +362,7 @@ class AppPresenter(
         if (lastUpdatedAt.hasExpired()) {
           rssRepository.updateFeeds()
           lastUpdatedAt.refresh()
-          observableDate.refresh()
+          currentDateTimeSource.refresh()
         }
       }
     }
