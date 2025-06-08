@@ -48,15 +48,17 @@ import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupPresenterFactory
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
+import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.search.SearchPresentFactory
 import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.ObservableDate
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -92,7 +94,7 @@ class AppPresenter(
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
   private val lastUpdatedAt: LastUpdatedAt,
-  private val observableDate: ObservableDate,
+  private val currentDateTimeSource: CurrentDateTimeSource,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val linkHandler: LinkHandler,
@@ -103,7 +105,7 @@ class AppPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         lastUpdatedAt = lastUpdatedAt,
-        observableDate = observableDate,
+        currentDateTimeSource = currentDateTimeSource,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
       )
@@ -147,7 +149,12 @@ class AppPresenter(
   }
 
   fun onBackClicked() {
-    navigation.pop()
+    val isReaderScreen = screenStack.active.instance is Screen.Reader
+    if (isReaderScreen) {
+      (screenStack.active.instance as? Screen.Reader)?.presenter?.dispatch(ReaderEvent.BackClicked)
+    } else {
+      navigation.pop()
+    }
   }
 
   private fun createModal(modalConfig: ModalConfig, componentContext: ComponentContext): Modals =
@@ -230,8 +237,12 @@ class AppPresenter(
                 fromScreen = config.fromScreen,
               ),
               componentContext
-            ) {
-              navigation.pop()
+            ) { activePostIndex ->
+              navigation.pop {
+                (screenStack.active.instance as? Screen.Home)
+                  ?.presenter
+                  ?.dispatch(HomeEvent.UpdateVisibleItemIndex(activePostIndex))
+              }
             }
         )
       }
@@ -331,7 +342,7 @@ class AppPresenter(
     dispatchersProvider: DispatchersProvider,
     settingsRepository: SettingsRepository,
     private val lastUpdatedAt: LastUpdatedAt,
-    private val observableDate: ObservableDate,
+    private val currentDateTimeSource: CurrentDateTimeSource,
     private val rssRepository: RssRepository,
   ) : InstanceKeeper.Instance {
 
@@ -362,7 +373,7 @@ class AppPresenter(
         if (lastUpdatedAt.hasExpired()) {
           rssRepository.updateFeeds()
           lastUpdatedAt.refresh()
-          observableDate.refresh()
+          currentDateTimeSource.refresh()
         }
       }
     }
