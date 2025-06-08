@@ -27,7 +27,7 @@ import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
-import dev.sasikanth.rss.reader.utils.ObservableDate
+import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -37,7 +37,7 @@ class FeedsRefreshWorker(
   workerParameters: WorkerParameters,
   private val rssRepository: RssRepository,
   private val lastUpdatedAt: LastUpdatedAt,
-  private val observableDate: ObservableDate,
+  private val currentDateTimeSource: CurrentDateTimeSource,
   private val settingsRepository: SettingsRepository,
 ) : CoroutineWorker(context, workerParameters) {
 
@@ -65,7 +65,7 @@ class FeedsRefreshWorker(
       try {
         rssRepository.updateFeeds()
         lastUpdatedAt.refresh()
-        observableDate.refresh()
+        currentDateTimeSource.refresh()
         Result.success()
       } catch (e: CancellationException) {
         Result.failure()

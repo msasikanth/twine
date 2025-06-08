@@ -17,13 +17,14 @@ package dev.sasikanth.rss.reader.utils
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Duration.Companion.hours
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -32,25 +33,28 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class ObservableDate {
+class CurrentDateTimeSource {
 
-  private val refreshFlow = MutableSharedFlow<Unit>(replay = 1)
+  private val delayInterval = 1.hours
+  private val refreshSignal =
+    MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
   val dateTimeFlow: Flow<LocalDateTime> =
     merge(
-      flow {
-        while (true) {
-          emit(currentDateTime())
-          delay(1.hours)
-        }
-      },
-      refreshFlow.onStart { emit(Unit) }.map { currentDateTime() }
-    )
+        flow {
+          while (true) {
+            emit(currentDateTime())
+            delay(delayInterval)
+          }
+        },
+        refreshSignal.map { currentDateTime() }
+      )
+      .distinctUntilChanged()
 
   private fun currentDateTime() =
     Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
 
-  fun refresh() {
-    refreshFlow.tryEmit(Unit)
+  suspend fun refresh() {
+    refreshSignal.emit(Unit)
   }
 }

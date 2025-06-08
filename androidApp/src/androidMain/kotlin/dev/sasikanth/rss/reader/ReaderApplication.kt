@@ -61,6 +61,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     rssRepository = appComponent.rssRepository,
                     lastUpdatedAt = appComponent.lastUpdatedAt,
                     settingsRepository = appComponent.settingsRepository,
+                    currentDateTimeSource = appComponent.currentDateTimeSource,
                   )
                 }
                 PostsCleanUpWorker::class.qualifiedName -> {
