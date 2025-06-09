@@ -159,6 +159,8 @@ internal class DynamicColorState(
       surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
       surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
       inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
+      inverseSurface = dynamicColors.inverseSurface().toColor(scheme),
+      inverseOnSurface = dynamicColors.inverseOnSurface().toColor(scheme),
       textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
       textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop =
@@ -294,6 +296,9 @@ internal class DynamicColorState(
           fraction = progress
         ),
       inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
+      inverseSurface = lerp(start = inverseSurface, stop = to.inverseSurface, fraction = progress),
+      inverseOnSurface =
+        lerp(start = inverseOnSurface, stop = to.inverseOnSurface, fraction = progress),
       backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
       bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
       bottomSheetBorder =

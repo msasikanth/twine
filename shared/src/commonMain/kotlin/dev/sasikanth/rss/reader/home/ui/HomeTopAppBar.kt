@@ -17,8 +17,11 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +35,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
@@ -40,7 +44,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.rounded.DoneOutline
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
@@ -79,9 +82,14 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
+import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
+import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
+import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
+import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.homeAppBarTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.datetime.LocalDateTime
@@ -387,67 +395,59 @@ private fun OverflowMenu(
 
     if (dropdownExpanded) {
       DropdownMenu(
+        modifier = Modifier.requiredWidth(240.dp),
         offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
         expanded = dropdownExpanded,
         onDismissRequest = { dropdownExpanded = false }
       ) {
-        if (hasUnreadPosts) {
-          OverflowMenuItem(
-            label = stringResource(Res.string.markAllAsRead),
-            icon = Icons.Rounded.DoneOutline,
-            onClick = {
-              dropdownExpanded = false
-              onMarkAllAsRead()
-            }
-          )
+        Text(
+          modifier = Modifier.padding(horizontal = 20.dp).padding(top = 20.dp, bottom = 12.dp),
+          text = stringResource(Res.string.homeViewMode),
+          style = MaterialTheme.typography.labelMedium,
+          color = AppTheme.colorScheme.onSurfaceVariant,
+        )
 
-          HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-            thickness = 2.dp,
-            color = AppTheme.colorScheme.surfaceContainerHigh
-          )
-        }
-
-        val homeViewModesFeatureFlag = false
-        if (homeViewModesFeatureFlag) {
-          // TODO: Change menu design and icons once Ed finalises the menu for view modes
-          Text(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 20.dp),
-            text = stringResource(Res.string.homeViewMode),
-            style = MaterialTheme.typography.labelMedium,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
-
-          OverflowMenuItem(
+        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+          LayoutIconButton(
+            modifier = Modifier.weight(1f),
             label = stringResource(Res.string.homeViewModeDefault),
-            icon = TwineIcons.DropdownIcon,
+            icon = TwineIcons.LayoutDefault,
             selected = homeViewMode == HomeViewMode.Default,
-            padding = PaddingValues(horizontal = 8.dp),
             onClick = { onChangeHomeViewMode(HomeViewMode.Default) }
           )
 
-          OverflowMenuItem(
+          LayoutIconButton(
+            modifier = Modifier.weight(1f),
             label = stringResource(Res.string.homeViewModeSimple),
-            icon = TwineIcons.DropdownIcon,
+            icon = TwineIcons.LayoutSimple,
             selected = homeViewMode == HomeViewMode.Simple,
-            padding = PaddingValues(horizontal = 8.dp),
             onClick = { onChangeHomeViewMode(HomeViewMode.Simple) }
           )
 
-          OverflowMenuItem(
+          LayoutIconButton(
+            modifier = Modifier.weight(1f),
             label = stringResource(Res.string.homeViewModeCompact),
-            icon = TwineIcons.DropdownIcon,
+            icon = TwineIcons.LayoutCompact,
             selected = homeViewMode == HomeViewMode.Compact,
-            padding = PaddingValues(horizontal = 8.dp),
             onClick = { onChangeHomeViewMode(HomeViewMode.Compact) }
           )
-
-          HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-            thickness = 2.dp,
-            color = AppTheme.colorScheme.surfaceContainerHigh
-          )
         }
+
+        HorizontalDivider(
+          modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+          thickness = 2.dp,
+          color = AppTheme.colorScheme.surfaceContainerHigh
+        )
+
+        OverflowMenuItem(
+          label = stringResource(Res.string.markAllAsRead),
+          icon = TwineIcons.MarkAllAsRead,
+          enabled = hasUnreadPosts,
+          onClick = {
+            dropdownExpanded = false
+            onMarkAllAsRead()
+          }
+        )
 
         OverflowMenuItem(
           label = stringResource(Res.string.settings),
@@ -469,6 +469,7 @@ private fun OverflowMenuItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
+  enabled: Boolean = true,
   padding: PaddingValues = PaddingValues(0.dp),
 ) {
   DropdownMenuItem(
@@ -490,6 +491,7 @@ private fun OverflowMenuItem(
         style = MaterialTheme.typography.bodyMedium
       )
     },
+    enabled = enabled,
     onClick = onClick,
     leadingIcon = {
       Icon(
@@ -500,4 +502,92 @@ private fun OverflowMenuItem(
       )
     },
   )
+}
+
+@Composable
+private fun LayoutIconButton(
+  icon: ImageVector,
+  label: String,
+  selected: Boolean,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit
+) {
+  Column(
+    modifier =
+      Modifier.then(modifier).padding(vertical = 8.dp).clip(MaterialTheme.shapes.medium).clickable {
+        onClick()
+      },
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
+    val defaultTranslucentStyle = LocalTranslucentStyles.current.default
+    val background =
+      if (selected) {
+        Color.Transparent
+      } else {
+        defaultTranslucentStyle.background
+      }
+    val border =
+      if (selected) {
+        defaultTranslucentStyle.outline.copy(alpha = 0.48f)
+      } else {
+        defaultTranslucentStyle.outline
+      }
+    val shape =
+      if (selected) {
+        MaterialTheme.shapes.medium
+      } else {
+        MaterialTheme.shapes.small
+      }
+    val iconTint =
+      if (selected) {
+        AppTheme.colorScheme.inverseOnSurface
+      } else {
+        AppTheme.colorScheme.outline
+      }
+    val padding by animateDpAsState(if (selected) 0.dp else 4.dp)
+
+    Box(
+      modifier =
+        Modifier.requiredSize(48.dp)
+          .padding(padding)
+          .background(background, shape)
+          .border(1.dp, border, shape),
+      contentAlignment = Alignment.Center
+    ) {
+      val iconBackground by
+        animateColorAsState(
+          if (selected) {
+            AppTheme.colorScheme.inverseSurface
+          } else {
+            Color.Transparent
+          }
+        )
+      val iconBackgroundSize by animateDpAsState(if (selected) 40.dp else 0.dp)
+
+      Box(
+        modifier =
+          Modifier.requiredSize(iconBackgroundSize)
+            .background(iconBackground, MaterialTheme.shapes.small),
+      )
+
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = iconTint,
+        modifier = Modifier.requiredSize(20.dp)
+      )
+    }
+
+    Spacer(Modifier.requiredHeight(4.dp))
+
+    val textStyle =
+      if (selected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodySmall
+    Text(
+      text = label,
+      style = textStyle,
+      color = AppTheme.colorScheme.onSurface,
+    )
+
+    Spacer(Modifier.requiredHeight(8.dp))
+  }
 }
