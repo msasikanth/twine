@@ -139,7 +139,11 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
             item {
               SubHeader(
                 text =
-                  pluralStringResource(Res.plurals.searchResultsCount, searchResults.itemCount),
+                  pluralStringResource(
+                    Res.plurals.searchResultsCount,
+                    searchResults.itemCount,
+                    searchResults.itemCount
+                  ),
                 modifier = Modifier.padding(top = 8.dp)
               )
             }
