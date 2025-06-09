@@ -80,7 +80,7 @@
     <string name="feedsSearchHint">筛选</string>
     <string name="allFeeds">所有订阅</string>
     <string name="pinnedFeeds">已置顶的订阅</string>
-    <string name="markAllAsRead">全部标记为已读</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">打开网站</string>
     <string name="noNewPosts">暂无新内容</string>
     <string name="noNewPostsSubtitle">请稍后检查，或下拉以检查是否有新的内容。</string>
@@ -148,7 +148,7 @@
     <string name="pullToClose">下拉关闭</string>
     <string name="readerSettings">阅读器设置</string>
     <string name="comingSoon">即将推出</string>
-    <string name="homeViewMode">视图模式</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">默认</string>
     <string name="homeViewModeSimple">简单</string>
     <string name="homeViewModeCompact">紧凑</string>
