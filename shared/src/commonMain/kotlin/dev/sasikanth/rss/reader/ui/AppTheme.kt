@@ -46,13 +46,32 @@ internal fun AppTheme(useDarkTheme: Boolean = false, content: @Composable () -> 
         dynamicColorState.lightAppColorScheme
       }
 
+    val secondary = colorScheme.secondary
+    val onSurface = colorScheme.onSurface
+    val localTranslucentStyles =
+      TranslucentStyles(
+        default =
+          TranslucentStyle(
+            background = secondary.copy(alpha = 0.08f),
+            outline = secondary.copy(alpha = 0.16f),
+            foreground = onSurface,
+          ),
+        prominent =
+          TranslucentStyle(
+            background = secondary.copy(alpha = 0.16f),
+            outline = secondary.copy(alpha = 0.16f),
+            foreground = onSurface,
+          )
+      )
+
     CompositionLocalProvider(
       LocalAppColorScheme provides colorScheme,
       LocalRippleConfiguration provides
         RippleConfiguration(
           color = colorScheme.secondary,
           rippleAlpha = DefaultRippleAlpha,
-        )
+        ),
+      LocalTranslucentStyles provides localTranslucentStyles
     ) {
       content()
     }
