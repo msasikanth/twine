@@ -359,11 +359,18 @@ class AppPresenter(
       combine(
           settingsRepository.appThemeMode,
           settingsRepository.showFeedFavIcon,
-        ) { appThemeMode, showFeedFavIcon ->
-          Pair(appThemeMode, showFeedFavIcon)
+          settingsRepository.homeViewMode,
+        ) { appThemeMode, showFeedFavIcon, homeViewMode ->
+          Triple(appThemeMode, showFeedFavIcon, homeViewMode)
         }
-        .onEach { (appThemeMode, showFeedFavIcon) ->
-          _state.update { it.copy(appThemeMode = appThemeMode, showFeedFavIcon = showFeedFavIcon) }
+        .onEach { (appThemeMode, showFeedFavIcon, homeViewMode) ->
+          _state.update {
+            it.copy(
+              appThemeMode = appThemeMode,
+              showFeedFavIcon = showFeedFavIcon,
+              homeViewMode = homeViewMode
+            )
+          }
         }
         .launchIn(coroutineScope)
     }
