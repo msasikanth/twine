@@ -80,7 +80,7 @@
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
-    <string name="markAllAsRead">Alle als gelesen markieren</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Website öffnen</string>
     <string name="noNewPosts">Keine neuen Beiträge</string>
     <string name="noNewPostsSubtitle">Schauen Sie später wieder vorbei oder ziehen Sie nach unten, um jetzt nach neuen Inhalten zu suchen</string>
@@ -148,7 +148,7 @@
     <string name="pullToClose">Nach unten ziehen, um zu schließen</string>
     <string name="readerSettings">Einstellungen für den Reader</string>
     <string name="comingSoon">Kommt bald</string>
-    <string name="homeViewMode">Ansichtsmodi</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
