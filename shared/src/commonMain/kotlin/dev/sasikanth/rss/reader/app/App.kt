@@ -39,6 +39,7 @@ import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
@@ -114,6 +115,12 @@ fun App(
       }
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
+
+    LaunchedEffect(appState.homeViewMode) {
+      if (appState.homeViewMode != HomeViewMode.Default) {
+        dynamicColorState.reset()
+      }
+    }
 
     AppTheme(useDarkTheme = useDarkTheme) {
       ChildStack(
