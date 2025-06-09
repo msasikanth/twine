@@ -50,7 +50,7 @@ internal fun AppTheme(useDarkTheme: Boolean = false, content: @Composable () -> 
       LocalAppColorScheme provides colorScheme,
       LocalRippleConfiguration provides
         RippleConfiguration(
-          color = colorScheme.tintedForeground,
+          color = colorScheme.secondary,
           rippleAlpha = DefaultRippleAlpha,
         )
     ) {
