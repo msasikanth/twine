@@ -44,7 +44,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.rounded.DoneOutline
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
@@ -86,6 +85,7 @@ import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
+import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -441,7 +441,7 @@ private fun OverflowMenu(
 
         OverflowMenuItem(
           label = stringResource(Res.string.markAllAsRead),
-          icon = Icons.Rounded.DoneOutline,
+          icon = TwineIcons.MarkAllAsRead,
           enabled = hasUnreadPosts,
           onClick = {
             dropdownExpanded = false
