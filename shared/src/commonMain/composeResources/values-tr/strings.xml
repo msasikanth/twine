@@ -80,7 +80,7 @@
     <string name="feedsSearchHint">Filtrele</string>
     <string name="allFeeds">Tüm akışlar</string>
     <string name="pinnedFeeds">Sabitlenmiş akışlar</string>
-    <string name="markAllAsRead">Tümünü okundu olarak işaretle</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Web sitesini aç</string>
     <string name="noNewPosts">Yeni içerik yok</string>
     <string name="noNewPostsSubtitle">Daha sonra tekrar kontrol edin veya şimdi yeni içerik için aşağı çekin</string>
@@ -148,7 +148,7 @@
     <string name="pullToClose">Kapatmak için aşağı çekin</string>
     <string name="readerSettings">Okuyucu ekranı ayarları</string>
     <string name="comingSoon">Yakında</string>
-    <string name="homeViewMode">Görünüm modları</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">Varsayılan</string>
     <string name="homeViewModeSimple">Basit</string>
     <string name="homeViewModeCompact">Kompakt</string>
