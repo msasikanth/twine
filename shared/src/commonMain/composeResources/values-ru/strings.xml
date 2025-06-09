@@ -80,7 +80,7 @@
     <string name="feedsSearchHint">Фильтр</string>
     <string name="allFeeds">Новостные ленты</string>
     <string name="pinnedFeeds">Закреплённые</string>
-    <string name="markAllAsRead">Отметить все как прочитанные</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Открыть веб-сайт</string>
     <string name="noNewPosts">Свежих новостей нет</string>
     <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие свежих новостей</string>
@@ -148,7 +148,7 @@
     <string name="pullToClose">Потяните вниз, чтобы закрыть</string>
     <string name="readerSettings">Настройки экрана программы чтения</string>
     <string name="comingSoon">Скоро будет добавлено</string>
-    <string name="homeViewMode">Режимы просмотра</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">По умолчанию</string>
     <string name="homeViewModeSimple">Простой</string>
     <string name="homeViewModeCompact">Компактный</string>
