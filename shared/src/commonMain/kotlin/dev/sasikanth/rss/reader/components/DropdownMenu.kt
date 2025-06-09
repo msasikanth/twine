@@ -73,7 +73,14 @@ internal fun DropdownMenuItem(
         .padding(start = 16.dp, end = 20.dp)
         .fillMaxWidth()
   ) {
-    CompositionLocalProvider(LocalContentColor provides AppTheme.colorScheme.onSurface) {
+    val contentColor =
+      if (enabled) {
+        AppTheme.colorScheme.onSurface
+      } else {
+        AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+      }
+
+    CompositionLocalProvider(LocalContentColor provides contentColor) {
       if (leadingIcon != null) {
         leadingIcon()
         Spacer(Modifier.width(12.dp))
