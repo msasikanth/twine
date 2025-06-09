@@ -69,8 +69,7 @@ internal fun DropdownMenuItem(
     modifier =
       modifier
         .clickable(onClickLabel = contentDescription, enabled = enabled, onClick = onClick)
-        .padding(vertical = 12.dp)
-        .padding(start = 16.dp, end = 20.dp)
+        .padding(vertical = 12.dp, horizontal = 20.dp)
         .fillMaxWidth()
   ) {
     val contentColor =
@@ -83,7 +82,7 @@ internal fun DropdownMenuItem(
     CompositionLocalProvider(LocalContentColor provides contentColor) {
       if (leadingIcon != null) {
         leadingIcon()
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(16.dp))
       } else {
         Spacer(Modifier.width(4.dp))
       }
