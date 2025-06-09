@@ -17,8 +17,6 @@ package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 
 @Immutable
@@ -38,6 +36,7 @@ class AppColorScheme(
   val surfaceContainerHigh: Color,
   val surfaceContainerHighest: Color,
   val inversePrimary: Color,
+  val inverseSurface: Color,
   val textEmphasisHigh: Color,
   val textEmphasisMed: Color,
   val backdrop: Color,
@@ -65,6 +64,7 @@ class AppColorScheme(
     surfaceContainerHigh: Color = this.surfaceContainerHigh,
     surfaceContainerHighest: Color = this.surfaceContainerHighest,
     inversePrimary: Color = this.inversePrimary,
+    inverseSurface: Color = this.inverseSurface,
     textEmphasisHigh: Color = this.textEmphasisHigh,
     textEmphasisMed: Color = this.textEmphasisMed,
     backdrop: Color = this.backdrop,
@@ -91,6 +91,7 @@ class AppColorScheme(
       surfaceContainerHigh = surfaceContainerHigh,
       surfaceContainerHighest = surfaceContainerHighest,
       inversePrimary = inversePrimary,
+      inverseSurface = inverseSurface,
       textEmphasisHigh = textEmphasisHigh,
       textEmphasisMed = textEmphasisMed,
       backdrop = backdrop,
@@ -120,6 +121,7 @@ fun lightAppColorScheme(): AppColorScheme {
     surfaceContainerHigh = Color(0xFFE4EAE5),
     surfaceContainerHighest = Color(0xFFDEE4DF),
     inversePrimary = Color(0xFF43E269),
+    inverseSurface = Color(0xFF111412),
     textEmphasisHigh = Color.Black.copy(alpha = 0.9f),
     textEmphasisMed = Color.Black.copy(alpha = 0.7f),
     backdrop = Color(0xFFECF3E7),
@@ -149,6 +151,7 @@ fun darkAppColorScheme(): AppColorScheme {
     surfaceContainerHigh = Color(0xFF272B29),
     surfaceContainerHighest = Color(0xFF323633),
     inversePrimary = Color(0xFF006E28),
+    inverseSurface = Color(0xFFF5FBF6),
     textEmphasisHigh = Color.White.copy(alpha = 0.9f),
     textEmphasisMed = Color.White.copy(alpha = 0.7f),
     backdrop = Color(0xFF0C120C),
