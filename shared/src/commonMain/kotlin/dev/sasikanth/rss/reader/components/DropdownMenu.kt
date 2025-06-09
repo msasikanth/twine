@@ -62,12 +62,13 @@ internal fun DropdownMenuItem(
   modifier: Modifier = Modifier,
   leadingIcon: (@Composable () -> Unit)? = null,
   contentDescription: String? = null,
+  enabled: Boolean = true,
   text: @Composable () -> Unit,
 ) {
   Row(
     modifier =
       modifier
-        .clickable(onClickLabel = contentDescription, onClick = onClick)
+        .clickable(onClickLabel = contentDescription, enabled = enabled, onClick = onClick)
         .padding(vertical = 12.dp)
         .padding(start = 16.dp, end = 20.dp)
         .fillMaxWidth()
