@@ -401,7 +401,7 @@ private fun OverflowMenu(
         onDismissRequest = { dropdownExpanded = false }
       ) {
         Text(
-          modifier = Modifier.padding(horizontal = 20.dp).padding(top = 20.dp, bottom = 12.dp),
+          modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
           text = stringResource(Res.string.homeViewMode),
           style = MaterialTheme.typography.labelMedium,
           color = AppTheme.colorScheme.onSurfaceVariant,
@@ -514,9 +514,10 @@ private fun LayoutIconButton(
 ) {
   Column(
     modifier =
-      Modifier.then(modifier).padding(vertical = 8.dp).clip(MaterialTheme.shapes.medium).clickable {
-        onClick()
-      },
+      Modifier.then(modifier)
+        .clip(MaterialTheme.shapes.medium)
+        .clickable { onClick() }
+        .padding(vertical = 8.dp),
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     val defaultTranslucentStyle = LocalTranslucentStyles.current.default
@@ -587,7 +588,5 @@ private fun LayoutIconButton(
       style = textStyle,
       color = AppTheme.colorScheme.onSurface,
     )
-
-    Spacer(Modifier.requiredHeight(8.dp))
   }
 }
