@@ -17,10 +17,12 @@
 package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
 data class AppState(
   val appThemeMode: AppThemeMode,
   val showFeedFavIcon: Boolean,
+  val homeViewMode: HomeViewMode,
 ) {
 
   companion object {
@@ -28,6 +30,7 @@ data class AppState(
       AppState(
         appThemeMode = AppThemeMode.Auto,
         showFeedFavIcon = true,
+        homeViewMode = HomeViewMode.Default
       )
   }
 }

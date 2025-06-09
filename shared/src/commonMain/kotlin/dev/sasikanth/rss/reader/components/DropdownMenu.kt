@@ -41,19 +41,15 @@ internal fun DropdownMenu(
   offset: DpOffset = DpOffset.Zero,
   content: @Composable ColumnScope.() -> Unit
 ) {
-  MaterialTheme(shapes = MaterialTheme.shapes.copy(extraSmall = MaterialTheme.shapes.large)) {
-    androidx.compose.material3.DropdownMenu(
-      expanded = expanded,
-      onDismissRequest = onDismissRequest,
-      offset = offset,
-      modifier =
-        modifier.background(
-          color = AppTheme.colorScheme.surface,
-          shape = MaterialTheme.shapes.large
-        ),
-      content = content
-    )
-  }
+  androidx.compose.material3.DropdownMenu(
+    expanded = expanded,
+    onDismissRequest = onDismissRequest,
+    offset = offset,
+    shape = MaterialTheme.shapes.extraLarge,
+    modifier =
+      modifier.background(color = AppTheme.colorScheme.surface, shape = MaterialTheme.shapes.large),
+    content = content
+  )
 }
 
 @Composable
