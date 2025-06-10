@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,15 +44,13 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
-import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 
 @Immutable data class FeaturedPostItem(val postWithMetadata: PostWithMetadata, val seedColor: Int?)
 
 @Composable
 internal fun FeaturedPostItem(
   item: PostWithMetadata,
-  page: Int,
-  pagerState: PagerState,
+  pageOffset: () -> Float,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -74,12 +71,7 @@ internal fun FeaturedPostItem(
     FeaturedImage(
       modifier =
         Modifier.graphicsLayer {
-          translationX =
-            if (page in 0..pagerState.pageCount) {
-              pagerState.getOffsetFractionForPage(page) * 250f
-            } else {
-              0f
-            }
+          translationX = pageOffset.invoke() * 250f
           scaleX = 1.08f
           scaleY = 1.08f
         },
