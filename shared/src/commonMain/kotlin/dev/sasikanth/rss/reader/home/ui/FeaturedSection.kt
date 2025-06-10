@@ -62,8 +62,8 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlinx.collections.immutable.ImmutableList
 import kotlin.math.absoluteValue
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 internal fun FeaturedSection(
