@@ -151,16 +151,11 @@ internal fun HomeScreen(
     homePresenter.effects.collectLatest { effect ->
       when (effect) {
         is HomeEffect.ScrollPostListTo -> {
-          if (effect.index <= Constants.NUMBER_OF_FEATURED_POSTS) {
+          if (effect.index < Constants.NUMBER_OF_FEATURED_POSTS) {
             featuredPostsPagerState.scrollToPage(effect.index)
           } else {
-            val adjustedIndex =
-              if (featuredPosts.size > 0) {
-                (effect.index - featuredPosts.size).coerceAtLeast(0)
-              } else {
-                effect.index
-              }
-
+            // Since indexes start from 0, we are increasing the featured posts size by one
+            val adjustedIndex = (effect.index - featuredPosts.size + 1).coerceAtLeast(0)
             postsListState.scrollToItem(adjustedIndex)
           }
         }
