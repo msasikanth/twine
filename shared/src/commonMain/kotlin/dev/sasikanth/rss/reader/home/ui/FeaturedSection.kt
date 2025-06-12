@@ -59,6 +59,7 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
+import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
@@ -168,11 +169,13 @@ internal fun FeaturedSection(
         val postWithMetadata = featuredPost.postWithMetadata
 
         Box {
-          FeaturedSectionBackground(
-            featuredPost = featuredPost,
-            useDarkTheme = useDarkTheme,
-            pageOffset = { pagerState.getOffsetFractionForPage(page) },
-          )
+          if (canBlurImage) {
+            FeaturedSectionBackground(
+              featuredPost = featuredPost,
+              useDarkTheme = useDarkTheme,
+              pageOffset = { pagerState.getOffsetFractionForPage(page) },
+            )
+          }
 
           FeaturedPostItem(
             modifier =
