@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.utils.NTuple4
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -65,7 +66,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-import kotlin.time.Duration.Companion.hours
 
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -36,15 +36,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
@@ -214,21 +214,8 @@ internal fun HomeScreen(
           AppTheme(useDarkTheme = useDarkTheme) {
             Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
               val hasFeeds = state.hasFeeds
-              val showRefreshIndicator by remember {
-                derivedStateOf {
-                  posts?.loadState?.refresh is LoadState.Loading || state.isSyncing
-                }
-              }
-              val swipeRefreshState =
-                rememberPullRefreshState(
-                  refreshing = showRefreshIndicator,
-                  onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) }
-                )
-              val canSwipeToRefresh = hasFeeds == true
 
               HomeScreenContentScaffold(
-                modifier =
-                  Modifier.pullRefresh(state = swipeRefreshState, enabled = canSwipeToRefresh),
                 homeTopAppBar = {
                   HomeTopAppBar(
                     source = state.activeSource,
@@ -265,48 +252,61 @@ internal fun HomeScreen(
                         NoNewPosts()
                       }
                       else -> {
-                        PostsList(
-                          modifier = Modifier.nestedScroll(nestedScrollConnection),
-                          paddingValues = paddingValues,
-                          featuredPosts = featuredPosts,
-                          posts = posts,
-                          useDarkTheme = useDarkTheme,
-                          listState = postsListState,
-                          featuredPostsPagerState = featuredPostsPagerState,
-                          homeViewMode = state.homeViewMode,
-                          markPostAsRead = {
-                            homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                          },
-                          postsScrolled = {
-                            homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
-                          },
-                          markScrolledPostsAsRead = {
-                            homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
-                          },
-                          onPostClicked = { post, postIndex ->
-                            homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
-                          },
-                          onPostBookmarkClick = {
-                            homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
-                          },
-                          onPostCommentsClick = { commentsLink ->
-                            coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                          },
-                          onPostSourceClick = { feedId ->
-                            homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                          },
-                          onTogglePostReadClick = { postId, postRead ->
-                            homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                        val pullToRefreshState = rememberPullToRefreshState()
+
+                        PullToRefreshBox(
+                          state = pullToRefreshState,
+                          isRefreshing = state.isSyncing,
+                          onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+                          indicator = {
+                            Indicator(
+                              modifier = Modifier.align(Alignment.TopCenter),
+                              isRefreshing = state.isSyncing,
+                              containerColor = AppTheme.colorScheme.primaryContainer,
+                              color = AppTheme.colorScheme.primary,
+                              state = pullToRefreshState
+                            )
                           }
-                        )
+                        ) {
+                          PostsList(
+                            modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection),
+                            paddingValues = paddingValues,
+                            featuredPosts = featuredPosts,
+                            posts = posts,
+                            useDarkTheme = useDarkTheme,
+                            listState = postsListState,
+                            featuredPostsPagerState = featuredPostsPagerState,
+                            homeViewMode = state.homeViewMode,
+                            markPostAsRead = {
+                              homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                            },
+                            postsScrolled = {
+                              homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
+                            },
+                            markScrolledPostsAsRead = {
+                              homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                            },
+                            onPostClicked = { post, postIndex ->
+                              homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
+                            },
+                            onPostBookmarkClick = {
+                              homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                            },
+                            onPostCommentsClick = { commentsLink ->
+                              coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                            },
+                            onPostSourceClick = { feedId ->
+                              homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                            },
+                            onTogglePostReadClick = { postId, postRead ->
+                              homePresenter.dispatch(
+                                HomeEvent.TogglePostReadStatus(postId, postRead)
+                              )
+                            }
+                          )
+                        }
                       }
                     }
-
-                    PullRefreshIndicator(
-                      modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
-                      refreshing = showRefreshIndicator,
-                      state = swipeRefreshState,
-                    )
                   }
                 },
               )

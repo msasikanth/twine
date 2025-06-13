@@ -20,7 +20,6 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
@@ -29,6 +28,7 @@ import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 import platform.UIKit.UIViewController
+import kotlin.experimental.ExperimentalNativeApi
 
 @AppScope
 @Component
