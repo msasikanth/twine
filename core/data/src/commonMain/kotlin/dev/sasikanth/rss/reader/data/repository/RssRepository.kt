@@ -42,16 +42,12 @@ import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
-import kotlin.time.Duration.Companion.seconds
 
 @Inject
 @AppScope
@@ -68,10 +64,6 @@ class RssRepository(
   private val sourceQueries: SourceQueries,
   private val dispatchersProvider: DispatchersProvider
 ) {
-
-  companion object {
-    private const val UPDATE_CHUNKS = 6
-  }
 
   suspend fun fetchAndAddFeed(
     feedLink: String,
@@ -135,46 +127,6 @@ class RssRepository(
       }
       FeedFetchResult.TooManyRedirects -> {
         FeedAddResult.TooManyRedirects
-      }
-    }
-  }
-
-  suspend fun updateFeeds() {
-    withContext(dispatchersProvider.io) {
-      val feedsChunks = allFeedsBlocking().chunked(UPDATE_CHUNKS)
-
-      feedsChunks.forEach { feeds ->
-        val jobs =
-          feeds.map { feed ->
-            launch { fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt) }
-          }
-        jobs.joinAll()
-
-        delay(1.seconds)
-      }
-    }
-  }
-
-  suspend fun updateFeed(selectedFeedId: String) {
-    val feed =
-      withContext(dispatchersProvider.databaseRead) {
-        feedQueries.feed(selectedFeedId).executeAsOneOrNull()
-      }
-
-    if (feed != null) {
-      fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
-    }
-  }
-
-  suspend fun updateGroup(feedIds: List<String>) {
-    feedIds.forEach { feedId ->
-      val feed =
-        withContext(dispatchersProvider.databaseRead) {
-          feedQueries.feed(feedId).executeAsOneOrNull()
-        }
-
-      if (feed != null) {
-        fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
       }
     }
   }
