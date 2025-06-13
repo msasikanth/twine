@@ -42,7 +42,6 @@ import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -52,6 +51,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
+import kotlin.time.Duration.Companion.seconds
 
 @Inject
 @AppScope
@@ -177,6 +177,42 @@ class RssRepository(
         fetchAndAddFeed(feedLink = feed.link, feedLastCleanUpAt = feed.lastCleanUpAt)
       }
     }
+  }
+
+  fun feed(feedId: String): Feed? {
+    return feedQueries
+      .feed(
+        feedId,
+        mapper = {
+          id: String,
+          name: String,
+          icon: String,
+          description: String,
+          link: String,
+          homepageLink: String,
+          createdAt: Instant,
+          pinnedAt: Instant?,
+          lastCleanUpAt: Instant?,
+          alwaysFetchSourceArticle: Boolean,
+          pinnedPosition: Double,
+          showFeedFavIcon: Boolean ->
+          Feed(
+            id = id,
+            name = name,
+            icon = icon,
+            description = description,
+            homepageLink = homepageLink,
+            createdAt = createdAt,
+            link = link,
+            pinnedAt = pinnedAt,
+            lastCleanUpAt = lastCleanUpAt,
+            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+            pinnedPosition = pinnedPosition,
+            showFeedFavIcon = showFeedFavIcon,
+          )
+        }
+      )
+      .executeAsOneOrNull()
   }
 
   fun allPosts(
