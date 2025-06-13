@@ -103,7 +103,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastUpdatedAt.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
-                    try await applicationComponent.rssRepository.updateFeeds()
+                    try await applicationComponent.syncCoordinator.refreshFeeds()
                     try await applicationComponent.lastUpdatedAt.refresh()
                 }
                 

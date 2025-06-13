@@ -24,8 +24,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
-import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import java.time.Duration
@@ -35,10 +35,10 @@ import kotlinx.coroutines.flow.first
 class FeedsRefreshWorker(
   context: Context,
   workerParameters: WorkerParameters,
-  private val rssRepository: RssRepository,
   private val lastUpdatedAt: LastUpdatedAt,
   private val currentDateTimeSource: CurrentDateTimeSource,
   private val settingsRepository: SettingsRepository,
+  private val syncCoordinator: SyncCoordinator,
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
@@ -63,7 +63,7 @@ class FeedsRefreshWorker(
 
     return if (lastUpdatedAt.hasExpired()) {
       try {
-        rssRepository.updateFeeds()
+        syncCoordinator.refreshFeeds()
         lastUpdatedAt.refresh()
         currentDateTimeSource.refresh()
         Result.success()

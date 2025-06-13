@@ -25,14 +25,14 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
-import dev.sasikanth.rss.reader.home.HomeLoadingState.Loading
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
 
 @Immutable
 internal data class HomeState(
   val posts: Flow<PagingData<PostWithMetadata>>?,
-  val loadingState: HomeLoadingState,
+  val syncState: SyncState,
   val feedsSheetState: SheetValue,
   val activeSource: Source?,
   val hasFeeds: Boolean?,
@@ -47,7 +47,7 @@ internal data class HomeState(
     fun default(currentDateTime: LocalDateTime) =
       HomeState(
         posts = null,
-        loadingState = HomeLoadingState.Idle,
+        syncState = SyncState.Idle,
         feedsSheetState = SheetValue.PartiallyExpanded,
         activeSource = null,
         hasFeeds = null,
@@ -58,14 +58,6 @@ internal data class HomeState(
       )
   }
 
-  val isRefreshing: Boolean
-    get() = loadingState == Loading
-}
-
-sealed interface HomeLoadingState {
-  data object Idle : HomeLoadingState
-
-  data object Loading : HomeLoadingState
-
-  data class Error(val errorMessage: String) : HomeLoadingState
+  val isSyncing: Boolean
+    get() = syncState is SyncState.InProgress
 }
