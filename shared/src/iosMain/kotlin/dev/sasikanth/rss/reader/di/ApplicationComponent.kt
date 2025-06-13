@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.di
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -38,6 +39,8 @@ abstract class ApplicationComponent(
   abstract val rssRepository: RssRepository
 
   abstract val settingsRepository: SettingsRepository
+
+  abstract val syncCoordinator: SyncCoordinator
 
   @Provides
   @AppScope
