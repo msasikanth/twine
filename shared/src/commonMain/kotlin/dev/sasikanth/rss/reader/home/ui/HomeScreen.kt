@@ -90,7 +90,6 @@ import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
@@ -106,7 +105,6 @@ import twine.shared.generated.resources.swipeUpGetStarted
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 
-@OptIn(FlowPreview::class)
 @Composable
 internal fun HomeScreen(
   homePresenter: HomePresenter,
@@ -216,9 +214,14 @@ internal fun HomeScreen(
           AppTheme(useDarkTheme = useDarkTheme) {
             Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
               val hasFeeds = state.hasFeeds
+              val showRefreshIndicator by remember {
+                derivedStateOf {
+                  posts?.loadState?.refresh is LoadState.Loading || state.isSyncing
+                }
+              }
               val swipeRefreshState =
                 rememberPullRefreshState(
-                  refreshing = state.isRefreshing || posts?.loadState?.refresh is LoadState.Loading,
+                  refreshing = showRefreshIndicator,
                   onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) }
                 )
               val canSwipeToRefresh = hasFeeds == true
@@ -301,8 +304,7 @@ internal fun HomeScreen(
 
                     PullRefreshIndicator(
                       modifier = Modifier.padding(paddingValues).align(Alignment.TopCenter),
-                      refreshing =
-                        state.isRefreshing || posts?.loadState?.refresh is LoadState.Loading,
+                      refreshing = showRefreshIndicator,
                       state = swipeRefreshState,
                     )
                   }

@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material3.SheetValue
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
 import com.arkivanov.essenty.backhandler.BackCallback
@@ -41,7 +40,6 @@ import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.utils.NTuple4
-import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
@@ -67,6 +65,7 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import kotlin.time.Duration.Companion.hours
 
 @Inject
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -307,6 +306,10 @@ class HomePresenter(
       val activeSourceFlow = observableActiveSource.activeSource
       val postsTypeFlow = settingsRepository.postsType
 
+      syncCoordinator.syncState
+        .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
+        .launchIn(coroutineScope)
+
       rssRepository
         .hasFeeds()
         .distinctUntilChanged()
@@ -379,21 +382,12 @@ class HomePresenter(
 
     private fun refreshContent() {
       coroutineScope.launch {
-        _state.update { it.copy(loadingState = HomeLoadingState.Loading) }
-
-        try {
-          when (val selectedSource = _state.value.activeSource) {
-            is FeedGroup -> syncCoordinator.refreshFeeds(selectedSource.feedIds)
-            is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
-            else -> syncCoordinator.refreshFeeds()
-          }
-        } catch (e: Exception) {
-          BugsnagKotlin.logMessage("RefreshContent")
-          BugsnagKotlin.sendHandledException(e)
-        } finally {
-          currentDateTimeSource.refresh()
-          _state.update { it.copy(loadingState = HomeLoadingState.Idle) }
+        when (val selectedSource = _state.value.activeSource) {
+          is FeedGroup -> syncCoordinator.refreshFeeds(selectedSource.feedIds)
+          is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
+          else -> syncCoordinator.refreshFeeds()
         }
+        currentDateTimeSource.refresh()
       }
     }
 
