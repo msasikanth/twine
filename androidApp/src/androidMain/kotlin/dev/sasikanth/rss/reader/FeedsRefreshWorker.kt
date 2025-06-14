@@ -26,8 +26,8 @@ import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
-import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
