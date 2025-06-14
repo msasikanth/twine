@@ -65,7 +65,6 @@ class FeedsRefreshWorker(
       try {
         syncCoordinator.refreshFeeds()
         lastUpdatedAt.refresh()
-        currentDateTimeSource.refresh()
         Result.success()
       } catch (e: CancellationException) {
         Result.failure()

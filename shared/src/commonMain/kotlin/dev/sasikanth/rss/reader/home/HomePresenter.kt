@@ -387,7 +387,6 @@ class HomePresenter(
           is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
           else -> syncCoordinator.refreshFeeds()
         }
-        currentDateTimeSource.refresh()
       }
     }
 

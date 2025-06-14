@@ -382,8 +382,8 @@ class AppPresenter(
         if (lastUpdatedAt.hasExpired()) {
           syncCoordinator.refreshFeeds()
           lastUpdatedAt.refresh()
-          currentDateTimeSource.refresh()
         }
+        currentDateTimeSource.refresh()
       }
     }
 
