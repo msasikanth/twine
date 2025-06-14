@@ -34,11 +34,11 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.utils.NTuple4
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
@@ -387,7 +387,6 @@ class HomePresenter(
           is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
           else -> syncCoordinator.refreshFeeds()
         }
-        currentDateTimeSource.refresh()
       }
     }
 
