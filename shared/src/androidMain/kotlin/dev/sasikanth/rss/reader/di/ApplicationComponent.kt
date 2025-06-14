@@ -21,8 +21,9 @@ import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -36,6 +37,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   abstract val settingsRepository: SettingsRepository
 
   abstract val currentDateTimeSource: CurrentDateTimeSource
+
+  abstract val syncCoordinator: SyncCoordinator
 
   @Provides
   @AppScope

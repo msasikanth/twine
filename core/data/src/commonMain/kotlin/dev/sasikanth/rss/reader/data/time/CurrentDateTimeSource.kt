@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.data.time
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Duration.Companion.hours

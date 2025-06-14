@@ -42,6 +42,9 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenterFactory
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -54,11 +57,9 @@ import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
-import dev.sasikanth.rss.reader.refresh.LastUpdatedAt
 import dev.sasikanth.rss.reader.search.SearchPresentFactory
 import dev.sasikanth.rss.reader.settings.SettingsPresenterFactory
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.CurrentDateTimeSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -98,16 +99,17 @@ class AppPresenter(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val linkHandler: LinkHandler,
+  private val syncCoordinator: SyncCoordinator,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
+        settingsRepository = settingsRepository,
         lastUpdatedAt = lastUpdatedAt,
         currentDateTimeSource = currentDateTimeSource,
-        rssRepository = rssRepository,
-        settingsRepository = settingsRepository,
+        syncCoordinator = syncCoordinator,
       )
     }
 
@@ -343,7 +345,7 @@ class AppPresenter(
     settingsRepository: SettingsRepository,
     private val lastUpdatedAt: LastUpdatedAt,
     private val currentDateTimeSource: CurrentDateTimeSource,
-    private val rssRepository: RssRepository,
+    private val syncCoordinator: SyncCoordinator,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -378,10 +380,10 @@ class AppPresenter(
     fun refreshFeedsIfExpired() {
       coroutineScope.launch {
         if (lastUpdatedAt.hasExpired()) {
-          rssRepository.updateFeeds()
+          syncCoordinator.refreshFeeds()
           lastUpdatedAt.refresh()
-          currentDateTimeSource.refresh()
         }
+        currentDateTimeSource.refresh()
       }
     }
 
