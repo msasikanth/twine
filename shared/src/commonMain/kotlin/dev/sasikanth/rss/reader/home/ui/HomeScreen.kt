@@ -260,7 +260,9 @@ internal fun HomeScreen(
                           onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
                           indicator = {
                             Indicator(
-                              modifier = Modifier.align(Alignment.TopCenter),
+                              modifier =
+                                Modifier.align(Alignment.TopCenter)
+                                  .padding(top = paddingValues.calculateTopPadding()),
                               isRefreshing = state.isSyncing,
                               containerColor = AppTheme.colorScheme.primaryContainer,
                               color = AppTheme.colorScheme.primary,
