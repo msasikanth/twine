@@ -484,13 +484,7 @@ private fun OverflowMenuItem(
           color = if (selected) AppTheme.colorScheme.primaryContainer else Color.Unspecified,
           shape = MaterialTheme.shapes.large
         ),
-    text = {
-      Text(
-        text = label,
-        color = AppTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.bodyMedium
-      )
-    },
+    text = { Text(text = label, style = MaterialTheme.typography.bodyMedium) },
     enabled = enabled,
     onClick = onClick,
     leadingIcon = {
@@ -498,7 +492,6 @@ private fun OverflowMenuItem(
         modifier = Modifier.requiredSize(20.dp),
         imageVector = icon,
         contentDescription = null,
-        tint = AppTheme.colorScheme.onSurfaceVariant
       )
     },
   )

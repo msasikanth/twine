@@ -74,15 +74,22 @@ internal fun DropdownMenuItem(
       } else {
         AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
       }
+    val iconColor =
+      if (enabled) {
+        AppTheme.colorScheme.onSurfaceVariant
+      } else {
+        AppTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+      }
 
-    CompositionLocalProvider(LocalContentColor provides contentColor) {
+    CompositionLocalProvider(LocalContentColor provides iconColor) {
       if (leadingIcon != null) {
         leadingIcon()
         Spacer(Modifier.width(16.dp))
       } else {
         Spacer(Modifier.width(4.dp))
       }
-      text()
     }
+
+    CompositionLocalProvider(LocalContentColor provides contentColor) { text() }
   }
 }
