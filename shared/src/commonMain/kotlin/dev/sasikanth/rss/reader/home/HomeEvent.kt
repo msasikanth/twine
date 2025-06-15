@@ -65,4 +65,6 @@ sealed interface HomeEvent {
   data class UpdateVisibleItemIndex(val index: Int) : HomeEvent
 
   data object LoadNewArticlesClick : HomeEvent
+
+  data object UpdateDate : HomeEvent
 }

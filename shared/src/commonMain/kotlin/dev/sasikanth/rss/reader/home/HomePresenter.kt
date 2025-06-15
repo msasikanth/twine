@@ -23,6 +23,7 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -40,7 +41,6 @@ import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple5
-import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -65,6 +65,7 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import kotlin.time.Duration.Companion.hours
 
 @Inject
 class HomePresenter(
@@ -137,6 +138,8 @@ class HomePresenter(
       backHandler.register(backCallback)
       backCallback.isEnabled = false
     }
+
+    lifecycle.doOnResume { dispatch(HomeEvent.UpdateDate) }
   }
 
   fun dispatch(event: HomeEvent) {
@@ -217,6 +220,15 @@ class HomePresenter(
         is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
         is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
         is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
+        is HomeEvent.UpdateDate -> updateDate()
+      }
+    }
+
+    private fun updateDate() {
+      val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+      if (_state.value.currentDateTime.date != currentDate.date) {
+        _state.update { it.copy(currentDateTime = currentDate) }
       }
     }
 
