@@ -78,17 +78,21 @@ class AllPostsPager(
   }
 
   private fun observeHasNewerArticles() {
-    combine(observableActiveSource.activeSource, lastRefreshedAt.dateTimeFlow) {
-        activeSource,
-        dateTime ->
-        Pair(activeSource, dateTime)
+    combine(
+        observableActiveSource.activeSource,
+        settingsRepository.postsType,
+        lastRefreshedAt.dateTimeFlow,
+      ) { activeSource, postsType, dateTime ->
+        Triple(activeSource, postsType, dateTime)
       }
-      .flatMapLatest { (activeSource, dateTime) ->
+      .flatMapLatest { (activeSource, postsType, dateTime) ->
         val activeSourceIds = activeSourceIds(activeSource)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
 
         rssRepository.hasNewerArticles(
           sources = activeSourceIds,
-          postsAfter = dateTime.toInstant(TimeZone.currentSystemDefault()),
+          postsAfter = postsAfter,
+          lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
         )
       }
       .onEach { hasNewerArticles -> _hasNewerArticles.value = hasNewerArticles }

@@ -189,4 +189,5 @@ WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   read != 1 AND
-  post.syncedAt > :after;
+  post.date > :postsAfter AND
+  post.syncedAt > :lastSyncedAt;

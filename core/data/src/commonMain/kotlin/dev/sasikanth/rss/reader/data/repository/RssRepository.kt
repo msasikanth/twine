@@ -943,12 +943,17 @@ class RssRepository(
       .map { it > 0 }
   }
 
-  fun hasNewerArticles(sources: List<String>, postsAfter: Instant): Flow<Boolean> {
+  fun hasNewerArticles(
+    sources: List<String>,
+    postsAfter: Instant,
+    lastSyncedAt: Instant
+  ): Flow<Boolean> {
     return postQueries
       .newArticlesSinceCount(
         isSourceIdsEmpty = sources.isEmpty(),
         sourceIds = sources,
-        after = postsAfter,
+        postsAfter = postsAfter,
+        lastSyncedAt = lastSyncedAt,
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
