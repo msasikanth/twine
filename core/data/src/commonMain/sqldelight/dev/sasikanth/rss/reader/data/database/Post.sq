@@ -182,3 +182,11 @@ WHERE
   post.isHidden == 0 AND
   read != 1 AND
   date > :after;
+
+newArticlesSinceCount:
+SELECT COUNT(*) FROM post
+WHERE
+  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+  post.isHidden == 0 AND
+  read != 1 AND
+  post.syncedAt > :after;

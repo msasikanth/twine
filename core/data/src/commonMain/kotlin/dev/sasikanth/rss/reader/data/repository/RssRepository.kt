@@ -943,6 +943,18 @@ class RssRepository(
       .map { it > 0 }
   }
 
+  fun hasNewerArticles(sources: List<String>, postsAfter: Instant): Flow<Boolean> {
+    return postQueries
+      .newArticlesSinceCount(
+        isSourceIdsEmpty = sources.isEmpty(),
+        sourceIds = sources,
+        after = postsAfter,
+      )
+      .asFlow()
+      .mapToOne(dispatchersProvider.databaseRead)
+      .map { it > 0 }
+  }
+
   private fun sanitizeSearchQuery(searchQuery: String): String {
     return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
   }
