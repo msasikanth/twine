@@ -43,7 +43,6 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
@@ -68,8 +67,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import kotlin.time.Duration.Companion.milliseconds
 
 @Inject
 class FeedsPresenter(
@@ -402,7 +405,10 @@ class FeedsPresenter(
           }
           .flatMapLatest { (postsType, dateTime) ->
             val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
-            rssRepository.pinnedSources(postsAfter)
+            rssRepository.pinnedSources(
+              postsAfter = postsAfter,
+              lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+            )
           }
 
       val allSourcesFlow =
@@ -418,6 +424,7 @@ class FeedsPresenter(
             val sources =
               sources(
                 postsAfter = postsAfter,
+                lastSyncedAt = dateTime,
                 feedsSortOrder = feedsSortOrder,
               )
 
@@ -444,9 +451,17 @@ class FeedsPresenter(
         }
         .flow
 
-    private fun sources(postsAfter: Instant, feedsSortOrder: FeedsOrderBy) =
+    private fun sources(
+      postsAfter: Instant,
+      lastSyncedAt: LocalDateTime,
+      feedsSortOrder: FeedsOrderBy
+    ) =
       createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.sources(postsAfter = postsAfter, orderBy = feedsSortOrder)
+          rssRepository.sources(
+            postsAfter = postsAfter,
+            lastSyncedAt = lastSyncedAt.toInstant(TimeZone.currentSystemDefault()),
+            orderBy = feedsSortOrder
+          )
         }
         .flow
 

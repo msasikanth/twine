@@ -55,7 +55,7 @@ SELECT
   COUNT(CASE WHEN p.read = 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
   f.showFeedFavIcon
 FROM feed f
-LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
 WHERE f.id = :id
 ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
 

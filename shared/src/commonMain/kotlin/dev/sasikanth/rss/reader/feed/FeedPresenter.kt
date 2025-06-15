@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -175,7 +177,11 @@ class FeedPresenter(
           PostsFilterUtils.postsThresholdTime(postsType = postsType, dateTime = dateTime)
 
         rssRepository
-          .feed(feedId, postsAfter)
+          .feed(
+            feedId = feedId,
+            postsAfter = postsAfter,
+            lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+          )
           .onEach { feed -> _state.update { it.copy(feed = feed) } }
           .catch {
             // no-op
