@@ -45,7 +45,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
     visible = visible,
     enter = slideInVertically { it },
     exit = slideOutVertically { it },
-    modifier = Modifier.align(Alignment.BottomEnd)
+    modifier = Modifier.align(Alignment.BottomCenter)
   ) {
     FilledTonalButton(
       modifier = modifier,
