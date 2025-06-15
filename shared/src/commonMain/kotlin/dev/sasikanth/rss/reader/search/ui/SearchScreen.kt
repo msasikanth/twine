@@ -94,7 +94,6 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.postsSearchHint
-import twine.shared.generated.resources.scrollToTop
 import twine.shared.generated.resources.searchResultsCount
 import twine.shared.generated.resources.searchSortNewest
 import twine.shared.generated.resources.searchSortNewestFirst
@@ -182,13 +181,16 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
         }
 
         NewArticlesScrollToTopButton(
-          label = stringResource(Res.string.scrollToTop),
-          visible = showScrollToTop,
+          hasUnreadArticles = false,
+          canShowScrollToTop = true,
           modifier =
             Modifier.padding(
               end = padding.calculateEndPadding(layoutDirection) + 16.dp,
               bottom = padding.calculateBottomPadding() + 16.dp
-            )
+            ),
+          onLoadNewArticlesClick = {
+
+          }
         ) {
           listState.animateScrollToItem(0)
         }

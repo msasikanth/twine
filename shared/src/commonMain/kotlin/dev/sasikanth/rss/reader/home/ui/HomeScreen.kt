@@ -99,7 +99,6 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.noFeeds
 import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
-import twine.shared.generated.resources.scrollToTop
 import twine.shared.generated.resources.swipeUpGetStarted
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
@@ -247,7 +246,7 @@ internal fun HomeScreen(
                         NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
                       }
                       featuredPosts.isEmpty() &&
-                        posts.itemCount == 0 &&
+                          posts.itemCount == 0 &&
                         posts.loadState.refresh is LoadState.NotLoading -> {
                         NoNewPosts()
                       }
@@ -324,8 +323,8 @@ internal fun HomeScreen(
               )
 
               NewArticlesScrollToTopButton(
-                label = stringResource(Res.string.scrollToTop),
-                visible = showScrollToTop,
+                hasUnreadArticles = false,
+                canShowScrollToTop = showScrollToTop,
                 modifier =
                   Modifier.padding(
                     end = 16.dp,
@@ -334,6 +333,9 @@ internal fun HomeScreen(
                         .calculateBottomPadding()
                         .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
                   ),
+                onLoadNewArticlesClick = {
+                  // TODO: Refresh current date time source to load new articles
+                },
               ) {
                 scrollToTopClicked = true
                 postsListState.animateScrollToItem(0)

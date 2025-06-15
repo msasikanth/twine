@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Title (optional)</string>
     <string name="share">Share</string>
     <string name="scrollToTop">Scroll to top</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">No feeds present!</string>
     <string name="swipeUpGetStarted">Swipe up to get started</string>
     <string name="feedNameHint">Feed name</string>

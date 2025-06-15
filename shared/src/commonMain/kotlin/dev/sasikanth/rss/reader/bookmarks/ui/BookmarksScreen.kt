@@ -63,7 +63,6 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.bookmarksPlaceholder
 import twine.shared.generated.resources.buttonGoBack
-import twine.shared.generated.resources.scrollToTop
 
 @Composable
 internal fun BookmarksScreen(
@@ -158,13 +157,16 @@ internal fun BookmarksScreen(
           }
 
           NewArticlesScrollToTopButton(
-            label = stringResource(Res.string.scrollToTop),
-            visible = showScrollToTop,
+            hasUnreadArticles = false,
+            canShowScrollToTop = true,
             modifier =
               Modifier.padding(
                 end = padding.calculateEndPadding(layoutDirection) + 16.dp,
                 bottom = padding.calculateBottomPadding() + 16.dp
-              )
+              ),
+            onLoadNewArticlesClick = {
+
+            }
           ) {
             listState.animateScrollToItem(0)
           }
