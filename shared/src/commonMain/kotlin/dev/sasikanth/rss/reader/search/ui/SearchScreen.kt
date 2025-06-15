@@ -70,9 +70,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Newest
@@ -94,7 +94,6 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.postsSearchHint
-import twine.shared.generated.resources.scrollToTop
 import twine.shared.generated.resources.searchResultsCount
 import twine.shared.generated.resources.searchSortNewest
 import twine.shared.generated.resources.searchSortNewestFirst
@@ -181,14 +180,15 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
           }
         }
 
-        CompactFloatingActionButton(
-          label = stringResource(Res.string.scrollToTop),
-          visible = showScrollToTop,
+        NewArticlesScrollToTopButton(
+          hasUnreadArticles = false,
+          canShowScrollToTop = true,
           modifier =
             Modifier.padding(
               end = padding.calculateEndPadding(layoutDirection) + 16.dp,
               bottom = padding.calculateBottomPadding() + 16.dp
-            )
+            ),
+          onLoadNewArticlesClick = {}
         ) {
           listState.animateScrollToItem(0)
         }

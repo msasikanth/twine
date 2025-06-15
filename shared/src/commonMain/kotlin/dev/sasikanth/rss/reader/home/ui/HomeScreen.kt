@@ -73,7 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
@@ -99,7 +99,6 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.noFeeds
 import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
-import twine.shared.generated.resources.scrollToTop
 import twine.shared.generated.resources.swipeUpGetStarted
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
@@ -144,6 +143,7 @@ internal fun HomeScreen(
 
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
+  val hasNewerArticles = state.hasNewerArticles
 
   LaunchedEffect(Unit) {
     homePresenter.effects.collectLatest { effect ->
@@ -323,9 +323,9 @@ internal fun HomeScreen(
                     .align(Alignment.BottomCenter)
               )
 
-              CompactFloatingActionButton(
-                label = stringResource(Res.string.scrollToTop),
-                visible = showScrollToTop,
+              NewArticlesScrollToTopButton(
+                hasUnreadArticles = hasNewerArticles != null && hasNewerArticles,
+                canShowScrollToTop = showScrollToTop,
                 modifier =
                   Modifier.padding(
                     end = 16.dp,
@@ -334,6 +334,7 @@ internal fun HomeScreen(
                         .calculateBottomPadding()
                         .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
                   ),
+                onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
               ) {
                 scrollToTopClicked = true
                 postsListState.animateScrollToItem(0)

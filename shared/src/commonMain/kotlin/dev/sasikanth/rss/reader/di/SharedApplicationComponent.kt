@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.core.network.di.NetworkComponent
 import dev.sasikanth.rss.reader.data.di.DataComponent
-import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.logging.LoggingComponent
@@ -30,7 +30,7 @@ abstract class SharedApplicationComponent :
 
   abstract val initializers: Set<Initializer>
 
-  abstract val lastUpdatedAt: LastUpdatedAt
+  abstract val lastRefreshedAt: LastRefreshedAt
 
   @Provides @AppScope fun DefaultDispatchersProvider.bind(): DispatchersProvider = this
 }

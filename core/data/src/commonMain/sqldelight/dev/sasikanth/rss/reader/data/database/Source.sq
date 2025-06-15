@@ -70,7 +70,7 @@ FROM (
     NULL AS updatedAt,
     f.pinnedPosition
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
   GROUP BY f.id
 
   UNION ALL
@@ -94,7 +94,7 @@ FROM (
     fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   GROUP BY fg.id
 )
@@ -161,7 +161,7 @@ FROM (
     f.pinnedAt,
     NULL AS updatedAt
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
   GROUP BY f.id
 
   UNION ALL
@@ -184,7 +184,7 @@ FROM (
     fg.updatedAt
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter
+  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   GROUP BY fg.id
 )

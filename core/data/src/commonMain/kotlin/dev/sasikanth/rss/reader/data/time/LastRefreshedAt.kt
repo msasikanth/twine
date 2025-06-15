@@ -22,21 +22,34 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class LastUpdatedAt(private val dataStore: DataStore<Preferences>) {
+class LastRefreshedAt(private val dataStore: DataStore<Preferences>) {
 
   companion object {
     private val UPDATE_DURATION = 60.minutes
   }
 
   private val lastUpdatedAtKey = stringPreferencesKey("pref_last_updated_at")
+
+  val dateTimeFlow: Flow<LocalDateTime> =
+    dataStore.data.map { preferences ->
+      val timeZone = TimeZone.currentSystemDefault()
+      val instantString =
+        preferences[lastUpdatedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
+      val instant = Instant.parse(instantString)
+      instant.toLocalDateTime(timeZone)
+    }
 
   suspend fun refresh() {
     dataStore.edit { preferences -> preferences[lastUpdatedAtKey] = Clock.System.now().toString() }

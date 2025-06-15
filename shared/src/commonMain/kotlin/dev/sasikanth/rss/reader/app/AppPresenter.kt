@@ -43,8 +43,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
-import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -94,8 +93,7 @@ class AppPresenter(
   private val addFeedPresenter: AddFeedPresenterFactory,
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
-  private val lastUpdatedAt: LastUpdatedAt,
-  private val currentDateTimeSource: CurrentDateTimeSource,
+  private val lastRefreshedAt: LastRefreshedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val linkHandler: LinkHandler,
@@ -107,8 +105,7 @@ class AppPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         settingsRepository = settingsRepository,
-        lastUpdatedAt = lastUpdatedAt,
-        currentDateTimeSource = currentDateTimeSource,
+        lastRefreshedAt = lastRefreshedAt,
         syncCoordinator = syncCoordinator,
       )
     }
@@ -343,8 +340,7 @@ class AppPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     settingsRepository: SettingsRepository,
-    private val lastUpdatedAt: LastUpdatedAt,
-    private val currentDateTimeSource: CurrentDateTimeSource,
+    private val lastRefreshedAt: LastRefreshedAt,
     private val syncCoordinator: SyncCoordinator,
   ) : InstanceKeeper.Instance {
 
@@ -379,11 +375,9 @@ class AppPresenter(
 
     fun refreshFeedsIfExpired() {
       coroutineScope.launch {
-        if (lastUpdatedAt.hasExpired()) {
+        if (lastRefreshedAt.hasExpired()) {
           syncCoordinator.refreshFeeds()
-          lastUpdatedAt.refresh()
         }
-        currentDateTimeSource.refresh()
       }
     }
 

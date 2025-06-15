@@ -23,6 +23,7 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -34,15 +35,14 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.NTuple4
+import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,7 +68,6 @@ import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(
   dispatchersProvider: DispatchersProvider,
   feedsPresenterFactory:
@@ -81,7 +80,7 @@ class HomePresenter(
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val currentDateTimeSource: CurrentDateTimeSource,
+  private val lastRefreshedAt: LastRefreshedAt,
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
@@ -123,7 +122,7 @@ class HomePresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         observableActiveSource = observableActiveSource,
-        currentDateTimeSource = currentDateTimeSource,
+        lastRefreshedAt = lastRefreshedAt,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter,
         allPostsPager = allPostsPager,
@@ -139,6 +138,8 @@ class HomePresenter(
       backHandler.register(backCallback)
       backCallback.isEnabled = false
     }
+
+    lifecycle.doOnResume { dispatch(HomeEvent.UpdateDate) }
   }
 
   fun dispatch(event: HomeEvent) {
@@ -161,7 +162,7 @@ class HomePresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val currentDateTimeSource: CurrentDateTimeSource,
+    private val lastRefreshedAt: LastRefreshedAt,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
     private val allPostsPager: AllPostsPager,
@@ -218,6 +219,23 @@ class HomePresenter(
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
         is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
         is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
+        is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
+        is HomeEvent.UpdateDate -> updateDate()
+      }
+    }
+
+    private fun updateDate() {
+      val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+
+      if (_state.value.currentDateTime.date != currentDate.date) {
+        _state.update { it.copy(currentDateTime = currentDate) }
+      }
+    }
+
+    private fun loadNewArticles() {
+      coroutineScope.launch {
+        _state.update { it.copy(hasNewerArticles = false) }
+        lastRefreshedAt.refresh()
       }
     }
 
@@ -316,15 +334,8 @@ class HomePresenter(
         .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
         .launchIn(coroutineScope)
 
-      combine(
-          allPostsPager.allPostsPagingData,
-          currentDateTimeSource.dateTimeFlow,
-        ) { postsPagingData, dateTime ->
-          Pair(dateTime, postsPagingData)
-        }
-        .onEach { (dateTime, postsPagingData) ->
-          _state.update { it.copy(currentDateTime = dateTime, posts = postsPagingData) }
-        }
+      allPostsPager.allPostsPagingData
+        .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
         .launchIn(coroutineScope)
 
       combine(
@@ -332,17 +343,19 @@ class HomePresenter(
           postsTypeFlow,
           settingsRepository.homeViewMode,
           allPostsPager.hasUnreadPosts,
-        ) { activeSource, postsType, homeViewMode, hasUnreadPosts ->
-          NTuple4(activeSource, postsType, homeViewMode, hasUnreadPosts)
+          allPostsPager.hasNewerArticles,
+        ) { activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles ->
+          NTuple5(activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles)
         }
         .distinctUntilChanged()
-        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts) ->
+        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles) ->
           _state.update {
             it.copy(
               activeSource = activeSource,
               postsType = postsType,
               homeViewMode = homeViewMode,
-              hasUnreadPosts = hasUnreadPosts
+              hasUnreadPosts = hasUnreadPosts,
+              hasNewerArticles = hasNewerArticles,
             )
           }
         }
