@@ -334,9 +334,7 @@ internal fun HomeScreen(
                         .calculateBottomPadding()
                         .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
                   ),
-                onLoadNewArticlesClick = {
-                  // TODO: Refresh current date time source to load new articles
-                },
+                onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
               ) {
                 scrollToTopClicked = true
                 postsListState.animateScrollToItem(0)

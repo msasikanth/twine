@@ -43,7 +43,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
@@ -94,7 +94,7 @@ class AppPresenter(
   private val addFeedPresenter: AddFeedPresenterFactory,
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
-  private val lastUpdatedAt: LastUpdatedAt,
+  private val lastRefreshedAt: LastRefreshedAt,
   private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -107,7 +107,7 @@ class AppPresenter(
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         settingsRepository = settingsRepository,
-        lastUpdatedAt = lastUpdatedAt,
+        lastRefreshedAt = lastRefreshedAt,
         postsThresholdTimeSource = postsThresholdTimeSource,
         syncCoordinator = syncCoordinator,
       )
@@ -343,7 +343,7 @@ class AppPresenter(
   private class PresenterInstance(
     dispatchersProvider: DispatchersProvider,
     settingsRepository: SettingsRepository,
-    private val lastUpdatedAt: LastUpdatedAt,
+    private val lastRefreshedAt: LastRefreshedAt,
     private val postsThresholdTimeSource: PostsThresholdTimeSource,
     private val syncCoordinator: SyncCoordinator,
   ) : InstanceKeeper.Instance {
@@ -379,9 +379,9 @@ class AppPresenter(
 
     fun refreshFeedsIfExpired() {
       coroutineScope.launch {
-        if (lastUpdatedAt.hasExpired()) {
+        if (lastRefreshedAt.hasExpired()) {
           syncCoordinator.refreshFeeds()
-          lastUpdatedAt.refresh()
+          lastRefreshedAt.refresh()
         }
         postsThresholdTimeSource.refresh()
       }

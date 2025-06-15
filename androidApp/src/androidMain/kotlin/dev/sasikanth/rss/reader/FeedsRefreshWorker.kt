@@ -26,7 +26,7 @@ import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.LastUpdatedAt
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.first
 class FeedsRefreshWorker(
   context: Context,
   workerParameters: WorkerParameters,
-  private val lastUpdatedAt: LastUpdatedAt,
+  private val lastRefreshedAt: LastRefreshedAt,
   private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
@@ -61,10 +61,10 @@ class FeedsRefreshWorker(
   override suspend fun doWork(): Result {
     if (settingsRepository.enableAutoSync.first().not()) return Result.failure()
 
-    return if (lastUpdatedAt.hasExpired()) {
+    return if (lastRefreshedAt.hasExpired()) {
       try {
         syncCoordinator.refreshFeeds()
-        lastUpdatedAt.refresh()
+        lastRefreshedAt.refresh()
         Result.success()
       } catch (e: CancellationException) {
         Result.failure()

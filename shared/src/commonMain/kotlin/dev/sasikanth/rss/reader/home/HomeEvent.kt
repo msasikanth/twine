@@ -63,4 +63,6 @@ sealed interface HomeEvent {
   data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : HomeEvent
 
   data class UpdateVisibleItemIndex(val index: Int) : HomeEvent
+
+  data object LoadNewArticlesClick : HomeEvent
 }

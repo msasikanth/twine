@@ -218,6 +218,14 @@ class HomePresenter(
         is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
         is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
         is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
+        is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
+      }
+    }
+
+    private fun loadNewArticles() {
+      coroutineScope.launch {
+        _state.update { it.copy(hasNewerArticles = false) }
+        postsThresholdTimeSource.refresh()
       }
     }
 

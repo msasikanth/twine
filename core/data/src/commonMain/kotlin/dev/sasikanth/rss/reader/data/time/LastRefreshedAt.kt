@@ -30,7 +30,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class LastUpdatedAt(private val dataStore: DataStore<Preferences>) {
+class LastRefreshedAt(private val dataStore: DataStore<Preferences>) {
 
   companion object {
     private val UPDATE_DURATION = 60.minutes
