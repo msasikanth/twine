@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Название (необязательно)</string>
     <string name="share">Поделиться</string>
     <string name="scrollToTop">Наверх</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
     <string name="feedNameHint">Название канала</string>
