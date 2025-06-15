@@ -65,11 +65,34 @@ class AllPostsPager(
   val hasUnreadPosts: Flow<Boolean>
     get() = _hasUnreadPosts
 
+  private val _hasNewerArticles: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  val hasNewerArticles: Flow<Boolean>
+    get() = _hasNewerArticles
+
   init {
     coroutineScope.launch {
       observeAllPosts()
       observeHasUnreadPosts()
+      observeHasNewerArticles()
     }
+  }
+
+  private fun observeHasNewerArticles() {
+    combine(observableActiveSource.activeSource, postsThresholdTimeSource.dateTimeFlow) {
+        activeSource,
+        dateTime ->
+        Pair(activeSource, dateTime)
+      }
+      .flatMapLatest { (activeSource, dateTime) ->
+        val activeSourceIds = activeSourceIds(activeSource)
+
+        rssRepository.hasNewerArticles(
+          sources = activeSourceIds,
+          postsAfter = dateTime.toInstant(TimeZone.currentSystemDefault()),
+        )
+      }
+      .onEach { hasNewerArticles -> _hasNewerArticles.value = hasNewerArticles }
+      .launchIn(coroutineScope)
   }
 
   private fun observeHasUnreadPosts() {
