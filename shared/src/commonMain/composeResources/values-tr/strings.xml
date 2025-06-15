@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Başlık (isteğe bağlı)</string>
     <string name="share">Paylaş</string>
     <string name="scrollToTop">Başa kaydır</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">Akışlar yok!</string>
     <string name="swipeUpGetStarted">Başlamak için yukarı kaydırın</string>
     <string name="feedNameHint">Akış adı</string>
