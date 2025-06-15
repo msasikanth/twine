@@ -23,7 +23,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +57,7 @@ class FeedPresenter(
   rssRepository: RssRepository,
   settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val dateTimeSource: PostsThresholdTimeSource,
+  private val lastRefreshedAt: LastRefreshedAt,
   @Assisted feedId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val dismiss: () -> Unit
@@ -71,7 +71,7 @@ class FeedPresenter(
         settingsRepository = settingsRepository,
         feedId = feedId,
         observableActiveSource = observableActiveSource,
-        dateTimeSource = dateTimeSource,
+        lastRefreshedAt = lastRefreshedAt,
       )
     }
 
@@ -100,7 +100,7 @@ class FeedPresenter(
     private val settingsRepository: SettingsRepository,
     private val feedId: String,
     private val observableActiveSource: ObservableActiveSource,
-    private val dateTimeSource: PostsThresholdTimeSource,
+    private val lastRefreshedAt: LastRefreshedAt,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -135,7 +135,7 @@ class FeedPresenter(
         val (postsType, dateTime) =
           withContext(dispatchersProvider.io) {
             val postsType = settingsRepository.postsType.first()
-            val dateTime = dateTimeSource.dateTimeFlow.first()
+            val dateTime = lastRefreshedAt.dateTimeFlow.first()
 
             Pair(postsType, dateTime)
           }
@@ -167,7 +167,7 @@ class FeedPresenter(
         val (postsType, dateTime) =
           withContext(dispatchersProvider.io) {
             val postsType = settingsRepository.postsType.first()
-            val dateTime = dateTimeSource.dateTimeFlow.first()
+            val dateTime = lastRefreshedAt.dateTimeFlow.first()
 
             Pair(postsType, dateTime)
           }

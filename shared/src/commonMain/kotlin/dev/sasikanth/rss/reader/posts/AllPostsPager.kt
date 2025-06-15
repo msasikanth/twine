@@ -27,7 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -49,9 +49,9 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class AllPostsPager(
   private val observableActiveSource: ObservableActiveSource,
-  private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val settingsRepository: SettingsRepository,
   private val rssRepository: RssRepository,
+  private val lastRefreshedAt: LastRefreshedAt,
   dispatchersProvider: DispatchersProvider,
 ) {
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -78,7 +78,7 @@ class AllPostsPager(
   }
 
   private fun observeHasNewerArticles() {
-    combine(observableActiveSource.activeSource, postsThresholdTimeSource.dateTimeFlow) {
+    combine(observableActiveSource.activeSource, lastRefreshedAt.dateTimeFlow) {
         activeSource,
         dateTime ->
         Pair(activeSource, dateTime)
@@ -99,7 +99,7 @@ class AllPostsPager(
     combine(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
-        postsThresholdTimeSource.dateTimeFlow
+        lastRefreshedAt.dateTimeFlow
       ) { activeSource, postsType, dateTime ->
         Triple(activeSource, postsType, dateTime)
       }
@@ -120,16 +120,16 @@ class AllPostsPager(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(activeSourceFlow, postsTypeFlow, postsThresholdTimeSource.dateTimeFlow) {
+    combine(activeSourceFlow, postsTypeFlow, lastRefreshedAt.dateTimeFlow) {
         activeSource,
         postsType,
-        currentDateTime ->
-        Triple(activeSource, postsType, currentDateTime)
+        lastRefreshedAt ->
+        Triple(activeSource, postsType, lastRefreshedAt)
       }
       .distinctUntilChanged()
-      .onEach { (activeSource, postsType, dateTime) ->
+      .onEach { (activeSource, postsType, lastRefreshedAt) ->
         val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType)
-        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
         val activeSourceIds = activeSourceIds(activeSource)
 
         val postsPagingDataFlow =
@@ -138,7 +138,7 @@ class AllPostsPager(
                 activeSourceIds = activeSourceIds,
                 unreadOnly = unreadOnly,
                 after = postsAfter,
-                lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+                lastSyncedAt = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault())
               )
             }
             .flow

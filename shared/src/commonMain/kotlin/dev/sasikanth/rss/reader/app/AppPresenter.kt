@@ -44,7 +44,6 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
-import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.feed.FeedPresenterFactory
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -95,7 +94,6 @@ class AppPresenter(
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
   private val lastRefreshedAt: LastRefreshedAt,
-  private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val linkHandler: LinkHandler,
@@ -108,7 +106,6 @@ class AppPresenter(
         dispatchersProvider = dispatchersProvider,
         settingsRepository = settingsRepository,
         lastRefreshedAt = lastRefreshedAt,
-        postsThresholdTimeSource = postsThresholdTimeSource,
         syncCoordinator = syncCoordinator,
       )
     }
@@ -344,7 +341,6 @@ class AppPresenter(
     dispatchersProvider: DispatchersProvider,
     settingsRepository: SettingsRepository,
     private val lastRefreshedAt: LastRefreshedAt,
-    private val postsThresholdTimeSource: PostsThresholdTimeSource,
     private val syncCoordinator: SyncCoordinator,
   ) : InstanceKeeper.Instance {
 
@@ -381,9 +377,7 @@ class AppPresenter(
       coroutineScope.launch {
         if (lastRefreshedAt.hasExpired()) {
           syncCoordinator.refreshFeeds()
-          lastRefreshedAt.refresh()
         }
-        postsThresholdTimeSource.refresh()
       }
     }
 

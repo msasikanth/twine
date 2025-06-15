@@ -34,7 +34,7 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
@@ -42,7 +42,6 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -68,7 +67,6 @@ import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@OptIn(ExperimentalCoroutinesApi::class)
 class HomePresenter(
   dispatchersProvider: DispatchersProvider,
   feedsPresenterFactory:
@@ -81,7 +79,7 @@ class HomePresenter(
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val postsThresholdTimeSource: PostsThresholdTimeSource,
+  private val lastRefreshedAt: LastRefreshedAt,
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
@@ -123,7 +121,7 @@ class HomePresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         observableActiveSource = observableActiveSource,
-        postsThresholdTimeSource = postsThresholdTimeSource,
+        lastRefreshedAt = lastRefreshedAt,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter,
         allPostsPager = allPostsPager,
@@ -161,7 +159,7 @@ class HomePresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val postsThresholdTimeSource: PostsThresholdTimeSource,
+    private val lastRefreshedAt: LastRefreshedAt,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
     private val allPostsPager: AllPostsPager,
@@ -225,7 +223,7 @@ class HomePresenter(
     private fun loadNewArticles() {
       coroutineScope.launch {
         _state.update { it.copy(hasNewerArticles = false) }
-        postsThresholdTimeSource.refresh()
+        lastRefreshedAt.refresh()
       }
     }
 
@@ -324,15 +322,8 @@ class HomePresenter(
         .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
         .launchIn(coroutineScope)
 
-      combine(
-          allPostsPager.allPostsPagingData,
-          postsThresholdTimeSource.dateTimeFlow,
-        ) { postsPagingData, dateTime ->
-          Pair(dateTime, postsPagingData)
-        }
-        .onEach { (dateTime, postsPagingData) ->
-          _state.update { it.copy(currentDateTime = dateTime, posts = postsPagingData) }
-        }
+      allPostsPager.allPostsPagingData
+        .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
         .launchIn(coroutineScope)
 
       combine(
@@ -397,8 +388,6 @@ class HomePresenter(
           is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
           else -> syncCoordinator.refreshFeeds()
         }
-
-        postsThresholdTimeSource.refresh()
       }
     }
 

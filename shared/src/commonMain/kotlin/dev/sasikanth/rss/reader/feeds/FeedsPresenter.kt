@@ -39,7 +39,7 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
@@ -77,7 +77,7 @@ class FeedsPresenter(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val dateTimeSource: PostsThresholdTimeSource,
+  private val lastRefreshedAt: LastRefreshedAt,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
@@ -92,7 +92,7 @@ class FeedsPresenter(
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
         observableActiveSource = observableActiveSource,
-        dateTimeSource = dateTimeSource,
+        lastRefreshedAt = lastRefreshedAt,
       )
     }
 
@@ -133,7 +133,7 @@ class FeedsPresenter(
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val dateTimeSource: PostsThresholdTimeSource
+    private val lastRefreshedAt: LastRefreshedAt
   ) : InstanceKeeper.Instance {
 
     var searchQuery by mutableStateOf(TextFieldValue())
@@ -342,7 +342,7 @@ class FeedsPresenter(
       combine(
           searchQueryFlow,
           settingsRepository.postsType,
-          dateTimeSource.dateTimeFlow,
+          lastRefreshedAt.dateTimeFlow,
         ) { searchQuery, postsType, dateTime ->
           Triple(searchQuery, postsType, dateTime)
         }
@@ -396,7 +396,7 @@ class FeedsPresenter(
       val pinnedSourcesFlow =
         combine(
             settingsRepository.postsType,
-            dateTimeSource.dateTimeFlow,
+            lastRefreshedAt.dateTimeFlow,
           ) { postsType, dateTime ->
             Pair(postsType, dateTime)
           }
@@ -409,7 +409,7 @@ class FeedsPresenter(
         combine(
             settingsRepository.postsType,
             settingsRepository.feedsSortOrder,
-            dateTimeSource.dateTimeFlow
+            lastRefreshedAt.dateTimeFlow
           ) { postsType, feedsSortOrder, dateTime ->
             Triple(postsType, feedsSortOrder, dateTime)
           }
