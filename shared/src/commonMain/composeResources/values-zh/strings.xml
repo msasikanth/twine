@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">标题（可选）</string>
     <string name="share">分享</string>
     <string name="scrollToTop">返回顶部</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">暂无订阅！</string>
     <string name="swipeUpGetStarted">向上滑动以开始使用</string>
     <string name="feedNameHint">订阅名称</string>
