@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Titel (optional)</string>
     <string name="share">Teilen</string>
     <string name="scrollToTop">Nach oben scrollen</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">Keine Feeds vorhanden!</string>
     <string name="swipeUpGetStarted">Wischen Sie nach oben, um zu beginnen</string>
     <string name="feedNameHint">Feed-Name</string>
@@ -80,7 +81,7 @@
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
-    <string name="markAllAsRead">Alle als gelesen markieren</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Website öffnen</string>
     <string name="noNewPosts">Keine neuen Beiträge</string>
     <string name="noNewPostsSubtitle">Schauen Sie später wieder vorbei oder ziehen Sie nach unten, um jetzt nach neuen Inhalten zu suchen</string>
@@ -92,7 +93,7 @@
     <string name="markAsUnRead">Als ungelesen markieren</string>
     <string name="removeFeed">Feed entfernen</string>
     <string name="delete">Löschen</string>
-    <string name="removeFeedDesc">Do you want to remove <b>"%1$s"</b>?</string>
+    <string name="removeFeedDesc">Möchten Sie <b>"%1$s"</b> entfernen?</string>
     <string name="alwaysFetchSourceArticle">Immer vollständige Beiträge in der Leseansicht abrufen</string>
     <string name="getFeedInfo">Informationen bekommen</string>
     <string name="newTag">Neuer Tag</string>
@@ -148,14 +149,14 @@
     <string name="pullToClose">Nach unten ziehen, um zu schließen</string>
     <string name="readerSettings">Einstellungen für den Reader</string>
     <string name="comingSoon">Kommt bald</string>
-    <string name="homeViewMode">Ansichtsmodi</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
-        <item quantity="one">%1$d result</item>
-        <item quantity="other">%1$d results</item>
+        <item quantity="one">%1$d Ergebnis</item>
+        <item quantity="other">%1$d Ergebnisse</item>
     </plurals>
     <plurals name="numberOfUnreadPostsInFeed">
         <item quantity="one">%d ungelesener Beitrag</item>

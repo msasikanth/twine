@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Title (optional)</string>
     <string name="share">Share</string>
     <string name="scrollToTop">Scroll to top</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">No feeds present!</string>
     <string name="swipeUpGetStarted">Swipe up to get started</string>
     <string name="feedNameHint">Feed name</string>
@@ -80,7 +81,7 @@
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Pinned</string>
-    <string name="markAllAsRead">Mark All as Read</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Open Website</string>
     <string name="noNewPosts">No new content</string>
     <string name="noNewPostsSubtitle">Check back later or pull down to check for new content now</string>
@@ -148,7 +149,7 @@
     <string name="pullToClose">Pull down to close</string>
     <string name="readerSettings">Reader screen settings</string>
     <string name="comingSoon">Coming soon</string>
-    <string name="homeViewMode">View modes</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">Default</string>
     <string name="homeViewModeSimple">Simple</string>
     <string name="homeViewModeCompact">Compact</string>
