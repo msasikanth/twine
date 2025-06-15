@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.data.time
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,26 +28,16 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
-import kotlin.time.Duration.Companion.hours
 
 @Inject
 @AppScope
 class PostsThresholdTimeSource {
 
-  private val delayInterval = 1.hours
   private val refreshSignal =
     MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
   val dateTimeFlow: Flow<LocalDateTime> =
-    merge(
-        flow {
-          while (true) {
-            emit(currentDateTime())
-            delay(delayInterval)
-          }
-        },
-        refreshSignal.map { currentDateTime() }
-      )
+    merge(flow { emit(currentDateTime()) }, refreshSignal.map { currentDateTime() })
       .distinctUntilChanged()
 
   private fun currentDateTime() =
