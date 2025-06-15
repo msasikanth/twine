@@ -13,6 +13,7 @@
     <string name="feedEntryTitleHint">Название (необязательно)</string>
     <string name="share">Поделиться</string>
     <string name="scrollToTop">Наверх</string>
+    <string name="newArticles">New articles</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
     <string name="feedNameHint">Название канала</string>
@@ -41,7 +42,7 @@
     <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
     <string name="settingsHeaderTheme">Тема</string>
     <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
-    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию.</string>
+    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию</string>
     <string name="settingsEnableBlurTitle">Включить размытие на главной странице</string>
     <string name="settingsEnableBlurSubtitle">Если функция отключена, вместо размытых изображений будут отображаться градиенты. Это может повысить производительность.</string>
     <string name="settingsShowUnreadCountTitle">Показывать количество непрочитанных сообщений</string>
@@ -70,7 +71,7 @@
     <string name="feeds">Новостные ленты</string>
     <string name="editFeeds">Редактировать новостные ленты</string>
     <string name="comments">Комментарии</string>
-    <string name="about">О</string>
+    <string name="about">О приложении</string>
     <string name="aboutRoleDeveloper">Разработчик</string>
     <string name="aboutRoleDesigner">Дизайнер</string>
     <string name="aboutSocialTwitter">Twitter</string>
@@ -80,10 +81,10 @@
     <string name="feedsSearchHint">Фильтр</string>
     <string name="allFeeds">Новостные ленты</string>
     <string name="pinnedFeeds">Закреплённые</string>
-    <string name="markAllAsRead">Отметить все как прочитанные</string>
+    <string name="markAllAsRead">Mark as read</string>
     <string name="openWebsite">Открыть веб-сайт</string>
-    <string name="noNewPosts">Никакого нового контента</string>
-    <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие нового контента сейчас</string>
+    <string name="noNewPosts">Свежих новостей нет</string>
+    <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие свежих новостей</string>
     <string name="postsAll">Все статьи</string>
     <string name="postsUnread">Непрочитанные</string>
     <string name="postsToday">За сегодня</string>
@@ -129,7 +130,7 @@
     <string name="buttonAddToGroup">Добавить в группу...</string>
     <string name="removeSources">Удалить источники</string>
     <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
-    <string name="noPinnedSources">Нет закреплённых каналов/групп</string>
+    <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
     <string name="databaseMaintainenceTitle">Пожалуйста, подождите...</string>
     <string name="databaseMaintainenceSubtitle">Выполняется обслуживание базы данных, не закрывайте приложение</string>
     <string name="cdLoadFullArticle">Загрузить полную статью</string>
@@ -148,7 +149,7 @@
     <string name="pullToClose">Потяните вниз, чтобы закрыть</string>
     <string name="readerSettings">Настройки экрана программы чтения</string>
     <string name="comingSoon">Скоро будет добавлено</string>
-    <string name="homeViewMode">Режимы просмотра</string>
+    <string name="homeViewMode">Layout</string>
     <string name="homeViewModeDefault">По умолчанию</string>
     <string name="homeViewModeSimple">Простой</string>
     <string name="homeViewModeCompact">Компактный</string>
