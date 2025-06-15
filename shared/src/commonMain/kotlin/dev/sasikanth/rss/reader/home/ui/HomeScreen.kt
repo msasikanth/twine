@@ -73,7 +73,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
@@ -323,7 +323,7 @@ internal fun HomeScreen(
                     .align(Alignment.BottomCenter)
               )
 
-              CompactFloatingActionButton(
+              NewArticlesScrollToTopButton(
                 label = stringResource(Res.string.scrollToTop),
                 visible = showScrollToTop,
                 modifier =

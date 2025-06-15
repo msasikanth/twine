@@ -34,7 +34,7 @@ import dev.sasikanth.rss.reader.ui.ElevationTokens
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun BoxScope.CompactFloatingActionButton(
+internal fun BoxScope.NewArticlesScrollToTopButton(
   label: String,
   visible: Boolean,
   modifier: Modifier = Modifier,

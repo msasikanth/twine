@@ -70,9 +70,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Newest
@@ -181,7 +181,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
           }
         }
 
-        CompactFloatingActionButton(
+        NewArticlesScrollToTopButton(
           label = stringResource(Res.string.scrollToTop),
           visible = showScrollToTop,
           modifier =

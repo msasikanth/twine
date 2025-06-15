@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -157,7 +157,7 @@ internal fun BookmarksScreen(
             }
           }
 
-          CompactFloatingActionButton(
+          NewArticlesScrollToTopButton(
             label = stringResource(Res.string.scrollToTop),
             visible = showScrollToTop,
             modifier =
