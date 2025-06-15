@@ -34,7 +34,7 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
@@ -81,7 +81,7 @@ class HomePresenter(
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val currentDateTimeSource: CurrentDateTimeSource,
+  private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
@@ -123,7 +123,7 @@ class HomePresenter(
         dispatchersProvider = dispatchersProvider,
         rssRepository = rssRepository,
         observableActiveSource = observableActiveSource,
-        currentDateTimeSource = currentDateTimeSource,
+        postsThresholdTimeSource = postsThresholdTimeSource,
         settingsRepository = settingsRepository,
         feedsPresenter = feedsPresenter,
         allPostsPager = allPostsPager,
@@ -161,7 +161,7 @@ class HomePresenter(
     dispatchersProvider: DispatchersProvider,
     private val rssRepository: RssRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val currentDateTimeSource: CurrentDateTimeSource,
+    private val postsThresholdTimeSource: PostsThresholdTimeSource,
     private val settingsRepository: SettingsRepository,
     private val feedsPresenter: FeedsPresenter,
     private val allPostsPager: AllPostsPager,
@@ -318,7 +318,7 @@ class HomePresenter(
 
       combine(
           allPostsPager.allPostsPagingData,
-          currentDateTimeSource.dateTimeFlow,
+          postsThresholdTimeSource.dateTimeFlow,
         ) { postsPagingData, dateTime ->
           Pair(dateTime, postsPagingData)
         }

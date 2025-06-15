@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +34,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class SyncCoordinator(
   private val rssRepository: RssRepository,
-  private val currentDateTimeSource: CurrentDateTimeSource,
+  private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -69,7 +69,7 @@ class SyncCoordinator(
         }
 
         updateSyncState(SyncState.Complete)
-        currentDateTimeSource.refresh()
+        postsThresholdTimeSource.refresh()
       } catch (e: Exception) {
         BugsnagKotlin.logMessage("SyncCoordinator#refreshFeeds")
         BugsnagKotlin.sendFatalException(e)
@@ -96,7 +96,7 @@ class SyncCoordinator(
       }
 
       updateSyncState(SyncState.Complete)
-      currentDateTimeSource.refresh()
+      postsThresholdTimeSource.refresh()
     } catch (e: Exception) {
       BugsnagKotlin.logMessage("SyncCoordinator#refreshFeeds")
       BugsnagKotlin.sendFatalException(e)
@@ -115,7 +115,7 @@ class SyncCoordinator(
       }
 
       updateSyncState(SyncState.Complete)
-      currentDateTimeSource.refresh()
+      postsThresholdTimeSource.refresh()
     } catch (e: Exception) {
       BugsnagKotlin.logMessage("SyncCoordinator#refreshFeed")
       BugsnagKotlin.sendFatalException(e)

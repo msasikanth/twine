@@ -188,9 +188,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
               end = padding.calculateEndPadding(layoutDirection) + 16.dp,
               bottom = padding.calculateBottomPadding() + 16.dp
             ),
-          onLoadNewArticlesClick = {
-
-          }
+          onLoadNewArticlesClick = {}
         ) {
           listState.animateScrollToItem(0)
         }

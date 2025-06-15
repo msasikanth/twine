@@ -61,7 +61,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     syncCoordinator = appComponent.syncCoordinator,
                     lastUpdatedAt = appComponent.lastUpdatedAt,
                     settingsRepository = appComponent.settingsRepository,
-                    currentDateTimeSource = appComponent.currentDateTimeSource,
+                    postsThresholdTimeSource = appComponent.postsThresholdTimeSource,
                   )
                 }
                 PostsCleanUpWorker::class.qualifiedName -> {

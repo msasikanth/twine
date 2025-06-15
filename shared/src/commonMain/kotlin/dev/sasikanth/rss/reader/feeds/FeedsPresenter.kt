@@ -39,7 +39,7 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
@@ -77,7 +77,7 @@ class FeedsPresenter(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val dateTimeSource: CurrentDateTimeSource,
+  private val dateTimeSource: PostsThresholdTimeSource,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
@@ -133,7 +133,7 @@ class FeedsPresenter(
     private val rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val observableActiveSource: ObservableActiveSource,
-    private val dateTimeSource: CurrentDateTimeSource
+    private val dateTimeSource: PostsThresholdTimeSource
   ) : InstanceKeeper.Instance {
 
     var searchQuery by mutableStateOf(TextFieldValue())

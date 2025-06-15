@@ -27,7 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +49,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class AllPostsPager(
   private val observableActiveSource: ObservableActiveSource,
-  private val currentDateTimeSource: CurrentDateTimeSource,
+  private val postsThresholdTimeSource: PostsThresholdTimeSource,
   private val settingsRepository: SettingsRepository,
   private val rssRepository: RssRepository,
   dispatchersProvider: DispatchersProvider,
@@ -76,7 +76,7 @@ class AllPostsPager(
     combine(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
-        currentDateTimeSource.dateTimeFlow
+        postsThresholdTimeSource.dateTimeFlow
       ) { activeSource, postsType, dateTime ->
         Triple(activeSource, postsType, dateTime)
       }
@@ -97,7 +97,7 @@ class AllPostsPager(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(activeSourceFlow, postsTypeFlow, currentDateTimeSource.dateTimeFlow) {
+    combine(activeSourceFlow, postsTypeFlow, postsThresholdTimeSource.dateTimeFlow) {
         activeSource,
         postsType,
         currentDateTime ->

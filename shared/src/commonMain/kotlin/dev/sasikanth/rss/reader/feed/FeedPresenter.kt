@@ -23,7 +23,7 @@ import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.PostsThresholdTimeSource
 import dev.sasikanth.rss.reader.posts.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +57,7 @@ class FeedPresenter(
   rssRepository: RssRepository,
   settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val dateTimeSource: CurrentDateTimeSource,
+  private val dateTimeSource: PostsThresholdTimeSource,
   @Assisted feedId: String,
   @Assisted componentContext: ComponentContext,
   @Assisted private val dismiss: () -> Unit
@@ -100,7 +100,7 @@ class FeedPresenter(
     private val settingsRepository: SettingsRepository,
     private val feedId: String,
     private val observableActiveSource: ObservableActiveSource,
-    private val dateTimeSource: CurrentDateTimeSource,
+    private val dateTimeSource: PostsThresholdTimeSource,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)

@@ -72,48 +72,48 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
     ) {
       val buttonShape = RoundedCornerShape(50)
       Box(
-        modifier = modifier
-          .background(AppTheme.colorScheme.bottomSheet, buttonShape)
-          .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
-          .dropShadow(
-            shape = buttonShape,
-            color = Color.Black.copy(alpha = 0.4f),
-            offsetX = 0.dp,
-            offsetY = 16.dp,
-            blur = 32.dp,
-            spread = 0.dp,
-          )
-          .dropShadow(
-            shape = buttonShape,
-            color = Color.Black.copy(alpha = 0.016f),
-            offsetX = 0.dp,
-            offsetY = 4.dp,
-            blur = 8.dp,
-            spread = 0.dp,
-          )
-          .padding(4.dp),
+        modifier =
+          modifier
+            .background(AppTheme.colorScheme.bottomSheet, buttonShape)
+            .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
+            .dropShadow(
+              shape = buttonShape,
+              color = Color.Black.copy(alpha = 0.4f),
+              offsetX = 0.dp,
+              offsetY = 16.dp,
+              blur = 32.dp,
+              spread = 0.dp,
+            )
+            .dropShadow(
+              shape = buttonShape,
+              color = Color.Black.copy(alpha = 0.016f),
+              offsetX = 0.dp,
+              offsetY = 4.dp,
+              blur = 8.dp,
+              spread = 0.dp,
+            )
+            .padding(4.dp),
       ) {
-        Row(
-          modifier = Modifier.height(IntrinsicSize.Min)
-        ) {
-          AnimatedVisibility(
-            visible = hasUnreadArticles
-          ) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+          AnimatedVisibility(visible = hasUnreadArticles) {
             Row {
-              val endPadding by animateDpAsState(targetValue = if (canShowScrollToTop) 12.dp else 16.dp)
+              val endPadding by
+                animateDpAsState(targetValue = if (canShowScrollToTop) 12.dp else 16.dp)
 
               TextButton(
                 onClick = onLoadNewArticlesClick,
                 shape = RoundedCornerShape(50),
-                colors = ButtonDefaults.textButtonColors(
-                  contentColor = AppTheme.colorScheme.onSurface,
-                ),
-                contentPadding = PaddingValues(
-                  start = 12.dp,
-                  top = 8.dp,
-                  end = endPadding,
-                  bottom = 8.dp,
-                ),
+                colors =
+                  ButtonDefaults.textButtonColors(
+                    contentColor = AppTheme.colorScheme.onSurface,
+                  ),
+                contentPadding =
+                  PaddingValues(
+                    start = 12.dp,
+                    top = 8.dp,
+                    end = endPadding,
+                    bottom = 8.dp,
+                  ),
                 content = {
                   Text(
                     text = stringResource(Res.string.newArticles),
@@ -124,22 +124,15 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
             }
           }
 
-          AnimatedVisibility(
-            visible = hasUnreadArticles && canShowScrollToTop
-          ) {
+          AnimatedVisibility(visible = hasUnreadArticles && canShowScrollToTop) {
             VerticalDivider(
-              modifier = Modifier.fillMaxHeight()
-                .padding(vertical = 16.dp),
+              modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp),
             )
           }
 
-          AnimatedVisibility(
-            visible = canShowScrollToTop
-          ) {
+          AnimatedVisibility(visible = canShowScrollToTop) {
             IconButton(
-              onClick = {
-                coroutineScope.launch { onScrollToTopClick() }
-              },
+              onClick = { coroutineScope.launch { onScrollToTopClick() } },
               content = {
                 Icon(
                   imageVector = Icons.Rounded.KeyboardArrowUp,

@@ -246,7 +246,7 @@ internal fun HomeScreen(
                         NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
                       }
                       featuredPosts.isEmpty() &&
-                          posts.itemCount == 0 &&
+                        posts.itemCount == 0 &&
                         posts.loadState.refresh is LoadState.NotLoading -> {
                         NoNewPosts()
                       }
