@@ -13,7 +13,7 @@
     <string name="feedEntryTitleHint">Başlık (isteğe bağlı)</string>
     <string name="share">Paylaş</string>
     <string name="scrollToTop">Başa kaydır</string>
-    <string name="newArticles">New articles</string>
+    <string name="newArticles">Yeni makaleler</string>
     <string name="noFeeds">Akışlar yok!</string>
     <string name="swipeUpGetStarted">Başlamak için yukarı kaydırın</string>
     <string name="feedNameHint">Akış adı</string>
@@ -31,9 +31,9 @@
     <string name="searchSortNewestFirst">Önce en yeni</string>
     <string name="searchSortOldest">En eski</string>
     <string name="searchSortOldestFirst">Önce en eski</string>
-    <string name="bookmark">Kaydet</string>
+    <string name="bookmark">Yer imi ekle</string>
     <string name="unBookmark">Kaydetmeyi kaldır</string>
-    <string name="bookmarks">Kaydedilenler</string>
+    <string name="bookmarks">Yer imleri</string>
     <string name="bookmarksPlaceholder">Kaydedilen gönderiler burada görünecek 🔖</string>
     <string name="settings">Ayarlar</string>
     <string name="moreMenuOptions">Daha fazla seçenek</string>
