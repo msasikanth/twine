@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
-import dev.sasikanth.rss.reader.components.CompactFloatingActionButton
+import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -63,7 +63,6 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.bookmarksPlaceholder
 import twine.shared.generated.resources.buttonGoBack
-import twine.shared.generated.resources.scrollToTop
 
 @Composable
 internal fun BookmarksScreen(
@@ -157,14 +156,15 @@ internal fun BookmarksScreen(
             }
           }
 
-          CompactFloatingActionButton(
-            label = stringResource(Res.string.scrollToTop),
-            visible = showScrollToTop,
+          NewArticlesScrollToTopButton(
+            hasUnreadArticles = false,
+            canShowScrollToTop = true,
             modifier =
               Modifier.padding(
                 end = padding.calculateEndPadding(layoutDirection) + 16.dp,
                 bottom = padding.calculateBottomPadding() + 16.dp
-              )
+              ),
+            onLoadNewArticlesClick = {}
           ) {
             listState.animateScrollToItem(0)
           }

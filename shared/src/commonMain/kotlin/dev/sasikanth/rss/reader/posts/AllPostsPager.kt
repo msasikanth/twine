@@ -27,7 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.CurrentDateTimeSource
+import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
@@ -49,9 +49,9 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class AllPostsPager(
   private val observableActiveSource: ObservableActiveSource,
-  private val currentDateTimeSource: CurrentDateTimeSource,
   private val settingsRepository: SettingsRepository,
   private val rssRepository: RssRepository,
+  private val lastRefreshedAt: LastRefreshedAt,
   dispatchersProvider: DispatchersProvider,
 ) {
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -65,18 +65,45 @@ class AllPostsPager(
   val hasUnreadPosts: Flow<Boolean>
     get() = _hasUnreadPosts
 
+  private val _hasNewerArticles: MutableStateFlow<Boolean> = MutableStateFlow(false)
+  val hasNewerArticles: Flow<Boolean>
+    get() = _hasNewerArticles
+
   init {
     coroutineScope.launch {
       observeAllPosts()
       observeHasUnreadPosts()
+      observeHasNewerArticles()
     }
+  }
+
+  private fun observeHasNewerArticles() {
+    combine(
+        observableActiveSource.activeSource,
+        settingsRepository.postsType,
+        lastRefreshedAt.dateTimeFlow,
+      ) { activeSource, postsType, dateTime ->
+        Triple(activeSource, postsType, dateTime)
+      }
+      .flatMapLatest { (activeSource, postsType, dateTime) ->
+        val activeSourceIds = activeSourceIds(activeSource)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+
+        rssRepository.hasNewerArticles(
+          sources = activeSourceIds,
+          postsAfter = postsAfter,
+          lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+        )
+      }
+      .onEach { hasNewerArticles -> _hasNewerArticles.value = hasNewerArticles }
+      .launchIn(coroutineScope)
   }
 
   private fun observeHasUnreadPosts() {
     combine(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
-        currentDateTimeSource.dateTimeFlow
+        lastRefreshedAt.dateTimeFlow
       ) { activeSource, postsType, dateTime ->
         Triple(activeSource, postsType, dateTime)
       }
@@ -97,16 +124,16 @@ class AllPostsPager(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(activeSourceFlow, postsTypeFlow, currentDateTimeSource.dateTimeFlow) {
+    combine(activeSourceFlow, postsTypeFlow, lastRefreshedAt.dateTimeFlow) {
         activeSource,
         postsType,
-        currentDateTime ->
-        Triple(activeSource, postsType, currentDateTime)
+        lastRefreshedAt ->
+        Triple(activeSource, postsType, lastRefreshedAt)
       }
       .distinctUntilChanged()
-      .onEach { (activeSource, postsType, dateTime) ->
+      .onEach { (activeSource, postsType, lastRefreshedAt) ->
         val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType)
-        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
+        val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
         val activeSourceIds = activeSourceIds(activeSource)
 
         val postsPagingDataFlow =
@@ -115,7 +142,7 @@ class AllPostsPager(
                 activeSourceIds = activeSourceIds,
                 unreadOnly = unreadOnly,
                 after = postsAfter,
-                lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+                lastSyncedAt = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault())
               )
             }
             .flow

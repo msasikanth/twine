@@ -343,11 +343,16 @@ class RssRepository(
     )
   }
 
-  fun feed(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST): Flow<Feed> {
+  fun feed(
+    feedId: String,
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Flow<Feed> {
     return feedQueries
       .feedWithUnreadPostsCount(
         id = feedId,
         postsAfter = postsAfter,
+        lastSyncedAt = lastSyncedAt,
         mapper = {
           id: String,
           name: String,
@@ -381,12 +386,17 @@ class RssRepository(
       .mapToOne(dispatchersProvider.databaseRead)
   }
 
-  suspend fun feedBlocking(feedId: String, postsAfter: Instant = Instant.DISTANT_PAST): Feed {
+  suspend fun feedBlocking(
+    feedId: String,
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Feed {
     return withContext(dispatchersProvider.databaseRead) {
       feedQueries
         .feedWithUnreadPostsCount(
           id = feedId,
           postsAfter = postsAfter,
+          lastSyncedAt = lastSyncedAt,
           mapper = {
             id: String,
             name: String,
@@ -654,10 +664,14 @@ class RssRepository(
     }
   }
 
-  fun pinnedSources(postsAfter: Instant = Instant.DISTANT_PAST): Flow<List<Source>> {
+  fun pinnedSources(
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Flow<List<Source>> {
     return sourceQueries
       .pinnedSources(
         postsAfter = postsAfter,
+        lastSyncedAt = lastSyncedAt,
         mapper = {
           type: String,
           id: String,
@@ -712,6 +726,7 @@ class RssRepository(
 
   fun sources(
     postsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
   ): PagingSource<Int, Source> {
     return QueryPagingSource(
@@ -721,6 +736,7 @@ class RssRepository(
       queryProvider = { limit, offset ->
         sourceQueries.sources(
           postsAfter = postsAfter,
+          lastSyncedAt = lastSyncedAt,
           orderBy = orderBy.value,
           limit = limit,
           offset = offset,
@@ -937,6 +953,23 @@ class RssRepository(
         isSourceIdsEmpty = activeSourceIds.isEmpty(),
         sourceIds = activeSourceIds,
         after = postsAfter
+      )
+      .asFlow()
+      .mapToOne(dispatchersProvider.databaseRead)
+      .map { it > 0 }
+  }
+
+  fun hasNewerArticles(
+    sources: List<String>,
+    postsAfter: Instant,
+    lastSyncedAt: Instant
+  ): Flow<Boolean> {
+    return postQueries
+      .newArticlesSinceCount(
+        isSourceIdsEmpty = sources.isEmpty(),
+        sourceIds = sources,
+        postsAfter = postsAfter,
+        lastSyncedAt = lastSyncedAt,
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
