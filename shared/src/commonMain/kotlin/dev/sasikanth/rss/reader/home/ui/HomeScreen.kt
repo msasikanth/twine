@@ -143,6 +143,7 @@ internal fun HomeScreen(
 
   val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
+  val hasNewerArticles = state.hasNewerArticles
 
   LaunchedEffect(Unit) {
     homePresenter.effects.collectLatest { effect ->
@@ -323,7 +324,7 @@ internal fun HomeScreen(
               )
 
               NewArticlesScrollToTopButton(
-                hasUnreadArticles = false,
+                hasUnreadArticles = hasNewerArticles != null && hasNewerArticles,
                 canShowScrollToTop = showScrollToTop,
                 modifier =
                   Modifier.padding(

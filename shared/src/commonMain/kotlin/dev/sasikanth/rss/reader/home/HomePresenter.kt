@@ -39,7 +39,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.NTuple4
+import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -332,17 +332,19 @@ class HomePresenter(
           postsTypeFlow,
           settingsRepository.homeViewMode,
           allPostsPager.hasUnreadPosts,
-        ) { activeSource, postsType, homeViewMode, hasUnreadPosts ->
-          NTuple4(activeSource, postsType, homeViewMode, hasUnreadPosts)
+          allPostsPager.hasNewerArticles,
+        ) { activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles ->
+          NTuple5(activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles)
         }
         .distinctUntilChanged()
-        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts) ->
+        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles) ->
           _state.update {
             it.copy(
               activeSource = activeSource,
               postsType = postsType,
               homeViewMode = homeViewMode,
-              hasUnreadPosts = hasUnreadPosts
+              hasUnreadPosts = hasUnreadPosts,
+              hasNewerArticles = hasNewerArticles,
             )
           }
         }
