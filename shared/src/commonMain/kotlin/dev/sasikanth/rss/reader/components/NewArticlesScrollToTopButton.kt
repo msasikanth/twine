@@ -26,11 +26,12 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -48,8 +49,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -129,29 +130,9 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
                       if (showFeedFavIcon) unreadSinceLastSync.feedHomepageLinks
                       else unreadSinceLastSync.feedIcons
 
-                    icons.forEachIndexed { index, icon ->
-                      val overlappedIconModifier =
-                        if (index > 0) {
-                          Modifier.offset(x = (-12 * index).dp)
-                        } else {
-                          Modifier
-                        }
+                    OverlappedFeedIcons(icons = icons)
 
-                      FeedIcon(
-                        url = icon,
-                        contentDescription = null,
-                        modifier =
-                          Modifier.requiredSize(24.dp)
-                            .then(overlappedIconModifier)
-                            .border(
-                              width = 2.dp,
-                              color = AppTheme.colorScheme.bottomSheet,
-                              shape = MaterialTheme.shapes.extraSmall
-                            )
-                            .clip(MaterialTheme.shapes.extraSmall)
-                            .zIndex(index.toFloat())
-                      )
-                    }
+                    Spacer(modifier = Modifier.requiredWidth(12.dp))
 
                     Text(
                       text = stringResource(Res.string.newArticles),
@@ -182,6 +163,52 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
             }
           }
         }
+      }
+    }
+  }
+}
+
+@Composable
+private fun OverlappedFeedIcons(
+  icons: List<String>,
+  modifier: Modifier = Modifier,
+) {
+  Layout(
+    modifier = modifier,
+    content = {
+      icons.forEach { icon ->
+        Box(
+          modifier =
+            Modifier.background(AppTheme.colorScheme.bottomSheet, MaterialTheme.shapes.extraSmall)
+              .padding(horizontal = 2.dp, vertical = 1.dp)
+        ) {
+          FeedIcon(
+            url = icon,
+            contentDescription = null,
+            modifier = Modifier.requiredSize(20.dp).clip(MaterialTheme.shapes.extraSmall)
+          )
+        }
+      }
+    }
+  ) { measurables, constraints ->
+    val placeables = measurables.map { it.measure(constraints) }
+    val height = placeables.maxOfOrNull { it.height } ?: 0
+    val totalWidth =
+      if (placeables.isNotEmpty()) {
+        val firstItemWidth = placeables.first().width
+        val remainingItemsWidth = placeables.drop(1).sumOf { it.width }
+        val overlap = (12 * (placeables.size - 1)).dp.roundToPx()
+
+        firstItemWidth + remainingItemsWidth - overlap
+      } else {
+        0
+      }
+
+    layout(totalWidth, height) {
+      var x = 0
+      placeables.forEachIndexed { index, placeable ->
+        placeable.placeRelative(x = x, y = 0, zIndex = index.toFloat())
+        x += placeable.width - 12.dp.roundToPx()
       }
     }
   }
