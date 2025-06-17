@@ -181,7 +181,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
         }
 
         NewArticlesScrollToTopButton(
-          hasUnreadArticles = false,
+          unreadSinceLastSync = null,
           canShowScrollToTop = true,
           modifier =
             Modifier.padding(
