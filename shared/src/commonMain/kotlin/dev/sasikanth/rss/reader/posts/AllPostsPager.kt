@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -65,9 +66,9 @@ class AllPostsPager(
   val hasUnreadPosts: Flow<Boolean>
     get() = _hasUnreadPosts
 
-  private val _hasNewerArticles: MutableStateFlow<Boolean> = MutableStateFlow(false)
-  val hasNewerArticles: Flow<Boolean>
-    get() = _hasNewerArticles
+  private val _unreadSinceLastSync: MutableStateFlow<UnreadSinceLastSync?> = MutableStateFlow(null)
+  val unreadSinceLastSync: Flow<UnreadSinceLastSync?>
+    get() = _unreadSinceLastSync
 
   init {
     coroutineScope.launch {
@@ -89,13 +90,13 @@ class AllPostsPager(
         val activeSourceIds = activeSourceIds(activeSource)
         val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
 
-        rssRepository.hasNewerArticles(
+        rssRepository.unreadSinceLastSync(
           sources = activeSourceIds,
           postsAfter = postsAfter,
           lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
         )
       }
-      .onEach { hasNewerArticles -> _hasNewerArticles.value = hasNewerArticles }
+      .onEach { _unreadSinceLastSync.value = it }
       .launchIn(coroutineScope)
   }
 
