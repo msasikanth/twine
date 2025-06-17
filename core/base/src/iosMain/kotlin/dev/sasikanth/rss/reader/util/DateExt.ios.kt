@@ -22,21 +22,44 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toNSDate
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSDateFormatterMediumStyle
+import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.NSLocale
 import platform.Foundation.currentLocale
+import platform.Foundation.languageCode
 
 actual fun Instant.readerDateTimestamp(): String {
-  val formatter = NSDateFormatter()
-  formatter.locale = NSLocale.currentLocale()
-  formatter.dateFormat = "MMM dd, yyyy • hh:mm a"
+  val currentLocale = NSLocale.currentLocale()
+  val dateFormatter =
+    NSDateFormatter().apply {
+      locale = currentLocale
+      dateStyle = NSDateFormatterMediumStyle
+    }
+  val timeFormatter =
+    NSDateFormatter().apply {
+      locale = currentLocale
+      timeStyle = NSDateFormatterShortStyle
+    }
 
-  return formatter.stringFromDate(this.toNSDate())
+  val formattedDate = dateFormatter.stringFromDate(toNSDate())
+  val formattedTime = timeFormatter.stringFromDate(toNSDate())
+
+  return "$formattedDate • $formattedTime"
 }
 
 actual fun LocalDateTime.homeAppBarTimestamp(): String {
-  val formatter = NSDateFormatter()
-  formatter.locale = NSLocale.currentLocale()
-  formatter.dateFormat = "EEE, MMM dd"
+  val currentLocale = NSLocale.currentLocale()
+  val datePattern =
+    when (currentLocale.languageCode()) {
+      "de" -> "EEE, d. MMM"
+      "fr" -> "EEE d MMM"
+      else -> "EEE, MMM d"
+    }
+  val formatter =
+    NSDateFormatter().apply {
+      locale = currentLocale
+      dateFormat = datePattern
+    }
 
   val date = this.toInstant(TimeZone.currentSystemDefault()).toNSDate()
   return formatter.stringFromDate(date)

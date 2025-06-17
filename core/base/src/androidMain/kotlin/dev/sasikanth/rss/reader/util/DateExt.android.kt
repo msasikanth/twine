@@ -18,6 +18,8 @@ package dev.sasikanth.rss.reader.util
 
 import java.time.LocalDateTime as JavaLocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import java.util.TimeZone
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -25,12 +27,25 @@ import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDateTime
 
 actual fun Instant.readerDateTimestamp(): String {
-  val dateTimeFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy • hh:mm a")
   val dateTime = JavaLocalDateTime.ofInstant(toJavaInstant(), TimeZone.getDefault().toZoneId())
-  return dateTimeFormatter.format(dateTime)
+  val dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+  val timeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
+
+  val formattedDate = dateFormatter.format(dateTime)
+  val formattedTime = timeFormatter.format(dateTime)
+
+  return "$formattedDate • $formattedTime"
 }
 
 actual fun LocalDateTime.homeAppBarTimestamp(): String {
-  val dateTimeFormatter = DateTimeFormatter.ofPattern("EEE, MMM dd")
-  return dateTimeFormatter.format(toJavaLocalDateTime())
+  val locale = Locale.getDefault()
+  val pattern =
+    when (locale.language) {
+      "de" -> "EEE, d. MMM"
+      "fr" -> "EEE d MMM"
+      else -> "EEE, MMM d"
+    }
+
+  val formatter = DateTimeFormatter.ofPattern(pattern, locale)
+  return formatter.format(toJavaLocalDateTime())
 }
