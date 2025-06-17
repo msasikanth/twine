@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.database.BookmarkQueries
@@ -959,21 +960,27 @@ class RssRepository(
       .map { it > 0 }
   }
 
-  fun hasNewerArticles(
+  fun unreadSinceLastSync(
     sources: List<String>,
     postsAfter: Instant,
     lastSyncedAt: Instant
-  ): Flow<Boolean> {
+  ): Flow<UnreadSinceLastSync> {
     return postQueries
-      .newArticlesSinceCount(
+      .unreadSinceLastSync(
         isSourceIdsEmpty = sources.isEmpty(),
         sourceIds = sources,
         postsAfter = postsAfter,
         lastSyncedAt = lastSyncedAt,
+        mapper = { count, feedHomepageLinks, feedIcons ->
+          UnreadSinceLastSync(
+            hasNewArticles = count > 0,
+            feedHomepageLinks = feedHomepageLinks.orEmpty().split(",").filterNot { it.isBlank() },
+            feedIcons = feedIcons.orEmpty().split(",").filterNot { it.isBlank() }
+          )
+        }
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
-      .map { it > 0 }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {

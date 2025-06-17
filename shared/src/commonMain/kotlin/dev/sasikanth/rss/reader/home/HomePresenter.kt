@@ -234,7 +234,7 @@ class HomePresenter(
 
     private fun loadNewArticles() {
       coroutineScope.launch {
-        _state.update { it.copy(hasNewerArticles = false) }
+        _state.update { it.copy(unreadSinceLastSync = null) }
         lastRefreshedAt.refresh()
       }
     }
@@ -343,19 +343,19 @@ class HomePresenter(
           postsTypeFlow,
           settingsRepository.homeViewMode,
           allPostsPager.hasUnreadPosts,
-          allPostsPager.hasNewerArticles,
-        ) { activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles ->
-          NTuple5(activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles)
+          allPostsPager.unreadSinceLastSync,
+        ) { activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync ->
+          NTuple5(activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync)
         }
         .distinctUntilChanged()
-        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts, hasNewerArticles) ->
+        .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync) ->
           _state.update {
             it.copy(
               activeSource = activeSource,
               postsType = postsType,
               homeViewMode = homeViewMode,
               hasUnreadPosts = hasUnreadPosts,
-              hasNewerArticles = hasNewerArticles,
+              unreadSinceLastSync = unreadSinceLastSync,
             )
           }
         }

@@ -157,7 +157,7 @@ internal fun BookmarksScreen(
           }
 
           NewArticlesScrollToTopButton(
-            hasUnreadArticles = false,
+            unreadSinceLastSync = null,
             canShowScrollToTop = true,
             modifier =
               Modifier.padding(
