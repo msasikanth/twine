@@ -186,30 +186,36 @@ WHERE
 unreadSinceLastSync:
 SELECT COUNT(post.id),
 (
-  SELECT GROUP_CONCAT(DISTINCT feed.homepageLink)
-  FROM post
-  INNER JOIN feed ON post.sourceId == feed.id
-  WHERE
-    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-    post.isHidden == 0 AND
-    read != 1 AND
-    post.date > :postsAfter AND
-    post.syncedAt > :lastSyncedAt
-  ORDER BY post.syncedAt
-  LIMIT 3
+  SELECT GROUP_CONCAT(homepageLink, ',')
+  FROM (
+    SELECT DISTINCT feed.homepageLink
+    FROM post
+    INNER JOIN feed ON post.sourceId == feed.id
+    WHERE
+      ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+      post.isHidden == 0 AND
+      read != 1 AND
+      post.date > :postsAfter AND
+      post.syncedAt > :lastSyncedAt
+    ORDER BY post.syncedAt
+    LIMIT 3
+  )
 ) AS feedHomepageLinks,
 (
-  SELECT GROUP_CONCAT(DISTINCT feed.icon)
-  FROM post
-  INNER JOIN feed ON post.sourceId == feed.id
-  WHERE
-    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-    post.isHidden == 0 AND
-    read != 1 AND
-    post.date > :postsAfter AND
-    post.syncedAt > :lastSyncedAt
-  ORDER BY post.syncedAt
-  LIMIT 3
+  SELECT GROUP_CONCAT(icon, ',')
+  FROM (
+    SELECT DISTINCT feed.icon
+    FROM post
+    INNER JOIN feed ON post.sourceId == feed.id
+    WHERE
+      ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+      post.isHidden == 0 AND
+      read != 1 AND
+      post.date > :postsAfter AND
+      post.syncedAt > :lastSyncedAt
+    ORDER BY post.syncedAt
+    LIMIT 3
+  )
 ) AS feedIcons
 FROM post
 WHERE
