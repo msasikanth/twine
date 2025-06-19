@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -53,8 +54,10 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -160,10 +163,10 @@ internal fun HomeScreen(
       val sheetPeekHeight by
         animateDpAsState(
           targetValue =
-            if (postsListState.firstVisibleItemIndex > 0) {
-              0.dp
-            } else {
+            if (postsListState.isScrollingUp()) {
               BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
+            } else {
+              0.dp
             },
           label = "Sheet Peek Height Animation"
         )
@@ -470,4 +473,24 @@ fun featuredPosts(
       emit(mutablePostsList.filterNotNull().toImmutableList())
     }
   }
+}
+
+@Composable
+private fun LazyListState.isScrollingUp(): Boolean {
+  var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
+  var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
+  return remember(this) {
+      derivedStateOf {
+        if (previousIndex != firstVisibleItemIndex) {
+            previousIndex > firstVisibleItemIndex
+          } else {
+            previousScrollOffset >= firstVisibleItemScrollOffset
+          }
+          .also {
+            previousIndex = firstVisibleItemIndex
+            previousScrollOffset = firstVisibleItemScrollOffset
+          }
+      }
+    }
+    .value
 }
