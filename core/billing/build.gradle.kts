@@ -26,11 +26,8 @@ kotlin {
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
-    named { it.lowercase().startsWith("ios") }.configureEach {
-      languageSettings {
-        optIn("kotlinx.cinterop.ExperimentalForeignApi")
-      }
-    }
+    named { it.lowercase().startsWith("ios") }
+      .configureEach { languageSettings { optIn("kotlinx.cinterop.ExperimentalForeignApi") } }
 
     commonMain.dependencies {
       implementation(projects.core.model)
@@ -43,4 +40,11 @@ kotlin {
       implementation(libs.purchases.datetime)
     }
   }
+}
+
+android {
+  namespace = "dev.sasikanth.rss.reader.core.billing"
+  compileSdk = libs.versions.android.sdk.compile.get().toInt()
+
+  defaultConfig { minSdk = libs.versions.android.sdk.min.get().toInt() }
 }
