@@ -53,20 +53,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
@@ -163,50 +156,20 @@ internal fun HomeScreen(
 
   AppTheme(useDarkTheme = true) {
     Scaffold(modifier) { scaffoldPadding ->
-      val density = LocalDensity.current
       val bottomPadding = scaffoldPadding.calculateBottomPadding()
-      val targetSheetPeekHeight =
-        remember(bottomPadding) { BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding }
-      var sheetPeekHeight by
-        remember(targetSheetPeekHeight) { mutableStateOf(targetSheetPeekHeight) }
-
-      // Since `animateScrollToItem` doesn't trigger nested scroll connection
-      // we are manually animating the sheet peek height back to target sheet peek height
-      var scrollToTopClicked by remember { mutableStateOf(false) }
-      val scrollToTopAnimatedSheetPeekHeight by
+      val sheetPeekHeight by
         animateDpAsState(
-          targetValue = if (scrollToTopClicked) targetSheetPeekHeight else 0.dp,
-          finishedListener = { scrollToTopClicked = false }
+          targetValue =
+            if (postsListState.firstVisibleItemIndex > 0) {
+              0.dp
+            } else {
+              BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
+            },
+          label = "Sheet Peek Height Animation"
         )
+      val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
 
-      LaunchedEffect(scrollToTopAnimatedSheetPeekHeight) {
-        if (scrollToTopClicked) {
-          sheetPeekHeight = scrollToTopAnimatedSheetPeekHeight
-        }
-      }
-
-      LaunchedEffect(sheetPeekHeight) { onBottomSheetHidden(sheetPeekHeight == 0.dp) }
-
-      val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-          override fun onPostScroll(
-            consumed: Offset,
-            available: Offset,
-            source: NestedScrollSource
-          ): Offset {
-            val delta = consumed.y.toInt()
-            val sheetPeekHeightInPx = with(density) { sheetPeekHeight.roundToPx() }
-            val newSheetPeekHeight = sheetPeekHeightInPx + delta * 2
-
-            sheetPeekHeight =
-              with(density) {
-                newSheetPeekHeight.coerceIn(0, targetSheetPeekHeight.roundToPx()).toDp()
-              }
-
-            return Offset.Zero
-          }
-        }
-      }
+      LaunchedEffect(isBottomSheetHidden) { onBottomSheetHidden(isBottomSheetHidden) }
 
       BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,
@@ -271,7 +234,7 @@ internal fun HomeScreen(
                           }
                         ) {
                           PostsList(
-                            modifier = Modifier.fillMaxSize().nestedScroll(nestedScrollConnection),
+                            modifier = Modifier.fillMaxSize(),
                             paddingValues = paddingValues,
                             featuredPosts = featuredPosts,
                             posts = posts,
@@ -336,7 +299,6 @@ internal fun HomeScreen(
                   ),
                 onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
               ) {
-                scrollToTopClicked = true
                 postsListState.animateScrollToItem(0)
               }
             }
