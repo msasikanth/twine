@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
@@ -26,7 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 
-internal fun LazyGridScope.sourcesSearchResults(
+internal fun LazyListScope.sourcesSearchResults(
   searchResults: LazyPagingItems<Feed>,
   selectedSources: Set<Source>,
   canShowUnreadPostsCount: Boolean,

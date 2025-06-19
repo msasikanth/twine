@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
@@ -81,7 +81,7 @@ import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import org.jetbrains.compose.resources.stringResource
-import sh.calvin.reorderable.rememberReorderableLazyGridState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.actionAddTo
 import twine.shared.generated.resources.actionDelete
@@ -222,13 +222,13 @@ internal fun BottomSheetExpandedContent(
 
     var pinnedSources by remember(state.pinnedSources) { mutableStateOf(state.pinnedSources) }
     val isInSearchMode by derivedStateOf {
-      searchQuery.text.length < Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
+      searchQuery.text.length >= Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
     }
 
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    val lazyGridState = rememberLazyGridState()
+    val lazyListState = rememberLazyListState()
     val reorderableLazyGridState =
-      rememberReorderableLazyGridState(lazyGridState) { from, to ->
+      rememberReorderableLazyListState(lazyListState) { from, to ->
         // We are doing this here instead of the presenter is to avoid
         // items blinking or having janky frames while the presenter updates happen and
         // state changes.
@@ -238,7 +238,7 @@ internal fun BottomSheetExpandedContent(
         feedsPresenter.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(pinnedSources))
       }
 
-    SourcesGrid(
+    SourcesList(
       modifier =
         Modifier.padding(
           bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
@@ -246,10 +246,10 @@ internal fun BottomSheetExpandedContent(
           // not overlap with each other
           top = padding.calculateTopPadding() - 1.dp
         ),
-      state = lazyGridState,
+      state = lazyListState,
       pinnedSources = {
         pinnedSources(
-          reorderableLazyGridState = reorderableLazyGridState,
+          reorderableLazyListState = reorderableLazyGridState,
           pinnedSources = pinnedSources,
           selectedSources = state.selectedSources,
           isPinnedSectionExpanded = state.isPinnedSectionExpanded,

@@ -24,8 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
@@ -68,7 +67,7 @@ import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
 
-internal fun LazyGridScope.allSources(
+internal fun LazyListScope.allSources(
   numberOfFeeds: Int,
   numberOfFeedGroups: Int,
   sources: LazyPagingItems<SourceListItem>,
@@ -81,7 +80,7 @@ internal fun LazyGridScope.allSources(
   onToggleSourceSelection: (Source) -> Unit
 ) {
   if (sources.itemCount > 0) {
-    item(key = "AllFeedsHeader", span = { GridItemSpan(2) }) {
+    item(key = "AllFeedsHeader") {
       AllFeedsHeader(
         feedsCount = numberOfFeeds,
         feedsSortOrder = feedsSortOrder,

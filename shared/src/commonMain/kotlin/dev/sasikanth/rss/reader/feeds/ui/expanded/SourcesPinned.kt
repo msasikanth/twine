@@ -21,8 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -48,12 +47,12 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.ReorderableLazyGridState
+import sh.calvin.reorderable.ReorderableLazyListState
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.pinnedFeeds
 
-internal fun LazyGridScope.pinnedSources(
-  reorderableLazyGridState: ReorderableLazyGridState,
+internal fun LazyListScope.pinnedSources(
+  reorderableLazyListState: ReorderableLazyListState,
   pinnedSources: List<Source>,
   selectedSources: Set<Source>,
   isPinnedSectionExpanded: Boolean,
@@ -64,7 +63,7 @@ internal fun LazyGridScope.pinnedSources(
   onToggleSourceSelection: (Source) -> Unit,
 ) {
   if (pinnedSources.isNotEmpty()) {
-    item(key = "PinnedFeedsHeader", span = { GridItemSpan(2) }) {
+    item(key = "PinnedFeedsHeader") {
       PinnedFeedsHeader(
         isPinnedSectionExpanded = isPinnedSectionExpanded,
         onToggleSection = onTogglePinnedSection
@@ -90,7 +89,7 @@ internal fun LazyGridScope.pinnedSources(
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
         val interactionSource = remember { MutableInteractionSource() }
 
-        ReorderableItem(state = reorderableLazyGridState, key = "PinnedSource: ${source.id}") {
+        ReorderableItem(state = reorderableLazyListState, key = "PinnedSource: ${source.id}") {
           when (source) {
             is FeedGroup -> {
               FeedGroupItem(
@@ -135,7 +134,7 @@ internal fun LazyGridScope.pinnedSources(
       }
     }
 
-    item(span = { GridItemSpan(2) }) {
+    item {
       HorizontalDivider(
         modifier = Modifier.padding(top = 24.dp),
         color = AppTheme.colorScheme.tintedSurface
