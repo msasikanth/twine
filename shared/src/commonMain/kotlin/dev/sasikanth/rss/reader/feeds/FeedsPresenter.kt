@@ -32,7 +32,6 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
@@ -167,7 +166,6 @@ class FeedsPresenter(
         is FeedsEvent.OnSourceClick -> onSourceClicked(event.source)
         FeedsEvent.TogglePinnedSection -> onTogglePinnedSection()
         is FeedsEvent.OnFeedSortOrderChanged -> onFeedSortOrderChanged(event.feedsOrderBy)
-        FeedsEvent.OnChangeFeedsViewModeClick -> onChangeFeedsViewModeClick()
         is FeedsEvent.OnHomeSelected -> onHomeSelected()
         FeedsEvent.CancelSourcesSelection -> onCancelSourcesSelection()
         FeedsEvent.DeleteSelectedSourcesClicked -> onDeleteSelectedSourcesClicked()
@@ -262,20 +260,6 @@ class FeedsPresenter(
       coroutineScope.launch { observableActiveSource.clearSelection() }
     }
 
-    private fun onChangeFeedsViewModeClick() {
-      val newFeedsViewMode =
-        when (_state.value.feedsViewMode) {
-          FeedsViewMode.Grid -> FeedsViewMode.List
-          FeedsViewMode.List -> FeedsViewMode.Grid
-        }
-
-      coroutineScope.launch {
-        withContext(dispatchersProvider.io) {
-          settingsRepository.updateFeedsViewMode(newFeedsViewMode)
-        }
-      }
-    }
-
     private fun onFeedSortOrderChanged(feedsOrderBy: FeedsOrderBy) {
       coroutineScope.launch {
         withContext(dispatchersProvider.io) {
@@ -367,10 +351,6 @@ class FeedsPresenter(
     }
 
     private fun observePreferences() {
-      settingsRepository.feedsViewMode
-        .onEach { feedsViewMode -> _state.update { it.copy(feedsViewMode = feedsViewMode) } }
-        .launchIn(coroutineScope)
-
       settingsRepository.feedsSortOrder
         .onEach { feedsSortOrder -> _state.update { it.copy(feedsSortOrder = feedsSortOrder) } }
         .launchIn(coroutineScope)

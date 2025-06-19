@@ -20,8 +20,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -31,18 +29,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.ViewAgenda
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
@@ -73,7 +67,6 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.FeedsViewMode
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
@@ -110,7 +103,6 @@ internal fun BottomSheetExpandedContent(
 ) {
   val state by feedsPresenter.state.collectAsState()
   val searchQuery = feedsPresenter.searchQuery
-  val feedsViewMode = state.feedsViewMode
 
   var showNewGroupDialog by remember { mutableStateOf(false) }
 
@@ -126,12 +118,8 @@ internal fun BottomSheetExpandedContent(
     topBar = {
       SearchBar(
         query = searchQuery,
-        feedsViewMode = feedsViewMode,
         onQueryChange = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
         onClearClick = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
-        onChangeFeedsViewModeClick = {
-          feedsPresenter.dispatch(FeedsEvent.OnChangeFeedsViewModeClick)
-        }
       )
     },
     bottomBar = {
@@ -238,11 +226,6 @@ internal fun BottomSheetExpandedContent(
     }
 
     val imeBottomPadding = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-    val gridItemSpan =
-      when (state.feedsViewMode) {
-        FeedsViewMode.Grid -> GridItemSpan(1)
-        FeedsViewMode.List -> GridItemSpan(2)
-      }
     val lazyGridState = rememberLazyGridState()
     val reorderableLazyGridState =
       rememberReorderableLazyGridState(lazyGridState) { from, to ->
@@ -271,7 +254,6 @@ internal fun BottomSheetExpandedContent(
           selectedSources = state.selectedSources,
           isPinnedSectionExpanded = state.isPinnedSectionExpanded,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          gridItemSpan = gridItemSpan,
           isInMultiSelectMode = state.isInMultiSelectMode,
           onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
           onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
@@ -289,7 +271,6 @@ internal fun BottomSheetExpandedContent(
           feedsSortOrder = state.feedsSortOrder,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           isInMultiSelectMode = state.isInMultiSelectMode,
-          gridItemSpan = gridItemSpan,
           onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
           onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
           onToggleSourceSelection = {
@@ -303,7 +284,6 @@ internal fun BottomSheetExpandedContent(
           selectedSources = state.selectedSources,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           isInMultiSelectMode = state.isInMultiSelectMode,
-          gridItemSpan = gridItemSpan,
           onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
           onToggleSourceSelection = {
             feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it))
@@ -326,10 +306,8 @@ internal fun BottomSheetExpandedContent(
 @Composable
 private fun SearchBar(
   query: TextFieldValue,
-  feedsViewMode: FeedsViewMode,
   onQueryChange: (TextFieldValue) -> Unit,
   onClearClick: () -> Unit,
-  onChangeFeedsViewModeClick: () -> Unit,
 ) {
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
@@ -340,76 +318,56 @@ private fun SearchBar(
     }
   }
 
-  Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-    MaterialTheme(
-      colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
-    ) {
-      OutlinedTextField(
-        modifier =
-          Modifier.weight(1f)
-            .windowInsetsPadding(
-              WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+  MaterialTheme(
+    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+  ) {
+    OutlinedTextField(
+      modifier =
+        Modifier.fillMaxWidth()
+          .windowInsetsPadding(
+            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+          )
+          .padding(vertical = 8.dp)
+          .padding(start = 24.dp, end = 24.dp),
+      value = query.copy(selection = TextRange(query.text.length)),
+      onValueChange = onQueryChange,
+      placeholder = {
+        Text(
+          text = stringResource(Res.string.feedsSearchHint),
+          color = AppTheme.colorScheme.tintedForeground,
+          style = MaterialTheme.typography.bodyLarge
+        )
+      },
+      leadingIcon = {
+        Icon(
+          imageVector = Icons.Rounded.Search,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.tintedForeground
+        )
+      },
+      trailingIcon = {
+        if (query.text.isNotBlank()) {
+          IconButton(onClick = onClearClick) {
+            Icon(
+              Icons.Rounded.Close,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.tintedForeground
             )
-            .padding(vertical = 8.dp)
-            .padding(start = 24.dp, end = 12.dp),
-        value = query.copy(selection = TextRange(query.text.length)),
-        onValueChange = onQueryChange,
-        placeholder = {
-          Text(
-            text = stringResource(Res.string.feedsSearchHint),
-            color = AppTheme.colorScheme.tintedForeground,
-            style = MaterialTheme.typography.bodyLarge
-          )
-        },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Rounded.Search,
-            contentDescription = null,
-            tint = AppTheme.colorScheme.tintedForeground
-          )
-        },
-        trailingIcon = {
-          if (query.text.isNotBlank()) {
-            IconButton(onClick = onClearClick) {
-              Icon(
-                Icons.Rounded.Close,
-                contentDescription = null,
-                tint = AppTheme.colorScheme.tintedForeground
-              )
-            }
           }
-        },
-        shape = RoundedCornerShape(16.dp),
-        singleLine = true,
-        textStyle = MaterialTheme.typography.bodyLarge,
-        colors =
-          OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-            unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-            disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
-            focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
-            disabledTextColor = Color.Transparent,
-          )
-      )
-    }
-
-    IconButton(
-      onClick = onChangeFeedsViewModeClick,
-    ) {
-      val icon =
-        when (feedsViewMode) {
-          FeedsViewMode.Grid -> Icons.Outlined.ViewAgenda
-          FeedsViewMode.List -> Icons.Filled.GridView
         }
-
-      Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
-
-    Spacer(Modifier.requiredWidth(20.dp))
+      },
+      shape = RoundedCornerShape(16.dp),
+      singleLine = true,
+      textStyle = MaterialTheme.typography.bodyLarge,
+      colors =
+        OutlinedTextFieldDefaults.colors(
+          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
+          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          disabledTextColor = Color.Transparent,
+        )
+    )
   }
 }
 

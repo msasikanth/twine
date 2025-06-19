@@ -17,9 +17,9 @@
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -31,7 +31,6 @@ internal fun LazyGridScope.sourcesSearchResults(
   selectedSources: Set<Source>,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
-  gridItemSpan: GridItemSpan,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
 ) {
@@ -39,12 +38,11 @@ internal fun LazyGridScope.sourcesSearchResults(
     count = searchResults.itemCount,
     key = searchResults.itemKey { "SearchResult:${it.id}" },
     contentType = { "FeedListItem" },
-    span = { gridItemSpan }
   ) { index ->
     val feed = searchResults[index]
-    val startPadding = startPaddingOfSourceItem(gridItemSpan, index)
-    val endPadding = endPaddingOfSourceItem(gridItemSpan, index)
-    val topPadding = topPaddingOfSourceItem(gridItemSpan, index)
+    val startPadding = 24.dp
+    val endPadding = 24.dp
+    val topPadding = 8.dp
     val bottomPadding = bottomPaddingOfSourceItem(index, searchResults.itemCount)
 
     if (feed != null) {
