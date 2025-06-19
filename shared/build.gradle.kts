@@ -77,6 +77,7 @@ kotlin {
       api(projects.core.model)
       api(projects.core.network)
       api(projects.core.data)
+      api(projects.core.billing)
 
       implementation(projects.resources.icons)
 
