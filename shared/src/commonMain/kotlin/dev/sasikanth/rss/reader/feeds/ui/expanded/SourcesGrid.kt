@@ -20,35 +20,29 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridScope
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun SourcesGrid(
-  state: LazyGridState,
-  pinnedSources: LazyGridScope.() -> Unit,
-  allSources: LazyGridScope.() -> Unit,
-  searchResults: LazyGridScope.() -> Unit,
+internal fun SourcesList(
+  state: LazyListState,
+  pinnedSources: LazyListScope.() -> Unit,
+  allSources: LazyListScope.() -> Unit,
+  searchResults: LazyListScope.() -> Unit,
   isInSearchMode: Boolean,
   padding: PaddingValues,
   modifier: Modifier = Modifier
 ) {
   val layoutDirection = LocalLayoutDirection.current
 
-  LazyVerticalGrid(
+  LazyColumn(
     modifier = Modifier.fillMaxSize().then(modifier),
     state = state,
-    columns = GridCells.Fixed(2),
     contentPadding =
       PaddingValues(
         start = padding.calculateStartPadding(layoutDirection),
@@ -58,10 +52,10 @@ internal fun SourcesGrid(
       ),
   ) {
     if (isInSearchMode) {
+      searchResults()
+    } else {
       pinnedSources()
       allSources()
-    } else {
-      searchResults()
     }
   }
 }
@@ -70,25 +64,4 @@ internal fun bottomPaddingOfSourceItem(index: Int, itemCount: Int) =
   when {
     index < itemCount -> 8.dp
     else -> 0.dp
-  }
-
-internal fun topPaddingOfSourceItem(gridItemSpan: GridItemSpan, index: Int) =
-  when {
-    gridItemSpan.currentLineSpan == 2 && index > 0 -> 8.dp
-    gridItemSpan.currentLineSpan == 1 && index > 1 -> 8.dp
-    else -> 0.dp
-  }
-
-internal fun endPaddingOfSourceItem(gridItemSpan: GridItemSpan, index: Int) =
-  when {
-    gridItemSpan.currentLineSpan == 2 || (gridItemSpan.currentLineSpan == 1 && index % 2 == 1) ->
-      24.dp
-    else -> 8.dp
-  }
-
-internal fun startPaddingOfSourceItem(gridItemSpan: GridItemSpan, index: Int) =
-  when {
-    gridItemSpan.currentLineSpan == 2 || (gridItemSpan.currentLineSpan == 1 && index % 2 == 0) ->
-      24.dp
-    else -> 8.dp
   }
