@@ -15,5 +15,4 @@ import me.tatarka.inject.annotations.Inject
 
 interface BillingHandler
 
-@Inject
-class RealBillingHandler : BillingHandler
+@Inject class RealBillingHandler : BillingHandler
