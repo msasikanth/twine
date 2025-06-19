@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.billing
+package dev.sasikanth.twine.billing
 
-class BillingHandler {
-}
+import me.tatarka.inject.annotations.Inject
+
+interface BillingHandler
+
+@Inject
+class RealBillingHandler : BillingHandler
