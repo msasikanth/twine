@@ -16,7 +16,6 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -53,7 +52,6 @@ import sh.calvin.reorderable.ReorderableLazyGridState
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.pinnedFeeds
 
-@OptIn(ExperimentalFoundationApi::class)
 internal fun LazyGridScope.pinnedSources(
   reorderableLazyGridState: ReorderableLazyGridState,
   pinnedSources: List<Source>,
@@ -61,7 +59,6 @@ internal fun LazyGridScope.pinnedSources(
   isPinnedSectionExpanded: Boolean,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
-  gridItemSpan: GridItemSpan,
   onTogglePinnedSection: () -> Unit,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit,
@@ -85,12 +82,11 @@ internal fun LazyGridScope.pinnedSources(
             "FeedListItem"
           }
         },
-        span = { gridItemSpan }
       ) { index ->
         val source = pinnedSources[index]
-        val startPadding = startPaddingOfSourceItem(gridItemSpan, index)
-        val endPadding = endPaddingOfSourceItem(gridItemSpan, index)
-        val topPadding = topPaddingOfSourceItem(gridItemSpan, index)
+        val startPadding = 24.dp
+        val endPadding = 24.dp
+        val topPadding = 8.dp
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
         val interactionSource = remember { MutableInteractionSource() }
 
