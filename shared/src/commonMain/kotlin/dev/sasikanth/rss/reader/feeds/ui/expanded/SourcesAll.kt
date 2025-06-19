@@ -76,7 +76,6 @@ internal fun LazyGridScope.allSources(
   feedsSortOrder: FeedsOrderBy,
   canShowUnreadPostsCount: Boolean,
   isInMultiSelectMode: Boolean,
-  gridItemSpan: GridItemSpan,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onSourceClick: (Source) -> Unit,
   onToggleSourceSelection: (Source) -> Unit
@@ -90,7 +89,6 @@ internal fun LazyGridScope.allSources(
       )
     }
 
-    val feedGroupGridItemSpan = GridItemSpan(1)
     items(
       count = sources.itemCount,
       key =
@@ -113,19 +111,6 @@ internal fun LazyGridScope.allSources(
           null -> null
         }
       },
-      span = {
-        when (val sourceItem = sources[it]) {
-          SourceListItem.Separator -> GridItemSpan(2)
-          is SourceListItem.SourceItem -> {
-            when (sourceItem.source) {
-              is FeedGroup -> feedGroupGridItemSpan
-              is Feed -> gridItemSpan
-              else -> GridItemSpan(2)
-            }
-          }
-          null -> GridItemSpan(2)
-        }
-      }
     ) { index ->
       when (val sourceItem = sources[index]) {
         SourceListItem.Separator -> {
@@ -134,9 +119,9 @@ internal fun LazyGridScope.allSources(
         is SourceListItem.SourceItem -> {
           when (val source = sourceItem.source) {
             is FeedGroup -> {
-              val startPadding = startPaddingOfSourceItem(feedGroupGridItemSpan, index)
-              val endPadding = endPaddingOfSourceItem(feedGroupGridItemSpan, index)
-              val topPadding = topPaddingOfSourceItem(feedGroupGridItemSpan, index)
+              val startPadding = 24.dp
+              val endPadding = 24.dp
+              val topPadding = 8.dp
               val bottomPadding = bottomPaddingOfSourceItem(index, sources.itemCount)
 
               FeedGroupItem(
@@ -165,9 +150,9 @@ internal fun LazyGridScope.allSources(
                 } else {
                   index
                 }
-              val startPadding = startPaddingOfSourceItem(gridItemSpan, transformedIndex)
-              val endPadding = endPaddingOfSourceItem(gridItemSpan, transformedIndex)
-              val topPadding = topPaddingOfSourceItem(gridItemSpan, transformedIndex)
+              val startPadding = 24.dp
+              val endPadding = 24.dp
+              val topPadding = 8.dp
               val bottomPadding = bottomPaddingOfSourceItem(transformedIndex, sources.itemCount)
 
               FeedListItem(
