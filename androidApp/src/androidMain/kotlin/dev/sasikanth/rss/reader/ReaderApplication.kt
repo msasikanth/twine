@@ -26,6 +26,9 @@ import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.enableBugsnag
 import com.bugsnag.android.Bugsnag
+import com.revenuecat.purchases.kmp.LogLevel
+import com.revenuecat.purchases.kmp.Purchases
+import com.revenuecat.purchases.kmp.PurchasesConfiguration
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
 
@@ -92,6 +95,9 @@ class ReaderApplication : Application(), Configuration.Provider {
     enqueuePeriodicPostsCleanUp()
 
     appComponent.initializers.forEach { it.initialize() }
+
+    Purchases.logLevel = LogLevel.DEBUG
+    Purchases.configure(PurchasesConfiguration.Builder("goog_PjAVIPsVVoDfdsnLWfLOIVgwULm").build())
   }
 
   private fun enqueuePeriodicPostsCleanUp() {
