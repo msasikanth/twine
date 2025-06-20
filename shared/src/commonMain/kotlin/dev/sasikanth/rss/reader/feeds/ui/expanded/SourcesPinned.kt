@@ -65,6 +65,7 @@ internal fun LazyListScope.pinnedSources(
   if (pinnedSources.isNotEmpty()) {
     item(key = "PinnedFeedsHeader") {
       PinnedFeedsHeader(
+        modifier = Modifier.animateItem(),
         isPinnedSectionExpanded = isPinnedSectionExpanded,
         onToggleSection = onTogglePinnedSection
       )
@@ -89,7 +90,11 @@ internal fun LazyListScope.pinnedSources(
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
         val interactionSource = remember { MutableInteractionSource() }
 
-        ReorderableItem(state = reorderableLazyListState, key = "PinnedSource: ${source.id}") {
+        ReorderableItem(
+          modifier = Modifier.animateItem(),
+          state = reorderableLazyListState,
+          key = "PinnedSource: ${source.id}"
+        ) {
           when (source) {
             is FeedGroup -> {
               FeedGroupItem(
@@ -136,7 +141,7 @@ internal fun LazyListScope.pinnedSources(
 
     item {
       HorizontalDivider(
-        modifier = Modifier.padding(top = 24.dp),
+        modifier = Modifier.padding(top = 24.dp).animateItem(),
         color = AppTheme.colorScheme.tintedSurface
       )
     }

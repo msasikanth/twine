@@ -47,6 +47,7 @@ import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
@@ -186,6 +187,12 @@ fun App(
           }
           is Screen.BlockedWords -> {
             BlockedWordsScreen(
+              modifier = fillMaxSizeModifier,
+              presenter = screen.presenter,
+            )
+          }
+          is Screen.Paywall -> {
+            PremiumPaywallScreen(
               modifier = fillMaxSizeModifier,
               presenter = screen.presenter,
             )

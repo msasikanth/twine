@@ -49,4 +49,6 @@ sealed interface SettingsEvent {
   data object BlockedWordsClicked : SettingsEvent
 
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
+
+  data object OnPurchasePremiumClick : SettingsEvent
 }
