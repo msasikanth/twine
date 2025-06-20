@@ -119,6 +119,7 @@ kotlin {
       implementation(libs.markdown.coil)
       implementation(libs.markdown.code)
       implementation(libs.shadow)
+      implementation(libs.purchases.ui)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)

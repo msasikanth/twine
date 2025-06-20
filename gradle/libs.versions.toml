@@ -139,6 +139,7 @@ markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", 
 shadow = { module = "com.adamglin:compose-shadow", version.ref = "shadow" }
 purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat" }
 purchases-datetime = { module = "com.revenuecat.purchases:purchases-kmp-datetime", version.ref = "revenuecat" }
+purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
