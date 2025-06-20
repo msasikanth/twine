@@ -82,6 +82,7 @@ internal fun LazyListScope.allSources(
   if (sources.itemCount > 0) {
     item(key = "AllFeedsHeader") {
       AllFeedsHeader(
+        modifier = Modifier.animateItem(),
         feedsCount = numberOfFeeds,
         feedsSortOrder = feedsSortOrder,
         onFeedsSortChanged = onFeedsSortChanged
@@ -132,11 +133,12 @@ internal fun LazyListScope.allSources(
                 onFeedGroupClick = onSourceClick,
                 modifier =
                   Modifier.padding(
-                    start = startPadding,
-                    top = topPadding,
-                    end = endPadding,
-                    bottom = bottomPadding
-                  ),
+                      start = startPadding,
+                      top = topPadding,
+                      end = endPadding,
+                      bottom = bottomPadding
+                    )
+                    .animateItem(),
               )
             }
             is Feed -> {
@@ -163,11 +165,12 @@ internal fun LazyListScope.allSources(
                 onFeedSelected = onToggleSourceSelection,
                 modifier =
                   Modifier.padding(
-                    start = startPadding,
-                    top = topPadding,
-                    end = endPadding,
-                    bottom = bottomPadding
-                  )
+                      start = startPadding,
+                      top = topPadding,
+                      end = endPadding,
+                      bottom = bottomPadding
+                    )
+                    .animateItem()
               )
             }
           }
