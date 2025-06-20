@@ -284,7 +284,10 @@ class AppPresenter(
               componentContext,
               { navigation.pop() },
               { navigation.pushNew(Config.About) },
-              { navigation.pushNew(Config.BlockedWords) }
+              { navigation.pushNew(Config.BlockedWords) },
+              {
+                // open paywall
+              }
             )
         )
       }

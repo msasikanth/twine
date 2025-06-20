@@ -46,6 +46,7 @@ internal typealias SettingsPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPaywall: () -> Unit,
     openAbout: () -> Unit,
     openBlockedWords: () -> Unit,
   ) -> SettingsPresenter
@@ -59,6 +60,7 @@ class SettingsPresenter(
   private val opmlManager: OpmlManager,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
   @Assisted private val openBlockedWords: () -> Unit,
 ) : ComponentContext by componentContext {
@@ -79,6 +81,7 @@ class SettingsPresenter(
   fun dispatch(event: SettingsEvent) {
     when (event) {
       SettingsEvent.BackClicked -> goBack()
+      SettingsEvent.OnPurchasePremiumClick -> openPaywall()
       SettingsEvent.AboutClicked -> openAbout()
       SettingsEvent.BlockedWordsClicked -> openBlockedWords()
       else -> {
@@ -165,7 +168,8 @@ class SettingsPresenter(
 
     fun dispatch(event: SettingsEvent) {
       when (event) {
-        SettingsEvent.BackClicked -> {
+        SettingsEvent.BackClicked,
+        SettingsEvent.OnPurchasePremiumClick -> {
           // no-op
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
