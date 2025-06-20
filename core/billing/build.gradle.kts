@@ -23,7 +23,11 @@ kotlin {
   jvmToolchain(20)
 
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
-  listOf(iosArm64(), iosSimulatorArm64())
+  listOf(iosArm64(), iosSimulatorArm64()).forEach { iOSTarget ->
+    iOSTarget.binaries.framework {
+      isStatic = true
+    }
+  }
 
   sourceSets {
     named { it.lowercase().startsWith("ios") }
