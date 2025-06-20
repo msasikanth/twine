@@ -153,6 +153,8 @@
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
+    <string name="twinePremium">Twine premium subscription</string>
+    <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
