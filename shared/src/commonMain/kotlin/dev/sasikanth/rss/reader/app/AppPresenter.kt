@@ -53,6 +53,7 @@ import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenterFactory
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenterFactory
 import dev.sasikanth.rss.reader.platform.LinkHandler
+import dev.sasikanth.rss.reader.premium.PremiumPaywallPresenterFactory
 import dev.sasikanth.rss.reader.reader.ReaderEvent
 import dev.sasikanth.rss.reader.reader.ReaderPresenterFactory
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
@@ -93,6 +94,7 @@ class AppPresenter(
   private val addFeedPresenter: AddFeedPresenterFactory,
   private val groupPresenter: GroupPresenterFactory,
   private val blockedWordsPresenter: BlockedWordsPresenterFactory,
+  private val paywallPresenter: PremiumPaywallPresenterFactory,
   private val lastRefreshedAt: LastRefreshedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
@@ -320,6 +322,9 @@ class AppPresenter(
           presenter = blockedWordsPresenter(componentContext) { navigation.pop() }
         )
       }
+      is Config.Paywall -> {
+        Screen.Paywall(presenter = paywallPresenter(componentContext) { navigation.pop() })
+      }
     }
 
   private fun openPost(
@@ -416,6 +421,8 @@ class AppPresenter(
     @Serializable data class GroupDetails(val groupId: String) : Config
 
     @Serializable data object BlockedWords : Config
+
+    @Serializable data object Paywall : Config
   }
 
   @Serializable
