@@ -287,9 +287,7 @@ class AppPresenter(
               { navigation.pop() },
               { navigation.pushNew(Config.About) },
               { navigation.pushNew(Config.BlockedWords) },
-              {
-                // open paywall
-              }
+              { navigation.pushNew(Config.Paywall) }
             )
         )
       }

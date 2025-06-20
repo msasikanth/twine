@@ -60,9 +60,9 @@ class SettingsPresenter(
   private val opmlManager: OpmlManager,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
-  @Assisted private val openPaywall: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
   @Assisted private val openBlockedWords: () -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
