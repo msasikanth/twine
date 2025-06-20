@@ -36,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -134,6 +135,8 @@ import twine.shared.generated.resources.settingsThemeLight
 import twine.shared.generated.resources.settingsVersion
 import twine.shared.generated.resources.showFeedFavIconDesc
 import twine.shared.generated.resources.showFeedFavIconTitle
+import twine.shared.generated.resources.twinePremium
+import twine.shared.generated.resources.twinePremiumDesc
 
 @Composable
 internal fun SettingsScreen(
@@ -185,6 +188,14 @@ internal fun SettingsScreen(
               bottom = padding.calculateBottomPadding() + 80.dp
             ),
         ) {
+          item {
+            TwinePremium(
+              onClick = { settingsPresenter.dispatch(SettingsEvent.OnPurchasePremiumClick) }
+            )
+          }
+
+          item { Divider() }
+
           item {
             SubHeader(
               text = stringResource(Res.string.settingsHeaderTheme),
@@ -352,6 +363,36 @@ internal fun SettingsScreen(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+fun TwinePremium(modifier: Modifier = Modifier, onClick: () -> Unit) {
+  Row(
+    modifier =
+      modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(32.dp),
+      imageVector = Icons.Rounded.WorkspacePremium,
+      contentDescription = null
+    )
+
+    Column {
+      Text(
+        text = stringResource(Res.string.twinePremium),
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh
+      )
+
+      Text(
+        text = stringResource(Res.string.twinePremiumDesc),
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+    }
+  }
 }
 
 @Composable

@@ -46,6 +46,7 @@ internal typealias SettingsPresenterFactory =
   (
     ComponentContext,
     goBack: () -> Unit,
+    openPaywall: () -> Unit,
     openAbout: () -> Unit,
     openBlockedWords: () -> Unit,
   ) -> SettingsPresenter
@@ -61,6 +62,7 @@ class SettingsPresenter(
   @Assisted private val goBack: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
   @Assisted private val openBlockedWords: () -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
   private val presenterInstance =
@@ -79,6 +81,7 @@ class SettingsPresenter(
   fun dispatch(event: SettingsEvent) {
     when (event) {
       SettingsEvent.BackClicked -> goBack()
+      SettingsEvent.OnPurchasePremiumClick -> openPaywall()
       SettingsEvent.AboutClicked -> openAbout()
       SettingsEvent.BlockedWordsClicked -> openBlockedWords()
       else -> {
@@ -165,7 +168,8 @@ class SettingsPresenter(
 
     fun dispatch(event: SettingsEvent) {
       when (event) {
-        SettingsEvent.BackClicked -> {
+        SettingsEvent.BackClicked,
+        SettingsEvent.OnPurchasePremiumClick -> {
           // no-op
         }
         is SettingsEvent.UpdateBrowserType -> updateBrowserType(event.browserType)
