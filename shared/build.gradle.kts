@@ -77,7 +77,6 @@ kotlin {
       api(projects.core.model)
       api(projects.core.network)
       api(projects.core.data)
-      api(projects.core.billing)
 
       implementation(projects.resources.icons)
 
@@ -119,6 +118,8 @@ kotlin {
       implementation(libs.markdown.coil)
       implementation(libs.markdown.code)
       implementation(libs.shadow)
+      implementation(libs.purchases.core)
+      implementation(libs.purchases.datetime)
       implementation(libs.purchases.ui)
     }
     commonTest.dependencies {

@@ -30,6 +30,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -80,13 +82,16 @@ class FeedsPresenter(
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
   private val lastRefreshedAt: LastRefreshedAt,
+  private val billingHandler: BillingHandler,
   @Assisted componentContext: ComponentContext,
   @Assisted private val openGroupSelectionSheet: () -> Unit,
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
   @Assisted private val openGroupScreen: (groupId: String) -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
+  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
@@ -108,26 +113,43 @@ class FeedsPresenter(
   }
 
   fun dispatch(event: FeedsEvent) {
-    when (event) {
-      is FeedsEvent.OnAddToGroupClicked -> {
-        openGroupSelectionSheet()
-      }
-      is FeedsEvent.OnEditSourceClicked -> {
-        when (val source = event.source) {
-          is Feed -> openFeedInfoSheet(source.id)
-          is FeedGroup -> openGroupScreen(source.id)
-          else -> {
-            throw IllegalArgumentException("Unknown source: $source")
+    val canForwardDispatch =
+      when (event) {
+        is FeedsEvent.OnAddToGroupClicked -> {
+          openGroupSelectionSheet()
+          false
+        }
+        is FeedsEvent.OnEditSourceClicked -> {
+          when (val source = event.source) {
+            is Feed -> openFeedInfoSheet(source.id)
+            is FeedGroup -> openGroupScreen(source.id)
+            else -> {
+              throw IllegalArgumentException("Unknown source: $source")
+            }
           }
+          false
+        }
+        is FeedsEvent.OnNewFeedClicked -> {
+          coroutineScope.launch {
+            val feedsCount = state.value.numberOfFeeds
+            val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+            if (!isSubscribed && feedsCount >= 10) {
+              openPaywall()
+              return@launch
+            }
+
+            openAddFeedScreen()
+          }
+          false
+        }
+        else -> {
+          true
         }
       }
-      is FeedsEvent.OnNewFeedClicked -> openAddFeedScreen()
-      else -> {
-        // no-op
-      }
-    }
 
-    presenterInstance.dispatch(event)
+    if (canForwardDispatch) {
+      presenterInstance.dispatch(event)
+    }
   }
 
   private class PresenterInstance(

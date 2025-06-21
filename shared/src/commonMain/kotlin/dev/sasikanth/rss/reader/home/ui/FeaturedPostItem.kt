@@ -99,21 +99,19 @@ internal fun FeaturedPostItem(
       }
     )
 
-    if (item.title.isNotBlank() && item.description.isNotBlank()) {
-      Spacer(modifier = Modifier.requiredHeight(8.dp))
+    Spacer(modifier = Modifier.requiredHeight(8.dp))
 
-      Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = item.description,
-        style = MaterialTheme.typography.bodySmall,
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        minLines = 3,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
-      )
+    Text(
+      modifier = Modifier.padding(horizontal = 16.dp),
+      text = item.description,
+      style = MaterialTheme.typography.bodySmall,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      minLines = 3,
+      maxLines = 3,
+      overflow = TextOverflow.Ellipsis,
+    )
 
-      Spacer(Modifier.requiredHeight(descriptionBottomPadding))
-    }
+    Spacer(Modifier.requiredHeight(descriptionBottomPadding))
 
     val showFeedFavIcon = LocalShowFeedFavIconSetting.current
     val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon

@@ -224,7 +224,8 @@ class AppPresenter(
               { modalNavigation.activate(ModalConfig.GroupSelection) },
               { modalNavigation.activate(ModalConfig.FeedInfo(it)) },
               { navigation.pushNew(Config.AddFeed) },
-              { navigation.pushNew(Config.GroupDetails(it)) }
+              { navigation.pushNew(Config.GroupDetails(it)) },
+              { navigation.pushNew(Config.Paywall) }
             )
         )
       }

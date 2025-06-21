@@ -19,6 +19,8 @@ import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -58,6 +60,7 @@ class SettingsPresenter(
   private val rssRepository: RssRepository,
   private val appInfo: AppInfo,
   private val opmlManager: OpmlManager,
+  private val billingHandler: BillingHandler,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: () -> Unit,
   @Assisted private val openAbout: () -> Unit,
@@ -65,31 +68,58 @@ class SettingsPresenter(
   @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
+  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
         dispatchersProvider = dispatchersProvider,
         appInfo = appInfo,
-        settingsRepository = settingsRepository,
         rssRepository = rssRepository,
-        opmlManager = opmlManager,
+        settingsRepository = settingsRepository,
+        opmlManager = opmlManager
       )
     }
 
   internal val state = presenterInstance.state
 
   fun dispatch(event: SettingsEvent) {
-    when (event) {
-      SettingsEvent.BackClicked -> goBack()
-      SettingsEvent.OnPurchasePremiumClick -> openPaywall()
-      SettingsEvent.AboutClicked -> openAbout()
-      SettingsEvent.BlockedWordsClicked -> openBlockedWords()
-      else -> {
-        // no-op
+    val canForwardDispatch =
+      when (event) {
+        SettingsEvent.BackClicked -> {
+          goBack()
+          false
+        }
+        SettingsEvent.OnPurchasePremiumClick -> {
+          openPaywall()
+          false
+        }
+        SettingsEvent.AboutClicked -> {
+          openAbout()
+          false
+        }
+        SettingsEvent.BlockedWordsClicked -> {
+          openBlockedWords()
+          false
+        }
+        SettingsEvent.ImportOpmlClicked -> {
+          coroutineScope.launch {
+            val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+            if (!isSubscribed) {
+              openPaywall()
+            } else {
+              presenterInstance.dispatch(event)
+            }
+          }
+          false
+        }
+        else -> {
+          true
+        }
       }
-    }
 
-    presenterInstance.dispatch(event)
+    if (canForwardDispatch) {
+      presenterInstance.dispatch(event)
+    }
   }
 
   private class PresenterInstance(
