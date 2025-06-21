@@ -90,11 +90,7 @@ internal fun LazyListScope.pinnedSources(
         val bottomPadding = bottomPaddingOfSourceItem(index, pinnedSources.size)
         val interactionSource = remember { MutableInteractionSource() }
 
-        ReorderableItem(
-          modifier = Modifier.animateItem(),
-          state = reorderableLazyListState,
-          key = "PinnedSource: ${source.id}"
-        ) {
+        ReorderableItem(state = reorderableLazyListState, key = "PinnedSource: ${source.id}") {
           when (source) {
             is FeedGroup -> {
               FeedGroupItem(
@@ -108,11 +104,12 @@ internal fun LazyListScope.pinnedSources(
                 interactionSource = interactionSource,
                 modifier =
                   Modifier.padding(
-                    start = startPadding,
-                    top = topPadding,
-                    end = endPadding,
-                    bottom = bottomPadding
-                  ),
+                      start = startPadding,
+                      top = topPadding,
+                      end = endPadding,
+                      bottom = bottomPadding
+                    )
+                    .animateItem(),
               )
             }
             is Feed -> {
@@ -127,11 +124,12 @@ internal fun LazyListScope.pinnedSources(
                 interactionSource = interactionSource,
                 modifier =
                   Modifier.padding(
-                    start = startPadding,
-                    top = topPadding,
-                    end = endPadding,
-                    bottom = bottomPadding
-                  ),
+                      start = startPadding,
+                      top = topPadding,
+                      end = endPadding,
+                      bottom = bottomPadding
+                    )
+                    .animateItem(),
               )
             }
           }
