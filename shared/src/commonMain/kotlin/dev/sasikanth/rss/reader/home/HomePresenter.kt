@@ -76,7 +76,8 @@ class HomePresenter(
       openGroupSelectionSheet: () -> Unit,
       openFeedInfoSheet: (feedId: String) -> Unit,
       openAddFeedScreen: () -> Unit,
-      openGroupScreen: (groupId: String) -> Unit
+      openGroupScreen: (groupId: String) -> Unit,
+      openPaywall: () -> Unit,
     ) -> FeedsPresenter,
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
@@ -93,6 +94,7 @@ class HomePresenter(
   @Assisted private val openFeedInfoSheet: (feedId: String) -> Unit,
   @Assisted private val openAddFeedScreen: () -> Unit,
   @Assisted private val openGroupScreen: (groupId: String) -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
   internal val feedsPresenter =
@@ -102,6 +104,7 @@ class HomePresenter(
       openFeedInfoSheet,
       openAddFeedScreen,
       openGroupScreen,
+      openPaywall,
     )
 
   private val backCallback = BackCallback {
@@ -420,6 +423,7 @@ internal typealias HomePresenterFactory =
     openFeedInfoSheet: (feedId: String) -> Unit,
     openAddFeedScreen: () -> Unit,
     openGroupScreen: (groupId: String) -> Unit,
+    openPaywall: () -> Unit,
   ) -> HomePresenter
 
 private typealias OpenPost = (postIndex: Int, post: PostWithMetadata) -> Unit
