@@ -43,8 +43,6 @@ include(":shared")
 
 include(":core:base")
 
-include(":core:billing")
-
 include(":core:model")
 
 include(":core:network")
