@@ -55,7 +55,7 @@ korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.35.0"
-shadow = "2.0.3"
+shadow = "2.0.4"
 revenuecat = "1.8.4+13.37.0"
 
 [libraries]
