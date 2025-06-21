@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -132,7 +131,7 @@ class FeedsPresenter(
         }
         is FeedsEvent.OnNewFeedClicked -> {
           coroutineScope.launch {
-            val feedsCount = rssRepository.numberOfFeeds().first()
+            val feedsCount = state.value.numberOfFeeds
             val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
             if (!isSubscribed && feedsCount >= 10) {
               openPaywall()
