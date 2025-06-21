@@ -63,8 +63,8 @@ import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
+import kotlin.math.absoluteValue
 
 @Composable
 internal fun FeaturedSection(
@@ -272,7 +272,6 @@ private fun FeaturedSectionBackground(
         .fillMaxWidth()
         .aspectRatio(1f)
         .graphicsLayer { translationX = size.width * pageOffset.invoke() }
-        .then(gradientOverlayModifier)
         .graphicsLayer {
           val blurRadius = 100.dp
 
@@ -284,6 +283,7 @@ private fun FeaturedSectionBackground(
               edgeTreatment = TileMode.Decal,
             )
         }
+        .then(gradientOverlayModifier)
         .drawWithContent {
           drawContent()
           drawRect(

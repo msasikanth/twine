@@ -376,7 +376,8 @@ fun TwinePremium(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Icon(
       modifier = Modifier.requiredSize(32.dp),
       imageVector = Icons.Rounded.WorkspacePremium,
-      contentDescription = null
+      contentDescription = null,
+      tint = AppTheme.colorScheme.primary,
     )
 
     Column {
