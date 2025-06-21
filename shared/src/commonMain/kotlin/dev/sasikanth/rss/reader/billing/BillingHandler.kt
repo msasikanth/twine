@@ -19,9 +19,7 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class BillingHandler(
-  private val dispatchersProvider: DispatchersProvider
-) {
+class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
 
   companion object {
     private const val ENTITLEMENT_PREMIUM = "Premium"
@@ -31,15 +29,15 @@ class BillingHandler(
 
   suspend fun customerResult(): SubscriptionResult {
     try {
-      val customerInfo = withContext(dispatchersProvider.io) {
-        purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.NOT_STALE_CACHED_OR_CURRENT)
-      }
+      val customerInfo =
+        withContext(dispatchersProvider.io) {
+          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.NOT_STALE_CACHED_OR_CURRENT)
+        }
 
       val isPremium = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]?.isActive
       if (isPremium == true) {
         return SubscriptionResult.Subscribed
       }
-
     } catch (e: Exception) {
       return SubscriptionResult.Error
     }
