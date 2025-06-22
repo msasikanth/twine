@@ -27,7 +27,8 @@ internal data class ReaderState(
   val activePostIndex: Int,
   val activePostId: String,
   val loadFullArticleMap: Map<String, Boolean>,
-  val posts: Flow<PagingData<PostWithMetadata>>
+  val posts: Flow<PagingData<PostWithMetadata>>,
+  val showReaderCustomisations: Boolean,
 ) {
 
   fun canLoadFullPost(postId: String): Boolean {
@@ -41,7 +42,8 @@ internal data class ReaderState(
         activePostIndex = initialPostIndex,
         activePostId = initialPostId,
         loadFullArticleMap = emptyMap(),
-        posts = emptyFlow()
+        posts = emptyFlow(),
+        showReaderCustomisations = false,
       )
     }
   }

@@ -30,4 +30,8 @@ sealed interface ReaderEvent {
   data class LoadFullArticleClicked(val postId: String) : ReaderEvent
 
   data class PostLoaded(val post: PostWithMetadata) : ReaderEvent
+
+  data object ShowReaderCustomisations : ReaderEvent
+
+  data object HideReaderCustomisations : ReaderEvent
 }

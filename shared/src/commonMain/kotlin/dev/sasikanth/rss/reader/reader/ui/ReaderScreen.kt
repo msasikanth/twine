@@ -24,6 +24,7 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +63,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -86,6 +86,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -165,7 +166,6 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.cdLoadFullArticle
-import twine.shared.generated.resources.comingSoon
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.openWebsite
 import twine.shared.generated.resources.readerSettings
@@ -326,8 +326,6 @@ internal fun ReaderScreen(
             } catch (e: IndexOutOfBoundsException) {
               null
             }
-          val comingSoonString = stringResource(Res.string.comingSoon)
-
           if (readerPost != null) {
             BottomBar(
               darkTheme = darkTheme,
@@ -338,15 +336,7 @@ internal fun ReaderScreen(
               loadFullArticleClick = {
                 presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
               },
-              openReaderViewSettings = {
-                // TODO: Open reader view settings
-                coroutineScope.launch {
-                  snackbarHostState.showSnackbar(
-                    message = comingSoonString,
-                    duration = SnackbarDuration.Short,
-                  )
-                }
-              }
+              openReaderViewSettings = { presenter.dispatch(ReaderEvent.ShowReaderCustomisations) }
             )
           }
         },
@@ -406,6 +396,15 @@ internal fun ReaderScreen(
               contentPaddingValues = paddingValues
             )
           }
+        }
+
+        if (state.showReaderCustomisations) {
+          Box(
+            modifier =
+              Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures { presenter.dispatch(ReaderEvent.HideReaderCustomisations) }
+              }
+          )
         }
       }
     }

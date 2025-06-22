@@ -20,8 +20,10 @@ import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -67,6 +69,21 @@ class ReaderPresenter(
     }
 
   internal val state = presenterInstance.state
+
+  private val backCallback = BackCallback {
+    if (state.value.showReaderCustomisations) {
+      dispatch(ReaderEvent.HideReaderCustomisations)
+    } else {
+      dispatch(ReaderEvent.BackClicked)
+    }
+  }
+
+  init {
+    lifecycle.doOnCreate {
+      backHandler.register(backCallback)
+      backCallback.isEnabled = true
+    }
+  }
 
   fun dispatch(event: ReaderEvent) {
     when (event) {
@@ -116,7 +133,13 @@ class ReaderPresenter(
         is ReaderEvent.PostPageChanged -> postPageChange(event.postIndex, event.post)
         is ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked(event.postId)
         is ReaderEvent.PostLoaded -> postLoaded(event.post)
+        is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
+        is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
       }
+    }
+
+    private fun toggleReaderCustomisations(show: Boolean) {
+      _state.update { it.copy(showReaderCustomisations = show) }
     }
 
     private fun postLoaded(post: PostWithMetadata) {
