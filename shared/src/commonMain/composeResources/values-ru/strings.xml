@@ -155,6 +155,7 @@
     <string name="homeViewModeCompact">Компактный</string>
     <string name="twinePremium">Twine premium subscription</string>
     <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
+    <string name="readerCustomisationsTypeface">Typeface</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
