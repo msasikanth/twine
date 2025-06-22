@@ -238,14 +238,16 @@ class AppPresenter(
                 postIndex = config.postIndex,
                 fromScreen = config.fromScreen,
               ),
-              componentContext
-            ) { activePostIndex ->
-              navigation.pop {
-                (screenStack.active.instance as? Screen.Home)
-                  ?.presenter
-                  ?.dispatch(HomeEvent.UpdateVisibleItemIndex(activePostIndex))
-              }
-            }
+              componentContext,
+              { activePostIndex ->
+                navigation.pop {
+                  (screenStack.active.instance as? Screen.Home)
+                    ?.presenter
+                    ?.dispatch(HomeEvent.UpdateVisibleItemIndex(activePostIndex))
+                }
+              },
+              { navigation.pushNew(Config.Paywall) }
+            )
         )
       }
       Config.Search -> {
