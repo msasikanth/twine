@@ -393,11 +393,13 @@ fun TwinePremium(
     )
 
     Column {
-      Text(
-        text = stringResource(Res.string.twinePremium),
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh
-      )
+      if (subscriptionResult != BillingHandler.SubscriptionResult.Subscribed) {
+        Text(
+          text = stringResource(Res.string.twinePremium),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+      }
 
       val subscriptionDescRes =
         if (subscriptionResult == BillingHandler.SubscriptionResult.Subscribed) {
