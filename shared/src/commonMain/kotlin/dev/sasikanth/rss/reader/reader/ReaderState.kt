@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.reader
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -29,6 +30,9 @@ internal data class ReaderState(
   val loadFullArticleMap: Map<String, Boolean>,
   val posts: Flow<PagingData<PostWithMetadata>>,
   val showReaderCustomisations: Boolean,
+  val selectedReaderFont: ReaderFont,
+  val readerFontScaleFactor: Float,
+  val readerLineHeightScaleFactor: Float,
 ) {
 
   fun canLoadFullPost(postId: String): Boolean {
@@ -44,6 +48,9 @@ internal data class ReaderState(
         loadFullArticleMap = emptyMap(),
         posts = emptyFlow(),
         showReaderCustomisations = false,
+        selectedReaderFont = ReaderFont.Golos,
+        readerFontScaleFactor = 1f,
+        readerLineHeightScaleFactor = 1f,
       )
     }
   }

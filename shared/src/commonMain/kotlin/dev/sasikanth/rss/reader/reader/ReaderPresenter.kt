@@ -26,7 +26,9 @@ import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
@@ -39,6 +41,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -53,6 +56,7 @@ class ReaderPresenter(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
   private val allPostsPager: AllPostsPager,
+  private val settingsRepository: SettingsRepository,
   @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
   @Assisted private val goBack: (activePostIndex: Int) -> Unit
@@ -65,6 +69,7 @@ class ReaderPresenter(
         readerScreenArgs = readerScreenArgs,
         rssRepository = rssRepository,
         allPostsPager = allPostsPager,
+        settingsRepository = settingsRepository,
       )
     }
 
@@ -101,6 +106,7 @@ class ReaderPresenter(
     private val rssRepository: RssRepository,
     private val readerScreenArgs: ReaderScreenArgs,
     private val allPostsPager: AllPostsPager,
+    private val settingsRepository: SettingsRepository,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -135,7 +141,12 @@ class ReaderPresenter(
         is ReaderEvent.PostLoaded -> postLoaded(event.post)
         is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
         is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
+        is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
       }
+    }
+
+    private fun updateReaderFont(font: ReaderFont) {
+      coroutineScope.launch { settingsRepository.updateReaderFont(font) }
     }
 
     private fun toggleReaderCustomisations(show: Boolean) {
@@ -183,6 +194,25 @@ class ReaderPresenter(
 
     private fun init() {
       coroutineScope.launch {
+        combine(
+            settingsRepository.readerFontStyle,
+            settingsRepository.readerFontScaleFactor,
+            settingsRepository.readerLineHeightScaleFactor,
+            { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
+              Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+            }
+          )
+          .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
+            _state.update {
+              it.copy(
+                selectedReaderFont = fontStyle,
+                readerFontScaleFactor = fontScaleFactor,
+                readerLineHeightScaleFactor = lineHeightScaleFactor
+              )
+            }
+          }
+          .launchIn(coroutineScope)
+
         if (readerScreenArgs.fromScreen == Home) {
           allPostsPager.allPostsPagingData
             .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }

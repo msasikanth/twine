@@ -16,9 +16,13 @@
 
 package dev.sasikanth.rss.reader.reader.ui
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.animateBounds
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
@@ -45,7 +49,9 @@ import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -87,6 +93,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -127,6 +134,7 @@ import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
@@ -139,16 +147,21 @@ import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.LoraFontFamily
+import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
+import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -168,6 +181,7 @@ import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.cdLoadFullArticle
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.readerCustomisationsTypeface
 import twine.shared.generated.resources.readerSettings
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
@@ -267,8 +281,14 @@ internal fun ReaderScreen(
   ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val fontFamily =
+      when (state.selectedReaderFont) {
+        ReaderFont.Golos -> GolosFontFamily
+        ReaderFont.Lora -> LoraFontFamily
+        ReaderFont.Merriweather -> MerriWeatherFontFamily
+      }
 
-    AppTheme(useDarkTheme = darkTheme) {
+    AppTheme(useDarkTheme = darkTheme, typography = typography(fontFamily = fontFamily)) {
       Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
         topBar = {
@@ -330,13 +350,16 @@ internal fun ReaderScreen(
             BottomBar(
               darkTheme = darkTheme,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
+              showReaderCustomisations = state.showReaderCustomisations,
+              selectedFont = state.selectedReaderFont,
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
               loadFullArticleClick = {
                 presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
               },
-              openReaderViewSettings = { presenter.dispatch(ReaderEvent.ShowReaderCustomisations) }
+              openReaderViewSettings = { presenter.dispatch(ReaderEvent.ShowReaderCustomisations) },
+              onFontChange = { font -> presenter.dispatch(ReaderEvent.UpdateReaderFont(font)) }
             )
           }
         },
@@ -573,143 +596,207 @@ private fun ProgressIndicator() {
   }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun BottomBar(
   darkTheme: Boolean,
   loadFullArticle: Boolean,
+  showReaderCustomisations: Boolean,
+  selectedFont: ReaderFont,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
+  onFontChange: (ReaderFont) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val navBarScrimColor = AppTheme.colorScheme.backdrop
 
-  Box(
-    modifier =
-      Modifier.fillMaxWidth()
-        .wrapContentHeight()
-        .drawBehind {
-          drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-        }
-        .padding(bottom = 16.dp)
-        .then(modifier),
-    contentAlignment = Alignment.Center
-  ) {
-    val (shadowColor1, shadowColor2) =
-      if (darkTheme) {
-        Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
-      } else {
-        Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
-      }
-
-    Row(
+  LookaheadScope {
+    Box(
       modifier =
-        Modifier.padding(bottom = 16.dp, top = 16.dp)
-          .height(IntrinsicSize.Min)
-          .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(50))
-          .border(
-            width = 1.dp,
-            color = AppTheme.colorScheme.bottomSheetBorder,
-            shape = RoundedCornerShape(50)
+        Modifier.fillMaxWidth()
+          .wrapContentHeight()
+          .drawBehind {
+            drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+          }
+          .animateBounds(
+            lookaheadScope = this,
+            boundsTransform = { _, _ ->
+              spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow,
+              )
+            },
+            animateMotionFrameOfReference = true,
           )
-          .dropShadow(
-            shape = RoundedCornerShape(50),
-            offsetY = 16.dp,
-            blur = 32.dp,
-            color = shadowColor1
-          )
-          .dropShadow(
-            shape = RoundedCornerShape(50),
-            offsetY = 4.dp,
-            blur = 8.dp,
-            color = shadowColor2
-          )
-          .padding(horizontal = 12.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
+          .padding(bottom = 16.dp)
+          .then(modifier),
+      contentAlignment = Alignment.Center
     ) {
-      AppTheme(useDarkTheme = true) {
-        val transition = updateTransition(loadFullArticle)
-        val buttonMinWidth by
-          transition.animateDp {
-            if (it) {
-              52.dp
-            } else {
-              56.dp
+      val (shadowColor1, shadowColor2) =
+        if (darkTheme) {
+          Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+        } else {
+          Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+        }
+
+      Box(
+        modifier =
+          Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            .pointerInput(Unit) {}
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(36.dp))
+            .border(
+              width = 1.dp,
+              color = AppTheme.colorScheme.bottomSheetBorder,
+              shape = RoundedCornerShape(36.dp)
+            )
+            .dropShadow(
+              shape = RoundedCornerShape(36.dp),
+              offsetY = 16.dp,
+              blur = 32.dp,
+              color = shadowColor1
+            )
+            .dropShadow(
+              shape = RoundedCornerShape(36.dp),
+              offsetY = 4.dp,
+              blur = 8.dp,
+              color = shadowColor2
+            )
+      ) {
+        AppTheme(useDarkTheme = true) {
+          if (showReaderCustomisations) {
+            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+              Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Icon(
+                  modifier = Modifier.requiredSize(20.dp),
+                  imageVector = TwineIcons.CustomTypography,
+                  contentDescription = null,
+                  tint = AppTheme.colorScheme.onSurface,
+                )
+
+                Text(
+                  text = stringResource(Res.string.readerCustomisationsTypeface),
+                  style = MaterialTheme.typography.titleMedium,
+                  color = AppTheme.colorScheme.onSurface,
+                  modifier = Modifier.padding(16.dp)
+                )
+              }
+
+              LazyRow(
+                contentPadding =
+                  PaddingValues(
+                    start = 28.dp,
+                    top = 8.dp,
+                    end = 28.dp,
+                    bottom = 24.dp,
+                  ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                items(ReaderFont.entries) { fontStyle ->
+                  TypefaceChip(
+                    selected = fontStyle == selectedFont,
+                    label = fontStyle.value,
+                    onClick = { onFontChange(fontStyle) }
+                  )
+                }
+              }
             }
-          }
-        val readerViewToggleWidth by
-          transition.animateDp(
-            transitionSpec = {
-              spring(
-                stiffness = Spring.StiffnessMedium,
-                dampingRatio = Spring.DampingRatioMediumBouncy
+          } else {
+            Row(
+              modifier =
+                Modifier.wrapContentWidth().height(IntrinsicSize.Min).padding(horizontal = 12.dp),
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              val transition = updateTransition(loadFullArticle)
+              val buttonMinWidth by
+                transition.animateDp {
+                  if (it) {
+                    52.dp
+                  } else {
+                    56.dp
+                  }
+                }
+              val readerViewToggleWidth by
+                transition.animateDp(
+                  transitionSpec = {
+                    spring(
+                      stiffness = Spring.StiffnessMedium,
+                      dampingRatio = Spring.DampingRatioMediumBouncy
+                    )
+                  }
+                ) {
+                  if (it) {
+                    88.dp
+                  } else {
+                    72.dp
+                  }
+                }
+              val readerViewToggleVerticalPadding by
+                transition.animateDp(
+                  transitionSpec = {
+                    spring(
+                      stiffness = Spring.StiffnessMedium,
+                      dampingRatio = Spring.DampingRatioMediumBouncy
+                    )
+                  }
+                ) {
+                  if (it) {
+                    8.dp
+                  } else {
+                    12.dp
+                  }
+                }
+              val readerViewToggleBackgroundColor by
+                transition.animateColor {
+                  if (it) {
+                    AppTheme.colorScheme.primaryContainer
+                  } else {
+                    AppTheme.colorScheme.surfaceContainerHighest
+                  }
+                }
+              val readerViewToggleContentColor by
+                transition.animateColor {
+                  if (it) {
+                    AppTheme.colorScheme.onPrimaryContainer
+                  } else {
+                    AppTheme.colorScheme.onSurface
+                  }
+                }
+
+              BottomBarIconButton(
+                modifier = Modifier.padding(vertical = 12.dp),
+                label = stringResource(Res.string.openWebsite),
+                icon = TwineIcons.OpenBrowser,
+                onClick = openInBrowserClick,
+                minWidth = buttonMinWidth
+              )
+
+              BottomBarToggleIconButton(
+                modifier =
+                  Modifier.fillMaxHeight().padding(vertical = readerViewToggleVerticalPadding),
+                label = stringResource(Res.string.cdLoadFullArticle),
+                icon = TwineIcons.ArticleShortcut,
+                onClick = loadFullArticleClick,
+                backgroundColor = readerViewToggleBackgroundColor,
+                contentColor = readerViewToggleContentColor,
+                minWidth = readerViewToggleWidth
+              )
+
+              BottomBarIconButton(
+                modifier = Modifier.padding(vertical = 12.dp),
+                label = stringResource(Res.string.readerSettings),
+                icon = TwineIcons.Settings,
+                onClick = openReaderViewSettings,
+                minWidth = buttonMinWidth
               )
             }
-          ) {
-            if (it) {
-              88.dp
-            } else {
-              72.dp
-            }
           }
-        val readerViewToggleVerticalPadding by
-          transition.animateDp(
-            transitionSpec = {
-              spring(
-                stiffness = Spring.StiffnessMedium,
-                dampingRatio = Spring.DampingRatioMediumBouncy
-              )
-            }
-          ) {
-            if (it) {
-              8.dp
-            } else {
-              12.dp
-            }
-          }
-        val readerViewToggleBackgroundColor by
-          transition.animateColor {
-            if (it) {
-              AppTheme.colorScheme.primaryContainer
-            } else {
-              AppTheme.colorScheme.surfaceContainerHighest
-            }
-          }
-        val readerViewToggleContentColor by
-          transition.animateColor {
-            if (it) {
-              AppTheme.colorScheme.onPrimaryContainer
-            } else {
-              AppTheme.colorScheme.onSurface
-            }
-          }
-
-        BottomBarIconButton(
-          modifier = Modifier.padding(vertical = 12.dp),
-          label = stringResource(Res.string.openWebsite),
-          icon = TwineIcons.OpenBrowser,
-          onClick = openInBrowserClick,
-          minWidth = buttonMinWidth
-        )
-
-        BottomBarToggleIconButton(
-          modifier = Modifier.fillMaxHeight().padding(vertical = readerViewToggleVerticalPadding),
-          label = stringResource(Res.string.cdLoadFullArticle),
-          icon = TwineIcons.ArticleShortcut,
-          onClick = loadFullArticleClick,
-          backgroundColor = readerViewToggleBackgroundColor,
-          contentColor = readerViewToggleContentColor,
-          minWidth = readerViewToggleWidth
-        )
-
-        BottomBarIconButton(
-          modifier = Modifier.padding(vertical = 12.dp),
-          label = stringResource(Res.string.readerSettings),
-          icon = TwineIcons.Settings,
-          onClick = openReaderViewSettings,
-          minWidth = buttonMinWidth
-        )
+        }
       }
     }
   }
@@ -1016,6 +1103,43 @@ private fun PostOptionIconButton(
       tint = iconTint,
       modifier = Modifier.size(20.dp)
     )
+  }
+}
+
+@Composable
+private fun TypefaceChip(
+  selected: Boolean,
+  label: String,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit,
+) {
+  val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
+  val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
+
+  Box(
+    modifier =
+      Modifier.then(modifier)
+        .clip(RoundedCornerShape(50))
+        .clickable { onClick() }
+        .padding(vertical = chipOuterPadding)
+        .background(AppTheme.colorScheme.secondary.copy(alpha = 0.08f), RoundedCornerShape(50))
+        .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
+        .padding(chipPadding)
+  ) {
+    val background by
+      animateColorAsState(if (selected) AppTheme.colorScheme.inverseSurface else Color.Transparent)
+    val contentColor by
+      animateColorAsState(
+        if (selected) AppTheme.colorScheme.inverseOnSurface else AppTheme.colorScheme.onSurface
+      )
+
+    Box(
+      modifier =
+        Modifier.background(background, RoundedCornerShape(50))
+          .padding(horizontal = 20.dp, vertical = 8.dp)
+    ) {
+      Text(text = label, color = contentColor)
+    }
   }
 }
 
