@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.reader
 
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.data.repository.ReaderFont
 
 sealed interface ReaderEvent {
 
@@ -30,4 +31,10 @@ sealed interface ReaderEvent {
   data class LoadFullArticleClicked(val postId: String) : ReaderEvent
 
   data class PostLoaded(val post: PostWithMetadata) : ReaderEvent
+
+  data object ShowReaderCustomisations : ReaderEvent
+
+  data object HideReaderCustomisations : ReaderEvent
+
+  data class UpdateReaderFont(val font: ReaderFont) : ReaderEvent
 }

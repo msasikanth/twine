@@ -19,6 +19,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -42,6 +43,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
   private val homeViewModeKey = stringPreferencesKey("home_view_mode")
+  private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
+  private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
+  private val readerFontStyleKey = stringPreferencesKey("reader_font_style")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -83,6 +87,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val homeViewMode: Flow<HomeViewMode> =
     dataStore.data.map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
+
+  val readerFontScaleFactor: Flow<Float> =
+    dataStore.data.map { preferences -> preferences[readerFontScaleFactorKey] ?: 1f }
+
+  val readerLineHeightScaleFactor: Flow<Float> =
+    dataStore.data.map { preferences -> preferences[readerLineHeightScaleFactorKey] ?: 1f }
+
+  val readerFontStyle: Flow<ReaderFont> =
+    dataStore.data.map { preferences -> mapToReaderFont(preferences[readerFontStyleKey]) }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -136,6 +149,18 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[homeViewModeKey] = value.name }
   }
 
+  suspend fun updateReaderFontScaleFactor(value: Float) {
+    dataStore.edit { preferences -> preferences[readerFontScaleFactorKey] = value }
+  }
+
+  suspend fun updateReaderLineHeightScaleFactor(value: Float) {
+    dataStore.edit { preferences -> preferences[readerLineHeightScaleFactorKey] = value }
+  }
+
+  suspend fun updateReaderFont(value: ReaderFont) {
+    dataStore.edit { preferences -> preferences[readerFontStyleKey] = value.name }
+  }
+
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
     if (pref.isNullOrBlank()) return null
     return AppThemeMode.valueOf(pref)
@@ -170,6 +195,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     if (pref.isNullOrBlank()) return HomeViewMode.Default
     return HomeViewMode.valueOf(pref)
   }
+
+  private fun mapToReaderFont(pref: String?): ReaderFont {
+    if (pref.isNullOrBlank()) return ReaderFont.Golos
+    return try {
+      ReaderFont.valueOf(pref)
+    } catch (e: Exception) {
+      ReaderFont.Golos
+    }
+  }
 }
 
 enum class AppThemeMode {
@@ -201,4 +235,10 @@ enum class HomeViewMode {
   Default,
   Simple,
   Compact
+}
+
+enum class ReaderFont(val value: String) {
+  Golos("Golos Text"),
+  Lora("Lora"),
+  Merriweather("Merriweather")
 }
