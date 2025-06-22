@@ -51,4 +51,6 @@ sealed interface SettingsEvent {
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 
   data object OnPurchasePremiumClick : SettingsEvent
+
+  data object LoadSubscriptionStatus : SettingsEvent
 }
