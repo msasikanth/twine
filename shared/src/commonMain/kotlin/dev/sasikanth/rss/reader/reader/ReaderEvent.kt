@@ -37,4 +37,8 @@ sealed interface ReaderEvent {
   data object HideReaderCustomisations : ReaderEvent
 
   data class UpdateReaderFont(val font: ReaderFont) : ReaderEvent
+
+  data class UpdateFontScaleFactor(val fontScaleFactor: Float) : ReaderEvent
+
+  data class UpdateFontLineHeightFactor(val fontLineHeightFactor: Float) : ReaderEvent
 }

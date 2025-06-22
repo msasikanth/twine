@@ -24,6 +24,8 @@ import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
+import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
@@ -57,11 +59,14 @@ class ReaderPresenter(
   private val rssRepository: RssRepository,
   private val allPostsPager: AllPostsPager,
   private val settingsRepository: SettingsRepository,
+  private val billingHandler: BillingHandler,
   @Assisted private val readerScreenArgs: ReaderScreenArgs,
   @Assisted componentContext: ComponentContext,
-  @Assisted private val goBack: (activePostIndex: Int) -> Unit
+  @Assisted private val goBack: (activePostIndex: Int) -> Unit,
+  @Assisted private val openPaywall: () -> Unit,
 ) : ComponentContext by componentContext {
 
+  private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
@@ -91,14 +96,31 @@ class ReaderPresenter(
   }
 
   fun dispatch(event: ReaderEvent) {
-    when (event) {
-      ReaderEvent.BackClicked -> goBack(state.value.activePostIndex)
-      else -> {
-        // no-op
+    val canForwardDispatch =
+      when (event) {
+        ReaderEvent.BackClicked -> {
+          goBack(state.value.activePostIndex)
+          false
+        }
+        ReaderEvent.ShowReaderCustomisations -> {
+          coroutineScope.launch {
+            val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+            if (!isSubscribed) {
+              openPaywall()
+            } else {
+              presenterInstance.dispatch(event)
+            }
+          }
+          false
+        }
+        else -> {
+          true
+        }
       }
-    }
 
-    presenterInstance.dispatch(event)
+    if (canForwardDispatch) {
+      presenterInstance.dispatch(event)
+    }
   }
 
   private class PresenterInstance(
@@ -142,7 +164,20 @@ class ReaderPresenter(
         is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
         is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
         is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
+        is ReaderEvent.UpdateFontScaleFactor -> updateFontScaleFactor(event.fontScaleFactor)
+        is ReaderEvent.UpdateFontLineHeightFactor ->
+          updateFontLineHeightFactor(event.fontLineHeightFactor)
       }
+    }
+
+    private fun updateFontLineHeightFactor(fontLineHeightFactor: Float) {
+      coroutineScope.launch {
+        settingsRepository.updateReaderLineHeightScaleFactor(fontLineHeightFactor)
+      }
+    }
+
+    private fun updateFontScaleFactor(fontScaleFactor: Float) {
+      coroutineScope.launch { settingsRepository.updateReaderFontScaleFactor(fontScaleFactor) }
     }
 
     private fun updateReaderFont(font: ReaderFont) {
@@ -269,6 +304,7 @@ internal typealias ReaderPresenterFactory =
     args: ReaderScreenArgs,
     ComponentContext,
     goBack: (activePostIndex: Int) -> Unit,
+    openPaywall: () -> Unit,
   ) -> ReaderPresenter
 
 @Serializable
