@@ -36,9 +36,8 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
 
       val entitlementInfo = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]
       val isPremium = entitlementInfo?.isActive
-      val isSandbox = entitlementInfo?.isSandbox
 
-      if (isPremium == true || isSandbox == true) {
+      if (isPremium == true) {
         return SubscriptionResult.Subscribed
       }
     } catch (e: Exception) {

@@ -25,9 +25,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let config = BugsnagConfiguration.loadConfig()
         BugsnagConfigKt.startBugsnag(config: config)
         #endif
-        
-        Purchases.logLevel = .debug
-        Purchases.configure(withAPIKey: "appl_zvvXwxUBoQIpsOIOQeKPJDYzkNh")
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
