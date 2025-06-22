@@ -40,70 +40,74 @@ private val defaultTextStyle =
       textDirection = TextDirection.ContentOrLtr,
     )
 
-internal fun typography(fontFamily: FontFamily) =
+internal fun typography(
+  fontFamily: FontFamily,
+  fontScalingFactor: Float = 1f,
+  lineHeightScalingFactor: Float = 1f,
+) =
   Typography(
     displayLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 57.sp,
-        lineHeight = 64.sp,
+        fontSize = 57.sp * fontScalingFactor,
+        lineHeight = 64.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle,
       ),
     displayMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 45.sp,
-        lineHeight = 52.sp,
+        fontSize = 45.sp * fontScalingFactor,
+        lineHeight = 52.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     displaySmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 36.sp,
-        lineHeight = 44.sp,
+        fontSize = 36.sp * fontScalingFactor,
+        lineHeight = 44.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     headlineLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
+        fontSize = 32.sp * fontScalingFactor,
+        lineHeight = 40.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     headlineMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 28.sp,
-        lineHeight = 36.sp,
+        fontSize = 28.sp * fontScalingFactor,
+        lineHeight = 36.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     headlineSmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
+        fontSize = 24.sp * fontScalingFactor,
+        lineHeight = 32.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     titleLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
+        fontSize = 22.sp * fontScalingFactor,
+        lineHeight = 28.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle
       ),
     titleMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 16.sp * fontScalingFactor,
+        lineHeight = 24.sp * lineHeightScalingFactor,
         letterSpacing = 0.15.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -111,8 +115,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 14.sp * fontScalingFactor,
+        lineHeight = 20.sp * lineHeightScalingFactor,
         letterSpacing = 0.1.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -120,8 +124,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 16.sp * fontScalingFactor,
+        lineHeight = 24.sp * lineHeightScalingFactor,
         letterSpacing = 0.15.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -129,8 +133,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 14.sp * fontScalingFactor,
+        lineHeight = 20.sp * lineHeightScalingFactor,
         letterSpacing = 0.25.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -138,8 +142,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
+        fontSize = 12.sp * fontScalingFactor,
+        lineHeight = 16.sp * lineHeightScalingFactor,
         letterSpacing = 0.4.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -147,8 +151,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
+        fontSize = 14.sp * fontScalingFactor,
+        lineHeight = 20.sp * lineHeightScalingFactor,
         letterSpacing = 0.1.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -156,8 +160,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
+        fontSize = 12.sp * fontScalingFactor,
+        lineHeight = 16.sp * lineHeightScalingFactor,
         letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
@@ -165,8 +169,8 @@ internal fun typography(fontFamily: FontFamily) =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
+        fontSize = 11.sp * fontScalingFactor,
+        lineHeight = 16.sp * lineHeightScalingFactor,
         letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
