@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.settings
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
@@ -76,11 +77,16 @@ class SettingsPresenter(
         appInfo = appInfo,
         rssRepository = rssRepository,
         settingsRepository = settingsRepository,
-        opmlManager = opmlManager
+        opmlManager = opmlManager,
+        billingHandler = billingHandler,
       )
     }
 
   internal val state = presenterInstance.state
+
+  init {
+    lifecycle.doOnCreate { dispatch(SettingsEvent.LoadSubscriptionStatus) }
+  }
 
   fun dispatch(event: SettingsEvent) {
     val canForwardDispatch =
@@ -128,6 +134,7 @@ class SettingsPresenter(
     rssRepository: RssRepository,
     private val settingsRepository: SettingsRepository,
     private val opmlManager: OpmlManager,
+    private val billingHandler: BillingHandler,
   ) : InstanceKeeper.Instance {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -219,6 +226,14 @@ class SettingsPresenter(
           // no-op
         }
         is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
+        is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
+      }
+    }
+
+    private fun loadSubscriptionStatus() {
+      coroutineScope.launch {
+        val subscriptionResult = billingHandler.customerResult()
+        _state.update { it.copy(subscriptionResult = subscriptionResult) }
       }
     }
 

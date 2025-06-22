@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
@@ -137,6 +138,7 @@ import twine.shared.generated.resources.showFeedFavIconDesc
 import twine.shared.generated.resources.showFeedFavIconTitle
 import twine.shared.generated.resources.twinePremium
 import twine.shared.generated.resources.twinePremiumDesc
+import twine.shared.generated.resources.twinePremiumSubscribedDesc
 
 @Composable
 internal fun SettingsScreen(
@@ -190,6 +192,7 @@ internal fun SettingsScreen(
         ) {
           item {
             TwinePremium(
+              subscriptionResult = state.subscriptionResult,
               onClick = { settingsPresenter.dispatch(SettingsEvent.OnPurchasePremiumClick) }
             )
           }
@@ -366,10 +369,19 @@ internal fun SettingsScreen(
 }
 
 @Composable
-fun TwinePremium(modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun TwinePremium(
+  subscriptionResult: BillingHandler.SubscriptionResult?,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit
+) {
   Row(
     modifier =
-      modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
+      modifier
+        .fillMaxWidth()
+        .clickable(enabled = subscriptionResult != BillingHandler.SubscriptionResult.Subscribed) {
+          onClick()
+        }
+        .padding(horizontal = 24.dp, vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
@@ -387,8 +399,14 @@ fun TwinePremium(modifier: Modifier = Modifier, onClick: () -> Unit) {
         color = AppTheme.colorScheme.textEmphasisHigh
       )
 
+      val subscriptionDescRes =
+        if (subscriptionResult == BillingHandler.SubscriptionResult.Subscribed) {
+          Res.string.twinePremiumSubscribedDesc
+        } else {
+          Res.string.twinePremiumDesc
+        }
       Text(
-        text = stringResource(Res.string.twinePremiumDesc),
+        text = stringResource(subscriptionDescRes),
         style = MaterialTheme.typography.labelLarge,
         color = AppTheme.colorScheme.textEmphasisMed
       )
