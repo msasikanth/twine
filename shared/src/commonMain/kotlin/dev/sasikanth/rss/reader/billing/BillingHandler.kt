@@ -34,8 +34,11 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
           purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.NOT_STALE_CACHED_OR_CURRENT)
         }
 
-      val isPremium = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]?.isActive
-      if (isPremium == true) {
+      val entitlementInfo = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]
+      val isPremium = entitlementInfo?.isActive
+      val isSandbox = entitlementInfo?.isSandbox
+
+      if (isPremium == true || isSandbox == true) {
         return SubscriptionResult.Subscribed
       }
     } catch (e: Exception) {
