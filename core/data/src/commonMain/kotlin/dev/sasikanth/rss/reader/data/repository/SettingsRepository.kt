@@ -19,6 +19,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -42,6 +43,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
   private val homeViewModeKey = stringPreferencesKey("home_view_mode")
+  private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
+  private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -83,6 +86,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val homeViewMode: Flow<HomeViewMode> =
     dataStore.data.map { preferences -> mapToHomeViewMode(preferences[homeViewModeKey]) }
+
+  val readerFontScaleFactor: Flow<Float> =
+    dataStore.data.map { preferences -> preferences[readerFontScaleFactorKey] ?: 1f }
+
+  val readerLineHeightScaleFactor: Flow<Float> =
+    dataStore.data.map { preferences -> preferences[readerLineHeightScaleFactorKey] ?: 1f }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -134,6 +143,14 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updateHomeViewMode(value: HomeViewMode) {
     dataStore.edit { preferences -> preferences[homeViewModeKey] = value.name }
+  }
+
+  suspend fun updateReaderFontScaleFactor(value: Float) {
+    dataStore.edit { preferences -> preferences[readerFontScaleFactorKey] = value }
+  }
+
+  suspend fun updateReaderLineHeightScaleFactor(value: Float) {
+    dataStore.edit { preferences -> preferences[readerLineHeightScaleFactorKey] = value }
   }
 
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
