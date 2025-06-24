@@ -153,6 +153,10 @@
     <string name="homeViewModeDefault">默认</string>
     <string name="homeViewModeSimple">简单</string>
     <string name="homeViewModeCompact">紧凑</string>
+    <string name="twinePremium">Twine premium subscription</string>
+    <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
+    <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
+    <string name="readerCustomisationsTypeface">Typeface</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d results</item>
