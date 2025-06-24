@@ -13,7 +13,7 @@
     <string name="feedEntryTitleHint">Titel (optional)</string>
     <string name="share">Teilen</string>
     <string name="scrollToTop">Nach oben scrollen</string>
-    <string name="newArticles">New articles</string>
+    <string name="newArticles">Neue Beiträge</string>
     <string name="noFeeds">Keine Feeds vorhanden!</string>
     <string name="swipeUpGetStarted">Wischen Sie nach oben, um zu beginnen</string>
     <string name="feedNameHint">Feed-Name</string>
@@ -81,7 +81,7 @@
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
-    <string name="markAllAsRead">Mark as read</string>
+    <string name="markAllAsRead">Als gelesen markieren</string>
     <string name="openWebsite">Website öffnen</string>
     <string name="noNewPosts">Keine neuen Beiträge</string>
     <string name="noNewPostsSubtitle">Schauen Sie später wieder vorbei oder ziehen Sie nach unten, um jetzt nach neuen Inhalten zu suchen</string>
@@ -153,6 +153,10 @@
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
+    <string name="twinePremium">Twine premium subscription</string>
+    <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
+    <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
+    <string name="readerCustomisationsTypeface">Typeface</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
