@@ -86,6 +86,7 @@ import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
+import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
@@ -175,6 +176,10 @@ internal fun ReaderScreen(
           )
         }
       }
+  }
+
+  BackHandler(backHandler = presenter.backHandler, isEnabled = state.showReaderCustomisations) {
+    presenter.dispatch(ReaderEvent.HideReaderCustomisations)
   }
 
   CompositionLocalProvider(
