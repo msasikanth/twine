@@ -40,7 +40,7 @@ private class ReaderJSInterface(private val contentLoaded: (String) -> Unit) {
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-actual fun ReaderWebView(
+internal actual fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,
