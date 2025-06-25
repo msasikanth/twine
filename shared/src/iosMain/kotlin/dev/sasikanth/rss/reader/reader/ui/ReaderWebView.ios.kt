@@ -44,7 +44,7 @@ import platform.darwin.NSObject
 
 @OptIn(ExperimentalForeignApi::class)
 @Composable
-actual fun ReaderWebView(
+internal actual fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,

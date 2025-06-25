@@ -20,10 +20,8 @@ import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -79,21 +77,6 @@ class ReaderPresenter(
     }
 
   internal val state = presenterInstance.state
-
-  private val backCallback = BackCallback {
-    if (state.value.showReaderCustomisations) {
-      dispatch(ReaderEvent.HideReaderCustomisations)
-    } else {
-      dispatch(ReaderEvent.BackClicked)
-    }
-  }
-
-  init {
-    lifecycle.doOnCreate {
-      backHandler.register(backCallback)
-      backCallback.isEnabled = true
-    }
-  }
 
   fun dispatch(event: ReaderEvent) {
     val canForwardDispatch =
