@@ -20,26 +20,32 @@ import twine.shared.generated.resources.Res
 
 object ReaderHTML {
 
-  internal suspend fun create(): String {
-    val mercuryJS = readFile("mercury.web.js")
-    val readabilityJS = readFile("readability.bundle.min.js")
+  private var readerHTML: String? = null
+
+  internal suspend fun createOrGet(): String {
+    val readabilityJS = readFile("readability.js")
     val turndownJS = readFile("turndown.js")
     val readerJS = readFile("main.js")
 
-    // language=HTML
-    @Suppress("HtmlRequiredLangAttribute", "HtmlRequiredTitleElement")
-    return """
-    <html dir='auto'>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-      <script>$turndownJS</script>
-      <script>$readabilityJS</script>
-      <script>$readerJS</script>
-    </head>
-    <body />
-    </html>
+    if (readerHTML.isNullOrBlank()) {
+      // language=HTML
+      @Suppress("HtmlRequiredLangAttribute", "HtmlRequiredTitleElement")
+      readerHTML =
         """
-      .trimIndent()
+        <html dir='auto'>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+          <script>$readabilityJS</script>
+          <script>$turndownJS</script>
+          <script>$readerJS</script>
+        </head>
+        <body />
+        </html>
+        """
+          .trimIndent()
+    }
+
+    return readerHTML!!
   }
 
   private suspend fun readFile(fileName: String): String {
