@@ -21,8 +21,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyRow
@@ -102,14 +104,14 @@ internal fun ReaderCustomisationsContent(
       }
     }
 
+    Spacer(Modifier.requiredHeight(8.dp))
+
     FontScaleStepper(
-      modifier = Modifier.padding(top = 8.dp),
       defaultValue = fontScaleFactor,
       onValueChange = { onFontScaleFactorChange(it) }
     )
 
     FontLineHeightStepper(
-      modifier = Modifier.padding(top = 8.dp),
       defaultValue = fontLineHeightFactor,
       onValueChange = { onFontLineHeightFactorChange(it) }
     )
