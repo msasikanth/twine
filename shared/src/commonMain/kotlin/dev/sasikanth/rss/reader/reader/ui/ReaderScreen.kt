@@ -158,6 +158,7 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
+import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
@@ -283,6 +284,7 @@ internal fun ReaderScreen(
         ReaderFont.Golos -> GolosFontFamily
         ReaderFont.Lora -> LoraFontFamily
         ReaderFont.Merriweather -> MerriWeatherFontFamily
+        ReaderFont.RobotoSerif -> RobotoSerifFontFamily
       }
     val typography =
       typography(
