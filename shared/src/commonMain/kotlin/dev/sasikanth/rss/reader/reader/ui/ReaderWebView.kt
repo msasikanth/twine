@@ -19,9 +19,9 @@ package dev.sasikanth.rss.reader.reader.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-/** Need this to parse the HTML content of the post using Postlight parser using JS */
+/** Need this to parse the HTML content of the post using a custom reader parser in JS */
 @Composable
-expect fun ReaderWebView(
+internal expect fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,

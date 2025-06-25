@@ -66,7 +66,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.readerCustomisationsTypeface
 
 @Composable
-internal fun ReaderCustomisationsContent(
+internal fun ReaderCustomizationsContent(
   selectedFont: ReaderFont,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
