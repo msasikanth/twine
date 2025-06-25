@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -76,7 +77,12 @@ internal fun ReaderCustomisationsContent(
   Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
     CustomisationsTypefaceHeader()
 
+    val activeTypefaceIndex = ReaderFont.entries.indexOf(selectedFont)
+    val typefaceListState =
+      rememberLazyListState(initialFirstVisibleItemIndex = activeTypefaceIndex)
+
     LazyRow(
+      state = typefaceListState,
       contentPadding =
         PaddingValues(
           start = 28.dp,
