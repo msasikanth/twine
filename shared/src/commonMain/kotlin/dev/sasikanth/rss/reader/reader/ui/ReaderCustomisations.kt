@@ -44,12 +44,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.*
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.LoraFontFamily
+import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
+import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -79,9 +85,18 @@ internal fun ReaderCustomisationsContent(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       items(ReaderFont.entries) { fontStyle ->
+        val fontFamily =
+          when (fontStyle) {
+            Golos -> GolosFontFamily
+            Lora -> LoraFontFamily
+            Merriweather -> MerriWeatherFontFamily
+            RobotoSerif -> RobotoSerifFontFamily
+          }
+
         TypefaceChip(
           selected = fontStyle == selectedFont,
           label = fontStyle.value,
+          fontFamily = fontFamily,
           onClick = { onFontChange(fontStyle) }
         )
       }
@@ -245,6 +260,7 @@ private fun TypefaceChip(
   label: String,
   modifier: Modifier = Modifier,
   onClick: () -> Unit,
+  fontFamily: FontFamily = FontFamily.Default,
 ) {
   val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
   val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
@@ -271,7 +287,7 @@ private fun TypefaceChip(
         Modifier.background(background, RoundedCornerShape(50))
           .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-      Text(text = label, color = contentColor)
+      Text(text = label, color = contentColor, fontFamily = fontFamily)
     }
   }
 }
