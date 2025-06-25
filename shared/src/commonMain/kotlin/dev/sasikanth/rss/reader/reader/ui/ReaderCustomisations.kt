@@ -21,12 +21,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,12 +47,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.*
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
+import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.LoraFontFamily
+import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
+import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -67,7 +77,12 @@ internal fun ReaderCustomisationsContent(
   Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
     CustomisationsTypefaceHeader()
 
+    val activeTypefaceIndex = ReaderFont.entries.indexOf(selectedFont)
+    val typefaceListState =
+      rememberLazyListState(initialFirstVisibleItemIndex = activeTypefaceIndex)
+
     LazyRow(
+      state = typefaceListState,
       contentPadding =
         PaddingValues(
           start = 28.dp,
@@ -79,22 +94,32 @@ internal fun ReaderCustomisationsContent(
       verticalAlignment = Alignment.CenterVertically,
     ) {
       items(ReaderFont.entries) { fontStyle ->
+        val fontFamily =
+          when (fontStyle) {
+            ComicNeue -> ComicNeueFontFamily
+            Golos -> GolosFontFamily
+            Lora -> LoraFontFamily
+            Merriweather -> MerriWeatherFontFamily
+            RobotoSerif -> RobotoSerifFontFamily
+          }
+
         TypefaceChip(
           selected = fontStyle == selectedFont,
           label = fontStyle.value,
+          fontFamily = fontFamily,
           onClick = { onFontChange(fontStyle) }
         )
       }
     }
 
+    Spacer(Modifier.requiredHeight(8.dp))
+
     FontScaleStepper(
-      modifier = Modifier.padding(top = 8.dp),
       defaultValue = fontScaleFactor,
       onValueChange = { onFontScaleFactorChange(it) }
     )
 
     FontLineHeightStepper(
-      modifier = Modifier.padding(top = 8.dp),
       defaultValue = fontLineHeightFactor,
       onValueChange = { onFontLineHeightFactorChange(it) }
     )
@@ -245,6 +270,7 @@ private fun TypefaceChip(
   label: String,
   modifier: Modifier = Modifier,
   onClick: () -> Unit,
+  fontFamily: FontFamily = FontFamily.Default,
 ) {
   val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
   val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
@@ -271,7 +297,7 @@ private fun TypefaceChip(
         Modifier.background(background, RoundedCornerShape(50))
           .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
-      Text(text = label, color = contentColor)
+      Text(text = label, color = contentColor, fontFamily = fontFamily)
     }
   }
 }

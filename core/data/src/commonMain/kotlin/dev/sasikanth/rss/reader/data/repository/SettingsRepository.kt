@@ -238,7 +238,9 @@ enum class HomeViewMode {
 }
 
 enum class ReaderFont(val value: String) {
+  ComicNeue("Comic Neue"),
   Golos("Golos Text"),
   Lora("Lora"),
-  Merriweather("Merriweather")
+  Merriweather("Merriweather"),
+  RobotoSerif("Roboto Serif")
 }

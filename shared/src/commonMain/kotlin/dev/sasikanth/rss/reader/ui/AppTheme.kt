@@ -26,19 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import org.jetbrains.compose.resources.Font
-import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.golos_bold
-import twine.shared.generated.resources.golos_medium
-import twine.shared.generated.resources.golos_regular
-import twine.shared.generated.resources.lora_bold
-import twine.shared.generated.resources.lora_medium
-import twine.shared.generated.resources.lora_regular
-import twine.shared.generated.resources.merriweather_bold
-import twine.shared.generated.resources.merriweather_medium
-import twine.shared.generated.resources.merriweather_regular
 
 @Composable
 internal fun AppTheme(
@@ -95,33 +82,6 @@ internal object AppTheme {
   val colorScheme: AppColorScheme
     @Composable @ReadOnlyComposable get() = LocalAppColorScheme.current
 }
-
-internal val GolosFontFamily: FontFamily
-  @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.golos_regular, weight = FontWeight.Normal),
-      Font(Res.font.golos_medium, weight = FontWeight.Medium),
-      Font(Res.font.golos_bold, weight = FontWeight.Bold),
-    )
-
-internal val LoraFontFamily: FontFamily
-  @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.lora_regular, weight = FontWeight.Normal),
-      Font(Res.font.lora_medium, weight = FontWeight.Medium),
-      Font(Res.font.lora_bold, weight = FontWeight.Bold),
-    )
-
-internal val MerriWeatherFontFamily: FontFamily
-  @Composable
-  get() =
-    FontFamily(
-      Font(Res.font.merriweather_regular, weight = FontWeight.Normal),
-      Font(Res.font.merriweather_medium, weight = FontWeight.Medium),
-      Font(Res.font.merriweather_bold, weight = FontWeight.Bold),
-    )
 
 internal val DefaultRippleAlpha =
   RippleAlpha(

@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
@@ -151,12 +152,14 @@ import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
+import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
@@ -279,9 +282,11 @@ internal fun ReaderScreen(
     val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val fontFamily =
       when (state.selectedReaderFont) {
+        ReaderFont.ComicNeue -> ComicNeueFontFamily
         ReaderFont.Golos -> GolosFontFamily
         ReaderFont.Lora -> LoraFontFamily
         ReaderFont.Merriweather -> MerriWeatherFontFamily
+        ReaderFont.RobotoSerif -> RobotoSerifFontFamily
       }
     val typography =
       typography(
@@ -637,7 +642,7 @@ private fun BottomBar(
             lookaheadScope = this,
             boundsTransform = { _, _ ->
               spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
+                dampingRatio = Spring.DampingRatioLowBouncy,
                 stiffness = Spring.StiffnessMediumLow,
               )
             },
@@ -679,6 +684,8 @@ private fun BottomBar(
       ) {
         AppTheme(useDarkTheme = true) {
           AnimatedContent(
+            modifier = Modifier.requiredHeightIn(min = 64.dp),
+            contentAlignment = Alignment.BottomCenter,
             targetState = showReaderCustomisations,
           ) { targetState ->
             if (targetState) {
