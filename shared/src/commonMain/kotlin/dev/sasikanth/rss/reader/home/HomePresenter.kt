@@ -19,10 +19,8 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material3.SheetValue
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.childContext
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.doOnCreate
 import com.arkivanov.essenty.lifecycle.doOnResume
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -107,18 +105,6 @@ class HomePresenter(
       openPaywall,
     )
 
-  private val backCallback = BackCallback {
-    if (feedsPresenter.state.value.isInMultiSelectMode) {
-      feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
-      return@BackCallback
-    }
-
-    if (state.value.feedsSheetState == SheetValue.Expanded) {
-      dispatch(HomeEvent.BackClicked)
-      return@BackCallback
-    }
-  }
-
   private val presenterInstance =
     instanceKeeper.getOrCreate {
       PresenterInstance(
@@ -137,19 +123,11 @@ class HomePresenter(
   internal val effects = presenterInstance.effects.asSharedFlow()
 
   init {
-    lifecycle.doOnCreate {
-      backHandler.register(backCallback)
-      backCallback.isEnabled = false
-    }
-
     lifecycle.doOnResume { dispatch(HomeEvent.UpdateDate) }
   }
 
   fun dispatch(event: HomeEvent) {
     when (event) {
-      is HomeEvent.FeedsSheetStateChanged -> {
-        backCallback.isEnabled = event.feedsSheetState == SheetValue.Expanded
-      }
       is HomeEvent.SearchClicked -> openSearch()
       is HomeEvent.BookmarksClicked -> openBookmarks()
       is HomeEvent.SettingsClicked -> openSettings()

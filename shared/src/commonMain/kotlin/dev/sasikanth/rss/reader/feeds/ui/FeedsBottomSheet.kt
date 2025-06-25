@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
 import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
+import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.inverse
 
 @Composable
@@ -45,6 +46,10 @@ internal fun FeedsBottomSheet(
         FeedsEffect.SelectedFeedChanged -> selectedFeedChanged()
       }
     }
+  }
+
+  BackHandler(backHandler = feedsPresenter.backHandler, isEnabled = state.isInMultiSelectMode) {
+    feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
   Column(modifier = Modifier.fillMaxSize()) {

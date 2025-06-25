@@ -81,6 +81,7 @@ import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.collections.immutable.ImmutableList
@@ -156,6 +157,12 @@ internal fun HomeScreen(
       }
     }
   }
+
+  BackHandler(
+    backHandler = homePresenter.backHandler,
+    isEnabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
+    onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } }
+  )
 
   AppTheme(useDarkTheme = true) {
     Scaffold(modifier) { scaffoldPadding ->
