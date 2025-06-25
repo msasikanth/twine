@@ -1,8 +1,7 @@
 [versions]
-kotlin = "2.1.20"
+kotlin = "2.2.0"
 android_gradle_plugin = "8.10.0"
-compose = "1.8.0"
-compose-material = "1.8.0-alpha03"
+compose = "1.8.2"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "35"
@@ -31,8 +30,8 @@ androidx_annotation = "1.9.1"
 coil = "3.2.0"
 spotless = "7.0.3"
 ktfmt = "0.44"
-kotlininject = "0.7.2"
-ksp = "2.1.20-1.0.31"
+kotlininject = "0.8.0"
+ksp = "2.2.0-2.0.2"
 material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.2.3"
 sqliteAndroid = "3.45.0"
@@ -63,8 +62,8 @@ compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.re
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
 compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
-compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose-material" }
-compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-material" }
+compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
+compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_material_icons_extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose_material_icons_extended" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
