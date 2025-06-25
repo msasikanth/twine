@@ -23,32 +23,36 @@ import com.arkivanov.decompose.ExperimentalDecomposeApi
 import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.PredictiveBackGestureOverlay
 import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.app.App
-import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 import platform.UIKit.UIViewController
 
-typealias HomeViewController = (backDispatcher: BackDispatcher) -> UIViewController
-
 @OptIn(ExperimentalDecomposeApi::class)
 @Inject
-fun HomeViewController(app: App, @Assisted backDispatcher: BackDispatcher): UIViewController {
-  return ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
-    PredictiveBackGestureOverlay(
-      backDispatcher = backDispatcher,
-      backIcon = null,
-      modifier = Modifier.fillMaxSize()
-    ) {
-      app(
-        {
-          // no-op
-        },
-        {
-          // no-op
-        },
-        {
-          // no-op
-        }
-      )
+class HomeViewController(
+  private val app: App,
+  private val backDispatcher: BackDispatcher,
+) {
+
+  @Suppress("unused")
+  fun viewController(): UIViewController {
+    return ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
+      PredictiveBackGestureOverlay(
+        backDispatcher = backDispatcher,
+        backIcon = null,
+        modifier = Modifier.fillMaxSize()
+      ) {
+        app(
+          {
+            // no-op
+          },
+          {
+            // no-op
+          },
+          {
+            // no-op
+          }
+        )
+      }
     }
   }
 }
