@@ -100,7 +100,8 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   let doc;
   try {
     const parser = new DOMParser();
-    doc = parser.parseFromString(sanitizedHtml, 'text/html');
+    const htmlWithBase = `<head><base href="${link}"></head>${sanitizedHtml}`;
+    doc = parser.parseFromString(htmlWithBase, 'text/html');
   } catch (error) {
     console.error("Error parsing HTML:", error);
     return null;
@@ -110,10 +111,10 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   processIFrames(doc);
   removeFirstImageTagByUrl(doc, bannerImage);
 
-  const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
+//  const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
 
-  const parseResult = await parse(doc.body.innerHTML, link);
+  const article = new Readability(doc).parse();
   const turndownService = new TurndownService()
-  const markdown = turndownService.turndown(parseResult.content)
-  return JSON.stringify({ content: markdown, excerpt: parseResult.excerpt });
+  const markdown = turndownService.turndown(article.content)
+  return JSON.stringify({ content: markdown, excerpt: article.excerpt });
 }

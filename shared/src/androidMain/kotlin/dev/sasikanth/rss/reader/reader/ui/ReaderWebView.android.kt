@@ -22,16 +22,21 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import dev.sasikanth.rss.reader.utils.asJSString
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private class ReaderJSInterface(private val contentLoaded: (String) -> Unit) {
+  @JavascriptInterface
+  fun onContentParsed(result: String) {
+    contentLoaded(result)
+  }
+}
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -43,16 +48,7 @@ actual fun ReaderWebView(
   contentLoaded: (String) -> Unit,
   modifier: Modifier,
 ) {
-  var html by remember(link) { mutableStateOf("") }
-
-  LaunchedEffect(link) { html = withContext(Dispatchers.Default) { ReaderHTML.create() } }
-
-  class ReaderJSInterface {
-    @JavascriptInterface
-    fun onContentParsed(result: String) {
-      contentLoaded(result)
-    }
-  }
+  val coroutineScope = rememberCoroutineScope()
 
   val webViewClient =
     remember(link, fetchFullArticle) {
@@ -79,14 +75,18 @@ actual fun ReaderWebView(
       WebView(context).apply {
         settings.javaScriptEnabled = true
         setBackgroundColor(Color.TRANSPARENT)
-        addJavascriptInterface(ReaderJSInterface(), "ReaderJSInterface")
+        addJavascriptInterface(
+          ReaderJSInterface(contentLoaded = contentLoaded),
+          "ReaderJSInterface"
+        )
       }
     },
     modifier = modifier,
     update = { webView ->
       webView.webViewClient = webViewClient
 
-      if (html.isNotBlank()) {
+      coroutineScope.launch {
+        val html = withContext(Dispatchers.Default) { ReaderHTML.createOrGet() }
         webView.loadDataWithBaseURL(
           /* baseUrl = */ link ?: "",
           /* data = */ html,

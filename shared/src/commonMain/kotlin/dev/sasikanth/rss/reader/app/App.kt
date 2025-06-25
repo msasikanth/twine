@@ -60,7 +60,6 @@ import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
-import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import me.tatarka.inject.annotations.Assisted
@@ -83,7 +82,6 @@ fun App(
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
   seedColorExtractor: SeedColorExtractor,
-  dispatchersProvider: DispatchersProvider,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,

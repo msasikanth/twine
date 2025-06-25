@@ -17,11 +17,8 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
@@ -29,6 +26,7 @@ import dev.sasikanth.rss.reader.utils.asJSString
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.readValue
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import platform.CoreGraphics.CGRectZero
 import platform.Foundation.NSString
@@ -54,10 +52,7 @@ actual fun ReaderWebView(
   contentLoaded: (String) -> Unit,
   modifier: Modifier,
 ) {
-  var html by remember(link) { mutableStateOf("") }
-
-  LaunchedEffect(link) { html = withContext(Dispatchers.Default) { ReaderHTML.create() } }
-
+  val coroutineScope = rememberCoroutineScope()
   val navigationDelegate =
     remember(link, fetchFullArticle) {
       @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -119,8 +114,9 @@ actual fun ReaderWebView(
     update = {
       it.setNavigationDelegate(navigationDelegate)
 
-      if (html.isNotBlank()) {
-        it.loadHTMLString(html, NSURL.URLWithString(link ?: ""))
+      coroutineScope.launch {
+        val html = withContext(Dispatchers.Default) { ReaderHTML.createOrGet() }
+        it.loadHTMLString(string = html, baseURL = NSURL.URLWithString(link ?: ""))
       }
     },
     onRelease = { it.navigationDelegate = null },
