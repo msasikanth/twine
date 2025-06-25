@@ -54,6 +54,7 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.*
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
@@ -89,6 +90,7 @@ internal fun ReaderCustomisationsContent(
       items(ReaderFont.entries) { fontStyle ->
         val fontFamily =
           when (fontStyle) {
+            ComicNeue -> ComicNeueFontFamily
             Golos -> GolosFontFamily
             Lora -> LoraFontFamily
             Merriweather -> MerriWeatherFontFamily

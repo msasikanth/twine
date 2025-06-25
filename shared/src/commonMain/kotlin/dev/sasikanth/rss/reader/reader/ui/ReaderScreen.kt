@@ -152,6 +152,7 @@ import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
@@ -281,6 +282,7 @@ internal fun ReaderScreen(
     val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val fontFamily =
       when (state.selectedReaderFont) {
+        ReaderFont.ComicNeue -> ComicNeueFontFamily
         ReaderFont.Golos -> GolosFontFamily
         ReaderFont.Lora -> LoraFontFamily
         ReaderFont.Merriweather -> MerriWeatherFontFamily

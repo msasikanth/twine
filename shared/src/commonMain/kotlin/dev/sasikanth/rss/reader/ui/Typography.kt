@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import dev.sasikanth.rss.reader.utils.toSp
 import org.jetbrains.compose.resources.Font
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.comic_neue_bold
+import twine.shared.generated.resources.comic_neue_regular
 import twine.shared.generated.resources.golos_bold
 import twine.shared.generated.resources.golos_medium
 import twine.shared.generated.resources.golos_regular
@@ -194,6 +196,15 @@ internal val Typography.bottomSheetItemLabel
   @Composable
   @ReadOnlyComposable
   get() = labelSmall.copy(fontSize = 10.dp.toSp(), lineHeight = 24.dp.toSp())
+
+internal val ComicNeueFontFamily: FontFamily
+  @Composable
+  get() =
+    FontFamily(
+      Font(Res.font.comic_neue_regular, weight = FontWeight.Normal),
+      Font(Res.font.comic_neue_regular, weight = FontWeight.Medium),
+      Font(Res.font.comic_neue_bold, weight = FontWeight.Bold),
+    )
 
 internal val GolosFontFamily: FontFamily
   @Composable
