@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.requiredWidth
@@ -637,7 +638,7 @@ private fun BottomBar(
             lookaheadScope = this,
             boundsTransform = { _, _ ->
               spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
+                dampingRatio = Spring.DampingRatioLowBouncy,
                 stiffness = Spring.StiffnessMediumLow,
               )
             },
@@ -679,6 +680,8 @@ private fun BottomBar(
       ) {
         AppTheme(useDarkTheme = true) {
           AnimatedContent(
+            modifier = Modifier.requiredHeightIn(min = 64.dp),
+            contentAlignment = Alignment.BottomCenter,
             targetState = showReaderCustomisations,
           ) { targetState ->
             if (targetState) {
