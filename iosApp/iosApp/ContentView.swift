@@ -13,7 +13,7 @@ struct ComposeView: UIViewControllerRepresentable {
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
-        return homeViewControllerComponent.homeViewControllerFactory(backDispatcher)
+        return homeViewControllerComponent.homeViewController.viewController()
 	}
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {

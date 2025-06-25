@@ -16,7 +16,8 @@ struct iOSApp: App {
         let backDispatcher = BackDispatcherKt.BackDispatcher()
         let homeViewControllerComponent = InjectHomeViewControllerComponent(
             componentContext: DefaultComponentContext(lifecycle: rootHolder.lifecycle, stateKeeper: nil, instanceKeeper: nil, backHandler: backDispatcher),
-            applicationComponent: appDelegate.applicationComponent
+            applicationComponent: appDelegate.applicationComponent,
+            backDispatcher: backDispatcher
         )
 
 		WindowGroup {
