@@ -168,6 +168,26 @@ class RssRepository(
       .executeAsOneOrNull()
   }
 
+  suspend fun allPostsCount(
+    activeSourceIds: List<String>,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .allPostsCount(
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
+        )
+        .executeAsOneOrNull()
+        ?: 0L
+    }
+  }
+
   fun allPosts(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
