@@ -215,7 +215,7 @@ internal fun BottomSheetExpandedContent(
         }
       }
     },
-    containerColor = AppTheme.colorScheme.tintedBackground
+    containerColor = Color.Transparent,
   ) { padding ->
     val allSources = state.sources.collectAsLazyPagingItems()
     val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
