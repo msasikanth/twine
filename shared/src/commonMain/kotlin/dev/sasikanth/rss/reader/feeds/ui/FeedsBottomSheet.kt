@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.feeds.ui
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -195,7 +196,8 @@ internal fun FeedsBottomSheet(
 
         BottomSheetCollapsedContent(
           modifier =
-            Modifier.layout { measurable, constraints ->
+            Modifier.padding(bottom = 24.dp)
+              .layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 val height =
                   lerp(
@@ -212,7 +214,7 @@ internal fun FeedsBottomSheet(
           numberOfFeeds = state.numberOfFeeds,
           activeSource = state.activeSource,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          homeItemBackgroundColor = collapsedContentBackgroundColor,
+          homeItemBackgroundColor = AppTheme.colorScheme.surfaceContainerLow,
           homeItemShadowColors = homeItemShadowColors,
           onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnSourceClick(feed)) },
           onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
