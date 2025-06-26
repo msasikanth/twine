@@ -215,7 +215,7 @@ internal fun BottomSheetExpandedContent(
         }
       }
     },
-    containerColor = AppTheme.colorScheme.tintedBackground
+    containerColor = Color.Transparent,
   ) { padding ->
     val allSources = state.sources.collectAsLazyPagingItems()
     val searchResults = state.feedsSearchResults.collectAsLazyPagingItems()
@@ -244,7 +244,7 @@ internal fun BottomSheetExpandedContent(
           bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
           // doing this so that the dividers in sticky headers can go below the search bar and
           // not overlap with each other
-          top = padding.calculateTopPadding() - 1.dp
+          top = padding.calculateTopPadding()
         ),
       state = lazyListState,
       pinnedSources = {
@@ -361,7 +361,7 @@ private fun SearchBar(
       textStyle = MaterialTheme.typography.bodyLarge,
       colors =
         OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          focusedBorderColor = AppTheme.colorScheme.primary,
           unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
           disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,

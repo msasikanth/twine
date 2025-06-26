@@ -67,7 +67,7 @@ internal fun FeedListItem(
   val haptic = LocalHapticFeedback.current
   val backgroundColor =
     if (isFeedSelected) {
-      AppTheme.colorScheme.tintedHighlight
+      AppTheme.colorScheme.primaryContainer
     } else {
       AppTheme.colorScheme.tintedSurface
     }

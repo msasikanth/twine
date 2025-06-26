@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
 import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
-import dev.sasikanth.material.color.utilities.dynamiccolor.ToneDeltaConstraint
-import dev.sasikanth.material.color.utilities.dynamiccolor.TonePolarity
 import dev.sasikanth.material.color.utilities.hct.Hct
 import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
@@ -136,6 +134,14 @@ internal class DynamicColorState(
         defaultLightAppColorScheme
       }
 
+    val bottomSheet =
+      DynamicColor.fromPalette(
+          palette = { s -> s.primaryPalette },
+          tone = { s -> if (s.isDark) 0.0 else 5.0 },
+          background = { s -> dynamicColors.highestSurface(s) },
+        )
+        .toColor(scheme)
+
     return AppColorScheme(
       primary = dynamicColors.primary().toColor(scheme),
       secondary = dynamicColors.secondary().toColor(scheme),
@@ -169,86 +175,17 @@ internal class DynamicColorState(
             tone = { s -> if (s.isDark) 5.0 else 95.0 },
           )
           .toColor(scheme),
-      bottomSheet =
-        if (useDarkTheme) {
-          Color.Black
-        } else {
-          DynamicColor.fromPalette(
-              palette = { s -> s.primaryPalette },
-              tone = { s -> 5.0 },
-              background = { s -> dynamicColors.highestSurface(s) },
-              toneDeltaConstraint = { s ->
-                ToneDeltaConstraint(
-                  MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
-                  dynamicColors.primaryContainer(),
-                  if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
-                )
-              }
-            )
-            .toColor(scheme)
-        },
+      bottomSheet = bottomSheet,
       bottomSheetBorder =
         DynamicColor.fromPalette(
             palette = { s -> s.neutralPalette },
             tone = { s -> 15.0 },
           )
           .toColor(scheme),
-      tintedBackground =
-        DynamicColor.fromPalette(
-            palette = { s -> s.primaryPalette },
-            tone = { s -> if (s.isDark) 10.0 else 99.0 },
-            background = { s -> dynamicColors.highestSurface(s) },
-            toneDeltaConstraint = { s ->
-              ToneDeltaConstraint(
-                MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
-                dynamicColors.primaryContainer(),
-                if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
-              )
-            }
-          )
-          .toColor(scheme),
-      tintedSurface =
-        DynamicColor.fromPalette(
-            palette = { s -> s.primaryPalette },
-            tone = { s -> if (s.isDark) 20.0 else 95.0 },
-            background = { s -> dynamicColors.highestSurface(s) },
-            toneDeltaConstraint = { s ->
-              ToneDeltaConstraint(
-                MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
-                dynamicColors.primaryContainer(),
-                if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
-              )
-            }
-          )
-          .toColor(scheme),
-      tintedForeground =
-        DynamicColor.fromPalette(
-            palette = { s -> s.primaryPalette },
-            tone = { s -> if (s.isDark) 80.0 else 40.0 },
-            background = { s -> dynamicColors.highestSurface(s) },
-            toneDeltaConstraint = { s ->
-              ToneDeltaConstraint(
-                MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
-                dynamicColors.primaryContainer(),
-                if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
-              )
-            }
-          )
-          .toColor(scheme),
-      tintedHighlight =
-        DynamicColor.fromPalette(
-            palette = { s -> s.primaryPalette },
-            tone = { s -> if (s.isDark) 40.0 else 80.0 },
-            background = { s -> dynamicColors.highestSurface(s) },
-            toneDeltaConstraint = { s ->
-              ToneDeltaConstraint(
-                MaterialDynamicColors.CONTAINER_ACCENT_TONE_DELTA,
-                dynamicColors.primaryContainer(),
-                if (s.isDark) TonePolarity.DARKER else TonePolarity.LIGHTER
-              )
-            }
-          )
-          .toColor(scheme),
+      tintedBackground = bottomSheet,
+      tintedSurface = dynamicColors.surfaceContainerLow().toColor(scheme),
+      tintedForeground = dynamicColors.primary().toColor(scheme),
+      tintedHighlight = dynamicColors.outline().toColor(scheme),
     )
   }
 

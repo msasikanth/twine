@@ -71,9 +71,9 @@ internal fun FeaturedPostItem(
     FeaturedImage(
       modifier =
         Modifier.graphicsLayer {
-          translationX = pageOffset.invoke() * 250f
-          scaleX = 1.08f
-          scaleY = 1.08f
+          translationX = pageOffset.invoke() * 350f
+          scaleX = 1.15f
+          scaleY = 1.15f
         },
       image = item.imageUrl,
     )
@@ -81,7 +81,7 @@ internal fun FeaturedPostItem(
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
     Text(
-      modifier = Modifier.padding(horizontal = 16.dp),
+      modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
       text = item.title.ifBlank { item.description },
       style = MaterialTheme.typography.titleLarge,
       color = AppTheme.colorScheme.textEmphasisHigh,
@@ -102,7 +102,7 @@ internal fun FeaturedPostItem(
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
     Text(
-      modifier = Modifier.padding(horizontal = 16.dp),
+      modifier = Modifier.padding(horizontal = 4.dp),
       text = item.description,
       style = MaterialTheme.typography.bodySmall,
       color = AppTheme.colorScheme.textEmphasisHigh,
@@ -128,7 +128,6 @@ internal fun FeaturedPostItem(
       onCommentsClick = onCommentsClick,
       onSourceClick = onSourceClick,
       onTogglePostReadClick = onTogglePostReadClick,
-      modifier = Modifier.padding(start = 16.dp, end = 0.dp)
     )
 
     Spacer(modifier = Modifier.height(8.dp))

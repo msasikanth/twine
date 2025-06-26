@@ -48,7 +48,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -149,7 +148,8 @@ internal fun HomeTopAppBar(
         .windowInsetsPadding(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
-        .padding(horizontal = 8.dp, vertical = 16.dp),
+        .padding(vertical = 16.dp)
+        .padding(start = 12.dp, end = 24.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     SourceInfo(
@@ -163,25 +163,17 @@ internal fun HomeTopAppBar(
 
     Spacer(Modifier.requiredWidth(16.dp))
 
-    IconButton(
-      onClick = onSearchClicked,
-    ) {
-      Icon(
-        imageVector = Icons.Rounded.Search,
-        contentDescription = stringResource(Res.string.postsSearchHint),
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
+    ActionIconButton(
+      imageVector = Icons.Rounded.Search,
+      contentDescription = stringResource(Res.string.postsSearchHint),
+      onClick = onSearchClicked
+    )
 
-    IconButton(
-      onClick = onBookmarksClicked,
-    ) {
-      Icon(
-        imageVector = Icons.Outlined.BookmarkBorder,
-        contentDescription = stringResource(Res.string.bookmarks),
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
+    ActionIconButton(
+      imageVector = Icons.Outlined.BookmarkBorder,
+      contentDescription = stringResource(Res.string.bookmarks),
+      onClick = onBookmarksClicked
+    )
 
     OverflowMenu(
       hasUnreadPosts = hasUnreadPosts,
@@ -194,7 +186,31 @@ internal fun HomeTopAppBar(
 }
 
 @Composable
-fun SourceInfo(
+private fun ActionIconButton(
+  imageVector: ImageVector,
+  contentDescription: String?,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit
+) {
+  Box(
+    modifier =
+      Modifier.requiredSize(40.dp)
+        .clip(MaterialTheme.shapes.small)
+        .clickable(onClick = onClick)
+        .then(modifier),
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = imageVector,
+      contentDescription = contentDescription,
+      tint = AppTheme.colorScheme.tintedForeground
+    )
+  }
+}
+
+@Composable
+private fun SourceInfo(
   source: Source?,
   currentDateTime: LocalDateTime,
   postsType: PostsType,
@@ -223,7 +239,7 @@ fun SourceInfo(
           is FeedGroup -> source.name
           is Feed -> source.name
           else -> currentDateTime.homeAppBarTimestamp()
-        }
+        }.uppercase()
 
       Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
         Text(
@@ -379,19 +395,15 @@ private fun OverflowMenu(
     var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
-    IconButton(
+    ActionIconButton(
       modifier =
         Modifier.onGloballyPositioned { coordinates ->
           buttonHeight = with(density) { coordinates.size.height.toDp() }
         },
-      onClick = { dropdownExpanded = true },
-    ) {
-      Icon(
-        imageVector = Icons.Rounded.MoreVert,
-        contentDescription = stringResource(Res.string.moreMenuOptions),
-        tint = AppTheme.colorScheme.tintedForeground
-      )
-    }
+      imageVector = Icons.Rounded.MoreVert,
+      contentDescription = stringResource(Res.string.moreMenuOptions),
+      onClick = { dropdownExpanded = true }
+    )
 
     if (dropdownExpanded) {
       DropdownMenu(

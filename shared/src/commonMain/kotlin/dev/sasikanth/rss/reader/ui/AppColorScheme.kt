@@ -131,10 +131,10 @@ fun lightAppColorScheme(): AppColorScheme {
     backdrop = Color(0xFFECF3E7),
     bottomSheet = Color(0xFF001503),
     bottomSheetBorder = Color(0xFF2B322A),
-    tintedBackground = Color(0xFFF4FFF8),
-    tintedSurface = Color(0xFFBAFFE4),
-    tintedForeground = Color(0xFF006C53),
-    tintedHighlight = Color(0xFF63DBB5),
+    tintedBackground = Color(0xFF001503),
+    tintedSurface = Color(0xFFEFF5F0),
+    tintedForeground = Color(0xFF37693C),
+    tintedHighlight = Color(0xFF6A7771),
   )
 }
 
@@ -162,10 +162,10 @@ fun darkAppColorScheme(): AppColorScheme {
     backdrop = Color(0xFF0C120C),
     bottomSheet = Color.Black,
     bottomSheetBorder = Color(0xFF2B322A),
-    tintedBackground = Color(0xFF002117),
-    tintedSurface = Color(0xFF00382A),
-    tintedForeground = Color(0xFF63DBB5),
-    tintedHighlight = Color(0xFF006C53),
+    tintedBackground = Color.Black,
+    tintedSurface = Color(0xFF191C1B),
+    tintedForeground = Color(0xFF9DD49D),
+    tintedHighlight = Color(0xFF89938E),
   )
 }
 

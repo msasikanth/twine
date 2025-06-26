@@ -32,9 +32,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.BottomSheetScaffold
@@ -43,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -62,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
@@ -83,7 +83,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -98,8 +97,7 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
-private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
 @Composable
 internal fun HomeScreen(
@@ -164,184 +162,171 @@ internal fun HomeScreen(
     onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } }
   )
 
-  AppTheme(useDarkTheme = true) {
-    Scaffold(modifier) { scaffoldPadding ->
-      val bottomPadding = scaffoldPadding.calculateBottomPadding()
-      val sheetPeekHeight by
-        animateDpAsState(
-          targetValue =
-            if (postsListState.isScrollingUp()) {
-              BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
-            } else {
-              0.dp
+  Scaffold(modifier) { scaffoldPadding ->
+    val bottomPadding = scaffoldPadding.calculateBottomPadding()
+    val sheetPeekHeight by
+      animateDpAsState(
+        targetValue =
+          if (postsListState.isScrollingUp()) {
+            BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
+          } else {
+            0.dp
+          },
+        label = "Sheet Peek Height Animation"
+      )
+    val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
+
+    LaunchedEffect(isBottomSheetHidden) { onBottomSheetHidden(isBottomSheetHidden) }
+
+    BottomSheetScaffold(
+      scaffoldState = bottomSheetScaffoldState,
+      content = { bottomSheetScaffoldContentPadding ->
+        Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
+          val hasFeeds = state.hasFeeds
+
+          HomeScreenContentScaffold(
+            homeTopAppBar = {
+              HomeTopAppBar(
+                source = state.activeSource,
+                currentDateTime = state.currentDateTime,
+                postsType = state.postsType,
+                listState = postsListState,
+                hasFeeds = hasFeeds,
+                hasUnreadPosts = state.hasUnreadPosts,
+                homeViewMode = state.homeViewMode,
+                onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
+                onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
+                onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
+                onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
+                onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) },
+                onChangeHomeViewMode = { homePresenter.dispatch(HomeEvent.ChangeHomeViewMode(it)) }
+              )
             },
-          label = "Sheet Peek Height Animation"
-        )
-      val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
+            body = { paddingValues ->
+              Box(modifier = Modifier.fillMaxSize()) {
+                when {
+                  hasFeeds == null || posts == null -> {
+                    // no-op
+                  }
+                  !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
+                    NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
+                  }
+                  featuredPosts.isEmpty() &&
+                    posts.itemCount == 0 &&
+                    posts.loadState.refresh is LoadState.NotLoading -> {
+                    NoNewPosts()
+                  }
+                  else -> {
+                    val pullToRefreshState = rememberPullToRefreshState()
 
-      LaunchedEffect(isBottomSheetHidden) { onBottomSheetHidden(isBottomSheetHidden) }
-
-      BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
-        content = { bottomSheetScaffoldContentPadding ->
-          AppTheme(useDarkTheme = useDarkTheme) {
-            Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
-              val hasFeeds = state.hasFeeds
-
-              HomeScreenContentScaffold(
-                homeTopAppBar = {
-                  HomeTopAppBar(
-                    source = state.activeSource,
-                    currentDateTime = state.currentDateTime,
-                    postsType = state.postsType,
-                    listState = postsListState,
-                    hasFeeds = hasFeeds,
-                    hasUnreadPosts = state.hasUnreadPosts,
-                    homeViewMode = state.homeViewMode,
-                    onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-                    onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-                    onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-                    onPostTypeChanged = {
-                      homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it))
-                    },
-                    onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) },
-                    onChangeHomeViewMode = {
-                      homePresenter.dispatch(HomeEvent.ChangeHomeViewMode(it))
-                    }
-                  )
-                },
-                body = { paddingValues ->
-                  Box(modifier = Modifier.fillMaxSize()) {
-                    when {
-                      hasFeeds == null || posts == null -> {
-                        // no-op
-                      }
-                      !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
-                        NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
-                      }
-                      featuredPosts.isEmpty() &&
-                        posts.itemCount == 0 &&
-                        posts.loadState.refresh is LoadState.NotLoading -> {
-                        NoNewPosts()
-                      }
-                      else -> {
-                        val pullToRefreshState = rememberPullToRefreshState()
-
-                        PullToRefreshBox(
-                          state = pullToRefreshState,
+                    PullToRefreshBox(
+                      state = pullToRefreshState,
+                      isRefreshing = state.isSyncing,
+                      onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+                      indicator = {
+                        Indicator(
+                          modifier =
+                            Modifier.align(Alignment.TopCenter)
+                              .padding(top = paddingValues.calculateTopPadding()),
                           isRefreshing = state.isSyncing,
-                          onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
-                          indicator = {
-                            Indicator(
-                              modifier =
-                                Modifier.align(Alignment.TopCenter)
-                                  .padding(top = paddingValues.calculateTopPadding()),
-                              isRefreshing = state.isSyncing,
-                              containerColor = AppTheme.colorScheme.primaryContainer,
-                              color = AppTheme.colorScheme.primary,
-                              state = pullToRefreshState
-                            )
-                          }
-                        ) {
-                          PostsList(
-                            modifier = Modifier.fillMaxSize(),
-                            paddingValues = paddingValues,
-                            featuredPosts = featuredPosts,
-                            posts = posts,
-                            useDarkTheme = useDarkTheme,
-                            listState = postsListState,
-                            featuredPostsPagerState = featuredPostsPagerState,
-                            homeViewMode = state.homeViewMode,
-                            markPostAsRead = {
-                              homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                            },
-                            postsScrolled = {
-                              homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
-                            },
-                            markScrolledPostsAsRead = {
-                              homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
-                            },
-                            onPostClicked = { post, postIndex ->
-                              homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
-                            },
-                            onPostBookmarkClick = {
-                              homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
-                            },
-                            onPostCommentsClick = { commentsLink ->
-                              coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                            },
-                            onPostSourceClick = { feedId ->
-                              homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                            },
-                            onTogglePostReadClick = { postId, postRead ->
-                              homePresenter.dispatch(
-                                HomeEvent.TogglePostReadStatus(postId, postRead)
-                              )
-                            }
-                          )
-                        }
+                          containerColor = AppTheme.colorScheme.primaryContainer,
+                          color = AppTheme.colorScheme.primary,
+                          state = pullToRefreshState
+                        )
                       }
+                    ) {
+                      PostsList(
+                        modifier = Modifier.fillMaxSize(),
+                        paddingValues = paddingValues,
+                        featuredPosts = featuredPosts,
+                        posts = posts,
+                        useDarkTheme = useDarkTheme,
+                        listState = postsListState,
+                        featuredPostsPagerState = featuredPostsPagerState,
+                        homeViewMode = state.homeViewMode,
+                        markPostAsRead = {
+                          homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                        },
+                        postsScrolled = {
+                          homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
+                        },
+                        markScrolledPostsAsRead = {
+                          homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                        },
+                        onPostClicked = { post, postIndex ->
+                          homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
+                        },
+                        onPostBookmarkClick = {
+                          homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                        },
+                        onPostCommentsClick = { commentsLink ->
+                          coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                        },
+                        onPostSourceClick = { feedId ->
+                          homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                        },
+                        onTogglePostReadClick = { postId, postRead ->
+                          homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                        }
+                      )
                     }
                   }
-                },
-              )
-
-              val navBarScrimColor = AppTheme.colorScheme.backdrop
-              Box(
-                modifier =
-                  Modifier.fillMaxWidth()
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-                    .navigationBarsPadding()
-                    .padding(top = 24.dp)
-                    .align(Alignment.BottomCenter)
-              )
-
-              NewArticlesScrollToTopButton(
-                unreadSinceLastSync = unreadSinceLastSync,
-                canShowScrollToTop = showScrollToTop,
-                modifier =
-                  Modifier.padding(
-                    end = 16.dp,
-                    bottom =
-                      bottomSheetScaffoldContentPadding
-                        .calculateBottomPadding()
-                        .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
-                  ),
-                onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
-              ) {
-                postsListState.animateScrollToItem(0)
+                }
               }
+            },
+          )
+
+          val navBarScrimColor = AppTheme.colorScheme.backdrop
+          Box(
+            modifier =
+              Modifier.fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+                .navigationBarsPadding()
+                .padding(top = 24.dp)
+                .align(Alignment.BottomCenter)
+          )
+
+          NewArticlesScrollToTopButton(
+            unreadSinceLastSync = unreadSinceLastSync,
+            canShowScrollToTop = showScrollToTop,
+            modifier =
+              Modifier.padding(
+                end = 16.dp,
+                bottom =
+                  bottomSheetScaffoldContentPadding
+                    .calculateBottomPadding()
+                    .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
+              ),
+            onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
+          ) {
+            postsListState.animateScrollToItem(0)
+          }
+        }
+      },
+      sheetContent = {
+        FeedsBottomSheet(
+          feedsPresenter = homePresenter.feedsPresenter,
+          bottomSheetProgress = { bottomSheetProgress },
+          darkTheme = useDarkTheme,
+          closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
+          selectedFeedChanged = {
+            coroutineScope.launch {
+              postsListState.scrollToItem(0)
+              featuredPostsPagerState.scrollToPage(0)
             }
           }
-        },
-        sheetContent = {
-          FeedsBottomSheet(
-            feedsPresenter = homePresenter.feedsPresenter,
-            bottomSheetProgress = bottomSheetProgress,
-            closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
-            selectedFeedChanged = {
-              coroutineScope.launch {
-                postsListState.scrollToItem(0)
-                featuredPostsPagerState.scrollToPage(0)
-              }
-            }
-          )
-        },
-        containerColor = Color.Transparent,
-        sheetContainerColor = AppTheme.colorScheme.tintedBackground,
-        sheetContentColor = AppTheme.colorScheme.tintedForeground,
-        sheetShadowElevation = 0.dp,
-        sheetTonalElevation = 0.dp,
-        sheetPeekHeight = sheetPeekHeight,
-        sheetShape =
-          RoundedCornerShape(
-            topStart = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse(),
-            topEnd = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-          ),
-        sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
-        sheetDragHandle = null
-      )
-    }
+        )
+      },
+      containerColor = Color.Transparent,
+      sheetContainerColor = Color.Transparent,
+      sheetContentColor = Color.Unspecified,
+      sheetShadowElevation = 0.dp,
+      sheetTonalElevation = 0.dp,
+      sheetPeekHeight = sheetPeekHeight,
+      sheetShape = RectangleShape,
+      sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
+      sheetDragHandle = null
+    )
   }
 }
 

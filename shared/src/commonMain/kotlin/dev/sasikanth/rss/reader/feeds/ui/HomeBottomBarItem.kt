@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.All
@@ -34,6 +35,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
 internal fun HomeBottomBarItem(
+  backgroundColor: Color,
   selected: Boolean = false,
   modifier: Modifier = Modifier,
   onClick: () -> Unit
@@ -43,9 +45,9 @@ internal fun HomeBottomBarItem(
     Box(
       modifier =
         Modifier.clip(RoundedCornerShape(16.dp))
-          .background(color = AppTheme.colorScheme.tintedSurface)
+          .background(color = backgroundColor)
           .clickable(onClick = onClick, role = Role.Button)
-          .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
+          .padding(12.dp)
           .align(Alignment.Center),
     ) {
       Icon(
