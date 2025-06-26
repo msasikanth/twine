@@ -15,15 +15,30 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.offset
+import androidx.compose.ui.util.lerp
+import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsPresenter
@@ -31,14 +46,19 @@ import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.inverse
+import kotlin.math.roundToInt
+
+private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 
 @Composable
 internal fun FeedsBottomSheet(
   feedsPresenter: FeedsPresenter,
-  bottomSheetProgress: Float,
+  bottomSheetProgress: () -> Float,
+  darkTheme: Boolean,
   closeSheet: () -> Unit,
   selectedFeedChanged: () -> Unit
 ) {
+  val density = LocalDensity.current
   val state by feedsPresenter.state.collectAsState()
 
   LaunchedEffect(Unit) {
@@ -54,45 +74,155 @@ internal fun FeedsBottomSheet(
     feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
+  val collapsedContentBackgroundColor = AppTheme.colorScheme.bottomSheet
+  val collapsedContentBorderColor = AppTheme.colorScheme.bottomSheetBorder
+  val (shadowColor1, shadowColor2) =
+    if (darkTheme) {
+      Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+    } else {
+      Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+    }
+  val homeItemShadowColors =
+    arrayOf(
+      0.85f to AppTheme.colorScheme.bottomSheet,
+      0.9f to AppTheme.colorScheme.bottomSheet.copy(alpha = 0.4f),
+      1f to Color.Transparent
+    )
+
   AppTheme(useDarkTheme = true) {
-    Column(
-      modifier =
-        Modifier.fillMaxSize()
-          .background(color = AppTheme.colorScheme.bottomSheet.copy(alpha = bottomSheetProgress))
-    ) {
-      BottomSheetHandle(bottomSheetProgress)
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+      val collapsedSheetHeight = 100.dp
+      val targetSheetHeight = with(density) { constraints.maxHeight.toDp() }
 
-      // Transforming the bottom sheet progress from 0-1 to 1-0,
-      // since we want to control the alpha of the content as
-      // users swipes the sheet up and down
-      val bottomSheetExpandingProgress = (bottomSheetProgress * 5f).inverse()
-      val hasBottomSheetExpandedThreshold = bottomSheetExpandingProgress > 1e-6f
+      Column(
+        modifier =
+          Modifier.layout { measurable, constraints ->
+              val sheetHeight =
+                lerp(
+                    start = collapsedSheetHeight,
+                    stop = targetSheetHeight,
+                    fraction = bottomSheetProgress()
+                  )
+                  .toPx()
+              val sheetHorizontalPadding =
+                lerp(
+                  start = 32.dp,
+                  stop = 0.dp,
+                  fraction = bottomSheetProgress(),
+                )
+              val minTargetHeight = sheetHeight.roundToInt()
 
-      if (hasBottomSheetExpandedThreshold) {
+              val paddedConstraints =
+                constraints
+                  .offset(
+                    horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
+                  )
+                  .copy(minHeight = minTargetHeight, maxHeight = minTargetHeight)
+
+              val placeable = measurable.measure(paddedConstraints)
+              val layoutWidth =
+                lerp(
+                  start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
+                  stop = constraints.maxWidth,
+                  fraction = bottomSheetProgress(),
+                ) + sheetHorizontalPadding.roundToPx() * 2
+              val layoutHeight = placeable.height
+
+              layout(layoutWidth, layoutHeight) {
+                placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
+              }
+            }
+            .dropShadow(
+              shape = RoundedCornerShape(50),
+              offsetY = 16.dp,
+              blur = 32.dp,
+              color = shadowColor1
+            )
+            .dropShadow(
+              shape = RoundedCornerShape(50),
+              offsetY = 4.dp,
+              blur = 8.dp,
+              color = shadowColor2
+            )
+            .graphicsLayer {
+              shape =
+                RoundedCornerShape(
+                  BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress().inverse(),
+                )
+              clip = true
+            }
+            .drawBehind {
+              val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress().inverse()
+              val cornerRadius =
+                CornerRadius(
+                  x = cornerRadiusDp.toPx(),
+                  y = cornerRadiusDp.toPx(),
+                )
+              val backgroundColor =
+                lerp(
+                  collapsedContentBackgroundColor,
+                  Color.Black,
+                  bottomSheetProgress(),
+                )
+
+              drawRoundRect(color = backgroundColor)
+
+              val borderColor =
+                lerp(
+                  start = collapsedContentBorderColor,
+                  stop = backgroundColor,
+                  fraction = bottomSheetProgress(),
+                )
+
+              drawRoundRect(
+                color = borderColor,
+                style = Stroke(width = 2.dp.toPx()),
+                cornerRadius = cornerRadius
+              )
+            },
+      ) {
+        BottomSheetHandle(progress = bottomSheetProgress())
+
+        val touchInterceptor by derivedStateOf {
+          if (bottomSheetProgress() < 1f) {
+            Modifier.pointerInput(Unit) {
+              // Consume any touches
+            }
+          } else {
+            Modifier
+          }
+        }
+
         BottomSheetCollapsedContent(
-          modifier = Modifier.graphicsLayer { alpha = bottomSheetExpandingProgress },
+          modifier =
+            Modifier.layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                val height =
+                  lerp(
+                      placeable.height,
+                      0,
+                      bottomSheetProgress() * 5f,
+                    )
+                    .coerceAtLeast(0)
+
+                layout(placeable.width, height) { placeable.place(0, 0) }
+              }
+              .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
           pinnedSources = state.pinnedSources,
           numberOfFeeds = state.numberOfFeeds,
           activeSource = state.activeSource,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+          homeItemBackgroundColor = collapsedContentBackgroundColor,
+          homeItemShadowColors = homeItemShadowColors,
           onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnSourceClick(feed)) },
           onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
         )
-      } else {
+
         BottomSheetExpandedContent(
           feedsPresenter = feedsPresenter,
           modifier =
-            Modifier.graphicsLayer {
-              val threshold = 0.3
-              val scaleFactor = 1 / (1 - threshold)
-              val targetAlpha =
-                if (bottomSheetProgress > threshold) {
-                    (bottomSheetProgress - threshold) * scaleFactor
-                  } else {
-                    0f
-                  }
-                  .toFloat()
-              alpha = targetAlpha
+            Modifier.fillMaxSize().then(touchInterceptor).graphicsLayer {
+              alpha = bottomSheetProgress()
             }
         )
       }

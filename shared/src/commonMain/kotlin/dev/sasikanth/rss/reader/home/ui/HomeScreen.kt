@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -62,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
@@ -83,7 +83,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.inverse
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -98,8 +97,7 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 96.dp
-private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
 @Composable
 internal fun HomeScreen(
@@ -308,7 +306,8 @@ internal fun HomeScreen(
       sheetContent = {
         FeedsBottomSheet(
           feedsPresenter = homePresenter.feedsPresenter,
-          bottomSheetProgress = bottomSheetProgress,
+          bottomSheetProgress = { bottomSheetProgress },
+          darkTheme = useDarkTheme,
           closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
           selectedFeedChanged = {
             coroutineScope.launch {
@@ -319,16 +318,12 @@ internal fun HomeScreen(
         )
       },
       containerColor = Color.Transparent,
-      sheetContainerColor = AppTheme.colorScheme.tintedBackground,
-      sheetContentColor = AppTheme.colorScheme.tintedForeground,
+      sheetContainerColor = Color.Transparent,
+      sheetContentColor = Color.Unspecified,
       sheetShadowElevation = 0.dp,
       sheetTonalElevation = 0.dp,
       sheetPeekHeight = sheetPeekHeight,
-      sheetShape =
-        RoundedCornerShape(
-          topStart = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse(),
-          topEnd = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-        ),
+      sheetShape = RectangleShape,
       sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
       sheetDragHandle = null
     )
