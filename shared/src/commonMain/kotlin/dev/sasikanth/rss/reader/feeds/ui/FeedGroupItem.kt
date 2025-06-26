@@ -73,7 +73,7 @@ internal fun FeedGroupItem(
   val haptic = LocalHapticFeedback.current
   val backgroundColor =
     if (selected) {
-      AppTheme.colorScheme.tintedHighlight
+      AppTheme.colorScheme.primaryContainer
     } else {
       AppTheme.colorScheme.tintedSurface
     }
