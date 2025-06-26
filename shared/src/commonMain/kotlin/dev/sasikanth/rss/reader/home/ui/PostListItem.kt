@@ -141,7 +141,7 @@ internal fun PostListItem(
       onCommentsClick = onPostCommentsClick,
       onSourceClick = onPostSourceClick,
       onTogglePostReadClick = togglePostReadClick,
-      modifier = Modifier.padding(start = 24.dp, end = 12.dp)
+      modifier = Modifier.padding(horizontal = 24.dp)
     )
   }
 }
