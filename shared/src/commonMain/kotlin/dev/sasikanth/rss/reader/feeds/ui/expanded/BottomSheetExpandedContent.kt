@@ -361,7 +361,7 @@ private fun SearchBar(
       textStyle = MaterialTheme.typography.bodyLarge,
       colors =
         OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
+          focusedBorderColor = AppTheme.colorScheme.primary,
           unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
           disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
