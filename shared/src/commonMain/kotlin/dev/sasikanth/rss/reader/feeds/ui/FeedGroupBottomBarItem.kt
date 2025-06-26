@@ -62,9 +62,9 @@ internal fun FeedGroupBottomBarItem(
         val icons = if (showFeedFavIcon) feedGroup.feedHomepageLinks else feedGroup.feedIconLinks
         val iconSize =
           if (icons.size > 2) {
-            18.dp
+            16.dp
           } else {
-            20.dp
+            18.dp
           }
 
         val iconSpacing =

@@ -62,7 +62,7 @@ internal fun BottomSheetCollapsedContent(
   Box {
     LazyRow(
       modifier = modifier.fillMaxWidth().padding(start = 20.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
       contentPadding = PaddingValues(end = 24.dp)
     ) {
       stickyHeader {
@@ -88,7 +88,6 @@ internal fun BottomSheetCollapsedContent(
                   )
                 }
               }
-              .padding(end = 4.dp)
         )
       }
 
