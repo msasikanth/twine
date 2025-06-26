@@ -223,7 +223,7 @@ fun SourceInfo(
           is FeedGroup -> source.name
           is Feed -> source.name
           else -> currentDateTime.homeAppBarTimestamp()
-        }
+        }.uppercase()
 
       Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
         Text(
