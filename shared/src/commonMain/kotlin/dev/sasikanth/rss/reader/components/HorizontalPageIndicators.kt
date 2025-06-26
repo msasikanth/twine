@@ -78,7 +78,7 @@ fun HorizontalPageIndicators(
   modifier: Modifier = Modifier,
   selectedColor: Color = AppTheme.colorScheme.onSurface,
   unselectedColor: Color = AppTheme.colorScheme.outline,
-  indicatorSize: Dp = 10.dp,
+  indicatorSize: Dp = 8.dp,
   spacing: Dp = 8.dp,
   indicatorShape: Shape = CircleShape
 ) {
