@@ -53,6 +53,8 @@ internal fun BottomSheetCollapsedContent(
   numberOfFeeds: Int,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
+  homeItemBackgroundColor: Color,
+  homeItemShadowColors: Array<Pair<Float, Color>>,
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
@@ -64,18 +66,12 @@ internal fun BottomSheetCollapsedContent(
       contentPadding = PaddingValues(end = 24.dp)
     ) {
       stickyHeader {
-        val shadowColors =
-          arrayOf(
-            0.85f to AppTheme.colorScheme.tintedBackground,
-            0.9f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.4f),
-            1f to Color.Transparent
-          )
-
         val allFeedsLabel = stringResource(Res.string.allFeeds)
 
         HomeBottomBarItem(
           selected = activeSource == null,
           onClick = onHomeSelected,
+          backgroundColor = homeItemBackgroundColor,
           modifier =
             Modifier.clearAndSetSemantics {
                 contentDescription = allFeedsLabel
@@ -85,7 +81,7 @@ internal fun BottomSheetCollapsedContent(
                 onDrawBehind {
                   val brush =
                     Brush.horizontalGradient(
-                      colorStops = shadowColors,
+                      colorStops = homeItemShadowColors,
                     )
                   drawRect(
                     brush = brush,

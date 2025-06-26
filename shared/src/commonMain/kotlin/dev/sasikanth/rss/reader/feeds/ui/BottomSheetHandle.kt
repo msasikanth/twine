@@ -27,31 +27,36 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import dev.sasikanth.rss.reader.ui.AppTheme
 
-private val COLLAPSED_HANDLE_SIZE = 32.dp
+private val COLLAPSED_HANDLE_SIZE = 24.dp
 private val EXPANDED_HANDLE_SIZE = 64.dp
 
 @Composable
-internal fun BottomSheetHandle(progress: Float) {
+internal fun BottomSheetHandle(
+  progress: Float,
+  modifier: Modifier = Modifier,
+) {
   val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
   val targetHandleSize =
     min(COLLAPSED_HANDLE_SIZE * progress + COLLAPSED_HANDLE_SIZE, EXPANDED_HANDLE_SIZE)
 
-  val collapsedTopPadding = 8.dp
+  val collapsedTopPadding = 12.dp
   val targetTopPadding =
     (collapsedTopPadding * (progress * 2) + collapsedTopPadding) + (statusBarPadding * progress)
 
-  Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+  Column(
+    modifier = Modifier.fillMaxWidth().then(modifier),
+    horizontalAlignment = Alignment.CenterHorizontally
+  ) {
     Spacer(Modifier.requiredHeight(targetTopPadding))
     Box(
       Modifier.background(AppTheme.colorScheme.tintedForeground, shape = RoundedCornerShape(50))
-        .requiredSize(width = targetHandleSize, height = 4.dp)
+        .requiredSize(width = targetHandleSize, height = 3.dp)
     )
     Spacer(Modifier.requiredHeight(8.dp))
   }

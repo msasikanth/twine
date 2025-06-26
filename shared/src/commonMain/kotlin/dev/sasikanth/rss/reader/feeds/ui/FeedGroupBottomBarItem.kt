@@ -51,7 +51,7 @@ internal fun FeedGroupBottomBarItem(
       SelectionIndicator(selected = selected, animationProgress = 1f)
       Box(
         modifier =
-          Modifier.requiredSize(56.dp)
+          Modifier.requiredSize(48.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable { onClick() }
             .background(AppTheme.colorScheme.tintedSurface)

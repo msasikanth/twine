@@ -244,7 +244,7 @@ internal fun BottomSheetExpandedContent(
           bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
           // doing this so that the dividers in sticky headers can go below the search bar and
           // not overlap with each other
-          top = padding.calculateTopPadding() - 1.dp
+          top = padding.calculateTopPadding()
         ),
       state = lazyListState,
       pinnedSources = {

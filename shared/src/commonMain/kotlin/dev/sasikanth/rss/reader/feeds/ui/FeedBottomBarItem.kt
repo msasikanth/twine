@@ -60,7 +60,7 @@ internal fun FeedBottomBarItem(
         url = feedIcon,
         contentDescription = null,
         modifier =
-          Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
+          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
       )
     }
 
@@ -99,7 +99,7 @@ internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
   // Set alpha to 0 once the progress goes below this threshold
   val threshold = 0.89f
 
-  val size = (64.dp * animationProgress).coerceAtLeast(56.dp)
+  val size = (56.dp * animationProgress).coerceAtLeast(48.dp)
   val cornerRadius = (20.dp * animationProgress).coerceAtLeast(16.dp)
   val alpha = animationProgress.takeIf { it >= threshold } ?: 0f
 
