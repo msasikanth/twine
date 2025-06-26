@@ -71,9 +71,9 @@ internal fun FeaturedPostItem(
     FeaturedImage(
       modifier =
         Modifier.graphicsLayer {
-          translationX = pageOffset.invoke() * 250f
-          scaleX = 1.08f
-          scaleY = 1.08f
+          translationX = pageOffset.invoke() * 350f
+          scaleX = 1.15f
+          scaleY = 1.15f
         },
       image = item.imageUrl,
     )
