@@ -51,7 +51,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
-import dev.sasikanth.rss.reader.data.repository.ReaderFont.*
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.ComicNeue
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.Golos
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -74,7 +78,10 @@ internal fun ReaderCustomizationsContent(
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
 ) {
-  Column(modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+  Column(
+    modifier =
+      Modifier.fillMaxWidth().background(AppTheme.colorScheme.bottomSheet).padding(vertical = 16.dp)
+  ) {
     CustomisationsTypefaceHeader()
 
     val activeTypefaceIndex = ReaderFont.entries.indexOf(selectedFont)

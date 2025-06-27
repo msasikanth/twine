@@ -23,6 +23,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,16 +33,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -216,16 +218,22 @@ internal fun ReaderScreen(
                 scrolledContainerColor = Color.Transparent,
               ),
             navigationIcon = {
-              FilledIconButton(
-                modifier = Modifier.padding(start = 24.dp),
-                colors =
-                  IconButtonDefaults.filledIconButtonColors(
-                    containerColor = AppTheme.colorScheme.primary.copy(alpha = 0.08f)
-                  ),
-                shape = RoundedCornerShape(50),
-                onClick = { presenter.dispatch(ReaderEvent.BackClicked) },
+              Box(
+                modifier =
+                  Modifier.padding(start = 24.dp)
+                    .requiredSize(40.dp)
+                    .clip(CircleShape)
+                    .clickable { presenter.dispatch(ReaderEvent.BackClicked) }
+                    .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
+                    .border(
+                      width = 1.dp,
+                      color = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
+                      shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
               ) {
                 Icon(
+                  modifier = Modifier.requiredSize(20.dp),
                   imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                   contentDescription = null,
                   tint = AppTheme.colorScheme.onSurface,
@@ -403,29 +411,26 @@ private fun ReaderActionsPanel(
         } else {
           Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
         }
+      val backgroundShape = RoundedCornerShape(36.dp)
 
       Box(
         modifier =
           Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             .pointerInput(Unit) {}
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(36.dp))
+            .clip(backgroundShape)
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
             .border(
               width = 1.dp,
               color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = RoundedCornerShape(36.dp)
+              shape = backgroundShape
             )
             .dropShadow(
-              shape = RoundedCornerShape(36.dp),
+              shape = backgroundShape,
               offsetY = 16.dp,
               blur = 32.dp,
               color = shadowColor1
             )
-            .dropShadow(
-              shape = RoundedCornerShape(36.dp),
-              offsetY = 4.dp,
-              blur = 8.dp,
-              color = shadowColor2
-            )
+            .dropShadow(shape = backgroundShape, offsetY = 4.dp, blur = 8.dp, color = shadowColor2)
             .graphicsLayer { clip = true }
       ) {
         AppTheme(useDarkTheme = true) {

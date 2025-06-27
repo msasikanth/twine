@@ -72,7 +72,7 @@ private val compactPostListPadding
   get() =
     when (LocalWindowSizeClass.current.widthSizeClass) {
       WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
-      else -> PaddingValues(start = 24.dp, end = 12.dp)
+      else -> PaddingValues(horizontal = 24.dp)
     }
 
 @Composable
@@ -100,11 +100,12 @@ internal fun PostListItem(
         .semantics { contentDescription = item.title.ifBlank { item.description } }
   ) {
     Row(
-      modifier = Modifier.padding(start = 24.dp, top = 20.dp, end = 24.dp),
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       Text(
-        modifier = Modifier.weight(1f).align(Alignment.Top),
+        modifier =
+          Modifier.weight(1f).align(Alignment.Top).padding(horizontal = 8.dp).padding(top = 4.dp),
         style = MaterialTheme.typography.titleMedium,
         text = item.title.ifBlank { item.description },
         color = AppTheme.colorScheme.textEmphasisHigh,
@@ -116,8 +117,8 @@ internal fun PostListItem(
         AsyncImage(
           url = url,
           modifier =
-            Modifier.requiredSize(width = 128.dp, height = 72.dp)
-              .clip(RoundedCornerShape(12.dp))
+            Modifier.requiredSize(width = 120.dp, height = 68.dp)
+              .clip(RoundedCornerShape(16.dp))
               .align(Alignment.CenterVertically),
           contentDescription = null,
           contentScale = ContentScale.Crop

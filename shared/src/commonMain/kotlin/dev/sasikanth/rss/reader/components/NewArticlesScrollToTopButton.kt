@@ -71,38 +71,38 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
   onScrollToTopClick: suspend () -> Unit,
 ) {
   if (unreadSinceLastSync != null) {
-    AppTheme(useDarkTheme = true) {
-      val coroutineScope = rememberCoroutineScope()
-      AnimatedVisibility(
-        visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
-        enter = slideInVertically { it },
-        exit = slideOutVertically { it },
-        modifier = Modifier.align(Alignment.BottomCenter)
+    val coroutineScope = rememberCoroutineScope()
+    AnimatedVisibility(
+      visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
+      enter = slideInVertically { it },
+      exit = slideOutVertically { it },
+      modifier = Modifier.align(Alignment.BottomCenter)
+    ) {
+      val buttonShape = RoundedCornerShape(50)
+      Box(
+        modifier =
+          modifier
+            .background(AppTheme.colorScheme.bottomSheet, buttonShape)
+            .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
+            .dropShadow(
+              shape = buttonShape,
+              color = Color.Black.copy(alpha = 0.4f),
+              offsetX = 0.dp,
+              offsetY = 16.dp,
+              blur = 32.dp,
+              spread = 0.dp,
+            )
+            .dropShadow(
+              shape = buttonShape,
+              color = Color.Black.copy(alpha = 0.016f),
+              offsetX = 0.dp,
+              offsetY = 4.dp,
+              blur = 8.dp,
+              spread = 0.dp,
+            )
+            .padding(4.dp),
       ) {
-        val buttonShape = RoundedCornerShape(50)
-        Box(
-          modifier =
-            modifier
-              .background(AppTheme.colorScheme.bottomSheet, buttonShape)
-              .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
-              .dropShadow(
-                shape = buttonShape,
-                color = Color.Black.copy(alpha = 0.4f),
-                offsetX = 0.dp,
-                offsetY = 16.dp,
-                blur = 32.dp,
-                spread = 0.dp,
-              )
-              .dropShadow(
-                shape = buttonShape,
-                color = Color.Black.copy(alpha = 0.016f),
-                offsetX = 0.dp,
-                offsetY = 4.dp,
-                blur = 8.dp,
-                spread = 0.dp,
-              )
-              .padding(4.dp),
-        ) {
+        AppTheme(useDarkTheme = true) {
           Row(modifier = Modifier.height(IntrinsicSize.Min)) {
             AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles) {
               Row {
