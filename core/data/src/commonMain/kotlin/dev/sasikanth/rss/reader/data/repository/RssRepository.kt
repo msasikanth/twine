@@ -173,6 +173,12 @@ class RssRepository(
       .executeAsOneOrNull()
   }
 
+  suspend fun postsCountForFeed(feedId: String): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.countPostsForFeed(feedId).executeAsOne()
+    }
+  }
+
   suspend fun allPostsCount(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,

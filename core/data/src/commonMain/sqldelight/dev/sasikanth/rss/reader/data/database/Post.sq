@@ -224,3 +224,7 @@ WHERE
   read != 1 AND
   post.date > :postsAfter AND
   post.syncedAt > :lastSyncedAt;
+
+countPostsForFeed:
+SELECT COUNT(*) FROM post
+WHERE sourceId = :feedId;
