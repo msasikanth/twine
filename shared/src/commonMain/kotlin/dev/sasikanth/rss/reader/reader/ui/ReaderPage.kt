@@ -315,12 +315,12 @@ private fun PostInfo(
           Modifier.graphicsLayer {
               translationX =
                 if (page in 0..pagerState.pageCount) {
-                  pagerState.getOffsetFractionForPage(page) * 250f
+                  pagerState.getOffsetFractionForPage(page) * 350f
                 } else {
                   0f
                 }
-              scaleX = 1.08f
-              scaleY = 1.08f
+              scaleX = 1.15f
+              scaleY = 1.15f
             }
             .align(Alignment.CenterHorizontally),
         image = postImage
