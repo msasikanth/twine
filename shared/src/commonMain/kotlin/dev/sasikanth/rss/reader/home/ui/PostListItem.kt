@@ -72,7 +72,7 @@ private val compactPostListPadding
   get() =
     when (LocalWindowSizeClass.current.widthSizeClass) {
       WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
-      else -> PaddingValues(start = 24.dp, end = 12.dp)
+      else -> PaddingValues(horizontal = 24.dp)
     }
 
 @Composable
