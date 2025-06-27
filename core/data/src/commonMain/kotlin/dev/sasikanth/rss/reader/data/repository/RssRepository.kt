@@ -476,6 +476,18 @@ class RssRepository(
     }
   }
 
+  suspend fun updateFeedLastUpdatedAt(feedId: String, lastUpdatedAt: Instant) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateLastUpdatedAt(lastUpdatedAt = lastUpdatedAt, id = feedId)
+    }
+  }
+
+  suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateRefreshInterval(refreshInterval = refreshInterval, id = feedId)
+    }
+  }
+
   fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 

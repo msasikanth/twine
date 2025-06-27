@@ -108,3 +108,9 @@ LIMIT :limit OFFSET :offset;
 
 updatedPinnedPosition:
 UPDATE feed SET pinnedPosition = :pinnedPosition WHERE id = :id;
+
+updateLastUpdatedAt:
+UPDATE feed SET lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+updateRefreshInterval:
+UPDATE feed SET refreshInterval = :refreshInterval WHERE id = :id;
