@@ -401,7 +401,7 @@ private fun ReaderActionsPanel(
               )
             },
           )
-          .padding(bottom = 16.dp)
+          .navigationBarsPadding()
           .then(modifier),
       contentAlignment = Alignment.Center
     ) {
