@@ -43,6 +43,7 @@ import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -148,7 +149,9 @@ class RssRepository(
           lastCleanUpAt: Instant?,
           alwaysFetchSourceArticle: Boolean,
           pinnedPosition: Double,
-          showFeedFavIcon: Boolean ->
+          showFeedFavIcon: Boolean,
+          lastUpdatedAt: Instant?,
+          refreshInterval: Duration ->
           Feed(
             id = id,
             name = name,
@@ -159,6 +162,8 @@ class RssRepository(
             link = link,
             pinnedAt = pinnedAt,
             lastCleanUpAt = lastCleanUpAt,
+            lastUpdatedAt = lastCleanUpAt,
+            refreshInterval = refreshInterval,
             alwaysFetchSourceArticle = alwaysFetchSourceArticle,
             pinnedPosition = pinnedPosition,
             showFeedFavIcon = showFeedFavIcon,
@@ -285,7 +290,9 @@ class RssRepository(
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
             pinnedPosition: Double,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            lastUpdatedAt: Instant?,
+            refreshInterval: Duration ->
             Feed(
               id = id,
               name = name,
@@ -296,6 +303,8 @@ class RssRepository(
               link = link,
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
+              lastUpdatedAt = lastCleanUpAt,
+              refreshInterval = refreshInterval,
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               pinnedPosition = pinnedPosition,
               showFeedFavIcon = showFeedFavIcon,
