@@ -1,4 +1,5 @@
 import kotlin.Boolean;
+import kotlin.time.Duration;
 import kotlinx.datetime.Instant;
 
 CREATE TABLE feed(
@@ -13,7 +14,9 @@ CREATE TABLE feed(
   lastCleanUpAt INTEGER AS Instant,
   alwaysFetchSourceArticle INTEGER AS Boolean NOT NULL DEFAULT 0,
   pinnedPosition REAL NOT NULL DEFAULT 0.0,
-  showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1
+  showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1,
+  lastUpdatedAt INTEGER AS Instant,
+  refreshInterval TEXT AS Duration NOT NULL DEFAULT '1h'
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -105,3 +108,9 @@ LIMIT :limit OFFSET :offset;
 
 updatedPinnedPosition:
 UPDATE feed SET pinnedPosition = :pinnedPosition WHERE id = :id;
+
+updateLastUpdatedAt:
+UPDATE feed SET lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+updateRefreshInterval:
+UPDATE feed SET refreshInterval = :refreshInterval WHERE id = :id;

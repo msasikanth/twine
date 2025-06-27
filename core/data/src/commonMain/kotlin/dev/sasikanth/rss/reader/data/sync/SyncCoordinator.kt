@@ -19,6 +19,7 @@ import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -26,6 +27,8 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +39,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
@@ -63,21 +68,15 @@ class SyncCoordinator(
       try {
         updateSyncState(SyncState.InProgress(0f))
         checkAndRefreshLastRefreshTime {
-          val feedsChunks = rssRepository.allFeedsBlocking().chunked(SYNC_CHUNK_SIZE)
+          val allFeeds = rssRepository.allFeedsBlocking()
+          val now = Clock.System.now()
+          val feedsToRefresh = allFeeds.filter { feed -> shouldRefreshFeed(feed, now) }
+          val feedsChunks = feedsToRefresh.chunked(SYNC_CHUNK_SIZE)
 
           feedsChunks.forEachIndexed { index, feeds ->
-            val jobs =
-              feeds.map { feed ->
-                launch {
-                  rssRepository.fetchAndAddFeed(
-                    feedLink = feed.link,
-                    feedLastCleanUpAt = feed.lastCleanUpAt,
-                  )
-                }
-              }
+            val jobs = feeds.map { feed -> launch { refreshSingleFeed(feed, now) } }
 
             jobs.joinAll()
-
             updateSyncState(SyncState.InProgress((index + 1).toFloat() / feedsChunks.size))
           }
         }
@@ -94,17 +93,14 @@ class SyncCoordinator(
   suspend fun refreshFeeds(feedIds: List<String>) {
     try {
       updateSyncState(SyncState.InProgress(0f))
+
+      val now = Clock.System.now()
       feedIds.forEachIndexed { index, feedId ->
         val feed =
           withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = feedId) }
 
         if (feed != null) {
-          checkAndRefreshLastRefreshTime {
-            rssRepository.fetchAndAddFeed(
-              feedLink = feed.link,
-              feedLastCleanUpAt = feed.lastCleanUpAt
-            )
-          }
+          checkAndRefreshLastRefreshTime { refreshSingleFeed(feed, now) }
         }
 
         updateSyncState(SyncState.InProgress((index + 1).toFloat() / feedIds.size))
@@ -122,14 +118,12 @@ class SyncCoordinator(
     try {
       updateSyncState(SyncState.InProgress(0f))
       val feed = withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = id) }
+      val now = Clock.System.now()
 
       if (feed != null) {
         checkAndRefreshLastRefreshTime {
           updateSyncState(SyncState.InProgress(0.5f))
-          rssRepository.fetchAndAddFeed(
-            feedLink = feed.link,
-            feedLastCleanUpAt = feed.lastCleanUpAt
-          )
+          refreshSingleFeed(feed, now)
         }
       }
 
@@ -138,6 +132,28 @@ class SyncCoordinator(
       BugsnagKotlin.logMessage("SyncCoordinator#refreshFeed")
       BugsnagKotlin.sendFatalException(e)
       updateSyncState(SyncState.Error(e))
+    }
+  }
+
+  private suspend fun refreshSingleFeed(feed: Feed, now: Instant) {
+    val initialPostCount = rssRepository.postsCountForFeed(feed.id)
+    val result =
+      rssRepository.fetchAndAddFeed(
+        feedLink = feed.link,
+        feedLastCleanUpAt = feed.lastCleanUpAt,
+      )
+
+    if (result is FeedAddResult.Success) {
+      val finalPostCount = rssRepository.postsCountForFeed(feed.id)
+      val hasNewContent = finalPostCount > initialPostCount
+
+      if (hasNewContent) {
+        withContext(dispatchersProvider.databaseWrite) {
+          rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
+        }
+      }
+
+      adjustRefreshInterval(feed, hasNewContent)
     }
   }
 
@@ -176,6 +192,33 @@ class SyncCoordinator(
 
   private suspend fun updateSyncState(newState: SyncState) {
     syncMutex.withLock { _syncState.value = newState }
+  }
+
+  private fun shouldRefreshFeed(feed: Feed, now: Instant): Boolean {
+    val lastUpdatedAt = feed.lastUpdatedAt ?: return true
+    val timeSinceLastUpdate = (now - lastUpdatedAt)
+    return timeSinceLastUpdate >= feed.refreshInterval
+  }
+
+  private suspend fun adjustRefreshInterval(feed: Feed, hasNewContent: Boolean) {
+    val currentRefreshInterval = feed.refreshInterval
+
+    val adjustmentFactor = if (hasNewContent) 0.8 else 1.2
+    val newRefreshInterval =
+      if (hasNewContent) {
+        maxOf(15.minutes, (currentRefreshInterval * adjustmentFactor))
+      } else {
+        minOf(1.days, (currentRefreshInterval * adjustmentFactor))
+      }
+
+    if (newRefreshInterval != currentRefreshInterval) {
+      withContext(dispatchersProvider.databaseWrite) {
+        rssRepository.updateFeedRefreshInterval(
+          feedId = feed.id,
+          refreshInterval = newRefreshInterval
+        )
+      }
+    }
   }
 }
 
