@@ -21,6 +21,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,6 +45,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -76,6 +78,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomePresenter
+import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -204,6 +207,8 @@ internal fun HomeScreen(
             },
             body = { paddingValues ->
               Box(modifier = Modifier.fillMaxSize()) {
+                val pullToRefreshState = rememberPullToRefreshState()
+
                 when {
                   hasFeeds == null || posts == null -> {
                     // no-op
@@ -214,26 +219,21 @@ internal fun HomeScreen(
                   featuredPosts.isEmpty() &&
                     posts.itemCount == 0 &&
                     posts.loadState.refresh is LoadState.NotLoading -> {
-                    NoNewPosts()
+                    PullToRefreshContent(
+                      pullToRefreshState = pullToRefreshState,
+                      state = state,
+                      homePresenter = homePresenter,
+                      paddingValues = paddingValues,
+                    ) {
+                      NoNewPosts()
+                    }
                   }
                   else -> {
-                    val pullToRefreshState = rememberPullToRefreshState()
-
-                    PullToRefreshBox(
-                      state = pullToRefreshState,
-                      isRefreshing = state.isSyncing,
-                      onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
-                      indicator = {
-                        Indicator(
-                          modifier =
-                            Modifier.align(Alignment.TopCenter)
-                              .padding(top = paddingValues.calculateTopPadding()),
-                          isRefreshing = state.isSyncing,
-                          containerColor = AppTheme.colorScheme.primaryContainer,
-                          color = AppTheme.colorScheme.primary,
-                          state = pullToRefreshState
-                        )
-                      }
+                    PullToRefreshContent(
+                      pullToRefreshState = pullToRefreshState,
+                      state = state,
+                      homePresenter = homePresenter,
+                      paddingValues = paddingValues,
                     ) {
                       PostsList(
                         modifier = Modifier.fillMaxSize(),
@@ -327,6 +327,33 @@ internal fun HomeScreen(
       sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
       sheetDragHandle = null
     )
+  }
+}
+
+@Composable
+private fun PullToRefreshContent(
+  pullToRefreshState: PullToRefreshState,
+  state: HomeState,
+  homePresenter: HomePresenter,
+  paddingValues: PaddingValues,
+  content: @Composable () -> Unit,
+) {
+  PullToRefreshBox(
+    state = pullToRefreshState,
+    isRefreshing = state.isSyncing,
+    onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+    indicator = {
+      Indicator(
+        modifier =
+          Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
+        isRefreshing = state.isSyncing,
+        containerColor = AppTheme.colorScheme.primaryContainer,
+        color = AppTheme.colorScheme.primary,
+        state = pullToRefreshState
+      )
+    }
+  ) {
+    content()
   }
 }
 
