@@ -196,8 +196,7 @@ internal fun FeedsBottomSheet(
 
         BottomSheetCollapsedContent(
           modifier =
-            Modifier.padding(bottom = 24.dp)
-              .layout { measurable, constraints ->
+            Modifier.layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 val height =
                   lerp(
@@ -209,6 +208,7 @@ internal fun FeedsBottomSheet(
 
                 layout(placeable.width, height) { placeable.place(0, 0) }
               }
+              .padding(bottom = 24.dp)
               .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
           pinnedSources = state.pinnedSources,
           numberOfFeeds = state.numberOfFeeds,

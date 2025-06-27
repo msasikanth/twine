@@ -16,6 +16,8 @@
 package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
 import kotlinx.datetime.Instant
 
 @Immutable
@@ -30,6 +32,8 @@ data class Feed(
   override val pinnedAt: Instant?,
   val lastCleanUpAt: Instant? = null,
   val numberOfUnreadPosts: Long = 0L,
+  val lastUpdatedAt: Instant? = null,
+  val refreshInterval: Duration = 1.hours,
   val alwaysFetchSourceArticle: Boolean = false,
   override val sourceType: SourceType = SourceType.Feed,
   override val pinnedPosition: Double = 0.0,
