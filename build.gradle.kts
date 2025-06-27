@@ -30,6 +30,7 @@ plugins {
   alias(libs.plugins.kotlin.serialization).apply(false)
   alias(libs.plugins.kotlin.compose).apply(false)
   alias(libs.plugins.bugsnag).apply(false)
+  alias(libs.plugins.kotlin.cocoapods).apply(false)
 }
 
 allprojects {
