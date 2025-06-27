@@ -56,6 +56,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -403,29 +404,26 @@ private fun ReaderActionsPanel(
         } else {
           Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
         }
+      val backgroundShape = RoundedCornerShape(36.dp)
 
       Box(
         modifier =
           Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             .pointerInput(Unit) {}
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = RoundedCornerShape(36.dp))
+            .clip(backgroundShape)
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
             .border(
               width = 1.dp,
               color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = RoundedCornerShape(36.dp)
+              shape = backgroundShape
             )
             .dropShadow(
-              shape = RoundedCornerShape(36.dp),
+              shape = backgroundShape,
               offsetY = 16.dp,
               blur = 32.dp,
               color = shadowColor1
             )
-            .dropShadow(
-              shape = RoundedCornerShape(36.dp),
-              offsetY = 4.dp,
-              blur = 8.dp,
-              color = shadowColor2
-            )
+            .dropShadow(shape = backgroundShape, offsetY = 4.dp, blur = 8.dp, color = shadowColor2)
             .graphicsLayer { clip = true }
       ) {
         AppTheme(useDarkTheme = true) {
