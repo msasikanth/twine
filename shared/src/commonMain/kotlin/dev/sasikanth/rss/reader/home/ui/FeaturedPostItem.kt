@@ -81,7 +81,7 @@ internal fun FeaturedPostItem(
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
     Text(
-      modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+      modifier = Modifier.padding(8.dp),
       text = item.title.ifBlank { item.description },
       style = MaterialTheme.typography.titleLarge,
       color = AppTheme.colorScheme.textEmphasisHigh,
@@ -99,10 +99,8 @@ internal fun FeaturedPostItem(
       }
     )
 
-    Spacer(modifier = Modifier.requiredHeight(8.dp))
-
     Text(
-      modifier = Modifier.padding(horizontal = 4.dp),
+      modifier = Modifier.padding(horizontal = 8.dp),
       text = item.description,
       style = MaterialTheme.typography.bodySmall,
       color = AppTheme.colorScheme.textEmphasisHigh,
@@ -111,7 +109,7 @@ internal fun FeaturedPostItem(
       overflow = TextOverflow.Ellipsis,
     )
 
-    Spacer(Modifier.requiredHeight(descriptionBottomPadding))
+    Spacer(Modifier.requiredHeight(descriptionBottomPadding + 4.dp))
 
     val showFeedFavIcon = LocalShowFeedFavIconSetting.current
     val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
