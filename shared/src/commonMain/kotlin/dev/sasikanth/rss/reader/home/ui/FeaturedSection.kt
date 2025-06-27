@@ -147,8 +147,8 @@ internal fun FeaturedSection(
     val contentPadding =
       remember(systemBarsHorizontalPadding) {
         PaddingValues(
-          start = systemBarsHorizontalPadding,
-          end = systemBarsHorizontalPadding,
+          start = systemBarsHorizontalPadding + 24.dp,
+          end = systemBarsHorizontalPadding + 8.dp,
           bottom = 24.dp
         )
       }
@@ -179,8 +179,7 @@ internal fun FeaturedSection(
 
           FeaturedPostItem(
             modifier =
-              Modifier.padding(horizontal = 24.dp)
-                .padding(top = paddingValues.calculateTopPadding() + 8.dp),
+              Modifier.padding(top = paddingValues.calculateTopPadding() + 8.dp, end = 16.dp),
             item = postWithMetadata,
             pageOffset = { pagerState.getOffsetFractionForPage(page) },
             onClick = { onItemClick(postWithMetadata, page) },
