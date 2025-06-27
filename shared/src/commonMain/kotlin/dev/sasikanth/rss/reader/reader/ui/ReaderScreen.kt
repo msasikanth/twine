@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
@@ -417,13 +418,6 @@ private fun ReaderActionsPanel(
         modifier =
           Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             .pointerInput(Unit) {}
-            .clip(backgroundShape)
-            .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
-            .border(
-              width = 1.dp,
-              color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = backgroundShape
-            )
             .dropShadow(
               shape = backgroundShape,
               offsetY = 16.dp,
@@ -431,6 +425,13 @@ private fun ReaderActionsPanel(
               color = shadowColor1
             )
             .dropShadow(shape = backgroundShape, offsetY = 4.dp, blur = 8.dp, color = shadowColor2)
+            .clip(backgroundShape)
+            .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
+            .border(
+              width = 1.dp,
+              color = AppTheme.colorScheme.bottomSheetBorder,
+              shape = backgroundShape
+            )
             .graphicsLayer { clip = true }
       ) {
         AppTheme(useDarkTheme = true) {
