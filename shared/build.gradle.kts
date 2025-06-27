@@ -27,7 +27,6 @@ plugins {
   alias(libs.plugins.kotlin.parcelize)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.kotlin.compose)
-  alias(libs.plugins.kotlin.cocoapods)
 }
 
 composeCompiler { featureFlags = setOf(ComposeFeatureFlag.StrongSkipping) }
@@ -144,21 +143,6 @@ kotlin {
     }
 
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
-  }
-
-  cocoapods {
-    noPodspec()
-    version = "1"
-    ios.deploymentTarget = "15"
-
-    pod("PurchasesHybridCommon") {
-      version = libs.versions.revenuecat.common.get()
-      extraOpts += listOf("-compiler-option", "-fmodules")
-    }
-    pod("PurchasesHybridCommonUI") {
-      version = libs.versions.revenuecat.common.get()
-      extraOpts += listOf("-compiler-option", "-fmodules")
-    }
   }
 }
 
