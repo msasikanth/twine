@@ -31,7 +31,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -173,94 +175,102 @@ internal fun ReaderPage(
     )
   }
 
-  SelectionContainer {
-    Box(modifier = modifier) {
-      // Dummy view to parse the reader content using JS
-      ReaderWebView(
-        modifier = Modifier.requiredSize(0.dp),
-        link = readerPost.link,
-        content = readerPost.rawContent ?: readerPost.description,
-        postImage = readerPost.imageUrl,
-        fetchFullArticle = loadFullArticle,
-        contentLoaded = {
-          readerProcessingProgress = ReaderProcessingProgress.Idle
-          parsedContent = json.decodeFromString(it)
-        },
-      )
+  val textSelectionColors =
+    TextSelectionColors(
+      handleColor = AppTheme.colorScheme.primary,
+      backgroundColor = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
+    )
+  CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
+    SelectionContainer {
+      Box(modifier = modifier) {
+        // Dummy view to parse the reader content using JS
+        ReaderWebView(
+          modifier = Modifier.requiredSize(0.dp),
+          link = readerPost.link,
+          content = readerPost.rawContent ?: readerPost.description,
+          postImage = readerPost.imageUrl,
+          fetchFullArticle = loadFullArticle,
+          contentLoaded = {
+            readerProcessingProgress = ReaderProcessingProgress.Idle
+            parsedContent = json.decodeFromString(it)
+          },
+        )
 
-      CompositionLocalProvider(
-        LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
-        LocalMarkdownPadding provides markdownPadding(),
-        LocalMarkdownDimens provides markdownDimens(),
-        LocalImageTransformer provides CoilMarkdownTransformer,
-        LocalMarkdownAnnotator provides markdownAnnotator(),
-        LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
-        LocalMarkdownAnimations provides markdownAnimations(),
-        LocalMarkdownColors provides markdownColor(),
-        LocalMarkdownTypography provides
-          markdownTypography(
-            h1 = MaterialTheme.typography.displaySmall,
-            h2 = MaterialTheme.typography.headlineLarge,
-            h3 = MaterialTheme.typography.headlineMedium,
-            h4 = MaterialTheme.typography.headlineSmall,
-            h5 = MaterialTheme.typography.titleLarge,
-            h6 = MaterialTheme.typography.titleMedium,
-          ),
-      ) {
-        LazyColumn(
-          modifier = Modifier.fillMaxSize(),
-          overscrollEffect = null,
-          contentPadding =
-            PaddingValues(
-              top = contentPaddingValues.calculateTopPadding(),
-              bottom = contentPaddingValues.calculateBottomPadding()
-            )
+        CompositionLocalProvider(
+          LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
+          LocalMarkdownPadding provides markdownPadding(),
+          LocalMarkdownDimens provides markdownDimens(),
+          LocalImageTransformer provides CoilMarkdownTransformer,
+          LocalMarkdownAnnotator provides markdownAnnotator(),
+          LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
+          LocalMarkdownAnimations provides markdownAnimations(),
+          LocalMarkdownColors provides markdownColor(),
+          LocalMarkdownTypography provides
+            markdownTypography(
+              h1 = MaterialTheme.typography.displaySmall,
+              h2 = MaterialTheme.typography.headlineLarge,
+              h3 = MaterialTheme.typography.headlineMedium,
+              h4 = MaterialTheme.typography.headlineSmall,
+              h5 = MaterialTheme.typography.titleLarge,
+              h6 = MaterialTheme.typography.titleMedium,
+            ),
         ) {
-          item(key = "reader-header") {
-            PostInfo(
-              readerPost = readerPost,
-              page = page,
-              pagerState = pagerState,
-              parsedContent = parsedContent,
-              onCommentsClick = {
-                coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
-              },
-              onShareClick = { sharedHandler.share(readerPost.link) },
-              onBookmarkClick = onBookmarkClick
-            )
-          }
-
-          item(key = "divider") {
-            HorizontalDivider(
-              modifier = Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
-              color = AppTheme.colorScheme.outlineVariant
-            )
-          }
-
-          if (readerProcessingProgress == ReaderProcessingProgress.Loading) {
-            item(key = "progress-indicator") { ProgressIndicator() }
-          }
-
-          if (
-            readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent
+          LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            overscrollEffect = null,
+            contentPadding =
+              PaddingValues(
+                top = contentPaddingValues.calculateTopPadding(),
+                bottom = contentPaddingValues.calculateBottomPadding()
+              )
           ) {
-            if (parsedContent.hasContent) {
-              when (val state = markdownState) {
-                is State.Success -> {
-                  items(items = state.node.children) { node ->
-                    Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-                      handleElement(
-                        node = node,
-                        components = markdownComponents,
-                        content = state.content,
-                        includeSpacer = true,
-                        skipLinkDefinition = state.linksLookedUp,
-                      )
+            item(key = "reader-header") {
+              PostInfo(
+                readerPost = readerPost,
+                page = page,
+                pagerState = pagerState,
+                parsedContent = parsedContent,
+                onCommentsClick = {
+                  coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
+                },
+                onShareClick = { sharedHandler.share(readerPost.link) },
+                onBookmarkClick = onBookmarkClick
+              )
+            }
+
+            item(key = "divider") {
+              HorizontalDivider(
+                modifier =
+                  Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+                color = AppTheme.colorScheme.outlineVariant
+              )
+            }
+
+            if (readerProcessingProgress == ReaderProcessingProgress.Loading) {
+              item(key = "progress-indicator") { ProgressIndicator() }
+            }
+
+            if (
+              readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent
+            ) {
+              if (parsedContent.hasContent) {
+                when (val state = markdownState) {
+                  is State.Success -> {
+                    items(items = state.node.children) { node ->
+                      Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                        handleElement(
+                          node = node,
+                          components = markdownComponents,
+                          content = state.content,
+                          includeSpacer = true,
+                          skipLinkDefinition = state.linksLookedUp,
+                        )
+                      }
                     }
                   }
-                }
-                else -> {
-                  // no-op
+                  else -> {
+                    // no-op
+                  }
                 }
               }
             }
