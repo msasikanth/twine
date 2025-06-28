@@ -43,6 +43,7 @@ data class HomeState(
   val homeViewMode: HomeViewMode,
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
+  val activePostIndex: Int,
 ) {
 
   companion object {
@@ -60,6 +61,7 @@ data class HomeState(
         homeViewMode = HomeViewMode.Default,
         unreadSinceLastSync = null,
         prevActiveSource = null,
+        activePostIndex = 0,
       )
   }
 

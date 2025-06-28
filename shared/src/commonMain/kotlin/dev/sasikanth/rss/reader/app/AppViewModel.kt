@@ -76,6 +76,10 @@ class AppViewModel(
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
   }
 
+  fun updateActivePostIndex(index: Int) {
+    _state.update { it.copy(activePostIndex = index) }
+  }
+
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
       if (lastRefreshedAt.hasExpired()) {

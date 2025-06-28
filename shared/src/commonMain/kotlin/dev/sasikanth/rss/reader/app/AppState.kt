@@ -24,6 +24,7 @@ data class AppState(
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
+  val activePostIndex: Int,
 ) {
 
   companion object {
@@ -33,6 +34,7 @@ data class AppState(
         showFeedFavIcon = true,
         homeViewMode = HomeViewMode.Default,
         showReaderView = false,
+        activePostIndex = 0,
       )
   }
 }

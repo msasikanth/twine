@@ -34,7 +34,6 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlin.time.Duration.Companion.hours
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -71,8 +70,6 @@ class HomeViewModel(
   private val _state = MutableStateFlow(defaultState)
   val state: StateFlow<HomeState>
     get() = _state
-
-  val effects = MutableSharedFlow<HomeEffect>()
 
   init {
     init()
@@ -161,7 +158,7 @@ class HomeViewModel(
   }
 
   private fun updateVisibleItemIndex(index: Int) {
-    viewModelScope.launch { effects.emit(HomeEffect.ScrollPostListTo(index)) }
+    viewModelScope.launch { _state.update { it.copy(activePostIndex = index) } }
   }
 
   private fun changeHomeViewMode(homeViewMode: HomeViewMode) {

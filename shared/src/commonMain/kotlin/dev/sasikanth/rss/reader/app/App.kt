@@ -25,7 +25,6 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,6 +61,7 @@ import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
+import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
@@ -208,11 +208,16 @@ fun App(
               .launchIn(this)
           }
 
+          LaunchedEffect(Unit) {
+            viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
+          }
+
           HomeScreen(
             modifier = fillMaxSizeModifier,
             useDarkTheme = useDarkTheme,
             viewModel = viewModel,
             feedsViewModel = feedsViewModel,
+            onFirstVisiblePostItemChanged = { index -> appViewModel.updateActivePostIndex(index) },
             openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
             openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
             openSearch = { navController.navigate(Screen.Search) },
@@ -255,6 +260,9 @@ fun App(
             modifier = fillMaxSizeModifier,
             darkTheme = useDarkTheme,
             viewModel = viewModel,
+            onPostChanged = { activePostIndex ->
+              appViewModel.updateActivePostIndex(activePostIndex)
+            },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) }
           )

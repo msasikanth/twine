@@ -104,6 +104,7 @@ import kotlinx.coroutines.launch
 internal fun ReaderScreen(
   darkTheme: Boolean,
   viewModel: ReaderViewModel,
+  onPostChanged: (Int) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
@@ -323,6 +324,7 @@ internal fun ReaderScreen(
               val readerPost = runCatching { posts.peek(page) }.getOrNull()
 
               if (readerPost != null) {
+                onPostChanged(page)
                 viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
               }
             }

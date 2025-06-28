@@ -59,6 +59,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -79,7 +80,6 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
-import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
@@ -89,12 +89,16 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -105,11 +109,12 @@ import twine.shared.generated.resources.swipeUpGetStarted
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
 internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
+  onFirstVisiblePostItemChanged: (Int) -> Unit,
   openSearch: () -> Unit,
   openBookmarks: () -> Unit,
   openSettings: () -> Unit,
@@ -158,20 +163,27 @@ internal fun HomeScreen(
   val unreadSinceLastSync = state.unreadSinceLastSync
 
   LaunchedEffect(Unit) {
-    viewModel.effects.collectLatest { effect ->
-      when (effect) {
-        is HomeEffect.ScrollPostListTo -> {
-          if (effect.index < Constants.NUMBER_OF_FEATURED_POSTS) {
-            featuredPostsPagerState.scrollToPage(effect.index)
-          } else {
-            // Since indexes start from 0, we are increasing the featured posts size by one
-            val adjustedIndex = (effect.index - featuredPosts.size + 1).coerceAtLeast(0)
-            postsListState.scrollToItem(adjustedIndex)
-          }
+    snapshotFlow { postsListState.firstVisibleItemIndex }
+      .debounce(500.milliseconds)
+      .onEach { index -> onFirstVisiblePostItemChanged(index) }
+      .launchIn(this)
+  }
+
+  LaunchedEffect(state.activePostIndex) {
+    if (state.activePostIndex != postsListState.firstVisibleItemIndex) {
+      coroutineScope.launch {
+        val activePostIndex = state.activePostIndex
+        if (activePostIndex < Constants.NUMBER_OF_FEATURED_POSTS && featuredPosts.isNotEmpty()) {
+          featuredPostsPagerState.scrollToPage(activePostIndex)
+        } else {
+          // Since indexes start from 0, we are increasing the featured posts size by one
+          val adjustedIndex = (activePostIndex - featuredPosts.size + 1).coerceAtLeast(0)
+          postsListState.scrollToItem(adjustedIndex)
         }
       }
     }
   }
+
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomSheetState.partialExpand()
