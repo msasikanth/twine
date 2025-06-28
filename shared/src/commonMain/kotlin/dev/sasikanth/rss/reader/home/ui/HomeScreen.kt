@@ -351,7 +351,7 @@ internal fun HomeScreen(
                 bottom =
                   bottomSheetScaffoldContentPadding
                     .calculateBottomPadding()
-                    .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
+                    .coerceAtLeast(scaffoldPadding.calculateBottomPadding())
               ),
             onLoadNewArticlesClick = { viewModel.dispatch(HomeEvent.LoadNewArticlesClick) },
           ) {

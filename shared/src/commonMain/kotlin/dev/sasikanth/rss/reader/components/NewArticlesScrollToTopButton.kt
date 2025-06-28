@@ -76,12 +76,12 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
       visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
       enter = slideInVertically { it },
       exit = slideOutVertically { it },
-      modifier = Modifier.align(Alignment.BottomCenter)
+      modifier = modifier.align(Alignment.BottomCenter)
     ) {
       val buttonShape = RoundedCornerShape(50)
       Box(
         modifier =
-          modifier
+          Modifier.padding(bottom = 16.dp)
             .background(AppTheme.colorScheme.bottomSheet, buttonShape)
             .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
             .dropShadow(
