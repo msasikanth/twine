@@ -16,11 +16,9 @@
 
 package dev.sasikanth.rss.reader.groupselection
 
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-
 sealed interface GroupSelectionEvent {
 
-  data class OnToggleGroupSelection(val feedGroup: FeedGroup) : GroupSelectionEvent
+  data class OnToggleGroupSelection(val id: String) : GroupSelectionEvent
 
   data class OnCreateGroup(val name: String) : GroupSelectionEvent
 }

@@ -21,7 +21,6 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent.OnCreateGroup
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent.OnToggleGroupSelection
@@ -55,22 +54,25 @@ class GroupSelectionViewModel(
 
   fun dispatch(event: GroupSelectionEvent) {
     when (event) {
-      is OnToggleGroupSelection -> onToggleGroupSelection(event.feedGroup)
+      is OnToggleGroupSelection -> onToggleGroupSelection(event.id)
       is OnCreateGroup -> onCreateGroup(event.name)
     }
   }
 
   private fun onCreateGroup(name: String) {
-    viewModelScope.launch { rssRepository.createGroup(name) }
+    viewModelScope.launch {
+      val groupId = rssRepository.createGroup(name)
+      onToggleGroupSelection(groupId)
+    }
   }
 
-  private fun onToggleGroupSelection(feedGroup: FeedGroup) {
+  private fun onToggleGroupSelection(groupId: String) {
     _state.update {
       val selectedGroups = it.selectedGroups
-      if (selectedGroups.contains(feedGroup.id)) {
-        it.copy(selectedGroups = selectedGroups - setOf(feedGroup.id))
+      if (selectedGroups.contains(groupId)) {
+        it.copy(selectedGroups = selectedGroups - setOf(groupId))
       } else {
-        it.copy(selectedGroups = selectedGroups + setOf(feedGroup.id))
+        it.copy(selectedGroups = selectedGroups + setOf(groupId))
       }
     }
   }

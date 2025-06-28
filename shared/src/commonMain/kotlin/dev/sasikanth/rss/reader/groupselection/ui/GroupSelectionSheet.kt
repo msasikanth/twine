@@ -146,7 +146,7 @@ fun GroupSelectionSheet(
               isInMultiSelectMode = true,
               selected = state.selectedGroups.contains(group.id),
               onFeedGroupSelected = {
-                viewModel.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group))
+                viewModel.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group.id))
               },
               onFeedGroupClick = {
                 // no-op
