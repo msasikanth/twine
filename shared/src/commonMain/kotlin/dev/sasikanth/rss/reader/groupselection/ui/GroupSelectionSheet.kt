@@ -42,7 +42,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,29 +51,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent
-import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
+import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonConfirm
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.groupAddNew
 
+const val SELECTED_GROUPS_KEY = "dev.sasikanth.twine.SELECTED_GROUPS"
+
 @Composable
-fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier = Modifier) {
+fun GroupSelectionSheet(
+  viewModel: GroupSelectionViewModel,
+  dismiss: () -> Unit,
+  onGroupsSelected: (Set<String>) -> Unit,
+  modifier: Modifier = Modifier
+) {
   AppTheme(useDarkTheme = true) {
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
-      onDismissRequest = { presenter.dispatch(GroupSelectionEvent.BackClicked) },
+      onDismissRequest = { dismiss() },
       containerColor = AppTheme.colorScheme.tintedBackground,
       contentColor = Color.Unspecified,
       contentWindowInsets = {
@@ -83,16 +89,16 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
       sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-      scrimColor = SYSTEM_SCRIM
+      scrimColor = Color.Transparent,
     ) {
-      val state by presenter.state.collectAsState()
+      val state by viewModel.state.collectAsStateWithLifecycle()
       val groups = state.groups.collectAsLazyPagingItems()
 
       var showCreateGroupDialog by remember { mutableStateOf(false) }
 
       if (showCreateGroupDialog) {
         CreateGroupDialog(
-          onCreateGroup = { presenter.dispatch(GroupSelectionEvent.OnCreateGroup(it)) },
+          onCreateGroup = { viewModel.dispatch(GroupSelectionEvent.OnCreateGroup(it)) },
           onDismiss = { showCreateGroupDialog = false }
         )
       }
@@ -140,7 +146,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
               isInMultiSelectMode = true,
               selected = state.selectedGroups.contains(group.id),
               onFeedGroupSelected = {
-                presenter.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group))
+                viewModel.dispatch(GroupSelectionEvent.OnToggleGroupSelection(group))
               },
               onFeedGroupClick = {
                 // no-op
@@ -162,7 +168,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
               contentColor = AppTheme.colorScheme.tintedForeground
             ),
           border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
-          onClick = { presenter.dispatch(GroupSelectionEvent.BackClicked) }
+          onClick = { dismiss() }
         ) {
           Text(text = stringResource(Res.string.buttonGoBack))
         }
@@ -172,7 +178,7 @@ fun GroupSelectionSheet(presenter: GroupSelectionPresenter, modifier: Modifier =
         Button(
           modifier = Modifier.weight(1f),
           enabled = state.areGroupsSelected,
-          onClick = { presenter.dispatch(GroupSelectionEvent.OnConfirmGroupSelectionClicked) }
+          onClick = { onGroupsSelected(state.selectedGroups) }
         ) {
           Text(text = stringResource(Res.string.buttonConfirm))
         }

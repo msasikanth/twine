@@ -13,8 +13,7 @@ import Bugsnag
 import RevenueCat
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-	let rootHolder: RootHolder = RootHolder()
-    
+
     lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent(
       uiViewControllerProvider: { UIApplication.topViewController()! }
     )

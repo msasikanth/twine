@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
-internal data class ReaderState(
+data class ReaderState(
   val activePostIndex: Int,
   val activePostId: String,
   val loadFullArticleMap: Map<String, Boolean>,
@@ -33,6 +33,7 @@ internal data class ReaderState(
   val selectedReaderFont: ReaderFont,
   val readerFontScaleFactor: Float,
   val readerLineHeightScaleFactor: Float,
+  val openPaywall: Boolean,
 ) {
 
   fun canLoadFullPost(postId: String): Boolean {
@@ -51,6 +52,7 @@ internal data class ReaderState(
         selectedReaderFont = ReaderFont.Golos,
         readerFontScaleFactor = 1f,
         readerLineHeightScaleFactor = 1f,
+        openPaywall = false,
       )
     }
   }

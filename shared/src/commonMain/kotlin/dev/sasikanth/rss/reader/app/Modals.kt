@@ -16,11 +16,13 @@
 
 package dev.sasikanth.rss.reader.app
 
-import dev.sasikanth.rss.reader.feed.FeedPresenter
-import dev.sasikanth.rss.reader.groupselection.GroupSelectionPresenter
+import kotlinx.serialization.Serializable
 
 internal sealed interface Modals {
-  class FeedInfo(val presenter: FeedPresenter) : Modals
 
-  class GroupSelection(val presenter: GroupSelectionPresenter) : Modals
+  data object None : Modals
+
+  @Serializable data class FeedInfo(val feedId: String) : Modals
+
+  @Serializable data object GroupSelection : Modals
 }

@@ -15,21 +15,16 @@
  */
 package dev.sasikanth.rss.reader.di
 
-import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.HomeViewController
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
 import me.tatarka.inject.annotations.Component
-import me.tatarka.inject.annotations.Provides
 
 @Component
 @ActivityScope
 abstract class HomeViewControllerComponent(
-  @get:Provides val componentContext: ComponentContext,
   @Component val applicationComponent: ApplicationComponent,
-  @get:Provides val backDispatcher: BackDispatcher,
 ) : PlatformComponent, ShareComponent {
 
   abstract val homeViewController: HomeViewController

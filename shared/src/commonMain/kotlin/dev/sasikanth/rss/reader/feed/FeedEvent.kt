@@ -18,15 +18,9 @@ package dev.sasikanth.rss.reader.feed
 
 sealed interface FeedEvent {
 
-  data object Init : FeedEvent
-
-  data object BackClicked : FeedEvent
-
   data object RemoveFeedClicked : FeedEvent
 
   data class OnFeedNameChanged(val newFeedName: String, val feedId: String) : FeedEvent
-
-  data object DismissSheet : FeedEvent
 
   data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean, val feedId: String) :
     FeedEvent

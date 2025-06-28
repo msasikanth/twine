@@ -25,7 +25,7 @@ import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.opml.OpmlResult
 
 @Immutable
-internal data class SettingsState(
+data class SettingsState(
   val browserType: BrowserType,
   val showUnreadPostsCount: Boolean,
   val hasFeeds: Boolean,
@@ -38,6 +38,7 @@ internal data class SettingsState(
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val subscriptionResult: BillingHandler.SubscriptionResult?,
+  val openPaywall: Boolean,
 ) {
 
   companion object {
@@ -56,6 +57,7 @@ internal data class SettingsState(
         showFeedFavIcon = true,
         markAsReadOn = MarkAsReadOn.Open,
         subscriptionResult = null,
+        openPaywall = false,
       )
   }
 }

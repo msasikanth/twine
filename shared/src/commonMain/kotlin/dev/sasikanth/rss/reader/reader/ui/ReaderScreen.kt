@@ -51,13 +51,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
@@ -70,6 +71,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
@@ -77,7 +79,7 @@ import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
-import dev.sasikanth.rss.reader.reader.ReaderPresenter
+import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
@@ -89,7 +91,6 @@ import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
-import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
@@ -98,14 +99,18 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun ReaderScreen(
   darkTheme: Boolean,
-  presenter: ReaderPresenter,
+  viewModel: ReaderViewModel,
+  onPostChanged: (Int) -> Unit,
+  onBack: () -> Unit,
+  openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val state by presenter.state.collectAsState()
+  val state by viewModel.state.collectAsStateWithLifecycle()
   val posts = state.posts.collectAsLazyPagingItems()
   val linkHandler = LocalLinkHandler.current
   val seedColorExtractor = LocalSeedColorExtractor.current
@@ -181,8 +186,15 @@ internal fun ReaderScreen(
       }
   }
 
-  BackHandler(backHandler = presenter.backHandler, isEnabled = state.showReaderCustomisations) {
-    presenter.dispatch(ReaderEvent.HideReaderCustomisations)
+  LaunchedEffect(state.openPaywall) {
+    if (state.openPaywall) {
+      openPaywall()
+      viewModel.dispatch(ReaderEvent.MarkOpenPaywallDone)
+    }
+  }
+
+  BackHandler(enabled = state.showReaderCustomisations) {
+    viewModel.dispatch(ReaderEvent.HideReaderCustomisations)
   }
 
   CompositionLocalProvider(
@@ -224,7 +236,7 @@ internal fun ReaderScreen(
                   Modifier.padding(start = 24.dp)
                     .requiredSize(40.dp)
                     .clip(CircleShape)
-                    .clickable { presenter.dispatch(ReaderEvent.BackClicked) }
+                    .clickable { onBack() }
                     .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
                     .border(
                       width = 1.dp,
@@ -282,15 +294,15 @@ internal fun ReaderScreen(
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
               loadFullArticleClick = {
-                presenter.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+                viewModel.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
               },
-              openReaderViewSettings = { presenter.dispatch(ReaderEvent.ShowReaderCustomisations) },
-              onFontChange = { font -> presenter.dispatch(ReaderEvent.UpdateReaderFont(font)) },
+              openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
+              onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
               onFontScaleFactorChange = { fontScaleFactor ->
-                presenter.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
+                viewModel.dispatch(ReaderEvent.UpdateFontScaleFactor(fontScaleFactor))
               },
               onFontLineHeightFactorChange = { fontLineHeightFactor ->
-                presenter.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
+                viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
               }
             )
           }
@@ -312,7 +324,8 @@ internal fun ReaderScreen(
               val readerPost = runCatching { posts.peek(page) }.getOrNull()
 
               if (readerPost != null) {
-                presenter.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+                onPostChanged(page)
+                viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
               }
             }
         }
@@ -331,7 +344,7 @@ internal fun ReaderScreen(
           val readerPost = posts[page]
 
           if (readerPost != null) {
-            LaunchedEffect(readerPost.id) { presenter.dispatch(ReaderEvent.PostLoaded(readerPost)) }
+            LaunchedEffect(readerPost.id) { viewModel.dispatch(ReaderEvent.PostLoaded(readerPost)) }
 
             ReaderPage(
               readerPost = readerPost,
@@ -340,7 +353,7 @@ internal fun ReaderScreen(
               highlightsBuilder = highlightsBuilder,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
               onBookmarkClick = {
-                presenter.dispatch(
+                viewModel.dispatch(
                   ReaderEvent.TogglePostBookmark(
                     postId = readerPost.id,
                     currentBookmarkStatus = readerPost.bookmarked
@@ -357,7 +370,7 @@ internal fun ReaderScreen(
           Box(
             modifier =
               Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { presenter.dispatch(ReaderEvent.HideReaderCustomisations) }
+                detectTapGestures { viewModel.dispatch(ReaderEvent.HideReaderCustomisations) }
               }
           )
         }

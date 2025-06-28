@@ -23,8 +23,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.WindowCompat
-import com.arkivanov.decompose.ComponentContext
-import com.arkivanov.decompose.defaultComponentContext
 import dev.sasikanth.rss.reader.app.App
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
@@ -76,7 +74,6 @@ fun ApplicationComponent.Companion.from(activity: Activity) =
 @ActivityScope
 abstract class ActivityComponent(
   @get:Provides val activity: ComponentActivity,
-  @get:Provides val componentContext: ComponentContext = activity.defaultComponentContext(),
   @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity)
 ) : PlatformComponent, ShareComponent {
 

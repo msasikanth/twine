@@ -53,8 +53,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
-import dev.sasikanth.rss.reader.about.AboutEvent
-import dev.sasikanth.rss.reader.about.AboutPresenter
 import dev.sasikanth.rss.reader.about.Person
 import dev.sasikanth.rss.reader.about.Social
 import dev.sasikanth.rss.reader.components.image.AsyncImage
@@ -79,7 +77,10 @@ import twine.shared.generated.resources.aboutSocialTwitter
 import twine.shared.generated.resources.aboutSocialWebsite
 
 @Composable
-internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Modifier) {
+fun AboutScreen(
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val layoutDirection = LocalLayoutDirection.current
   val aboutRoleDeveloper = stringResource(Res.string.aboutRoleDeveloper)
   val aboutRoleDesigner = stringResource(Res.string.aboutRoleDesigner)
@@ -146,7 +147,7 @@ internal fun AboutScreen(aboutPresenter: AboutPresenter, modifier: Modifier = Mo
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.about)) },
           navigationIcon = {
-            IconButton(onClick = { aboutPresenter.dispatch(AboutEvent.BackClicked) }) {
+            IconButton(onClick = { goBack() }) {
               Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },

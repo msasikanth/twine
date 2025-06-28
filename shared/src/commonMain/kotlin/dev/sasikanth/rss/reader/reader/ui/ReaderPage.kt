@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -62,6 +61,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
@@ -152,7 +152,7 @@ internal fun ReaderPage(
 
   LaunchedEffect(parsedMarkdownState) { parsedMarkdownState.parse() }
 
-  val markdownState by parsedMarkdownState.state.collectAsState()
+  val markdownState by parsedMarkdownState.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
   val coroutineScope = rememberCoroutineScope()
