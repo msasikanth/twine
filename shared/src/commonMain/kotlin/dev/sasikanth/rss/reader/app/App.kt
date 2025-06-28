@@ -132,7 +132,7 @@ fun App(
   setSingletonImageLoaderFactory { imageLoader }
 
   val appViewModel = viewModel { appViewModel() }
-  val state by appViewModel.state.collectAsStateWithLifecycle()
+  val appState by appViewModel.state.collectAsStateWithLifecycle()
   val dynamicColorState =
     rememberDynamicColorState(
       defaultLightAppColorScheme = lightAppColorScheme(),
@@ -145,13 +145,13 @@ fun App(
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
-    LocalShowFeedFavIconSetting provides state.showFeedFavIcon,
+    LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
-      remember(isSystemInDarkTheme, state.appThemeMode) {
-        when (state.appThemeMode) {
+      remember(isSystemInDarkTheme, appState.appThemeMode) {
+        when (appState.appThemeMode) {
           AppThemeMode.Light -> false
           AppThemeMode.Dark -> true
           AppThemeMode.Auto -> isSystemInDarkTheme
@@ -160,8 +160,8 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    LaunchedEffect(state.homeViewMode) {
-      if (state.homeViewMode != HomeViewMode.Default) {
+    LaunchedEffect(appState.homeViewMode) {
+      if (appState.homeViewMode != HomeViewMode.Default) {
         dynamicColorState.reset()
       }
     }
@@ -221,7 +221,7 @@ fun App(
             openPost = { index, post ->
               coroutineScope.launch {
                 openPost(
-                  state = state,
+                  state = appState,
                   navController = navController,
                   index = index,
                   post = post,
@@ -289,7 +289,7 @@ fun App(
             goBack = { navController.popBackStack() },
             openPost = { searchQuery, sortOrder, index, post ->
               coroutineScope.launch {
-                if (state.showReaderView) {
+                if (appState.showReaderView) {
                   navController.navigate(
                     Screen.Reader(
                       readerScreenArgs =
@@ -318,7 +318,7 @@ fun App(
             goBack = { navController.popBackStack() },
             openPost = { index, post ->
               coroutineScope.launch {
-                if (state.showReaderView) {
+                if (appState.showReaderView) {
                   navController.navigate(
                     Screen.Reader(
                       readerScreenArgs =
