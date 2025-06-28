@@ -81,8 +81,12 @@ import twine.shared.generated.resources.buttonAdd
 import twine.shared.generated.resources.delete
 
 @Composable
-fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Modifier) {
-  val state by presenter.state.collectAsState()
+fun BlockedWordsScreen(
+  viewModel: BlockedWordsViewModel,
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val state by viewModel.state.collectAsState()
 
   Scaffold(
     modifier = modifier,
@@ -91,7 +95,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.blockedWords)) },
           navigationIcon = {
-            IconButton(onClick = { presenter.dispatch(BlockedWordsEvent.BackClicked) }) {
+            IconButton(onClick = { goBack() }) {
               Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
@@ -139,7 +143,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
         keyboardActions =
           KeyboardActions(
             onDone = {
-              presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+              viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
               newBlockedWord = TextFieldValue()
             }
           ),
@@ -179,7 +183,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           ) {
             IconButton(
               onClick = {
-                presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+                viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
                 newBlockedWord = TextFieldValue()
               }
             ) {
@@ -230,7 +234,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
             BlockedWordItem(
               word = blockedWord,
               removeClicked = {
-                presenter.dispatch(BlockedWordsEvent.DeleteBlockedWord(blockedWord.id))
+                viewModel.dispatch(BlockedWordsEvent.DeleteBlockedWord(blockedWord.id))
               }
             )
 

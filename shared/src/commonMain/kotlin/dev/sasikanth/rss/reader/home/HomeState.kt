@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDateTime
 
 @Immutable
-internal data class HomeState(
+data class HomeState(
   val posts: Flow<PagingData<PostWithMetadata>>?,
   val syncState: SyncState,
   val feedsSheetState: SheetValue,
@@ -42,6 +42,7 @@ internal data class HomeState(
   val currentDateTime: LocalDateTime,
   val homeViewMode: HomeViewMode,
   val unreadSinceLastSync: UnreadSinceLastSync?,
+  val prevActiveSource: Source?,
 ) {
 
   companion object {
@@ -58,6 +59,7 @@ internal data class HomeState(
         currentDateTime = currentDateTime,
         homeViewMode = HomeViewMode.Default,
         unreadSinceLastSync = null,
+        prevActiveSource = null,
       )
   }
 

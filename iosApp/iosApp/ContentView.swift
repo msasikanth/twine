@@ -5,11 +5,9 @@ import shared
 struct ComposeView: UIViewControllerRepresentable {
     
     let homeViewControllerComponent: InjectHomeViewControllerComponent
-    let backDispatcher: BackDispatcher
 	
-    init(homeViewControllerComponent: InjectHomeViewControllerComponent, backDispatcher: BackDispatcher) {
+    init(homeViewControllerComponent: InjectHomeViewControllerComponent) {
         self.homeViewControllerComponent = homeViewControllerComponent
-        self.backDispatcher = backDispatcher
 	}
 	
 	func makeUIViewController(context: Context) -> UIViewController {
@@ -24,15 +22,13 @@ struct ComposeView: UIViewControllerRepresentable {
 struct ContentView: View {
 	
     let homeViewControllerComponent: InjectHomeViewControllerComponent
-    let backDispatcher: BackDispatcher
 	
-    init(homeViewControllerComponent: InjectHomeViewControllerComponent, backDispatcher: BackDispatcher) {
+    init(homeViewControllerComponent: InjectHomeViewControllerComponent) {
         self.homeViewControllerComponent = homeViewControllerComponent
-        self.backDispatcher = backDispatcher
 	}
 
 	var body: some View {
-        ComposeView(homeViewControllerComponent: homeViewControllerComponent, backDispatcher: backDispatcher)
+        ComposeView(homeViewControllerComponent: homeViewControllerComponent)
 			.ignoresSafeArea(.keyboard) // Compose has own keyboard handler
 			.edgesIgnoringSafeArea(.all)
 	}

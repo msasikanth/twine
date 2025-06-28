@@ -21,8 +21,6 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 
 sealed interface GroupEvent {
 
-  data object Init : GroupEvent
-
   data class OnGroupNameChanged(val name: String) : GroupEvent
 
   data class OnGroupsSelected(val groupIds: Set<String>) : GroupEvent
@@ -34,8 +32,4 @@ sealed interface GroupEvent {
   data object OnCancelSelectionClicked : GroupEvent
 
   data class OnFeedClicked(val feed: Feed) : GroupEvent
-
-  data object OnMoveFeedsToClicked : GroupEvent
-
-  data object OnBackClicked : GroupEvent
 }

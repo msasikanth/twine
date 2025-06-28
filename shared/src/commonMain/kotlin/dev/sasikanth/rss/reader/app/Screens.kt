@@ -15,38 +15,32 @@
  */
 package dev.sasikanth.rss.reader.app
 
-import dev.sasikanth.rss.reader.about.AboutPresenter
-import dev.sasikanth.rss.reader.addfeed.AddFeedPresenter
-import dev.sasikanth.rss.reader.blockedwords.BlockedWordsPresenter
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
-import dev.sasikanth.rss.reader.group.GroupPresenter
-import dev.sasikanth.rss.reader.home.HomePresenter
-import dev.sasikanth.rss.reader.premium.PremiumPaywallPresenter
-import dev.sasikanth.rss.reader.reader.ReaderPresenter
-import dev.sasikanth.rss.reader.search.SearchPresenter
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
+import kotlinx.serialization.Serializable
 
 internal sealed interface Screen {
 
-  data object Placeholder : Screen
+  @Serializable data object Placeholder : Screen
 
-  class Home(val presenter: HomePresenter) : Screen
+  @Serializable data object Home : Screen
 
-  class Reader(val presenter: ReaderPresenter) : Screen
+  @Serializable data class Reader(val readerScreenArgs: ReaderScreenArgs) : Screen
 
-  class Search(val presenter: SearchPresenter) : Screen
+  @Serializable data object Search : Screen
 
-  class Bookmarks(val presenter: BookmarksPresenter) : Screen
+  @Serializable data object Bookmarks : Screen
 
-  class Settings(val presenter: SettingsPresenter) : Screen
+  @Serializable data object Settings : Screen
 
-  class About(val presenter: AboutPresenter) : Screen
+  @Serializable data object About : Screen
 
-  class AddFeed(val presenter: AddFeedPresenter) : Screen
+  @Serializable data object AddFeed : Screen
 
-  class GroupDetails(val presenter: GroupPresenter) : Screen
+  @Serializable data class FeedGroup(val groupId: String) : Screen
 
-  class BlockedWords(val presenter: BlockedWordsPresenter) : Screen
+  @Serializable data object BlockedWords : Screen
 
-  class Paywall(val presenter: PremiumPaywallPresenter) : Screen
+  @Serializable data object Paywall : Screen
+
+  data object None : Screen
 }

@@ -48,8 +48,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
-import dev.sasikanth.rss.reader.bookmarks.BookmarksPresenter
+import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -66,10 +67,12 @@ import twine.shared.generated.resources.buttonGoBack
 
 @Composable
 internal fun BookmarksScreen(
-  bookmarksPresenter: BookmarksPresenter,
+  bookmarksViewModel: BookmarksViewModel,
+  goBack: () -> Unit,
+  openPost: (postIndex: Int, post: PostWithMetadata) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val state by bookmarksPresenter.state.collectAsState()
+  val state by bookmarksViewModel.state.collectAsState()
   val bookmarks = state.bookmarks.collectAsLazyPagingItems()
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
@@ -84,7 +87,7 @@ internal fun BookmarksScreen(
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.bookmarks)) },
           navigationIcon = {
-            IconButton(onClick = { bookmarksPresenter.dispatch(BookmarksEvent.BackClicked) }) {
+            IconButton(onClick = { goBack() }) {
               Icon(
                 TwineIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.buttonGoBack)
@@ -128,11 +131,9 @@ internal fun BookmarksScreen(
                       showToggleReadUnreadOption = false,
                       enablePostSource = false
                     ),
-                  onClick = {
-                    bookmarksPresenter.dispatch(BookmarksEvent.OnPostClicked(index, post))
-                  },
+                  onClick = { openPost(index, post) },
                   onPostBookmarkClick = {
-                    bookmarksPresenter.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
+                    bookmarksViewModel.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
                   },
                   onPostCommentsClick = {
                     post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
@@ -141,7 +142,7 @@ internal fun BookmarksScreen(
                     // no-op
                   },
                   togglePostReadClick = {
-                    bookmarksPresenter.dispatch(
+                    bookmarksViewModel.dispatch(
                       BookmarksEvent.TogglePostReadStatus(post.id, post.read)
                     )
                   }
@@ -158,7 +159,7 @@ internal fun BookmarksScreen(
 
           NewArticlesScrollToTopButton(
             unreadSinceLastSync = null,
-            canShowScrollToTop = true,
+            canShowScrollToTop = showScrollToTop,
             modifier =
               Modifier.padding(
                 end = padding.calculateEndPadding(layoutDirection) + 16.dp,

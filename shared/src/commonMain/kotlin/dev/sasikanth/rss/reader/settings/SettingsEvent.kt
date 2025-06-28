@@ -22,8 +22,6 @@ import dev.sasikanth.rss.reader.data.repository.Period
 
 sealed interface SettingsEvent {
 
-  data object BackClicked : SettingsEvent
-
   data class UpdateBrowserType(val browserType: BrowserType) : SettingsEvent
 
   data class ToggleShowUnreadPostsCount(val value: Boolean) : SettingsEvent
@@ -33,8 +31,6 @@ sealed interface SettingsEvent {
   data class ToggleAutoSync(val value: Boolean) : SettingsEvent
 
   data class ToggleShowFeedFavIcon(val value: Boolean) : SettingsEvent
-
-  data object AboutClicked : SettingsEvent
 
   data object ImportOpmlClicked : SettingsEvent
 
@@ -46,11 +42,9 @@ sealed interface SettingsEvent {
 
   data class OnAppThemeModeChanged(val appThemeMode: AppThemeMode) : SettingsEvent
 
-  data object BlockedWordsClicked : SettingsEvent
-
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 
-  data object OnPurchasePremiumClick : SettingsEvent
-
   data object LoadSubscriptionStatus : SettingsEvent
+
+  data object MarkOpenPaywallAsDone : SettingsEvent
 }

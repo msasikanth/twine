@@ -26,11 +26,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
 sealed interface HomeEvent {
 
-  data object Init : HomeEvent
-
   data object OnSwipeToRefresh : HomeEvent
-
-  data class OnPostClicked(val post: PostWithMetadata, val postIndex: Int) : HomeEvent
 
   data class OnPostSourceClicked(val feedId: String) : HomeEvent
 
@@ -38,17 +34,9 @@ sealed interface HomeEvent {
 
   data object OnHomeSelected : HomeEvent
 
-  data object BackClicked : HomeEvent
-
-  data object SearchClicked : HomeEvent
-
   data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
 
   data class OnPostsTypeChanged(val postsType: PostsType) : HomeEvent
-
-  data object BookmarksClicked : HomeEvent
-
-  data object SettingsClicked : HomeEvent
 
   data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : HomeEvent
 
@@ -67,4 +55,6 @@ sealed interface HomeEvent {
   data object LoadNewArticlesClick : HomeEvent
 
   data object UpdateDate : HomeEvent
+
+  data class UpdatePrevActiveSource(val source: Source?) : HomeEvent
 }

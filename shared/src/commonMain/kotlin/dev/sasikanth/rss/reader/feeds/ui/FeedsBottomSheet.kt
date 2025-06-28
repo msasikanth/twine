@@ -26,7 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
@@ -42,40 +44,34 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
 import com.adamglin.composeshadow.dropShadow
-import dev.sasikanth.rss.reader.feeds.FeedsEffect
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
-import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.roundToInt
 
 private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun FeedsBottomSheet(
-  feedsPresenter: FeedsPresenter,
-  bottomSheetProgress: () -> Float,
+  feedsViewModel: FeedsViewModel,
   darkTheme: Boolean,
-  closeSheet: () -> Unit,
-  selectedFeedChanged: () -> Unit
+  bottomSheetProgress: () -> Float,
+  openFeedInfoSheet: (id: String) -> Unit,
+  openGroupScreen: (id: String) -> Unit,
+  openGroupSelectionSheet: () -> Unit,
+  openAddFeedScreen: () -> Unit,
+  openPaywall: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   val density = LocalDensity.current
   val focusManager = LocalFocusManager.current
-  val state by feedsPresenter.state.collectAsState()
+  val state by feedsViewModel.state.collectAsState()
 
-  LaunchedEffect(Unit) {
-    feedsPresenter.effects.collect { effect ->
-      when (effect) {
-        FeedsEffect.MinimizeSheet -> closeSheet()
-        FeedsEffect.SelectedFeedChanged -> selectedFeedChanged()
-      }
-    }
-  }
-
-  BackHandler(backHandler = feedsPresenter.backHandler, isEnabled = state.isInMultiSelectMode) {
-    feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection)
+  BackHandler(enabled = state.isInMultiSelectMode) {
+    feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
   val collapsedContentBackgroundColor = AppTheme.colorScheme.bottomSheet
@@ -97,7 +93,7 @@ internal fun FeedsBottomSheet(
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
       val collapsedSheetHeight = 100.dp
       val targetSheetHeight = with(density) { constraints.maxHeight.toDp() }
 
@@ -222,16 +218,21 @@ internal fun FeedsBottomSheet(
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           homeItemBackgroundColor = AppTheme.colorScheme.surfaceContainerLow,
           homeItemShadowColors = homeItemShadowColors,
-          onSourceClick = { feed -> feedsPresenter.dispatch(FeedsEvent.OnSourceClick(feed)) },
-          onHomeSelected = { feedsPresenter.dispatch(FeedsEvent.OnHomeSelected) }
+          onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
+          onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) }
         )
 
         BottomSheetExpandedContent(
-          feedsPresenter = feedsPresenter,
           modifier =
             Modifier.fillMaxSize().then(touchInterceptor).graphicsLayer {
               alpha = bottomSheetProgress()
-            }
+            },
+          viewModel = feedsViewModel,
+          openFeedInfoSheet = openFeedInfoSheet,
+          openGroupScreen = openGroupScreen,
+          openGroupSelectionSheet = openGroupSelectionSheet,
+          openAddFeedScreen = openAddFeedScreen,
+          openPaywall = openPaywall,
         )
       }
     }

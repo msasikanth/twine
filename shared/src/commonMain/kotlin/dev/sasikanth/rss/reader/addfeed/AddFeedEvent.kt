@@ -22,11 +22,11 @@ sealed interface AddFeedEvent {
 
   data class AddFeedClicked(val feedLink: String, val name: String?) : AddFeedEvent
 
-  data object BackClicked : AddFeedEvent
-
-  data object OnGroupDropdownClicked : AddFeedEvent
-
   data class OnGroupsSelected(val selectedGroupIds: Set<String>) : AddFeedEvent
 
   data class OnRemoveGroupClicked(val group: FeedGroup) : AddFeedEvent
+
+  data object MarkGoBackAsDone : AddFeedEvent
+
+  data object MarkErrorAsShown : AddFeedEvent
 }

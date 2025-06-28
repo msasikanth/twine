@@ -48,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,7 +92,7 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
-import dev.sasikanth.rss.reader.settings.SettingsPresenter
+import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
@@ -142,13 +143,24 @@ import twine.shared.generated.resources.twinePremiumSubscribedDesc
 
 @Composable
 internal fun SettingsScreen(
-  settingsPresenter: SettingsPresenter,
+  viewModel: SettingsViewModel,
+  goBack: () -> Unit,
+  openAbout: () -> Unit,
+  openBlockedWords: () -> Unit,
+  openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val state by settingsPresenter.state.collectAsState()
+  val state by viewModel.state.collectAsState()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+
+  LaunchedEffect(state.openPaywall) {
+    if (state.openPaywall) {
+      openPaywall()
+      viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
+    }
+  }
 
   Scaffold(
     modifier = modifier,
@@ -157,7 +169,7 @@ internal fun SettingsScreen(
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.settings)) },
           navigationIcon = {
-            IconButton(onClick = { settingsPresenter.dispatch(SettingsEvent.BackClicked) }) {
+            IconButton(onClick = { goBack() }) {
               Icon(
                 TwineIcons.ArrowBack,
                 contentDescription = stringResource(Res.string.buttonGoBack)
@@ -191,10 +203,7 @@ internal fun SettingsScreen(
             ),
         ) {
           item {
-            TwinePremium(
-              subscriptionResult = state.subscriptionResult,
-              onClick = { settingsPresenter.dispatch(SettingsEvent.OnPurchasePremiumClick) }
-            )
+            TwinePremium(subscriptionResult = state.subscriptionResult, onClick = { openPaywall() })
           }
 
           item { Divider() }
@@ -229,7 +238,7 @@ internal fun SettingsScreen(
                   )
                 ),
               onItemSelected = {
-                settingsPresenter.dispatch(
+                viewModel.dispatch(
                   SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode)
                 )
               }
@@ -248,7 +257,7 @@ internal fun SettingsScreen(
             ShowReaderViewSettingItem(
               showReaderView = state.showReaderView,
               onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
+                viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
               }
             )
           }
@@ -259,7 +268,7 @@ internal fun SettingsScreen(
             BrowserTypeSettingItem(
               browserType = state.browserType,
               onBrowserTypeChanged = { newBrowserType ->
-                settingsPresenter.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
+                viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
               }
             )
           }
@@ -270,7 +279,7 @@ internal fun SettingsScreen(
             UnreadPostsCountSettingItem(
               showUnreadCountEnabled = state.showUnreadPostsCount,
               onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+                viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
               }
             )
           }
@@ -281,7 +290,7 @@ internal fun SettingsScreen(
             AutoSyncSettingItem(
               enableAutoSync = state.enableAutoSync,
               onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.ToggleAutoSync(newValue))
+                viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
               }
             )
           }
@@ -292,24 +301,20 @@ internal fun SettingsScreen(
             ShowFeedFavIconSettingItem(
               showFeedFavIcon = state.showFeedFavIcon,
               onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
+                viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
               }
             )
           }
 
           item { Divider(24.dp) }
 
-          item {
-            BlockedWordsSettingItem {
-              settingsPresenter.dispatch(SettingsEvent.BlockedWordsClicked)
-            }
-          }
+          item { BlockedWordsSettingItem { openBlockedWords() } }
 
           item { Divider(24.dp) }
 
           item {
             MarkArticleAsReadOnSetting(articleMarkAsReadOn = state.markAsReadOn) {
-              settingsPresenter.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
+              viewModel.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
             }
           }
 
@@ -319,7 +324,7 @@ internal fun SettingsScreen(
             PostsDeletionPeriodSettingItem(
               postsDeletionPeriod = state.postsDeletionPeriod,
               onValueChanged = { newValue ->
-                settingsPresenter.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
+                viewModel.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
               }
             )
           }
@@ -330,11 +335,9 @@ internal fun SettingsScreen(
             OPMLSettingItem(
               opmlResult = state.opmlResult,
               hasFeeds = state.hasFeeds,
-              onImportClicked = { settingsPresenter.dispatch(SettingsEvent.ImportOpmlClicked) },
-              onExportClicked = { settingsPresenter.dispatch(SettingsEvent.ExportOpmlClicked) },
-              onCancelClicked = {
-                settingsPresenter.dispatch(SettingsEvent.CancelOpmlImportOrExport)
-              }
+              onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
+              onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
+              onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) }
             )
           }
 
@@ -357,7 +360,7 @@ internal fun SettingsScreen(
 
           item { Divider() }
 
-          item { AboutItem { settingsPresenter.dispatch(SettingsEvent.AboutClicked) } }
+          item { AboutItem { openAbout() } }
 
           item { Divider() }
         }

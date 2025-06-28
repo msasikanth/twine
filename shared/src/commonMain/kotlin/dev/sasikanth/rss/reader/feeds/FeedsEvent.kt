@@ -22,10 +22,6 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 
 sealed interface FeedsEvent {
 
-  data object Init : FeedsEvent
-
-  data object OnGoBackClicked : FeedsEvent
-
   data class OnDeleteFeed(val feed: Feed) : FeedsEvent
 
   data class OnToggleFeedSelection(val source: Source) : FeedsEvent
@@ -58,10 +54,6 @@ sealed interface FeedsEvent {
 
   data class OnGroupsSelected(val groupIds: Set<String>) : FeedsEvent
 
-  data class OnEditSourceClicked(val source: Source) : FeedsEvent
-
-  data object OnAddToGroupClicked : FeedsEvent
-
   data object OnNewFeedClicked : FeedsEvent
 
   data object DismissDeleteConfirmation : FeedsEvent
@@ -69,4 +61,8 @@ sealed interface FeedsEvent {
   data object DeleteSelectedSources : FeedsEvent
 
   data class OnPinnedSourcePositionChanged(val newSourcesList: List<Source>) : FeedsEvent
+
+  data object MarkOpenPaywallDone : FeedsEvent
+
+  data object MarkOpenAddFeedDone : FeedsEvent
 }

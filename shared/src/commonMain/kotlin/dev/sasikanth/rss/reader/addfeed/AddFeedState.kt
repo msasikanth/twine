@@ -21,12 +21,19 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 data class AddFeedState(
   val feedFetchingState: FeedFetchingState,
   val selectedFeedGroups: Set<FeedGroup>,
+  val error: AddFeedErrorType?,
+  val goBack: Boolean,
 ) {
 
   companion object {
 
     val DEFAULT =
-      AddFeedState(feedFetchingState = FeedFetchingState.Idle, selectedFeedGroups = emptySet())
+      AddFeedState(
+        feedFetchingState = FeedFetchingState.Idle,
+        selectedFeedGroups = emptySet(),
+        error = null,
+        goBack = false,
+      )
   }
 }
 

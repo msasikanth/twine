@@ -69,7 +69,7 @@ import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
-import dev.sasikanth.rss.reader.feeds.FeedsPresenter
+import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.BottomSheetExpandedBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
 import dev.sasikanth.rss.reader.resources.icons.Delete
@@ -98,18 +98,36 @@ import twine.shared.generated.resources.settings
 
 @Composable
 internal fun BottomSheetExpandedContent(
-  feedsPresenter: FeedsPresenter,
-  modifier: Modifier = Modifier
+  viewModel: FeedsViewModel,
+  openFeedInfoSheet: (id: String) -> Unit,
+  openGroupScreen: (id: String) -> Unit,
+  openGroupSelectionSheet: () -> Unit,
+  openAddFeedScreen: () -> Unit,
+  openPaywall: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  val state by feedsPresenter.state.collectAsState()
-  val searchQuery = feedsPresenter.searchQuery
+  val state by viewModel.state.collectAsState()
+  val searchQuery = viewModel.searchQuery
+
+  LaunchedEffect(state.openPaywall, state.openAddFeedScreen) {
+    when {
+      state.openPaywall -> {
+        openPaywall()
+        viewModel.dispatch(FeedsEvent.MarkOpenPaywallDone)
+      }
+      state.openAddFeedScreen -> {
+        openAddFeedScreen()
+        viewModel.dispatch(FeedsEvent.MarkOpenAddFeedDone)
+      }
+    }
+  }
 
   var showNewGroupDialog by remember { mutableStateOf(false) }
 
   if (state.showDeleteConfirmation) {
     DeleteConfirmationDialog(
-      onDelete = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSources) },
-      dismiss = { feedsPresenter.dispatch(FeedsEvent.DismissDeleteConfirmation) }
+      onDelete = { viewModel.dispatch(FeedsEvent.DeleteSelectedSources) },
+      dismiss = { viewModel.dispatch(FeedsEvent.DismissDeleteConfirmation) }
     )
   }
 
@@ -118,8 +136,8 @@ internal fun BottomSheetExpandedContent(
     topBar = {
       SearchBar(
         query = searchQuery,
-        onQueryChange = { feedsPresenter.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearClick = { feedsPresenter.dispatch(FeedsEvent.ClearSearchQuery) },
+        onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+        onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
       )
     },
     bottomBar = {
@@ -131,7 +149,7 @@ internal fun BottomSheetExpandedContent(
         ) {
           BottomSheetExpandedBottomBar(
             onNewGroupClick = { showNewGroupDialog = true },
-            onNewFeedClick = { feedsPresenter.dispatch(FeedsEvent.OnNewFeedClicked) }
+            onNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
           )
         }
 
@@ -150,7 +168,7 @@ internal fun BottomSheetExpandedContent(
 
           ContextActionsBottomBar(
             tooltip = tooltip,
-            onCancel = { feedsPresenter.dispatch(FeedsEvent.CancelSourcesSelection) }
+            onCancel = { viewModel.dispatch(FeedsEvent.CancelSourcesSelection) }
           ) {
             val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
 
@@ -164,9 +182,9 @@ internal fun BottomSheetExpandedContent(
               label = pinActionLabel,
               onClick = {
                 if (areSelectedFeedsPinned) {
-                  feedsPresenter.dispatch(FeedsEvent.UnPinSelectedSources)
+                  viewModel.dispatch(FeedsEvent.UnPinSelectedSources)
                 } else {
-                  feedsPresenter.dispatch(FeedsEvent.PinSelectedSources)
+                  viewModel.dispatch(FeedsEvent.PinSelectedSources)
                 }
               }
             )
@@ -176,14 +194,14 @@ internal fun BottomSheetExpandedContent(
               icon = TwineIcons.NewGroup,
               label = stringResource(Res.string.actionAddTo),
               enabled = !areGroupsSelected,
-              onClick = { feedsPresenter.dispatch(FeedsEvent.OnAddToGroupClicked) }
+              onClick = { openGroupSelectionSheet() }
             )
 
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Delete,
               label = stringResource(Res.string.actionDelete),
-              onClick = { feedsPresenter.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
+              onClick = { viewModel.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
             )
 
             if (state.selectedSources.size == 1) {
@@ -205,9 +223,15 @@ internal fun BottomSheetExpandedContent(
                 icon = editIcon,
                 label = editLabel,
                 onClick = {
-                  feedsPresenter.dispatch(
-                    FeedsEvent.OnEditSourceClicked(state.selectedSources.first())
-                  )
+                  val selectedSource = state.selectedSources.first()
+                  when (selectedSource.sourceType) {
+                    SourceType.Feed -> {
+                      openFeedInfoSheet(selectedSource.id)
+                    }
+                    SourceType.FeedGroup -> {
+                      openGroupScreen(selectedSource.id)
+                    }
+                  }
                 }
               )
             }
@@ -235,7 +259,7 @@ internal fun BottomSheetExpandedContent(
         pinnedSources =
           pinnedSources.toMutableList().apply { add(to.index - 1, removeAt(from.index - 1)) }
 
-        feedsPresenter.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(pinnedSources))
+        viewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(pinnedSources))
       }
 
     SourcesList(
@@ -255,11 +279,9 @@ internal fun BottomSheetExpandedContent(
           isPinnedSectionExpanded = state.isPinnedSectionExpanded,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           isInMultiSelectMode = state.isInMultiSelectMode,
-          onTogglePinnedSection = { feedsPresenter.dispatch(FeedsEvent.TogglePinnedSection) },
-          onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = {
-            feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it))
-          }
+          onTogglePinnedSection = { viewModel.dispatch(FeedsEvent.TogglePinnedSection) },
+          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
         )
       },
       allSources = {
@@ -271,11 +293,9 @@ internal fun BottomSheetExpandedContent(
           feedsSortOrder = state.feedsSortOrder,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           isInMultiSelectMode = state.isInMultiSelectMode,
-          onFeedsSortChanged = { feedsPresenter.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
-          onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = {
-            feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it))
-          }
+          onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
+          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
         )
       },
       searchResults = {
@@ -284,10 +304,8 @@ internal fun BottomSheetExpandedContent(
           selectedSources = state.selectedSources,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
           isInMultiSelectMode = state.isInMultiSelectMode,
-          onSourceClick = { feedsPresenter.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = {
-            feedsPresenter.dispatch(FeedsEvent.OnToggleFeedSelection(it))
-          }
+          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
         )
       },
       isInSearchMode = isInSearchMode,
@@ -296,7 +314,7 @@ internal fun BottomSheetExpandedContent(
 
     if (showNewGroupDialog) {
       CreateGroupDialog(
-        onCreateGroup = { feedsPresenter.dispatch(FeedsEvent.OnCreateGroup(it)) },
+        onCreateGroup = { viewModel.dispatch(FeedsEvent.OnCreateGroup(it)) },
         onDismiss = { showNewGroupDialog = false }
       )
     }
@@ -375,7 +393,7 @@ private fun SearchBar(
 fun DeleteConfirmationDialog(
   onDelete: () -> Unit,
   dismiss: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   AlertDialog(
     modifier = modifier,

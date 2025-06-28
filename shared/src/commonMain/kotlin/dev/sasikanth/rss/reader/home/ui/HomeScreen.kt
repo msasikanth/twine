@@ -60,7 +60,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -74,17 +76,17 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEffect
 import dev.sasikanth.rss.reader.home.HomeEvent
-import dev.sasikanth.rss.reader.home.HomePresenter
 import dev.sasikanth.rss.reader.home.HomeState
+import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
-import dev.sasikanth.rss.reader.utils.BackHandler
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -102,17 +104,28 @@ import twine.shared.generated.resources.swipeUpGetStarted
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun HomeScreen(
-  homePresenter: HomePresenter,
-  useDarkTheme: Boolean = false,
-  modifier: Modifier = Modifier,
+  viewModel: HomeViewModel,
+  feedsViewModel: FeedsViewModel,
+  openSearch: () -> Unit,
+  openBookmarks: () -> Unit,
+  openSettings: () -> Unit,
+  openPost: (Int, PostWithMetadata) -> Unit,
+  openGroupSelectionSheet: () -> Unit,
+  openFeedInfoSheet: (feedId: String) -> Unit,
+  openAddFeedScreen: () -> Unit,
+  openGroupScreen: (groupId: String) -> Unit,
+  openPaywall: () -> Unit,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
   onBottomSheetHidden: (isHidden: Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+  useDarkTheme: Boolean = false,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val state by homePresenter.state.collectAsState()
-  val feedsState by homePresenter.feedsPresenter.state.collectAsState()
+  val state by viewModel.state.collectAsState()
+  val feedsState by feedsViewModel.state.collectAsState()
   val linkHandler = LocalLinkHandler.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
@@ -126,9 +139,9 @@ internal fun HomeScreen(
       initialValue = state.feedsSheetState,
       confirmValueChange = {
         if (it != SheetValue.Hidden) {
-          homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(it))
+          viewModel.dispatch(HomeEvent.FeedsSheetStateChanged(it))
         } else {
-          homePresenter.dispatch(HomeEvent.FeedsSheetStateChanged(SheetValue.PartiallyExpanded))
+          viewModel.dispatch(HomeEvent.FeedsSheetStateChanged(SheetValue.PartiallyExpanded))
         }
 
         onBottomSheetStateChanged(it)
@@ -144,7 +157,7 @@ internal fun HomeScreen(
   val unreadSinceLastSync = state.unreadSinceLastSync
 
   LaunchedEffect(Unit) {
-    homePresenter.effects.collectLatest { effect ->
+    viewModel.effects.collectLatest { effect ->
       when (effect) {
         is HomeEffect.ScrollPostListTo -> {
           if (effect.index < Constants.NUMBER_OF_FEATURED_POSTS) {
@@ -158,10 +171,18 @@ internal fun HomeScreen(
       }
     }
   }
+  LaunchedEffect(state.activeSource) {
+    if (state.activeSource != state.prevActiveSource) {
+      bottomSheetState.partialExpand()
+      postsListState.scrollToItem(0)
+      featuredPostsPagerState.scrollToPage(0)
+
+      viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
+    }
+  }
 
   BackHandler(
-    backHandler = homePresenter.backHandler,
-    isEnabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
+    enabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
     onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } }
   )
 
@@ -197,12 +218,12 @@ internal fun HomeScreen(
                 hasFeeds = hasFeeds,
                 hasUnreadPosts = state.hasUnreadPosts,
                 homeViewMode = state.homeViewMode,
-                onSearchClicked = { homePresenter.dispatch(HomeEvent.SearchClicked) },
-                onBookmarksClicked = { homePresenter.dispatch(HomeEvent.BookmarksClicked) },
-                onSettingsClicked = { homePresenter.dispatch(HomeEvent.SettingsClicked) },
-                onPostTypeChanged = { homePresenter.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
-                onMarkPostsAsRead = { homePresenter.dispatch(HomeEvent.MarkPostsAsRead(it)) },
-                onChangeHomeViewMode = { homePresenter.dispatch(HomeEvent.ChangeHomeViewMode(it)) }
+                onSearchClicked = openSearch,
+                onBookmarksClicked = openBookmarks,
+                onSettingsClicked = openSettings,
+                onPostTypeChanged = { viewModel.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
+                onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) },
+                onChangeHomeViewMode = { viewModel.dispatch(HomeEvent.ChangeHomeViewMode(it)) }
               )
             },
             body = { paddingValues ->
@@ -222,7 +243,7 @@ internal fun HomeScreen(
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
-                      homePresenter = homePresenter,
+                      homeViewModel = viewModel,
                       paddingValues = paddingValues,
                     ) {
                       NoNewPosts()
@@ -232,7 +253,7 @@ internal fun HomeScreen(
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
-                      homePresenter = homePresenter,
+                      homeViewModel = viewModel,
                       paddingValues = paddingValues,
                     ) {
                       PostsList(
@@ -245,28 +266,24 @@ internal fun HomeScreen(
                         featuredPostsPagerState = featuredPostsPagerState,
                         homeViewMode = state.homeViewMode,
                         markPostAsRead = {
-                          homePresenter.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                         },
-                        postsScrolled = {
-                          homePresenter.dispatch(HomeEvent.OnPostItemsScrolled(it))
-                        },
+                        postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
                         markScrolledPostsAsRead = {
-                          homePresenter.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                          viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
                         },
-                        onPostClicked = { post, postIndex ->
-                          homePresenter.dispatch(HomeEvent.OnPostClicked(post, postIndex))
-                        },
+                        onPostClicked = { post, postIndex -> openPost(postIndex, post) },
                         onPostBookmarkClick = {
-                          homePresenter.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                          viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
                         },
                         onPostCommentsClick = { commentsLink ->
                           coroutineScope.launch { linkHandler.openLink(commentsLink) }
                         },
                         onPostSourceClick = { feedId ->
-                          homePresenter.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                          viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
                         },
                         onTogglePostReadClick = { postId, postRead ->
-                          homePresenter.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                          viewModel.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
                         }
                       )
                     }
@@ -297,7 +314,7 @@ internal fun HomeScreen(
                     .calculateBottomPadding()
                     .coerceAtLeast(scaffoldPadding.calculateBottomPadding()) + 16.dp
               ),
-            onLoadNewArticlesClick = { homePresenter.dispatch(HomeEvent.LoadNewArticlesClick) },
+            onLoadNewArticlesClick = { viewModel.dispatch(HomeEvent.LoadNewArticlesClick) },
           ) {
             postsListState.animateScrollToItem(0)
           }
@@ -305,16 +322,14 @@ internal fun HomeScreen(
       },
       sheetContent = {
         FeedsBottomSheet(
-          feedsPresenter = homePresenter.feedsPresenter,
-          bottomSheetProgress = { bottomSheetProgress },
+          feedsViewModel = feedsViewModel,
           darkTheme = useDarkTheme,
-          closeSheet = { coroutineScope.launch { bottomSheetState.partialExpand() } },
-          selectedFeedChanged = {
-            coroutineScope.launch {
-              postsListState.scrollToItem(0)
-              featuredPostsPagerState.scrollToPage(0)
-            }
-          }
+          bottomSheetProgress = { bottomSheetProgress },
+          openFeedInfoSheet = openFeedInfoSheet,
+          openGroupScreen = openGroupScreen,
+          openGroupSelectionSheet = openGroupSelectionSheet,
+          openAddFeedScreen = openAddFeedScreen,
+          openPaywall = openPaywall,
         )
       },
       containerColor = Color.Transparent,
@@ -334,14 +349,14 @@ internal fun HomeScreen(
 private fun PullToRefreshContent(
   pullToRefreshState: PullToRefreshState,
   state: HomeState,
-  homePresenter: HomePresenter,
+  homeViewModel: HomeViewModel,
   paddingValues: PaddingValues,
   content: @Composable () -> Unit,
 ) {
   PullToRefreshBox(
     state = pullToRefreshState,
     isRefreshing = state.isSyncing,
-    onRefresh = { homePresenter.dispatch(HomeEvent.OnSwipeToRefresh) },
+    onRefresh = { homeViewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
     indicator = {
       Indicator(
         modifier =
@@ -452,7 +467,7 @@ private fun SheetState.progressAsState(): State<Float> {
 @Composable
 fun featuredPosts(
   posts: LazyPagingItems<PostWithMetadata>?,
-  homeViewMode: HomeViewMode
+  homeViewMode: HomeViewMode,
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
   return remember(posts?.itemSnapshotList?.items, homeViewMode) {

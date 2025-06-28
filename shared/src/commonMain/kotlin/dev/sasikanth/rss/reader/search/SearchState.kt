@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
-internal data class SearchState(
+data class SearchState(
   val searchResults: Flow<PagingData<PostWithMetadata>>,
   val searchInProgress: Boolean,
   val searchSortOrder: SearchSortOrder

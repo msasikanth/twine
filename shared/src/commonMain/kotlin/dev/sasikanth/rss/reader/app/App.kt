@@ -26,30 +26,52 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
+import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
-import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.experimental.stack.ChildStack
-import com.arkivanov.decompose.extensions.compose.experimental.stack.animation.StackAnimation
-import com.arkivanov.decompose.extensions.compose.subscribeAsState
-import com.arkivanov.essenty.backhandler.BackHandler
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
+import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
+import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
+import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
+import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
+import dev.sasikanth.rss.reader.feeds.FeedsEvent
+import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.group.GroupEvent
+import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
+import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
+import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
+import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
+import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
+import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
+import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
+import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
@@ -62,6 +84,11 @@ import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import kotlin.reflect.typeOf
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
@@ -75,38 +102,52 @@ typealias App =
 
 @Inject
 @Composable
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class, ExperimentalDecomposeApi::class)
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 fun App(
-  appPresenter: AppPresenter,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
   seedColorExtractor: SeedColorExtractor,
+  appViewModel: () -> AppViewModel,
+  placeholderViewModel: () -> PlaceholderViewModel,
+  homeViewModel: () -> HomeViewModel,
+  feedsViewModel: () -> FeedsViewModel,
+  readerViewModel: (SavedStateHandle) -> ReaderViewModel,
+  addFeedViewModel: () -> AddFeedViewModel,
+  feedViewModel: (SavedStateHandle) -> FeedViewModel,
+  groupSelectionViewModel: () -> GroupSelectionViewModel,
+  searchViewModel: () -> SearchViewModel,
+  bookmarksViewModel: () -> BookmarksViewModel,
+  settingsViewModel: () -> SettingsViewModel,
+  groupViewModel: (SavedStateHandle) -> GroupViewModel,
+  blockedWordsViewModel: () -> BlockedWordsViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
 ) {
   setSingletonImageLoaderFactory { imageLoader }
 
-  val appState by appPresenter.state.collectAsState()
+  val appViewModel = viewModel { appViewModel() }
+  val state by appViewModel.state.collectAsState()
   val dynamicColorState =
     rememberDynamicColorState(
       defaultLightAppColorScheme = lightAppColorScheme(),
       defaultDarkAppColorScheme = darkAppColorScheme(),
     )
+  val coroutineScope = rememberCoroutineScope()
 
   CompositionLocalProvider(
     LocalWindowSizeClass provides calculateWindowSizeClass(),
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
-    LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
+    LocalShowFeedFavIconSetting provides state.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
-      remember(isSystemInDarkTheme, appState.appThemeMode) {
-        when (appState.appThemeMode) {
+      remember(isSystemInDarkTheme, state.appThemeMode) {
+        when (state.appThemeMode) {
           AppThemeMode.Light -> false
           AppThemeMode.Dark -> true
           AppThemeMode.Auto -> isSystemInDarkTheme
@@ -115,106 +156,270 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    LaunchedEffect(appState.homeViewMode) {
-      if (appState.homeViewMode != HomeViewMode.Default) {
+    LaunchedEffect(state.homeViewMode) {
+      if (state.homeViewMode != HomeViewMode.Default) {
         dynamicColorState.reset()
       }
     }
 
     AppTheme(useDarkTheme = useDarkTheme) {
-      ChildStack(
-        modifier = Modifier.fillMaxSize(),
-        stack = appPresenter.screenStack,
-        animation =
-          backAnimation(
-            backHandler = appPresenter.backHandler,
-            onBack = appPresenter::onBackClicked
+      val navController = rememberNavController()
+      val fillMaxSizeModifier = Modifier.fillMaxSize()
+
+      NavHost(navController = navController, startDestination = Screen.Placeholder) {
+        composable<Screen.Placeholder> {
+          val viewModel = viewModel { placeholderViewModel() }
+          PlaceholderScreen(
+            modifier = fillMaxSizeModifier,
+            viewModel = viewModel,
+            navigateHome = {
+              navController.navigate(Screen.Home) {
+                popUpTo(Screen.Placeholder) { inclusive = true }
+              }
+            }
           )
-      ) { child ->
-        val fillMaxSizeModifier = Modifier.fillMaxSize()
-        when (val screen = child.instance) {
-          Screen.Placeholder -> {
-            PlaceholderScreen(modifier = fillMaxSizeModifier)
-          }
-          is Screen.Home -> {
-            HomeScreen(
-              homePresenter = screen.presenter,
-              useDarkTheme = useDarkTheme,
-              modifier = fillMaxSizeModifier,
-              onBottomSheetStateChanged = { sheetValue ->
-                val showDarkStatusBar =
-                  if (sheetValue == SheetValue.Expanded) {
-                    true
-                  } else {
-                    useDarkTheme
-                  }
-
-                toggleLightStatusBar(showDarkStatusBar.not())
-              },
-              onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
-            )
-          }
-          is Screen.Reader -> {
-            ReaderScreen(
-              darkTheme = useDarkTheme,
-              presenter = screen.presenter,
-              modifier = fillMaxSizeModifier
-            )
-          }
-          is Screen.Search -> {
-            SearchScreen(searchPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-          }
-          is Screen.Bookmarks -> {
-            BookmarksScreen(bookmarksPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-          }
-          is Screen.Settings -> {
-            SettingsScreen(settingsPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-          }
-          is Screen.About -> {
-            AboutScreen(aboutPresenter = screen.presenter, modifier = fillMaxSizeModifier)
-          }
-          is Screen.AddFeed -> {
-            AppTheme(useDarkTheme = true) {
-              AddFeedScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-          }
-          is Screen.GroupDetails -> {
-            AppTheme(useDarkTheme = true) {
-              GroupScreen(presenter = screen.presenter, modifier = fillMaxSizeModifier)
-            }
-          }
-          is Screen.BlockedWords -> {
-            BlockedWordsScreen(
-              modifier = fillMaxSizeModifier,
-              presenter = screen.presenter,
-            )
-          }
-          is Screen.Paywall -> {
-            PremiumPaywallScreen(
-              modifier = fillMaxSizeModifier,
-              presenter = screen.presenter,
-            )
-          }
         }
-      }
 
-      val modals by appPresenter.modalStack.subscribeAsState()
-      modals.child?.instance?.also { modal ->
-        when (modal) {
-          is Modals.FeedInfo -> {
-            FeedInfoBottomSheet(feedPresenter = modal.presenter)
+        composable<Screen.Home> {
+          val viewModel = viewModel { homeViewModel() }
+          val feedsViewModel = viewModel { feedsViewModel() }
+
+          LaunchedEffect(Unit) {
+            it.savedStateHandle
+              .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+              .filterNotNull()
+              .onEach { selectedGroupIds ->
+                feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+              }
+              .launchIn(this)
           }
-          is Modals.GroupSelection -> {
-            GroupSelectionSheet(presenter = modal.presenter)
+
+          HomeScreen(
+            modifier = fillMaxSizeModifier,
+            useDarkTheme = useDarkTheme,
+            viewModel = viewModel,
+            feedsViewModel = feedsViewModel,
+            openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
+            openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
+            openSearch = { navController.navigate(Screen.Search) },
+            openBookmarks = { navController.navigate(Screen.Bookmarks) },
+            openSettings = { navController.navigate(Screen.Settings) },
+            openPost = { index, post ->
+              coroutineScope.launch {
+                openPost(
+                  state = state,
+                  navController = navController,
+                  index = index,
+                  post = post,
+                  linkHandler = linkHandler,
+                  appViewModel = appViewModel
+                )
+              }
+            },
+            openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
+            openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
+            openPaywall = { navController.navigate(Screen.Paywall) },
+            onBottomSheetStateChanged = { sheetValue ->
+              val showDarkStatusBar =
+                if (sheetValue == SheetValue.Expanded) {
+                  true
+                } else {
+                  useDarkTheme
+                }
+
+              toggleLightStatusBar(showDarkStatusBar.not())
+            },
+            onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
+          )
+        }
+
+        composable<Screen.Reader>(
+          typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap),
+        ) {
+          val viewModel = viewModel { readerViewModel(it.savedStateHandle) }
+          ReaderScreen(
+            modifier = fillMaxSizeModifier,
+            darkTheme = useDarkTheme,
+            viewModel = viewModel,
+            onBack = { navController.popBackStack() },
+            openPaywall = { navController.navigate(Screen.Paywall) }
+          )
+        }
+
+        composable<Screen.AddFeed> {
+          val viewModel = viewModel { addFeedViewModel() }
+
+          LaunchedEffect(Unit) {
+            it.savedStateHandle
+              .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+              .filterNotNull()
+              .onEach { selectedGroupIds ->
+                viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
+              }
+              .launchIn(this)
           }
+
+          AddFeedScreen(
+            modifier = fillMaxSizeModifier,
+            viewModel = viewModel,
+            goBack = { navController.popBackStack() },
+            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
+          )
+        }
+
+        composable<Screen.Search> {
+          val viewModel = viewModel { searchViewModel() }
+          SearchScreen(
+            modifier = fillMaxSizeModifier,
+            searchViewModel = viewModel,
+            goBack = { navController.popBackStack() },
+            openPost = { searchQuery, sortOrder, index, post ->
+              coroutineScope.launch {
+                if (state.showReaderView) {
+                  navController.navigate(
+                    Screen.Reader(
+                      readerScreenArgs =
+                        ReaderScreenArgs(
+                          postIndex = index,
+                          postId = post.id,
+                          fromScreen = FromScreen.Search(searchQuery, sortOrder)
+                        )
+                    )
+                  )
+                } else {
+                  linkHandler.openLink(post.link)
+                  appViewModel.markPostAsRead(post.id)
+                }
+              }
+            }
+          )
+        }
+
+        composable<Screen.Bookmarks> {
+          val viewModel = viewModel { bookmarksViewModel() }
+
+          BookmarksScreen(
+            modifier = fillMaxSizeModifier,
+            bookmarksViewModel = viewModel,
+            goBack = { navController.popBackStack() },
+            openPost = { index, post ->
+              coroutineScope.launch {
+                if (state.showReaderView) {
+                  navController.navigate(
+                    Screen.Reader(
+                      readerScreenArgs =
+                        ReaderScreenArgs(
+                          postIndex = index,
+                          postId = post.id,
+                          fromScreen = FromScreen.Bookmarks
+                        )
+                    )
+                  )
+                } else {
+                  linkHandler.openLink(post.link)
+                  appViewModel.markPostAsRead(post.id)
+                }
+              }
+            }
+          )
+        }
+
+        composable<Screen.Settings> {
+          val viewModel = viewModel { settingsViewModel() }
+
+          SettingsScreen(
+            modifier = fillMaxSizeModifier,
+            viewModel = viewModel,
+            goBack = { navController.popBackStack() },
+            openBlockedWords = {},
+            openPaywall = { navController.navigate(Screen.Paywall) },
+            openAbout = { navController.navigate(Screen.About) }
+          )
+        }
+
+        composable<Screen.About> {
+          AboutScreen(modifier = fillMaxSizeModifier, goBack = { navController.popBackStack() })
+        }
+
+        composable<Screen.FeedGroup> {
+          val viewModel = viewModel { groupViewModel(it.savedStateHandle) }
+
+          LaunchedEffect(Unit) {
+            it.savedStateHandle
+              .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+              .filterNotNull()
+              .onEach { selectedGroupIds ->
+                viewModel.dispatch(GroupEvent.OnGroupsSelected(selectedGroupIds))
+              }
+              .launchIn(this)
+          }
+
+          GroupScreen(
+            modifier = fillMaxSizeModifier,
+            viewModel = viewModel,
+            goBack = { navController.popBackStack() },
+            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
+          )
+        }
+
+        composable<Screen.BlockedWords> {
+          val viewModel = viewModel { blockedWordsViewModel() }
+          BlockedWordsScreen(
+            modifier = fillMaxSizeModifier,
+            viewModel = viewModel,
+            goBack = { navController.popBackStack() }
+          )
+        }
+
+        composable<Screen.Paywall> {
+          PremiumPaywallScreen(goBack = { navController.popBackStack() })
+        }
+
+        dialog<Modals.FeedInfo> {
+          val viewModel = viewModel { feedViewModel(it.savedStateHandle) }
+          FeedInfoBottomSheet(feedViewModel = viewModel, dismiss = { navController.popBackStack() })
+        }
+
+        dialog<Modals.GroupSelection> {
+          val viewModel = viewModel { groupSelectionViewModel() }
+          GroupSelectionSheet(
+            viewModel = viewModel,
+            dismiss = { navController.popBackStack() },
+            onGroupsSelected = { selectedGroupIds ->
+              navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(SELECTED_GROUPS_KEY, selectedGroupIds)
+
+              navController.popBackStack()
+            }
+          )
         }
       }
     }
   }
 }
 
-@OptIn(ExperimentalDecomposeApi::class)
-internal expect fun <C : Any, T : Any> backAnimation(
-  backHandler: BackHandler,
-  onBack: () -> Unit,
-): StackAnimation<C, T>
+// TODO: Move this to individual screens
+private suspend fun openPost(
+  state: AppState,
+  navController: NavHostController,
+  index: Int,
+  post: PostWithMetadata,
+  linkHandler: LinkHandler,
+  appViewModel: AppViewModel,
+) {
+  if (state.showReaderView) {
+    navController.navigate(
+      Screen.Reader(
+        ReaderScreenArgs(
+          postIndex = index,
+          postId = post.id,
+          fromScreen = FromScreen.Home,
+        )
+      )
+    )
+  } else {
+    linkHandler.openLink(post.link)
+    appViewModel.markPostAsRead(post.id)
+  }
+}

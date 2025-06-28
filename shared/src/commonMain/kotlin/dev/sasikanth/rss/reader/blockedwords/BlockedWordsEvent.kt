@@ -20,8 +20,6 @@ import com.benasher44.uuid.Uuid
 
 sealed interface BlockedWordsEvent {
 
-  data object BackClicked : BlockedWordsEvent
-
   data class AddBlockedWord(val word: String) : BlockedWordsEvent
 
   data class DeleteBlockedWord(val id: Uuid) : BlockedWordsEvent

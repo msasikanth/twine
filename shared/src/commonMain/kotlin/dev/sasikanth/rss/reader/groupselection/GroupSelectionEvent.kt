@@ -22,9 +22,5 @@ sealed interface GroupSelectionEvent {
 
   data class OnToggleGroupSelection(val feedGroup: FeedGroup) : GroupSelectionEvent
 
-  data object OnConfirmGroupSelectionClicked : GroupSelectionEvent
-
-  data object BackClicked : GroupSelectionEvent
-
   data class OnCreateGroup(val name: String) : GroupSelectionEvent
 }

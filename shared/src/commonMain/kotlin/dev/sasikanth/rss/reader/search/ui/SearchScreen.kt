@@ -74,6 +74,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Newest
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Oldest
@@ -84,7 +85,7 @@ import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.search.SearchEvent
-import dev.sasikanth.rss.reader.search.SearchPresenter
+import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -101,8 +102,16 @@ import twine.shared.generated.resources.searchSortOldest
 import twine.shared.generated.resources.searchSortOldestFirst
 
 @Composable
-internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier = Modifier) {
-  val state by searchPresenter.state.collectAsState()
+internal fun SearchScreen(
+  searchViewModel: SearchViewModel,
+  goBack: () -> Unit,
+  openPost:
+    (
+      searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: PostWithMetadata
+    ) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val state by searchViewModel.state.collectAsState()
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
@@ -114,17 +123,17 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
     modifier = modifier,
     topBar = {
       SearchBar(
-        query = searchPresenter.searchQuery,
-        sortOrder = searchPresenter.searchSortOrder,
-        onQueryChange = { searchPresenter.dispatch(SearchEvent.SearchQueryChanged(it)) },
-        onBackClick = { searchPresenter.dispatch(SearchEvent.BackClicked) },
-        onClearClick = { searchPresenter.dispatch(SearchEvent.ClearSearchQuery) },
-        onSortOrderChanged = { searchPresenter.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
+        query = searchViewModel.searchQuery,
+        sortOrder = searchViewModel.searchSortOrder,
+        onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
+        onBackClick = { goBack() },
+        onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
+        onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
     },
     content = { padding ->
       Box(modifier = Modifier.fillMaxSize()) {
-        LaunchedEffect(searchPresenter.searchSortOrder) { listState.animateScrollToItem(0) }
+        LaunchedEffect(searchViewModel.searchSortOrder) { listState.animateScrollToItem(0) }
 
         LazyColumn(
           contentPadding =
@@ -155,9 +164,16 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
                 item = post,
                 postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
                 reduceReadItemAlpha = true,
-                onClick = { searchPresenter.dispatch(SearchEvent.OnPostClicked(index, post)) },
+                onClick = {
+                  openPost(
+                    searchViewModel.searchQuery.text,
+                    searchViewModel.searchSortOrder,
+                    index,
+                    post
+                  )
+                },
                 onPostBookmarkClick = {
-                  searchPresenter.dispatch(SearchEvent.OnPostBookmarkClick(post))
+                  searchViewModel.dispatch(SearchEvent.OnPostBookmarkClick(post))
                 },
                 onPostCommentsClick = {
                   post.commentsLink?.let { coroutineScope.launch { linkHandler.openLink(it) } }
@@ -166,7 +182,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
                   // no-op
                 },
                 togglePostReadClick = {
-                  searchPresenter.dispatch(SearchEvent.TogglePostReadStatus(post.id, post.read))
+                  searchViewModel.dispatch(SearchEvent.TogglePostReadStatus(post.id, post.read))
                 }
               )
 
@@ -182,7 +198,7 @@ internal fun SearchScreen(searchPresenter: SearchPresenter, modifier: Modifier =
 
         NewArticlesScrollToTopButton(
           unreadSinceLastSync = null,
-          canShowScrollToTop = true,
+          canShowScrollToTop = showScrollToTop,
           modifier =
             Modifier.padding(
               end = padding.calculateEndPadding(layoutDirection) + 16.dp,
