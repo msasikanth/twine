@@ -57,7 +57,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +73,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -113,7 +113,7 @@ fun FeedInfoBottomSheet(
   dismiss: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val state by feedViewModel.state.collectAsState()
+  val state by feedViewModel.state.collectAsStateWithLifecycle()
 
   LaunchedEffect(state.dismissSheet) {
     if (state.dismissSheet) {

@@ -36,7 +36,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -46,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
@@ -72,7 +72,7 @@ internal fun BookmarksScreen(
   openPost: (postIndex: Int, post: PostWithMetadata) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val state by bookmarksViewModel.state.collectAsState()
+  val state by bookmarksViewModel.state.collectAsStateWithLifecycle()
   val bookmarks = state.bookmarks.collectAsLazyPagingItems()
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()

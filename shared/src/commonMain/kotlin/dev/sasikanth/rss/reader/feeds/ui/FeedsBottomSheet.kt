@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -43,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
@@ -68,7 +68,7 @@ internal fun FeedsBottomSheet(
 ) {
   val density = LocalDensity.current
   val focusManager = LocalFocusManager.current
-  val state by feedsViewModel.state.collectAsState()
+  val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
   BackHandler(enabled = state.isInMultiSelectMode) {
     feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)

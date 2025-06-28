@@ -61,7 +61,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,6 +78,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.addfeed.AddFeedErrorType
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
@@ -110,7 +110,7 @@ fun AddFeedScreen(
   openGroupSelection: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val state by viewModel.state.collectAsState()
+  val state by viewModel.state.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
   val (feedLinkFocus, feedTitleFocus) = remember { FocusRequester.createRefs() }
 

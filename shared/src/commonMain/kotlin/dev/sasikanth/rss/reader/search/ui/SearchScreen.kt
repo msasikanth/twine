@@ -47,7 +47,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +68,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -111,7 +111,7 @@ internal fun SearchScreen(
     ) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val state by searchViewModel.state.collectAsState()
+  val state by searchViewModel.state.collectAsStateWithLifecycle()
   val listState = rememberLazyListState()
   val coroutineScope = rememberCoroutineScope()
   val showScrollToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }

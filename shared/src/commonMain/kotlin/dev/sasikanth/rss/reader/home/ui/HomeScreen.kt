@@ -70,6 +70,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -124,8 +125,8 @@ internal fun HomeScreen(
   useDarkTheme: Boolean = false,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val state by viewModel.state.collectAsState()
-  val feedsState by feedsViewModel.state.collectAsState()
+  val state by viewModel.state.collectAsStateWithLifecycle()
+  val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
 
   val posts = state.posts?.collectAsLazyPagingItems()

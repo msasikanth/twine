@@ -32,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -131,7 +132,7 @@ fun App(
   setSingletonImageLoaderFactory { imageLoader }
 
   val appViewModel = viewModel { appViewModel() }
-  val state by appViewModel.state.collectAsState()
+  val state by appViewModel.state.collectAsStateWithLifecycle()
   val dynamicColorState =
     rememberDynamicColorState(
       defaultLightAppColorScheme = lightAppColorScheme(),
