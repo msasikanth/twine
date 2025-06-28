@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
@@ -60,6 +62,7 @@ internal fun FeedsBottomSheet(
   selectedFeedChanged: () -> Unit
 ) {
   val density = LocalDensity.current
+  val focusManager = LocalFocusManager.current
   val state by feedsPresenter.state.collectAsState()
 
   LaunchedEffect(Unit) {
@@ -89,6 +92,9 @@ internal fun FeedsBottomSheet(
       0.9f to AppTheme.colorScheme.bottomSheet.copy(alpha = 0.4f),
       1f to Color.Transparent
     )
+  val isCollapsing by remember { derivedStateOf { bottomSheetProgress() < 1f } }
+
+  LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
