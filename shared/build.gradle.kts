@@ -121,6 +121,8 @@ kotlin {
       implementation(libs.purchases.core)
       implementation(libs.purchases.datetime)
       implementation(libs.purchases.ui)
+      implementation(libs.viewmodel)
+      implementation(libs.navigation)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
