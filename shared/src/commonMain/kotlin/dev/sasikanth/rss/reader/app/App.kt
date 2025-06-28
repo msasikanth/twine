@@ -15,6 +15,8 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SheetValue
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -166,7 +169,17 @@ fun App(
       val navController = rememberNavController()
       val fillMaxSizeModifier = Modifier.fillMaxSize()
 
-      NavHost(navController = navController, startDestination = Screen.Placeholder) {
+      NavHost(
+        navController = navController,
+        startDestination = Screen.Placeholder,
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = {
+          scaleOut(
+            targetScale = 0.9f,
+            transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f)
+          )
+        }
+      ) {
         composable<Screen.Placeholder> {
           val viewModel = viewModel { placeholderViewModel() }
           PlaceholderScreen(
