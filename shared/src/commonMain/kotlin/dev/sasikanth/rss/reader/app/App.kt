@@ -19,6 +19,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -168,7 +170,7 @@ fun App(
 
     AppTheme(useDarkTheme = useDarkTheme) {
       val navController = rememberNavController()
-      val fillMaxSizeModifier = Modifier.fillMaxSize()
+      val fillMaxSizeModifier = Modifier.fillMaxSize().clip(MaterialTheme.shapes.extraLarge)
 
       NavHost(
         navController = navController,
