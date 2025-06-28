@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 @Immutable
-internal data class FeedsState(
+data class FeedsState(
   val pinnedSources: List<Source>,
   val sources: Flow<PagingData<SourceListItem>>,
   val feedsSearchResults: Flow<PagingData<Feed>>,
@@ -36,6 +36,8 @@ internal data class FeedsState(
   val numberOfFeeds: Int,
   val numberOfFeedGroups: Int,
   val showDeleteConfirmation: Boolean,
+  val openPaywall: Boolean,
+  val openAddFeedScreen: Boolean,
 ) {
 
   val isInMultiSelectMode: Boolean
@@ -55,7 +57,9 @@ internal data class FeedsState(
         selectedSources = emptySet(),
         numberOfFeeds = 0,
         numberOfFeedGroups = 0,
-        showDeleteConfirmation = false
+        showDeleteConfirmation = false,
+        openPaywall = false,
+        openAddFeedScreen = false,
       )
   }
 }

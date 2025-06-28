@@ -50,7 +50,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.core.model.local.BlockedWord
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
@@ -81,8 +81,12 @@ import twine.shared.generated.resources.buttonAdd
 import twine.shared.generated.resources.delete
 
 @Composable
-fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Modifier) {
-  val state by presenter.state.collectAsState()
+fun BlockedWordsScreen(
+  viewModel: BlockedWordsViewModel,
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val state by viewModel.state.collectAsStateWithLifecycle()
 
   Scaffold(
     modifier = modifier,
@@ -91,7 +95,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.blockedWords)) },
           navigationIcon = {
-            IconButton(onClick = { presenter.dispatch(BlockedWordsEvent.BackClicked) }) {
+            IconButton(onClick = { goBack() }) {
               Icon(TwineIcons.ArrowBack, contentDescription = null)
             }
           },
@@ -139,7 +143,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
         keyboardActions =
           KeyboardActions(
             onDone = {
-              presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+              viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
               newBlockedWord = TextFieldValue()
             }
           ),
@@ -179,7 +183,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
           ) {
             IconButton(
               onClick = {
-                presenter.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
+                viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
                 newBlockedWord = TextFieldValue()
               }
             ) {
@@ -230,7 +234,7 @@ fun BlockedWordsScreen(presenter: BlockedWordsPresenter, modifier: Modifier = Mo
             BlockedWordItem(
               word = blockedWord,
               removeClicked = {
-                presenter.dispatch(BlockedWordsEvent.DeleteBlockedWord(blockedWord.id))
+                viewModel.dispatch(BlockedWordsEvent.DeleteBlockedWord(blockedWord.id))
               }
             )
 

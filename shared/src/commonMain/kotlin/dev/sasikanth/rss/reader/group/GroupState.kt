@@ -24,7 +24,7 @@ import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
-internal data class GroupState(
+data class GroupState(
   val group: FeedGroup?,
   val feeds: Flow<PagingData<Feed>>,
   val selectedSources: Set<Source>,

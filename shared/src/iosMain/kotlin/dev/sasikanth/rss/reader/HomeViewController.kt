@@ -15,44 +15,29 @@
  */
 package dev.sasikanth.rss.reader
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
-import com.arkivanov.decompose.ExperimentalDecomposeApi
-import com.arkivanov.decompose.extensions.compose.stack.animation.predictiveback.PredictiveBackGestureOverlay
-import com.arkivanov.essenty.backhandler.BackDispatcher
 import dev.sasikanth.rss.reader.app.App
 import me.tatarka.inject.annotations.Inject
 import platform.UIKit.UIViewController
 
-@OptIn(ExperimentalDecomposeApi::class)
 @Inject
-class HomeViewController(
-  private val app: App,
-  private val backDispatcher: BackDispatcher,
-) {
+class HomeViewController(private val app: App) {
 
   @Suppress("unused")
   fun viewController(): UIViewController {
     return ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
-      PredictiveBackGestureOverlay(
-        backDispatcher = backDispatcher,
-        backIcon = null,
-        modifier = Modifier.fillMaxSize()
-      ) {
-        app(
-          {
-            // no-op
-          },
-          {
-            // no-op
-          },
-          {
-            // no-op
-          }
-        )
-      }
+      app(
+        {
+          // no-op
+        },
+        {
+          // no-op
+        },
+        {
+          // no-op
+        }
+      )
     }
   }
 }

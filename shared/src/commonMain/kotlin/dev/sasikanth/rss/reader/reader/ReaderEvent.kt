@@ -21,8 +21,6 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont
 
 sealed interface ReaderEvent {
 
-  data object BackClicked : ReaderEvent
-
   data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
     ReaderEvent
 
@@ -41,4 +39,6 @@ sealed interface ReaderEvent {
   data class UpdateFontScaleFactor(val fontScaleFactor: Float) : ReaderEvent
 
   data class UpdateFontLineHeightFactor(val fontLineHeightFactor: Float) : ReaderEvent
+
+  data object MarkOpenPaywallDone : ReaderEvent
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -49,7 +50,20 @@ import twine.shared.generated.resources.databaseMaintainenceSubtitle
 import twine.shared.generated.resources.databaseMaintainenceTitle
 
 @Composable
-fun PlaceholderScreen(modifier: Modifier = Modifier) {
+fun PlaceholderScreen(
+  viewModel: PlaceholderViewModel,
+  navigateHome: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val navigateToHome by viewModel.navigateToHome.collectAsStateWithLifecycle()
+
+  LaunchedEffect(navigateToHome) {
+    if (navigateToHome) {
+      navigateHome()
+      viewModel.markNavigateToHomeAsDone()
+    }
+  }
+
   var isVisible by remember { mutableStateOf(false) }
 
   LaunchedEffect(Unit) {

@@ -19,9 +19,12 @@ import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 
 @Composable
-fun PremiumPaywallScreen(presenter: PremiumPaywallPresenter, modifier: Modifier = Modifier) {
+fun PremiumPaywallScreen(
+  goBack: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
   val paywallOptions = remember {
-    PaywallOptions.Builder(dismissRequest = { presenter.dispatch(PremiumPaywallEvent.GoBack) })
+    PaywallOptions.Builder(dismissRequest = { goBack() })
       .apply { shouldDisplayDismissButton = true }
       .build()
   }

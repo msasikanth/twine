@@ -57,7 +57,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,13 +73,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.feed.FeedEffect
 import dev.sasikanth.rss.reader.feed.FeedEvent
-import dev.sasikanth.rss.reader.feed.FeedPresenter
+import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.Share
@@ -88,13 +87,11 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -112,23 +109,22 @@ private val HORIZONTAL_PADDING = 24.dp
 
 @Composable
 fun FeedInfoBottomSheet(
-  feedPresenter: FeedPresenter,
+  feedViewModel: FeedViewModel,
+  dismiss: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val state by feedPresenter.state.collectAsState()
+  val state by feedViewModel.state.collectAsStateWithLifecycle()
 
-  LaunchedEffect(Unit) {
-    feedPresenter.effects.collectLatest { effect ->
-      when (effect) {
-        FeedEffect.DismissSheet -> feedPresenter.dispatch(FeedEvent.DismissSheet)
-      }
+  LaunchedEffect(state.dismissSheet) {
+    if (state.dismissSheet) {
+      dismiss()
     }
   }
 
   AppTheme(useDarkTheme = true) {
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
-      onDismissRequest = { feedPresenter.dispatch(FeedEvent.BackClicked) },
+      onDismissRequest = { dismiss() },
       containerColor = AppTheme.colorScheme.tintedBackground,
       contentColor = Color.Unspecified,
       contentWindowInsets = {
@@ -137,7 +133,7 @@ fun FeedInfoBottomSheet(
           .union(WindowInsets.ime.only(WindowInsetsSides.Bottom))
       },
       sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-      scrimColor = SYSTEM_SCRIM
+      scrimColor = Color.Transparent,
     ) {
       Column(
         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
@@ -148,7 +144,7 @@ fun FeedInfoBottomSheet(
             modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
             feed = feed,
             onFeedNameChange = { newFeedName ->
-              feedPresenter.dispatch(
+              feedViewModel.dispatch(
                 FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedId = feed.id)
               )
             }
@@ -159,7 +155,7 @@ fun FeedInfoBottomSheet(
           FeedUnreadCount(
             modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
             numberOfUnreadPosts = feed.numberOfUnreadPosts,
-            onMarkPostsAsRead = { feedPresenter.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
+            onMarkPostsAsRead = { feedViewModel.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
           )
 
           Divider(horizontalInsets = HORIZONTAL_PADDING)
@@ -167,7 +163,7 @@ fun FeedInfoBottomSheet(
           AlwaysFetchSourceArticleSwitch(
             feed = feed,
             onValueChanged = { newValue, feedId ->
-              feedPresenter.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
+              feedViewModel.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
             }
           )
 
@@ -176,7 +172,7 @@ fun FeedInfoBottomSheet(
           FeedOptions(
             modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
             feed = feed,
-            onRemoveFeedClick = { feedPresenter.dispatch(FeedEvent.RemoveFeedClicked) }
+            onRemoveFeedClick = { feedViewModel.dispatch(FeedEvent.RemoveFeedClicked) }
           )
 
           Spacer(Modifier.requiredHeight(8.dp))
@@ -195,7 +191,7 @@ fun FeedInfoBottomSheet(
 private fun FeedUnreadCount(
   numberOfUnreadPosts: Long,
   modifier: Modifier = Modifier,
-  onMarkPostsAsRead: () -> Unit
+  onMarkPostsAsRead: () -> Unit,
 ) {
   Row(
     modifier = modifier,
@@ -254,7 +250,7 @@ private fun FeedUnreadCount(
 private fun FeedLabelInput(
   feed: Feed,
   modifier: Modifier = Modifier,
-  onFeedNameChange: (String) -> Unit
+  onFeedNameChange: (String) -> Unit,
 ) {
   Row(
     Modifier.then(modifier)
@@ -375,7 +371,7 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
 private fun AlwaysFetchSourceArticleSwitch(
   feed: Feed,
   modifier: Modifier = Modifier,
-  onValueChanged: (newValue: Boolean, feedId: String) -> Unit
+  onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
 ) {
   var checked by
     remember(feed.alwaysFetchSourceArticle) { mutableStateOf(feed.alwaysFetchSourceArticle) }
@@ -411,7 +407,7 @@ private fun FeedOptionItem(
   icon: ImageVector,
   text: String,
   modifier: Modifier = Modifier,
-  onOptionClick: () -> Unit
+  onOptionClick: () -> Unit,
 ) {
   Column(
     modifier =
