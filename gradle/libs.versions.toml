@@ -15,8 +15,6 @@ kotlinx_date_time = "0.6.2"
 kotlinx_immutable_collections = "0.4.0"
 kotlinx_serialization_json = "1.8.1"
 kotlinx_io = "0.7.0"
-decompose = "3.3.0"
-essenty = "2.5.0"
 androidx_activity = "1.10.1"
 androidx_appcompat = "1.7.0"
 androidx_core = "1.16.0"
@@ -87,12 +85,6 @@ sqldelight_driver_native = { module = "app.cash.sqldelight:native-driver", versi
 sqldelight_extensions_coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
 sqldelight_extensions_paging = { module = "app.cash.sqldelight:androidx-paging3-extensions", version.ref = "sqldelight" }
 sqldelight_sqlite_dialect = { module = "app.cash.sqldelight:sqlite-3-35-dialect", version.ref = "sqldelight" }
-decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
-decompose_extensions_compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decompose" }
-decompose_extensions_compose_experimental = { module = "com.arkivanov.decompose:extensions-compose-experimental", version.ref = "decompose" }
-essenty_lifecycle = { module = "com.arkivanov.essenty:lifecycle", version.ref = "essenty" }
-essenty_lifecycle_coroutines = { module = "com.arkivanov.essenty:lifecycle-coroutines", version.ref = "essenty" }
-essenty_backhandler = { module = "com.arkivanov.essenty:back-handler", version.ref = "essenty" }
 androidx_activity_compose = { module = "androidx.activity:activity-compose", version.ref = "androidx_activity" }
 androidx_appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat" }
 androidx_core = { module = "androidx.core:core-ktx", version.ref = "androidx_core" }

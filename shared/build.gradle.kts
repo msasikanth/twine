@@ -53,9 +53,6 @@ kotlin {
 
       freeCompilerArgs += iOSBinaryFlags
 
-      export(libs.decompose)
-      export(libs.essenty.lifecycle)
-      export(libs.essenty.backhandler)
       export(libs.crashkios.bugsnag)
     }
   }
@@ -84,12 +81,6 @@ kotlin {
       implementation(libs.bundles.kotlinx)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
-      api(libs.decompose)
-      implementation(libs.decompose.extensions.compose)
-      implementation(libs.decompose.extensions.compose.experimental)
-      api(libs.essenty.lifecycle)
-      implementation(libs.essenty.lifecycle.coroutines)
-      api(libs.essenty.backhandler)
       implementation(libs.kotlininject.runtime)
       implementation(libs.androidx.collection)
       implementation(libs.material.color.utilities)
