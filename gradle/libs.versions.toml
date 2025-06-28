@@ -68,6 +68,7 @@ compose_material = { module = "org.jetbrains.compose.material:material", version
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_material_icons_extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose_material_icons_extended" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
+compose_backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
@@ -159,7 +160,7 @@ ksp = { id = 'com.google.devtools.ksp', version.ref = 'ksp' }
 bugsnag = { id = "com.bugsnag.android.gradle", version.ref = "bugsnag-plugin" }
 
 [bundles]
-compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended" ]
+compose = [ "compose_runtime", "compose_foundation", "compose_material", "compose_material3", "compose_resources", "compose_ui", "compose_ui_util", "compose_material_icons_extended", "compose_backhandler" ]
 kotlinx = [ "kotlinx_coroutines", "kotlinx_datetime", "kotlinx_immutable_collections", "kotlinx_serialization_json", "kotlinx_io" ]
 androidx_test = [ "androidx_test_runner", "androidx_test_rules" ]
 xmlutil = [ "xmlutil-core", "xmlutil-serialization" ]
