@@ -217,7 +217,7 @@ fun App(
             useDarkTheme = useDarkTheme,
             viewModel = viewModel,
             feedsViewModel = feedsViewModel,
-            onFirstVisiblePostItemChanged = { index -> appViewModel.updateActivePostIndex(index) },
+            onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
             openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
             openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
             openSearch = { navController.navigate(Screen.Search) },

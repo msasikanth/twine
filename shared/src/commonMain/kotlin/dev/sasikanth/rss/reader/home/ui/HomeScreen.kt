@@ -59,7 +59,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -68,9 +67,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
@@ -89,16 +91,12 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -114,7 +112,7 @@ internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
-  onFirstVisiblePostItemChanged: (Int) -> Unit,
+  onVisiblePostChanged: (Int) -> Unit,
   openSearch: () -> Unit,
   openBookmarks: () -> Unit,
   openSettings: () -> Unit,
@@ -133,6 +131,7 @@ internal fun HomeScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
+  val density = LocalDensity.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
   val featuredPosts by
@@ -162,35 +161,12 @@ internal fun HomeScreen(
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
 
-  LaunchedEffect(Unit) {
-    snapshotFlow { postsListState.firstVisibleItemIndex }
-      .debounce(500.milliseconds)
-      .onEach { index -> onFirstVisiblePostItemChanged(index) }
-      .launchIn(this)
-  }
-
-  LaunchedEffect(state.activePostIndex) {
-    if (state.activePostIndex != postsListState.firstVisibleItemIndex) {
-      coroutineScope.launch {
-        val activePostIndex = state.activePostIndex
-        if (activePostIndex < Constants.NUMBER_OF_FEATURED_POSTS && featuredPosts.isNotEmpty()) {
-          featuredPostsPagerState.scrollToPage(activePostIndex)
-        } else {
-          // Since indexes start from 0, we are increasing the featured posts size by one
-          val adjustedIndex = (activePostIndex - featuredPosts.size + 1).coerceAtLeast(0)
-          postsListState.scrollToItem(adjustedIndex)
-        }
-      }
-    }
-  }
-
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomSheetState.partialExpand()
-      postsListState.scrollToItem(0)
-      featuredPostsPagerState.scrollToPage(0)
 
       viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
+      viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
     }
   }
 
@@ -201,13 +177,17 @@ internal fun HomeScreen(
 
   Scaffold(modifier) { scaffoldPadding ->
     val bottomPadding = scaffoldPadding.calculateBottomPadding()
+    val isPostListScrollingUp by remember {
+      derivedStateOf { postsListState.firstVisibleItemIndex > 0 }
+    }
+
     val sheetPeekHeight by
       animateDpAsState(
         targetValue =
-          if (postsListState.isScrollingUp()) {
-            BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
-          } else {
+          if (isPostListScrollingUp) {
             0.dp
+          } else {
+            BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
           },
         label = "Sheet Peek Height Animation"
       )
@@ -240,6 +220,52 @@ internal fun HomeScreen(
               )
             },
             body = { paddingValues ->
+              val topOffset =
+                remember(paddingValues) {
+                  with(density) { paddingValues.calculateTopPadding().roundToPx() }
+                }
+
+              LaunchedEffect(state.activePostIndex) {
+                coroutineScope.launch {
+                  val activePostIndex = state.activePostIndex
+                  val numberOfFeaturedPosts = featuredPosts.size
+
+                  if (activePostIndex < numberOfFeaturedPosts && featuredPosts.isNotEmpty()) {
+                    postsListState.scrollToItem(0)
+                    featuredPostsPagerState.scrollToPage(activePostIndex)
+                  } else {
+                    // Since indexes start from 0, we are increasing the featured posts size by one
+                    val offset = 1
+                    val adjustedIndex =
+                      ((activePostIndex - featuredPosts.size) + offset).coerceAtLeast(0)
+                    // Since we apply top content padding to the LazyColumn, we are offsetting
+                    // the scroll so that the actual item is visible at top of the page for user.
+                    postsListState.scrollToItem(
+                      adjustedIndex,
+                      scrollOffset = topOffset.unaryMinus()
+                    )
+                  }
+                }
+              }
+
+              LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
+                val topOffset =
+                  if (featuredPosts.isEmpty()) {
+                    0
+                  } else {
+                    topOffset
+                  }
+                val firstVisibleItemIndexAfterOffset =
+                  postsListState.layoutInfo.visibleItemsInfo
+                    .firstOrNull { itemInfo -> itemInfo.offset >= topOffset }
+                    ?.index
+                    ?: 0
+                val adjustedIndex =
+                  firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
+
+                onVisiblePostChanged(adjustedIndex)
+              }
+
               Box(modifier = Modifier.fillMaxSize()) {
                 val pullToRefreshState = rememberPullToRefreshState()
 
