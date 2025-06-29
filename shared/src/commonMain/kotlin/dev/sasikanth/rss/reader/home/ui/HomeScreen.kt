@@ -177,17 +177,14 @@ internal fun HomeScreen(
 
   Scaffold(modifier) { scaffoldPadding ->
     val bottomPadding = scaffoldPadding.calculateBottomPadding()
-    val isPostListScrollingUp by remember {
-      derivedStateOf { postsListState.firstVisibleItemIndex > 0 }
-    }
 
     val sheetPeekHeight by
       animateDpAsState(
         targetValue =
-          if (isPostListScrollingUp) {
-            0.dp
-          } else {
+          if (postsListState.isScrollingTowardsUp()) {
             BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
+          } else {
+            0.dp
           },
         label = "Sheet Peek Height Animation"
       )
@@ -551,7 +548,7 @@ fun featuredPosts(
 }
 
 @Composable
-private fun LazyListState.isScrollingUp(): Boolean {
+private fun LazyListState.isScrollingTowardsUp(): Boolean {
   var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
   var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
   return remember(this) {
