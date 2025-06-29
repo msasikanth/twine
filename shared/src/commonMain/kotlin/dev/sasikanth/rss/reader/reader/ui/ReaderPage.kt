@@ -257,7 +257,7 @@ internal fun ReaderPage(
                 when (val state = markdownState) {
                   is State.Success -> {
                     items(items = state.node.children) { node ->
-                      Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                      Box(modifier = Modifier.padding(horizontal = 24.dp)) {
                         handleElement(
                           node = node,
                           components = markdownComponents,
@@ -303,7 +303,7 @@ private fun PostInfo(
   modifier: Modifier = Modifier,
 ) {
   Column(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp).then(modifier),
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).then(modifier),
   ) {
     val title = readerPost.title
     val description = readerPost.description

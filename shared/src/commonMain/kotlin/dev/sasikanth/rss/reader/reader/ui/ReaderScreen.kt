@@ -233,7 +233,7 @@ internal fun ReaderScreen(
             navigationIcon = {
               Box(
                 modifier =
-                  Modifier.padding(start = 24.dp)
+                  Modifier.padding(start = 20.dp)
                     .requiredSize(40.dp)
                     .clip(CircleShape)
                     .clickable { onBack() }

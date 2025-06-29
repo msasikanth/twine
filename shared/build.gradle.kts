@@ -165,6 +165,8 @@ android {
 }
 
 dependencies {
+  debugImplementation(compose.uiTooling)
+
   // https://github.com/google/ksp/pull/1021
   add("kspAndroid", libs.kotlininject.compiler)
   add("kspIosArm64", libs.kotlininject.compiler)

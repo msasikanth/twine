@@ -221,47 +221,49 @@ internal fun HomeScreen(
             },
             body = { paddingValues ->
               val topOffset =
-                remember(paddingValues) {
-                  with(density) { paddingValues.calculateTopPadding().roundToPx() }
+                remember(paddingValues, featuredPosts) {
+                  val topPaddingPx =
+                    with(density) { paddingValues.calculateTopPadding().roundToPx() }
+                  if (featuredPosts.isEmpty()) {
+                    postsListState.layoutInfo.beforeContentPadding
+                  } else {
+                    topPaddingPx
+                  }
                 }
 
-              LaunchedEffect(state.activePostIndex) {
-                coroutineScope.launch {
-                  val activePostIndex = state.activePostIndex
-                  val numberOfFeaturedPosts = featuredPosts.size
+              LaunchedEffect(state.activePostIndex, featuredPosts, posts?.itemCount) {
+                val activePostIndex = state.activePostIndex
+                val numberOfFeaturedPosts = featuredPosts.size
 
-                  if (activePostIndex < numberOfFeaturedPosts && featuredPosts.isNotEmpty()) {
-                    postsListState.scrollToItem(0)
-                    featuredPostsPagerState.scrollToPage(activePostIndex)
-                  } else {
-                    // Since indexes start from 0, we are increasing the featured posts size by one
-                    val offset = 1
-                    val adjustedIndex =
-                      ((activePostIndex - featuredPosts.size) + offset).coerceAtLeast(0)
-                    // Since we apply top content padding to the LazyColumn, we are offsetting
-                    // the scroll so that the actual item is visible at top of the page for user.
-                    postsListState.scrollToItem(
-                      adjustedIndex,
-                      scrollOffset = topOffset.unaryMinus()
-                    )
-                  }
+                if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
+                  postsListState.scrollToItem(0)
+                  featuredPostsPagerState.scrollToPage(activePostIndex)
+                } else {
+                  // Since indexes start from 0, we are increasing the featured posts size by one
+                  val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
+                  val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
+
+                  // Since we apply top content padding to the LazyColumn, we are offsetting
+                  // the scroll so that the actual item is visible at top of the page for user.
+                  postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
                 }
               }
 
               LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
-                val topOffset =
-                  if (featuredPosts.isEmpty()) {
-                    0
-                  } else {
-                    topOffset
-                  }
                 val firstVisibleItemIndexAfterOffset =
                   postsListState.layoutInfo.visibleItemsInfo
-                    .firstOrNull { itemInfo -> itemInfo.offset >= topOffset }
+                    .firstOrNull { itemInfo ->
+                      itemInfo.offset >= topOffset || itemInfo.offset == 0
+                    }
                     ?.index
                     ?: 0
+
                 val adjustedIndex =
-                  firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
+                  if (firstVisibleItemIndexAfterOffset == 0) {
+                    firstVisibleItemIndexAfterOffset
+                  } else {
+                    firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
+                  }
 
                 onVisiblePostChanged(adjustedIndex)
               }
