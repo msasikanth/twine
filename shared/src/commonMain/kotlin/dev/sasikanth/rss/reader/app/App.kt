@@ -355,7 +355,7 @@ fun App(
             modifier = fillMaxSizeModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
-            openBlockedWords = {},
+            openBlockedWords = { navController.navigate(Screen.BlockedWords) },
             openPaywall = { navController.navigate(Screen.Paywall) },
             openAbout = { navController.navigate(Screen.About) }
           )
