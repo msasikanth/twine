@@ -52,7 +52,7 @@ class ReaderApplication : Application(), Configuration.Provider {
               appContext: Context,
               workerClassName: String,
               workerParameters: WorkerParameters
-            ): ListenableWorker {
+            ): ListenableWorker? {
               return when (workerClassName) {
                 FeedsRefreshWorker::class.qualifiedName -> {
                   FeedsRefreshWorker(
@@ -71,9 +71,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     settingsRepository = appComponent.settingsRepository
                   )
                 }
-                else -> {
-                  throw IllegalArgumentException("Unknown background worker: $workerClassName")
-                }
+                else -> null
               }
             }
           }
