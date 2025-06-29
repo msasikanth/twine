@@ -95,6 +95,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -515,9 +517,9 @@ fun featuredPosts(
         return@flow
       }
 
-      val size = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
+      val featuredPostsCount = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
       val mutablePostsList =
-        MutableList(size) { index ->
+        MutableList(featuredPostsCount) { index ->
           val post = posts[index]
           if (post != null && post.imageUrl.isNullOrBlank().not()) {
             FeaturedPostItem(
@@ -531,18 +533,27 @@ fun featuredPosts(
 
       emit(mutablePostsList.filterNotNull().toImmutableList())
 
-      mutablePostsList.forEachIndexed { index, post ->
-        post?.let {
-          if (it.seedColor == null) {
-            mutablePostsList[index] =
-              it.copy(
-                seedColor = seedColorExtractor.calculateSeedColor(it.postWithMetadata.imageUrl)
-              )
+      val updatedPosts =
+        mutablePostsList.mapIndexedNotNull { index, item ->
+          item?.let {
+            if (it.seedColor == null && !it.postWithMetadata.imageUrl.isNullOrBlank()) {
+              val deferredSeedColor = coroutineScope {
+                async { seedColorExtractor.calculateSeedColor(it.postWithMetadata.imageUrl) }
+              }
+
+              it to deferredSeedColor
+            } else {
+              null
+            }
           }
         }
-      }
 
-      emit(mutablePostsList.filterNotNull().toImmutableList())
+      val finalFeaturedPosts =
+        updatedPosts
+          .map { (post, deferredSeedColor) -> post.copy(seedColor = deferredSeedColor.await()) }
+          .toImmutableList()
+
+      emit(finalFeaturedPosts)
     }
   }
 }
