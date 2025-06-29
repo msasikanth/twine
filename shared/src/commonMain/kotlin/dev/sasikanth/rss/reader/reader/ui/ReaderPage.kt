@@ -257,7 +257,7 @@ internal fun ReaderPage(
                 when (val state = markdownState) {
                   is State.Success -> {
                     items(items = state.node.children) { node ->
-                      Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+                      Box(modifier = Modifier.padding(horizontal = 32.dp)) {
                         handleElement(
                           node = node,
                           components = markdownComponents,
@@ -303,16 +303,17 @@ private fun PostInfo(
   modifier: Modifier = Modifier,
 ) {
   Column(
-    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).then(modifier),
+    modifier = Modifier.fillMaxWidth().then(modifier),
   ) {
     val title = readerPost.title
     val description = readerPost.description
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
-      FeaturedImage(
-        modifier =
-          Modifier.graphicsLayer {
+      Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
+        FeaturedImage(
+          modifier =
+            Modifier.graphicsLayer {
               translationX =
                 if (page in 0..pagerState.pageCount) {
                   pagerState.getOffsetFractionForPage(page) * 350f
@@ -321,74 +322,76 @@ private fun PostInfo(
                 }
               scaleX = 1.15f
               scaleY = 1.15f
-            }
-            .align(Alignment.CenterHorizontally),
-        image = postImage
-      )
+            },
+          image = postImage
+        )
+      }
 
       Spacer(modifier = Modifier.requiredHeight(8.dp))
     }
 
-    DisableSelection {
-      Text(
-        modifier = Modifier.padding(top = 20.dp),
-        text = readerPost.date.readerDateTimestamp(),
-        style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.outline,
-        maxLines = 1,
-      )
-    }
-
-    Text(
-      modifier = Modifier.padding(top = 12.dp),
-      text = title.ifBlank { description },
-      style = MaterialTheme.typography.headlineSmall,
-      color = AppTheme.colorScheme.onSurface,
-      overflow = TextOverflow.Ellipsis,
-    )
-
-    if (!parsedContent.excerpt.isNullOrBlank()) {
-      Spacer(Modifier.requiredHeight(8.dp))
-
-      Text(
-        text = parsedContent.excerpt,
-        style = MaterialTheme.typography.bodyMedium,
-        color = AppTheme.colorScheme.secondary,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis,
-      )
-    }
-
-    Spacer(Modifier.requiredHeight(12.dp))
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
-
+    Column(modifier = Modifier.padding(horizontal = 32.dp)) {
       DisableSelection {
-        PostSourcePill(
-          modifier = Modifier.weight(1f).clearAndSetSemantics {},
-          feedName = readerPost.feedName,
-          feedIcon = feedIconUrl,
-          config =
-            PostMetadataConfig(
-              showUnreadIndicator = false,
-              showToggleReadUnreadOption = true,
-              enablePostSource = false
-            ),
-          onSourceClick = {
-            // no-op
-          },
+        Text(
+          modifier = Modifier.padding(top = 20.dp),
+          text = readerPost.date.readerDateTimestamp(),
+          style = MaterialTheme.typography.bodyMedium,
+          color = AppTheme.colorScheme.outline,
+          maxLines = 1,
         )
       }
 
-      PostOptionsButtonRow(
-        postBookmarked = readerPost.bookmarked,
-        commentsLink = readerPost.commentsLink,
-        onCommentsClick = onCommentsClick,
-        onShareClick = onShareClick,
-        onBookmarkClick = onBookmarkClick,
+      Text(
+        modifier = Modifier.padding(top = 12.dp),
+        text = title.ifBlank { description },
+        style = MaterialTheme.typography.headlineSmall,
+        color = AppTheme.colorScheme.onSurface,
+        overflow = TextOverflow.Ellipsis,
       )
+
+      if (!parsedContent.excerpt.isNullOrBlank()) {
+        Spacer(Modifier.requiredHeight(8.dp))
+
+        Text(
+          text = parsedContent.excerpt,
+          style = MaterialTheme.typography.bodyMedium,
+          color = AppTheme.colorScheme.secondary,
+          maxLines = 3,
+          overflow = TextOverflow.Ellipsis,
+        )
+      }
+
+      Spacer(Modifier.requiredHeight(12.dp))
+
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+        val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
+
+        DisableSelection {
+          PostSourcePill(
+            modifier = Modifier.weight(1f).clearAndSetSemantics {},
+            feedName = readerPost.feedName,
+            feedIcon = feedIconUrl,
+            config =
+              PostMetadataConfig(
+                showUnreadIndicator = false,
+                showToggleReadUnreadOption = true,
+                enablePostSource = false
+              ),
+            onSourceClick = {
+              // no-op
+            },
+          )
+        }
+
+        PostOptionsButtonRow(
+          postBookmarked = readerPost.bookmarked,
+          commentsLink = readerPost.commentsLink,
+          onCommentsClick = onCommentsClick,
+          onShareClick = onShareClick,
+          onBookmarkClick = onBookmarkClick,
+        )
+      }
     }
   }
 }
@@ -452,8 +455,9 @@ private fun PostOptionsButtonRow(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
-  Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
+  Row(modifier = modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       PostOptionIconButton(
