@@ -33,7 +33,7 @@ sealed interface Screen {
     }
 
     fun toRoute(): String {
-      return "$ROUTE?${Json.encodeToString(readerScreenArgs)}"
+      return "$ROUTE/${Json.encodeToString(readerScreenArgs)}"
     }
   }
 
