@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavHostController
 import androidx.navigation.NavUri
 import androidx.navigation.compose.NavHost
@@ -179,8 +180,9 @@ fun App(
 
       DisposableEffect(Unit) {
         ExternalUriHandler.listener = { uri ->
-          navController.navigate(Screen.Home)
-          navController.navigate(NavUri(uri))
+          navController.handleDeepLink(
+            NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+          )
         }
 
         onDispose { ExternalUriHandler.listener = null }
@@ -188,7 +190,7 @@ fun App(
 
       NavHost(
         navController = navController,
-        startDestination = Screen.Placeholder,
+        startDestination = Screen.Home,
         popEnterTransition = { EnterTransition.None },
         popExitTransition = {
           scaleOut(
