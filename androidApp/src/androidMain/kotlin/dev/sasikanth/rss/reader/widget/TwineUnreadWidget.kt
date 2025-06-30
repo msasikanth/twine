@@ -1,4 +1,3 @@
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -11,7 +10,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.TaskStackBuilder
 import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -136,14 +134,10 @@ class TwineUnreadWidget : GlanceAppWidget() {
                   val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
                   val deepLinkIntent =
-                    Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java)
-
-                  val deepLinkPendingIntent: PendingIntent? =
-                    TaskStackBuilder.create(context).run {
-                      addNextIntentWithParentStack(deepLinkIntent)
-                      getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+                    Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
-                  deepLinkPendingIntent?.send()
+                  context.startActivity(deepLinkIntent)
                 }
               )
             }
@@ -208,18 +202,13 @@ class TwineUnreadWidget : GlanceAppWidget() {
         onClick = {
           val deepLinkIntent =
             Intent(
-              Intent.ACTION_VIEW,
-              Screen.AddFeed.ROUTE.toUri(),
-              context,
-              MainActivity::class.java
-            )
-
-          val deepLinkPendingIntent: PendingIntent? =
-            TaskStackBuilder.create(context).run {
-              addNextIntentWithParentStack(deepLinkIntent)
-              getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
-            }
-          deepLinkPendingIntent?.send()
+                Intent.ACTION_VIEW,
+                Screen.AddFeed.ROUTE.toUri(),
+                context,
+                MainActivity::class.java
+              )
+              .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+          context.startActivity(deepLinkIntent)
         }
       )
 
