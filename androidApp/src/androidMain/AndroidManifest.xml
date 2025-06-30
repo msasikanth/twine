@@ -37,10 +37,22 @@
             android:launchMode="standard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+                <data android:scheme="twine" />
+                <data android:host="reader" />
+                <data android:host="add" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".widget.TwineWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/twine_widget_info" />
+        </receiver>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

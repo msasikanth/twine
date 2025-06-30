@@ -17,14 +17,25 @@ package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
-internal sealed interface Screen {
+sealed interface Screen {
 
   @Serializable data object Placeholder : Screen
 
   @Serializable data object Home : Screen
 
-  @Serializable data class Reader(val readerScreenArgs: ReaderScreenArgs) : Screen
+  @Serializable
+  data class Reader(val readerScreenArgs: ReaderScreenArgs) : Screen {
+
+    companion object {
+      const val ROUTE = "twine://reader"
+    }
+
+    fun toRoute(): String {
+      return "$ROUTE?${Json.encodeToString(readerScreenArgs)}"
+    }
+  }
 
   @Serializable data object Search : Screen
 
@@ -34,7 +45,11 @@ internal sealed interface Screen {
 
   @Serializable data object About : Screen
 
-  @Serializable data object AddFeed : Screen
+  @Serializable
+  data object AddFeed : Screen {
+
+    const val ROUTE = "twine://add"
+  }
 
   @Serializable data class FeedGroup(val groupId: String) : Screen
 
