@@ -153,10 +153,10 @@
     <string name="homeViewModeDefault">Standard</string>
     <string name="homeViewModeSimple">Einfach</string>
     <string name="homeViewModeCompact">Kompakt</string>
-    <string name="twinePremium">Twine premium subscription</string>
-    <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
-    <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
-    <string name="readerCustomisationsTypeface">Typeface</string>
+    <string name="twinePremium">Twine Premium Abonnement</string>
+    <string name="twinePremiumDesc">Abonnieren Sie Premium: Alles freischalten und die zukünftige Entwicklung vorantreiben.</string>
+    <string name="twinePremiumSubscribedDesc">Sie haben Twine Premium abonniert. Danke für die Unterstützung ❤️</string>
+    <string name="readerCustomisationsTypeface">Schriftart</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
