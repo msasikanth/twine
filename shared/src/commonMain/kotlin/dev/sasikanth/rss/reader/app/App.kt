@@ -25,6 +25,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,10 +37,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
+import androidx.navigation.toRoute
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
@@ -88,6 +92,7 @@ import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
+import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.reflect.typeOf
@@ -171,6 +176,15 @@ fun App(
     AppTheme(useDarkTheme = useDarkTheme) {
       val navController = rememberNavController()
       val fillMaxSizeModifier = Modifier.fillMaxSize().clip(MaterialTheme.shapes.extraLarge)
+
+      DisposableEffect(Unit) {
+        ExternalUriHandler.listener = { uri ->
+          navController.navigate(Screen.Home)
+          navController.navigate(NavUri(uri))
+        }
+
+        onDispose { ExternalUriHandler.listener = null }
+      }
 
       NavHost(
         navController = navController,
@@ -256,21 +270,34 @@ fun App(
 
         composable<Screen.Reader>(
           typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap),
+          deepLinks =
+            listOf(
+              navDeepLink<Screen.Reader>(
+                basePath = Screen.Reader.ROUTE,
+                typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap)
+              )
+            )
         ) {
           val viewModel = viewModel { readerViewModel(it.savedStateHandle) }
+          val fromScreen = it.toRoute<Screen.Reader>().readerScreenArgs.fromScreen
+
           ReaderScreen(
             modifier = fillMaxSizeModifier,
             darkTheme = useDarkTheme,
             viewModel = viewModel,
             onPostChanged = { activePostIndex ->
-              appViewModel.updateActivePostIndex(activePostIndex)
+              if (fromScreen !is FromScreen.UnreadWidget) {
+                appViewModel.updateActivePostIndex(activePostIndex)
+              }
             },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) }
           )
         }
 
-        composable<Screen.AddFeed> {
+        composable<Screen.AddFeed>(
+          deepLinks = listOf(navDeepLink<Screen.AddFeed>(basePath = Screen.AddFeed.ROUTE))
+        ) {
           val viewModel = viewModel { addFeedViewModel() }
 
           LaunchedEffect(Unit) {
