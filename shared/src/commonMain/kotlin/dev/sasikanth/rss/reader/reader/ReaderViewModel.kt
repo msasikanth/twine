@@ -29,10 +29,12 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
@@ -52,6 +54,7 @@ import me.tatarka.inject.annotations.Inject
 class ReaderViewModel(
   dispatchersProvider: DispatchersProvider,
   private val rssRepository: RssRepository,
+  private val widgetDataRepository: WidgetDataRepository,
   private val allPostsPager: AllPostsPager,
   private val settingsRepository: SettingsRepository,
   private val billingHandler: BillingHandler,
@@ -206,6 +209,9 @@ class ReaderViewModel(
                 }
                 Bookmarks -> {
                   rssRepository.bookmarks()
+                }
+                UnreadWidget -> {
+                  widgetDataRepository.unreadPostsPager()
                 }
                 else -> {
                   throw IllegalArgumentException(
