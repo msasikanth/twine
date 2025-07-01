@@ -498,7 +498,7 @@ private fun MarkArticleAsReadOnSetting(
           ) {
             val textColor =
               if (markAsReadOn == articleMarkAsReadOn) {
-                AppTheme.colorScheme.onSurface
+                AppTheme.colorScheme.inverseOnSurface
               } else {
                 AppTheme.colorScheme.textEmphasisHigh
               }
@@ -651,7 +651,7 @@ private fun PostsDeletionPeriodSettingItem(
           ) {
             val textColor =
               if (period == postsDeletionPeriod) {
-                AppTheme.colorScheme.onSurface
+                AppTheme.colorScheme.inverseOnSurface
               } else {
                 AppTheme.colorScheme.textEmphasisHigh
               }

@@ -355,7 +355,7 @@ private fun PostsFilterDropdown(
         }
       val labelColor =
         if (postsType == type) {
-          AppTheme.colorScheme.onSurface
+          AppTheme.colorScheme.inverseOnSurface
         } else {
           AppTheme.colorScheme.textEmphasisHigh
         }

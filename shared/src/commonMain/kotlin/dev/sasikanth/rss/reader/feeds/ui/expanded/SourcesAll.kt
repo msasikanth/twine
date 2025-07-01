@@ -283,13 +283,13 @@ internal fun AllFeedsHeader(
 
             val color =
               if (feedsSortOrder == sortOrder) {
-                AppTheme.colorScheme.tintedSurface
+                AppTheme.colorScheme.tintedHighlight
               } else {
                 Color.Unspecified
               }
             val labelColor =
               if (feedsSortOrder == sortOrder) {
-                AppTheme.colorScheme.onSurface
+                AppTheme.colorScheme.inverseOnSurface
               } else {
                 AppTheme.colorScheme.textEmphasisHigh
               }
