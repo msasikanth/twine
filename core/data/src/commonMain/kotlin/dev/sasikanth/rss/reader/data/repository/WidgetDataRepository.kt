@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
@@ -29,7 +30,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class WidgetDataRepository(
   private val postQueries: PostQueries,
-  private val dispatcherProvider: DispatchersProvider,
+  private val dispatchersProvider: DispatchersProvider,
 ) {
 
   val unreadPostsCount: Flow<Long>
@@ -41,7 +42,19 @@ class WidgetDataRepository(
           after = Instant.DISTANT_PAST,
         )
         .asFlow()
-        .mapToOne(dispatcherProvider.databaseRead)
+        .mapToOne(dispatchersProvider.databaseRead)
+
+  suspend fun unreadPostsCountBlocking(): Long {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .unreadPostsCountInSource(
+          isSourceIdsEmpty = true,
+          sourceIds = emptyList(),
+          after = Instant.DISTANT_PAST,
+        )
+        .executeAsOne()
+    }
+  }
 
   fun unreadPosts(numberOfPosts: Int): Flow<List<WidgetPost>> {
     return postQueries
@@ -83,30 +96,54 @@ class WidgetDataRepository(
         }
       )
       .asFlow()
-      .mapToList(dispatcherProvider.databaseRead)
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  suspend fun unreadPostsBlocking(numberOfPosts: Int): List<WidgetPost> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .widgetUnreadPosts(
+          numberOfPosts = numberOfPosts.toLong(),
+          offset = 0,
+          mapper = {
+            id,
+            sourceId,
+            title,
+            description,
+            rawContent,
+            imageUrl,
+            date,
+            link,
+            commentsLink,
+            bookmarked,
+            read,
+            feedName,
+            feedIcon,
+            feedHomepageLink,
+            alwaysFetchSourceArticle ->
+            WidgetPost(
+              id = id,
+              title = title,
+              description = description,
+              image = imageUrl,
+              postedOn = date,
+              feedName = feedName,
+              feedIcon = feedIcon,
+            )
+          }
+        )
+        .executeAsList()
+    }
   }
 
   fun unreadPostsPager(): PagingSource<Int, PostWithMetadata> {
     return QueryPagingSource(
-      countQuery =
-        postQueries.allPostsCount(
-          isSourceIdsEmpty = true,
-          sourceIds = emptyList(),
-          unreadOnly = true,
-          postsAfter = Instant.DISTANT_PAST,
-          lastSyncedAt = Instant.DISTANT_FUTURE,
-        ),
+      countQuery = postQueries.widgetUnreadPostsCount(),
       transacter = postQueries,
-      context = dispatcherProvider.databaseRead,
+      context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        postQueries.allPosts(
-          isSourceIdsEmpty = true,
-          sourceIds = emptyList(),
-          unreadOnly = true,
-          postsAfter = Instant.DISTANT_PAST,
-          numberOfFeaturedPosts = 0,
-          lastSyncedAt = Instant.DISTANT_FUTURE,
-          limit = limit,
+        postQueries.widgetUnreadPosts(
+          numberOfPosts = limit,
           offset = offset,
           mapper = {
             id,
@@ -123,8 +160,7 @@ class WidgetDataRepository(
             feedName,
             feedIcon,
             feedHomepageLink,
-            alwaysFetchSourceArticle,
-            _ ->
+            alwaysFetchSourceArticle ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
