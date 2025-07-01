@@ -101,4 +101,6 @@ dependencies {
   implementation(libs.kotlinx.datetime)
   implementation(libs.bugsnag)
   implementation(libs.purchases.core)
+  implementation(libs.glance)
+  implementation(libs.glance.material3)
 }

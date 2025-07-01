@@ -35,6 +35,8 @@ data class ReaderScreenArgs(
     data class Search(val searchQuery: String, val sortOrder: SearchSortOrder) : FromScreen
 
     @Serializable data object Bookmarks : FromScreen
+
+    @Serializable data object UnreadWidget : FromScreen
   }
 
   companion object {

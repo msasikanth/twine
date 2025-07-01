@@ -1,0 +1,83 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "bullet_separator" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "\\u{2022}"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
+    "unread_no_posts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No unread posts"
+          }
+        }
+      }
+    },
+    "unread_widget_no_feed_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No feed name"
+          }
+        }
+      }
+    },
+    "unread_widget_no_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No title"
+          }
+        }
+      }
+    },
+    "widget_name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unread posts"
+          }
+        }
+      }
+    },
+    "widget_premium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+          }
+        }
+      }
+    },
+    "widget_unread_remaining %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%@ unread…"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -56,6 +56,7 @@ shadow = "2.0.3"
 revenuecat = "1.8.4+13.37.0"
 viewmodel = "2.9.1"
 navigation = "2.9.0-beta03"
+glance = "1.2.0-alpha01"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -137,6 +138,8 @@ purchases-datetime = { module = "com.revenuecat.purchases:purchases-kmp-datetime
 purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

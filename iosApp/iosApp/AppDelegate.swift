@@ -11,6 +11,7 @@ import shared
 import BackgroundTasks
 import Bugsnag
 import RevenueCat
+import WidgetKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -39,6 +40,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             self.cleanUpPosts(task: task as! BGProcessingTask)
         }
         
+        return true
+    }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
         return true
     }
     
@@ -106,6 +112,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                     try await applicationComponent.syncCoordinator.refreshFeeds()
                 }
                 
+                WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadWidget")
                 task.setTaskCompleted(success: true)
             } catch {
                 Bugsnag.notifyError(error)
