@@ -54,8 +54,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "Keine ungelesenen Beiträge"
           }
         },
         "en" : {
