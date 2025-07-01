@@ -23,14 +23,14 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 @Inject
 class XmlFeedParser(
@@ -132,7 +132,8 @@ private fun ByteReadChannel.toCharIterator(
 
     private var encodingCharset: Charset? = null
     private var currentIndex = 0
-    private var currentBuffer = String()
+    private var currentBuffer = ""
+    private var isFirstRead = true
 
     override fun hasNext(): Boolean {
       if (currentIndex < currentBuffer.length) return true
@@ -150,6 +151,11 @@ private fun ByteReadChannel.toCharIterator(
         buildString { (encodingCharset ?: charset).decode(this, bytes) }
           .replace("&acirc;&#128;&#148;", "&ndash;")
           .replace("&acirc;&#128;&#153;", "&apos;")
+
+      if (isFirstRead && currentBuffer.startsWith("\uFEFF")) {
+        currentBuffer = currentBuffer.substring(1)
+      }
+      isFirstRead = false
 
       packet.close()
       currentIndex = 0
