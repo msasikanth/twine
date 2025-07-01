@@ -19,6 +19,18 @@ struct TwineUnreadWidgetEntryViewModel : View {
     }()
 
     var body: some View {
+        if entry.isSubscribed {
+            if entry.posts.isEmpty {
+                noPosts
+            } else {
+                unreadPostsView
+            }
+        } else {
+            twinePremium
+        }
+    }
+    
+    var unreadPostsView: some View {
         VStack(alignment: .leading) {
             ForEach(entry.posts.indices, id: \.self) { index in
                 let post = entry.posts[index]
@@ -92,6 +104,22 @@ struct TwineUnreadWidgetEntryViewModel : View {
         }
     }
     
+    var twinePremium: some View {
+        VStack {
+            Text("Widgets are only available for premium users. Please subscribe in the app.")
+                .font(.body)
+                .multilineTextAlignment(.center)
+        }.frame(maxHeight: .infinity, alignment: .center)
+    }
+    
+    var noPosts: some View {
+        VStack {
+            Text("No unread posts")
+                .font(.body)
+                .multilineTextAlignment(.center)
+        }.frame(maxHeight: .infinity, alignment: .center)
+    }
+    
     private func createDeepLink(postIndex: Int, postId: String) -> URL {
         let fromScreenType = "dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget"
         let urlString = "twine://reader/{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
@@ -122,10 +150,11 @@ struct UnreadPostsEntry: TimelineEntry {
     let date: Date
     let count: Int
     let posts: [ModelWidgetPost]
+    let isSubscribed: Bool
 }
 
 #Preview(as: .systemMedium) {
     TwineUnreadWidget()
 } timeline: {
-    UnreadPostsEntry(date: .now, count: 0, posts: [])
+    UnreadPostsEntry(date: .now, count: 0, posts: [], isSubscribed: true)
 }

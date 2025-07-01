@@ -18,7 +18,7 @@ struct Provider: TimelineProvider {
     })
     
     func placeholder(in context: Context) -> UnreadPostsEntry {
-        UnreadPostsEntry(date: Date(), count: 0, posts: [])
+        UnreadPostsEntry(date: Date(), count: 0, posts: [], isSubscribed: true)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (UnreadPostsEntry) -> ()) {
@@ -62,9 +62,10 @@ struct Provider: TimelineProvider {
             let repository = component.widgetDataRepository
             let unreadPostsCount = try await repository.unreadPostsCountBlocking()
             let unreadPosts = try await repository.unreadPostsBlocking(numberOfPosts: Int32(numberOfPosts))
+            let isSubscribed = try await component.billingHandler.customerResult() is BillingHandlerSubscriptionResultSubscribed
             
             let currentDate = Date()
-            return UnreadPostsEntry(date: currentDate, count: unreadPostsCount.intValue, posts: unreadPosts)
+            return UnreadPostsEntry(date: currentDate, count: unreadPostsCount.intValue, posts: unreadPosts, isSubscribed: isSubscribed)
         } catch {
             print("Failed to create entry: \(error)")
             return nil
