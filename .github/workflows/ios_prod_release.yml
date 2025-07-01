@@ -79,7 +79,7 @@ jobs:
           PROVISIONING_PROFILE=${{ secrets.PROVISION_PROFILE_ID }} \
           BUGSNAG_API_KEY=${BUGSNAG_API_KEY} \
           clean archive
-          CODE_SIGN_IDENTITY="iPhone Distribution: Sasikanth Miriyampalli (V9V8885383)";
+          CODE_SIGN_IDENTITY="Apple Distribution: Sasikanth Miriyampalli (V9V8885383)";
 
       - name: Export ipa
         env:
