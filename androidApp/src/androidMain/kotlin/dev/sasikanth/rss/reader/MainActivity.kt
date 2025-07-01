@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
+import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import io.github.vinceglb.filekit.core.FileKit
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
@@ -43,6 +44,8 @@ class MainActivity : ComponentActivity() {
       statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
       navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
     )
+
+    intent.data?.let { ExternalUriHandler.onNewUri(it.toString()) }
 
     val activityComponent = ActivityComponent::class.create(activity = this)
 

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,7 +16,42 @@
 		CD6AEE262C51E57700486A95 /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = CD6AEE252C51E57700486A95 /* BugsnagNetworkRequestPlugin */; };
 		CD6DFBF82E0466AF0048A870 /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = CD6DFBF72E0466AF0048A870 /* PurchasesHybridCommon */; };
 		CD6DFBFA2E0466AF0048A870 /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD6DFBF92E0466AF0048A870 /* PurchasesHybridCommonUI */; };
+		CD87EC132E12AFC900E516A7 /* Bugsnag in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC122E12AFC900E516A7 /* Bugsnag */; };
+		CD87EC152E12AFC900E516A7 /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC142E12AFC900E516A7 /* BugsnagNetworkRequestPlugin */; };
+		CD87EC172E12AFC900E516A7 /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */; };
+		CD87EC192E12AFC900E516A7 /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */; };
+		CD87EC1E2E12C20D00E516A7 /* KMPNativeCoroutinesAsync in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC1D2E12C20D00E516A7 /* KMPNativeCoroutinesAsync */; };
+		CD87EC202E12C20D00E516A7 /* KMPNativeCoroutinesCombine in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC1F2E12C20D00E516A7 /* KMPNativeCoroutinesCombine */; };
+		CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
+		CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
+		CDBE05C42E129DDB00CC593E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE05C32E129DDB00CC593E /* WidgetKit.framework */; };
+		CDBE05C62E129DDB00CC593E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE05C52E129DDB00CC593E /* SwiftUI.framework */; };
+		CDBE05D32E129DDC00CC593E /* TwineWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		CDBE05D12E129DDC00CC593E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7555FF73242A565900829871 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CDBE05C12E129DDB00CC593E;
+			remoteInfo = TwineWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		CDBE05D42E129DDC00CC593E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				CDBE05D32E129DDC00CC593E /* TwineWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -27,10 +62,44 @@
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		CD87EC2B2E13550000E516A7 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		CD9827912E13C8E400D17D40 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		CDA832B62B2019C800BB2514 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TwineWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDBE05C32E129DDB00CC593E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		CDBE05C52E129DDB00CC593E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CDBE05D72E129DDC00CC593E /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CDBE05C12E129DDB00CC593E /* TwineWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CDBE05C72E129DDB00CC593E /* TwineWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CDBE05D72E129DDC00CC593E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = TwineWidget; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		CDBE05BF2E129DDB00CC593E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD87EC172E12AFC900E516A7 /* PurchasesHybridCommon in Frameworks */,
+				CD87EC202E12C20D00E516A7 /* KMPNativeCoroutinesCombine in Frameworks */,
+				CD87EC1E2E12C20D00E516A7 /* KMPNativeCoroutinesAsync in Frameworks */,
+				CD87EC152E12AFC900E516A7 /* BugsnagNetworkRequestPlugin in Frameworks */,
+				CD87EC132E12AFC900E516A7 /* Bugsnag in Frameworks */,
+				CDBE05C62E129DDB00CC593E /* SwiftUI.framework in Frameworks */,
+				CD87EC192E12AFC900E516A7 /* PurchasesHybridCommonUI in Frameworks */,
+				CDBE05C42E129DDB00CC593E /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F85CB1118929364A9C6EFABC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -56,6 +125,8 @@
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CDBE05C32E129DDB00CC593E /* WidgetKit.framework */,
+				CDBE05C52E129DDB00CC593E /* SwiftUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -63,8 +134,10 @@
 		7555FF72242A565900829871 = {
 			isa = PBXGroup;
 			children = (
+				CD9827912E13C8E400D17D40 /* Localizable.xcstrings */,
 				AB1DB47929225F7C00F7AF9C /* Configuration */,
 				7555FF7D242A565900829871 /* iosApp */,
+				CDBE05C72E129DDB00CC593E /* TwineWidget */,
 				7555FF7C242A565900829871 /* Products */,
 				42799AB246E5F90AF97AA0EF /* Frameworks */,
 			);
@@ -74,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				7555FF7B242A565900829871 /* Twine (Debug).app */,
+				CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -81,6 +155,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				CD87EC2B2E13550000E516A7 /* iosApp.entitlements */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
@@ -109,6 +184,7 @@
 			buildPhases = (
 				05D91A922A5F233C00F138EB /* Compile Kotlin */,
 				7555FF77242A565900829871 /* Sources */,
+				CDBE05D42E129DDC00CC593E /* Embed Foundation Extensions */,
 				7555FF79242A565900829871 /* Resources */,
 				F85CB1118929364A9C6EFABC /* Frameworks */,
 				E8479EF0239AA3C1B90F902B /* Upload Bugsnag dSYM */,
@@ -116,6 +192,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				CDBE05D22E129DDC00CC593E /* PBXTargetDependency */,
 			);
 			name = iosApp;
 			packageProductDependencies = (
@@ -128,18 +205,50 @@
 			productReference = 7555FF7B242A565900829871 /* Twine (Debug).app */;
 			productType = "com.apple.product-type.application";
 		};
+		CDBE05C12E129DDB00CC593E /* TwineWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CDBE05D82E129DDC00CC593E /* Build configuration list for PBXNativeTarget "TwineWidgetExtension" */;
+			buildPhases = (
+				CDBE05D92E129E4C00CC593E /* Compile Kotlin */,
+				CDBE05BE2E129DDB00CC593E /* Sources */,
+				CDBE05BF2E129DDB00CC593E /* Frameworks */,
+				CDBE05C02E129DDB00CC593E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CDBE05C72E129DDB00CC593E /* TwineWidget */,
+			);
+			name = TwineWidgetExtension;
+			packageProductDependencies = (
+				CD87EC122E12AFC900E516A7 /* Bugsnag */,
+				CD87EC142E12AFC900E516A7 /* BugsnagNetworkRequestPlugin */,
+				CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */,
+				CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */,
+				CD87EC1D2E12C20D00E516A7 /* KMPNativeCoroutinesAsync */,
+				CD87EC1F2E12C20D00E516A7 /* KMPNativeCoroutinesCombine */,
+			);
+			productName = TwineWidgetExtension;
+			productReference = CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		7555FF73242A565900829871 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1130;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = orgName;
 				TargetAttributes = {
 					7555FF7A242A565900829871 = {
 						CreatedOnToolsVersion = 11.3.1;
+					};
+					CDBE05C12E129DDB00CC593E = {
+						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
@@ -155,12 +264,14 @@
 			packageReferences = (
 				CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */,
 				CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
+				CD87EC1C2E12C20D00E516A7 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				7555FF7A242A565900829871 /* iosApp */,
+				CDBE05C12E129DDB00CC593E /* TwineWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -172,6 +283,15 @@
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
+				CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CDBE05C02E129DDB00CC593E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,6 +299,24 @@
 
 /* Begin PBXShellScriptBuildPhase section */
 		05D91A922A5F233C00F138EB /* Compile Kotlin */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Kotlin";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT/..\"\n./gradlew :shared:embedAndSignAppleFrameworkForXcode\n";
+		};
+		CDBE05D92E129E4C00CC593E /* Compile Kotlin */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -231,7 +369,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CDBE05BE2E129DDB00CC593E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CDBE05D22E129DDC00CC593E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CDBE05C12E129DDB00CC593E /* TwineWidgetExtension */;
+			targetProxy = CDBE05D12E129DDC00CC593E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7555FFA3242A565B00829871 /* Debug */ = {
@@ -292,6 +445,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -347,6 +501,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};
@@ -356,10 +511,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = V9V8885383;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -392,12 +548,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = V9V8885383;
-				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = V9V8885383;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -421,7 +576,90 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "${BUNDLE_ID}";
 				PRODUCT_NAME = "${APP_NAME}";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = twine_adhoc_dist;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CDBE05D52E129DDC00CC593E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = TwineWidget/TwineWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = V9V8885383;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TwineWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TwineWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 orgName. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lsqlite3",
+					"-ld_classic",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader.debug.TwineWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CDBE05D62E129DDC00CC593E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = TwineWidget/TwineWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = V9V8885383;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TwineWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TwineWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 orgName. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lsqlite3",
+					"-ld_classic",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.sasikanth.rss.reader.TwineWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -448,6 +686,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CDBE05D82E129DDC00CC593E /* Build configuration list for PBXNativeTarget "TwineWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDBE05D52E129DDC00CC593E /* Debug */,
+				CDBE05D62E129DDC00CC593E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -465,6 +712,14 @@
 			requirement = {
 				kind = exactVersion;
 				version = 13.37.0;
+			};
+		};
+		CD87EC1C2E12C20D00E516A7 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickclephas/KMP-NativeCoroutines.git";
+			requirement = {
+				kind = exactVersion;
+				version = "1.0.0-ALPHA-45";
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -489,6 +744,36 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
 			productName = PurchasesHybridCommonUI;
+		};
+		CD87EC122E12AFC900E516A7 /* Bugsnag */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
+			productName = Bugsnag;
+		};
+		CD87EC142E12AFC900E516A7 /* BugsnagNetworkRequestPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD6AEE222C51E57700486A95 /* XCRemoteSwiftPackageReference "bugsnag-cocoa" */;
+			productName = BugsnagNetworkRequestPlugin;
+		};
+		CD87EC162E12AFC900E516A7 /* PurchasesHybridCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			productName = PurchasesHybridCommon;
+		};
+		CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD6DFBF62E0466AF0048A870 /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			productName = PurchasesHybridCommonUI;
+		};
+		CD87EC1D2E12C20D00E516A7 /* KMPNativeCoroutinesAsync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD87EC1C2E12C20D00E516A7 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesAsync;
+		};
+		CD87EC1F2E12C20D00E516A7 /* KMPNativeCoroutinesCombine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CD87EC1C2E12C20D00E516A7 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCombine;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

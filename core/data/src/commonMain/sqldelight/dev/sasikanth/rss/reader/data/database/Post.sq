@@ -228,3 +228,36 @@ WHERE
 countPostsForFeed:
 SELECT COUNT(*) FROM post
 WHERE sourceId = :feedId;
+
+widgetUnreadPostsCount:
+SELECT COUNT(*) FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE
+  post.isHidden == 0 AND
+  post.read == 0
+ORDER BY date DESC;
+
+widgetUnreadPosts:
+SELECT
+  post.id,
+  sourceId,
+  post.title,
+  post.description,
+  post.rawContent,
+  post.imageUrl,
+  post.date,
+  post.link,
+  post.commentsLink,
+  post.bookmarked,
+  post.read,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle
+FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE
+  post.isHidden == 0 AND
+  post.read == 0
+ORDER BY date DESC
+LIMIT :numberOfPosts OFFSET :offset;
