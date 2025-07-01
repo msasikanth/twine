@@ -8,8 +8,6 @@
 import SwiftUI
 import WidgetKit
 import shared
-import KMPNativeCoroutinesAsync
-import KMPNativeCoroutinesCombine
 
 struct Provider: TimelineProvider {
 
