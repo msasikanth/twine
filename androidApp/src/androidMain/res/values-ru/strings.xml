@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Twine</string>
+    <plurals name="widget_unread_posts">
+        <item quantity="one">Unread (%1$d post)</item>
+        <item quantity="few">Unread (%1$d posts)</item>
+        <item quantity="many">Unread (%1$d posts)</item>
+        <item quantity="other">Unread (%1$d posts)</item>
+    </plurals>
+    <string name="widget_no_title">No title</string>
+    <string name="widget_no_description">No description</string>
+    <string name="widget_see_more">See more</string>
+    <string name="widget_unread_refresh">Refresh</string>
+    <string name="widget_unread_add">Add feed</string>
+    <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
+    <string name="widget_no_posts">No posts</string>
+</resources>
