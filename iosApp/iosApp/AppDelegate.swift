@@ -11,6 +11,7 @@ import shared
 import BackgroundTasks
 import Bugsnag
 import RevenueCat
+import WidgetKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
 
@@ -111,6 +112,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                     try await applicationComponent.syncCoordinator.refreshFeeds()
                 }
                 
+                WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadWidget")
                 task.setTaskCompleted(success: true)
             } catch {
                 Bugsnag.notifyError(error)
