@@ -22,6 +22,8 @@
 		CD87EC192E12AFC900E516A7 /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC182E12AFC900E516A7 /* PurchasesHybridCommonUI */; };
 		CD87EC1E2E12C20D00E516A7 /* KMPNativeCoroutinesAsync in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC1D2E12C20D00E516A7 /* KMPNativeCoroutinesAsync */; };
 		CD87EC202E12C20D00E516A7 /* KMPNativeCoroutinesCombine in Frameworks */ = {isa = PBXBuildFile; productRef = CD87EC1F2E12C20D00E516A7 /* KMPNativeCoroutinesCombine */; };
+		CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
+		CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CD9827912E13C8E400D17D40 /* Localizable.xcstrings */; };
 		CDBE05C42E129DDB00CC593E /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE05C32E129DDB00CC593E /* WidgetKit.framework */; };
 		CDBE05C62E129DDB00CC593E /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDBE05C52E129DDB00CC593E /* SwiftUI.framework */; };
 		CDBE05D32E129DDC00CC593E /* TwineWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -61,6 +63,7 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Release.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		CD87EC2B2E13550000E516A7 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		CD9827912E13C8E400D17D40 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		CDA832B62B2019C800BB2514 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		CDBE05C22E129DDB00CC593E /* TwineWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TwineWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDBE05C32E129DDB00CC593E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -131,6 +134,7 @@
 		7555FF72242A565900829871 = {
 			isa = PBXGroup;
 			children = (
+				CD9827912E13C8E400D17D40 /* Localizable.xcstrings */,
 				AB1DB47929225F7C00F7AF9C /* Configuration */,
 				7555FF7D242A565900829871 /* iosApp */,
 				CDBE05C72E129DDB00CC593E /* TwineWidget */,
@@ -279,6 +283,7 @@
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
+				CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +291,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -439,6 +445,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -494,6 +501,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};

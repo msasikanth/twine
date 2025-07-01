@@ -67,16 +67,16 @@ struct TwineUnreadWidgetEntryViewModel : View {
                             alignment: .leading,
                             spacing: 8
                         ) {
-                            Text(post.title ?? "No title")
+                            Text(post.title ?? String(localized: "unread_widget_no_title"))
                                 .lineLimit(2)
                                 .font(.headline)
 
                             HStack(alignment: .center) {
-                                Text(post.feedName ?? "No feed name")
+                                Text(post.feedName ?? String(localized: "unread_widget_no_feed_name"))
                                     .lineLimit(1)
                                     .font(.caption2)
                                 
-                                Text("\u{2022}")
+                                Text("bullet_separator")
                                     .font(.caption2)
 
                                 Text(formatter.localizedString(for: date, relativeTo: Date()))
@@ -95,7 +95,7 @@ struct TwineUnreadWidgetEntryViewModel : View {
             }
             
             let morePostsCount = (entry.count - entry.posts.count).description
-            Text("+\(morePostsCount) unread...")
+            Text("widget_unread_remaining \(morePostsCount)")
                 .foregroundColor(.blue)
                 .font(.footnote)
                 .padding(.top, 8)
@@ -106,7 +106,7 @@ struct TwineUnreadWidgetEntryViewModel : View {
     
     var twinePremium: some View {
         VStack {
-            Text("Widgets are only available for premium users. Please subscribe in the app.")
+            Text("widget_premium")
                 .font(.body)
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
@@ -114,7 +114,7 @@ struct TwineUnreadWidgetEntryViewModel : View {
     
     var noPosts: some View {
         VStack {
-            Text("No unread posts")
+            Text("unread_no_posts")
                 .font(.body)
                 .multilineTextAlignment(.center)
         }.frame(maxHeight: .infinity, alignment: .center)
@@ -141,7 +141,7 @@ struct TwineUnreadWidget: Widget {
                     .background()
             }
         }
-        .configurationDisplayName("Unread posts")
+        .configurationDisplayName(String(localized: "widget_name"))
         .supportedFamilies([.systemMedium, .systemLarge])
     }
 }
