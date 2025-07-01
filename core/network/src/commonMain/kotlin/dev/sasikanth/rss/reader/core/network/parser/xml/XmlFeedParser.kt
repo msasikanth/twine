@@ -23,14 +23,14 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.io.readByteArray
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.XmlPullParserException
 import org.kobjects.ktxml.mini.MiniXmlPullParser
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 @Inject
 class XmlFeedParser(
