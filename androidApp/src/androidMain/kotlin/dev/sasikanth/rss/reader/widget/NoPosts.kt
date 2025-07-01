@@ -46,7 +46,7 @@ fun NoPosts(modifier: GlanceModifier = GlanceModifier) {
       style =
         TextStyle(
           fontWeight = FontWeight.Medium,
-          fontSize = 18.sp,
+          fontSize = 16.sp,
           textAlign = TextAlign.Center,
         )
     )
