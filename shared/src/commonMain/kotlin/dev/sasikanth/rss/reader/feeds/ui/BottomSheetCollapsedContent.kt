@@ -18,11 +18,9 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -59,69 +57,64 @@ internal fun BottomSheetCollapsedContent(
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box {
-    LazyRow(
-      modifier = modifier.fillMaxWidth().padding(start = 20.dp),
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
-      contentPadding = PaddingValues(end = 24.dp)
-    ) {
-      stickyHeader {
-        val allFeedsLabel = stringResource(Res.string.allFeeds)
+  LazyRow(
+    modifier = modifier.fillMaxWidth().padding(start = 20.dp),
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    contentPadding = PaddingValues(end = 24.dp)
+  ) {
+    stickyHeader {
+      val allFeedsLabel = stringResource(Res.string.allFeeds)
 
-        HomeBottomBarItem(
-          selected = activeSource == null,
-          onClick = onHomeSelected,
-          backgroundColor = homeItemBackgroundColor,
-          modifier =
-            Modifier.clearAndSetSemantics {
-                contentDescription = allFeedsLabel
-                role = Role.Button
-              }
-              .drawWithCache {
-                onDrawBehind {
-                  val brush =
-                    Brush.horizontalGradient(
-                      colorStops = homeItemShadowColors,
-                    )
-                  drawRect(
-                    brush = brush,
+      HomeBottomBarItem(
+        selected = activeSource == null,
+        onClick = onHomeSelected,
+        backgroundColor = homeItemBackgroundColor,
+        modifier =
+          Modifier.clearAndSetSemantics {
+              contentDescription = allFeedsLabel
+              role = Role.Button
+            }
+            .drawWithCache {
+              onDrawBehind {
+                val brush =
+                  Brush.horizontalGradient(
+                    colorStops = homeItemShadowColors,
                   )
-                }
+                drawRect(
+                  brush = brush,
+                )
               }
-        )
-      }
+            }
+      )
+    }
 
-      items(pinnedSources.size) { index ->
-        when (val source = pinnedSources[index]) {
-          is FeedGroup -> {
-            FeedGroupBottomBarItem(
-              feedGroup = source,
-              canShowUnreadPostsCount = canShowUnreadPostsCount,
-              selected = activeSource?.id == source.id,
-              onClick = { onSourceClick(source) }
-            )
-          }
-          is Feed -> {
-            FeedBottomBarItem(
-              badgeCount = source.numberOfUnreadPosts,
-              homePageUrl = source.homepageLink,
-              feedIconUrl = source.icon,
-              canShowUnreadPostsCount = canShowUnreadPostsCount,
-              onClick = { onSourceClick(source) },
-              selected = activeSource?.id == source.id
-            )
-          }
+    items(pinnedSources.size) { index ->
+      when (val source = pinnedSources[index]) {
+        is FeedGroup -> {
+          FeedGroupBottomBarItem(
+            feedGroup = source,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
+            selected = activeSource?.id == source.id,
+            onClick = { onSourceClick(source) }
+          )
+        }
+        is Feed -> {
+          FeedBottomBarItem(
+            badgeCount = source.numberOfUnreadPosts,
+            homePageUrl = source.homepageLink,
+            feedIconUrl = source.icon,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
+            onClick = { onSourceClick(source) },
+            selected = activeSource?.id == source.id
+          )
         }
       }
     }
 
     if (pinnedSources.isEmpty() && numberOfFeeds > 0) {
-      Box(
-        modifier = Modifier.fillMaxWidth().requiredHeight(height = 64.dp),
-        contentAlignment = Alignment.Center
-      ) {
+      item {
         Text(
-          modifier = Modifier.padding(start = 24.dp),
           text = stringResource(Res.string.noPinnedSources),
           color = AppTheme.colorScheme.onSurfaceVariant,
           style = MaterialTheme.typography.bodyMedium

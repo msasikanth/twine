@@ -6,5 +6,5 @@ files:
   - source: /androidApp/src/androidMain/res/values/strings.xml
     translation: /androidApp/src/androidMain/res/values-%two_letters_code%/strings.xml
   - source: /iosApp/Localizable.xcstrings
-    translation: '%original_path%%original_file_name%'
+    translation: /iosApp/%original_file_name%
     multilingual: 1
