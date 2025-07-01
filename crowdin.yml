@@ -1,8 +1,7 @@
-"files": [
-  {
-    "source": "/shared/src/commonMain/composeResources/values/strings.xml",
-    "translation": "/shared/src/commonMain/composeResources/values-%two_letters_code%/strings.xml",
-    "escape_special_characters": 0,
-    "escape_quotes": 0
-  }
-]
+files:
+  - source: /shared/src/commonMain/composeResources/values/strings.xml
+    translation: /shared/src/commonMain/composeResources/values-%two_letters_code%/strings.xml
+    escape_special_characters: 0
+    escape_quotes: 0
+  - source: /androidApp/src/androidMain/res/values/strings.xml
+    translation: /androidApp/src/androidMain/res/values-%two_letters_code%/strings.xml
