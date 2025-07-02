@@ -17,6 +17,7 @@ import com.revenuecat.purchases.kmp.PurchasesConfiguration
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
+import dev.sasikanth.rss.reader.utils.Constants
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -31,6 +32,10 @@ class BillingInitializer : Initializer {
       }
 
     Purchases.logLevel = LogLevel.DEBUG
-    Purchases.configure(PurchasesConfiguration.Builder(publicApiKey).build())
+    Purchases.configure(
+      PurchasesConfiguration.Builder(publicApiKey)
+        .userDefaultsSuiteName(Constants.IOS_APP_GROUP)
+        .build()
+    )
   }
 }
