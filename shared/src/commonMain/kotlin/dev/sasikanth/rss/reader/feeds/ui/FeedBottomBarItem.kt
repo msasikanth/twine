@@ -48,9 +48,12 @@ internal fun FeedBottomBarItem(
   canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  hasActiveSource: Boolean = false,
   selected: Boolean = false,
 ) {
-  Box(modifier = modifier) {
+  Box(
+    modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.5f }
+  ) {
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
       val showFeedFavIcon = LocalShowFeedFavIconSetting.current

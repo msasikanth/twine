@@ -20,20 +20,15 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -41,7 +36,6 @@ import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
-import twine.shared.generated.resources.allFeeds
 import twine.shared.generated.resources.noPinnedSources
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -58,58 +52,64 @@ internal fun BottomSheetCollapsedContent(
   modifier: Modifier = Modifier
 ) {
   LazyRow(
-    modifier = modifier.fillMaxWidth().padding(start = 20.dp),
+    modifier = modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.spacedBy(12.dp),
     verticalAlignment = Alignment.CenterVertically,
-    contentPadding = PaddingValues(end = 24.dp)
+    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 24.dp)
   ) {
-    stickyHeader {
-      val allFeedsLabel = stringResource(Res.string.allFeeds)
+    //    stickyHeader {
+    //      val allFeedsLabel = stringResource(Res.string.allFeeds)
+    //
+    //      HomeBottomBarItem(
+    //        selected = activeSource == null,
+    //        onClick = onHomeSelected,
+    //        backgroundColor = homeItemBackgroundColor,
+    //        modifier =
+    //          Modifier.clearAndSetSemantics {
+    //              contentDescription = allFeedsLabel
+    //              role = Role.Button
+    //            }
+    //            .drawWithCache {
+    //              onDrawBehind {
+    //                val brush =
+    //                  Brush.horizontalGradient(
+    //                    colorStops = homeItemShadowColors,
+    //                  )
+    //                drawRect(
+    //                  brush = brush,
+    //                )
+    //              }
+    //            }
+    //      )
+    //    }
 
-      HomeBottomBarItem(
-        selected = activeSource == null,
-        onClick = onHomeSelected,
-        backgroundColor = homeItemBackgroundColor,
-        modifier =
-          Modifier.clearAndSetSemantics {
-              contentDescription = allFeedsLabel
-              role = Role.Button
-            }
-            .drawWithCache {
-              onDrawBehind {
-                val brush =
-                  Brush.horizontalGradient(
-                    colorStops = homeItemShadowColors,
-                  )
-                drawRect(
-                  brush = brush,
-                )
-              }
-            }
-      )
+    if (activeSource != null && activeSource.pinnedAt == null) {
+      item {
+        SourceItem(
+          source = activeSource,
+          activeSource = activeSource,
+          canShowUnreadPostsCount = canShowUnreadPostsCount,
+          onHomeSelected = onHomeSelected,
+          onSourceClick = onSourceClick
+        )
+      }
+
+      item {
+        VerticalDivider(
+          modifier = Modifier.requiredHeight(24.dp),
+          color = AppTheme.colorScheme.outlineVariant,
+        )
+      }
     }
 
     items(pinnedSources.size) { index ->
-      when (val source = pinnedSources[index]) {
-        is FeedGroup -> {
-          FeedGroupBottomBarItem(
-            feedGroup = source,
-            canShowUnreadPostsCount = canShowUnreadPostsCount,
-            selected = activeSource?.id == source.id,
-            onClick = { onSourceClick(source) }
-          )
-        }
-        is Feed -> {
-          FeedBottomBarItem(
-            badgeCount = source.numberOfUnreadPosts,
-            homePageUrl = source.homepageLink,
-            feedIconUrl = source.icon,
-            canShowUnreadPostsCount = canShowUnreadPostsCount,
-            onClick = { onSourceClick(source) },
-            selected = activeSource?.id == source.id
-          )
-        }
-      }
+      SourceItem(
+        source = pinnedSources[index],
+        activeSource = activeSource,
+        canShowUnreadPostsCount = canShowUnreadPostsCount,
+        onHomeSelected = onHomeSelected,
+        onSourceClick = onSourceClick
+      )
     }
 
     if (pinnedSources.isEmpty() && numberOfFeeds > 0) {
@@ -120,6 +120,50 @@ internal fun BottomSheetCollapsedContent(
           style = MaterialTheme.typography.bodyMedium
         )
       }
+    }
+  }
+}
+
+@Composable
+private fun SourceItem(
+  source: Source,
+  activeSource: Source?,
+  canShowUnreadPostsCount: Boolean,
+  onHomeSelected: () -> Unit,
+  onSourceClick: (Source) -> Unit,
+) {
+  when (val source = source) {
+    is FeedGroup -> {
+      FeedGroupBottomBarItem(
+        feedGroup = source,
+        canShowUnreadPostsCount = canShowUnreadPostsCount,
+        hasActiveSource = activeSource != null,
+        selected = activeSource?.id == source.id,
+        onClick = {
+          if (activeSource?.id == source.id) {
+            onHomeSelected()
+          } else {
+            onSourceClick(source)
+          }
+        }
+      )
+    }
+    is Feed -> {
+      FeedBottomBarItem(
+        badgeCount = source.numberOfUnreadPosts,
+        homePageUrl = source.homepageLink,
+        feedIconUrl = source.icon,
+        canShowUnreadPostsCount = canShowUnreadPostsCount,
+        hasActiveSource = activeSource != null,
+        selected = activeSource?.id == source.id,
+        onClick = {
+          if (activeSource?.id == source.id) {
+            onHomeSelected()
+          } else {
+            onSourceClick(source)
+          }
+        },
+      )
     }
   }
 }
