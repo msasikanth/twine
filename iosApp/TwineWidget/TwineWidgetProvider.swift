@@ -15,6 +15,14 @@ struct Provider: TimelineProvider {
         UIViewController()
     })
     
+    init() {
+        component.initializers
+            .compactMap { ($0 as! any Initializer) }
+            .forEach { initializer in
+                initializer.initialize()
+            }
+    }
+    
     func placeholder(in context: Context) -> UnreadPostsEntry {
         UnreadPostsEntry(date: Date(), count: 0, posts: [], isSubscribed: true)
     }
