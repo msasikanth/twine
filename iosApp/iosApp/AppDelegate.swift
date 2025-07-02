@@ -15,7 +15,7 @@ import WidgetKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     
-    static let refreshFeedsWidgetKind = "dev.sasikanth.reader.feeds_refresh"
+    static let unreadWidgetKind = "TwineUnreadWidget"
 
     lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent(
       uiViewControllerProvider: { UIApplication.topViewController()! }
@@ -80,7 +80,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func scheduledRefreshFeeds(earliest: Date) {
-        let request = BGProcessingTaskRequest(identifier: AppDelegate.refreshFeedsWidgetKind)
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
         request.earliestBeginDate = earliest
         request.requiresNetworkConnectivity = true
         
@@ -109,7 +109,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                     try await applicationComponent.syncCoordinator.refreshFeeds()
                 }
                 
-                WidgetCenter.shared.reloadTimelines(ofKind: "TwineUnreadWidget")
+                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
                 task.setTaskCompleted(success: true)
             } catch {
                 Bugsnag.notifyError(error)
