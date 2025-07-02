@@ -11,7 +11,6 @@
 
 package dev.sasikanth.rss.reader.widget
 
-import TwineUnreadWidget
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 
