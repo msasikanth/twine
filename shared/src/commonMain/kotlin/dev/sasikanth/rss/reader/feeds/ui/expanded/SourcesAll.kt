@@ -131,6 +131,7 @@ internal fun LazyListScope.allSources(
                 selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
+                onOptionsClick = { onToggleSourceSelection(source) },
                 modifier =
                   Modifier.padding(
                       start = startPadding,
@@ -163,6 +164,7 @@ internal fun LazyListScope.allSources(
                 isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
+                onOptionsClick = { onToggleSourceSelection(source) },
                 modifier =
                   Modifier.padding(
                       start = startPadding,

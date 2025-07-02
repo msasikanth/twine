@@ -17,9 +17,11 @@
 package dev.sasikanth.rss.reader.feeds.ui.expanded
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
@@ -100,6 +102,7 @@ internal fun LazyListScope.pinnedSources(
                 selected = selectedSources.any { it.id == source.id },
                 onFeedGroupSelected = onToggleSourceSelection,
                 onFeedGroupClick = onSourceClick,
+                onOptionsClick = { onToggleSourceSelection(source) },
                 dragHandle = { DragHandle(this, interactionSource) },
                 interactionSource = interactionSource,
                 modifier =
@@ -120,6 +123,7 @@ internal fun LazyListScope.pinnedSources(
                 isFeedSelected = selectedSources.any { it.id == source.id },
                 onFeedClick = onSourceClick,
                 onFeedSelected = onToggleSourceSelection,
+                onOptionsClick = { onToggleSourceSelection(source) },
                 dragHandle = { DragHandle(this, interactionSource) },
                 interactionSource = interactionSource,
                 modifier =
@@ -152,12 +156,15 @@ private fun DragHandle(
   interactionSource: MutableInteractionSource
 ) {
   with(scope) {
-    Icon(
-      modifier = Modifier.draggableHandle(interactionSource = interactionSource),
-      imageVector = TwineIcons.DragIndicator,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.onSurfaceVariant,
-    )
+    Box(modifier = Modifier.requiredSize(40.dp), contentAlignment = Alignment.Center) {
+      Icon(
+        modifier =
+          Modifier.requiredSize(20.dp).draggableHandle(interactionSource = interactionSource),
+        imageVector = TwineIcons.DragIndicator,
+        contentDescription = null,
+        tint = AppTheme.colorScheme.onSurfaceVariant,
+      )
+    }
   }
 }
 
