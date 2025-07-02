@@ -7,43 +7,43 @@
         "de" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         }
       },
@@ -84,8 +84,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "Okunmamış gönderi yok"
           }
         },
         "zh-Hant" : {
@@ -131,8 +131,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "Akış adı yok"
           }
         },
         "zh-Hant" : {
@@ -178,8 +178,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "Başlık yok"
           }
         },
         "zh-Hant" : {
@@ -225,8 +225,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "Okunmamış gönderiler"
           }
         },
         "zh-Hant" : {
@@ -272,8 +272,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "Widget'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun."
           }
         },
         "zh-Hant" : {
@@ -318,8 +318,8 @@
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ okunmamış…"
           }
         },
         "zh-Hant" : {
