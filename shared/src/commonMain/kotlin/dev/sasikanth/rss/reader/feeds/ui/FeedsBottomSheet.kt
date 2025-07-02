@@ -210,7 +210,6 @@ internal fun FeedsBottomSheet(
 
                 layout(placeable.width, height) { placeable.place(0, 0) }
               }
-              .padding(bottom = 24.dp)
               .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
           pinnedSources = state.pinnedSources,
           numberOfFeeds = state.numberOfFeeds,
@@ -219,12 +218,12 @@ internal fun FeedsBottomSheet(
           homeItemBackgroundColor = AppTheme.colorScheme.surfaceContainerLow,
           homeItemShadowColors = homeItemShadowColors,
           onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-          onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) }
+          onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
         )
 
         BottomSheetExpandedContent(
           modifier =
-            Modifier.fillMaxSize().then(touchInterceptor).graphicsLayer {
+            Modifier.fillMaxSize().then(touchInterceptor).padding(top = 12.dp).graphicsLayer {
               alpha = bottomSheetProgress()
             },
           viewModel = feedsViewModel,
