@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.uikit.OnFocusBehavior
 import androidx.compose.ui.window.ComposeUIViewController
 import dev.sasikanth.rss.reader.app.App
@@ -22,11 +23,17 @@ import me.tatarka.inject.annotations.Inject
 import platform.UIKit.UIViewController
 
 @Inject
+@OptIn(ExperimentalComposeUiApi::class)
 class HomeViewController(private val app: App) {
 
   @Suppress("unused")
   fun viewController(): UIViewController {
-    return ComposeUIViewController(configure = { onFocusBehavior = OnFocusBehavior.DoNothing }) {
+    return ComposeUIViewController(
+      configure = {
+        onFocusBehavior = OnFocusBehavior.DoNothing
+        parallelRendering = true
+      }
+    ) {
       app(
         {
           // no-op
