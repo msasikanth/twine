@@ -1,4 +1,5 @@
 import UIKit
+import WidgetKit
 import SwiftUI
 import shared
 
@@ -33,6 +34,9 @@ struct ContentView: View {
 			.edgesIgnoringSafeArea(.all)
             .onOpenURL { url in
                 ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIScene.didEnterBackgroundNotification)) { output in
+                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.refreshFeedsWidgetKind)
             }
 	}
 }
