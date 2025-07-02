@@ -36,7 +36,7 @@ struct ContentView: View {
                 ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScene.didEnterBackgroundNotification)) { output in
-                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.refreshFeedsWidgetKind)
+                WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
             }
 	}
 }
