@@ -17,7 +17,7 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
-import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -37,7 +37,7 @@ data class SettingsState(
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
-  val subscriptionResult: BillingHandler.SubscriptionResult?,
+  val subscriptionResult: SubscriptionResult?,
   val openPaywall: Boolean,
 ) {
 

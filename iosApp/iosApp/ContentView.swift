@@ -31,5 +31,8 @@ struct ContentView: View {
         ComposeView(homeViewControllerComponent: homeViewControllerComponent)
 			.ignoresSafeArea(.keyboard) // Compose has own keyboard handler
 			.edgesIgnoringSafeArea(.all)
+            .onOpenURL { url in
+                ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
+            }
 	}
 }

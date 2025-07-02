@@ -9,7 +9,7 @@ import SwiftUI
 import WidgetKit
 import shared
 
-struct TwineUnreadWidgetEntryViewModel : View {
+struct TwineUnreadWidgetEntryView : View {
     var entry: Provider.Entry
     
     private let formatter: RelativeDateTimeFormatter = {
@@ -133,10 +133,10 @@ struct TwineUnreadWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(iOS 17.0, *) {
-                TwineUnreadWidgetEntryViewModel(entry: entry)
+                TwineUnreadWidgetEntryView(entry: entry)
                     .containerBackground(.fill.tertiary, for: .widget)
             } else {
-                TwineUnreadWidgetEntryViewModel(entry: entry)
+                TwineUnreadWidgetEntryView(entry: entry)
                     .padding()
                     .background()
             }

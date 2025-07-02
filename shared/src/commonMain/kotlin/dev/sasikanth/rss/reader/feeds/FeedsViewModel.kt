@@ -29,7 +29,7 @@ import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import app.cash.paging.map
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult
+import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source

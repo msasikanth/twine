@@ -41,18 +41,9 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
         return SubscriptionResult.Subscribed
       }
     } catch (e: Exception) {
-      return SubscriptionResult.Error
+      return SubscriptionResult.Error(e)
     }
 
     return SubscriptionResult.NotSubscribed
-  }
-
-  sealed interface SubscriptionResult {
-
-    data object Subscribed : SubscriptionResult
-
-    data object NotSubscribed : SubscriptionResult
-
-    data object Error : SubscriptionResult
   }
 }

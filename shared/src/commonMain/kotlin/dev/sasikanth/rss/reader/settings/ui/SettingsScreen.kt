@@ -66,9 +66,11 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
-import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
@@ -160,6 +162,10 @@ internal fun SettingsScreen(
       openPaywall()
       viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
     }
+  }
+
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
   }
 
   Scaffold(
@@ -373,7 +379,7 @@ internal fun SettingsScreen(
 
 @Composable
 fun TwinePremium(
-  subscriptionResult: BillingHandler.SubscriptionResult?,
+  subscriptionResult: SubscriptionResult?,
   modifier: Modifier = Modifier,
   onClick: () -> Unit
 ) {
@@ -381,9 +387,7 @@ fun TwinePremium(
     modifier =
       modifier
         .fillMaxWidth()
-        .clickable(enabled = subscriptionResult != BillingHandler.SubscriptionResult.Subscribed) {
-          onClick()
-        }
+        .clickable(enabled = subscriptionResult != SubscriptionResult.Subscribed) { onClick() }
         .padding(horizontal = 24.dp, vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically,
@@ -396,7 +400,7 @@ fun TwinePremium(
     )
 
     Column {
-      if (subscriptionResult != BillingHandler.SubscriptionResult.Subscribed) {
+      if (subscriptionResult != SubscriptionResult.Subscribed) {
         Text(
           text = stringResource(Res.string.twinePremium),
           style = MaterialTheme.typography.titleMedium,
@@ -405,7 +409,7 @@ fun TwinePremium(
       }
 
       val subscriptionDescRes =
-        if (subscriptionResult == BillingHandler.SubscriptionResult.Subscribed) {
+        if (subscriptionResult == SubscriptionResult.Subscribed) {
           Res.string.twinePremiumSubscribedDesc
         } else {
           Res.string.twinePremiumDesc

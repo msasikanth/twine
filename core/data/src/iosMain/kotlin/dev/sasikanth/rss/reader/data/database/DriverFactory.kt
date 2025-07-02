@@ -22,6 +22,7 @@ import app.cash.sqldelight.driver.native.wrapConnection
 import co.touchlab.kermit.Logger
 import co.touchlab.sqliter.DatabaseConfiguration
 import co.touchlab.sqliter.JournalMode
+import dev.sasikanth.rss.reader.data.utils.Constants.APP_GROUP
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Inject
@@ -145,5 +146,4 @@ actual class DriverFactory(
   }
 }
 
-private const val APP_GROUP = "group.dev.sasikanth.rss.reader"
 private const val DATABASE_PATH = "databases"

@@ -42,12 +42,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         return true
     }
-    
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
-        return true
-    }
-    
+
     func scheduleCleanUpPosts(earliest: Date) {
         let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
         request.earliestBeginDate = earliest
