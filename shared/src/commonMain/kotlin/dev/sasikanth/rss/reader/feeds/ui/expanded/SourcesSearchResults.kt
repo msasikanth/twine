@@ -53,6 +53,7 @@ internal fun LazyListScope.sourcesSearchResults(
         isFeedSelected = selectedSources.any { it.id == feed.id },
         onFeedClick = onSourceClick,
         onFeedSelected = onToggleSourceSelection,
+        onOptionsClick = { onToggleSourceSelection(feed) },
         modifier =
           Modifier.padding(
             start = startPadding,

@@ -29,8 +29,11 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,9 +48,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.resources.icons.RadioSelected
-import dev.sasikanth.rss.reader.resources.icons.RadioUnselected
-import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
@@ -60,6 +60,7 @@ internal fun FeedListItem(
   isFeedSelected: Boolean,
   onFeedClick: (Feed) -> Unit,
   onFeedSelected: (Feed) -> Unit,
+  onOptionsClick: () -> Unit,
   modifier: Modifier = Modifier,
   dragHandle: (@Composable () -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
@@ -135,34 +136,26 @@ internal fun FeedListItem(
       }
 
       if (isInMultiSelectMode) {
-        val icon =
-          if (isFeedSelected) {
-            TwineIcons.RadioSelected
-          } else {
-            TwineIcons.RadioUnselected
-          }
-
-        val tint =
-          if (isFeedSelected) {
-            AppTheme.colorScheme.tintedForeground
-          } else {
-            AppTheme.colorScheme.onSurface
-          }
-
-        Icon(
-          imageVector = icon,
-          contentDescription = null,
-          tint = tint,
-          modifier = Modifier.requiredSize(24.dp),
-        )
+        SelectedCheckIndicator(selected = isFeedSelected)
       }
 
       if (!isInMultiSelectMode) {
-        Spacer(Modifier.requiredWidth(8.dp))
         dragHandle?.invoke()
       }
 
-      Spacer(Modifier.requiredWidth(4.dp))
+      if (!isInMultiSelectMode && dragHandle == null) {
+        IconButton(
+          modifier = Modifier.requiredSize(40.dp),
+          onClick = onOptionsClick,
+        ) {
+          Icon(
+            modifier = Modifier.requiredSize(20.dp),
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
+      }
     }
   }
 }

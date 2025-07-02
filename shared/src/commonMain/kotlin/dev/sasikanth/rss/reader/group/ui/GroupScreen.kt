@@ -181,6 +181,7 @@ fun GroupScreen(
               isFeedSelected = state.selectedSources.any { it.id == feed.id },
               onFeedClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
               onFeedSelected = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
+              onOptionsClick = { viewModel.dispatch(GroupEvent.OnFeedClicked(feed)) },
             )
           }
         }
