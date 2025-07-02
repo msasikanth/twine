@@ -1,3 +1,15 @@
+/*
+ * Copyright 2025 Sasikanth Miriyampalli
+ *
+ * Licensed under the GPL, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ */
+package dev.sasikanth.rss.reader.widget
+
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
@@ -47,21 +59,8 @@ import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
-import dev.sasikanth.rss.reader.widget.NoPosts
-import dev.sasikanth.rss.reader.widget.RequireTwinePremium
-import dev.sasikanth.rss.reader.widget.WidgetPostListItem
 import kotlinx.coroutines.launch
 
-/*
- * Copyright 2025 Sasikanth Miriyampalli
- *
- * Licensed under the GPL, Version 3.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.gnu.org/licenses/gpl-3.0.en.html
- *
- */
 class TwineUnreadWidget : GlanceAppWidget() {
 
   override val sizeMode: SizeMode = SizeMode.Single
