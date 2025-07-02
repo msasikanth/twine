@@ -58,7 +58,5 @@ internal fun BottomSheetHandle(
       Modifier.background(AppTheme.colorScheme.onSurfaceVariant, shape = RoundedCornerShape(50))
         .requiredSize(width = targetHandleSize, height = 3.dp)
     )
-
-    Spacer(Modifier.requiredHeight(13.dp))
   }
 }
