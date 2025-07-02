@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -189,6 +190,7 @@ fun App(
       }
 
       NavHost(
+        modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
         navController = navController,
         startDestination = Screen.Home,
         popEnterTransition = { EnterTransition.None },
