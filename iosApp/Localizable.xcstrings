@@ -6,44 +6,44 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "\\u{2022}"
+            "value" : "•"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         },
         "tr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "\\u{2022}"
+            "state" : "translated",
+            "value" : "•"
           }
         }
       },
