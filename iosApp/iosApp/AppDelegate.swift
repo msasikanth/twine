@@ -14,6 +14,8 @@ import RevenueCat
 import WidgetKit
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    static let refreshFeedsWidgetKind = "dev.sasikanth.reader.feeds_refresh"
 
     lazy var applicationComponent: InjectApplicationComponent = InjectApplicationComponent(
       uiViewControllerProvider: { UIApplication.topViewController()! }
@@ -78,7 +80,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func scheduledRefreshFeeds(earliest: Date) {
-        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
+        let request = BGProcessingTaskRequest(identifier: AppDelegate.refreshFeedsWidgetKind)
         request.earliestBeginDate = earliest
         request.requiresNetworkConnectivity = true
         
