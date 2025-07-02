@@ -44,7 +44,7 @@ import dev.sasikanth.rss.reader.MainActivity
 import dev.sasikanth.rss.reader.R
 import dev.sasikanth.rss.reader.ReaderApplication
 import dev.sasikanth.rss.reader.app.Screen
-import dev.sasikanth.rss.reader.billing.BillingHandler.SubscriptionResult.Subscribed
+import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.widget.NoPosts
@@ -80,7 +80,9 @@ class TwineUnreadWidget : GlanceAppWidget() {
       GlanceTheme {
         var isSubscribed: Boolean? by remember { mutableStateOf(null) }
 
-        LaunchedEffect(Unit) { isSubscribed = billingHandler.customerResult() is Subscribed }
+        LaunchedEffect(Unit) {
+          isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+        }
 
         when (isSubscribed) {
           true -> {
