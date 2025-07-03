@@ -13,7 +13,7 @@
     <string name="feedEntryTitleHint">Название (необязательно)</string>
     <string name="share">Поделиться</string>
     <string name="scrollToTop">Наверх</string>
-    <string name="newArticles">New articles</string>
+    <string name="newArticles">Новые статьи</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
     <string name="feedNameHint">Название канала</string>
@@ -81,7 +81,7 @@
     <string name="feedsSearchHint">Фильтр</string>
     <string name="allFeeds">Новостные ленты</string>
     <string name="pinnedFeeds">Закреплённые</string>
-    <string name="markAllAsRead">Mark as read</string>
+    <string name="markAllAsRead">Отметить как прочитанное</string>
     <string name="openWebsite">Открыть веб-сайт</string>
     <string name="noNewPosts">Свежих новостей нет</string>
     <string name="noNewPostsSubtitle">Зайдите позже или потяните вниз, чтобы проверить наличие свежих новостей</string>
@@ -149,14 +149,14 @@
     <string name="pullToClose">Потяните вниз, чтобы закрыть</string>
     <string name="readerSettings">Настройки экрана программы чтения</string>
     <string name="comingSoon">Скоро будет добавлено</string>
-    <string name="homeViewMode">Layout</string>
+    <string name="homeViewMode">Расположение</string>
     <string name="homeViewModeDefault">По умолчанию</string>
     <string name="homeViewModeSimple">Простой</string>
     <string name="homeViewModeCompact">Компактный</string>
-    <string name="twinePremium">Twine premium subscription</string>
-    <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
-    <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
-    <string name="readerCustomisationsTypeface">Typeface</string>
+    <string name="twinePremium">Подписка на Twine премиум</string>
+    <string name="twinePremiumDesc">Переходите на премиум: открывайте все возможности приложения и стимулируйте его дальнейшее развитие.</string>
+    <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
+    <string name="readerCustomisationsTypeface">Шрифт</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
