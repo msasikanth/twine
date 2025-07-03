@@ -230,7 +230,11 @@ internal fun HomeScreen(
                   }
                 }
 
-              LaunchedEffect(state.activePostIndex, featuredPosts, posts?.itemCount) {
+              LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
+                if (featuredPosts.isEmpty()) {
+                  return@LaunchedEffect
+                }
+
                 val activePostIndex = state.activePostIndex
                 val numberOfFeaturedPosts = featuredPosts.size
 
