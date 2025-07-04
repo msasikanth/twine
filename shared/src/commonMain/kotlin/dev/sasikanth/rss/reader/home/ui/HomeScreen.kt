@@ -1,3 +1,4 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -48,7 +49,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.rememberSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -150,8 +151,9 @@ internal fun HomeScreen(
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val bottomSheetState =
-    rememberStandardBottomSheetState(
+    rememberSheetState(
       initialValue = state.feedsSheetState,
+      velocityThreshold = 300.dp,
       confirmValueChange = {
         if (it != SheetValue.Hidden) {
           viewModel.dispatch(HomeEvent.FeedsSheetStateChanged(it))
@@ -551,7 +553,6 @@ private fun NoNewPosts() {
   }
 }
 
-@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 private fun SheetState.progressAsState(): State<Float> {
   return derivedStateOf {
     when {
