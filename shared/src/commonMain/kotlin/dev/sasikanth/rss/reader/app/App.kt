@@ -17,7 +17,6 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -190,7 +189,6 @@ fun App(
       }
 
       NavHost(
-        modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop),
         navController = navController,
         startDestination = Screen.Home,
         popEnterTransition = { EnterTransition.None },
@@ -233,7 +231,7 @@ fun App(
           }
 
           HomeScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = Modifier.fillMaxSize(),
             useDarkTheme = useDarkTheme,
             viewModel = viewModel,
             feedsViewModel = feedsViewModel,
@@ -315,7 +313,7 @@ fun App(
           }
 
           AddFeedScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = Modifier.fillMaxSize(),
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }
@@ -410,7 +408,7 @@ fun App(
           }
 
           GroupScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = Modifier.fillMaxSize(),
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }

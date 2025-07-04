@@ -1,3 +1,4 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -48,7 +49,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
-import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.rememberSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -59,6 +60,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -89,8 +91,12 @@ import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Feed
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -98,6 +104,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -134,6 +142,7 @@ internal fun HomeScreen(
   val feedsState by feedsViewModel.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
   val density = LocalDensity.current
+  val dynamicColorState = LocalDynamicColorState.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
   val featuredPosts by
@@ -142,8 +151,9 @@ internal fun HomeScreen(
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val bottomSheetState =
-    rememberStandardBottomSheetState(
+    rememberSheetState(
       initialValue = state.feedsSheetState,
+      velocityThreshold = 300.dp,
       confirmValueChange = {
         if (it != SheetValue.Hidden) {
           viewModel.dispatch(HomeEvent.FeedsSheetStateChanged(it))
@@ -170,6 +180,57 @@ internal fun HomeScreen(
       viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
       viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
     }
+  }
+
+  LaunchedEffect(featuredPostsPagerState, featuredPosts) {
+    if (featuredPosts.isEmpty()) return@LaunchedEffect
+
+    snapshotFlow {
+        runCatching {
+            val settledPage = featuredPostsPagerState.settledPage
+            featuredPostsPagerState.getOffsetFractionForPage(settledPage)
+          }
+          .getOrNull()
+          ?: 0f
+      }
+      .debounce(16.milliseconds)
+      .collectLatest { offset ->
+        // The default snap position of the pager is 0.5f, that means the targetPage
+        // state only changes after reaching half way point. We instead want it to scale
+        // as we start swiping.
+        //
+        // Instead of using EPSILON for snap threshold, we are doing that calculation
+        // as the page offset changes
+        //
+        val settledPage = featuredPostsPagerState.settledPage
+        val activePost = runCatching { featuredPosts[settledPage] }.getOrNull()
+
+        if (activePost == null) return@collectLatest
+
+        val fromItem =
+          when {
+            offset < -EPSILON -> {
+              runCatching { featuredPosts[settledPage - 1] }.getOrNull() ?: activePost
+            }
+            else -> activePost
+          }
+        val toItem =
+          when {
+            offset > EPSILON -> {
+              runCatching { featuredPosts[settledPage + 1] }.getOrNull() ?: activePost
+            }
+            else -> activePost
+          }
+
+        val fromSeedColor = fromItem.seedColor?.let { Color(it) }
+        val toSeedColor = toItem.seedColor?.let { Color(it) }
+
+        dynamicColorState.animate(
+          fromSeedColor = fromSeedColor,
+          toSeedColor = toSeedColor,
+          progress = offset
+        )
+      }
   }
 
   BackHandler(
@@ -492,7 +553,6 @@ private fun NoNewPosts() {
   }
 }
 
-@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 private fun SheetState.progressAsState(): State<Float> {
   return derivedStateOf {
     when {

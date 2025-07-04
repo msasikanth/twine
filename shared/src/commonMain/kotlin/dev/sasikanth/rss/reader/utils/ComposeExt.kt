@@ -57,10 +57,10 @@ internal class Ref(var value: Int)
 // copied at the call site to ensure that its logging only recompositions from the
 // original call site.
 @Composable
-internal fun LogCompositions(tag: String, msg: String) {
+internal fun LogCompositions(msg: String) {
   val ref = remember { Ref(0) }
   SideEffect { ref.value++ }
-  Logger.d(tag) { "Compositions: $msg ${ref.value}" }
+  Logger.i { "Compositions: $msg ${ref.value}" }
 }
 
 fun PagerState.getOffsetFractionForPage(page: Int): Float {

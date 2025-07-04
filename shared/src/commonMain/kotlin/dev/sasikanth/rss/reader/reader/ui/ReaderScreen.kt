@@ -95,11 +95,14 @@ import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
 internal fun ReaderScreen(
   darkTheme: Boolean,
@@ -122,7 +125,6 @@ internal fun ReaderScreen(
       defaultDarkAppColorScheme = LocalAppColorScheme.current,
       useTonalSpotScheme = true,
     )
-  val defaultSeedColor = AppTheme.colorScheme.tintedForeground
   val readerLinkHandler = remember {
     object : UriHandler {
       override fun openUri(uri: String) {
@@ -132,57 +134,54 @@ internal fun ReaderScreen(
   }
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
 
-  // Dynamic theme animator
   LaunchedEffect(pagerState, posts.loadState) {
+    if (posts.itemCount == 0) return@LaunchedEffect
+
     snapshotFlow {
-        val settledPage = pagerState.settledPage
-        try {
-          pagerState.getOffsetFractionForPage(settledPage)
-        } catch (_: Throwable) {
-          0f
-        }
+        runCatching {
+            val settledPage = pagerState.settledPage
+            pagerState.getOffsetFractionForPage(settledPage)
+          }
+          .getOrNull()
+          ?: 0f
       }
-      .collect { offset ->
+      .debounce(16.milliseconds)
+      .collectLatest { offset ->
         val settledPage = pagerState.settledPage
         val activePost = runCatching { posts.peek(settledPage) }.getOrNull()
 
-        if (activePost != null) {
-          // The default snap position of the pager is 0.5f, that means the targetPage
-          // state only changes after reaching half way point. We instead want it to scale
-          // as we start swiping.
-          //
-          // Instead of using EPSILON for snap threshold, we are doing that calculation
-          // as the page offset changes
-          //
-          val fromItem =
-            if (offset < -EPSILON) {
-              runCatching { posts.peek(settledPage - 1) }.getOrNull()
-            } else {
-              activePost
-            }
+        if (activePost == null) return@collectLatest
 
-          val toItem =
-            if (offset > EPSILON) {
-              runCatching { posts.peek(settledPage + 1) }.getOrNull()
-            } else {
-              activePost
-            }
+        // The default snap position of the pager is 0.5f, that means the targetPage
+        // state only changes after reaching half way point. We instead want it to scale
+        // as we start swiping.
+        //
+        // Instead of using EPSILON for snap threshold, we are doing that calculation
+        // as the page offset changes
+        //
+        val fromItem =
+          if (offset < -EPSILON) {
+            runCatching { posts.peek(settledPage - 1) }.getOrNull() ?: activePost
+          } else {
+            activePost
+          }
 
-          val fromSeedColor =
-            seedColorExtractor.calculateSeedColor(fromItem?.imageUrl).run {
-              if (this != null) Color(this) else defaultSeedColor
-            }
-          val toSeedColor =
-            seedColorExtractor.calculateSeedColor(toItem?.imageUrl).run {
-              if (this != null) Color(this) else defaultSeedColor
-            }
+        val toItem =
+          if (offset > EPSILON) {
+            runCatching { posts.peek(settledPage + 1) }.getOrNull() ?: activePost
+          } else {
+            activePost
+          }
 
-          dynamicColorState.animate(
-            fromSeedColor = fromSeedColor,
-            toSeedColor = toSeedColor,
-            progress = offset
-          )
-        }
+        val fromSeedColor =
+          seedColorExtractor.calculateSeedColor(fromItem.imageUrl)?.let { Color(it) }
+        val toSeedColor = seedColorExtractor.calculateSeedColor(toItem.imageUrl)?.let { Color(it) }
+
+        dynamicColorState.animate(
+          fromSeedColor = fromSeedColor,
+          toSeedColor = toSeedColor,
+          progress = offset
+        )
       }
   }
 

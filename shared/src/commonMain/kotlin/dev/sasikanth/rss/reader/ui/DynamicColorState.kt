@@ -34,8 +34,11 @@ import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
 import dev.sasikanth.material.color.utilities.scheme.SchemeContent
 import dev.sasikanth.material.color.utilities.scheme.SchemeTonalSpot
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 internal fun rememberDynamicColorState(
@@ -66,7 +69,7 @@ internal class DynamicColorState(
 
   private val cache = lruCache<String, AppColorScheme>(maxSize = 4)
 
-  fun animate(fromSeedColor: Color, toSeedColor: Color, progress: Float) {
+  suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
     val normalizedProgress =
       ease(
         if (progress < -EPSILON) {
@@ -76,35 +79,59 @@ internal class DynamicColorState(
         }
       )
 
-    val startLightColors =
-      cache["light_$fromSeedColor"]
-        ?: generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = fromSeedColor)
+    val (startLight, startDark, endLight, endDark) =
+      withContext(Dispatchers.Default) {
+        val defaultLightSeedColor = defaultLightAppColorScheme.tintedForeground
+        val defaultDarkSeedColor = defaultDarkAppColorScheme.tintedForeground
 
-    val startDarkColors =
-      cache["dark_$fromSeedColor"]
-        ?: generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = fromSeedColor)
+        val startLight =
+          cache["light_$fromSeedColor"]
+            ?: generateDynamicColorsFromSeedColor(
+                useDarkTheme = false,
+                seedColor = fromSeedColor ?: defaultLightSeedColor
+              )
+              .also { cache.put("light_$fromSeedColor", it) }
 
-    val endLightColors =
-      cache["light_$toSeedColor"]
-        ?: generateDynamicColorsFromSeedColor(useDarkTheme = false, seedColor = toSeedColor)
+        val startDark =
+          cache["dark_$fromSeedColor"]
+            ?: generateDynamicColorsFromSeedColor(
+                useDarkTheme = true,
+                seedColor = fromSeedColor ?: defaultLightSeedColor
+              )
+              .also { cache.put("dark_$fromSeedColor", it) }
 
-    val endDarkColors =
-      cache["dark_$toSeedColor"]
-        ?: generateDynamicColorsFromSeedColor(useDarkTheme = true, seedColor = toSeedColor)
+        val endLight =
+          cache["light_$toSeedColor"]
+            ?: generateDynamicColorsFromSeedColor(
+                useDarkTheme = false,
+                seedColor = toSeedColor ?: defaultDarkSeedColor
+              )
+              .also { cache.put("light_$toSeedColor", it) }
+
+        val endDark =
+          cache["dark_$toSeedColor"]
+            ?: generateDynamicColorsFromSeedColor(
+                useDarkTheme = true,
+                seedColor = toSeedColor ?: defaultDarkSeedColor
+              )
+              .also { cache.put("dark_$toSeedColor", it) }
+
+        NTuple4(startLight, startDark, endLight, endDark)
+      }
 
     lightAppColorScheme =
-      if (startLightColors == endLightColors) {
-        startLightColors
+      if (startLight == endLight) {
+        startLight
       } else {
-        startLightColors.animate(to = endLightColors, progress = normalizedProgress)
+        startLight.animate(to = endLight, progress = normalizedProgress)
       }
 
     darkAppColorScheme =
-      if (startDarkColors == endDarkColors) {
-        startDarkColors
+      if (startDark == endDark) {
+        startDark
       } else {
-        startDarkColors.animate(
-          to = endDarkColors,
+        startDark.animate(
+          to = endDark,
           progress = normalizedProgress,
         )
       }

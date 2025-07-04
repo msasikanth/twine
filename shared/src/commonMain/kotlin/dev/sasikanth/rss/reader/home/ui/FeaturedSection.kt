@@ -34,9 +34,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -58,9 +56,7 @@ import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.util.canBlurImage
-import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
@@ -80,7 +76,6 @@ internal fun FeaturedSection(
   onTogglePostReadClick: (String, Boolean) -> Unit,
 ) {
   val layoutDirection = LocalLayoutDirection.current
-  val dynamicColorState = LocalDynamicColorState.current
 
   val systemBarsPaddingValues =
     WindowInsets.systemBars.only(WindowInsetsSides.Horizontal).asPaddingValues()
@@ -93,55 +88,6 @@ internal fun FeaturedSection(
     } else {
       systemBarsEndPadding
     }
-
-  val defaultSeedColor = AppTheme.colorScheme.tintedForeground
-
-  LaunchedEffect(pagerState, featuredPosts) {
-    snapshotFlow {
-        val settledPage = pagerState.settledPage
-        try {
-          pagerState.getOffsetFractionForPage(settledPage)
-        } catch (e: Throwable) {
-          0f
-        }
-      }
-      .collect { offset ->
-        if (featuredPosts.isEmpty()) return@collect
-
-        // The default snap position of the pager is 0.5f, that means the targetPage
-        // state only changes after reaching half way point. We instead want it to scale
-        // as we start swiping.
-        //
-        // Instead of using EPSILON for snap threshold, we are doing that calculation
-        // as the page offset changes
-        //
-        val currentItem = featuredPosts[pagerState.settledPage]
-        val fromItem =
-          if (offset < -EPSILON) {
-            featuredPosts[pagerState.settledPage - 1]
-          } else {
-            currentItem
-          }
-
-        val toItem =
-          if (offset > EPSILON) {
-            featuredPosts[pagerState.settledPage + 1]
-          } else {
-            currentItem
-          }
-
-        val fromSeedColor =
-          fromItem.seedColor.run { if (this != null) Color(this) else defaultSeedColor }
-        val toSeedColor =
-          toItem.seedColor.run { if (this != null) Color(this) else defaultSeedColor }
-
-        dynamicColorState.animate(
-          fromSeedColor = fromSeedColor,
-          toSeedColor = toSeedColor,
-          progress = offset
-        )
-      }
-  }
 
   Box(modifier) {
     val contentPadding =
