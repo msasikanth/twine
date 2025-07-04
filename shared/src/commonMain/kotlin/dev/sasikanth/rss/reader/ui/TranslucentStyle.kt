@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.ui
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 data class TranslucentStyle(val background: Color, val foreground: Color, val outline: Color)
@@ -29,6 +29,6 @@ class TranslucentStyles(
 )
 
 internal val LocalTranslucentStyles =
-  staticCompositionLocalOf<TranslucentStyles> {
+  compositionLocalOf<TranslucentStyles> {
     throw IllegalStateException("Translucent styles is not provided")
   }
