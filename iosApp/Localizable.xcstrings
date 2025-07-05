@@ -40,6 +40,12 @@
             "value" : "•"
           }
         },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "•"
+          }
+        },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "new",
@@ -78,14 +84,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "Никаких непрочитанных постов"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Okunmamış gönderi yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No unread posts"
           }
         },
         "zh-Hant" : {
@@ -125,14 +137,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "Нет названия канала"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Akış adı yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No feed name"
           }
         },
         "zh-Hant" : {
@@ -172,14 +190,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "Без названия"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Başlık yok"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No title"
           }
         },
         "zh-Hant" : {
@@ -219,14 +243,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "Непрочитанные посты"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Okunmamış gönderiler"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Unread posts"
           }
         },
         "zh-Hant" : {
@@ -266,14 +296,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении."
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Widget'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Widgets are only available for premium users. Please subscribe in the app."
           }
         },
         "zh-Hant" : {
@@ -312,14 +348,20 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ непрочитанные…"
           }
         },
         "tr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "+%@ okunmamış…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "+%@ unread…"
           }
         },
         "zh-Hant" : {
