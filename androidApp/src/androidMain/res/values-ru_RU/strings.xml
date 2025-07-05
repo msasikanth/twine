@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Twine</string>
+    <plurals name="widget_unread_posts">
+        <item quantity="one">Один</item>
+        <item quantity="few">Несколько</item>
+        <item quantity="many">Много</item>
+        <item quantity="other">Другое</item>
+    </plurals>
+    <string name="widget_no_title">Без названия</string>
+    <string name="widget_no_description">Нет описания</string>
+    <string name="widget_see_more">Больше</string>
+    <string name="widget_unread_refresh">Обновить</string>
+    <string name="widget_unread_add">Добавить канал</string>
+    <string name="widget_required_premium">Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении.</string>
+    <string name="widget_no_posts">Постов нет</string>
+</resources>
