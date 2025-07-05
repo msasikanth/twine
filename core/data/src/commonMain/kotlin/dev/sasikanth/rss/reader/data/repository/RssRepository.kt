@@ -557,6 +557,12 @@ class RssRepository(
     return withContext(dispatchersProvider.databaseRead) { feedQueries.hasFeed(id).executeAsOne() }
   }
 
+  suspend fun hasPost(id: String): Boolean {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.post(id).executeAsOneOrNull() != null
+    }
+  }
+
   suspend fun toggleFeedPinStatus(feed: Feed) {
     val now =
       if (feed.pinnedAt == null) {

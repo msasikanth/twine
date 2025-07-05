@@ -54,7 +54,7 @@ class BookmarksViewModel(
 
   private fun onPostBookmarkClicked(post: PostWithMetadata) {
     viewModelScope.launch {
-      if (rssRepository.hasFeed(post.sourceId)) {
+      if (rssRepository.hasFeed(post.sourceId) && rssRepository.hasPost(post.id)) {
         rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
       } else {
         rssRepository.deleteBookmark(id = post.id)
