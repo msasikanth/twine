@@ -198,7 +198,10 @@ internal fun ReaderPage(
 
         CompositionLocalProvider(
           LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
-          LocalMarkdownPadding provides markdownPadding(),
+          LocalMarkdownPadding provides
+            markdownPadding(
+              block = 12.dp,
+            ),
           LocalMarkdownDimens provides markdownDimens(),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
