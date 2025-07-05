@@ -1,8 +1,8 @@
 files:
   - source: /shared/src/commonMain/composeResources/values/strings.xml
-    translation: /shared/src/commonMain/composeResources/values-%locale_with_underscore%/strings.xml
+    translation: /shared/src/commonMain/composeResources/values-%two_letters_code%/strings.xml
   - source: /androidApp/src/androidMain/res/values/strings.xml
-    translation: /androidApp/src/androidMain/res/values-%locale_with_underscore%/strings.xml
+    translation: /androidApp/src/androidMain/res/values-%two_letters_code%/strings.xml
   - source: /iosApp/Localizable.xcstrings
     translation: /iosApp/%original_file_name%
     multilingual: 1
