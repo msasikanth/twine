@@ -74,6 +74,9 @@ ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor_client_darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 ktor_client_logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor_client_mock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
+ktor_content_negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor_json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor_resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
 kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
