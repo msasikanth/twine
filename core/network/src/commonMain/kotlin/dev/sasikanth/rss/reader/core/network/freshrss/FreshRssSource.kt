@@ -291,6 +291,6 @@ class FreshRssSource(
 
   private fun toIdString(id: String): String {
     val signedId = id.toLong()
-    return signedId.toString(radix = 16).padStart(16, '0')
+    return "tag:google.com,2005:reader/item/" + signedId.toString(radix = 16).padStart(16, '0')
   }
 }
