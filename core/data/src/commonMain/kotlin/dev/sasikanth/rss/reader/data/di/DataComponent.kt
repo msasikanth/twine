@@ -147,4 +147,6 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
 
   @Provides
   fun providesFeedGroupFeedQueries(database: ReaderDatabase) = database.feedGroupFeedQueries
+
+  @Provides fun providesUserQueries(database: ReaderDatabase) = database.userQueries
 }
