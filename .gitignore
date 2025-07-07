@@ -26,5 +26,6 @@ androidApp/release
 .idea/modules.xml
 .idea/appInsightsSettings.xml
 .idea/shelf
+.idea/httpRequests
 gradle.xml
 *.iml
