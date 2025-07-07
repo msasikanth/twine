@@ -17,4 +17,5 @@ data class User(
   val profileId: String,
   val email: String,
   val token: String,
+  val authUrl: String,
 )

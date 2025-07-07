@@ -32,13 +32,14 @@ class UserRepository(
     name: String,
     profileId: String,
     email: String,
-    token: String
+    token: String,
+    authUrl: String,
   ) {
     withContext(dispatchersProvider.databaseWrite) {
       val user = user().firstOrNull()
       if (user == null) return@withContext
 
-      userQueries.insert(id, name, profileId, email, token)
+      userQueries.insert(id, name, profileId, email, token, authUrl)
     }
   }
 

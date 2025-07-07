@@ -3,12 +3,13 @@ CREATE TABLE user(
     name TEXT NOT NULL,
     profileId TEXT NOT NULL,
     email TEXT NOT NULL,
-    token TEXT NOT NULL
+    token TEXT NOT NULL,
+    authUrl TEXT NOT NULL
 );
 
 insert:
-INSERT OR IGNORE INTO user(id, name, profileId, email, token)
-VALUES (:id, :name, :profileId, :email, :token);
+INSERT OR IGNORE INTO user(id, name, profileId, email, token, authUrl)
+VALUES (:id, :name, :profileId, :email, :token, :authUrl);
 
 delete:
 DELETE FROM user;

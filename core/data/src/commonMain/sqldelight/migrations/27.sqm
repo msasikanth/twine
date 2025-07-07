@@ -3,5 +3,6 @@ CREATE TABLE user (
     name TEXT NOT NULL,
     profileId TEXT NOT NULL,
     email TEXT NOT NULL,
-    token TEXT NOT NULL
+    token TEXT NOT NULL,
+    authUrl TEXT NOT NULL
 );
