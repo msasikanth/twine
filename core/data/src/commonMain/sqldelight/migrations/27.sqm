@@ -4,5 +4,5 @@ CREATE TABLE user (
     profileId TEXT NOT NULL,
     email TEXT NOT NULL,
     token TEXT NOT NULL,
-    authUrl TEXT NOT NULL
+    serverUrl TEXT NOT NULL
 );
