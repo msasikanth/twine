@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.core.network.freshrss
 
+import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlesPayload
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ItemIds
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.SubscriptionsPayload
@@ -31,11 +32,12 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import kotlinx.coroutines.withContext
+import me.tatarka.inject.annotations.Inject
 
+@Inject
 class FreshRssSource(
-  httpClient: HttpClient,
-  baseEndPoint: String,
-  private val authToken: String?,
+  private val appHttpClient: HttpClient,
+  private val user: Lazy<User?>,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -44,22 +46,16 @@ class FreshRssSource(
     private const val USER_STATE_STARRED = "user/-/state/com.google/starred"
   }
 
-  private val httpClient =
-    httpClient.config {
-      followRedirects = true
-      defaultRequest {
-        url(baseEndPoint)
+  private var _httpClient: HttpClient? = null
 
-        if (!(authToken.isNullOrBlank())) {
-          header("Authorization", "GoogleLogin auth=$authToken")
-        }
-      }
-    }
-
-  /** @return: auth token for the account */
-  suspend fun login(username: String, password: String): String? {
+  /** @return: auth token for the account if successful or else return null */
+  suspend fun login(endpoint: String, username: String, password: String): String? {
     return withContext(dispatchersProvider.io) {
-      httpClient
+      appHttpClient
+        .config {
+          followRedirects = true
+          defaultRequest { url(endpoint) }
+        }
         .post(Authentication) {
           contentType(ContentType.Application.FormUrlEncoded)
           setBody(
@@ -87,20 +83,26 @@ class FreshRssSource(
   }
 
   suspend fun userInfo(): UserInfoPayload {
-    return withContext(dispatchersProvider.io) { httpClient.get(Reader.UserInfo()).body() }
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(Reader.UserInfo()).body()
+    }
   }
 
   suspend fun tags(): TagsPayload {
-    return withContext(dispatchersProvider.io) { httpClient.get(Reader.Tags()).body() }
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(Reader.Tags()).body()
+    }
   }
 
   suspend fun subscriptions(): SubscriptionsPayload {
-    return withContext(dispatchersProvider.io) { httpClient.get(Reader.Subscriptions()).body() }
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(Reader.Subscriptions()).body()
+    }
   }
 
   suspend fun articles(limit: Int, newerThan: Long, continuation: String? = null): ArticlesPayload {
     return withContext(dispatchersProvider.io) {
-      httpClient
+      authenticatedHttpClient()
         .get(
           Reader.Articles(
             limit = limit,
@@ -114,7 +116,7 @@ class FreshRssSource(
 
   suspend fun markArticlesAsRead(ids: List<String>) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditTag()) {
+      authenticatedHttpClient().post(Reader.EditTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -130,7 +132,7 @@ class FreshRssSource(
 
   suspend fun markArticlesAsUnRead(ids: List<String>) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditTag()) {
+      authenticatedHttpClient().post(Reader.EditTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -145,12 +147,14 @@ class FreshRssSource(
   }
 
   suspend fun addFeed(url: String) {
-    withContext(dispatchersProvider.io) { httpClient.post(Reader.AddFeed(url = url)) }
+    withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().post(Reader.AddFeed(url = url))
+    }
   }
 
   suspend fun editFeedName(feedId: String, name: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditFeed()) {
+      authenticatedHttpClient().post(Reader.EditFeed()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -167,7 +171,7 @@ class FreshRssSource(
 
   suspend fun deleteFeed(feedId: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditFeed()) {
+      authenticatedHttpClient().post(Reader.EditFeed()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -183,7 +187,7 @@ class FreshRssSource(
 
   suspend fun addTagToFeed(feedId: String, tagId: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditFeed()) {
+      authenticatedHttpClient().post(Reader.EditFeed()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -200,7 +204,7 @@ class FreshRssSource(
 
   suspend fun addTag(tagName: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditFeed()) {
+      authenticatedHttpClient().post(Reader.EditFeed()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -217,7 +221,7 @@ class FreshRssSource(
 
   suspend fun editTag(tagId: String, newName: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.RenameTag()) {
+      authenticatedHttpClient().post(Reader.RenameTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -233,7 +237,7 @@ class FreshRssSource(
 
   suspend fun deleteTag(tagId: String) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.DisableTag()) {
+      authenticatedHttpClient().post(Reader.DisableTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(FormDataContent(parameters { append("s", tagId) }))
       }
@@ -242,7 +246,7 @@ class FreshRssSource(
 
   suspend fun addBookmarks(ids: List<String>) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditTag()) {
+      authenticatedHttpClient().post(Reader.EditTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -258,7 +262,7 @@ class FreshRssSource(
 
   suspend fun removeBookmarks(ids: List<String>) {
     withContext(dispatchersProvider.io) {
-      httpClient.post(Reader.EditTag()) {
+      authenticatedHttpClient().post(Reader.EditTag()) {
         contentType(ContentType.Application.FormUrlEncoded)
         setBody(
           FormDataContent(
@@ -274,18 +278,49 @@ class FreshRssSource(
 
   suspend fun readIds(): List<String> {
     return withContext(dispatchersProvider.io) {
-      httpClient.get(Reader.ItemIds(state = USER_STATE_READ)).body<ItemIds>().itemRefs.map { (id) ->
-        return@map toIdString(id)
-      }
+      authenticatedHttpClient()
+        .get(Reader.ItemIds(state = USER_STATE_READ))
+        .body<ItemIds>()
+        .itemRefs
+        .map { (id) ->
+          return@map toIdString(id)
+        }
     }
   }
 
   suspend fun bookmarkIds(): List<String> {
     return withContext(dispatchersProvider.io) {
-      httpClient.get(Reader.ItemIds(state = USER_STATE_STARRED)).body<ItemIds>().itemRefs.map { (id)
-        ->
-        return@map toIdString(id)
-      }
+      authenticatedHttpClient()
+        .get(Reader.ItemIds(state = USER_STATE_STARRED))
+        .body<ItemIds>()
+        .itemRefs
+        .map { (id) ->
+          return@map toIdString(id)
+        }
+    }
+  }
+
+  fun authenticatedHttpClient(): HttpClient {
+    return if (_httpClient != null) _httpClient!!
+    else {
+      val user by user
+
+      appHttpClient
+        .config {
+          followRedirects = true
+          defaultRequest {
+            val baseEndPoint = user?.serverUrl
+            if (!(baseEndPoint.isNullOrBlank())) {
+              url(baseEndPoint)
+            }
+
+            val authToken = user?.token
+            if (!(authToken.isNullOrBlank())) {
+              header("Authorization", "GoogleLogin auth=$authToken")
+            }
+          }
+        }
+        .also { _httpClient = it }
     }
   }
 
