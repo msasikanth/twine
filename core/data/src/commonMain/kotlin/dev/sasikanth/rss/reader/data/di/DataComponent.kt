@@ -32,7 +32,8 @@ expect interface SqlDriverPlatformComponent
 
 expect interface DataStorePlatformComponent
 
-interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent {
+interface DataComponent :
+  SqlDriverPlatformComponent, DataStorePlatformComponent, UserDataComponent {
 
   @Provides
   @AppScope

@@ -17,7 +17,6 @@ import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.data.database.UserQueries
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -36,7 +35,7 @@ class UserRepository(
     serverUrl: String,
   ) {
     withContext(dispatchersProvider.databaseWrite) {
-      val user = user().firstOrNull()
+      val user = userBlocking()
       if (user == null) return@withContext
 
       userQueries.insert(id, name, profileId, email, token, serverUrl)
@@ -45,6 +44,10 @@ class UserRepository(
 
   fun user(): Flow<User?> {
     return userQueries.user(mapper = ::User).asFlow().mapToOne(dispatchersProvider.databaseRead)
+  }
+
+  fun userBlocking(): User? {
+    return userQueries.user(mapper = ::User).executeAsOneOrNull()
   }
 
   suspend fun deleteUser() {
