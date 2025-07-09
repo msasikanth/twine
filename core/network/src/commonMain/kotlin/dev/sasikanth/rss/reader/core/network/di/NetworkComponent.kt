@@ -27,6 +27,7 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import co.touchlab.kermit.Logger as KermitLogger
 
 expect interface NetworkComponent
@@ -64,7 +65,7 @@ fun <T : HttpClientEngineConfig> httpClient(
         }
     }
 
-    install(ContentNegotiation) { json() }
+    install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
 
     install(Resources)
   }
