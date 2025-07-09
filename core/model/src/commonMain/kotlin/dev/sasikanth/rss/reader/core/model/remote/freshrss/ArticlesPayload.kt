@@ -32,7 +32,7 @@ data class ArticlePayload(
   val alternate: List<LinksPayload>,
   val origin: OriginPayload,
   val summary: SummaryPayload,
-  val author: String
+  val author: String? = null,
 )
 
 @Serializable

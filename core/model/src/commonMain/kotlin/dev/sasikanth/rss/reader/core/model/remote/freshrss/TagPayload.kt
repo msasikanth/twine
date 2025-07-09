@@ -21,5 +21,5 @@ data class TagsPayload(
 @Serializable
 data class TagPayload(
   val id: String,
-  val type: String?,
+  val type: String? = null,
 )
