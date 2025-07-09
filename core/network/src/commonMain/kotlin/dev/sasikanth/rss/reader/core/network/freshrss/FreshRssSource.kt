@@ -20,6 +20,7 @@ import dev.sasikanth.rss.reader.core.model.remote.freshrss.UserInfoPayload
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.resources.get
 import io.ktor.client.plugins.resources.post
@@ -31,7 +32,11 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.parameters
+import io.ktor.serialization.kotlinx.KotlinxSerializationConverter
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -46,16 +51,26 @@ class FreshRssSource(
     private const val USER_STATE_STARRED = "user/-/state/com.google/starred"
   }
 
-  private var _httpClient: HttpClient? = null
+  private val defaultHttpClient by lazy {
+    appHttpClient.config {
+      followRedirects = true
+
+      install(ContentNegotiation) {
+        val json = Json { ignoreUnknownKeys = true }
+
+        json(json)
+        register(ContentType.Text.Html, KotlinxSerializationConverter(json))
+      }
+    }
+  }
+
+  private var _authenticatedHttpClient: HttpClient? = null
 
   /** @return: auth token for the account if successful or else return null */
   suspend fun login(endpoint: String, username: String, password: String): String? {
     return withContext(dispatchersProvider.io) {
-      appHttpClient
-        .config {
-          followRedirects = true
-          defaultRequest { url(endpoint) }
-        }
+      defaultHttpClient
+        .config { defaultRequest { url(endpoint) } }
         .post(Authentication) {
           contentType(ContentType.Application.FormUrlEncoded)
           setBody(
@@ -82,9 +97,17 @@ class FreshRssSource(
     }
   }
 
-  suspend fun userInfo(): UserInfoPayload {
+  suspend fun userInfo(endPoint: String, authToken: String): UserInfoPayload {
     return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().get(Reader.UserInfo()).body()
+      defaultHttpClient
+        .config {
+          defaultRequest {
+            url(endPoint)
+            header("Authorization", "GoogleLogin auth=${authToken}")
+          }
+        }
+        .get(Reader.UserInfo())
+        .body()
     }
   }
 
@@ -100,7 +123,11 @@ class FreshRssSource(
     }
   }
 
-  suspend fun articles(limit: Int, newerThan: Long, continuation: String? = null): ArticlesPayload {
+  suspend fun articles(
+    limit: Int = 1000,
+    newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
+    continuation: String? = null
+  ): ArticlesPayload {
     return withContext(dispatchersProvider.io) {
       authenticatedHttpClient()
         .get(
@@ -148,7 +175,7 @@ class FreshRssSource(
 
   suspend fun addFeed(url: String) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().post(Reader.AddFeed(url = url))
+      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url))
     }
   }
 
@@ -301,13 +328,12 @@ class FreshRssSource(
   }
 
   fun authenticatedHttpClient(): HttpClient {
-    return if (_httpClient != null) _httpClient!!
+    return if (_authenticatedHttpClient != null) _authenticatedHttpClient!!
     else {
       val user by user
 
-      appHttpClient
+      defaultHttpClient
         .config {
-          followRedirects = true
           defaultRequest {
             val baseEndPoint = user?.serverUrl
             if (!(baseEndPoint.isNullOrBlank())) {
@@ -316,11 +342,11 @@ class FreshRssSource(
 
             val authToken = user?.token
             if (!(authToken.isNullOrBlank())) {
-              header("Authorization", "GoogleLogin auth=$authToken")
+              header("Authorization", "GoogleLogin auth=${authToken.trim()}")
             }
           }
         }
-        .also { _httpClient = it }
+        .also { _authenticatedHttpClient = it }
     }
   }
 
