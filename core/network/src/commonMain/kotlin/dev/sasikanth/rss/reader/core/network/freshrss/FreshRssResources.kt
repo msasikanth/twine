@@ -13,30 +13,48 @@ package dev.sasikanth.rss.reader.core.network.freshrss
 
 import io.ktor.resources.Resource
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Resource("/accounts/ClientLogin") object Authentication
 
 @Resource("/reader/api/0")
 class Reader {
 
-  @Resource("user-info?output=json") class UserInfo(val parent: Reader = Reader())
+  @Resource("user-info")
+  class UserInfo(
+    val parent: Reader = Reader(),
+    val output: String = "json",
+  )
 
-  @Resource("tag/list?output=json") class Tags(val parent: Reader = Reader())
+  @Resource("tag/list")
+  class Tags(
+    val parent: Reader = Reader(),
+    val output: String = "json",
+  )
 
-  @Resource("subscription/list?output=json") class Subscriptions(val parent: Reader = Reader())
+  @Resource("subscription/list")
+  class Subscriptions(
+    val parent: Reader = Reader(),
+    val output: String = "json",
+  )
 
-  @Resource("stream/contents/reading-list?n={limit}&ot={newerThan}&c={continuation}")
+  @Serializable
+  @Resource("stream/contents/reading-list")
   class Articles(
     val parent: Reader = Reader(),
-    val limit: Int = 1000,
-    val newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
-    val continuation: String = ""
+    @SerialName("n") val limit: Int = 1000,
+    @SerialName("ot") val newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
+    @SerialName("c") val continuation: String = ""
   )
 
   @Resource("edit-tag") class EditTag(val parent: Reader = Reader())
 
-  @Resource("subscription/quickadd?quickadd={url}")
-  class AddFeed(val parent: Reader = Reader(), val url: String)
+  @Resource("subscription/quickadd")
+  class AddFeed(
+    val parent: Reader = Reader(),
+    val quickadd: String = "",
+  )
 
   @Resource("subscription/edit") class EditFeed(val parent: Reader = Reader())
 
@@ -44,6 +62,11 @@ class Reader {
 
   @Resource("disable-tag") class DisableTag(val parent: Reader = Reader())
 
-  @Resource("stream/items/ids?s={state}&n={limit}")
-  class ItemIds(val state: String, val limit: Int = 10000)
+  @Serializable
+  @Resource("stream/items/ids")
+  class ItemIds(
+    val parent: Reader = Reader(),
+    @SerialName("s") val state: String,
+    @SerialName("n") val limit: Int = 10000
+  )
 }
