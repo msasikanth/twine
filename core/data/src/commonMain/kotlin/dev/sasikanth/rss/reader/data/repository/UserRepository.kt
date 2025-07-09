@@ -12,7 +12,7 @@
 package dev.sasikanth.rss.reader.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.data.database.UserQueries
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -36,14 +36,17 @@ class UserRepository(
   ) {
     withContext(dispatchersProvider.databaseWrite) {
       val user = userBlocking()
-      if (user == null) return@withContext
+      if (user != null) return@withContext
 
       userQueries.insert(id, name, profileId, email, token, serverUrl)
     }
   }
 
   fun user(): Flow<User?> {
-    return userQueries.user(mapper = ::User).asFlow().mapToOne(dispatchersProvider.databaseRead)
+    return userQueries
+      .user(mapper = ::User)
+      .asFlow()
+      .mapToOneOrNull(dispatchersProvider.databaseRead)
   }
 
   fun userBlocking(): User? {
