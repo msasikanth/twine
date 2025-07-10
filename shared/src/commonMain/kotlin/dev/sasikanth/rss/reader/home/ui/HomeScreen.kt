@@ -102,7 +102,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -111,7 +110,6 @@ import twine.shared.generated.resources.noFeeds
 import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
-import kotlin.time.Duration.Companion.milliseconds
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
@@ -190,7 +188,6 @@ internal fun HomeScreen(
           .getOrNull()
           ?: 0f
       }
-      .debounce(16.milliseconds)
       .collect { offset ->
         // The default snap position of the pager is 0.5f, that means the targetPage
         // state only changes after reaching half way point. We instead want it to scale
