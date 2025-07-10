@@ -97,10 +97,8 @@ import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -145,7 +143,6 @@ internal fun ReaderScreen(
           .getOrNull()
           ?: 0f
       }
-      .debounce(16.milliseconds)
       .collect { offset ->
         val settledPage = pagerState.settledPage
         val activePost = runCatching { posts.peek(settledPage) }.getOrNull()
