@@ -95,12 +95,12 @@ import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -146,11 +146,11 @@ internal fun ReaderScreen(
           ?: 0f
       }
       .debounce(16.milliseconds)
-      .collectLatest { offset ->
+      .collect { offset ->
         val settledPage = pagerState.settledPage
         val activePost = runCatching { posts.peek(settledPage) }.getOrNull()
 
-        if (activePost == null) return@collectLatest
+        if (activePost == null) return@collect
 
         // The default snap position of the pager is 0.5f, that means the targetPage
         // state only changes after reaching half way point. We instead want it to scale

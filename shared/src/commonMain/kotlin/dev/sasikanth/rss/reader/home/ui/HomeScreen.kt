@@ -95,7 +95,6 @@ import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -103,7 +102,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -113,6 +111,7 @@ import twine.shared.generated.resources.noFeeds
 import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
+import kotlin.time.Duration.Companion.milliseconds
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
@@ -192,7 +191,7 @@ internal fun HomeScreen(
           ?: 0f
       }
       .debounce(16.milliseconds)
-      .collectLatest { offset ->
+      .collect { offset ->
         // The default snap position of the pager is 0.5f, that means the targetPage
         // state only changes after reaching half way point. We instead want it to scale
         // as we start swiping.
@@ -203,7 +202,7 @@ internal fun HomeScreen(
         val settledPage = featuredPostsPagerState.settledPage
         val activePost = runCatching { featuredPosts[settledPage] }.getOrNull()
 
-        if (activePost == null) return@collectLatest
+        if (activePost == null) return@collect
 
         val fromItem =
           when {
