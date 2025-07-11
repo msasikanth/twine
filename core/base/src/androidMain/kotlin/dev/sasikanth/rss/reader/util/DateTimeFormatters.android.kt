@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.UnsupportedTemporalTypeException
 import java.util.Locale
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toJavaZoneId

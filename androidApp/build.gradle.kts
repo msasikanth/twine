@@ -27,6 +27,8 @@ kotlin {
   jvmToolchain(20)
 
   androidTarget()
+
+  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
 android {

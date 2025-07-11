@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.util
 
 import android.text.format.DateUtils
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 actual fun Instant.relativeDurationString(): String {
   return DateUtils.getRelativeTimeSpanString(

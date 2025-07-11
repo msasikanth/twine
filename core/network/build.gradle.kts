@@ -57,6 +57,8 @@ kotlin {
     }
 
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+
+    compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
   }
 }
 

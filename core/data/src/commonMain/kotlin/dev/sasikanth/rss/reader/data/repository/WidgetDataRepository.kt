@@ -21,9 +21,9 @@ import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import me.tatarka.inject.annotations.Inject
 
 @Inject

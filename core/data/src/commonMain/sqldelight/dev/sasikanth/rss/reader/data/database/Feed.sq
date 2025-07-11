@@ -1,6 +1,6 @@
 import kotlin.Boolean;
 import kotlin.time.Duration;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 CREATE TABLE feed(
   id TEXT NOT NULL PRIMARY KEY,
