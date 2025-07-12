@@ -12,22 +12,31 @@
 package dev.sasikanth.rss.reader.premium
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.revenuecat.purchases.kmp.ui.revenuecatui.CustomerCenter
 import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 
 @Composable
 fun PremiumPaywallScreen(
+  hasPremium: Boolean,
   goBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val paywallOptions = remember {
-    PaywallOptions.Builder(dismissRequest = { goBack() })
-      .apply { shouldDisplayDismissButton = true }
-      .build()
-  }
+  Box(modifier = modifier) {
+    if (!hasPremium) {
+      val paywallOptions = remember {
+        PaywallOptions.Builder(dismissRequest = { goBack() })
+          .apply { shouldDisplayDismissButton = true }
+          .build()
+      }
 
-  Box(modifier = modifier) { Paywall(paywallOptions) }
+      Paywall(paywallOptions)
+    } else {
+      CustomerCenter(modifier = Modifier.fillMaxSize(), onDismiss = { goBack() })
+    }
+  }
 }

@@ -76,6 +76,7 @@ import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
+import dev.sasikanth.rss.reader.premium.PremiumPaywallViewModel
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
@@ -133,6 +134,7 @@ fun App(
   settingsViewModel: () -> SettingsViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
+  premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -425,7 +427,10 @@ fun App(
         }
 
         composable<Screen.Paywall> {
-          PremiumPaywallScreen(goBack = { navController.popBackStack() })
+          val viewModel = viewModel { premiumPaywallViewModel() }
+          val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
+
+          PremiumPaywallScreen(hasPremium = hasPremium, goBack = { navController.popBackStack() })
         }
 
         dialog<Modals.FeedInfo> {
