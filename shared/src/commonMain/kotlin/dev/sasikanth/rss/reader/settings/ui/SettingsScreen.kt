@@ -385,10 +385,7 @@ fun TwinePremium(
 ) {
   Row(
     modifier =
-      modifier
-        .fillMaxWidth()
-        .clickable(enabled = subscriptionResult != SubscriptionResult.Subscribed) { onClick() }
-        .padding(horizontal = 24.dp, vertical = 16.dp),
+      modifier.fillMaxWidth().clickable { onClick() }.padding(horizontal = 24.dp, vertical = 16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
