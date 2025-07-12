@@ -430,7 +430,11 @@ fun App(
           val viewModel = viewModel { premiumPaywallViewModel() }
           val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
 
-          PremiumPaywallScreen(hasPremium = hasPremium, goBack = { navController.popBackStack() })
+          PremiumPaywallScreen(
+            modifier = fillMaxSizeModifier,
+            hasPremium = hasPremium,
+            goBack = { navController.popBackStack() }
+          )
         }
 
         dialog<Modals.FeedInfo> {
