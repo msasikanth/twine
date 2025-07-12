@@ -26,12 +26,18 @@ class PremiumPaywallViewModel(
   private val billingHandler: BillingHandler,
 ) : ViewModel() {
 
+  private val _hasPremium = MutableStateFlow(false)
   val hasPremium =
-    MutableStateFlow(false)
-      .onStart { billingHandler.customerResult() is SubscriptionResult.Subscribed }
+    _hasPremium
+      .onStart { checkSubscription() }
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = false
       )
+
+  private suspend fun checkSubscription() {
+    val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+    _hasPremium.value = isSubscribed
+  }
 }
