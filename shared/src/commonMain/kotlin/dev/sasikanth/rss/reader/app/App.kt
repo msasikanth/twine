@@ -482,6 +482,9 @@ private suspend fun openPost(
     )
   } else {
     linkHandler.openLink(post.link)
-    appViewModel.markPostAsRead(post.id)
+    appViewModel.run {
+      updateActivePostIndex(index)
+      markPostAsRead(post.id)
+    }
   }
 }

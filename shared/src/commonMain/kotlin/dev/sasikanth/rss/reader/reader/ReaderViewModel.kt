@@ -35,6 +35,7 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -47,7 +48,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
-import kotlin.reflect.typeOf
 
 @Inject
 class ReaderViewModel(
