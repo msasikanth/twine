@@ -100,6 +100,10 @@ class HomeViewModel(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
+    allPostsPager.allPostsPagingData
+      .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
+      .launchIn(viewModelScope)
+
     syncCoordinator.syncState
       .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
       .launchIn(viewModelScope)
@@ -108,10 +112,6 @@ class HomeViewModel(
       .hasFeeds()
       .distinctUntilChanged()
       .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
-      .launchIn(viewModelScope)
-
-    allPostsPager.allPostsPagingData
-      .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
       .launchIn(viewModelScope)
 
     combine(
