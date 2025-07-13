@@ -29,9 +29,7 @@ import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import app.cash.paging.map
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.Feed
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
@@ -107,7 +105,7 @@ class FeedsViewModel(
       FeedsEvent.OnNewFeedClicked -> {
         viewModelScope.launch {
           val feedsCount = state.value.numberOfFeeds
-          val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
+          val isSubscribed = billingHandler.isSubscribed()
           if (!isSubscribed && feedsCount >= 10) {
             _state.update { it.copy(openPaywall = true) }
             return@launch

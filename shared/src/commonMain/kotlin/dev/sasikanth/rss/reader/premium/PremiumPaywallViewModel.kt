@@ -14,7 +14,6 @@ package dev.sasikanth.rss.reader.premium
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -37,7 +36,6 @@ class PremiumPaywallViewModel(
       )
 
   private suspend fun checkSubscription() {
-    val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
-    _hasPremium.value = isSubscribed
+    _hasPremium.value = billingHandler.isSubscribed()
   }
 }
