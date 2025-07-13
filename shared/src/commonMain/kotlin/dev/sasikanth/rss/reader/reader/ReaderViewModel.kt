@@ -24,7 +24,6 @@ import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -117,8 +116,7 @@ class ReaderViewModel(
 
   private fun toggleReaderCustomisations(show: Boolean) {
     coroutineScope.launch {
-      val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
-      if (!isSubscribed) {
+      if (!billingHandler.isSubscribed()) {
         _state.update { it.copy(openPaywall = true) }
       } else {
         _state.update { it.copy(showReaderCustomisations = show) }
@@ -167,24 +165,26 @@ class ReaderViewModel(
 
   private fun init() {
     coroutineScope.launch {
-      combine(
-          settingsRepository.readerFontStyle,
-          settingsRepository.readerFontScaleFactor,
-          settingsRepository.readerLineHeightScaleFactor,
-          { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
-            Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+      if (billingHandler.isSubscribed()) {
+        combine(
+            settingsRepository.readerFontStyle,
+            settingsRepository.readerFontScaleFactor,
+            settingsRepository.readerLineHeightScaleFactor,
+            { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
+              Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+            }
+          )
+          .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
+            _state.update {
+              it.copy(
+                selectedReaderFont = fontStyle,
+                readerFontScaleFactor = fontScaleFactor,
+                readerLineHeightScaleFactor = lineHeightScaleFactor
+              )
+            }
           }
-        )
-        .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
-          _state.update {
-            it.copy(
-              selectedReaderFont = fontStyle,
-              readerFontScaleFactor = fontScaleFactor,
-              readerLineHeightScaleFactor = lineHeightScaleFactor
-            )
-          }
-        }
-        .launchIn(coroutineScope)
+          .launchIn(coroutineScope)
+      }
 
       if (readerScreenArgs.fromScreen == Home) {
         allPostsPager.allPostsPagingData

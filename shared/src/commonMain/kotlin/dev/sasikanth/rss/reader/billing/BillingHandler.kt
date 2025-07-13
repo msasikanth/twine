@@ -27,6 +27,10 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
 
   private val purchases by lazy { Purchases.sharedInstance }
 
+  suspend fun isSubscribed(): Boolean {
+    return customerResult() is SubscriptionResult.Subscribed
+  }
+
   suspend fun customerResult(): SubscriptionResult {
     try {
       val customerInfo =

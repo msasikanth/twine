@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -170,8 +169,7 @@ class SettingsViewModel(
 
   private fun importOpmlClicked() {
     viewModelScope.launch {
-      val isSubscribed = billingHandler.customerResult() is SubscriptionResult.Subscribed
-      if (isSubscribed) {
+      if (billingHandler.isSubscribed()) {
         opmlManager.import()
       } else {
         _state.update { it.copy(openPaywall = true) }
