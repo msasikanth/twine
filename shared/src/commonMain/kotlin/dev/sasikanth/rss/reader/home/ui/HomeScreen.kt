@@ -407,7 +407,6 @@ internal fun HomeScreen(
             canShowScrollToTop = showScrollToTop,
             modifier =
               Modifier.padding(
-                end = 16.dp,
                 bottom =
                   bottomSheetScaffoldContentPadding
                     .calculateBottomPadding()
