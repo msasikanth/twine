@@ -35,7 +35,6 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -48,6 +47,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
+import kotlin.reflect.typeOf
 
 @Inject
 class ReaderViewModel(
@@ -165,27 +165,6 @@ class ReaderViewModel(
 
   private fun init() {
     coroutineScope.launch {
-      if (billingHandler.isSubscribed()) {
-        combine(
-            settingsRepository.readerFontStyle,
-            settingsRepository.readerFontScaleFactor,
-            settingsRepository.readerLineHeightScaleFactor,
-            { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
-              Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
-            }
-          )
-          .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
-            _state.update {
-              it.copy(
-                selectedReaderFont = fontStyle,
-                readerFontScaleFactor = fontScaleFactor,
-                readerLineHeightScaleFactor = lineHeightScaleFactor
-              )
-            }
-          }
-          .launchIn(coroutineScope)
-      }
-
       if (readerScreenArgs.fromScreen == Home) {
         allPostsPager.allPostsPagingData
           .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
@@ -224,6 +203,27 @@ class ReaderViewModel(
             .cachedIn(coroutineScope)
 
         _state.update { it.copy(posts = posts) }
+      }
+
+      if (billingHandler.isSubscribed()) {
+        combine(
+            settingsRepository.readerFontStyle,
+            settingsRepository.readerFontScaleFactor,
+            settingsRepository.readerLineHeightScaleFactor,
+            { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
+              Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+            }
+          )
+          .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
+            _state.update {
+              it.copy(
+                selectedReaderFont = fontStyle,
+                readerFontScaleFactor = fontScaleFactor,
+                readerLineHeightScaleFactor = lineHeightScaleFactor
+              )
+            }
+          }
+          .launchIn(coroutineScope)
       }
     }
   }
