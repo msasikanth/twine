@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -71,10 +72,11 @@ internal fun FeaturedPostItem(
     FeaturedImage(
       modifier =
         Modifier.graphicsLayer {
-          translationX = pageOffset.invoke() * 350f
-          scaleX = 1.15f
-          scaleY = 1.15f
-        },
+            translationX = pageOffset.invoke() * 350f
+            scaleX = 1.15f
+            scaleY = 1.15f
+          }
+          .align(Alignment.CenterHorizontally),
       image = item.imageUrl,
     )
 
