@@ -128,7 +128,7 @@ internal fun FeedsBottomSheet(
                   start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
                   stop = constraints.maxWidth,
                   fraction = bottomSheetProgress(),
-                ) + sheetHorizontalPadding.roundToPx() * 2
+                )
               val layoutHeight = placeable.height
 
               layout(layoutWidth, layoutHeight) {
