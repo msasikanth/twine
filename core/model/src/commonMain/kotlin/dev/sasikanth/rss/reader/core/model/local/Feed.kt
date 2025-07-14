@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.core.model.local
 import androidx.compose.runtime.Immutable
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @Immutable
 data class Feed(

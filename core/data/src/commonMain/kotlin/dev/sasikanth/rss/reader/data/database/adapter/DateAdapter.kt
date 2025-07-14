@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.data.database.adapter
 
 import app.cash.sqldelight.ColumnAdapter
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal object DateAdapter : ColumnAdapter<Instant, Long> {
 

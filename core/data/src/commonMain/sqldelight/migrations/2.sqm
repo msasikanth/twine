@@ -1,5 +1,5 @@
 import kotlin.Boolean;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 -- post table
 ALTER TABLE post ADD COLUMN bookmarked INTEGER NOT NULL DEFAULT 0;

@@ -13,7 +13,7 @@ package dev.sasikanth.rss.reader.data.utils
 
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import kotlin.time.Duration.Companion.hours
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn

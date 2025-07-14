@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 interface Source {
   val id: String

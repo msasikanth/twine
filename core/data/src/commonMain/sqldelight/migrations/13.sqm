@@ -1,5 +1,5 @@
 import kotlin.Boolean;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 DROP INDEX feed_link_index;
 DROP INDEX post_feed_link_index;
