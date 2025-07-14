@@ -1,3 +1,3 @@
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 ALTER TABLE feed ADD COLUMN pinnedAt INTEGER AS Instant;

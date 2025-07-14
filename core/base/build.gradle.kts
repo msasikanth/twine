@@ -37,6 +37,8 @@ kotlin {
 
     androidMain.dependencies { implementation(libs.androidx.annotation) }
   }
+
+  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
 android {

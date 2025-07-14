@@ -1,5 +1,5 @@
 import kotlin.Boolean;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 -- Start: Migrate post table to include id column --
 DROP INDEX post_feed_link_index;

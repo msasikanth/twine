@@ -1,4 +1,4 @@
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 CREATE TABLE IF NOT EXISTS feedGroup_new (
   id TEXT NOT NULL PRIMARY KEY,

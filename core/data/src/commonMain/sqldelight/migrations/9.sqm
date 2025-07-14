@@ -1,5 +1,5 @@
 import com.benasher44.uuid.Uuid;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 CREATE TABLE IF NOT EXISTS tag (
   id TEXT AS Uuid NOT NULL PRIMARY KEY,

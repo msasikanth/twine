@@ -70,6 +70,8 @@ kotlin {
 
     iosMain.dependencies { implementation(libs.sqldelight.driver.native) }
   }
+
+  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
 sqldelight {

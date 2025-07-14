@@ -17,10 +17,10 @@
 package dev.sasikanth.rss.reader.utils
 
 import dev.sasikanth.rss.reader.data.repository.Period
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
-import kotlinx.datetime.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.DateTimePeriod
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus

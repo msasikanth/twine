@@ -16,7 +16,7 @@
 package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.Serializable
 
 @Immutable

@@ -21,9 +21,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Locale
 import java.util.TimeZone
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toJavaLocalDateTime
 
 actual fun Instant.readerDateTimestamp(): String {

@@ -1,5 +1,5 @@
 import kotlin.time.Duration;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 ALTER TABLE feed ADD COLUMN lastUpdatedAt INTEGER AS Instant;
 ALTER TABLE feed ADD COLUMN refreshInterval TEXT AS Duration NOT NULL DEFAULT '1h';

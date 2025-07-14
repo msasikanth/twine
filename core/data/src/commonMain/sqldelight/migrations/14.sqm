@@ -1,6 +1,6 @@
 import kotlin.String;
 import kotlin.collections.List;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 CREATE TABLE IF NOT EXISTS feedGroup(
   id TEXT NOT NULL PRIMARY KEY,

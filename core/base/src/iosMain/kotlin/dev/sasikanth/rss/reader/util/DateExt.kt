@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.util
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.toNSDate
 import platform.Foundation.NSDate
 import platform.Foundation.NSRelativeDateTimeFormatter

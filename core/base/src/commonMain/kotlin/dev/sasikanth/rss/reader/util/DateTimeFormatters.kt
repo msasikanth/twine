@@ -16,7 +16,7 @@
 
 package dev.sasikanth.rss.reader.util
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal val dateFormatterPatterns =
   setOf(

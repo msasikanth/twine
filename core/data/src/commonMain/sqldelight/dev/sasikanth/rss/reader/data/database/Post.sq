@@ -1,5 +1,5 @@
 import kotlin.Boolean;
-import kotlinx.datetime.Instant;
+import kotlin.time.Instant;
 
 CREATE TABLE post(
   id TEXT NOT NULL PRIMARY KEY,

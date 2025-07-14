@@ -32,4 +32,6 @@ kotlin {
       implementation(libs.uuid)
     }
   }
+
+  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
