@@ -24,7 +24,7 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(20)
+  jvmToolchain(21)
 
   @Suppress("OPT_IN_USAGE")
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
