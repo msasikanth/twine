@@ -40,7 +40,7 @@
             "value" : "•"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "•"
@@ -78,8 +78,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "Никаких непрочитанных постов"
           }
         },
         "tr" : {
@@ -88,10 +88,10 @@
             "value" : "Okunmamış gönderi yok"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "没有未读文章"
           }
         }
       }
@@ -125,8 +125,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "Нет названия канала"
           }
         },
         "tr" : {
@@ -135,10 +135,10 @@
             "value" : "Akış adı yok"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "没有订阅源名称"
           }
         }
       }
@@ -172,8 +172,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "Без названия"
           }
         },
         "tr" : {
@@ -182,10 +182,10 @@
             "value" : "Başlık yok"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "没有标题"
           }
         }
       }
@@ -219,8 +219,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "Непрочитанные посты"
           }
         },
         "tr" : {
@@ -229,10 +229,10 @@
             "value" : "Okunmamış gönderiler"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "未读文章"
           }
         }
       }
@@ -266,8 +266,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении."
           }
         },
         "tr" : {
@@ -276,10 +276,10 @@
             "value" : "Widget'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun."
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "微件仅面向高级版用户。请在应用内订阅。"
           }
         }
       }
@@ -312,8 +312,8 @@
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ непрочитанные…"
           }
         },
         "tr" : {
@@ -322,10 +322,10 @@
             "value" : "+%@ okunmamış…"
           }
         },
-        "zh-Hant" : {
+        "zh-Hans" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ 篇未读……"
           }
         }
       }
