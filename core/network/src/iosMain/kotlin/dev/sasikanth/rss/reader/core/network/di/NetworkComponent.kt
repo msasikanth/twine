@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.core.network.di
 
+import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
@@ -25,9 +26,10 @@ actual interface NetworkComponent {
 
   @Provides
   @AppScope
-  fun providesHttpClient(): HttpClient {
+  fun providesHttpClient(appInfo: AppInfo): HttpClient {
     return httpClient(
       engine = Darwin,
+      appInfo = appInfo,
       config = { configureRequest { setAllowsCellularAccess(true) } }
     )
   }
