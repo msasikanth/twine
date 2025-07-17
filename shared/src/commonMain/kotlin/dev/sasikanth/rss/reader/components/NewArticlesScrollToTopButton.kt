@@ -49,10 +49,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
-import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -90,22 +91,18 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
           Modifier.padding(bottom = 16.dp)
             .background(AppTheme.colorScheme.bottomSheet, buttonShape)
             .border(1.dp, AppTheme.colorScheme.bottomSheetBorder, buttonShape)
-            .dropShadow(
-              shape = buttonShape,
-              color = Color.Black.copy(alpha = 0.4f),
-              offsetX = 0.dp,
-              offsetY = 16.dp,
-              blur = 32.dp,
-              spread = 0.dp,
-            )
-            .dropShadow(
-              shape = buttonShape,
-              color = Color.Black.copy(alpha = 0.016f),
-              offsetX = 0.dp,
-              offsetY = 4.dp,
-              blur = 8.dp,
-              spread = 0.dp,
-            )
+            .dropShadow(shape = buttonShape) {
+              color = Color.Black.copy(alpha = 0.4f)
+              offset = Offset(0f, 16.dp.toPx())
+              radius = 32.dp.toPx()
+              spread = 0f
+            }
+            .dropShadow(shape = buttonShape) {
+              color = Color.Black.copy(alpha = 0.016f)
+              offset = Offset(0f, 4.dp.toPx())
+              radius = 8.dp.toPx()
+              spread = 0f
+            }
             .padding(4.dp),
       ) {
         AppTheme(useDarkTheme = true) {

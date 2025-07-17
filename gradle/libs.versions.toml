@@ -52,7 +52,6 @@ korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.35.0"
-shadow = "2.0.3"
 revenuecat = "1.8.7+14.2.0"
 viewmodel = "2.9.1"
 navigation = "2.9.0-beta03"
@@ -135,7 +134,6 @@ markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", v
 markdown-material3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown"  }
 markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
 markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
-shadow = { module = "com.adamglin:compose-shadow", version.ref = "shadow" }
 purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat" }
 purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
