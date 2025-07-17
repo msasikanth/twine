@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -307,68 +308,76 @@ internal fun ReaderScreen(
         containerColor = AppTheme.colorScheme.backdrop,
         contentColor = Color.Unspecified
       ) { paddingValues ->
-        val layoutDirection = LocalLayoutDirection.current
-        val highlightsBuilder =
-          remember(darkTheme) {
-            Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
-          }
-
-        LaunchedEffect(pagerState, posts.loadState) {
-          snapshotFlow { pagerState.settledPage }
-            .distinctUntilChanged()
-            .collectLatest { page ->
-              val readerPost = runCatching { posts.peek(page) }.getOrNull()
-
-              if (readerPost != null) {
-                onPostChanged(page)
-                viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
-              }
+        Box(
+          modifier = Modifier.fillMaxSize(),
+        ) {
+          val layoutDirection = LocalLayoutDirection.current
+          val highlightsBuilder =
+            remember(darkTheme) {
+              Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
             }
-        }
 
-        HorizontalPager(
-          modifier = modifier,
-          state = pagerState,
-          overscrollEffect = null,
-          beyondViewportPageCount = 1,
-          contentPadding =
-            PaddingValues(
-              start = paddingValues.calculateStartPadding(layoutDirection),
-              end = paddingValues.calculateEndPadding(layoutDirection),
-            )
-        ) { page ->
-          val readerPost = posts[page]
+          LaunchedEffect(pagerState, posts.loadState) {
+            snapshotFlow { pagerState.settledPage }
+              .distinctUntilChanged()
+              .collectLatest { page ->
+                val readerPost = runCatching { posts.peek(page) }.getOrNull()
 
-          if (readerPost != null) {
-            LaunchedEffect(readerPost.id) { viewModel.dispatch(ReaderEvent.PostLoaded(readerPost)) }
+                if (readerPost != null) {
+                  onPostChanged(page)
+                  viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+                }
+              }
+          }
 
-            ReaderPage(
-              readerPost = readerPost,
-              page = page,
-              pagerState = pagerState,
-              highlightsBuilder = highlightsBuilder,
-              loadFullArticle = state.canLoadFullPost(readerPost.id),
-              onBookmarkClick = {
-                viewModel.dispatch(
-                  ReaderEvent.TogglePostBookmark(
-                    postId = readerPost.id,
-                    currentBookmarkStatus = readerPost.bookmarked
+          HorizontalPager(
+            modifier = Modifier.widthIn(max = 640.dp).fillMaxSize().align(Alignment.Center),
+            state = pagerState,
+            overscrollEffect = null,
+            beyondViewportPageCount = 1,
+            contentPadding =
+              PaddingValues(
+                start = paddingValues.calculateStartPadding(layoutDirection),
+                end = paddingValues.calculateEndPadding(layoutDirection),
+              )
+          ) { page ->
+            val readerPost = posts[page]
+
+            if (readerPost != null) {
+              LaunchedEffect(readerPost.id) {
+                viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
+              }
+
+              ReaderPage(
+                readerPost = readerPost,
+                page = page,
+                pagerState = pagerState,
+                highlightsBuilder = highlightsBuilder,
+                loadFullArticle = state.canLoadFullPost(readerPost.id),
+                onBookmarkClick = {
+                  viewModel.dispatch(
+                    ReaderEvent.TogglePostBookmark(
+                      postId = readerPost.id,
+                      currentBookmarkStatus = readerPost.bookmarked
+                    )
                   )
-                )
-              },
-              modifier = Modifier.fillMaxSize(),
-              contentPaddingValues = paddingValues
+                },
+                modifier = Modifier.fillMaxSize(),
+                contentPaddingValues = paddingValues
+              )
+            }
+          }
+
+          if (state.showReaderCustomisations) {
+            Box(
+              modifier =
+                Modifier.fillMaxSize()
+                  .pointerInput(Unit) {
+                    detectTapGestures { viewModel.dispatch(ReaderEvent.HideReaderCustomisations) }
+                  }
+                  .align(Alignment.BottomCenter)
             )
           }
-        }
-
-        if (state.showReaderCustomisations) {
-          Box(
-            modifier =
-              Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { viewModel.dispatch(ReaderEvent.HideReaderCustomisations) }
-              }
-          )
         }
       }
     }
@@ -426,6 +435,7 @@ private fun ReaderActionsPanel(
       Box(
         modifier =
           Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+            .widthIn(max = 640.dp)
             .pointerInput(Unit) {}
             .dropShadow(
               shape = backgroundShape,
