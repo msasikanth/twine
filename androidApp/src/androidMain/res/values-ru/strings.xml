@@ -2,16 +2,16 @@
 <resources>
     <string name="app_name">Twine</string>
     <plurals name="widget_unread_posts">
-        <item quantity="one">Unread (%1$d post)</item>
-        <item quantity="few">Unread (%1$d posts)</item>
-        <item quantity="many">Unread (%1$d posts)</item>
-        <item quantity="other">Unread (%1$d posts)</item>
+        <item quantity="one">Один</item>
+        <item quantity="few">Несколько</item>
+        <item quantity="many">Много</item>
+        <item quantity="other">Другое</item>
     </plurals>
-    <string name="widget_no_title">No title</string>
-    <string name="widget_no_description">No description</string>
-    <string name="widget_see_more">See more</string>
-    <string name="widget_unread_refresh">Refresh</string>
-    <string name="widget_unread_add">Add feed</string>
-    <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
-    <string name="widget_no_posts">No posts</string>
+    <string name="widget_no_title">Без названия</string>
+    <string name="widget_no_description">Нет описания</string>
+    <string name="widget_see_more">Больше</string>
+    <string name="widget_unread_refresh">Обновить</string>
+    <string name="widget_unread_add">Добавить канал</string>
+    <string name="widget_required_premium">Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении.</string>
+    <string name="widget_no_posts">Постов нет</string>
 </resources>

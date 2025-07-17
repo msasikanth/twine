@@ -24,7 +24,7 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(20)
+  jvmToolchain(21)
 
   @Suppress("OPT_IN_USAGE")
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
@@ -41,6 +41,9 @@ kotlin {
       implementation(libs.kotlininject.runtime)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
+      implementation(libs.ktor.content.negotiation)
+      implementation(libs.ktor.json)
+      implementation(libs.ktor.resources)
       implementation(libs.kotlinx.serialization.json)
       implementation(libs.ksoup)
       implementation(libs.ksoup.kotlinx.io)

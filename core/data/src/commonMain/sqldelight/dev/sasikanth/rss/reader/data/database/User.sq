@@ -1,0 +1,18 @@
+CREATE TABLE user(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    profileId TEXT NOT NULL,
+    email TEXT NOT NULL,
+    token TEXT NOT NULL,
+    serverUrl TEXT NOT NULL
+);
+
+insert:
+INSERT OR IGNORE INTO user(id, name, profileId, email, token, serverUrl)
+VALUES (:id, :name, :profileId, :email, :token, :serverUrl);
+
+delete:
+DELETE FROM user;
+
+user:
+SELECT * FROM user LIMIT 1;

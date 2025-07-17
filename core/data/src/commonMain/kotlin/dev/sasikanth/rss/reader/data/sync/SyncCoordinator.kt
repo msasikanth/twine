@@ -152,10 +152,8 @@ class SyncCoordinator(
       val finalPostCount = rssRepository.postsCountForFeed(feed.id)
       val hasNewContent = finalPostCount > initialPostCount
 
-      if (hasNewContent) {
-        withContext(dispatchersProvider.databaseWrite) {
-          rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
-        }
+      withContext(dispatchersProvider.databaseWrite) {
+        rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
       }
 
       adjustRefreshInterval(feed, hasNewContent)

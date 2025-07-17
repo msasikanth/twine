@@ -33,7 +33,7 @@ composeCompiler { featureFlags = setOf(ComposeFeatureFlag.StrongSkipping) }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
-  jvmToolchain(20)
+  jvmToolchain(21)
 
   androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
 
