@@ -1,0 +1,150 @@
+###
+# @name Login
+POST {{ host }}/accounts/ClientLogin
+Content-Type: application/x-www-form-urlencoded
+
+Email={{ username }}&Passwd={{ password }}
+
+###
+# @name User info
+GET {{ host }}/reader/api/0/user-info?output=json
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Token
+GET {{ host }}/reader/api/0/token
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Tags
+GET {{ host }}/reader/api/0/tag/list?output=json
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Subscriptions list
+GET {{ host }}/reader/api/0/subscription/list?output=json
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Unread articles only
+GET {{ host }}/reader/api/0/stream/contents
+    ?output=json&
+    s=user/-/state/com.google/reading-list&
+    n=1000&
+    c=
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Mark article as read
+POST {{ host }}/reader/api/0/edit-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+i=tag:google.com,2005:reader/item/0006392ff67f1c12 &
+i=tag:google.com,2005:reader/item/0006392ead82b70a &
+i=tag:google.com,2005:reader/item/0006393638b449c2 &
+a=user/-/state/com.google/read
+
+###
+# @name Mark article as unread
+POST {{ host }}/reader/api/0/edit-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+i=tag:google.com,2005:reader/item/0006392ff67f1c12 &
+i=tag:google.com,2005:reader/item/0006392ead82b70a &
+i=tag:google.com,2005:reader/item/0006393638b449c2 &
+r=user/-/state/com.google/read
+
+###
+# @name Add feed
+POST {{ host }}/reader/api/0/subscription/quickadd?quickadd=news.ycombinator.com
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Edit feed name
+POST {{ host }}/reader/api/0/subscription/edit
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+ac=edit &
+s=feed/4 &
+t=Kottke
+
+###
+# @name Delete feed
+POST {{ host }}/reader/api/0/subscription/edit
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+ac=unsubscribe &
+s=feed/4
+
+###
+# @name Add feed to tag
+### Will create folder/tag/group if the feed passed doesn't exist
+### Each feed can only exist in a single folder/tag/group?
+POST {{ host }}/reader/api/0/subscription/edit
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+ac=edit &
+s=feed/3 &
+a=user/-/label/Random
+
+###
+# @name Add tag
+POST {{ host }}/reader/api/0/subscription/edit
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+ac=edit &
+s= &
+a=user/-/label/Test
+
+###
+# @name Edit tag
+POST {{ host }}/reader/api/0/rename-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+s=user/-/label/Test &
+dest=user/-/label/Test-Renamed
+
+###
+# @name Delete tag
+POST {{ host }}/reader/api/0/disable-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+s=user/-/label/Test-Renamed
+
+###
+# @name Read ids
+GET {{ host }}/reader/api/0/stream/items/ids?s=user/-/state/com.google/read&n=10000
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Bookmark ids
+GET {{ host }}/reader/api/0/stream/items/ids?s=user/-/state/com.google/starred&n=10000
+Authorization: GoogleLogin auth={{ auth_token }}
+
+###
+# @name Add to bookmarks
+POST {{ host }}/reader/api/0/edit-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+# short id or full id
+i=1751851949376144 &
+a=user/-/state/com.google/starred
+
+###
+# @name Remove bookmarks
+POST {{ host }}/reader/api/0/edit-tag
+Authorization: GoogleLogin auth={{ auth_token }}
+Content-Type: application/x-www-form-urlencoded
+
+# short id or full id
+i=1751851949376144 &
+r=user/-/state/com.google/starred

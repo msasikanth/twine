@@ -32,7 +32,8 @@ expect interface SqlDriverPlatformComponent
 
 expect interface DataStorePlatformComponent
 
-interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent {
+interface DataComponent :
+  SqlDriverPlatformComponent, DataStorePlatformComponent, UserDataComponent {
 
   @Provides
   @AppScope
@@ -147,4 +148,6 @@ interface DataComponent : SqlDriverPlatformComponent, DataStorePlatformComponent
 
   @Provides
   fun providesFeedGroupFeedQueries(database: ReaderDatabase) = database.feedGroupFeedQueries
+
+  @Provides fun providesUserQueries(database: ReaderDatabase) = database.userQueries
 }

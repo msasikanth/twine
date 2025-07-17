@@ -1,0 +1,8 @@
+CREATE TABLE user (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    profileId TEXT NOT NULL,
+    email TEXT NOT NULL,
+    token TEXT NOT NULL,
+    serverUrl TEXT NOT NULL
+);

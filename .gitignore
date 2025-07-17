@@ -13,6 +13,7 @@ iosApp/iosApp.xcodeproj/*
 shared/shared.podspec
 androidApp/release
 .kotlin
+core/network/http_requests/http-client.private.env.json
 
 # IntelliJ .idea folder
 .idea/workspace.xml
@@ -26,5 +27,6 @@ androidApp/release
 .idea/modules.xml
 .idea/appInsightsSettings.xml
 .idea/shelf
+.idea/httpRequests
 gradle.xml
 *.iml
