@@ -62,6 +62,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -74,7 +76,6 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
-import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
@@ -437,13 +438,16 @@ private fun ReaderActionsPanel(
           Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             .widthIn(max = 640.dp)
             .pointerInput(Unit) {}
-            .dropShadow(
-              shape = backgroundShape,
-              offsetY = 16.dp,
-              blur = 32.dp,
+            .dropShadow(shape = backgroundShape) {
+              offset = Offset(x = 0f, y = 16.dp.toPx())
+              radius = 32.dp.toPx()
               color = shadowColor1
-            )
-            .dropShadow(shape = backgroundShape, offsetY = 4.dp, blur = 8.dp, color = shadowColor2)
+            }
+            .dropShadow(shape = backgroundShape) {
+              offset = Offset(x = 0f, y = 4.dp.toPx())
+              radius = 8.dp.toPx()
+              color = shadowColor2
+            }
             .clip(backgroundShape)
             .background(color = AppTheme.colorScheme.bottomSheet, shape = backgroundShape)
             .border(

@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.2.0"
 android_gradle_plugin = "8.11.1"
-compose = "1.9.0-alpha02"
+compose = "1.9.0-alpha03"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "35"
@@ -21,7 +21,7 @@ androidx_core = "1.16.0"
 androidx_collection = "1.5.0"
 androidx_test_runner = "1.6.2"
 androidx_test_rules = "1.6.1"
-androidx_work = "2.10.1"
+androidx_work = "2.10.2"
 androidx_datastore = "1.1.7"
 androidx_browser = "1.8.0"
 androidx_annotation = "1.9.1"
@@ -36,7 +36,7 @@ sqliteAndroid = "3.49.0"
 windowSizeClass = "0.5.0"
 desugarJdk = "2.1.5"
 lyricist = "1.7.0"
-atomicfu = "0.27.0"
+atomicfu = "0.29.0"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.91.1"
@@ -46,13 +46,12 @@ uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
 bugsnag = "6.13.0"
 crashkios-bugsnag = "0.9.0"
-kermit = "2.0.5"
+kermit = "2.0.6"
 reorderable = "2.4.3"
 korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.35.0"
-shadow = "2.0.3"
 revenuecat = "1.8.7+14.2.0"
 viewmodel = "2.9.1"
 navigation = "2.9.0-beta03"
@@ -135,7 +134,6 @@ markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", v
 markdown-material3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown"  }
 markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "markdown" }
 markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
-shadow = { module = "com.adamglin:compose-shadow", version.ref = "shadow" }
 purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat" }
 purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }

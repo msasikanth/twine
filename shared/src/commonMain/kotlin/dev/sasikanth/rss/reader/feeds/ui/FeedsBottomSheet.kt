@@ -29,7 +29,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -43,7 +45,6 @@ import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.adamglin.composeshadow.dropShadow
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
@@ -135,18 +136,16 @@ internal fun FeedsBottomSheet(
                 placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
               }
             }
-            .dropShadow(
-              shape = RoundedCornerShape(50),
-              offsetY = 16.dp,
-              blur = 32.dp,
+            .dropShadow(shape = RoundedCornerShape(50)) {
+              offset = Offset(x = 0f, y = 16.dp.toPx())
+              radius = 32.dp.toPx()
               color = shadowColor1
-            )
-            .dropShadow(
-              shape = RoundedCornerShape(50),
-              offsetY = 4.dp,
-              blur = 8.dp,
+            }
+            .dropShadow(shape = RoundedCornerShape(50)) {
+              offset = Offset(x = 0f, y = 4.dp.toPx())
+              radius = 8.dp.toPx()
               color = shadowColor2
-            )
+            }
             .graphicsLayer {
               shape =
                 RoundedCornerShape(
