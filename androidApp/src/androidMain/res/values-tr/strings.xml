@@ -10,6 +10,6 @@
     <string name="widget_see_more">Daha fazlasını gör</string>
     <string name="widget_unread_refresh">Yenile</string>
     <string name="widget_unread_add">Akış ekle</string>
-    <string name="widget_required_premium">Widget\'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun.</string>
+    <string name="widget_required_premium">Widget'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun.</string>
     <string name="widget_no_posts">Gönderi yok</string>
 </resources>
