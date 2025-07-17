@@ -137,7 +137,6 @@ markdown-coil = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3",
 markdown-code = { module = "com.mikepenz:multiplatform-markdown-renderer-code", version.ref = "markdown" }
 shadow = { module = "com.adamglin:compose-shadow", version.ref = "shadow" }
 purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "revenuecat" }
-purchases-datetime = { module = "com.revenuecat.purchases:purchases-kmp-datetime", version.ref = "revenuecat" }
 purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }

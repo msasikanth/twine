@@ -110,7 +110,6 @@ kotlin {
       implementation(libs.markdown.code)
       implementation(libs.shadow)
       implementation(libs.purchases.core)
-      implementation(libs.purchases.datetime)
       implementation(libs.purchases.ui)
       implementation(libs.viewmodel)
       implementation(libs.navigation)
