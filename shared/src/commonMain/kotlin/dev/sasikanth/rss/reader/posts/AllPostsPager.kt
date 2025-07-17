@@ -28,10 +28,13 @@ import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.NTuple4
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +42,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -54,6 +58,7 @@ class AllPostsPager(
   private val settingsRepository: SettingsRepository,
   private val rssRepository: RssRepository,
   private val lastRefreshedAt: LastRefreshedAt,
+  private val syncCoordinator: SyncCoordinator,
   dispatchersProvider: DispatchersProvider,
 ) {
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -84,10 +89,12 @@ class AllPostsPager(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
         lastRefreshedAt.dateTimeFlow,
-      ) { activeSource, postsType, dateTime ->
-        Triple(activeSource, postsType, dateTime)
+        syncCoordinator.syncState
+      ) { activeSource, postsType, dateTime, syncState ->
+        NTuple4(activeSource, postsType, dateTime, syncState)
       }
-      .flatMapLatest { (activeSource, postsType, dateTime) ->
+      .filter { (_, _, _, syncState) -> syncState !is SyncState.InProgress }
+      .flatMapLatest { (activeSource, postsType, dateTime, _) ->
         val activeSourceIds = activeSourceIds(activeSource)
         val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
 
