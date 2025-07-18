@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.core.network.parser.json
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
@@ -33,7 +33,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class JsonFeedParser(
   private val dispatchersProvider: DispatchersProvider,
-  private val htmlContentParser: HtmlContentParser,
+  private val articleHtmlParser: ArticleHtmlParser,
 ) {
 
   private val json = Json { ignoreUnknownKeys = true }
@@ -59,7 +59,7 @@ class JsonFeedParser(
               jsonFeedPayload.items.map { jsonFeedPost ->
                 val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
 
-                val htmlContent = htmlContentParser.parse(jsonFeedPost.contentHtml.orEmpty())
+                val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
                 val image = htmlContent?.leadImage
 
                 val description =

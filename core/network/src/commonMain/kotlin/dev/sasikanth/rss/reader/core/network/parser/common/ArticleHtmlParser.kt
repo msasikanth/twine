@@ -22,7 +22,7 @@ import io.ktor.utils.io.charsets.MalformedInputException
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class HtmlContentParser {
+class ArticleHtmlParser {
 
   companion object {
     private const val TAG_BODY = "body"

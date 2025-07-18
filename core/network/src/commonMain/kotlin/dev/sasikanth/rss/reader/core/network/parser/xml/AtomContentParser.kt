@@ -21,7 +21,7 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseMetaData
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_HREF
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_REL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_VALUE_ALTERNATE
@@ -54,7 +54,7 @@ import kotlin.time.Clock
 @Inject
 class AtomContentParser(
   httpClient: HttpClient,
-  private val htmlContentParser: HtmlContentParser,
+  private val articleHtmlParser: ArticleHtmlParser,
 ) : XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
@@ -156,7 +156,7 @@ class AtomContentParser(
         TAG_SUMMARY -> {
           rawContent = parser.nextText().trimIndent()
 
-          val htmlContent = htmlContentParser.parse(htmlContent = rawContent)
+          val htmlContent = articleHtmlParser.parse(htmlContent = rawContent)
           image = htmlContent?.leadImage ?: image
           content = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }

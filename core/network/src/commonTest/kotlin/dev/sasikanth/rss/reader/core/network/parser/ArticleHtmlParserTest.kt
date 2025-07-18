@@ -16,14 +16,14 @@
 
 package dev.sasikanth.rss.reader.core.network.parser
 
-import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class HtmlContentParserTest {
+class ArticleHtmlParserTest {
 
-  private val htmlContentParser = HtmlContentParser()
+  private val articleHtmlParser = ArticleHtmlParser()
 
   companion object {
     private const val TEST_HTML =
@@ -41,7 +41,7 @@ class HtmlContentParserTest {
   @Test
   fun parsingLeadImageAndContentFromHtmlShouldWorkCorrectly() {
     // when
-    val result = htmlContentParser.parse(TEST_HTML)
+    val result = articleHtmlParser.parse(TEST_HTML)
 
     // then
     assertEquals(
@@ -57,7 +57,7 @@ class HtmlContentParserTest {
   @Test
   fun parsingContentFromTextShouldWorkCorrectly() {
     // when
-    val result = htmlContentParser.parse("This is a normal text")
+    val result = articleHtmlParser.parse("This is a normal text")
 
     // then
     assertNull(result?.leadImage)

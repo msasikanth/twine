@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_RDF_RESOURCE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT_ENCODED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_DC_DATE
@@ -39,7 +39,7 @@ import kotlin.time.Clock
 
 @Inject
 class RDFContentParser(
-  private val htmlContentParser: HtmlContentParser,
+  private val articleHtmlParser: ArticleHtmlParser,
 ) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
@@ -138,7 +138,7 @@ class RDFContentParser(
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
 
-          val htmlContent = htmlContentParser.parse(htmlContent = rawContent)
+          val htmlContent = articleHtmlParser.parse(htmlContent = rawContent)
           image = htmlContent?.leadImage ?: image
           description = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }
