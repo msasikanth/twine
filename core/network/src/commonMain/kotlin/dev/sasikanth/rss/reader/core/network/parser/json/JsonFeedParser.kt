@@ -31,7 +31,10 @@ import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class JsonFeedParser(private val dispatchersProvider: DispatchersProvider) {
+class JsonFeedParser(
+  private val dispatchersProvider: DispatchersProvider,
+  private val htmlContentParser: HtmlContentParser,
+) {
 
   private val json = Json { ignoreUnknownKeys = true }
 
@@ -56,7 +59,7 @@ class JsonFeedParser(private val dispatchersProvider: DispatchersProvider) {
               jsonFeedPayload.items.map { jsonFeedPost ->
                 val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
 
-                val htmlContent = HtmlContentParser.parse(jsonFeedPost.contentHtml.orEmpty())
+                val htmlContent = htmlContentParser.parse(jsonFeedPost.contentHtml.orEmpty())
                 val image = htmlContent?.leadImage
 
                 val description =

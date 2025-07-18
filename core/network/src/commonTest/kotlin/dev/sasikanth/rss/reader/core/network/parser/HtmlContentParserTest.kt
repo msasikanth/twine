@@ -23,6 +23,8 @@ import kotlin.test.assertNull
 
 class HtmlContentParserTest {
 
+  private val htmlContentParser = HtmlContentParser()
+
   companion object {
     private const val TEST_HTML =
       """
@@ -39,7 +41,7 @@ class HtmlContentParserTest {
   @Test
   fun parsingLeadImageAndContentFromHtmlShouldWorkCorrectly() {
     // when
-    val result = HtmlContentParser.parse(TEST_HTML)
+    val result = htmlContentParser.parse(TEST_HTML)
 
     // then
     assertEquals(
@@ -55,7 +57,7 @@ class HtmlContentParserTest {
   @Test
   fun parsingContentFromTextShouldWorkCorrectly() {
     // when
-    val result = HtmlContentParser.parse("This is a normal text")
+    val result = htmlContentParser.parse("This is a normal text")
 
     // then
     assertNull(result?.leadImage)

@@ -32,13 +32,15 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
+import kotlin.time.Clock
 
 @Inject
-class RDFContentParser : XmlContentParser() {
+class RDFContentParser(
+  private val htmlContentParser: HtmlContentParser,
+) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
@@ -136,7 +138,7 @@ class RDFContentParser : XmlContentParser() {
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
 
-          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          val htmlContent = htmlContentParser.parse(htmlContent = rawContent)
           image = htmlContent?.leadImage ?: image
           description = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }

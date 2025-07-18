@@ -46,14 +46,15 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.asSource
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
+import kotlin.time.Clock
 
 @Inject
 class AtomContentParser(
-  private val httpClient: HttpClient,
+  httpClient: HttpClient,
+  private val htmlContentParser: HtmlContentParser,
 ) : XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
@@ -155,7 +156,7 @@ class AtomContentParser(
         TAG_SUMMARY -> {
           rawContent = parser.nextText().trimIndent()
 
-          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          val htmlContent = htmlContentParser.parse(htmlContent = rawContent)
           image = htmlContent?.leadImage ?: image
           content = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }
