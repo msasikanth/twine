@@ -34,9 +34,7 @@ class ArticleHtmlParser {
   private val allowedContentTags by lazy {
     Safelist().addTags(TAG_FIGCAPTION, TAG_IMG).addAttributes(TAG_IMG, ATTR_SRC)
   }
-  private val gifRegex by lazy {
-    Regex("/\\.gif(\\?.*)?\\$/i")
-  }
+  private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
 
   fun parse(htmlContent: String): Result? {
     if (htmlContent.isBlank()) return null

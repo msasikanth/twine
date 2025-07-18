@@ -37,15 +37,13 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
+import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
-import kotlin.time.Clock
 
 @Inject
-class RSSContentParser(
-  private val articleHtmlParser: ArticleHtmlParser
-) : XmlContentParser() {
+class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
