@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
@@ -44,6 +45,8 @@ class XmlFeedParserTest {
 
   @BeforeTest
   fun setup() {
+    val articleHtmlParser = ArticleHtmlParser()
+
     httpClient =
       HttpClient(MockEngine) {
         engine {
@@ -67,9 +70,9 @@ class XmlFeedParserTest {
       }
     xmlFeedParser =
       XmlFeedParser(
-        rdfContentParser = RDFContentParser(),
-        rssContentParser = RSSContentParser(),
-        atomContentParser = AtomContentParser(httpClient),
+        rdfContentParser = RDFContentParser(articleHtmlParser),
+        rssContentParser = RSSContentParser(articleHtmlParser),
+        atomContentParser = AtomContentParser(httpClient, articleHtmlParser),
         dispatchersProvider = TestDispatchersProvider()
       )
   }
