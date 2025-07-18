@@ -12,7 +12,7 @@
 package dev.sasikanth.rss.reader.core.network.freshrss
 
 import io.ktor.resources.Resource
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
