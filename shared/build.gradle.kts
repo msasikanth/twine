@@ -94,7 +94,6 @@ kotlin {
       implementation(libs.stately.isolate)
       implementation(libs.stately.iso.collections)
       implementation(libs.bundles.xmlutil)
-      api(libs.webview)
       implementation(libs.uuid)
       api(libs.coil.compose)
       api(libs.coil.network)

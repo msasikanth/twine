@@ -41,7 +41,6 @@ paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.91.1"
 ktxml = "1.0.0"
-webview = "1.9.40"
 uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
 bugsnag = "6.15.0"
@@ -120,7 +119,6 @@ stately-iso-collections = { module = "co.touchlab:stately-iso-collections", vers
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
-webview = { module = "io.github.kevinnzou:compose-webview-multiplatform", version.ref = "webview" }
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
 bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
