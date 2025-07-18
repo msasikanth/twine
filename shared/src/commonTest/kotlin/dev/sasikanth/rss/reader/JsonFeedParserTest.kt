@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,7 +26,11 @@ import kotlinx.coroutines.test.runTest
 
 class JsonFeedParserTest {
 
-  private val parser = JsonFeedParser(TestDispatchersProvider())
+  private val parser =
+    JsonFeedParser(
+      dispatchersProvider = TestDispatchersProvider(),
+      articleHtmlParser = ArticleHtmlParser(),
+    )
 
   @Test
   fun parsingJsonFeedShouldWorkCorrectly() = runTest {
