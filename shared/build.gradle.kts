@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import com.android.build.api.dsl.ManagedVirtualDevice
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
@@ -28,8 +27,6 @@ plugins {
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.kotlin.compose)
 }
-
-composeCompiler { featureFlags = setOf(ComposeFeatureFlag.StrongSkipping) }
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
