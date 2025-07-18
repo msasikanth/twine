@@ -18,17 +18,22 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
-import dev.sasikanth.rss.reader.core.network.parser.common.HtmlContentParser
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_RDF_RESOURCE
+import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_TYPE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_URL
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATTR_VALUE_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_COMMENTS
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT_ENCODED
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_DC_DATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_DESCRIPTION
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ENCLOSURE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEATURED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.decodeHTMLString
@@ -38,7 +43,7 @@ import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
-class RDFContentParser : XmlContentParser() {
+class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
@@ -51,7 +56,6 @@ class RDFContentParser : XmlContentParser() {
     var description: String? = null
     var iconUrl: String? = null
 
-    // Parse channel
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
 
@@ -69,20 +73,12 @@ class RDFContentParser : XmlContentParser() {
         TAG_DESCRIPTION -> {
           description = parser.nextText()
         }
-        TAG_FEED_IMAGE -> {
-          iconUrl = readFeedIcon(parser)
-        }
-        else -> parser.skip()
-      }
-    }
-
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-
-      when (parser.name) {
         TAG_RSS_ITEM -> {
           val host = UrlUtils.extractHost(link ?: feedUrl)
           posts.add(readRssItem(parser, host))
+        }
+        TAG_FEED_IMAGE -> {
+          iconUrl = readFeedIcon(parser)
         }
         else -> parser.skip()
       }
@@ -105,10 +101,19 @@ class RDFContentParser : XmlContentParser() {
 
   private fun readFeedIcon(parser: XmlPullParser): String? {
     parser.require(EventType.START_TAG, parser.namespace, TAG_FEED_IMAGE)
-    val link = parser.getAttributeValue(parser.namespace, ATTR_RDF_RESOURCE)
-    parser.nextTag()
-    parser.require(EventType.END_TAG, parser.namespace, TAG_FEED_IMAGE)
-    return link
+
+    var imageUrl: String? = null
+
+    while (parser.next() != EventType.END_TAG) {
+      if (parser.eventType != EventType.START_TAG) continue
+      if (parser.name == TAG_URL) {
+        imageUrl = parser.nextText()
+      } else {
+        parser.skip()
+      }
+    }
+
+    return imageUrl
   }
 
   private fun readRssItem(parser: XmlPullParser, hostLink: String?): PostPayload? {
@@ -120,7 +125,7 @@ class RDFContentParser : XmlContentParser() {
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
-    val commentsLink: String? = null
+    var commentsLink: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -130,18 +135,30 @@ class RDFContentParser : XmlContentParser() {
         name == TAG_TITLE -> {
           title = parser.nextText()
         }
-        link.isNullOrBlank() && name == TAG_LINK -> {
+        link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
           link = parser.nextText()
+        }
+        name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
+          link = parser.attrText(ATTR_URL)
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
 
-          val htmlContent = HtmlContentParser.parse(htmlContent = rawContent)
+          val htmlContent = articleHtmlParser.parse(htmlContent = rawContent)
           image = htmlContent?.leadImage ?: image
           description = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
         }
-        name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
+        name == TAG_PUB_DATE -> {
           date = parser.nextText()
+        }
+        image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
+          image = parser.attrText(ATTR_URL)
+        }
+        image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
+          image = parser.nextText()
+        }
+        commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
+          commentsLink = parser.nextText()
         }
         else -> parser.skip()
       }
@@ -164,4 +181,10 @@ class RDFContentParser : XmlContentParser() {
       isDateParsedCorrectly = postPubDateInMillis != null
     )
   }
+
+  private fun hasRssImageUrl(name: String, parser: XmlPullParser) =
+    (XmlFeedParser.imageTags.contains(name) ||
+      (name == TAG_ENCLOSURE &&
+        parser.getAttributeValue(parser.namespace, ATTR_TYPE) == ATTR_VALUE_IMAGE)) &&
+      !parser.getAttributeValue(parser.namespace, ATTR_URL).isNullOrBlank()
 }

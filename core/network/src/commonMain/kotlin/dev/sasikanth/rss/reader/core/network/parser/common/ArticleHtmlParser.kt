@@ -19,16 +19,21 @@ import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.safety.Safelist
 import io.ktor.utils.io.charsets.MalformedInputException
+import me.tatarka.inject.annotations.Inject
 
-internal object HtmlContentParser {
+@Inject
+class ArticleHtmlParser {
 
-  private const val TAG_BODY = "body"
-  private const val TAG_IMG = "img"
-  private const val TAG_FIGCAPTION = "figcaption"
-  private const val ATTR_SRC = "src"
+  companion object {
+    private const val TAG_BODY = "body"
+    private const val TAG_IMG = "img"
+    private const val TAG_FIGCAPTION = "figcaption"
+    private const val ATTR_SRC = "src"
+  }
 
-  private val allowedContentTags =
+  private val allowedContentTags by lazy {
     Safelist().addTags(TAG_FIGCAPTION, TAG_IMG).addAttributes(TAG_IMG, ATTR_SRC)
+  }
   private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
 
   fun parse(htmlContent: String): Result? {
@@ -38,10 +43,9 @@ internal object HtmlContentParser {
       val cleanedHtml = Ksoup.clean(htmlContent, allowedContentTags)
       val document = Ksoup.parse(cleanedHtml)
       val body = document.getElementsByTag(TAG_BODY).first() ?: return null
-      val elements = body.children()
 
       val leadImage =
-        elements.firstNotNullOfOrNull {
+        body.firstNotNullOfOrNull {
           val imageUrl = it.attr(ATTR_SRC)
           if (it.tagName() == TAG_IMG && !gifRegex.containsMatchIn(imageUrl)) {
             imageUrl.removeSurrounding("\"")
@@ -49,9 +53,8 @@ internal object HtmlContentParser {
             null
           }
         }
-      val content = body.ownText()
 
-      Result(leadImage = leadImage, content = content)
+      Result(leadImage = leadImage, content = body.ownText())
     } catch (e: Exception) {
       null
     } catch (e: MalformedInputException) {
