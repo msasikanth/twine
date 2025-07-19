@@ -92,6 +92,7 @@ import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.markdown.MarkdownStateImpl
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.webview.ReaderWebView
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
