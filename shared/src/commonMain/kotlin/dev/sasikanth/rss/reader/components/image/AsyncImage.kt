@@ -49,7 +49,12 @@ internal fun AsyncImage(
     val context = LocalPlatformContext.current
     val imageRequest =
       remember(url, context) {
-        ImageRequest.Builder(context).data(url).size(size).diskCacheKey(url).build()
+        ImageRequest.Builder(context)
+          .data(url)
+          .size(size)
+          .diskCacheKey(url)
+          .memoryCacheKey(url)
+          .build()
       }
 
     coil3.compose.AsyncImage(
