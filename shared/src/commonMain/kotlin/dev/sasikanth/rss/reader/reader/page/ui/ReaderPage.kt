@@ -62,7 +62,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
@@ -120,6 +119,7 @@ private val json = Json {
 
 @Composable
 internal fun ReaderPage(
+  pageViewModel: @Composable (key: String) -> ReaderPageViewModel,
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
@@ -128,8 +128,8 @@ internal fun ReaderPage(
   onBookmarkClick: () -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
-  pageViewModel: ReaderPageViewModel = viewModel(key = readerPost.id),
 ) {
+  val pageViewModel = pageViewModel(readerPost.id)
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
