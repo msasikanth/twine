@@ -59,6 +59,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -67,10 +69,10 @@ import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
 import com.mikepenz.markdown.compose.LocalMarkdownColors
 import com.mikepenz.markdown.compose.LocalMarkdownDimens
-import com.mikepenz.markdown.compose.LocalMarkdownExtendedSpans
 import com.mikepenz.markdown.compose.LocalMarkdownPadding
 import com.mikepenz.markdown.compose.LocalMarkdownTypography
 import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
+import com.mikepenz.markdown.compose.MarkdownElement
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
@@ -82,7 +84,6 @@ import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.markdownAnimations
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
-import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -90,7 +91,6 @@ import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.markdown.MarkdownStateImpl
-import dev.sasikanth.rss.reader.markdown.handleElement
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -197,7 +197,7 @@ internal fun ReaderPage(
         )
 
         CompositionLocalProvider(
-          LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
+          LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides
             markdownPadding(
               block = 12.dp,
@@ -205,18 +205,7 @@ internal fun ReaderPage(
           LocalMarkdownDimens provides markdownDimens(),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
-          LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
           LocalMarkdownAnimations provides markdownAnimations(),
-          LocalMarkdownColors provides markdownColor(),
-          LocalMarkdownTypography provides
-            markdownTypography(
-              h1 = MaterialTheme.typography.displaySmall,
-              h2 = MaterialTheme.typography.headlineLarge,
-              h3 = MaterialTheme.typography.headlineMedium,
-              h4 = MaterialTheme.typography.headlineSmall,
-              h5 = MaterialTheme.typography.titleLarge,
-              h6 = MaterialTheme.typography.titleMedium,
-            ),
         ) {
           LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -261,13 +250,38 @@ internal fun ReaderPage(
                   is State.Success -> {
                     items(items = state.node.children) { node ->
                       Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-                        handleElement(
-                          node = node,
-                          components = markdownComponents,
-                          content = state.content,
-                          includeSpacer = true,
-                          skipLinkDefinition = state.linksLookedUp,
-                        )
+                        CompositionLocalProvider(
+                          LocalMarkdownColors provides
+                            markdownColor(
+                              text = AppTheme.colorScheme.onSurface,
+                              codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                              dividerColor = AppTheme.colorScheme.outlineVariant,
+                              tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
+                            ),
+                          LocalMarkdownTypography provides
+                            markdownTypography(
+                              h1 = MaterialTheme.typography.displaySmall,
+                              h2 = MaterialTheme.typography.headlineLarge,
+                              h3 = MaterialTheme.typography.headlineMedium,
+                              h4 = MaterialTheme.typography.headlineSmall,
+                              h5 = MaterialTheme.typography.titleLarge,
+                              h6 = MaterialTheme.typography.titleMedium,
+                              link =
+                                MaterialTheme.typography.bodyLarge.copy(
+                                  fontWeight = FontWeight.Bold,
+                                  textDecoration = TextDecoration.Underline,
+                                  color = AppTheme.colorScheme.primary,
+                                )
+                            ),
+                        ) {
+                          MarkdownElement(
+                            node = node,
+                            components = markdownComponents,
+                            content = state.content,
+                            includeSpacer = true,
+                            skipLinkDefinition = state.linksLookedUp,
+                          )
+                        }
                       }
                     }
                   }
