@@ -1,20 +1,15 @@
 /*
  * Copyright 2025 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.reader.ui
+package dev.sasikanth.rss.reader.reader.webview
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -107,7 +102,7 @@ internal actual fun ReaderWebView(
     factory = {
       WKWebView(frame = CGRectZero.readValue(), configuration = configuration).apply {
         setOpaque(false)
-        backgroundColor = UIColor.clearColor
+        backgroundColor = UIColor.Companion.clearColor
       }
     },
     modifier = modifier,
@@ -116,7 +111,7 @@ internal actual fun ReaderWebView(
 
       coroutineScope.launch {
         val html = withContext(Dispatchers.Default) { ReaderHTML.createOrGet() }
-        it.loadHTMLString(string = html, baseURL = NSURL.URLWithString(link ?: ""))
+        it.loadHTMLString(string = html, baseURL = NSURL.Companion.URLWithString(link ?: ""))
       }
     },
     onRelease = { it.navigationDelegate = null },
