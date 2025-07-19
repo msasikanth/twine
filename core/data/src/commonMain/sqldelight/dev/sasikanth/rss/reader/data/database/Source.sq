@@ -195,3 +195,93 @@ ORDER BY type DESC,
   CASE WHEN :orderBy = 'pinned' THEN pinnedAt END DESC,
   createdAt DESC
 LIMIT :limit OFFSET :offset;
+
+source:
+WITH feed_group_metadata AS (
+  SELECT
+    distinct_groups.feedGroupId,
+    (
+      SELECT GROUP_CONCAT(gf.feedId)
+      FROM feedGroupFeed gf
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+    ) AS feedIds,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.homepageLink)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedHomepageLinks,
+    COALESCE((
+      SELECT GROUP_CONCAT(f.icon)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      LIMIT 4
+    ), '') AS feedIcons
+  FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
+)
+
+SELECT
+  type,
+  id,
+  name,
+  icon,
+  description,
+  link,
+  homepageLink,
+  createdAt,
+  pinnedAt,
+  lastCleanUpAt,
+  numberOfUnreadPosts,
+  feedIds,
+  feedHomepageLinks,
+  feedIcons,
+  updatedAt
+FROM (
+  SELECT
+    'feed' AS type,
+    f.id,
+    f.name,
+    f.icon,
+    f.description,
+    f.link,
+    f.homepageLink,
+    f.lastCleanUpAt,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    NULL AS feedIds,
+    NULL AS feedHomepageLinks,
+    NULL AS feedIcons,
+    f.createdAt,
+    f.pinnedAt,
+    NULL AS updatedAt
+  FROM feed f
+  LEFT JOIN post p ON f.id = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
+  WHERE f.id = :id
+  GROUP BY f.id
+
+  UNION ALL
+
+  SELECT
+    'group' AS type,
+    fg.id,
+    fg.name,
+    NULL AS icon,
+    NULL AS description,
+    NULL AS link,
+    NULL AS homepageLink,
+    NULL AS lastCleanUpAt,
+    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    fgm.feedIds,
+    fgm.feedHomepageLinks,
+    fgm.feedIcons,
+    fg.createdAt,
+    fg.pinnedAt,
+    fg.updatedAt
+  FROM feedGroup fg
+  LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.date > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
+  WHERE fg.id = :id
+  GROUP BY fg.id
+);
