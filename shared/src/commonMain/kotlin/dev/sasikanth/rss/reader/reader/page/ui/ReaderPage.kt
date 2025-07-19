@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.reader.ui
+package dev.sasikanth.rss.reader.reader.page.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,12 +41,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,39 +56,41 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
 import com.mikepenz.markdown.compose.LocalMarkdownColors
 import com.mikepenz.markdown.compose.LocalMarkdownDimens
-import com.mikepenz.markdown.compose.LocalMarkdownExtendedSpans
 import com.mikepenz.markdown.compose.LocalMarkdownPadding
 import com.mikepenz.markdown.compose.LocalMarkdownTypography
 import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
+import com.mikepenz.markdown.compose.MarkdownElement
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
-import com.mikepenz.markdown.model.Input
 import com.mikepenz.markdown.model.ReferenceLinkHandlerImpl
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.markdownAnimations
 import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
-import com.mikepenz.markdown.model.markdownExtendedSpans
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
-import dev.sasikanth.rss.reader.markdown.MarkdownStateImpl
-import dev.sasikanth.rss.reader.markdown.handleElement
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
+import dev.sasikanth.rss.reader.reader.webview.ReaderWebView
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
@@ -106,8 +105,6 @@ import dev.snipme.highlights.Highlights
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
-import org.intellij.markdown.parser.MarkdownParser
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
@@ -131,28 +128,12 @@ internal fun ReaderPage(
   onBookmarkClick: () -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
+  pageViewModel: ReaderPageViewModel = viewModel(key = readerPost.id),
 ) {
-  var readerProcessingProgress by
-    remember(readerPost.id) { mutableStateOf(ReaderProcessingProgress.Loading) }
-  var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
-  val parsedMarkdownState =
-    remember(readerPost.id, parsedContent) {
-      val flavour = GFMFlavourDescriptor()
-      val input =
-        Input(
-          content = parsedContent.content.orEmpty(),
-          lookupLinks = true,
-          flavour = flavour,
-          parser = MarkdownParser(flavour),
-          referenceLinkHandler = ReferenceLinkHandlerImpl(),
-        )
+  val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
+  val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
+  val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
 
-      MarkdownStateImpl(input)
-    }
-
-  LaunchedEffect(parsedMarkdownState) { parsedMarkdownState.parse() }
-
-  val markdownState by parsedMarkdownState.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -162,14 +143,14 @@ internal fun ReaderPage(
         MarkdownHighlightedCodeBlock(
           content = cm.content,
           node = cm.node,
-          highlights = highlightsBuilder
+          highlightsBuilder = highlightsBuilder
         )
       },
       codeFence = { cm ->
         MarkdownHighlightedCodeFence(
           content = cm.content,
           node = cm.node,
-          highlights = highlightsBuilder
+          highlightsBuilder = highlightsBuilder
         )
       },
     )
@@ -191,13 +172,13 @@ internal fun ReaderPage(
           postImage = readerPost.imageUrl,
           fetchFullArticle = loadFullArticle,
           contentLoaded = {
-            readerProcessingProgress = ReaderProcessingProgress.Idle
-            parsedContent = json.decodeFromString(it)
+            val readerContent = json.decodeFromString<ReaderContent>(it)
+            pageViewModel.onParsingComplete(readerContent)
           },
         )
 
         CompositionLocalProvider(
-          LocalReferenceLinkHandler provides markdownState.referenceLinkHandler,
+          LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides
             markdownPadding(
               block = 12.dp,
@@ -205,18 +186,7 @@ internal fun ReaderPage(
           LocalMarkdownDimens provides markdownDimens(),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
-          LocalMarkdownExtendedSpans provides markdownExtendedSpans(),
-          LocalMarkdownAnimations provides markdownAnimations(),
-          LocalMarkdownColors provides markdownColor(),
-          LocalMarkdownTypography provides
-            markdownTypography(
-              h1 = MaterialTheme.typography.displaySmall,
-              h2 = MaterialTheme.typography.headlineLarge,
-              h3 = MaterialTheme.typography.headlineMedium,
-              h4 = MaterialTheme.typography.headlineSmall,
-              h5 = MaterialTheme.typography.titleLarge,
-              h6 = MaterialTheme.typography.titleMedium,
-            ),
+          LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
         ) {
           LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -232,7 +202,7 @@ internal fun ReaderPage(
                 readerPost = readerPost,
                 page = page,
                 pagerState = pagerState,
-                parsedContent = parsedContent,
+                excerpt = excerptState,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
@@ -249,32 +219,54 @@ internal fun ReaderPage(
               )
             }
 
-            if (readerProcessingProgress == ReaderProcessingProgress.Loading) {
+            if (contentParsingProgress == ReaderProcessingProgress.Loading) {
               item(key = "progress-indicator") { ProgressIndicator() }
             }
 
-            if (
-              readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent
-            ) {
-              if (parsedContent.hasContent) {
-                when (val state = markdownState) {
-                  is State.Success -> {
-                    items(items = state.node.children) { node ->
-                      Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-                        handleElement(
-                          node = node,
-                          components = markdownComponents,
-                          content = state.content,
-                          includeSpacer = true,
-                          skipLinkDefinition = state.linksLookedUp,
-                        )
-                      }
+            when (val state = markdownContentState) {
+              is State.Success -> {
+                items(items = state.node.children) { node ->
+                  Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                    CompositionLocalProvider(
+                      LocalMarkdownColors provides
+                        markdownColor(
+                          text = AppTheme.colorScheme.onSurface,
+                          codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                          dividerColor = AppTheme.colorScheme.outlineVariant,
+                          tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
+                        ),
+                      LocalMarkdownTypography provides
+                        markdownTypography(
+                          h1 = MaterialTheme.typography.displaySmall,
+                          h2 = MaterialTheme.typography.headlineLarge,
+                          h3 = MaterialTheme.typography.headlineMedium,
+                          h4 = MaterialTheme.typography.headlineSmall,
+                          h5 = MaterialTheme.typography.titleLarge,
+                          h6 = MaterialTheme.typography.titleMedium,
+                          textLink =
+                            TextLinkStyles(
+                              MaterialTheme.typography.bodyLarge
+                                .copy(
+                                  fontWeight = FontWeight.Bold,
+                                  textDecoration = TextDecoration.Underline,
+                                  color = AppTheme.colorScheme.primary,
+                                )
+                                .toSpanStyle()
+                            ),
+                        ),
+                    ) {
+                      MarkdownElement(
+                        node = node,
+                        components = markdownComponents,
+                        content = state.content,
+                        includeSpacer = true,
+                      )
                     }
                   }
-                  else -> {
-                    // no-op
-                  }
                 }
+              }
+              else -> {
+                // no-op
               }
             }
           }
@@ -299,7 +291,7 @@ private fun PostInfo(
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
-  parsedContent: ReaderContent,
+  excerpt: String,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
@@ -352,11 +344,11 @@ private fun PostInfo(
         overflow = TextOverflow.Ellipsis,
       )
 
-      if (!parsedContent.excerpt.isNullOrBlank()) {
+      if (excerpt.isNotBlank()) {
         Spacer(Modifier.requiredHeight(8.dp))
 
         Text(
-          text = parsedContent.excerpt,
+          text = excerpt,
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.secondary,
           maxLines = 3,
@@ -424,16 +416,18 @@ private fun PostSourcePill(
           .border(
             1.dp,
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-            RoundedCornerShape(50)
+            androidx.compose.foundation.shape.RoundedCornerShape(50)
           )
-          .clip(RoundedCornerShape(50))
+          .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
           .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
           .padding(vertical = 6.dp)
           .padding(start = 8.dp, end = 12.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
       FeedIcon(
-        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        modifier =
+          Modifier.requiredSize(16.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp)),
         url = feedIcon,
         contentDescription = null,
       )
@@ -550,8 +544,4 @@ enum class ReaderProcessingProgress {
 data class ReaderContent(
   val excerpt: String?,
   val content: String?,
-) {
-
-  val hasContent: Boolean
-    get() = !content.isNullOrBlank()
-}
+)
