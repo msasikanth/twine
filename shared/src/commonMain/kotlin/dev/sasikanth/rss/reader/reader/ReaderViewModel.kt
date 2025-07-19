@@ -177,7 +177,6 @@ class ReaderViewModel(
                   pageSize = 4,
                   enablePlaceholders = true,
                 ),
-              initialKey = readerScreenArgs.postIndex,
             ) {
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
