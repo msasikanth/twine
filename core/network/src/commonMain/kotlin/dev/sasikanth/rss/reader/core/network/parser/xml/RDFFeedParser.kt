@@ -65,7 +65,7 @@ class RDFContentParser(
           if (link.isNullOrBlank()) {
             link = parser.nextText()
           } else {
-            parser.skip()
+            parser.skipSubTree()
           }
         }
         TAG_DESCRIPTION -> {
@@ -74,7 +74,7 @@ class RDFContentParser(
         TAG_FEED_IMAGE -> {
           iconUrl = readFeedIcon(parser)
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 
@@ -86,7 +86,7 @@ class RDFContentParser(
           val host = UrlUtils.extractHost(link ?: feedUrl)
           posts.add(readRssItem(parser, host))
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 
@@ -145,7 +145,7 @@ class RDFContentParser(
         name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 

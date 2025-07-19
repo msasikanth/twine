@@ -67,7 +67,7 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           if (link.isNullOrBlank()) {
             link = parser.nextText()
           } else {
-            parser.skip()
+            parser.skipSubTree()
           }
         }
         TAG_DESCRIPTION -> {
@@ -80,7 +80,7 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         TAG_FEED_IMAGE -> {
           iconUrl = readFeedIcon(parser)
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 
@@ -109,7 +109,7 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
       if (parser.name == TAG_URL) {
         imageUrl = parser.nextText()
       } else {
-        parser.skip()
+        parser.skipSubTree()
       }
     }
 
@@ -139,7 +139,8 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           link = parser.nextText()
         }
         name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
-          link = parser.attrText(ATTR_URL)
+          link = parser.getAttributeValue(parser.namespace, ATTR_URL)
+          parser.nextTag()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
           rawContent = parser.nextText().trimIndent()
@@ -152,7 +153,8 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           date = parser.nextText()
         }
         image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
-          image = parser.attrText(ATTR_URL)
+          image = parser.getAttributeValue(parser.namespace, ATTR_URL)
+          parser.nextTag()
         }
         image.isNullOrBlank() && name == TAG_FEATURED_IMAGE -> {
           image = parser.nextText()
@@ -160,7 +162,7 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
           commentsLink = parser.nextText()
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 

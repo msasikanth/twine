@@ -17,28 +17,9 @@
 package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
-import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 abstract class XmlContentParser {
 
   abstract suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload
-
-  fun XmlPullParser.attrText(attrName: String): String? {
-    return getAttributeValue(namespace, attrName).also { skip() }
-  }
-
-  fun XmlPullParser.skip() {
-    require(EventType.START_TAG, namespace, null)
-    var depth = 1
-    while (depth != 0) {
-      when (next()) {
-        EventType.END_TAG -> depth--
-        EventType.START_TAG -> depth++
-        else -> {
-          // no-op
-        }
-      }
-    }
-  }
 }
