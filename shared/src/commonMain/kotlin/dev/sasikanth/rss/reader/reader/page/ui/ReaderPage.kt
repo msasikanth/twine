@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.reader.ui
+package dev.sasikanth.rss.reader.reader.page.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -130,7 +130,7 @@ internal fun ReaderPage(
   highlightsBuilder: Highlights.Builder,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier,
+  modifier: Modifier = Modifier.Companion,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
   var readerProcessingProgress by
@@ -186,7 +186,7 @@ internal fun ReaderPage(
       Box(modifier = modifier) {
         // Dummy view to parse the reader content using JS
         ReaderWebView(
-          modifier = Modifier.requiredSize(0.dp),
+          modifier = Modifier.Companion.requiredSize(0.dp),
           link = readerPost.link,
           content = readerPost.rawContent ?: readerPost.description,
           postImage = readerPost.imageUrl,
@@ -209,7 +209,7 @@ internal fun ReaderPage(
           LocalMarkdownAnimations provides markdownAnimations(),
         ) {
           LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.Companion.fillMaxSize(),
             overscrollEffect = null,
             contentPadding =
               PaddingValues(
@@ -234,7 +234,8 @@ internal fun ReaderPage(
             item(key = "divider") {
               HorizontalDivider(
                 modifier =
-                  Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+                  Modifier.Companion.padding(horizontal = 32.dp)
+                    .padding(top = 20.dp, bottom = 24.dp),
                 color = AppTheme.colorScheme.outlineVariant
               )
             }
@@ -250,7 +251,7 @@ internal fun ReaderPage(
                 when (val state = markdownState) {
                   is State.Success -> {
                     items(items = state.node.children) { node ->
-                      Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                      Box(modifier = Modifier.Companion.padding(horizontal = 32.dp)) {
                         CompositionLocalProvider(
                           LocalMarkdownColors provides
                             markdownColor(
@@ -269,8 +270,8 @@ internal fun ReaderPage(
                               h6 = MaterialTheme.typography.titleMedium,
                               link =
                                 MaterialTheme.typography.bodyLarge.copy(
-                                  fontWeight = FontWeight.Bold,
-                                  textDecoration = TextDecoration.Underline,
+                                  fontWeight = FontWeight.Companion.Bold,
+                                  textDecoration = TextDecoration.Companion.Underline,
                                   color = AppTheme.colorScheme.primary,
                                 )
                             ),
@@ -301,7 +302,7 @@ internal fun ReaderPage(
 
 @Composable
 private fun ProgressIndicator() {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+  Box(modifier = Modifier.Companion.fillMaxSize(), contentAlignment = Alignment.Companion.Center) {
     LinearProgressIndicator(
       trackColor = AppTheme.colorScheme.tintedSurface,
       color = AppTheme.colorScheme.tintedForeground,
@@ -318,20 +319,24 @@ private fun PostInfo(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier,
+  modifier: Modifier = Modifier.Companion,
 ) {
   Column(
-    modifier = Modifier.fillMaxWidth().then(modifier),
+    modifier = Modifier.Companion.fillMaxWidth().then(modifier),
   ) {
     val title = readerPost.title
     val description = readerPost.description
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
-      Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
+      Box(
+        modifier =
+          Modifier.Companion.padding(horizontal = 24.dp)
+            .align(Alignment.Companion.CenterHorizontally)
+      ) {
         FeaturedImage(
           modifier =
-            Modifier.graphicsLayer {
+            Modifier.Companion.graphicsLayer {
               translationX =
                 if (page in 0..pagerState.pageCount) {
                   pagerState.getOffsetFractionForPage(page) * 350f
@@ -345,13 +350,13 @@ private fun PostInfo(
         )
       }
 
-      Spacer(modifier = Modifier.requiredHeight(8.dp))
+      Spacer(modifier = Modifier.Companion.requiredHeight(8.dp))
     }
 
-    Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+    Column(modifier = Modifier.Companion.padding(horizontal = 32.dp)) {
       DisableSelection {
         Text(
-          modifier = Modifier.padding(top = 20.dp),
+          modifier = Modifier.Companion.padding(top = 20.dp),
           text = readerPost.date.readerDateTimestamp(),
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.outline,
@@ -360,34 +365,34 @@ private fun PostInfo(
       }
 
       Text(
-        modifier = Modifier.padding(top = 12.dp),
+        modifier = Modifier.Companion.padding(top = 12.dp),
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineSmall,
         color = AppTheme.colorScheme.onSurface,
-        overflow = TextOverflow.Ellipsis,
+        overflow = TextOverflow.Companion.Ellipsis,
       )
 
       if (!parsedContent.excerpt.isNullOrBlank()) {
-        Spacer(Modifier.requiredHeight(8.dp))
+        Spacer(Modifier.Companion.requiredHeight(8.dp))
 
         Text(
           text = parsedContent.excerpt,
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.secondary,
           maxLines = 3,
-          overflow = TextOverflow.Ellipsis,
+          overflow = TextOverflow.Companion.Ellipsis,
         )
       }
 
-      Spacer(Modifier.requiredHeight(12.dp))
+      Spacer(Modifier.Companion.requiredHeight(12.dp))
 
-      Row(verticalAlignment = Alignment.CenterVertically) {
+      Row(verticalAlignment = Alignment.Companion.CenterVertically) {
         val showFeedFavIcon = LocalShowFeedFavIconSetting.current
         val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
 
         DisableSelection {
           PostSourcePill(
-            modifier = Modifier.weight(1f).clearAndSetSemantics {},
+            modifier = Modifier.Companion.weight(1f).clearAndSetSemantics {},
             feedName = readerPost.feedName,
             feedIcon = feedIconUrl,
             config =
@@ -420,7 +425,7 @@ private fun PostSourcePill(
   feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
-  modifier: Modifier = Modifier,
+  modifier: Modifier = Modifier.Companion,
 ) {
   Box(modifier = modifier) {
     val postSourceTextColor =
@@ -432,35 +437,37 @@ private fun PostSourcePill(
 
     Row(
       modifier =
-        Modifier.background(
+        Modifier.Companion.background(
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
             RoundedCornerShape(50)
           )
           .border(
             1.dp,
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-            RoundedCornerShape(50)
+            androidx.compose.foundation.shape.RoundedCornerShape(50)
           )
-          .clip(RoundedCornerShape(50))
+          .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
           .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
           .padding(vertical = 6.dp)
           .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.Companion.CenterVertically
     ) {
       FeedIcon(
-        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        modifier =
+          Modifier.Companion.requiredSize(16.dp)
+            .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp)),
         url = feedIcon,
         contentDescription = null,
       )
 
-      Spacer(Modifier.requiredWidth(6.dp))
+      Spacer(Modifier.Companion.requiredWidth(6.dp))
 
       Text(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = feedName,
         color = postSourceTextColor,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Companion.Ellipsis
       )
     }
   }
@@ -473,15 +480,15 @@ private fun PostOptionsButtonRow(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier,
+  modifier: Modifier = Modifier.Companion,
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       PostOptionIconButton(
         modifier =
-          Modifier.semantics {
-            role = Role.Button
+          Modifier.Companion.semantics {
+            role = Role.Companion.Button
             contentDescription = commentsLabel
           },
         icon = TwineIcons.Comments,
@@ -493,8 +500,8 @@ private fun PostOptionsButtonRow(
     val sharedLabel = stringResource(Res.string.share)
     PostOptionIconButton(
       modifier =
-        Modifier.semantics {
-          role = Role.Button
+        Modifier.Companion.semantics {
+          role = Role.Companion.Button
           contentDescription = sharedLabel
         },
       icon = TwineIcons.Share,
@@ -510,8 +517,8 @@ private fun PostOptionsButtonRow(
       }
     PostOptionIconButton(
       modifier =
-        Modifier.semantics {
-          role = Role.Button
+        Modifier.Companion.semantics {
+          role = Role.Companion.Button
           contentDescription = bookmarkLabel
         },
       icon =
@@ -534,23 +541,23 @@ private fun PostOptionsButtonRow(
 @Composable
 private fun PostOptionIconButton(
   icon: ImageVector,
-  modifier: Modifier = Modifier,
+  modifier: Modifier = Modifier.Companion,
   iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
   onClick: () -> Unit,
 ) {
   Box(
     modifier =
-      Modifier.requiredSize(40.dp)
+      Modifier.Companion.requiredSize(40.dp)
         .clip(MaterialTheme.shapes.small)
         .clickable(onClick = onClick)
         .then(modifier),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Companion.Center
   ) {
     Icon(
       imageVector = icon,
       contentDescription = null,
       tint = iconTint,
-      modifier = Modifier.size(20.dp)
+      modifier = Modifier.Companion.size(20.dp)
     )
   }
 }
