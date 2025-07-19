@@ -46,10 +46,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.asSource
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
+import kotlin.time.Clock
 
 @Inject
 class AtomContentParser(
@@ -79,7 +79,7 @@ class AtomContentParser(
           if (link.isNullOrBlank()) {
             link = readAtomLink(name, parser)
           } else {
-            parser.skip()
+            parser.skipSubTree()
           }
         }
         TAG_SUBTITLE -> {
@@ -92,7 +92,7 @@ class AtomContentParser(
         TAG_ICON -> {
           iconUrl = parser.nextText()
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 
@@ -149,7 +149,7 @@ class AtomContentParser(
           if (link.isNullOrBlank()) {
             link = readAtomLink(tagName, parser)
           } else {
-            parser.skip()
+            parser.skipSubTree()
           }
         }
         TAG_CONTENT,
@@ -165,7 +165,7 @@ class AtomContentParser(
           if (date.isNullOrBlank()) {
             date = parser.nextText()
           } else {
-            parser.skip()
+            parser.skipSubTree()
           }
         }
         TAG_MEDIA_GROUP -> {
@@ -180,11 +180,11 @@ class AtomContentParser(
               TAG_MEDIA_CONTENT -> {
                 content = content.orEmpty().ifBlank { parser.nextText() }
               }
-              else -> parser.skip()
+              else -> parser.skipSubTree()
             }
           }
         }
-        else -> parser.skip()
+        else -> parser.skipSubTree()
       }
     }
 
