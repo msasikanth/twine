@@ -19,6 +19,7 @@ import app.cash.paging.PagingSource
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -841,6 +842,65 @@ class RssRepository(
         )
       }
     )
+  }
+
+  fun source(
+    id: String,
+    postsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Flow<Source?> {
+    return sourceQueries
+      .source(
+        postsAfter = postsAfter,
+        lastSyncedAt = lastSyncedAt,
+        id = id,
+        mapper = {
+          type: String,
+          id: String,
+          name: String,
+          icon: String?,
+          description: String?,
+          link: String?,
+          homepageLink: String?,
+          createdAt: Instant,
+          pinnedAt: Instant?,
+          lastCleanUpAt: Instant?,
+          numberOfUnreadPosts: Long,
+          feedIds: String?,
+          feedHomepageLinks: String?,
+          feedIcons: String?,
+          updatedAt: Instant? ->
+          if (type == "group") {
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
+              feedHomepageLinks =
+                feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              createdAt = createdAt,
+              updatedAt = updatedAt!!,
+              pinnedAt = pinnedAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+            )
+          } else {
+            Feed(
+              id = id,
+              name = name,
+              icon = icon!!,
+              description = description!!,
+              link = link!!,
+              homepageLink = homepageLink!!,
+              createdAt = createdAt,
+              pinnedAt = pinnedAt,
+              lastCleanUpAt = lastCleanUpAt,
+              numberOfUnreadPosts = numberOfUnreadPosts,
+            )
+          }
+        }
+      )
+      .asFlow()
+      .mapToOneOrNull(dispatchersProvider.databaseRead)
   }
 
   fun allGroups(): PagingSource<Int, FeedGroup> {
