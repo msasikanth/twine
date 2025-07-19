@@ -40,6 +40,7 @@ interface ImageLoaderComponent : ImageLoaderPlatformComponent {
       .diskCache {
         DiskCache.Builder()
           .directory(appInfo.cachePath().toPath().resolve("dev_sasikanth_rss_reader_images_cache"))
+          .maxSizePercent(0.05)
           .build()
       }
       .build()
