@@ -284,8 +284,33 @@ class FeedsViewModel(
   }
 
   private fun observeSources() {
-    observableActiveSource.activeSource
-      .onEach { activeSource -> _state.update { it.copy(activeSource = activeSource) } }
+    val activeSourceFlow = observableActiveSource.activeSource
+    val postsTypeFlow = settingsRepository.postsType
+
+    combine(
+        activeSourceFlow,
+        lastRefreshedAt.dateTimeFlow,
+        postsTypeFlow,
+      ) { activeSource, lastRefreshedAt, postsType ->
+        Triple(activeSource, lastRefreshedAt, postsType)
+      }
+      .flatMapLatest { (activeSource, lastRefreshedAt, postsType) ->
+        when {
+          activeSource?.pinnedAt != null || activeSource == null -> {
+            flowOf(activeSource)
+          }
+          else -> {
+            val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
+
+            rssRepository.source(
+              id = activeSource.id,
+              lastSyncedAt = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault()),
+              postsAfter = postsAfter,
+            )
+          }
+        }
+      }
+      .onEach { source -> _state.update { it.copy(activeSource = source) } }
       .launchIn(viewModelScope)
 
     combine(rssRepository.numberOfFeeds(), rssRepository.numberOfFeedGroups()) {
