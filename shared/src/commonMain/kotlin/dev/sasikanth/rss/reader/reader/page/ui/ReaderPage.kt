@@ -56,6 +56,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -142,14 +143,14 @@ internal fun ReaderPage(
         MarkdownHighlightedCodeBlock(
           content = cm.content,
           node = cm.node,
-          highlights = highlightsBuilder
+          highlightsBuilder = highlightsBuilder
         )
       },
       codeFence = { cm ->
         MarkdownHighlightedCodeFence(
           content = cm.content,
           node = cm.node,
-          highlights = highlightsBuilder
+          highlightsBuilder = highlightsBuilder
         )
       },
     )
@@ -242,12 +243,16 @@ internal fun ReaderPage(
                           h4 = MaterialTheme.typography.headlineSmall,
                           h5 = MaterialTheme.typography.titleLarge,
                           h6 = MaterialTheme.typography.titleMedium,
-                          link =
-                            MaterialTheme.typography.bodyLarge.copy(
-                              fontWeight = FontWeight.Bold,
-                              textDecoration = TextDecoration.Underline,
-                              color = AppTheme.colorScheme.primary,
-                            )
+                          textLink =
+                            TextLinkStyles(
+                              MaterialTheme.typography.bodyLarge
+                                .copy(
+                                  fontWeight = FontWeight.Bold,
+                                  textDecoration = TextDecoration.Underline,
+                                  color = AppTheme.colorScheme.primary,
+                                )
+                                .toSpanStyle()
+                            ),
                         ),
                     ) {
                       MarkdownElement(
@@ -255,7 +260,6 @@ internal fun ReaderPage(
                         components = markdownComponents,
                         content = state.content,
                         includeSpacer = true,
-                        skipLinkDefinition = state.linksLookedUp,
                       )
                     }
                   }
