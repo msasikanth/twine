@@ -41,12 +41,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +61,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
 import com.mikepenz.markdown.compose.LocalMarkdownAnnotator
@@ -78,7 +76,6 @@ import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
-import com.mikepenz.markdown.model.Input
 import com.mikepenz.markdown.model.ReferenceLinkHandlerImpl
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.markdownAnimations
@@ -90,8 +87,8 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
-import dev.sasikanth.rss.reader.markdown.MarkdownStateImpl
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.webview.ReaderWebView
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
@@ -107,8 +104,6 @@ import dev.snipme.highlights.Highlights
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
-import org.intellij.markdown.parser.MarkdownParser
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
@@ -130,30 +125,14 @@ internal fun ReaderPage(
   highlightsBuilder: Highlights.Builder,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier.Companion,
+  modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
+  pageViewModel: ReaderPageViewModel = viewModel(key = readerPost.id),
 ) {
-  var readerProcessingProgress by
-    remember(readerPost.id) { mutableStateOf(ReaderProcessingProgress.Loading) }
-  var parsedContent by remember(readerPost.id) { mutableStateOf(ReaderContent("", "")) }
-  val parsedMarkdownState =
-    remember(readerPost.id, parsedContent) {
-      val flavour = GFMFlavourDescriptor()
-      val input =
-        Input(
-          content = parsedContent.content.orEmpty(),
-          lookupLinks = true,
-          flavour = flavour,
-          parser = MarkdownParser(flavour),
-          referenceLinkHandler = ReferenceLinkHandlerImpl(),
-        )
+  val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
+  val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
+  val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
 
-      MarkdownStateImpl(input)
-    }
-
-  LaunchedEffect(parsedMarkdownState) { parsedMarkdownState.parse() }
-
-  val markdownState by parsedMarkdownState.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
   val coroutineScope = rememberCoroutineScope()
@@ -186,14 +165,14 @@ internal fun ReaderPage(
       Box(modifier = modifier) {
         // Dummy view to parse the reader content using JS
         ReaderWebView(
-          modifier = Modifier.Companion.requiredSize(0.dp),
+          modifier = Modifier.requiredSize(0.dp),
           link = readerPost.link,
           content = readerPost.rawContent ?: readerPost.description,
           postImage = readerPost.imageUrl,
           fetchFullArticle = loadFullArticle,
           contentLoaded = {
-            readerProcessingProgress = ReaderProcessingProgress.Idle
-            parsedContent = json.decodeFromString(it)
+            val readerContent = json.decodeFromString<ReaderContent>(it)
+            pageViewModel.onParsingComplete(readerContent)
           },
         )
 
@@ -206,10 +185,10 @@ internal fun ReaderPage(
           LocalMarkdownDimens provides markdownDimens(),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
-          LocalMarkdownAnimations provides markdownAnimations(),
+          LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
         ) {
           LazyColumn(
-            modifier = Modifier.Companion.fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             overscrollEffect = null,
             contentPadding =
               PaddingValues(
@@ -222,7 +201,7 @@ internal fun ReaderPage(
                 readerPost = readerPost,
                 page = page,
                 pagerState = pagerState,
-                parsedContent = parsedContent,
+                excerpt = excerptState,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
@@ -234,63 +213,56 @@ internal fun ReaderPage(
             item(key = "divider") {
               HorizontalDivider(
                 modifier =
-                  Modifier.Companion.padding(horizontal = 32.dp)
-                    .padding(top = 20.dp, bottom = 24.dp),
+                  Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
                 color = AppTheme.colorScheme.outlineVariant
               )
             }
 
-            if (readerProcessingProgress == ReaderProcessingProgress.Loading) {
+            if (contentParsingProgress == ReaderProcessingProgress.Loading) {
               item(key = "progress-indicator") { ProgressIndicator() }
             }
 
-            if (
-              readerProcessingProgress == ReaderProcessingProgress.Idle || parsedContent.hasContent
-            ) {
-              if (parsedContent.hasContent) {
-                when (val state = markdownState) {
-                  is State.Success -> {
-                    items(items = state.node.children) { node ->
-                      Box(modifier = Modifier.Companion.padding(horizontal = 32.dp)) {
-                        CompositionLocalProvider(
-                          LocalMarkdownColors provides
-                            markdownColor(
-                              text = AppTheme.colorScheme.onSurface,
-                              codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                              dividerColor = AppTheme.colorScheme.outlineVariant,
-                              tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
-                            ),
-                          LocalMarkdownTypography provides
-                            markdownTypography(
-                              h1 = MaterialTheme.typography.displaySmall,
-                              h2 = MaterialTheme.typography.headlineLarge,
-                              h3 = MaterialTheme.typography.headlineMedium,
-                              h4 = MaterialTheme.typography.headlineSmall,
-                              h5 = MaterialTheme.typography.titleLarge,
-                              h6 = MaterialTheme.typography.titleMedium,
-                              link =
-                                MaterialTheme.typography.bodyLarge.copy(
-                                  fontWeight = FontWeight.Companion.Bold,
-                                  textDecoration = TextDecoration.Companion.Underline,
-                                  color = AppTheme.colorScheme.primary,
-                                )
-                            ),
-                        ) {
-                          MarkdownElement(
-                            node = node,
-                            components = markdownComponents,
-                            content = state.content,
-                            includeSpacer = true,
-                            skipLinkDefinition = state.linksLookedUp,
-                          )
-                        }
-                      }
+            when (val state = markdownContentState) {
+              is State.Success -> {
+                items(items = state.node.children) { node ->
+                  Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                    CompositionLocalProvider(
+                      LocalMarkdownColors provides
+                        markdownColor(
+                          text = AppTheme.colorScheme.onSurface,
+                          codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                          dividerColor = AppTheme.colorScheme.outlineVariant,
+                          tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
+                        ),
+                      LocalMarkdownTypography provides
+                        markdownTypography(
+                          h1 = MaterialTheme.typography.displaySmall,
+                          h2 = MaterialTheme.typography.headlineLarge,
+                          h3 = MaterialTheme.typography.headlineMedium,
+                          h4 = MaterialTheme.typography.headlineSmall,
+                          h5 = MaterialTheme.typography.titleLarge,
+                          h6 = MaterialTheme.typography.titleMedium,
+                          link =
+                            MaterialTheme.typography.bodyLarge.copy(
+                              fontWeight = FontWeight.Bold,
+                              textDecoration = TextDecoration.Underline,
+                              color = AppTheme.colorScheme.primary,
+                            )
+                        ),
+                    ) {
+                      MarkdownElement(
+                        node = node,
+                        components = markdownComponents,
+                        content = state.content,
+                        includeSpacer = true,
+                        skipLinkDefinition = state.linksLookedUp,
+                      )
                     }
                   }
-                  else -> {
-                    // no-op
-                  }
                 }
+              }
+              else -> {
+                // no-op
               }
             }
           }
@@ -302,7 +274,7 @@ internal fun ReaderPage(
 
 @Composable
 private fun ProgressIndicator() {
-  Box(modifier = Modifier.Companion.fillMaxSize(), contentAlignment = Alignment.Companion.Center) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
     LinearProgressIndicator(
       trackColor = AppTheme.colorScheme.tintedSurface,
       color = AppTheme.colorScheme.tintedForeground,
@@ -315,28 +287,24 @@ private fun PostInfo(
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
-  parsedContent: ReaderContent,
+  excerpt: String,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier.Companion,
+  modifier: Modifier = Modifier,
 ) {
   Column(
-    modifier = Modifier.Companion.fillMaxWidth().then(modifier),
+    modifier = Modifier.fillMaxWidth().then(modifier),
   ) {
     val title = readerPost.title
     val description = readerPost.description
     val postImage = readerPost.imageUrl
 
     if (!postImage.isNullOrBlank()) {
-      Box(
-        modifier =
-          Modifier.Companion.padding(horizontal = 24.dp)
-            .align(Alignment.Companion.CenterHorizontally)
-      ) {
+      Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
         FeaturedImage(
           modifier =
-            Modifier.Companion.graphicsLayer {
+            Modifier.graphicsLayer {
               translationX =
                 if (page in 0..pagerState.pageCount) {
                   pagerState.getOffsetFractionForPage(page) * 350f
@@ -350,13 +318,13 @@ private fun PostInfo(
         )
       }
 
-      Spacer(modifier = Modifier.Companion.requiredHeight(8.dp))
+      Spacer(modifier = Modifier.requiredHeight(8.dp))
     }
 
-    Column(modifier = Modifier.Companion.padding(horizontal = 32.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 32.dp)) {
       DisableSelection {
         Text(
-          modifier = Modifier.Companion.padding(top = 20.dp),
+          modifier = Modifier.padding(top = 20.dp),
           text = readerPost.date.readerDateTimestamp(),
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.outline,
@@ -365,34 +333,34 @@ private fun PostInfo(
       }
 
       Text(
-        modifier = Modifier.Companion.padding(top = 12.dp),
+        modifier = Modifier.padding(top = 12.dp),
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineSmall,
         color = AppTheme.colorScheme.onSurface,
-        overflow = TextOverflow.Companion.Ellipsis,
+        overflow = TextOverflow.Ellipsis,
       )
 
-      if (!parsedContent.excerpt.isNullOrBlank()) {
-        Spacer(Modifier.Companion.requiredHeight(8.dp))
+      if (excerpt.isNotBlank()) {
+        Spacer(Modifier.requiredHeight(8.dp))
 
         Text(
-          text = parsedContent.excerpt,
+          text = excerpt,
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.secondary,
           maxLines = 3,
-          overflow = TextOverflow.Companion.Ellipsis,
+          overflow = TextOverflow.Ellipsis,
         )
       }
 
-      Spacer(Modifier.Companion.requiredHeight(12.dp))
+      Spacer(Modifier.requiredHeight(12.dp))
 
-      Row(verticalAlignment = Alignment.Companion.CenterVertically) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
         val showFeedFavIcon = LocalShowFeedFavIconSetting.current
         val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
 
         DisableSelection {
           PostSourcePill(
-            modifier = Modifier.Companion.weight(1f).clearAndSetSemantics {},
+            modifier = Modifier.weight(1f).clearAndSetSemantics {},
             feedName = readerPost.feedName,
             feedIcon = feedIconUrl,
             config =
@@ -425,7 +393,7 @@ private fun PostSourcePill(
   feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
-  modifier: Modifier = Modifier.Companion,
+  modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     val postSourceTextColor =
@@ -437,7 +405,7 @@ private fun PostSourcePill(
 
     Row(
       modifier =
-        Modifier.Companion.background(
+        Modifier.background(
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
             RoundedCornerShape(50)
           )
@@ -450,24 +418,24 @@ private fun PostSourcePill(
           .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
           .padding(vertical = 6.dp)
           .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.Companion.CenterVertically
+      verticalAlignment = Alignment.CenterVertically
     ) {
       FeedIcon(
         modifier =
-          Modifier.Companion.requiredSize(16.dp)
+          Modifier.requiredSize(16.dp)
             .clip(androidx.compose.foundation.shape.RoundedCornerShape(4.dp)),
         url = feedIcon,
         contentDescription = null,
       )
 
-      Spacer(Modifier.Companion.requiredWidth(6.dp))
+      Spacer(Modifier.requiredWidth(6.dp))
 
       Text(
         style = MaterialTheme.typography.labelMedium,
         maxLines = 1,
         text = feedName,
         color = postSourceTextColor,
-        overflow = TextOverflow.Companion.Ellipsis
+        overflow = TextOverflow.Ellipsis
       )
     }
   }
@@ -480,15 +448,15 @@ private fun PostOptionsButtonRow(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
-  modifier: Modifier = Modifier.Companion,
+  modifier: Modifier = Modifier,
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       PostOptionIconButton(
         modifier =
-          Modifier.Companion.semantics {
-            role = Role.Companion.Button
+          Modifier.semantics {
+            role = Role.Button
             contentDescription = commentsLabel
           },
         icon = TwineIcons.Comments,
@@ -500,8 +468,8 @@ private fun PostOptionsButtonRow(
     val sharedLabel = stringResource(Res.string.share)
     PostOptionIconButton(
       modifier =
-        Modifier.Companion.semantics {
-          role = Role.Companion.Button
+        Modifier.semantics {
+          role = Role.Button
           contentDescription = sharedLabel
         },
       icon = TwineIcons.Share,
@@ -517,8 +485,8 @@ private fun PostOptionsButtonRow(
       }
     PostOptionIconButton(
       modifier =
-        Modifier.Companion.semantics {
-          role = Role.Companion.Button
+        Modifier.semantics {
+          role = Role.Button
           contentDescription = bookmarkLabel
         },
       icon =
@@ -541,23 +509,23 @@ private fun PostOptionsButtonRow(
 @Composable
 private fun PostOptionIconButton(
   icon: ImageVector,
-  modifier: Modifier = Modifier.Companion,
+  modifier: Modifier = Modifier,
   iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
   onClick: () -> Unit,
 ) {
   Box(
     modifier =
-      Modifier.Companion.requiredSize(40.dp)
+      Modifier.requiredSize(40.dp)
         .clip(MaterialTheme.shapes.small)
         .clickable(onClick = onClick)
         .then(modifier),
-    contentAlignment = Alignment.Companion.Center
+    contentAlignment = Alignment.Center
   ) {
     Icon(
       imageVector = icon,
       contentDescription = null,
       tint = iconTint,
-      modifier = Modifier.Companion.size(20.dp)
+      modifier = Modifier.size(20.dp)
     )
   }
 }
@@ -572,8 +540,4 @@ enum class ReaderProcessingProgress {
 data class ReaderContent(
   val excerpt: String?,
   val content: String?,
-) {
-
-  val hasContent: Boolean
-    get() = !content.isNullOrBlank()
-}
+)
