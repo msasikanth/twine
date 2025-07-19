@@ -17,15 +17,21 @@ import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdownFlow
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderContent
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import me.tatarka.inject.annotations.Inject
 
-class ReaderPageViewModel : ViewModel() {
+@Inject
+class ReaderPageViewModel(
+  dispatchersProvider: DispatchersProvider,
+) : ViewModel() {
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -33,6 +39,7 @@ class ReaderPageViewModel : ViewModel() {
       .filter { it.isNotBlank() }
       .distinctUntilChanged()
       .flatMapLatest { parseMarkdownFlow(it) }
+      .flowOn(dispatchersProvider.default)
       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), State.Loading())
 
   private val _excerptState = MutableStateFlow("")

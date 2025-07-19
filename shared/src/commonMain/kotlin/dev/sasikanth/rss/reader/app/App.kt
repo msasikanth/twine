@@ -80,6 +80,7 @@ import dev.sasikanth.rss.reader.premium.PremiumPaywallViewModel
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
+import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
 import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
@@ -126,6 +127,7 @@ fun App(
   homeViewModel: () -> HomeViewModel,
   feedsViewModel: () -> FeedsViewModel,
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
+  readerPageViewModel: () -> ReaderPageViewModel,
   addFeedViewModel: () -> AddFeedViewModel,
   feedViewModel: (SavedStateHandle) -> FeedViewModel,
   groupSelectionViewModel: () -> GroupSelectionViewModel,
@@ -289,6 +291,7 @@ fun App(
             modifier = fillMaxSizeModifier,
             darkTheme = useDarkTheme,
             viewModel = viewModel,
+            pageViewModel = { key -> viewModel(key = key) { readerPageViewModel() } },
             onPostChanged = { activePostIndex ->
               if (fromScreen !is FromScreen.UnreadWidget) {
                 appViewModel.updateActivePostIndex(activePostIndex)
