@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -416,6 +417,15 @@ internal fun HomeScreen(
           ) {
             postsListState.animateScrollToItem(0)
           }
+        }
+
+        if (bottomSheetState.currentValue == SheetValue.Expanded) {
+          Box(
+            modifier =
+              Modifier.fillMaxSize().pointerInput(Unit) {
+                detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+              }
+          )
         }
       },
       sheetContent = {

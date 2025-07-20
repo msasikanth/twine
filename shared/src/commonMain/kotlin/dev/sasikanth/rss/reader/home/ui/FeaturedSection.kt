@@ -27,12 +27,14 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,6 +52,7 @@ import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
@@ -57,6 +60,7 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
@@ -169,6 +173,14 @@ private fun FeaturedSectionBackground(
   pageOffset: () -> Float,
   modifier: Modifier = Modifier,
 ) {
+  val sizeClass = LocalWindowSizeClass.current.widthSizeClass
+  val imageMaxHeight =
+    if (sizeClass >= WindowWidthSizeClass.Medium) {
+      198.dp
+    } else {
+      Dp.Unspecified
+    }
+
   val gradientOverlayModifier =
     if (useDarkTheme) {
       Modifier.drawWithCache {
@@ -215,6 +227,7 @@ private fun FeaturedSectionBackground(
     modifier =
       Modifier.then(modifier)
         .fillMaxWidth()
+        .heightIn(max = imageMaxHeight)
         .aspectRatio(1f)
         .graphicsLayer { translationX = size.width * pageOffset.invoke() }
         .graphicsLayer {
