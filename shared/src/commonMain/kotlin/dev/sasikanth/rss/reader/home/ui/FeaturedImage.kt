@@ -18,7 +18,7 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -35,7 +35,7 @@ import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 fun FeaturedImage(image: String?, modifier: Modifier = Modifier) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val imageMaxHeight =
-    if (sizeClass == WindowWidthSizeClass.Medium || sizeClass == WindowWidthSizeClass.Expanded) {
+    if (sizeClass >= WindowWidthSizeClass.Medium) {
       198.dp
     } else {
       Dp.Unspecified
@@ -46,7 +46,7 @@ fun FeaturedImage(image: String?, modifier: Modifier = Modifier) {
       url = image,
       modifier =
         Modifier.clip(MaterialTheme.shapes.extraLarge)
-          .requiredHeightIn(max = imageMaxHeight)
+          .heightIn(max = imageMaxHeight)
           .aspectRatio(ratio = 16f / 9f)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
           .then(modifier),
