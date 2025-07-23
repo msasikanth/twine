@@ -37,7 +37,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -66,7 +65,6 @@ internal fun FeedsBottomSheet(
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val density = LocalDensity.current
   val focusManager = LocalFocusManager.current
   val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
@@ -94,12 +92,11 @@ internal fun FeedsBottomSheet(
 
   AppTheme(useDarkTheme = true) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-      val collapsedSheetHeight = 100.dp
-      val targetSheetHeight = with(density) { constraints.maxHeight.toDp() }
-
       Column(
         modifier =
           Modifier.layout { measurable, constraints ->
+              val collapsedSheetHeight = 100.dp
+              val targetSheetHeight = constraints.maxHeight.toDp()
               val sheetHeight =
                 lerp(
                     start = collapsedSheetHeight,
