@@ -187,6 +187,32 @@ internal fun ReaderPage(
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
           LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
+          LocalMarkdownColors provides
+            markdownColor(
+              text = AppTheme.colorScheme.onSurface,
+              codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+              dividerColor = AppTheme.colorScheme.outlineVariant,
+              tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
+            ),
+          LocalMarkdownTypography provides
+            markdownTypography(
+              h1 = MaterialTheme.typography.displaySmall,
+              h2 = MaterialTheme.typography.headlineLarge,
+              h3 = MaterialTheme.typography.headlineMedium,
+              h4 = MaterialTheme.typography.headlineSmall,
+              h5 = MaterialTheme.typography.titleLarge,
+              h6 = MaterialTheme.typography.titleMedium,
+              textLink =
+                TextLinkStyles(
+                  MaterialTheme.typography.bodyLarge
+                    .copy(
+                      fontWeight = FontWeight.Bold,
+                      textDecoration = TextDecoration.Underline,
+                      color = AppTheme.colorScheme.primary,
+                    )
+                    .toSpanStyle()
+                ),
+            ),
         ) {
           LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -227,41 +253,12 @@ internal fun ReaderPage(
               is State.Success -> {
                 items(items = state.node.children) { node ->
                   Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-                    CompositionLocalProvider(
-                      LocalMarkdownColors provides
-                        markdownColor(
-                          text = AppTheme.colorScheme.onSurface,
-                          codeBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                          dividerColor = AppTheme.colorScheme.outlineVariant,
-                          tableBackground = AppTheme.colorScheme.onSurface.copy(alpha = 0.02f),
-                        ),
-                      LocalMarkdownTypography provides
-                        markdownTypography(
-                          h1 = MaterialTheme.typography.displaySmall,
-                          h2 = MaterialTheme.typography.headlineLarge,
-                          h3 = MaterialTheme.typography.headlineMedium,
-                          h4 = MaterialTheme.typography.headlineSmall,
-                          h5 = MaterialTheme.typography.titleLarge,
-                          h6 = MaterialTheme.typography.titleMedium,
-                          textLink =
-                            TextLinkStyles(
-                              MaterialTheme.typography.bodyLarge
-                                .copy(
-                                  fontWeight = FontWeight.Bold,
-                                  textDecoration = TextDecoration.Underline,
-                                  color = AppTheme.colorScheme.primary,
-                                )
-                                .toSpanStyle()
-                            ),
-                        ),
-                    ) {
-                      MarkdownElement(
-                        node = node,
-                        components = markdownComponents,
-                        content = state.content,
-                        includeSpacer = true,
-                      )
-                    }
+                    MarkdownElement(
+                      node = node,
+                      components = markdownComponents,
+                      content = state.content,
+                      includeSpacer = true,
+                    )
                   }
                 }
               }
