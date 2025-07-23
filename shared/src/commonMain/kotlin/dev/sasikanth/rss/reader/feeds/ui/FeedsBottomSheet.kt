@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -185,16 +184,6 @@ internal fun FeedsBottomSheet(
       ) {
         BottomSheetHandle(progress = bottomSheetProgress())
 
-        val touchInterceptor by derivedStateOf {
-          if (bottomSheetProgress() < 1f) {
-            Modifier.pointerInput(Unit) {
-              // Consume any touches
-            }
-          } else {
-            Modifier
-          }
-        }
-
         BottomSheetCollapsedContent(
           modifier =
             Modifier.layout { measurable, constraints ->
@@ -222,7 +211,7 @@ internal fun FeedsBottomSheet(
 
         BottomSheetExpandedContent(
           modifier =
-            Modifier.fillMaxSize().then(touchInterceptor).padding(top = 12.dp).graphicsLayer {
+            Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
               alpha = bottomSheetProgress()
             },
           viewModel = feedsViewModel,
