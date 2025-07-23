@@ -15,7 +15,7 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui
 
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,9 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -67,7 +65,6 @@ internal fun FeedsBottomSheet(
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val density = LocalDensity.current
   val focusManager = LocalFocusManager.current
   val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
@@ -94,13 +91,12 @@ internal fun FeedsBottomSheet(
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
-      val collapsedSheetHeight = 100.dp
-      val targetSheetHeight = with(density) { constraints.maxHeight.toDp() }
-
+    Box(modifier = modifier.fillMaxSize()) {
       Column(
         modifier =
           Modifier.layout { measurable, constraints ->
+              val collapsedSheetHeight = 100.dp
+              val targetSheetHeight = constraints.maxHeight.toDp()
               val sheetHeight =
                 lerp(
                     start = collapsedSheetHeight,
@@ -185,16 +181,6 @@ internal fun FeedsBottomSheet(
       ) {
         BottomSheetHandle(progress = bottomSheetProgress())
 
-        val touchInterceptor by derivedStateOf {
-          if (bottomSheetProgress() < 1f) {
-            Modifier.pointerInput(Unit) {
-              // Consume any touches
-            }
-          } else {
-            Modifier
-          }
-        }
-
         BottomSheetCollapsedContent(
           modifier =
             Modifier.layout { measurable, constraints ->
@@ -222,7 +208,7 @@ internal fun FeedsBottomSheet(
 
         BottomSheetExpandedContent(
           modifier =
-            Modifier.fillMaxSize().then(touchInterceptor).padding(top = 12.dp).graphicsLayer {
+            Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
               alpha = bottomSheetProgress()
             },
           viewModel = feedsViewModel,
