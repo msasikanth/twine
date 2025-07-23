@@ -59,32 +59,6 @@ internal fun BottomSheetCollapsedContent(
     verticalAlignment = Alignment.CenterVertically,
     contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 24.dp)
   ) {
-    //    stickyHeader {
-    //      val allFeedsLabel = stringResource(Res.string.allFeeds)
-    //
-    //      HomeBottomBarItem(
-    //        selected = activeSource == null,
-    //        onClick = onHomeSelected,
-    //        backgroundColor = homeItemBackgroundColor,
-    //        modifier =
-    //          Modifier.clearAndSetSemantics {
-    //              contentDescription = allFeedsLabel
-    //              role = Role.Button
-    //            }
-    //            .drawWithCache {
-    //              onDrawBehind {
-    //                val brush =
-    //                  Brush.horizontalGradient(
-    //                    colorStops = homeItemShadowColors,
-    //                  )
-    //                drawRect(
-    //                  brush = brush,
-    //                )
-    //              }
-    //            }
-    //      )
-    //    }
-
     if (activeSource != null && activeSource.pinnedAt == null) {
       item {
         SourceItem(
@@ -114,7 +88,7 @@ internal fun BottomSheetCollapsedContent(
       )
     }
 
-    if (pinnedSources.isEmpty() && numberOfFeeds > 0) {
+    if (pinnedSources.isEmpty() && numberOfFeeds > 0 && activeSource == null) {
       item {
         Text(
           text = stringResource(Res.string.noPinnedSources),
