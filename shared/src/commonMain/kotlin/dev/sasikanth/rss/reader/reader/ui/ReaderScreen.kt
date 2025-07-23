@@ -344,7 +344,7 @@ internal fun ReaderScreen(
                 start = paddingValues.calculateStartPadding(layoutDirection),
                 end = paddingValues.calculateEndPadding(layoutDirection),
               ),
-            key = { posts.peek(it)?.id ?: it }
+            key = { runCatching { posts.peek(it)?.id }.getOrNull() ?: it }
           ) { page ->
             val readerPost = posts[page]
 
