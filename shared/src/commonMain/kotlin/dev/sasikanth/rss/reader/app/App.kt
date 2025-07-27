@@ -192,7 +192,7 @@ fun App(
 
       NavHost(
         navController = navController,
-        startDestination = Screen.Home,
+        startDestination = Screen.Placeholder,
         popEnterTransition = { EnterTransition.None },
         popExitTransition = {
           scaleOut(

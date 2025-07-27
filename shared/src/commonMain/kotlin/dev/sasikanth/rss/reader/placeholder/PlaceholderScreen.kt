@@ -72,8 +72,7 @@ fun PlaceholderScreen(
   }
 
   Box(
-    modifier =
-      modifier.background(AppTheme.colorScheme.surfaceContainerLowest).padding(horizontal = 24.dp),
+    modifier = modifier.background(AppTheme.colorScheme.backdrop).padding(horizontal = 24.dp),
     contentAlignment = Alignment.Center
   ) {
     AnimatedVisibility(
