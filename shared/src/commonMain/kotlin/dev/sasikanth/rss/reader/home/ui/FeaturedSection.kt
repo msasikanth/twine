@@ -107,7 +107,10 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
-      key = { page -> featuredPosts.getOrNull(page)?.postWithMetadata?.id ?: page },
+      key = { page ->
+        val post = featuredPosts.getOrNull(page)
+        post?.let { post.postWithMetadata.id + post.postWithMetadata.sourceId } ?: page
+      },
       flingBehavior =
         PagerDefaults.flingBehavior(
           state = pagerState,
