@@ -2,7 +2,7 @@ import kotlin.Boolean;
 import kotlin.time.Instant;
 
 CREATE TABLE post(
-  id TEXT NOT NULL PRIMARY KEY,
+  id TEXT NOT NULL,
   sourceId TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -15,6 +15,7 @@ CREATE TABLE post(
   bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
   read INTEGER AS Boolean NOT NULL DEFAULT 0,
   isHidden INTEGER AS Boolean NOT NULL DEFAULT 0,
+  PRIMARY KEY (id, sourceId),
   FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
 );
 
