@@ -73,7 +73,7 @@ END;
 upsert:
 INSERT INTO post(id, sourceId, title, description, rawContent, imageUrl, date, syncedAt, link, commentsLink)
 VALUES (:id,  :sourceId, :title, :description,  :rawContent, :imageUrl, :date, :syncedAt, :link, :commnetsLink)
-ON CONFLICT(id) DO
+ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
     description = excluded.description,
