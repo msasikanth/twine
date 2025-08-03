@@ -20,6 +20,8 @@ import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.darwin.Darwin
+import io.ktor.client.plugins.timeout
+import io.ktor.client.request.request
 import me.tatarka.inject.annotations.Provides
 
 actual interface NetworkComponent {
@@ -30,7 +32,12 @@ actual interface NetworkComponent {
     return httpClient(
       engine = Darwin,
       appInfo = appInfo,
-      config = { configureRequest { setAllowsCellularAccess(true) } }
+      config = {
+        configureRequest {
+          setAllowsCellularAccess(true)
+          request { timeout { connectTimeoutMillis = 10_000 } }
+        }
+      }
     )
   }
 }
