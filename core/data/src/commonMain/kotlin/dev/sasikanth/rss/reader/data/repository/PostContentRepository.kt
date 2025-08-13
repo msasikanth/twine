@@ -27,9 +27,12 @@ class PostContentRepository(
 ) {
 
   fun postContent(postId: String): Flow<PostContent> {
-    return postContentQueries.getByPostId(postId) { id, rawContent, htmlContent, createdAt ->
-      PostContent(id, rawContent, htmlContent)
-    }.asFlow().mapToOne(dispatcherProvider.databaseRead)
+    return postContentQueries
+      .getByPostId(postId) { id, rawContent, htmlContent, createdAt ->
+        PostContent(id, rawContent, htmlContent)
+      }
+      .asFlow()
+      .mapToOne(dispatcherProvider.databaseRead)
   }
 
   suspend fun updateFullArticleContent(postId: String, htmlContent: String?) {

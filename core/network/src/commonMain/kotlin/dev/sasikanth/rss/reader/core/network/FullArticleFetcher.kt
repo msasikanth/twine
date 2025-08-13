@@ -21,7 +21,8 @@ class FullArticleFetcher(
       followRedirects = true
 
       install(UserAgent) {
-        agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        agent =
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
       }
     }
   }
@@ -29,13 +30,19 @@ class FullArticleFetcher(
   suspend fun fetch(url: String): Result<String> {
     return withContext(dispatchersProvider.io) {
       try {
-        val htmlContent = fullArticleHttpClient.get(url) {
-          headers {
-            append(HttpHeaders.Accept, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-            append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.5")
-            append(HttpHeaders.Connection, "keep-alive")
-          }
-        }.bodyAsText()
+        val htmlContent =
+          fullArticleHttpClient
+            .get(url) {
+              headers {
+                append(
+                  HttpHeaders.Accept,
+                  "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+                )
+                append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.5")
+                append(HttpHeaders.Connection, "keep-alive")
+              }
+            }
+            .bodyAsText()
         Result.success(htmlContent)
       } catch (e: Exception) {
         Result.failure(e)

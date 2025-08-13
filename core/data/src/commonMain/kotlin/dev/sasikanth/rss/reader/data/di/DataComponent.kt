@@ -57,9 +57,10 @@ interface DataComponent :
           updatedAtAdapter = DateAdapter,
           pinnedAtAdapter = DateAdapter
         ),
-      postContentAdapter = PostContent.Adapter(
-        createdAtAdapter = DateAdapter,
-      )
+      postContentAdapter =
+        PostContent.Adapter(
+          createdAtAdapter = DateAdapter,
+        )
     )
   }
 
