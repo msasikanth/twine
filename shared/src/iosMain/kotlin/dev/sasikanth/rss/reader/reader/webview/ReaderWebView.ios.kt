@@ -49,7 +49,7 @@ internal actual fun ReaderWebView(
 ) {
   val coroutineScope = rememberCoroutineScope()
   val navigationDelegate =
-    remember(link, fetchFullArticle) {
+    remember(link, content.hashCode()) {
       @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
       object : NSObject(), WKNavigationDelegateProtocol {
         override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
@@ -57,9 +57,8 @@ internal actual fun ReaderWebView(
             """
           parseReaderContent(
             ${link.asJSString},
-            ${content.asJSString},
             ${postImage.orEmpty().asJSString},
-            $fetchFullArticle
+            ${content.asJSString},
           ).then(result => window.webkit.messageHandlers.readerMessageHandler.postMessage(result))
         """
               .trimIndent()

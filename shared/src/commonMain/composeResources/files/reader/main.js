@@ -79,20 +79,8 @@ function removeFirstImageTagByUrl(doc, imageUrl) {
   }
 }
 
-async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
-  let processedHtml = html;
-
-  if (fetchFullArticle) {
-    try {
-      const response = await fetch(link);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      processedHtml = await response.text();
-    } catch (error) {
-      console.error("Error fetching full article:", error);
-    }
-  }
-
-  const cleanedHtml = removeHeadTag(processedHtml);
+async function parseReaderContent(link, bannerImage, html) {
+  const cleanedHtml = removeHeadTag(html);
   const sanitizedHtml = isRedditUrl(link)
     ? formatRedditPost(cleanedHtml)
     : `<body><div>${cleanedHtml}</div></body>`;
@@ -110,8 +98,6 @@ async function parseReaderContent(link, html, bannerImage, fetchFullArticle) {
   removeFirstH1(doc);
   processIFrames(doc);
   removeFirstImageTagByUrl(doc, bannerImage);
-
-//  const opts = { html: doc.body.innerHTML, contentType: 'markdown' };
 
   const article = new Readability(doc).parse();
   const turndownService = new TurndownService()
