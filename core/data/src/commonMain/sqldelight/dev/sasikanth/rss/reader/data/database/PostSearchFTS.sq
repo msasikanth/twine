@@ -33,7 +33,6 @@ SELECT
   sourceId,
   post_search.title,
   post_search.description,
-  post.rawContent,
   post.imageUrl,
   post.date,
   post.link,

@@ -26,7 +26,6 @@ data class PostWithMetadata(
   val sourceId: String,
   val title: String,
   val description: String,
-  val rawContent: String?,
   val imageUrl: String?,
   val date: Instant,
   val link: String,

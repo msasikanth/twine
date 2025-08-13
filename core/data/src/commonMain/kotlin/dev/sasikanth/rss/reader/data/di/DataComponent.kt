@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.data.database.Bookmark
 import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
+import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.DurationAdapter
@@ -55,7 +56,10 @@ interface DataComponent :
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
           pinnedAtAdapter = DateAdapter
-        )
+        ),
+      postContentAdapter = PostContent.Adapter(
+        createdAtAdapter = DateAdapter,
+      )
     )
   }
 
@@ -150,4 +154,6 @@ interface DataComponent :
   fun providesFeedGroupFeedQueries(database: ReaderDatabase) = database.feedGroupFeedQueries
 
   @Provides fun providesUserQueries(database: ReaderDatabase) = database.userQueries
+
+  @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
 }
