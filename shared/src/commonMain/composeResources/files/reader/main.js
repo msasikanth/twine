@@ -13,11 +13,11 @@ function isRedditUrl(url) {
 }
 
 function formatRedditPost(html) {
-  const imagePattern = /<a href="([^"]+)">\s*<img src="([^"]+)"\s*alt="([^"]+)" title="([^"]+)"\s*\/>\s*<\/a>/;
+//  const imagePattern = /<a href="([^"]+)">\s*<img src="([^"]+)"\s*alt="([^"]+)" title="([^"]+)"\s*\/>\s*<\/a>/;
   const submitterPattern = /(?:submitted by\s*<a href="([^"]+)">|user\/([^"]+)[^<]*<\/a>)/;
   const divMdPattern = /(?:<!-- SC_OFF -->)?\s*<div class="md">([\s\S]*?)<\/div>\s*(?:<!-- SC_ON -->)?/;
 
-  const imageMatch = html.match(imagePattern);
+//  const imageMatch = html.match(imagePattern);
   let submitterMatch = html.match(submitterPattern);
   let divMdMatch = html.match(divMdPattern);
 
@@ -29,18 +29,18 @@ function formatRedditPost(html) {
 
   let result = "<table>\n";
 
-  if (imageMatch) {
-    const [_, postUrl, imageUrl, imageAlt, imageTitle] = imageMatch;
-    result += `
-      <tr>
-        <td>
-          <a href="${postUrl}">
-            <img style="max-width: 100%; height: auto !important; display: block; margin-bottom: 8px;"
-                 src="${imageUrl}" alt="${imageAlt}" title="${imageTitle}" />
-          </a>
-        </td>
-      </tr>`;
-  }
+//  if (imageMatch) {
+//    const [_, postUrl, imageUrl, imageAlt, imageTitle] = imageMatch;
+//    result += `
+//      <tr>
+//        <td>
+//          <a href="${postUrl}">
+//            <img style="max-width: 100%; height: auto !important; display: block; margin-bottom: 8px;"
+//                 src="${imageUrl}" alt="${imageAlt}" title="${imageTitle}" />
+//          </a>
+//        </td>
+//      </tr>`;
+//  }
 
   if (divContent) {
     result += `
