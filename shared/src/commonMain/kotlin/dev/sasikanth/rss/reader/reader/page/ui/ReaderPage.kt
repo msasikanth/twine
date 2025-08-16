@@ -275,7 +275,10 @@ internal fun ReaderPage(
 
 @Composable
 private fun ProgressIndicator() {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+  Box(
+    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+    contentAlignment = Alignment.Center,
+  ) {
     LinearProgressIndicator(
       trackColor = AppTheme.colorScheme.tintedSurface,
       color = AppTheme.colorScheme.tintedForeground,
