@@ -298,6 +298,7 @@ internal fun ReaderScreen(
               },
               loadFullArticleClick = {
                 viewModel.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+                pageViewModel.loadFullArticle(readerPost.link)
               },
               openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
