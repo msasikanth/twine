@@ -31,6 +31,10 @@ kotlin {
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
+    all {
+      languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
+    }
+
     commonMain.dependencies {
       implementation(projects.core.model)
       implementation(projects.core.base)
@@ -52,7 +56,11 @@ kotlin {
       implementation(libs.crashkios.bugsnag)
       api(libs.korlibs.string)
     }
-    commonTest.dependencies { implementation(libs.kotlin.test) }
+    commonTest.dependencies {
+      implementation(libs.kotlin.test)
+      implementation(libs.kotlinx.coroutines.test)
+      implementation(libs.ktor.client.mock)
+    }
 
     androidMain.dependencies {
       implementation(libs.androidx.annotation)

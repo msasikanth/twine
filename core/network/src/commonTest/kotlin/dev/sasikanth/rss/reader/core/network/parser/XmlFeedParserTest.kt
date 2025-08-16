@@ -1,19 +1,14 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
-package dev.sasikanth.rss.reader
+package dev.sasikanth.rss.reader.core.network.parser
 
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
@@ -22,7 +17,15 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import dev.sasikanth.rss.reader.core.network.utils.atomXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.feedUrl
+import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.youtubeAtomFeed
+import dev.sasikanth.rss.reader.core.network.utils.youtubeChannelHtml
+import dev.sasikanth.rss.reader.core.network.utils.youtubeFeedUrl
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
