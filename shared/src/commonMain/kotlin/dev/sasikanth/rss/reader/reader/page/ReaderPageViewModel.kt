@@ -43,20 +43,13 @@ class ReaderPageViewModel(
   @Assisted private val postId: String,
 ) : ViewModel() {
 
-  private val _postContent = MutableStateFlow<PostContent?>(null)
-  val postContent: StateFlow<PostContent?> =
-    _postContent.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
   init {
     loadPostContent()
   }
 
-  private fun loadPostContent() {
-    postContentRepository
-      .postContent(postId)
-      .onEach { _postContent.value = it }
-      .launchIn(viewModelScope)
-  }
+  private val _postContent = MutableStateFlow<PostContent?>(null)
+  val postContent: StateFlow<PostContent?> =
+    _postContent.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -94,5 +87,12 @@ class ReaderPageViewModel(
       val article = fullArticleFetcher.fetch(postUrl).getOrNull() ?: return@launch
       postContentRepository.updateFullArticleContent(postId, article)
     }
+  }
+
+  private fun loadPostContent() {
+    postContentRepository
+      .postContent(postId)
+      .onEach { _postContent.value = it }
+      .launchIn(viewModelScope)
   }
 }
