@@ -43,7 +43,6 @@ internal actual fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,
-  fetchFullArticle: Boolean,
   contentLoaded: (String) -> Unit,
   modifier: Modifier,
 ) {
