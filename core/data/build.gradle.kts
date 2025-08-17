@@ -34,6 +34,7 @@ plugins {
   alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.android.library)
   alias(libs.plugins.sqldelight)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -59,6 +60,9 @@ kotlin {
       api(libs.androidx.datastore.okio)
       api(libs.uuid)
       api(libs.ktor.core)
+      implementation(libs.filekit)
+      implementation(libs.bundles.xmlutil)
+      implementation(libs.stately.isolate)
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
 

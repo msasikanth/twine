@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.opml
+package dev.sasikanth.rss.reader.data.opml
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
