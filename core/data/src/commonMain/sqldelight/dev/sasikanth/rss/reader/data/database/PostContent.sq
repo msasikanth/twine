@@ -4,12 +4,16 @@ CREATE TABLE postContent (
   id TEXT NOT NULL PRIMARY KEY,
   rawContent TEXT,
   htmlContent TEXT,
+  rawContentLen INTEGER,
   createdAt INTEGER AS Instant NOT NULL
 );
 
 upsert:
-INSERT OR REPLACE INTO postContent (id, rawContent, htmlContent, createdAt)
-VALUES (:id, :rawContent, :htmlContent, :createdAt);
+INSERT INTO postContent (id, rawContent, rawContentLen, htmlContent, createdAt)
+VALUES (:id, :rawContent, :rawContentLen, :htmlContent, :createdAt)
+ON CONFLICT (id) DO UPDATE SET
+  rawContent = excluded.rawContent
+WHERE COALESCE(postContent.rawContentLen, 0) < COALESCE(length(excluded.rawContent), 0);
 
 getByPostId:
 SELECT * FROM postContent

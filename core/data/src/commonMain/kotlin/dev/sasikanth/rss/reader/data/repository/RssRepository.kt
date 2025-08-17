@@ -119,6 +119,7 @@ class RssRepository(
                   postContentQueries.upsert(
                     id = postId,
                     rawContent = postPayload.rawContent,
+                    rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
                     htmlContent = null,
                     createdAt = Clock.System.now(),
                   )

@@ -28,7 +28,7 @@ class PostContentRepository(
 
   fun postContent(postId: String): Flow<PostContent> {
     return postContentQueries
-      .getByPostId(postId) { id, rawContent, htmlContent, createdAt ->
+      .getByPostId(postId) { id, rawContent, htmlContent, _, createdAt ->
         PostContent(id, rawContent, htmlContent)
       }
       .asFlow()

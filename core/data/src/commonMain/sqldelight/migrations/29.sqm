@@ -8,7 +8,7 @@ CREATE TABLE postContent (
   createdAt INTEGER AS Instant NOT NULL
 );
 
-INSERT INTO postContent (id, rawContent, createdAt)
+INSERT OR IGNORE INTO postContent (id, rawContent, createdAt)
 SELECT id, rawContent, syncedAt FROM post WHERE rawContent IS NOT NULL;
 
 CREATE TABLE post_new (
