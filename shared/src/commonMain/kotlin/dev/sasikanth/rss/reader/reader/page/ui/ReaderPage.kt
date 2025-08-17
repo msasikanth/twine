@@ -169,7 +169,7 @@ internal fun ReaderPage(
         val postContent =
           remember(loadFullArticle, readerPostContent) {
             if (loadFullArticle) {
-              readerPostContent?.fullArticleHtml
+              readerPostContent?.fullArticleHtml ?: readerPostContent?.postContent
             } else {
               readerPostContent?.postContent
             }
