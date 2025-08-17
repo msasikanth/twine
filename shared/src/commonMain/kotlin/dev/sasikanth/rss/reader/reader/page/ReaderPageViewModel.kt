@@ -16,6 +16,7 @@ import androidx.lifecycle.viewModelScope
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdownFlow
 import dev.sasikanth.rss.reader.core.model.local.PostContent
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderContent
@@ -41,16 +42,11 @@ class ReaderPageViewModel(
   dispatchersProvider: DispatchersProvider,
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
-  @Assisted private val postId: String,
+  @Assisted private val readerPost: PostWithMetadata,
 ) : ViewModel() {
 
-  init {
-    loadPostContent()
-  }
-
   private val _postContent = MutableStateFlow<PostContent?>(null)
-  val postContent: StateFlow<PostContent?> =
-    _postContent.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+  val postContent: StateFlow<PostContent?> = _postContent
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -73,6 +69,13 @@ class ReaderPageViewModel(
   private val _parsingProgress = MutableStateFlow(ReaderProcessingProgress.Loading)
   val parsingProgress: StateFlow<ReaderProcessingProgress> = _parsingProgress
 
+  private val _showFullArticle = MutableStateFlow(readerPost.alwaysFetchFullArticle)
+  val showFullArticle: StateFlow<Boolean> = _showFullArticle
+
+  init {
+    loadPostContent()
+  }
+
   fun onParsingComplete(readerContent: ReaderContent) {
     viewModelScope.launch {
       _contentState.update { it -> readerContent.content ?: it }
@@ -80,20 +83,31 @@ class ReaderPageViewModel(
     }
   }
 
-  fun loadFullArticle(postUrl: String) {
+  fun loadFullArticle() {
     if (_postContent.value?.fullArticleHtml != null) return
 
     viewModelScope.launch {
       _parsingProgress.value = ReaderProcessingProgress.Loading
-      val article = fullArticleFetcher.fetch(postUrl).getOrNull() ?: return@launch
-      postContentRepository.updateFullArticleContent(postId, article)
+      val article = fullArticleFetcher.fetch(readerPost.link).getOrNull() ?: return@launch
+      postContentRepository.updateFullArticleContent(readerPost.id, article)
+    }
+  }
+
+  fun toggleFullArticle() {
+    _showFullArticle.value = !(_showFullArticle.value)
+    if (_showFullArticle.value) {
+      loadFullArticle()
     }
   }
 
   private fun loadPostContent() {
     postContentRepository
-      .postContent(postId)
+      .postContent(readerPost.id)
       .onEach { _postContent.value = it }
       .launchIn(viewModelScope)
+
+    if (_showFullArticle.value) {
+      loadFullArticle()
+    }
   }
 }

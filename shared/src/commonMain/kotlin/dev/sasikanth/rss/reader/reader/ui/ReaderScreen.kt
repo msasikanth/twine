@@ -78,6 +78,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
@@ -109,7 +110,7 @@ import kotlinx.coroutines.launch
 internal fun ReaderScreen(
   darkTheme: Boolean,
   viewModel: ReaderViewModel,
-  pageViewModelFactory: @Composable (id: String) -> ReaderPageViewModel,
+  pageViewModelFactory: @Composable (PostWithMetadata) -> ReaderPageViewModel,
   onPostChanged: (Int) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
@@ -284,11 +285,12 @@ internal fun ReaderScreen(
               null
             }
           if (readerPost != null) {
-            val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
+            val pageViewModel = pageViewModelFactory.invoke(readerPost)
+            val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
             ReaderActionsPanel(
               darkTheme = darkTheme,
-              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              loadFullArticle = showFullArticle,
               showReaderCustomisations = state.showReaderCustomisations,
               selectedFont = state.selectedReaderFont,
               fontScaleFactor = state.readerFontScaleFactor,
@@ -296,10 +298,7 @@ internal fun ReaderScreen(
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
-              loadFullArticleClick = {
-                viewModel.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
-                pageViewModel.loadFullArticle(readerPost.link)
-              },
+              loadFullArticleClick = { pageViewModel.toggleFullArticle() },
               openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
               onFontScaleFactorChange = { fontScaleFactor ->
@@ -359,11 +358,8 @@ internal fun ReaderScreen(
             val readerPost = posts[page]
 
             if (readerPost != null) {
-              val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
-
-              LaunchedEffect(readerPost.id) {
-                viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
-              }
+              val pageViewModel = pageViewModelFactory.invoke(readerPost)
+              val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
               ReaderPage(
                 pageViewModel = pageViewModel,
@@ -371,7 +367,7 @@ internal fun ReaderScreen(
                 page = page,
                 pagerState = pagerState,
                 highlightsBuilder = highlightsBuilder,
-                loadFullArticle = state.canLoadFullPost(readerPost.id),
+                loadFullArticle = showFullArticle,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(

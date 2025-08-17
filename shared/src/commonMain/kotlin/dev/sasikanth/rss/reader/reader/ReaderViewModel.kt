@@ -86,8 +86,6 @@ class ReaderViewModel(
       is ReaderEvent.TogglePostBookmark ->
         togglePostBookmark(event.postId, event.currentBookmarkStatus)
       is ReaderEvent.PostPageChanged -> postPageChange(event.postIndex, event.post)
-      is ReaderEvent.LoadFullArticleClicked -> loadFullArticleClicked(event.postId)
-      is ReaderEvent.PostLoaded -> postLoaded(event.post)
       is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
       is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
       is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
@@ -124,39 +122,9 @@ class ReaderViewModel(
     }
   }
 
-  private fun postLoaded(post: PostWithMetadata) {
-    coroutineScope.launch {
-      _state.update {
-        val newLoadFullArticleMap =
-          if (it.loadFullArticleMap.containsKey(post.id)) {
-            it.loadFullArticleMap
-          } else {
-            it.loadFullArticleMap + Pair(post.id, post.alwaysFetchFullArticle)
-          }
-
-        it.copy(loadFullArticleMap = newLoadFullArticleMap)
-      }
-    }
-  }
-
   private fun postPageChange(postIndex: Int, post: PostWithMetadata) {
     openedPostItems += post.id
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
-  }
-
-  private fun loadFullArticleClicked(postId: String) {
-    coroutineScope.launch {
-      _state.update {
-        val newLoadFullArticleMap =
-          if (it.loadFullArticleMap[postId] == true) {
-            it.loadFullArticleMap - postId
-          } else {
-            it.loadFullArticleMap + Pair(postId, true)
-          }
-
-        it.copy(loadFullArticleMap = newLoadFullArticleMap)
-      }
-    }
   }
 
   private fun markPostsAsRead(): Job {
