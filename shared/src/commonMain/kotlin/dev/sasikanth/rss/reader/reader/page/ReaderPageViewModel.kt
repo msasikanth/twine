@@ -69,6 +69,9 @@ class ReaderPageViewModel(
   private val _parsingProgress = MutableStateFlow(ReaderProcessingProgress.Loading)
   val parsingProgress: StateFlow<ReaderProcessingProgress> = _parsingProgress
 
+  private val _showFullArticle = MutableStateFlow(readerPost.alwaysFetchFullArticle)
+  val showFullArticle: StateFlow<Boolean> = _showFullArticle
+
   init {
     loadPostContent()
   }
@@ -87,6 +90,13 @@ class ReaderPageViewModel(
       _parsingProgress.value = ReaderProcessingProgress.Loading
       val article = fullArticleFetcher.fetch(readerPost.link).getOrNull() ?: return@launch
       postContentRepository.updateFullArticleContent(readerPost.id, article)
+    }
+  }
+
+  fun toggleFullArticle() {
+    _showFullArticle.value = !(_showFullArticle.value)
+    if (_showFullArticle.value) {
+      loadFullArticle()
     }
   }
 

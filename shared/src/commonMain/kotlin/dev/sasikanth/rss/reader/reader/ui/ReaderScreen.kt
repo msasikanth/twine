@@ -286,10 +286,11 @@ internal fun ReaderScreen(
             }
           if (readerPost != null) {
             val pageViewModel = pageViewModelFactory.invoke(readerPost)
+            val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
             ReaderActionsPanel(
               darkTheme = darkTheme,
-              loadFullArticle = state.canLoadFullPost(readerPost.id),
+              loadFullArticle = showFullArticle,
               showReaderCustomisations = state.showReaderCustomisations,
               selectedFont = state.selectedReaderFont,
               fontScaleFactor = state.readerFontScaleFactor,
@@ -297,10 +298,7 @@ internal fun ReaderScreen(
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
-              loadFullArticleClick = {
-                viewModel.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
-                pageViewModel.loadFullArticle(readerPost.link)
-              },
+              loadFullArticleClick = { pageViewModel.toggleFullArticle() },
               openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
               onFontScaleFactorChange = { fontScaleFactor ->
@@ -361,6 +359,7 @@ internal fun ReaderScreen(
 
             if (readerPost != null) {
               val pageViewModel = pageViewModelFactory.invoke(readerPost)
+              val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
               LaunchedEffect(readerPost.id) {
                 viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
@@ -372,7 +371,7 @@ internal fun ReaderScreen(
                 page = page,
                 pagerState = pagerState,
                 highlightsBuilder = highlightsBuilder,
-                loadFullArticle = state.canLoadFullPost(readerPost.id),
+                loadFullArticle = showFullArticle,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
