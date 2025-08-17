@@ -75,7 +75,7 @@ class ReaderPageViewModel(
 
   fun onParsingComplete(readerContent: ReaderContent) {
     viewModelScope.launch {
-      _contentState.value = readerContent.content.orEmpty()
+      _contentState.update { it -> readerContent.content ?: it }
       _excerptState.update { it -> it.ifBlank { readerContent.excerpt.orEmpty() } }
     }
   }
