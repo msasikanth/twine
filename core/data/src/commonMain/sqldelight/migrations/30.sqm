@@ -1,0 +1,15 @@
+import kotlin.time.Instant;
+
+CREATE TABLE postContent_new (
+  id TEXT NOT NULL PRIMARY KEY,
+  rawContent TEXT,
+  htmlContent TEXT,
+  rawContentLen INTEGER,
+  createdAt INTEGER AS Instant NOT NULL
+);
+
+INSERT OR IGNORE INTO postContent_new (id, rawContent, rawContentLen, htmlContent, createdAt)
+SELECT id, rawContent, COALESCE(length(rawContent), 0), htmlContent, createdAt FROM postContent;
+
+DROP TABLE postContent;
+ALTER TABLE postContent_new RENAME TO postContent;
