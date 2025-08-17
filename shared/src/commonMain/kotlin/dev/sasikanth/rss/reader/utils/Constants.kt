@@ -18,9 +18,6 @@ package dev.sasikanth.rss.reader.utils
 import dev.sasikanth.rss.reader.data.utils.Constants
 
 internal object Constants {
-  const val BACKUP_FILE_NAME = "twine_backup"
-  const val BACKUP_FILE_EXTENSION = "xml"
-
   const val EPSILON = 1e-6f
   const val REPORT_ISSUE_LINK = "https://github.com/msasikanth/twine/issues"
 

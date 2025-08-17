@@ -18,11 +18,11 @@ package dev.sasikanth.rss.reader.settings
 import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
-import dev.sasikanth.rss.reader.opml.OpmlResult
 
 @Immutable
 data class SettingsState(
