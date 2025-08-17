@@ -14,11 +14,13 @@ package dev.sasikanth.rss.reader.billing
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@AppScope
 class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
 
   companion object {
