@@ -116,7 +116,7 @@ class RssRepository(
                 )
 
                 if (postPayload.rawContent != null) {
-                  postContentQueries.upsert(
+                  postContentQueries.insert(
                     id = postId,
                     rawContent = postPayload.rawContent,
                     htmlContent = null,

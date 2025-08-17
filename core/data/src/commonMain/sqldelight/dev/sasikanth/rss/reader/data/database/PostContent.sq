@@ -7,8 +7,8 @@ CREATE TABLE postContent (
   createdAt INTEGER AS Instant NOT NULL
 );
 
-upsert:
-INSERT OR REPLACE INTO postContent (id, rawContent, htmlContent, createdAt)
+insert:
+INSERT OR IGNORE INTO postContent (id, rawContent, htmlContent, createdAt)
 VALUES (:id, :rawContent, :htmlContent, :createdAt);
 
 getByPostId:
