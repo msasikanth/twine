@@ -37,7 +37,7 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
     try {
       val customerInfo =
         withContext(dispatchersProvider.io) {
-          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.NOT_STALE_CACHED_OR_CURRENT)
+          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.default())
         }
 
       val entitlementInfo = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]
