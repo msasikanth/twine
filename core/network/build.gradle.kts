@@ -31,9 +31,7 @@ kotlin {
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
-    all {
-      languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
-    }
+    all { languageSettings.optIn("kotlinx.coroutines.ExperimentalCoroutinesApi") }
 
     commonMain.dependencies {
       implementation(projects.core.model)
