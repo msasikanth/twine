@@ -78,6 +78,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
+import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
@@ -109,7 +110,7 @@ import kotlinx.coroutines.launch
 internal fun ReaderScreen(
   darkTheme: Boolean,
   viewModel: ReaderViewModel,
-  pageViewModelFactory: @Composable (id: String) -> ReaderPageViewModel,
+  pageViewModelFactory: @Composable (PostWithMetadata) -> ReaderPageViewModel,
   onPostChanged: (Int) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
@@ -284,7 +285,7 @@ internal fun ReaderScreen(
               null
             }
           if (readerPost != null) {
-            val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
+            val pageViewModel = pageViewModelFactory.invoke(readerPost)
 
             ReaderActionsPanel(
               darkTheme = darkTheme,
@@ -359,7 +360,7 @@ internal fun ReaderScreen(
             val readerPost = posts[page]
 
             if (readerPost != null) {
-              val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
+              val pageViewModel = pageViewModelFactory.invoke(readerPost)
 
               LaunchedEffect(readerPost.id) {
                 viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
