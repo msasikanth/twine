@@ -12,8 +12,10 @@
 package dev.sasikanth.rss.reader.reader.webview
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.UIKitInteropProperties
 import androidx.compose.ui.viewinterop.UIKitView
@@ -47,8 +49,8 @@ internal actual fun ReaderWebView(
   modifier: Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
-  val navigationDelegate =
-    remember(link, content.hashCode()) {
+  val navigationDelegate by
+    rememberUpdatedState(
       @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
       object : NSObject(), WKNavigationDelegateProtocol {
         override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
@@ -65,7 +67,7 @@ internal actual fun ReaderWebView(
           webView.evaluateJavaScript(script, null)
         }
       }
-    }
+    )
 
   val messageHandler =
     remember(link) {

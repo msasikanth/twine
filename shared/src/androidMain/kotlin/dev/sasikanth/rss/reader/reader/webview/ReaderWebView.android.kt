@@ -17,8 +17,9 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import dev.sasikanth.rss.reader.utils.asJSString
@@ -37,8 +38,8 @@ internal actual fun ReaderWebView(
 ) {
   val coroutineScope = rememberCoroutineScope()
 
-  val webViewClient =
-    remember(link, content.hashCode()) {
+  val webViewClient by
+    rememberUpdatedState(
       object : WebViewClient() {
         override fun onPageFinished(view: WebView, url: String) {
           val script =
@@ -54,7 +55,7 @@ internal actual fun ReaderWebView(
           view.evaluateJavascript(script, null)
         }
       }
-    }
+    )
 
   AndroidView(
     factory = { context ->
