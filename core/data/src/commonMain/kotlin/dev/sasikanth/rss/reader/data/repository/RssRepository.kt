@@ -197,7 +197,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
-  ): Long {
+  ): Long? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
         .allPostsCount(
@@ -208,7 +208,6 @@ class RssRepository(
           lastSyncedAt = lastSyncedAt,
         )
         .executeAsOneOrNull()
-        ?: 0L
     }
   }
 
