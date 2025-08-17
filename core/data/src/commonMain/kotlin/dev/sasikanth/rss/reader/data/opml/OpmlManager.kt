@@ -1,29 +1,25 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.opml
+package dev.sasikanth.rss.reader.data.opml
 
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_EXTENSION
+import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_NAME
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.Constants.BACKUP_FILE_NAME
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
 import io.github.vinceglb.filekit.core.PickerType
@@ -154,7 +150,7 @@ class OpmlManager(
         FileKit.saveFile(
           bytes = opmlString.encodeToByteArray(),
           baseName = BACKUP_FILE_NAME,
-          extension = "opml",
+          extension = BACKUP_FILE_EXTENSION,
         )
       }
 

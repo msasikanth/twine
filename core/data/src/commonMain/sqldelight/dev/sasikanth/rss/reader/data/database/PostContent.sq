@@ -1,0 +1,20 @@
+import kotlin.time.Instant;
+
+CREATE TABLE postContent (
+  id TEXT NOT NULL PRIMARY KEY,
+  rawContent TEXT,
+  htmlContent TEXT,
+  createdAt INTEGER AS Instant NOT NULL
+);
+
+upsert:
+INSERT OR REPLACE INTO postContent (id, rawContent, htmlContent, createdAt)
+VALUES (:id, :rawContent, :htmlContent, :createdAt);
+
+getByPostId:
+SELECT * FROM postContent
+WHERE id = :id;
+
+updateHtmlContent:
+UPDATE postContent SET htmlContent = :htmlContent
+WHERE id = :id;

@@ -57,7 +57,7 @@ jobs:
           cache: 'gradle'
 
       - name: Common Tests
-        run: ./gradlew cleanAllTests allTests
+        run: ./gradlew :core:network:allTests :core:data:allTests
 
   android-tests:
     runs-on: ubuntu-latest

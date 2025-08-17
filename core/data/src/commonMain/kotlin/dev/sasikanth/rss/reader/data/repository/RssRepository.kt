@@ -36,6 +36,7 @@ import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
 import dev.sasikanth.rss.reader.data.database.FeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedSearchFTSQueries
+import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.SourceQueries
@@ -59,6 +60,7 @@ class RssRepository(
   private val transactionRunner: TransactionRunner,
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
+  private val postContentQueries: PostContentQueries,
   private val postSearchFTSQueries: PostSearchFTSQueries,
   private val bookmarkQueries: BookmarkQueries,
   private val feedSearchFTSQueries: FeedSearchFTSQueries,
@@ -96,22 +98,31 @@ class RssRepository(
                 feedLastCleanUpAt?.toEpochMilliseconds()
                   ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
-              feedPayload.posts.forEach { post ->
-                if (post.date < feedLastCleanUpAtEpochMilli) return@forEach
+              feedPayload.posts.forEach { postPayload ->
+                if (postPayload.date < feedLastCleanUpAtEpochMilli) return@forEach
 
+                val postId = nameBasedUuidOf(postPayload.link).toString()
                 postQueries.upsert(
-                  id = nameBasedUuidOf(post.link).toString(),
+                  id = postId,
                   sourceId = feedId,
-                  title = post.title,
-                  description = post.description,
-                  imageUrl = post.imageUrl,
-                  date = Instant.fromEpochMilliseconds(post.date),
+                  title = postPayload.title,
+                  description = postPayload.description,
+                  imageUrl = postPayload.imageUrl,
+                  date = Instant.fromEpochMilliseconds(postPayload.date),
                   syncedAt = Clock.System.now(),
-                  link = post.link,
-                  commnetsLink = post.commentsLink,
-                  rawContent = post.rawContent,
-                  isDateParsedCorrectly = post.isDateParsedCorrectly,
+                  link = postPayload.link,
+                  commnetsLink = postPayload.commentsLink,
+                  isDateParsedCorrectly = postPayload.isDateParsedCorrectly,
                 )
+
+                if (postPayload.rawContent != null) {
+                  postContentQueries.upsert(
+                    id = postId,
+                    rawContent = postPayload.rawContent,
+                    htmlContent = null,
+                    createdAt = Clock.System.now(),
+                  )
+                }
               }
             }
           }
@@ -232,7 +243,6 @@ class RssRepository(
             sourceId,
             title,
             description,
-            rawContent,
             imageUrl,
             date,
             link,
@@ -249,7 +259,6 @@ class RssRepository(
               sourceId = sourceId,
               title = title,
               description = description,
-              rawContent = rawContent,
               imageUrl = imageUrl,
               date = date,
               link = link,
@@ -536,7 +545,6 @@ class RssRepository(
               sourceId = sourceId,
               title = title,
               description = description,
-              rawContent = description,
               imageUrl = imageUrl,
               date = date,
               link = link,

@@ -1,4 +1,4 @@
-package dev.sasikanth.rss.reader.opml
+package dev.sasikanth.rss.reader.data.opml
 
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
