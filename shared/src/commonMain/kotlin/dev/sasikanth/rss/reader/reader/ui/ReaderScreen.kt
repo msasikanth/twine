@@ -361,10 +361,6 @@ internal fun ReaderScreen(
               val pageViewModel = pageViewModelFactory.invoke(readerPost)
               val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
-              LaunchedEffect(readerPost.id) {
-                viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
-              }
-
               ReaderPage(
                 pageViewModel = pageViewModel,
                 readerPost = readerPost,

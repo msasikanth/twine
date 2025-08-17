@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.emptyFlow
 data class ReaderState(
   val activePostIndex: Int,
   val activePostId: String,
-  val loadFullArticleMap: Map<String, Boolean>,
   val posts: Flow<PagingData<PostWithMetadata>>,
   val showReaderCustomisations: Boolean,
   val selectedReaderFont: ReaderFont,
@@ -36,17 +35,12 @@ data class ReaderState(
   val openPaywall: Boolean,
 ) {
 
-  fun canLoadFullPost(postId: String): Boolean {
-    return loadFullArticleMap[postId] ?: false
-  }
-
   companion object {
 
     fun default(initialPostIndex: Int, initialPostId: String): ReaderState {
       return ReaderState(
         activePostIndex = initialPostIndex,
         activePostId = initialPostId,
-        loadFullArticleMap = emptyMap(),
         posts = emptyFlow(),
         showReaderCustomisations = false,
         selectedReaderFont = ReaderFont.Golos,
