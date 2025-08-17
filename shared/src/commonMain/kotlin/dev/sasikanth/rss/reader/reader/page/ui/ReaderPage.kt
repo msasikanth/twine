@@ -119,7 +119,7 @@ private val json = Json {
 
 @Composable
 internal fun ReaderPage(
-  pageViewModel: @Composable (key: String) -> ReaderPageViewModel,
+  pageViewModel: ReaderPageViewModel,
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
@@ -129,10 +129,10 @@ internal fun ReaderPage(
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
-  val pageViewModel = pageViewModel(readerPost.id)
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
+  val readerPostContent by pageViewModel.postContent.collectAsStateWithLifecycle()
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -161,20 +161,29 @@ internal fun ReaderPage(
       handleColor = AppTheme.colorScheme.primary,
       backgroundColor = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
     )
+
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     SelectionContainer {
       Box(modifier = modifier) {
         // Dummy view to parse the reader content using JS
+        val postContent =
+          remember(loadFullArticle, readerPostContent) {
+            if (loadFullArticle) {
+              readerPostContent?.fullArticleHtml
+            } else {
+              readerPostContent?.postContent
+            }
+          }
+
         ReaderWebView(
-          modifier = Modifier.requiredSize(0.dp),
           link = readerPost.link,
-          content = readerPost.rawContent ?: readerPost.description,
+          content = postContent ?: readerPost.description,
           postImage = readerPost.imageUrl,
-          fetchFullArticle = loadFullArticle,
           contentLoaded = {
             val readerContent = json.decodeFromString<ReaderContent>(it)
             pageViewModel.onParsingComplete(readerContent)
           },
+          modifier = Modifier.requiredSize(0.dp),
         )
 
         CompositionLocalProvider(
@@ -275,7 +284,10 @@ internal fun ReaderPage(
 
 @Composable
 private fun ProgressIndicator() {
-  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+  Box(
+    modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+    contentAlignment = Alignment.Center,
+  ) {
     LinearProgressIndicator(
       trackColor = AppTheme.colorScheme.tintedSurface,
       color = AppTheme.colorScheme.tintedForeground,

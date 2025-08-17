@@ -109,7 +109,7 @@ import kotlinx.coroutines.launch
 internal fun ReaderScreen(
   darkTheme: Boolean,
   viewModel: ReaderViewModel,
-  pageViewModel: @Composable (key: String) -> ReaderPageViewModel,
+  pageViewModelFactory: @Composable (id: String) -> ReaderPageViewModel,
   onPostChanged: (Int) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
@@ -284,6 +284,8 @@ internal fun ReaderScreen(
               null
             }
           if (readerPost != null) {
+            val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
+
             ReaderActionsPanel(
               darkTheme = darkTheme,
               loadFullArticle = state.canLoadFullPost(readerPost.id),
@@ -296,6 +298,7 @@ internal fun ReaderScreen(
               },
               loadFullArticleClick = {
                 viewModel.dispatch(ReaderEvent.LoadFullArticleClicked(readerPost.id))
+                pageViewModel.loadFullArticle(readerPost.link)
               },
               openReaderViewSettings = { viewModel.dispatch(ReaderEvent.ShowReaderCustomisations) },
               onFontChange = { font -> viewModel.dispatch(ReaderEvent.UpdateReaderFont(font)) },
@@ -356,6 +359,8 @@ internal fun ReaderScreen(
             val readerPost = posts[page]
 
             if (readerPost != null) {
+              val pageViewModel = pageViewModelFactory.invoke(readerPost.id)
+
               LaunchedEffect(readerPost.id) {
                 viewModel.dispatch(ReaderEvent.PostLoaded(readerPost))
               }

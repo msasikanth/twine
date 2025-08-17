@@ -20,7 +20,6 @@ internal expect fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,
-  fetchFullArticle: Boolean,
   contentLoaded: (String) -> Unit,
   modifier: Modifier = Modifier.Companion,
 )

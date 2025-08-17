@@ -32,23 +32,21 @@ internal actual fun ReaderWebView(
   link: String?,
   content: String?,
   postImage: String?,
-  fetchFullArticle: Boolean,
   contentLoaded: (String) -> Unit,
   modifier: Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
 
   val webViewClient =
-    remember(link, fetchFullArticle) {
+    remember(link, content.hashCode()) {
       object : WebViewClient() {
         override fun onPageFinished(view: WebView, url: String) {
           val script =
             """
           parseReaderContent(
               ${link.asJSString},
-              ${content.asJSString},
               ${postImage.orEmpty().asJSString},
-              $fetchFullArticle
+              ${content.asJSString},
           ).then(result => window.ReaderJSInterface.onContentParsed(result))
         """
               .trimIndent()

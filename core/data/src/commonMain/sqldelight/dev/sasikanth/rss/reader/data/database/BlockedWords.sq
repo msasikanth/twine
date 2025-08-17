@@ -12,8 +12,7 @@ BEGIN
   SET isHidden = 1
   WHERE
     (title LIKE '%' || new.content || '%' OR
-    description LIKE '%' || new.content || '%' OR
-    rawContent LIKE '%' || new.content || '%') AND
+    description LIKE '%' || new.content || '%') AND
     isHidden = 0;
 END;
 
@@ -26,8 +25,7 @@ BEGIN
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
-           post.description LIKE '%' || blockedWord.content || '%' OR
-           post.rawContent LIKE '%' || blockedWord.content || '%')
+           post.description LIKE '%' || blockedWord.content || '%')
   )
   AND isHidden = 1;
 END;
