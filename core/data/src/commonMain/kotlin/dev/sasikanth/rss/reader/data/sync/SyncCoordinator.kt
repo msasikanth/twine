@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.data.sync
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -84,8 +83,6 @@ class SyncCoordinator(
 
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
-        BugsnagKotlin.logMessage("SyncCoordinator#refreshFeeds")
-        BugsnagKotlin.sendFatalException(e)
         updateSyncState(SyncState.Error(e))
       }
     }
@@ -110,8 +107,6 @@ class SyncCoordinator(
 
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
-        BugsnagKotlin.logMessage("SyncCoordinator#refreshFeeds")
-        BugsnagKotlin.sendFatalException(e)
         updateSyncState(SyncState.Error(e))
       }
     }
@@ -133,8 +128,6 @@ class SyncCoordinator(
 
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
-        BugsnagKotlin.logMessage("SyncCoordinator#refreshFeed")
-        BugsnagKotlin.sendFatalException(e)
         updateSyncState(SyncState.Error(e))
       }
     }
