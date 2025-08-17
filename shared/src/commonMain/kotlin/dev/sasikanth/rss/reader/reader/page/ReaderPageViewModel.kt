@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
@@ -75,7 +76,7 @@ class ReaderPageViewModel(
   fun onParsingComplete(readerContent: ReaderContent) {
     viewModelScope.launch {
       _contentState.value = readerContent.content.orEmpty()
-      _excerptState.value = readerContent.excerpt.orEmpty()
+      _excerptState.update { it -> it.ifBlank { readerContent.excerpt.orEmpty() } }
     }
   }
 
