@@ -169,7 +169,7 @@ internal fun ReaderPage(
         val postContent =
           remember(loadFullArticle, readerPostContent) {
             if (loadFullArticle) {
-              readerPostContent?.fullArticleHtml ?: readerPostContent?.postContent
+              readerPostContent?.fullArticleHtml
             } else {
               readerPostContent?.postContent
             }
@@ -177,7 +177,7 @@ internal fun ReaderPage(
 
         ReaderWebView(
           link = readerPost.link,
-          content = postContent ?: readerPost.description,
+          content = postContent,
           postImage = readerPost.imageUrl,
           contentLoaded = {
             val readerContent = json.decodeFromString<ReaderContent>(it)
