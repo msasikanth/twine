@@ -54,6 +54,8 @@ internal actual fun ReaderWebView(
       @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
       object : NSObject(), WKNavigationDelegateProtocol {
         override fun webView(webView: WKWebView, didFinishNavigation: WKNavigation?) {
+          if (content.isNullOrBlank()) return
+
           val script =
             """
           parseReaderContent(

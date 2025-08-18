@@ -42,6 +42,8 @@ internal actual fun ReaderWebView(
     rememberUpdatedState(
       object : WebViewClient() {
         override fun onPageFinished(view: WebView, url: String) {
+          if (content.isNullOrBlank()) return
+
           val script =
             """
           parseReaderContent(

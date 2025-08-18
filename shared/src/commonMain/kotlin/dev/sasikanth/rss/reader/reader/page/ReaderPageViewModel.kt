@@ -80,7 +80,7 @@ class ReaderPageViewModel(
   fun onParsingComplete(readerContent: ReaderContent) {
     viewModelScope.launch {
       _contentState.update { it -> readerContent.content ?: it }
-      _excerptState.update { it -> it.ifBlank { readerContent.excerpt.orEmpty() } }
+      _excerptState.update { it -> readerContent.excerpt ?: it }
     }
   }
 
@@ -89,7 +89,12 @@ class ReaderPageViewModel(
 
     viewModelScope.launch {
       _parsingProgress.value = ReaderProcessingProgress.Loading
-      val article = fullArticleFetcher.fetch(readerPost.link).getOrNull() ?: return@launch
+
+      val article = fullArticleFetcher.fetch(readerPost.link).getOrNull()
+      if (article == null) {
+        _parsingProgress.value = ReaderProcessingProgress.Idle
+        return@launch
+      }
       postContentRepository.updateFullArticleContent(readerPost.id, article)
     }
   }
@@ -104,7 +109,12 @@ class ReaderPageViewModel(
   private fun loadPostContent() {
     postContentRepository
       .postContent(readerPost.id)
-      .onEach { _postContent.value = it }
+      .onEach {
+        _postContent.value = it
+        if (it.postContent.isNullOrBlank()) {
+          _parsingProgress.value = ReaderProcessingProgress.Idle
+        }
+      }
       .launchIn(viewModelScope)
   }
 }
