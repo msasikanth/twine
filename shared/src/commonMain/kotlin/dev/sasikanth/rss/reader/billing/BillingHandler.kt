@@ -14,11 +14,13 @@ package dev.sasikanth.rss.reader.billing
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
+import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@AppScope
 class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
 
   companion object {
@@ -35,7 +37,7 @@ class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
     try {
       val customerInfo =
         withContext(dispatchersProvider.io) {
-          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.NOT_STALE_CACHED_OR_CURRENT)
+          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.default())
         }
 
       val entitlementInfo = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]

@@ -74,6 +74,7 @@ class ReaderPageViewModel(
 
   init {
     loadPostContent()
+    loadFullArticle()
   }
 
   fun onParsingComplete(readerContent: ReaderContent) {
@@ -105,9 +106,5 @@ class ReaderPageViewModel(
       .postContent(readerPost.id)
       .onEach { _postContent.value = it }
       .launchIn(viewModelScope)
-
-    if (_showFullArticle.value) {
-      loadFullArticle()
-    }
   }
 }
