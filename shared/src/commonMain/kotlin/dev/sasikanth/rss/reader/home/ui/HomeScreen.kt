@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -244,7 +245,8 @@ internal fun HomeScreen(
           } else {
             0.dp
           },
-        label = "Sheet Peek Height Animation"
+        label = "Sheet Peek Height Animation",
+        animationSpec = tween(delayMillis = 500),
       )
     val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
 
