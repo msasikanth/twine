@@ -68,6 +68,9 @@ jobs:
           /usr/libexec/Plistbuddy -c "Set CFBundleVersion ${{ steps.tramline.outputs.version_code }}" "iosApp/iosApp/Info.plist"
           /usr/libexec/Plistbuddy -c "Set CFBundleShortVersionString ${{ steps.tramline.outputs.version_name }}" "iosApp/iosApp/Info.plist"
 
+      - name: Select latest Xcode
+        run: "sudo xcode-select -s /Applications/Xcode_16.1.app"
+
       - name: Build Archive
         run: |          
           xcodebuild -project ./iosApp/iosApp.xcodeproj \
