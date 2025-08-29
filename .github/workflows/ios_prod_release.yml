@@ -70,6 +70,9 @@ jobs:
 
       - name: Select latest Xcode
         run: "sudo xcode-select -s /Applications/Xcode_16.1.app"
+        
+      - name: Download iOS 18.1
+        run: "xcodebuild -downloadPlatform iOS -buildVersion 18.1"
 
       - name: Build Archive
         run: |          
