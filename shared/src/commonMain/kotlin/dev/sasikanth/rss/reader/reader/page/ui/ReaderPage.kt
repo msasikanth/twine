@@ -233,7 +233,7 @@ internal fun ReaderPage(
               )
           ) {
             item(key = "reader-header") {
-              PostInfo(
+              PostHeader(
                 readerPost = readerPost,
                 page = page,
                 pagerState = pagerState,
@@ -296,7 +296,7 @@ private fun ProgressIndicator() {
 }
 
 @Composable
-private fun PostInfo(
+private fun PostHeader(
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
@@ -388,7 +388,7 @@ private fun PostInfo(
           )
         }
 
-        PostOptionsButtonRow(
+        PostActions(
           postBookmarked = readerPost.bookmarked,
           commentsLink = readerPost.commentsLink,
           onCommentsClick = onCommentsClick,
@@ -455,7 +455,7 @@ private fun PostSourcePill(
 }
 
 @Composable
-private fun PostOptionsButtonRow(
+private fun PostActions(
   postBookmarked: Boolean,
   commentsLink: String?,
   onCommentsClick: () -> Unit,
@@ -466,7 +466,7 @@ private fun PostOptionsButtonRow(
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
-      PostOptionIconButton(
+      PostActionButton(
         modifier =
           Modifier.semantics {
             role = Role.Button
@@ -479,7 +479,7 @@ private fun PostOptionsButtonRow(
     }
 
     val sharedLabel = stringResource(Res.string.share)
-    PostOptionIconButton(
+    PostActionButton(
       modifier =
         Modifier.semantics {
           role = Role.Button
@@ -496,7 +496,7 @@ private fun PostOptionsButtonRow(
       } else {
         stringResource(Res.string.bookmark)
       }
-    PostOptionIconButton(
+    PostActionButton(
       modifier =
         Modifier.semantics {
           role = Role.Button
@@ -520,7 +520,7 @@ private fun PostOptionsButtonRow(
 }
 
 @Composable
-private fun PostOptionIconButton(
+private fun PostActionButton(
   icon: ImageVector,
   modifier: Modifier = Modifier,
   iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
