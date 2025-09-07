@@ -12,7 +12,7 @@
 package dev.sasikanth.rss.reader.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOne
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.sasikanth.rss.reader.core.model.local.PostContent
 import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -26,13 +26,13 @@ class PostContentRepository(
   private val dispatcherProvider: DispatchersProvider,
 ) {
 
-  fun postContent(postId: String): Flow<PostContent> {
+  fun postContent(postId: String): Flow<PostContent?> {
     return postContentQueries
       .getByPostId(postId) { id, rawContent, htmlContent, _, createdAt ->
         PostContent(id, rawContent, htmlContent)
       }
       .asFlow()
-      .mapToOne(dispatcherProvider.databaseRead)
+      .mapToOneOrNull(dispatcherProvider.databaseRead)
   }
 
   suspend fun updateFullArticleContent(postId: String, htmlContent: String?) {
