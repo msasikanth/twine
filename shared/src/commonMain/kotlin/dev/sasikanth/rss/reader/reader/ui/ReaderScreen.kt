@@ -136,6 +136,7 @@ internal fun ReaderScreen(
     }
   }
   val pagerState = rememberPagerState(initialPage = state.activePostIndex) { posts.itemCount }
+  val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
 
   LaunchedEffect(pagerState, posts.loadState) {
     if (posts.itemCount == 0) return@LaunchedEffect
@@ -191,6 +192,12 @@ internal fun ReaderScreen(
     if (state.openPaywall) {
       openPaywall()
       viewModel.dispatch(ReaderEvent.MarkOpenPaywallDone)
+    }
+  }
+
+  LaunchedEffect(exitScreen) {
+    if (exitScreen) {
+      onBack()
     }
   }
 
@@ -368,6 +375,9 @@ internal fun ReaderScreen(
                     )
                   )
                 },
+                onMarkAsUnread = {
+                  viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = readerPost.id))
+                }
               )
             }
           }

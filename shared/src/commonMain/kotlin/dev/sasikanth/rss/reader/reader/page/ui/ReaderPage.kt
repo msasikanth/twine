@@ -34,6 +34,8 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -112,6 +114,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
+import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -130,6 +133,7 @@ internal fun ReaderPage(
   highlightsBuilder: Highlights.Builder,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -246,7 +250,8 @@ internal fun ReaderPage(
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
                 onShareClick = { sharedHandler.share(readerPost.link) },
-                onBookmarkClick = onBookmarkClick
+                onBookmarkClick = onBookmarkClick,
+                onMarkAsUnread = onMarkAsUnread,
               )
             }
 
@@ -308,6 +313,7 @@ private fun PostHeader(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(
@@ -398,6 +404,7 @@ private fun PostHeader(
           onCommentsClick = onCommentsClick,
           onShareClick = onShareClick,
           onBookmarkClick = onBookmarkClick,
+          onMarkAsUnread = onMarkAsUnread,
         )
       }
     }
@@ -465,9 +472,20 @@ private fun PostActions(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
+    val markAsUnreadLabel = stringResource(Res.string.markAsUnRead)
+    val markAsUnreadIcon = Icons.Filled.VisibilityOff
+
+    PostActionButton(
+      label = markAsUnreadLabel,
+      icon = markAsUnreadIcon,
+      iconTint = AppTheme.colorScheme.onSurfaceVariant,
+      onClick = onMarkAsUnread
+    )
+
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       PostActionButton(
