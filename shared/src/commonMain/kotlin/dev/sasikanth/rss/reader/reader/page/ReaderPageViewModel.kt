@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -109,6 +110,7 @@ class ReaderPageViewModel(
   private fun loadPostContent() {
     postContentRepository
       .postContent(readerPost.id)
+      .filterNotNull()
       .onEach {
         _postContent.value = it
         if (it.postContent.isNullOrBlank()) {

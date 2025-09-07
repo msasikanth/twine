@@ -37,4 +37,6 @@ sealed interface ReaderEvent {
   data class UpdateFontLineHeightFactor(val fontLineHeightFactor: Float) : ReaderEvent
 
   data object MarkOpenPaywallDone : ReaderEvent
+
+  data class OnMarkAsUnread(val postId: String) : ReaderEvent
 }

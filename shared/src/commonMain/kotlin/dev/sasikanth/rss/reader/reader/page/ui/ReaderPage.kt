@@ -34,11 +34,17 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -108,6 +114,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
+import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -126,6 +133,7 @@ internal fun ReaderPage(
   highlightsBuilder: Highlights.Builder,
   loadFullArticle: Boolean,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
   contentPaddingValues: PaddingValues = PaddingValues(),
 ) {
@@ -242,7 +250,8 @@ internal fun ReaderPage(
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
                 onShareClick = { sharedHandler.share(readerPost.link) },
-                onBookmarkClick = onBookmarkClick
+                onBookmarkClick = onBookmarkClick,
+                onMarkAsUnread = onMarkAsUnread,
               )
             }
 
@@ -304,6 +313,7 @@ private fun PostHeader(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(
@@ -394,6 +404,7 @@ private fun PostHeader(
           onCommentsClick = onCommentsClick,
           onShareClick = onShareClick,
           onBookmarkClick = onBookmarkClick,
+          onMarkAsUnread = onMarkAsUnread,
         )
       }
     }
@@ -461,17 +472,24 @@ private fun PostActions(
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
+  onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
+    val markAsUnreadLabel = stringResource(Res.string.markAsUnRead)
+    val markAsUnreadIcon = Icons.Filled.VisibilityOff
+
+    PostActionButton(
+      label = markAsUnreadLabel,
+      icon = markAsUnreadIcon,
+      iconTint = AppTheme.colorScheme.onSurfaceVariant,
+      onClick = onMarkAsUnread
+    )
+
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
       PostActionButton(
-        modifier =
-          Modifier.semantics {
-            role = Role.Button
-            contentDescription = commentsLabel
-          },
+        label = commentsLabel,
         icon = TwineIcons.Comments,
         iconTint = AppTheme.colorScheme.onSurfaceVariant,
         onClick = onCommentsClick
@@ -480,11 +498,7 @@ private fun PostActions(
 
     val sharedLabel = stringResource(Res.string.share)
     PostActionButton(
-      modifier =
-        Modifier.semantics {
-          role = Role.Button
-          contentDescription = sharedLabel
-        },
+      label = sharedLabel,
       icon = TwineIcons.Share,
       iconTint = AppTheme.colorScheme.onSurfaceVariant,
       onClick = onShareClick
@@ -497,11 +511,7 @@ private fun PostActions(
         stringResource(Res.string.bookmark)
       }
     PostActionButton(
-      modifier =
-        Modifier.semantics {
-          role = Role.Button
-          contentDescription = bookmarkLabel
-        },
+      label = bookmarkLabel,
       icon =
         if (postBookmarked) {
           TwineIcons.Bookmarked
@@ -522,24 +532,36 @@ private fun PostActions(
 @Composable
 private fun PostActionButton(
   icon: ImageVector,
+  label: String,
   modifier: Modifier = Modifier,
   iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
   onClick: () -> Unit,
 ) {
-  Box(
-    modifier =
-      Modifier.requiredSize(40.dp)
-        .clip(MaterialTheme.shapes.small)
-        .clickable(onClick = onClick)
-        .then(modifier),
-    contentAlignment = Alignment.Center
+  TooltipBox(
+    positionProvider =
+      TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
+    tooltip = { Text(text = label) },
+    state = rememberTooltipState()
   ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = null,
-      tint = iconTint,
-      modifier = Modifier.size(20.dp)
-    )
+    Box(
+      modifier =
+        Modifier.requiredSize(40.dp)
+          .clip(MaterialTheme.shapes.small)
+          .clickable(onClick = onClick)
+          .semantics {
+            role = Role.Button
+            contentDescription = label
+          }
+          .then(modifier),
+      contentAlignment = Alignment.Center
+    ) {
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = iconTint,
+        modifier = Modifier.size(20.dp)
+      )
+    }
   }
 }
 

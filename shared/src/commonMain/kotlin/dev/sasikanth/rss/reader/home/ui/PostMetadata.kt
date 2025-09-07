@@ -30,9 +30,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -293,9 +294,9 @@ internal fun PostOptionsButtonRow(
             leadingIcon = {
               val icon =
                 if (postRead) {
-                  Icons.Outlined.CheckCircle
+                  Icons.Outlined.VisibilityOff
                 } else {
-                  Icons.Filled.CheckCircle
+                  Icons.Outlined.Visibility
                 }
 
               Icon(

@@ -39,7 +39,9 @@ import kotlin.reflect.typeOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -77,6 +79,10 @@ class ReaderViewModel(
   val state: StateFlow<ReaderState>
     get() = _state
 
+  private val _exitScreen = MutableSharedFlow<Boolean>(replay = 0)
+  val exitScreen: SharedFlow<Boolean>
+    get() = _exitScreen
+
   init {
     init()
   }
@@ -95,6 +101,15 @@ class ReaderViewModel(
       ReaderEvent.MarkOpenPaywallDone -> {
         _state.update { it.copy(openPaywall = false) }
       }
+      is ReaderEvent.OnMarkAsUnread -> onMarkAsUnreadAndExit(postId = event.postId)
+    }
+  }
+
+  private fun onMarkAsUnreadAndExit(postId: String) {
+    coroutineScope.launch {
+      openedPostItems.remove(postId)
+      rssRepository.updatePostReadStatus(read = false, id = postId)
+      _exitScreen.emit(true)
     }
   }
 
