@@ -138,7 +138,9 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
           link = parser.nextText()
         }
-        name == TAG_ENCLOSURE && link.isNullOrBlank() -> {
+        name == TAG_ENCLOSURE &&
+          link.isNullOrBlank() &&
+          parser.getAttributeValue(parser.namespace, ATTR_TYPE) != ATTR_VALUE_IMAGE -> {
           link = parser.getAttributeValue(parser.namespace, ATTR_URL)
           parser.nextTag()
         }

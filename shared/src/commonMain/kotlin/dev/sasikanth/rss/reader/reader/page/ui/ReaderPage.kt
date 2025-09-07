@@ -540,7 +540,14 @@ private fun PostActionButton(
   TooltipBox(
     positionProvider =
       TooltipDefaults.rememberTooltipPositionProvider(positioning = TooltipAnchorPosition.Above),
-    tooltip = { Text(text = label) },
+    tooltip = {
+      Box(
+        modifier =
+          Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp)).padding(8.dp),
+      ) {
+        Text(text = label)
+      }
+    },
     state = rememberTooltipState()
   ) {
     Box(

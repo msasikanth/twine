@@ -41,8 +41,8 @@ const val rssXmlContent =
       <title>Post with enclosure image</title>
       <description>Fourth post description.</description>
       <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
-      <enclosure url="https://example.com/fourth-post" />
       <enclosure type="image/jpeg" url="https://example.com/enclosure-image" />
+      <enclosure url="https://example.com/fourth-post" />
     </item>
     <item>
       <title>Post with description and encoded content</title>
