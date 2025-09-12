@@ -112,7 +112,7 @@ class RssRepository(
                   syncedAt = Clock.System.now(),
                   link = postPayload.link,
                   commnetsLink = postPayload.commentsLink,
-                  isDateParsedCorrectly = postPayload.isDateParsedCorrectly,
+                  isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
                 )
 
                 if (postPayload.rawContent != null) {
