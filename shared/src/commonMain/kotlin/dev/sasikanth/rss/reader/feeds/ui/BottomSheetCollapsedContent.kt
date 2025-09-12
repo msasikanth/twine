@@ -29,7 +29,6 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -47,8 +46,6 @@ internal fun BottomSheetCollapsedContent(
   numberOfFeeds: Int,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
-  homeItemBackgroundColor: Color,
-  homeItemShadowColors: Array<Pair<Float, Color>>,
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier

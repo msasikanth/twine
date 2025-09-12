@@ -16,7 +16,6 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -113,7 +112,7 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -235,18 +234,15 @@ internal fun HomeScreen(
   )
 
   Scaffold(modifier) { scaffoldPadding ->
-    val bottomPadding = scaffoldPadding.calculateBottomPadding()
-
     val sheetPeekHeight by
       animateDpAsState(
         targetValue =
           if (postsListState.isScrollingTowardsUp()) {
-            BOTTOM_SHEET_PEEK_HEIGHT + bottomPadding
+            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding()
           } else {
             0.dp
           },
         label = "Sheet Peek Height Animation",
-        animationSpec = tween(delayMillis = 500),
       )
     val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
 
