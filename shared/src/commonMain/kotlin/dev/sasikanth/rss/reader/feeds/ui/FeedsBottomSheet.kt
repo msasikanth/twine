@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.layout
@@ -48,9 +47,8 @@ import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
-import kotlin.math.roundToInt
 
-private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
+private val BOTTOM_SHEET_CORNER_SIZE = 24.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -73,19 +71,14 @@ internal fun FeedsBottomSheet(
   }
 
   val collapsedContentBackgroundColor = AppTheme.colorScheme.bottomSheet
-  val collapsedContentBorderColor = AppTheme.colorScheme.bottomSheetBorder
   val (shadowColor1, shadowColor2) =
-    if (darkTheme) {
-      Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
-    } else {
-      Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+    remember {
+      if (darkTheme) {
+        Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
+      } else {
+        Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
+      }
     }
-  val homeItemShadowColors =
-    arrayOf(
-      0.85f to AppTheme.colorScheme.bottomSheet,
-      0.9f to AppTheme.colorScheme.bottomSheet.copy(alpha = 0.4f),
-      1f to Color.Transparent
-    )
   val isCollapsing by remember { derivedStateOf { bottomSheetProgress() < 1f } }
 
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
@@ -94,45 +87,7 @@ internal fun FeedsBottomSheet(
     Box(modifier = modifier.fillMaxSize()) {
       Column(
         modifier =
-          Modifier.layout { measurable, constraints ->
-              val collapsedSheetHeight = 100.dp
-              val targetSheetHeight = constraints.maxHeight.toDp()
-              val sheetHeight =
-                lerp(
-                    start = collapsedSheetHeight,
-                    stop = targetSheetHeight,
-                    fraction = bottomSheetProgress()
-                  )
-                  .toPx()
-              val sheetHorizontalPadding =
-                lerp(
-                  start = 32.dp,
-                  stop = 0.dp,
-                  fraction = bottomSheetProgress(),
-                )
-              val minTargetHeight = sheetHeight.roundToInt()
-
-              val paddedConstraints =
-                constraints
-                  .offset(
-                    horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
-                  )
-                  .copy(minHeight = minTargetHeight, maxHeight = minTargetHeight)
-
-              val placeable = measurable.measure(paddedConstraints)
-              val layoutWidth =
-                lerp(
-                  start = if (placeable.width > 0) placeable.width else constraints.maxWidth,
-                  stop = constraints.maxWidth,
-                  fraction = bottomSheetProgress(),
-                )
-              val layoutHeight = placeable.height
-
-              layout(layoutWidth, layoutHeight) {
-                placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
-              }
-            }
-            .dropShadow(shape = RoundedCornerShape(50)) {
+          Modifier.dropShadow(shape = RoundedCornerShape(50)) {
               offset = Offset(x = 0f, y = 16.dp.toPx())
               radius = 32.dp.toPx()
               color = shadowColor1
@@ -163,20 +118,7 @@ internal fun FeedsBottomSheet(
                   bottomSheetProgress(),
                 )
 
-              drawRoundRect(color = backgroundColor)
-
-              val borderColor =
-                lerp(
-                  start = collapsedContentBorderColor,
-                  stop = backgroundColor,
-                  fraction = bottomSheetProgress(),
-                )
-
-              drawRoundRect(
-                color = borderColor,
-                style = Stroke(width = 2.dp.toPx()),
-                cornerRadius = cornerRadius
-              )
+              drawRoundRect(color = backgroundColor, cornerRadius = cornerRadius)
             },
       ) {
         BottomSheetHandle(progress = bottomSheetProgress())
@@ -200,8 +142,6 @@ internal fun FeedsBottomSheet(
           numberOfFeeds = state.numberOfFeeds,
           activeSource = state.activeSource,
           canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          homeItemBackgroundColor = AppTheme.colorScheme.surfaceContainerLow,
-          homeItemShadowColors = homeItemShadowColors,
           onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
           onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
         )

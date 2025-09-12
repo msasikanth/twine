@@ -73,8 +73,7 @@ UPDATE SET
     title = excluded.title,
     description = excluded.description,
     imageUrl = excluded.imageUrl,
-    date = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.date ELSE date END,
-    read = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.read ELSE read END;
+    date = CASE WHEN :isDateParsedCorrectly AND date < excluded.date THEN excluded.date ELSE date END;
 
 allPostsCount:
 SELECT COUNT(post.id) FROM post
