@@ -130,7 +130,6 @@ internal fun HomeScreen(
   openGroupScreen: (groupId: String) -> Unit,
   openPaywall: () -> Unit,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
-  onBottomSheetHidden: (isHidden: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   useDarkTheme: Boolean = false,
 ) {
@@ -244,9 +243,6 @@ internal fun HomeScreen(
           },
         label = "Sheet Peek Height Animation",
       )
-    val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
-
-    LaunchedEffect(isBottomSheetHidden) { onBottomSheetHidden(isBottomSheetHidden) }
 
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,

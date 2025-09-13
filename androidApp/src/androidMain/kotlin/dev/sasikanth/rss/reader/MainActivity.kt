@@ -53,9 +53,9 @@ class MainActivity : ComponentActivity() {
       activityComponent.app(
         { useDarkTheme ->
           WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
-            useDarkTheme.not()
+            !useDarkTheme
           WindowCompat.getInsetsController(window, window.decorView)
-            .isAppearanceLightNavigationBars = false
+            .isAppearanceLightNavigationBars = !useDarkTheme
         },
         { isLightStatusBar ->
           WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
