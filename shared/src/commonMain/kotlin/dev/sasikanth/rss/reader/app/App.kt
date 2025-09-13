@@ -259,16 +259,16 @@ fun App(
             openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
             openPaywall = { navController.navigate(Screen.Paywall) },
             onBottomSheetStateChanged = { sheetValue ->
-              val showDarkStatusBar =
+              val showDarkSystemBars =
                 if (sheetValue == SheetValue.Expanded) {
                   true
                 } else {
                   useDarkTheme
                 }
 
-              toggleLightStatusBar(showDarkStatusBar.not())
+              toggleLightStatusBar(!showDarkSystemBars)
+              toggleLightNavBar(!showDarkSystemBars)
             },
-            onBottomSheetHidden = { isHidden -> toggleLightNavBar(isHidden) },
           )
         }
 

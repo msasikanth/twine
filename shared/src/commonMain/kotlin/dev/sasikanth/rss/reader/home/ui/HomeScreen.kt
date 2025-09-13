@@ -112,7 +112,7 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -130,7 +130,6 @@ internal fun HomeScreen(
   openGroupScreen: (groupId: String) -> Unit,
   openPaywall: () -> Unit,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
-  onBottomSheetHidden: (isHidden: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   useDarkTheme: Boolean = false,
 ) {
@@ -244,9 +243,6 @@ internal fun HomeScreen(
           },
         label = "Sheet Peek Height Animation",
       )
-    val isBottomSheetHidden by remember { derivedStateOf { sheetPeekHeight == 0.dp } }
-
-    LaunchedEffect(isBottomSheetHidden) { onBottomSheetHidden(isBottomSheetHidden) }
 
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
