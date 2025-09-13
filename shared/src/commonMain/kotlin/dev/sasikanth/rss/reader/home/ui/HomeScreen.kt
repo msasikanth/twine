@@ -112,7 +112,7 @@ import twine.shared.generated.resources.noNewPosts
 import twine.shared.generated.resources.noNewPostsSubtitle
 import twine.shared.generated.resources.swipeUpGetStarted
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
