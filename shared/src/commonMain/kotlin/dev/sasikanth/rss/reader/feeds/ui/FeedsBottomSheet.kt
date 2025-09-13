@@ -82,6 +82,8 @@ internal fun FeedsBottomSheet(
         Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
       }
     }
+
+  val isExpanding by remember { derivedStateOf { bottomSheetProgress() > 0f } }
   val isCollapsing by remember { derivedStateOf { bottomSheetProgress() < 1f } }
 
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
@@ -101,7 +103,7 @@ internal fun FeedsBottomSheet(
                 lerp(
                   start = BOTTOM_SHEET_HORIZONTAL_PADDING,
                   stop = 0.dp,
-                  fraction = bottomSheetProgress * 4f,
+                  fraction = (bottomSheetProgress * 4f).coerceAtMost(1f),
                 )
               val paddedConstraints =
                 constraints.offset(
@@ -168,7 +170,7 @@ internal fun FeedsBottomSheet(
                 lerp(
                   start = collapsedSheetHeight,
                   stop = targetSheetHeight,
-                  fraction = bottomSheetProgress * 2f
+                  fraction = (bottomSheetProgress * 2f).coerceAtMost(1f)
                 )
               val placeable = measurable.measure(constraints)
 
@@ -177,31 +179,35 @@ internal fun FeedsBottomSheet(
       )
 
       Box(modifier = Modifier.padding(innerPadding)) {
-        BottomSheetCollapsedContent(
-          modifier =
-            Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING).graphicsLayer {
-              alpha = (bottomSheetProgress() * 5f).inverse()
-            },
-          pinnedSources = state.pinnedSources,
-          numberOfFeeds = state.numberOfFeeds,
-          activeSource = state.activeSource,
-          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-          onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
-        )
+        if (isExpanding) {
+          BottomSheetExpandedContent(
+            modifier =
+              Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
+                alpha = bottomSheetProgress()
+              },
+            viewModel = feedsViewModel,
+            openFeedInfoSheet = openFeedInfoSheet,
+            openGroupScreen = openGroupScreen,
+            openGroupSelectionSheet = openGroupSelectionSheet,
+            openAddFeedScreen = openAddFeedScreen,
+            openPaywall = openPaywall,
+          )
+        }
 
-        BottomSheetExpandedContent(
-          modifier =
-            Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
-              alpha = bottomSheetProgress()
-            },
-          viewModel = feedsViewModel,
-          openFeedInfoSheet = openFeedInfoSheet,
-          openGroupScreen = openGroupScreen,
-          openGroupSelectionSheet = openGroupSelectionSheet,
-          openAddFeedScreen = openAddFeedScreen,
-          openPaywall = openPaywall,
-        )
+        if (isCollapsing) {
+          BottomSheetCollapsedContent(
+            modifier =
+              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING).graphicsLayer {
+                alpha = (bottomSheetProgress() * 5f).inverse()
+              },
+            pinnedSources = state.pinnedSources,
+            numberOfFeeds = state.numberOfFeeds,
+            activeSource = state.activeSource,
+            canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+            onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
+            onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+          )
+        }
       }
     }
   }
