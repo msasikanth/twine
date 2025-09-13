@@ -17,7 +17,9 @@ package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -25,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
@@ -32,11 +35,11 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -90,88 +93,84 @@ internal fun FeedsBottomSheet(
 
   AppTheme(useDarkTheme = true) {
     Scaffold(
-      modifier = modifier.fillMaxSize(),
+      modifier =
+        modifier.fillMaxSize().drawBehind {
+          val bottomSheetProgress = bottomSheetProgress()
+
+          val collapsedSheetHeight = 100.dp.toPx()
+          val targetSheetHeight = size.height
+          val sheetHeight =
+            lerp(
+              start = collapsedSheetHeight,
+              stop = targetSheetHeight,
+              fraction = (bottomSheetProgress * 2f).coerceAtMost(1f)
+            )
+          val sheetHorizontalPadding =
+            lerp(
+              start = BOTTOM_SHEET_HORIZONTAL_PADDING,
+              stop = 0.dp,
+              fraction = (bottomSheetProgress * 4f).coerceAtMost(1f),
+            )
+          val offset = Offset(x = sheetHorizontalPadding.toPx(), 0f)
+          val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
+
+          val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
+          val cornerRadius =
+            CornerRadius(
+              x = cornerRadiusDp.toPx(),
+              y = cornerRadiusDp.toPx(),
+            )
+          val backgroundColor =
+            lerp(
+              collapsedSheetBackgroundColor,
+              Color.Black,
+              bottomSheetProgress,
+            )
+          val borderColor =
+            lerp(
+              start = collapsedSheetBorderColor,
+              stop = backgroundColor,
+              fraction = bottomSheetProgress,
+            )
+
+          drawRoundRect(
+            color = backgroundColor,
+            cornerRadius = cornerRadius,
+            size = sheetSize,
+            topLeft = offset,
+          )
+
+          drawRoundRect(
+            color = borderColor,
+            style = Stroke(width = 2.dp.toPx()),
+            cornerRadius = cornerRadius,
+            size = sheetSize,
+            topLeft = offset,
+          )
+        },
       topBar = { BottomSheetHandle(progress = bottomSheetProgress()) },
       containerColor = Color.Transparent,
       contentColor = Color.Unspecified,
     ) { innerPadding ->
-      Box(
-        modifier =
-          Modifier.layout { measurable, constraints ->
-              val bottomSheetProgress = bottomSheetProgress()
-              val sheetHorizontalPadding =
-                lerp(
-                  start = BOTTOM_SHEET_HORIZONTAL_PADDING,
-                  stop = 0.dp,
-                  fraction = (bottomSheetProgress * 4f).coerceAtMost(1f),
-                )
-              val paddedConstraints =
-                constraints.offset(
-                  horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
-                )
-              val placeable = measurable.measure(paddedConstraints)
-
-              layout(placeable.width, placeable.height) {
-                placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
+      Box(modifier = Modifier.fillMaxSize().padding(top = innerPadding.calculateTopPadding())) {
+        Box(
+          modifier =
+            Modifier.align(Alignment.TopCenter)
+              .padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
+              .requiredHeight(100.dp)
+              .fillMaxWidth()
+              .dropShadow(shape = RoundedCornerShape(50)) {
+                offset = Offset(x = 0f, y = 16.dp.toPx())
+                radius = 32.dp.toPx()
+                color = shadowColor1
               }
-            }
-            .dropShadow(shape = RoundedCornerShape(50)) {
-              offset = Offset(x = 0f, y = 16.dp.toPx())
-              radius = 32.dp.toPx()
-              color = shadowColor1
-            }
-            .dropShadow(shape = RoundedCornerShape(50)) {
-              offset = Offset(x = 0f, y = 4.dp.toPx())
-              radius = 8.dp.toPx()
-              color = shadowColor2
-            }
-            .drawBehind {
-              val bottomSheetProgress = bottomSheetProgress()
-              val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-              val cornerRadius =
-                CornerRadius(
-                  x = cornerRadiusDp.toPx(),
-                  y = cornerRadiusDp.toPx(),
-                )
-              val backgroundColor =
-                lerp(
-                  collapsedSheetBackgroundColor,
-                  Color.Black,
-                  bottomSheetProgress,
-                )
+              .dropShadow(shape = RoundedCornerShape(50)) {
+                offset = Offset(x = 0f, y = 4.dp.toPx())
+                radius = 8.dp.toPx()
+                color = shadowColor2
+              },
+        )
 
-              drawRoundRect(color = backgroundColor, cornerRadius = cornerRadius)
-
-              val borderColor =
-                lerp(
-                  start = collapsedSheetBorderColor,
-                  stop = backgroundColor,
-                  fraction = bottomSheetProgress,
-                )
-
-              drawRoundRect(
-                color = borderColor,
-                style = Stroke(width = 2.dp.toPx()),
-                cornerRadius = cornerRadius
-              )
-            }
-            .layout { measurable, constraints ->
-              val bottomSheetProgress = bottomSheetProgress()
-              val collapsedSheetHeight = 100.dp.roundToPx()
-              val targetSheetHeight = constraints.maxHeight.toDp().roundToPx()
-              val sheetHeight =
-                lerp(
-                  start = collapsedSheetHeight,
-                  stop = targetSheetHeight,
-                  fraction = (bottomSheetProgress * 2f).coerceAtMost(1f)
-                )
-              val placeable = measurable.measure(constraints)
-
-              layout(constraints.maxWidth, sheetHeight) { placeable.placeRelative(0, 0) }
-            },
-      )
-
-      Box(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
         if (isExpanding) {
           BottomSheetExpandedContent(
             modifier =
