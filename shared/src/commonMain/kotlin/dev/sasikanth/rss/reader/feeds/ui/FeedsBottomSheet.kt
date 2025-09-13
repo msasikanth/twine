@@ -16,10 +16,10 @@
 package dev.sasikanth.rss.reader.feeds.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.layout
@@ -48,7 +49,8 @@ import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
-private val BOTTOM_SHEET_CORNER_SIZE = 24.dp
+private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
+private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -70,7 +72,8 @@ internal fun FeedsBottomSheet(
     feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
-  val collapsedContentBackgroundColor = AppTheme.colorScheme.bottomSheet
+  val collapsedSheetBackgroundColor = AppTheme.colorScheme.bottomSheet
+  val collapsedSheetBorderColor = AppTheme.colorScheme.bottomSheetBorder
   val (shadowColor1, shadowColor2) =
     remember {
       if (darkTheme) {
@@ -84,10 +87,33 @@ internal fun FeedsBottomSheet(
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
-    Box(modifier = modifier.fillMaxSize()) {
-      Column(
+    Scaffold(
+      modifier = modifier.fillMaxSize(),
+      topBar = { BottomSheetHandle(progress = bottomSheetProgress()) },
+      containerColor = Color.Transparent,
+      contentColor = Color.Unspecified,
+    ) { innerPadding ->
+      Box(
         modifier =
-          Modifier.dropShadow(shape = RoundedCornerShape(50)) {
+          Modifier.layout { measurable, constraints ->
+              val bottomSheetProgress = bottomSheetProgress()
+              val sheetHorizontalPadding =
+                lerp(
+                  start = BOTTOM_SHEET_HORIZONTAL_PADDING,
+                  stop = 0.dp,
+                  fraction = bottomSheetProgress * 4f,
+                )
+              val paddedConstraints =
+                constraints.offset(
+                  horizontal = (sheetHorizontalPadding.roundToPx() * 2).unaryMinus(),
+                )
+              val placeable = measurable.measure(paddedConstraints)
+
+              layout(placeable.width, placeable.height) {
+                placeable.placeRelative(sheetHorizontalPadding.roundToPx(), 0)
+              }
+            }
+            .dropShadow(shape = RoundedCornerShape(50)) {
               offset = Offset(x = 0f, y = 16.dp.toPx())
               radius = 32.dp.toPx()
               color = shadowColor1
@@ -105,7 +131,8 @@ internal fun FeedsBottomSheet(
               clip = true
             }
             .drawBehind {
-              val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress().inverse()
+              val bottomSheetProgress = bottomSheetProgress()
+              val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
               val cornerRadius =
                 CornerRadius(
                   x = cornerRadiusDp.toPx(),
@@ -113,31 +140,48 @@ internal fun FeedsBottomSheet(
                 )
               val backgroundColor =
                 lerp(
-                  collapsedContentBackgroundColor,
+                  collapsedSheetBackgroundColor,
                   Color.Black,
-                  bottomSheetProgress(),
+                  bottomSheetProgress,
                 )
 
-              drawRoundRect(color = backgroundColor, cornerRadius = cornerRadius)
-            },
-      ) {
-        BottomSheetHandle(progress = bottomSheetProgress())
+              drawRoundRect(color = backgroundColor)
 
+              val borderColor =
+                lerp(
+                  start = collapsedSheetBorderColor,
+                  stop = backgroundColor,
+                  fraction = bottomSheetProgress,
+                )
+
+              drawRoundRect(
+                color = borderColor,
+                style = Stroke(width = 2.dp.toPx()),
+                cornerRadius = cornerRadius
+              )
+            }
+            .layout { measurable, constraints ->
+              val bottomSheetProgress = bottomSheetProgress()
+              val collapsedSheetHeight = 100.dp.roundToPx()
+              val targetSheetHeight = constraints.maxHeight.toDp().roundToPx()
+              val sheetHeight =
+                lerp(
+                  start = collapsedSheetHeight,
+                  stop = targetSheetHeight,
+                  fraction = bottomSheetProgress * 2f
+                )
+              val placeable = measurable.measure(constraints)
+
+              layout(constraints.maxWidth, sheetHeight) { placeable.placeRelative(0, 0) }
+            },
+      )
+
+      Box(modifier = Modifier.padding(innerPadding)) {
         BottomSheetCollapsedContent(
           modifier =
-            Modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                val height =
-                  lerp(
-                      placeable.height,
-                      0,
-                      bottomSheetProgress() * 5f,
-                    )
-                    .coerceAtLeast(0)
-
-                layout(placeable.width, height) { placeable.place(0, 0) }
-              }
-              .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
+            Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING).graphicsLayer {
+              alpha = (bottomSheetProgress() * 5f).inverse()
+            },
           pinnedSources = state.pinnedSources,
           numberOfFeeds = state.numberOfFeeds,
           activeSource = state.activeSource,
