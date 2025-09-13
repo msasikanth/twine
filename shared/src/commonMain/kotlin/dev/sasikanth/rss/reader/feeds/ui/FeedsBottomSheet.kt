@@ -178,7 +178,7 @@ internal fun FeedsBottomSheet(
             },
       )
 
-      Box(modifier = Modifier.padding(innerPadding)) {
+      Box(modifier = Modifier.padding(top = innerPadding.calculateTopPadding())) {
         if (isExpanding) {
           BottomSheetExpandedContent(
             modifier =
