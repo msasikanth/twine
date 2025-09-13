@@ -125,13 +125,6 @@ internal fun FeedsBottomSheet(
               radius = 8.dp.toPx()
               color = shadowColor2
             }
-            .graphicsLayer {
-              shape =
-                RoundedCornerShape(
-                  BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress().inverse(),
-                )
-              clip = true
-            }
             .drawBehind {
               val bottomSheetProgress = bottomSheetProgress()
               val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
@@ -147,7 +140,7 @@ internal fun FeedsBottomSheet(
                   bottomSheetProgress,
                 )
 
-              drawRoundRect(color = backgroundColor)
+              drawRoundRect(color = backgroundColor, cornerRadius = cornerRadius)
 
               val borderColor =
                 lerp(
