@@ -55,6 +55,7 @@ markdown = "0.37.0"
 revenuecat = "2.1.0+16.2.0"
 viewmodel = "2.9.4"
 navigation = "2.9.0"
+navigation3 = "1.0.0-alpha01"
 glance = "1.2.0-beta01"
 
 [libraries]
@@ -137,6 +138,7 @@ purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", versi
 purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "revenuecat" }
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+navigation3 = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 

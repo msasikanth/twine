@@ -108,6 +108,7 @@ kotlin {
       implementation(libs.purchases.ui)
       implementation(libs.viewmodel)
       implementation(libs.navigation)
+      implementation(libs.navigation3)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
