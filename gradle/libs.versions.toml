@@ -55,7 +55,7 @@ markdown = "0.37.0"
 revenuecat = "2.1.0+16.2.0"
 viewmodel = "2.9.4"
 navigation = "2.9.0"
-navigation3 = "1.0.0-alpha01"
+navigation3 = "1.0.0+dev3015"
 glance = "1.2.0-beta01"
 
 [libraries]

@@ -105,4 +105,5 @@ dependencies {
   implementation(libs.purchases.core)
   implementation(libs.glance)
   implementation(libs.glance.material3)
+  implementation(libs.navigation3)
 }
