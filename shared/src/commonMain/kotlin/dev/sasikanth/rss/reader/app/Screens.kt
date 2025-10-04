@@ -15,11 +15,12 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.navigation3.runtime.NavKey
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-sealed interface Screen {
+sealed interface Screen : NavKey {
 
   @Serializable data object Placeholder : Screen
 

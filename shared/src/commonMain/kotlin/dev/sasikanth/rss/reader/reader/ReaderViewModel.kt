@@ -59,17 +59,12 @@ class ReaderViewModel(
   private val allPostsPager: AllPostsPager,
   private val settingsRepository: SettingsRepository,
   private val billingHandler: BillingHandler,
-  @Assisted private val savedStateHandle: SavedStateHandle,
+  @Assisted private val readerScreenArgs: ReaderScreenArgs,
 ) : ViewModel() {
 
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private val openedPostItems = mutableSetOf<String>()
-  private val readerScreenArgs =
-    savedStateHandle
-      .toRoute<Screen.Reader>(
-        typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap)
-      )
-      .readerScreenArgs
+
   private val defaultReaderState =
     ReaderState.default(
       initialPostIndex = readerScreenArgs.postIndex,
