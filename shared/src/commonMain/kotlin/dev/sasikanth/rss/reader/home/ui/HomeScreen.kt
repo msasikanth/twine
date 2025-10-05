@@ -83,7 +83,7 @@ import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
-import dev.sasikanth.rss.reader.feeds.ui.FeedsBottomSheet
+import dev.sasikanth.rss.reader.feeds.ui.sheet.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
