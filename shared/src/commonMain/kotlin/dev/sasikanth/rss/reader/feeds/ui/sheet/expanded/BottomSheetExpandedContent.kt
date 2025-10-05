@@ -1,17 +1,12 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package dev.sasikanth.rss.reader.feeds.ui.sheet.expanded
@@ -20,10 +15,14 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
@@ -31,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -107,6 +108,8 @@ internal fun BottomSheetExpandedContent(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val searchQuery = viewModel.searchQuery
 
+  var showNewGroupDialog by remember { mutableStateOf(false) }
+
   LaunchedEffect(state.openPaywall, state.openAddFeedScreen) {
     when {
       state.openPaywall -> {
@@ -120,12 +123,17 @@ internal fun BottomSheetExpandedContent(
     }
   }
 
-  var showNewGroupDialog by remember { mutableStateOf(false) }
-
   if (state.showDeleteConfirmation) {
     DeleteConfirmationDialog(
       onDelete = { viewModel.dispatch(FeedsEvent.DeleteSelectedSources) },
       dismiss = { viewModel.dispatch(FeedsEvent.DismissDeleteConfirmation) }
+    )
+  }
+
+  if (showNewGroupDialog) {
+    CreateGroupDialog(
+      onCreateGroup = { viewModel.dispatch(FeedsEvent.OnCreateGroup(it)) },
+      onDismiss = { showNewGroupDialog = false }
     )
   }
 
@@ -259,17 +267,41 @@ internal fun BottomSheetExpandedContent(
 
         viewModel.dispatch(FeedsEvent.OnPinnedSourcePositionChanged(pinnedSources))
       }
+    val layoutDirection = LocalLayoutDirection.current
+    val listContentPadding =
+      remember(padding, layoutDirection) {
+        PaddingValues(
+          start = padding.calculateStartPadding(layoutDirection),
+          end = padding.calculateEndPadding(layoutDirection),
+          // adding extra spacing to bottom so that there is space between list end and the bottom
+          // bar
+          bottom = padding.calculateBottomPadding() + 64.dp,
+          top = 8.dp
+        )
+      }
 
-    SourcesList(
+    LazyColumn(
       modifier =
-        Modifier.padding(
-          bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
-          // doing this so that the dividers in sticky headers can go below the search bar and
-          // not overlap with each other
-          top = padding.calculateTopPadding()
-        ),
+        Modifier.fillMaxSize()
+          .padding(
+            bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
+            // doing this so that the dividers in sticky headers can go below the search bar and
+            // not overlap with each other
+            top = padding.calculateTopPadding()
+          ),
       state = lazyListState,
-      pinnedSources = {
+      contentPadding = listContentPadding,
+    ) {
+      if (isInSearchMode) {
+        sourcesSearchResults(
+          searchResults = searchResults,
+          selectedSources = state.selectedSources,
+          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+          isInMultiSelectMode = state.isInMultiSelectMode,
+          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+        )
+      } else {
         pinnedSources(
           reorderableLazyListState = reorderableLazyGridState,
           pinnedSources = pinnedSources,
@@ -281,8 +313,7 @@ internal fun BottomSheetExpandedContent(
           onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
           onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
         )
-      },
-      allSources = {
+
         allSources(
           numberOfFeeds = state.numberOfFeeds,
           numberOfFeedGroups = state.numberOfFeedGroups,
@@ -295,26 +326,7 @@ internal fun BottomSheetExpandedContent(
           onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
           onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
         )
-      },
-      searchResults = {
-        sourcesSearchResults(
-          searchResults = searchResults,
-          selectedSources = state.selectedSources,
-          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          isInMultiSelectMode = state.isInMultiSelectMode,
-          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
-        )
-      },
-      isInSearchMode = isInSearchMode,
-      padding = padding
-    )
-
-    if (showNewGroupDialog) {
-      CreateGroupDialog(
-        onCreateGroup = { viewModel.dispatch(FeedsEvent.OnCreateGroup(it)) },
-        onDismiss = { showNewGroupDialog = false }
-      )
+      }
     }
   }
 }
@@ -437,3 +449,9 @@ fun DeleteConfirmationDialog(
     textContentColor = AppTheme.colorScheme.onSurface,
   )
 }
+
+internal fun bottomPaddingOfSourceItem(index: Int, itemCount: Int) =
+  when {
+    index < itemCount -> 8.dp
+    else -> 0.dp
+  }
