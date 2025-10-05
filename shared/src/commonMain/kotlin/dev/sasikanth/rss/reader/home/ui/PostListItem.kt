@@ -92,7 +92,7 @@ internal fun PostListItem(
       Modifier.then(modifier)
         .clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
-        .padding(postListPadding)
+//        .padding(postListPadding)
         .alpha(
           if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
           else Constants.ITEM_UNREAD_ALPHA

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
@@ -285,7 +286,7 @@ internal fun BottomSheetExpandedContent(
 
     LazyColumn(
       modifier =
-        Modifier.fillMaxSize()
+        Modifier.fillMaxHeight()
           .padding(
             bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
             // doing this so that the dividers in sticky headers can go below the search bar and

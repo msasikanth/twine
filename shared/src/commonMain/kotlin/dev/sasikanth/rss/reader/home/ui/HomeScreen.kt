@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -68,6 +69,7 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -83,6 +85,7 @@ import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.feeds.ui.drawer.FeedsFloatingNavigationDrawer
 import dev.sasikanth.rss.reader.feeds.ui.sheet.FeedsBottomSheet
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
@@ -247,183 +250,205 @@ internal fun HomeScreen(
     BottomSheetScaffold(
       scaffoldState = bottomSheetScaffoldState,
       content = { bottomSheetScaffoldContentPadding ->
-        Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
-          val hasFeeds = state.hasFeeds
+        Row(
+           modifier = Modifier
+             .fillMaxSize()
+             .background(AppTheme.colorScheme.backdrop)
+        ) {
+          FeedsFloatingNavigationDrawer(
+            feedsViewModel = feedsViewModel,
+            darkTheme = useDarkTheme,
+            bottomSheetProgress = { bottomSheetProgress },
+            openFeedInfoSheet = openFeedInfoSheet,
+            openGroupScreen = openGroupScreen,
+            openGroupSelectionSheet = openGroupSelectionSheet,
+            openAddFeedScreen = openAddFeedScreen,
+            openPaywall = openPaywall,
+          )
 
-          HomeScreenContentScaffold(
-            homeTopAppBar = {
-              HomeTopAppBar(
-                source = state.activeSource,
-                currentDateTime = state.currentDateTime,
-                postsType = state.postsType,
-                listState = postsListState,
-                hasFeeds = hasFeeds,
-                hasUnreadPosts = state.hasUnreadPosts,
-                homeViewMode = state.homeViewMode,
-                onSearchClicked = openSearch,
-                onBookmarksClicked = openBookmarks,
-                onSettingsClicked = openSettings,
-                onPostTypeChanged = { viewModel.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
-                onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) },
-                onChangeHomeViewMode = { viewModel.dispatch(HomeEvent.ChangeHomeViewMode(it)) }
-              )
-            },
-            body = { paddingValues ->
-              val topOffset =
-                remember(paddingValues, featuredPosts) {
-                  val topPaddingPx =
-                    with(density) { paddingValues.calculateTopPadding().roundToPx() }
-                  if (featuredPosts.isEmpty()) {
-                    postsListState.layoutInfo.beforeContentPadding
-                  } else {
-                    topPaddingPx
-                  }
-                }
+          Box {
+            Box(modifier = Modifier.fillMaxSize()) {
+              val hasFeeds = state.hasFeeds
 
-              LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
-                if (featuredPosts.isEmpty()) {
-                  return@LaunchedEffect
-                }
-
-                val activePostIndex = state.activePostIndex
-                val numberOfFeaturedPosts = featuredPosts.size
-
-                if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
-                  postsListState.scrollToItem(0)
-                  featuredPostsPagerState.scrollToPage(activePostIndex)
-                } else {
-                  // Since indexes start from 0, we are increasing the featured posts size by one
-                  val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
-                  val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
-
-                  // Since we apply top content padding to the LazyColumn, we are offsetting
-                  // the scroll so that the actual item is visible at top of the page for user.
-                  postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
-                }
-              }
-
-              LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
-                val firstVisibleItemIndexAfterOffset =
-                  postsListState.layoutInfo.visibleItemsInfo
-                    .firstOrNull { itemInfo ->
-                      itemInfo.offset >= topOffset || itemInfo.offset == 0
+              HomeScreenContentScaffold(
+                homeTopAppBar = {
+                  HomeTopAppBar(
+                    source = state.activeSource,
+                    currentDateTime = state.currentDateTime,
+                    postsType = state.postsType,
+                    listState = postsListState,
+                    hasFeeds = hasFeeds,
+                    hasUnreadPosts = state.hasUnreadPosts,
+                    homeViewMode = state.homeViewMode,
+                    onSearchClicked = openSearch,
+                    onBookmarksClicked = openBookmarks,
+                    onSettingsClicked = openSettings,
+                    onPostTypeChanged = { viewModel.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
+                    onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) },
+                    onChangeHomeViewMode = { viewModel.dispatch(HomeEvent.ChangeHomeViewMode(it)) }
+                  )
+                },
+                body = { paddingValues ->
+                  val topOffset =
+                    remember(paddingValues, featuredPosts) {
+                      val topPaddingPx =
+                        with(density) { paddingValues.calculateTopPadding().roundToPx() }
+                      if (featuredPosts.isEmpty()) {
+                        postsListState.layoutInfo.beforeContentPadding
+                      } else {
+                        topPaddingPx
+                      }
                     }
-                    ?.index
-                    ?: 0
 
-                val adjustedIndex =
-                  if (firstVisibleItemIndexAfterOffset == 0) {
-                    firstVisibleItemIndexAfterOffset
-                  } else {
-                    firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
-                  }
+                  LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
+                    if (featuredPosts.isEmpty()) {
+                      return@LaunchedEffect
+                    }
 
-                onVisiblePostChanged(adjustedIndex)
-              }
+                    val activePostIndex = state.activePostIndex
+                    val numberOfFeaturedPosts = featuredPosts.size
 
-              Box(modifier = Modifier.fillMaxSize()) {
-                val pullToRefreshState = rememberPullToRefreshState()
+                    if (activePostIndex < numberOfFeaturedPosts && numberOfFeaturedPosts > 0) {
+                      postsListState.scrollToItem(0)
+                      featuredPostsPagerState.scrollToPage(activePostIndex)
+                    } else {
+                      // Since indexes start from 0, we are increasing the featured posts size by one
+                      val featuredPostsLastIndex = (numberOfFeaturedPosts - 1).coerceAtLeast(0)
+                      val adjustedIndex = (activePostIndex - featuredPostsLastIndex).coerceAtLeast(0)
 
-                when {
-                  hasFeeds == null || posts == null -> {
-                    // no-op
-                  }
-                  !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
-                    NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
-                  }
-                  featuredPosts.isEmpty() &&
-                    posts.itemCount == 0 &&
-                    posts.loadState.refresh is LoadState.NotLoading -> {
-                    PullToRefreshContent(
-                      pullToRefreshState = pullToRefreshState,
-                      state = state,
-                      homeViewModel = viewModel,
-                      paddingValues = paddingValues,
-                    ) {
-                      NoNewPosts()
+                      // Since we apply top content padding to the LazyColumn, we are offsetting
+                      // the scroll so that the actual item is visible at top of the page for user.
+                      postsListState.scrollToItem(adjustedIndex, scrollOffset = topOffset.unaryMinus())
                     }
                   }
-                  else -> {
-                    PullToRefreshContent(
-                      pullToRefreshState = pullToRefreshState,
-                      state = state,
-                      homeViewModel = viewModel,
-                      paddingValues = paddingValues,
-                    ) {
-                      PostsList(
-                        modifier = Modifier.fillMaxSize(),
-                        paddingValues = paddingValues,
-                        featuredPosts = featuredPosts,
-                        posts = posts,
-                        useDarkTheme = useDarkTheme,
-                        listState = postsListState,
-                        featuredPostsPagerState = featuredPostsPagerState,
-                        homeViewMode = state.homeViewMode,
-                        markPostAsRead = {
-                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                        },
-                        postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
-                        markScrolledPostsAsRead = {
-                          viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
-                        },
-                        onPostClicked = { post, postIndex -> openPost(postIndex, post) },
-                        onPostBookmarkClick = {
-                          viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
-                        },
-                        onPostCommentsClick = { commentsLink ->
-                          coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                        },
-                        onPostSourceClick = { feedId ->
-                          viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                        },
-                        onTogglePostReadClick = { postId, postRead ->
-                          viewModel.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+
+                  LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
+                    val firstVisibleItemIndexAfterOffset =
+                      postsListState.layoutInfo.visibleItemsInfo
+                        .firstOrNull { itemInfo ->
+                          itemInfo.offset >= topOffset || itemInfo.offset == 0
                         }
-                      )
+                        ?.index
+                        ?: 0
+
+                    val adjustedIndex =
+                      if (firstVisibleItemIndexAfterOffset == 0) {
+                        firstVisibleItemIndexAfterOffset
+                      } else {
+                        firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
+                      }
+
+                    onVisiblePostChanged(adjustedIndex)
+                  }
+
+                  Box(modifier = Modifier.fillMaxSize()) {
+                    val pullToRefreshState = rememberPullToRefreshState()
+
+                    when {
+                      hasFeeds == null || posts == null -> {
+                        // no-op
+                      }
+                      !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
+                        NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
+                      }
+                      featuredPosts.isEmpty() &&
+                          posts.itemCount == 0 &&
+                          posts.loadState.refresh is LoadState.NotLoading -> {
+                        PullToRefreshContent(
+                          pullToRefreshState = pullToRefreshState,
+                          state = state,
+                          homeViewModel = viewModel,
+                          paddingValues = paddingValues,
+                        ) {
+                          NoNewPosts()
+                        }
+                      }
+                      else -> {
+                        PullToRefreshContent(
+                          pullToRefreshState = pullToRefreshState,
+                          state = state,
+                          homeViewModel = viewModel,
+                          paddingValues = paddingValues,
+                        ) {
+                          PostsList(
+                            modifier = Modifier.fillMaxSize(),
+                            paddingValues = paddingValues,
+                            featuredPosts = featuredPosts,
+                            posts = posts,
+                            useDarkTheme = useDarkTheme,
+                            listState = postsListState,
+                            featuredPostsPagerState = featuredPostsPagerState,
+                            homeViewMode = state.homeViewMode,
+                            markPostAsRead = {
+                              viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                            },
+                            postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
+                            markScrolledPostsAsRead = {
+                              viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                            },
+                            onPostClicked = { post, postIndex -> openPost(postIndex, post) },
+                            onPostBookmarkClick = {
+                              viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                            },
+                            onPostCommentsClick = { commentsLink ->
+                              coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                            },
+                            onPostSourceClick = { feedId ->
+                              viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                            },
+                            onTogglePostReadClick = { postId, postRead ->
+                              viewModel.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                            }
+                          )
+                        }
+                      }
                     }
                   }
-                }
+                },
+              )
+
+              val navBarScrimColor = AppTheme.colorScheme.backdrop
+              Box(
+                modifier =
+                  Modifier.fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+                    .navigationBarsPadding()
+                    .padding(top = 24.dp)
+                    .align(Alignment.BottomCenter)
+              )
+
+              NewArticlesScrollToTopButton(
+                unreadSinceLastSync = unreadSinceLastSync,
+                canShowScrollToTop = showScrollToTop,
+                modifier =
+                  Modifier.padding(
+                    bottom =
+                      bottomSheetScaffoldContentPadding
+                        .calculateBottomPadding()
+                        .coerceAtLeast(scaffoldPadding.calculateBottomPadding())
+                  ),
+                onLoadNewArticlesClick = { viewModel.dispatch(HomeEvent.LoadNewArticlesClick) },
+              ) {
+                postsListState.animateScrollToItem(0)
               }
-            },
-          )
+            }
 
-          val navBarScrimColor = AppTheme.colorScheme.backdrop
-          Box(
-            modifier =
-              Modifier.fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-                .navigationBarsPadding()
-                .padding(top = 24.dp)
-                .align(Alignment.BottomCenter)
-          )
-
-          NewArticlesScrollToTopButton(
-            unreadSinceLastSync = unreadSinceLastSync,
-            canShowScrollToTop = showScrollToTop,
-            modifier =
-              Modifier.padding(
-                bottom =
-                  bottomSheetScaffoldContentPadding
-                    .calculateBottomPadding()
-                    .coerceAtLeast(scaffoldPadding.calculateBottomPadding())
-              ),
-            onLoadNewArticlesClick = { viewModel.dispatch(HomeEvent.LoadNewArticlesClick) },
-          ) {
-            postsListState.animateScrollToItem(0)
+            if (bottomSheetState.currentValue == SheetValue.Expanded) {
+              Box(
+                modifier =
+                  Modifier.fillMaxSize().pointerInput(Unit) {
+                    detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+                  }
+              )
+            }
           }
-        }
-
-        if (bottomSheetState.currentValue == SheetValue.Expanded) {
-          Box(
-            modifier =
-              Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
-              }
-          )
         }
       },
       sheetContent = {
         FeedsBottomSheet(
+          modifier = Modifier.graphicsLayer {
+            alpha = 0f
+          },
           feedsViewModel = feedsViewModel,
           darkTheme = useDarkTheme,
           bottomSheetProgress = { bottomSheetProgress },

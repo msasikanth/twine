@@ -14,10 +14,13 @@ package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.NavigationRail
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -45,10 +48,10 @@ internal fun BottomSheetCollapsedContent(
   onHomeSelected: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  LazyRow(
-    modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    verticalAlignment = Alignment.CenterVertically,
+  LazyColumn(
+    modifier = modifier.fillMaxHeight(),
+    verticalArrangement = Arrangement.spacedBy(12.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
     contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 24.dp)
   ) {
     if (activeSource != null && activeSource.pinnedAt == null) {
@@ -62,12 +65,12 @@ internal fun BottomSheetCollapsedContent(
         )
       }
 
-      item {
-        VerticalDivider(
-          modifier = Modifier.requiredHeight(24.dp),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
+//      item {
+//        VerticalDivider(
+//          modifier = Modifier.requiredHeight(24.dp),
+//          color = AppTheme.colorScheme.outlineVariant,
+//        )
+//      }
     }
 
     items(pinnedSources.size) { index ->
@@ -80,17 +83,17 @@ internal fun BottomSheetCollapsedContent(
       )
     }
 
-    if (pinnedSources.isEmpty() && numberOfFeeds > 0 && activeSource == null) {
-      item {
-        Text(
-          text = stringResource(Res.string.noPinnedSources),
-          color = AppTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.fillParentMaxWidth().padding(top = 16.dp)
-        )
-      }
-    }
+//    if (pinnedSources.isEmpty() && numberOfFeeds > 0 && activeSource == null) {
+//      item {
+//        Text(
+//          text = stringResource(Res.string.noPinnedSources),
+//          color = AppTheme.colorScheme.onSurfaceVariant,
+//          style = MaterialTheme.typography.bodyMedium,
+//          textAlign = TextAlign.Center,
+//          modifier = Modifier.fillParentMaxWidth().padding(top = 16.dp)
+//        )
+//      }
+//    }
   }
 }
 
