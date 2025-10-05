@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.feeds.ui.expanded
+package dev.sasikanth.rss.reader.feeds.ui.sheet.expanded
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope

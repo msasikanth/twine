@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.feeds.ui.collapsed
+package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement

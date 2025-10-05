@@ -8,7 +8,7 @@
  *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
  */
-package dev.sasikanth.rss.reader.feeds.ui.collapsed
+package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

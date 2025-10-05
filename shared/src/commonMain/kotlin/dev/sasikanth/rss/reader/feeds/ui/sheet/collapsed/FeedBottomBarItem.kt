@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.feeds.ui.collapsed
+package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn

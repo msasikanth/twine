@@ -47,8 +47,8 @@ import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
-import dev.sasikanth.rss.reader.feeds.ui.collapsed.BottomSheetCollapsedContent
-import dev.sasikanth.rss.reader.feeds.ui.expanded.BottomSheetExpandedContent
+import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.BottomSheetCollapsedContent
+import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.BottomSheetExpandedContent
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
