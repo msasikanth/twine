@@ -224,11 +224,12 @@ private fun FeaturedSectionBackground(
         setToSaturation(sat)
       }
     }
-  val imageAspectRatio = if (sizeClass >= WindowWidthSizeClass.Expanded) {
-    1.4f
-  } else {
-    1f
-  }
+  val imageAspectRatio =
+    if (sizeClass >= WindowWidthSizeClass.Expanded) {
+      1.4f
+    } else {
+      1f
+    }
 
   AsyncImage(
     url = featuredPost.postWithMetadata.imageUrl!!,

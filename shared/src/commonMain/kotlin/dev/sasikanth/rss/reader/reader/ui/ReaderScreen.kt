@@ -331,14 +331,16 @@ internal fun ReaderScreen(
             remember(darkTheme) {
               Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
             }
-          val readerContentMaxWidth = if (sizeClass >= WindowWidthSizeClass.Expanded) {
-            960.dp
-          } else {
-            640.dp
-          }
+          val readerContentMaxWidth =
+            if (sizeClass >= WindowWidthSizeClass.Expanded) {
+              960.dp
+            } else {
+              640.dp
+            }
 
           HorizontalPager(
-            modifier = Modifier.widthIn(max = readerContentMaxWidth).fillMaxSize().align(Alignment.Center),
+            modifier =
+              Modifier.widthIn(max = readerContentMaxWidth).fillMaxSize().align(Alignment.Center),
             state = pagerState,
             overscrollEffect = null,
             beyondViewportPageCount = 1,

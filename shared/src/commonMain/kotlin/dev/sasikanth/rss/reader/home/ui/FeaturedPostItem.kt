@@ -59,7 +59,6 @@ private val featuredItemPadding
       else -> PaddingValues(0.dp)
     }
 
-
 @Immutable data class FeaturedPostItem(val postWithMetadata: PostWithMetadata, val seedColor: Int?)
 
 @Composable
