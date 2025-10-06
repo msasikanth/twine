@@ -70,9 +70,6 @@ jobs:
 
       - name: Select latest Xcode
         run: "sudo xcode-select -s /Applications/Xcode_26.0.1.app"
-        
-      - name: Download latest iOS SDK
-        run: "xcodebuild -downloadPlatform iOS -buildVersion 26.0"
 
       - name: Build Archive
         run: |          
