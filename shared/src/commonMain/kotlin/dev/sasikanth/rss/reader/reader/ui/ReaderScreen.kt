@@ -49,6 +49,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -98,6 +99,7 @@ import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
@@ -324,13 +326,19 @@ internal fun ReaderScreen(
           modifier = Modifier.fillMaxSize(),
         ) {
           val layoutDirection = LocalLayoutDirection.current
+          val sizeClass = LocalWindowSizeClass.current.widthSizeClass
           val highlightsBuilder =
             remember(darkTheme) {
               Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
             }
+          val readerContentMaxWidth = if (sizeClass >= WindowWidthSizeClass.Expanded) {
+            960.dp
+          } else {
+            640.dp
+          }
 
           HorizontalPager(
-            modifier = Modifier.widthIn(max = 640.dp).fillMaxSize().align(Alignment.Center),
+            modifier = Modifier.widthIn(max = readerContentMaxWidth).fillMaxSize().align(Alignment.Center),
             state = pagerState,
             overscrollEffect = null,
             beyondViewportPageCount = 1,
