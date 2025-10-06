@@ -16,9 +16,13 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
@@ -30,7 +34,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -80,6 +86,8 @@ import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.ui.ReaderScreen
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
@@ -178,7 +186,13 @@ fun App(
 
     AppTheme(useDarkTheme = useDarkTheme) {
       val navController = rememberNavController()
-      val fillMaxSizeModifier = Modifier.fillMaxSize()
+      val screenCornerRadius =
+        if (platform == Platform.Apple) {
+          38.dp
+        } else {
+          24.dp
+        }
+      val screenModifier = Modifier.fillMaxSize().clip(RoundedCornerShape(screenCornerRadius))
 
       DisposableEffect(Unit) {
         ExternalUriHandler.listener = { uri ->
@@ -204,7 +218,7 @@ fun App(
         composable<Screen.Placeholder> {
           val viewModel = viewModel { placeholderViewModel() }
           PlaceholderScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             viewModel = viewModel,
             navigateHome = {
               navController.navigate(Screen.Home) {
@@ -214,7 +228,17 @@ fun App(
           )
         }
 
-        composable<Screen.Home> {
+        composable<Screen.Home>(
+          enterTransition = {
+            fadeIn(
+              animationSpec =
+                tween(
+                  durationMillis = 200,
+                  easing = LinearEasing,
+                )
+            )
+          }
+        ) {
           val viewModel = viewModel { homeViewModel() }
           val feedsViewModel = viewModel { feedsViewModel() }
 
@@ -233,7 +257,7 @@ fun App(
           }
 
           HomeScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             useDarkTheme = useDarkTheme,
             viewModel = viewModel,
             feedsViewModel = feedsViewModel,
@@ -286,7 +310,7 @@ fun App(
           val fromScreen = it.toRoute<Screen.Reader>().readerScreenArgs.fromScreen
 
           ReaderScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             darkTheme = useDarkTheme,
             viewModel = viewModel,
             pageViewModelFactory = { post ->
@@ -318,7 +342,7 @@ fun App(
           }
 
           AddFeedScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }
@@ -328,7 +352,7 @@ fun App(
         composable<Screen.Search> {
           val viewModel = viewModel { searchViewModel() }
           SearchScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             searchViewModel = viewModel,
             goBack = { navController.popBackStack() },
             openPost = { searchQuery, sortOrder, index, post ->
@@ -357,7 +381,7 @@ fun App(
           val viewModel = viewModel { bookmarksViewModel() }
 
           BookmarksScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             bookmarksViewModel = viewModel,
             goBack = { navController.popBackStack() },
             openPost = { index, post ->
@@ -386,7 +410,7 @@ fun App(
           val viewModel = viewModel { settingsViewModel() }
 
           SettingsScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openBlockedWords = { navController.navigate(Screen.BlockedWords) },
@@ -396,7 +420,7 @@ fun App(
         }
 
         composable<Screen.About> {
-          AboutScreen(modifier = fillMaxSizeModifier, goBack = { navController.popBackStack() })
+          AboutScreen(modifier = screenModifier, goBack = { navController.popBackStack() })
         }
 
         composable<Screen.FeedGroup> {
@@ -413,7 +437,7 @@ fun App(
           }
 
           GroupScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }
@@ -423,7 +447,7 @@ fun App(
         composable<Screen.BlockedWords> {
           val viewModel = viewModel { blockedWordsViewModel() }
           BlockedWordsScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() }
           )
@@ -434,7 +458,7 @@ fun App(
           val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
 
           PremiumPaywallScreen(
-            modifier = fillMaxSizeModifier,
+            modifier = screenModifier,
             hasPremium = hasPremium,
             goBack = { navController.popBackStack() }
           )
