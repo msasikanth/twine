@@ -224,6 +224,11 @@ private fun FeaturedSectionBackground(
         setToSaturation(sat)
       }
     }
+  val imageAspectRatio = if (sizeClass >= WindowWidthSizeClass.Expanded) {
+    1.4f
+  } else {
+    1f
+  }
 
   AsyncImage(
     url = featuredPost.postWithMetadata.imageUrl!!,
@@ -231,7 +236,7 @@ private fun FeaturedSectionBackground(
       Modifier.then(modifier)
         .fillMaxWidth()
         .heightIn(max = imageMaxHeight)
-        .aspectRatio(1f)
+        .aspectRatio(imageAspectRatio)
         .graphicsLayer { translationX = size.width * pageOffset.invoke() }
         .graphicsLayer {
           val blurRadius = 100.dp
