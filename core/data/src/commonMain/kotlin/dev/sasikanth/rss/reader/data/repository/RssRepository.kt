@@ -115,15 +115,13 @@ class RssRepository(
                   isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
                 )
 
-                if (postPayload.rawContent != null) {
-                  postContentQueries.upsert(
-                    id = postId,
-                    rawContent = postPayload.rawContent,
-                    rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-                    htmlContent = null,
-                    createdAt = Clock.System.now(),
-                  )
-                }
+                postContentQueries.upsert(
+                  id = postId,
+                  rawContent = postPayload.rawContent,
+                  rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
+                  htmlContent = null,
+                  createdAt = Clock.System.now(),
+                )
               }
             }
           }

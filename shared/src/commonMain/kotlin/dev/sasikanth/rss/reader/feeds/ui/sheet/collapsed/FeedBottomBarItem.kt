@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.sasikanth.rss.reader.feeds.ui
+package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
@@ -33,14 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
-internal fun FeedGroupBottomBarItem(
-  feedGroup: FeedGroup,
+internal fun FeedBottomBarItem(
+  badgeCount: Long,
+  homePageUrl: String,
+  feedIconUrl: String,
   canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -52,42 +56,17 @@ internal fun FeedGroupBottomBarItem(
   ) {
     Box(contentAlignment = Alignment.Center) {
       SelectionIndicator(selected = selected, animationProgress = 1f)
-      Box(
+      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+      val feedIcon = if (showFeedFavIcon) homePageUrl else feedIconUrl
+
+      FeedIcon(
+        url = feedIcon,
+        contentDescription = null,
         modifier =
-          Modifier.requiredSize(48.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
-            .background(AppTheme.colorScheme.tintedSurface)
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
-      ) {
-        val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-        val icons = if (showFeedFavIcon) feedGroup.feedHomepageLinks else feedGroup.feedIconLinks
-        val iconSize =
-          if (icons.size > 2) {
-            16.dp
-          } else {
-            18.dp
-          }
-
-        val iconSpacing =
-          if (icons.size > 2) {
-            4.dp
-          } else {
-            0.dp
-          }
-
-        FeedGroupIconGrid(
-          icons = icons,
-          iconSize = iconSize,
-          iconShape = CircleShape,
-          verticalArrangement = Arrangement.spacedBy(iconSpacing),
-          horizontalArrangement = Arrangement.spacedBy(iconSpacing),
-        )
-      }
+          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
+      )
     }
 
-    val badgeCount = feedGroup.numberOfUnreadPosts
     if (badgeCount > 0 && canShowUnreadPostsCount) {
       Badge(
         containerColor = AppTheme.colorScheme.tintedForeground,
@@ -110,6 +89,36 @@ internal fun FeedGroupBottomBarItem(
             }
         )
       }
+    }
+  }
+}
+
+/**
+ * This component receives animation progress within the threshold of 0..0.2 of the original bottom
+ * sheet transition.
+ */
+@Composable
+internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
+  // Set alpha to 0 once the progress goes below this threshold
+  val threshold = 0.89f
+
+  val size = (56.dp * animationProgress).coerceAtLeast(48.dp)
+  val cornerRadius = (20.dp * animationProgress).coerceAtLeast(16.dp)
+  val alpha = animationProgress.takeIf { it >= threshold } ?: 0f
+
+  Box(
+    Modifier.requiredSize(size).graphicsLayer { this.alpha = alpha },
+    contentAlignment = Alignment.Center
+  ) {
+    AnimatedVisibility(
+      modifier = Modifier.matchParentSize(),
+      visible = selected,
+      enter = scaleIn() + fadeIn(),
+      exit = fadeOut() + scaleOut()
+    ) {
+      Box(
+        Modifier.background(AppTheme.colorScheme.tintedForeground, RoundedCornerShape(cornerRadius))
+      )
     }
   }
 }

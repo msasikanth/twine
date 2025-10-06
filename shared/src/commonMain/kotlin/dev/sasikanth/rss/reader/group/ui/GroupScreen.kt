@@ -61,7 +61,7 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
-import dev.sasikanth.rss.reader.feeds.ui.expanded.AllFeedsHeader
+import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack

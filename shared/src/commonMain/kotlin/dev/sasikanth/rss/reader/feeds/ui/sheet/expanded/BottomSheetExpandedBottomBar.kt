@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.feeds.ui
+package dev.sasikanth.rss.reader.feeds.ui.sheet.expanded
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

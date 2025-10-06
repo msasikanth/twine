@@ -1,20 +1,15 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2025 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.feeds.ui.expanded
+package dev.sasikanth.rss.reader.feeds.ui.common
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
@@ -25,6 +20,7 @@ import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
+import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
 
 internal fun LazyListScope.sourcesSearchResults(
   searchResults: LazyPagingItems<Feed>,
