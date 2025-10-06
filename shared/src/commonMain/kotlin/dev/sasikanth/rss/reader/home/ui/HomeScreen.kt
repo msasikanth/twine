@@ -15,7 +15,10 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -26,7 +29,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -388,14 +390,21 @@ internal fun HomeScreen(
           )
 
           val navBarScrimColor = AppTheme.colorScheme.backdrop
-          Box(
+          AnimatedVisibility(
             modifier =
               Modifier.fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
-                .navigationBarsPadding()
-                .padding(top = 24.dp)
-                .align(Alignment.BottomCenter)
-          )
+                .requiredHeight(BOTTOM_SHEET_PEEK_HEIGHT)
+                .align(Alignment.BottomCenter),
+            visible = postsListState.isScrollingTowardsUp(),
+            enter = slideInVertically { it },
+            exit = slideOutVertically { it }
+          ) {
+            Box(
+              modifier =
+                Modifier.matchParentSize()
+                  .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+            )
+          }
 
           NewArticlesScrollToTopButton(
             unreadSinceLastSync = unreadSinceLastSync,
