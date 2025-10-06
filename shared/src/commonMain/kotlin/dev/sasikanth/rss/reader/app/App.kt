@@ -16,6 +16,9 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -225,7 +228,17 @@ fun App(
           )
         }
 
-        composable<Screen.Home> {
+        composable<Screen.Home>(
+          enterTransition = {
+            fadeIn(
+              animationSpec =
+                tween(
+                  durationMillis = 200,
+                  easing = LinearEasing,
+                )
+            )
+          }
+        ) {
           val viewModel = viewModel { homeViewModel() }
           val feedsViewModel = viewModel { feedsViewModel() }
 
