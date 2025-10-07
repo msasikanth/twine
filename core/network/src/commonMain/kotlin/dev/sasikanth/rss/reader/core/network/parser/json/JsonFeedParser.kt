@@ -60,19 +60,20 @@ class JsonFeedParser(
                 val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
 
                 val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
-                val image = htmlContent?.leadImage
+                val image = htmlContent?.heroImage
 
                 val description =
                   jsonFeedPost.summary
                     .let {
                       if (it.isNullOrBlank()) {
-                        jsonFeedPost.contentText ?: htmlContent?.content
+                        jsonFeedPost.contentText ?: htmlContent?.textContent
                       } else {
                         it
                       }
                     }
                     .orEmpty()
-                val rawContent = jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
+                val rawContent =
+                  htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
 
                 PostPayload(
                   title = jsonFeedPost.title.orEmpty(),
