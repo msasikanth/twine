@@ -136,11 +136,12 @@ class RDFContentParser(
           link = parser.nextText()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          rawContent = parser.nextText().trimIndent()
+          val postHtmlContent = parser.nextText().trimIndent()
+          val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
 
-          val htmlContent = articleHtmlParser.parse(htmlContent = rawContent)
-          image = htmlContent?.leadImage ?: image
-          description = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
+          rawContent = htmlContent?.cleanedHtml
+          image = htmlContent?.heroImage ?: image
+          description = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim()
         }
         name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()

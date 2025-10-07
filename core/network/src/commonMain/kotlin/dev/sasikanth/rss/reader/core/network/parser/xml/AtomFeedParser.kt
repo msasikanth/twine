@@ -154,11 +154,12 @@ class AtomContentParser(
         }
         TAG_CONTENT,
         TAG_SUMMARY -> {
-          rawContent = parser.nextText().trimIndent()
+          val postHtmlContent = parser.nextText().trimIndent()
+          val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
 
-          val htmlContent = articleHtmlParser.parse(htmlContent = rawContent)
-          image = htmlContent?.leadImage ?: image
-          content = htmlContent?.content?.ifBlank { null } ?: rawContent.trim()
+          rawContent = htmlContent?.cleanedHtml
+          image = htmlContent?.heroImage ?: image
+          content = htmlContent?.textContent?.ifBlank { null } ?: rawContent?.trim()
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {

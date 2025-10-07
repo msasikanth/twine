@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.core.network.parser.common
 
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.safety.Cleaner
 import com.fleeksoft.ksoup.safety.Safelist
 import io.ktor.utils.io.charsets.MalformedInputException
 import me.tatarka.inject.annotations.Inject
@@ -40,11 +41,13 @@ class ArticleHtmlParser {
     if (htmlContent.isBlank()) return null
 
     return try {
-      val cleanedHtml = Ksoup.clean(htmlContent, allowedContentTags)
-      val document = Ksoup.parse(cleanedHtml)
-      val body = document.getElementsByTag(TAG_BODY).first() ?: return null
+      val originalHtmlDocument = Ksoup.parse(htmlContent)
+      val cleanedHtmlDocument = Cleaner(allowedContentTags).clean(originalHtmlDocument)
+      val body = cleanedHtmlDocument.body().first()
 
-      val leadImage =
+      originalHtmlDocument.head().remove()
+
+      val heroImage =
         body.firstNotNullOfOrNull {
           val imageUrl = it.attr(ATTR_SRC)
           if (it.tagName() == TAG_IMG && !gifRegex.containsMatchIn(imageUrl)) {
@@ -54,7 +57,11 @@ class ArticleHtmlParser {
           }
         }
 
-      Result(leadImage = leadImage, content = body.ownText())
+      Result(
+        heroImage = heroImage,
+        textContent = body.ownText(),
+        cleanedHtml = originalHtmlDocument.html()
+      )
     } catch (e: Exception) {
       null
     } catch (e: MalformedInputException) {
@@ -63,5 +70,5 @@ class ArticleHtmlParser {
     }
   }
 
-  data class Result(val leadImage: String?, val content: String)
+  data class Result(val heroImage: String?, val textContent: String, val cleanedHtml: String)
 }
