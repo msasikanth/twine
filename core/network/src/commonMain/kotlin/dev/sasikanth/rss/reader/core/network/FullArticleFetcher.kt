@@ -1,5 +1,6 @@
 package dev.sasikanth.rss.reader.core.network
 
+import com.fleeksoft.ksoup.Ksoup
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.UserAgent
@@ -43,7 +44,11 @@ class FullArticleFetcher(
               }
             }
             .bodyAsText()
-        Result.success(htmlContent)
+        val htmlDocument = Ksoup.parse(htmlContent)
+
+        htmlDocument.head().remove()
+
+        Result.success(htmlDocument.html())
       } catch (e: Exception) {
         Result.failure(e)
       }
