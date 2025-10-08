@@ -96,7 +96,13 @@ class XmlFeedParserTest {
               title = "Post with image",
               link = "https://example.com/first-post",
               description = "First post description.",
-              rawContent = "First post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>First post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = "https://example.com/first-post-media-url",
               date = 1685005200000,
               commentsLink = null,
@@ -106,7 +112,13 @@ class XmlFeedParserTest {
               title = "Post without image",
               link = "https://example.com/second-post",
               description = "Second post description.",
-              rawContent = "Second post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>Second post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1684999800000,
               commentsLink = null,
@@ -116,7 +128,13 @@ class XmlFeedParserTest {
               title = "Podcast post",
               link = "https://example.com/third-post",
               description = "Third post description.",
-              rawContent = "Third post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>Third post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1684924200000,
               commentsLink = null,
@@ -126,7 +144,13 @@ class XmlFeedParserTest {
               title = "Post with enclosure image",
               link = "https://example.com/fourth-post",
               description = "Fourth post description.",
-              rawContent = "Fourth post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>Fourth post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = "https://example.com/enclosure-image",
               date = 1684924200000,
               commentsLink = null,
@@ -138,8 +162,12 @@ class XmlFeedParserTest {
               description = "Fourth post description in HTML syntax.",
               rawContent =
                 """
-                  <p>Fourth post description in HTML syntax.</p>
-                  <img src="https://example.com/encoded-image" alt="encoded image" />
+                  <html>
+                   <body>
+                    <p>Fourth post description in HTML syntax.</p>
+                    <img src="https://example.com/encoded-image" alt="encoded image">
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = "https://example.com/encoded-image",
@@ -151,7 +179,13 @@ class XmlFeedParserTest {
               title = "Post with relative path image",
               link = "https://example.com/post-with-relative-image",
               description = "Relative image post description.",
-              rawContent = "Relative image post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>Relative image post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = "http://example.com/relative-media-url",
               date = 1685005200000,
               commentsLink = null,
@@ -161,7 +195,13 @@ class XmlFeedParserTest {
               title = "Post with comments",
               link = "https://example.com/post-with-comments",
               description = "Really long post with comments.",
-              rawContent = "Really long post with comments.",
+              rawContent =
+                """
+                  <html>
+                   <body>Really long post with comments.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1685005200000,
               commentsLink = "https://example/post-with-comments/comments",
@@ -194,7 +234,13 @@ class XmlFeedParserTest {
               title = "Post",
               link = "https://example.com/first-post",
               description = "First post description.",
-              rawContent = "First post description.",
+              rawContent =
+                """
+                  <html>
+                   <body>First post description.</body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1685005200000,
               commentsLink = null,
@@ -206,8 +252,12 @@ class XmlFeedParserTest {
               description = "Second post description in HTML syntax.",
               rawContent =
                 """
-                  <p>Second post description in HTML syntax.</p>
-                  <img src="https://example.com/encoded-image" alt="encoded image" />
+                  <html>
+                   <body>
+                    <p>Second post description in HTML syntax.</p>
+                    <img src="https://example.com/encoded-image" alt="encoded image">
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = "https://example.com/encoded-image",
@@ -244,8 +294,12 @@ class XmlFeedParserTest {
               description = "Post summary with an image.",
               rawContent =
                 """
-                  <img alt="First Image" src="https://example.com/image.jpg" />
-                  <p>Post summary with an image.</p>
+                  <html>
+                   <body>
+                    <img alt="First Image" src="https://example.com/image.jpg">
+                    <p>Post summary with an image.</p>
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = "https://example.com/image.jpg",
@@ -259,7 +313,11 @@ class XmlFeedParserTest {
               description = "Post summary of the second post.",
               rawContent =
                 """
-                  <p>Post summary of the second post.</p>
+                  <html>
+                   <body>
+                    <p>Post summary of the second post.</p>
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = null,
@@ -273,7 +331,11 @@ class XmlFeedParserTest {
               description = "Post summary of the third post. click here.",
               rawContent =
                 """
-                  <p>Post summary of the third post. <a href="https://example.com/hyperlink" >click here</a>.</p>
+                  <html>
+                   <body>
+                    <p>Post summary of the third post. <a href="https://example.com/hyperlink">click here</a>.</p>
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = null,
@@ -287,8 +349,12 @@ class XmlFeedParserTest {
               description = "Post summary with an image.",
               rawContent =
                 """
-                  <img alt="Relative Image" src="/resources/image.jpg" />
-                  <p>Post summary with an image.</p>
+                  <html>
+                   <body>
+                    <img alt="Relative Image" src="/resources/image.jpg">
+                    <p>Post summary with an image.</p>
+                   </body>
+                  </html>
                 """
                   .trimIndent(),
               imageUrl = "http://example.com/resources/image.jpg",
