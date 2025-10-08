@@ -47,7 +47,15 @@ class JsonFeedParserTest {
               description =
                 "An overview of recent quantum computing advances and what they mean for the tech industry",
               rawContent =
-                "Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.\n\nThe new 1000-qubit processor announced last month represents a major milestone in the industry.",
+                """
+               <html>
+                <body>
+                 <p>Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.</p>
+                 <p>The new 1000-qubit processor announced last month represents a major milestone in the industry.</p>
+                </body>
+               </html>
+              """
+                  .trimIndent(),
               imageUrl = "https://example.com/images/quantum-2025.jpg",
               date = 1740734100000,
               commentsLink = null,
@@ -59,7 +67,15 @@ class JsonFeedParserTest {
               description =
                 "Comparing different approaches to AI ethics across industry and government",
               rawContent =
-                "<p>As AI becomes more integrated into our daily lives, the need for robust ethical frameworks has never been more important.</p><p>This article examines the approaches taken by major tech companies and governments around the world.</p>",
+                """
+                  <html>
+                   <body>
+                    <p>As AI becomes more integrated into our daily lives, the need for robust ethical frameworks has never been more important.</p>
+                    <p>This article examines the approaches taken by major tech companies and governments around the world.</p>
+                   </body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1739629800000,
               commentsLink = null,
@@ -83,7 +99,15 @@ class JsonFeedParserTest {
               description =
                 "Silicon Valley companies are leading the charge in sustainable technology development.\n\nFrom carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.",
               rawContent =
-                "Silicon Valley companies are leading the charge in sustainable technology development.\n\nFrom carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.",
+                """
+                  <html>
+                   <body>
+                    <p>Silicon Valley companies are leading the charge in sustainable technology development.</p>
+                    <p>From carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.</p>
+                   </body>
+                  </html>
+              """
+                  .trimIndent(),
               imageUrl = null,
               date = 1737388800000,
               commentsLink = null,
