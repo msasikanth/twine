@@ -35,7 +35,10 @@ import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -46,9 +49,9 @@ import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -118,6 +121,7 @@ internal fun FeaturedSection(
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
         val postWithMetadata = featuredPost.postWithMetadata
+        var isImageRecorded by remember { mutableStateOf(false) }
         val imageGraphicsLayer = rememberGraphicsLayer()
         val blurRadius = 100.dp
 
@@ -125,7 +129,7 @@ internal fun FeaturedSection(
           if (canBlurImage) {
             FeaturedSectionBackground(
               modifier =
-                Modifier.graphicsLayer {
+                Modifier.matchParentSize().graphicsLayer {
                   val pageOffset = pagerState.getOffsetFractionForPage(page)
 
                   translationX = size.width * pageOffset
@@ -138,8 +142,26 @@ internal fun FeaturedSection(
                     )
                 },
               useDarkTheme = useDarkTheme,
-              imageGraphicsLayer = imageGraphicsLayer,
-            )
+            ) {
+              if (isImageRecorded) {
+                val imageWidth = imageGraphicsLayer.size.width
+                val imageHeight = imageGraphicsLayer.size.height
+
+                val canvasWidth = this.size.width
+                val canvasHeight = this.size.height
+
+                val scaleX = canvasWidth / imageWidth
+                val scaleY = canvasHeight / imageHeight
+
+                scale(
+                  scaleX = scaleX,
+                  scaleY = scaleY,
+                  pivot = Offset.Zero,
+                ) {
+                  drawLayer(imageGraphicsLayer)
+                }
+              }
+            }
           }
 
           FeaturedPostItem(
@@ -157,13 +179,18 @@ internal fun FeaturedSection(
             FeaturedImage(
               modifier =
                 Modifier.graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
-                  translationX = pageOffset * 350f
-                  scaleX = 1.15f
-                  scaleY = 1.15f
-                },
+                    val pageOffset = pagerState.getOffsetFractionForPage(page)
+                    translationX = pageOffset * 350f
+                    scaleX = 1.15f
+                    scaleY = 1.15f
+                  }
+                  .drawWithContent {
+                    imageGraphicsLayer.record { this@drawWithContent.drawContent() }
+                    isImageRecorded = true
+
+                    drawLayer(imageGraphicsLayer)
+                  },
               image = postWithMetadata.imageUrl,
-              imageGraphicsLayer = imageGraphicsLayer,
             )
           }
         }
@@ -196,7 +223,7 @@ internal fun FeaturedSection(
 private fun FeaturedSectionBackground(
   useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
-  imageGraphicsLayer: GraphicsLayer? = null,
+  drawImage: DrawScope.() -> Unit,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val gradientOverlayModifier =
@@ -239,31 +266,9 @@ private fun FeaturedSectionBackground(
       else -> 1f
     }
 
-  Box(
-    modifier =
-      Modifier.aspectRatio(imageAspectRatio)
-        .padding(end = 16.dp)
-        .then(modifier)
-        .then(gradientOverlayModifier)
-        .drawWithContent {
-          drawContent()
-          drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
-        },
-  ) {
-    Canvas(modifier = Modifier.matchParentSize()) {
-      imageGraphicsLayer?.let { graphicsLayer ->
-        val imageWidth = graphicsLayer.size.width
-        val imageHeight = graphicsLayer.size.height
-
-        val canvasWidth = this.size.width
-        val canvasHeight = this.size.height
-
-        val scaleX = canvasWidth / imageWidth
-        val scaleY = canvasHeight / imageHeight
-
-        scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) { drawLayer(graphicsLayer) }
-      }
-    }
+  Canvas(modifier.aspectRatio(imageAspectRatio).then(gradientOverlayModifier)) {
+    drawImage()
+    drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
   }
 }
 
