@@ -24,6 +24,9 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -32,7 +35,11 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
 @Composable
-fun FeaturedImage(image: String?, modifier: Modifier = Modifier) {
+fun FeaturedImage(
+  image: String?,
+  modifier: Modifier = Modifier,
+  imageGraphicsLayer: GraphicsLayer? = null,
+) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val imageMaxHeight =
     when {
@@ -49,9 +56,17 @@ fun FeaturedImage(image: String?, modifier: Modifier = Modifier) {
     AsyncImage(
       url = image,
       modifier =
-        Modifier.clip(MaterialTheme.shapes.extraLarge)
+        Modifier.aspectRatio(16f / 9f)
           .heightIn(max = imageMaxHeight)
-          .aspectRatio(ratio = 16f / 9f)
+          .drawWithContent {
+            if (imageGraphicsLayer != null) {
+              imageGraphicsLayer.record { this@drawWithContent.drawContent() }
+              drawLayer(imageGraphicsLayer)
+            } else {
+              this.drawContent()
+            }
+          }
+          .clip(MaterialTheme.shapes.extraLarge)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
           .then(modifier),
       contentDescription = null,
