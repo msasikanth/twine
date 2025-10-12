@@ -63,6 +63,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.collections.immutable.ImmutableList
@@ -99,7 +100,7 @@ internal fun FeaturedSection(
       remember(systemBarsHorizontalPadding) {
         PaddingValues(
           start = systemBarsHorizontalPadding + 24.dp,
-          end = systemBarsHorizontalPadding + 8.dp,
+          end = systemBarsHorizontalPadding + 24.dp,
           bottom = 24.dp
         )
       }
@@ -108,6 +109,7 @@ internal fun FeaturedSection(
       state = pagerState,
       verticalAlignment = Alignment.Top,
       contentPadding = contentPadding,
+      pageSpacing = 16.dp,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
         post?.let { post.postWithMetadata.id + post.postWithMetadata.sourceId } ?: page
@@ -129,18 +131,20 @@ internal fun FeaturedSection(
           if (canBlurImage) {
             FeaturedSectionBackground(
               modifier =
-                Modifier.matchParentSize().graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
+                Modifier.matchParentSize()
+                  .ignoreHorizontalParentPadding(horizontal = 24.dp)
+                  .graphicsLayer {
+                    val pageOffset = pagerState.getOffsetFractionForPage(page)
 
-                  translationX = size.width * pageOffset
-                  alpha = calculateAlpha(pageOffset)
-                  renderEffect =
-                    BlurEffect(
-                      radiusX = blurRadius.toPx(),
-                      radiusY = blurRadius.toPx(),
-                      edgeTreatment = TileMode.Decal,
-                    )
-                },
+                    translationX = size.width * pageOffset
+                    alpha = calculateAlpha(pageOffset)
+                    renderEffect =
+                      BlurEffect(
+                        radiusX = blurRadius.toPx(),
+                        radiusY = blurRadius.toPx(),
+                        edgeTreatment = TileMode.Decal,
+                      )
+                  },
               useDarkTheme = useDarkTheme,
             ) {
               if (isImageRecorded) {
@@ -165,8 +169,7 @@ internal fun FeaturedSection(
           }
 
           FeaturedPostItem(
-            modifier =
-              Modifier.padding(top = paddingValues.calculateTopPadding() + 8.dp, end = 16.dp),
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 8.dp),
             item = postWithMetadata,
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
