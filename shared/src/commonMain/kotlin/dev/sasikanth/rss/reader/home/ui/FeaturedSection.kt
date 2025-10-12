@@ -131,20 +131,18 @@ internal fun FeaturedSection(
           if (canBlurImage) {
             FeaturedSectionBackground(
               modifier =
-                Modifier.matchParentSize()
-                  .ignoreHorizontalParentPadding(horizontal = 24.dp)
-                  .graphicsLayer {
-                    val pageOffset = pagerState.getOffsetFractionForPage(page)
+                Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp).graphicsLayer {
+                  val pageOffset = pagerState.getOffsetFractionForPage(page)
 
-                    translationX = size.width * pageOffset
-                    alpha = calculateAlpha(pageOffset)
-                    renderEffect =
-                      BlurEffect(
-                        radiusX = blurRadius.toPx(),
-                        radiusY = blurRadius.toPx(),
-                        edgeTreatment = TileMode.Decal,
-                      )
-                  },
+                  translationX = size.width * pageOffset
+                  alpha = calculateAlpha(pageOffset)
+                  renderEffect =
+                    BlurEffect(
+                      radiusX = blurRadius.toPx(),
+                      radiusY = blurRadius.toPx(),
+                      edgeTreatment = TileMode.Decal,
+                    )
+                },
               useDarkTheme = useDarkTheme,
             ) {
               if (isImageRecorded) {
