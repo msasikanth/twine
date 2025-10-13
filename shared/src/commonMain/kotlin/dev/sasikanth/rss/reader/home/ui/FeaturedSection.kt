@@ -48,6 +48,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.scale
@@ -266,10 +268,36 @@ private fun FeaturedSectionBackground(
       sizeClass >= WindowWidthSizeClass.Medium -> 1.5f
       else -> 1f
     }
+  val colorFilter =
+    remember(useDarkTheme) {
+      ColorFilter.colorMatrix(
+        ColorMatrix().apply {
+          val saturation = if (useDarkTheme) 1f else 5f
+          setToSaturation(saturation)
+        }
+      )
+    }
 
-  Canvas(modifier.aspectRatio(imageAspectRatio).then(gradientOverlayModifier)) {
-    drawImage()
-    drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+  Box(
+    modifier =
+      modifier.then(gradientOverlayModifier).drawWithContent {
+        drawContent()
+        drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
+      }
+  ) {
+    Canvas(
+      Modifier.aspectRatio(imageAspectRatio).drawWithCache {
+        val graphicsLayer = obtainGraphicsLayer()
+        graphicsLayer.apply {
+          record { drawContent() }
+          this.colorFilter = colorFilter
+        }
+
+        onDrawWithContent { drawLayer(graphicsLayer) }
+      }
+    ) {
+      drawImage()
+    }
   }
 }
 
