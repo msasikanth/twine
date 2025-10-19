@@ -16,23 +16,19 @@
 package dev.sasikanth.rss.reader.feeds.ui.sheet
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -40,9 +36,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalGraphicsContext
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -52,6 +52,7 @@ import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.BottomSheetExpandedConte
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
@@ -69,6 +70,7 @@ internal fun FeedsBottomSheet(
   modifier: Modifier = Modifier,
 ) {
   val focusManager = LocalFocusManager.current
+  val shadowContext = LocalGraphicsContext.current.shadowContext
   val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
   BackHandler(enabled = state.isInMultiSelectMode) {
@@ -92,7 +94,7 @@ internal fun FeedsBottomSheet(
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
-    Scaffold(
+    Column(
       modifier =
         modifier.fillMaxSize().drawBehind {
           val bottomSheetProgress = bottomSheetProgress()
@@ -133,6 +135,32 @@ internal fun FeedsBottomSheet(
               fraction = bottomSheetProgress,
             )
 
+          val shadow1Painter =
+            shadowContext.createDropShadowPainter(
+              shape = RoundedCornerShape(cornerRadiusDp),
+              shadow =
+                Shadow(
+                  offset = DpOffset(x = offset.x.toDp(), y = 16.dp),
+                  radius = 32.dp,
+                  color = shadowColor1,
+                )
+            )
+
+          val shadow2Painter =
+            shadowContext.createDropShadowPainter(
+              shape = RoundedCornerShape(cornerRadiusDp),
+              shadow =
+                Shadow(
+                  offset = DpOffset(x = offset.x.toDp(), y = 4.dp),
+                  radius = 8.dp,
+                  color = shadowColor2,
+                )
+            )
+
+          with(shadow1Painter) { draw(sheetSize) }
+
+          with(shadow2Painter) { draw(sheetSize) }
+
           drawRoundRect(
             color = backgroundColor,
             cornerRadius = cornerRadius,
@@ -148,29 +176,10 @@ internal fun FeedsBottomSheet(
             topLeft = offset,
           )
         },
-      topBar = { BottomSheetHandle(progress = bottomSheetProgress()) },
-      containerColor = Color.Transparent,
-      contentColor = Color.Unspecified,
-    ) { innerPadding ->
-      Box(modifier = Modifier.fillMaxSize().padding(top = innerPadding.calculateTopPadding())) {
-        Box(
-          modifier =
-            Modifier.align(Alignment.TopCenter)
-              .padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
-              .requiredHeight(100.dp)
-              .fillMaxWidth()
-              .dropShadow(shape = RoundedCornerShape(50)) {
-                offset = Offset(x = 0f, y = 16.dp.toPx())
-                radius = 32.dp.toPx()
-                color = shadowColor1
-              }
-              .dropShadow(shape = RoundedCornerShape(50)) {
-                offset = Offset(x = 0f, y = 4.dp.toPx())
-                radius = 8.dp.toPx()
-                color = shadowColor2
-              },
-        )
+    ) {
+      BottomSheetHandle(progress = bottomSheetProgress)
 
+      Box(modifier = Modifier.weight(1f)) {
         if (isExpanding) {
           BottomSheetExpandedContent(
             modifier =
