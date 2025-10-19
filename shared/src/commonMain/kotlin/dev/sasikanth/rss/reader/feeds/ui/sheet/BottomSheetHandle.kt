@@ -17,20 +17,18 @@ package dev.sasikanth.rss.reader.feeds.ui.sheet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.unit.offset
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 private val COLLAPSED_HANDLE_SIZE = 24.dp
@@ -38,25 +36,41 @@ private val EXPANDED_HANDLE_SIZE = 64.dp
 
 @Composable
 internal fun BottomSheetHandle(
-  progress: Float,
+  progress: () -> Float,
   modifier: Modifier = Modifier,
 ) {
   val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-  val targetHandleSize =
-    min(COLLAPSED_HANDLE_SIZE * progress + COLLAPSED_HANDLE_SIZE, EXPANDED_HANDLE_SIZE)
 
-  val collapsedTopPadding = 12.dp
-  val targetTopPadding =
-    (collapsedTopPadding * (progress * 2) + collapsedTopPadding) + (statusBarPadding * progress)
-
-  Column(
-    modifier = Modifier.fillMaxWidth().then(modifier),
-    horizontalAlignment = Alignment.CenterHorizontally
-  ) {
-    Spacer(Modifier.requiredHeight(targetTopPadding))
+  Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
     Box(
-      Modifier.background(AppTheme.colorScheme.onSurfaceVariant, shape = RoundedCornerShape(50))
-        .requiredSize(width = targetHandleSize, height = 3.dp)
+      Modifier.layout { measurable, constraints ->
+          val progress = progress.invoke()
+          val collapsedTopPadding = 12.dp
+          val targetTopPadding = statusBarPadding + collapsedTopPadding
+          val topPadding =
+            lerp(start = collapsedTopPadding, stop = targetTopPadding, fraction = progress)
+              .roundToPx()
+          val targetHandleSize =
+            lerp(
+                start = COLLAPSED_HANDLE_SIZE,
+                stop = EXPANDED_HANDLE_SIZE,
+                fraction = progress,
+              )
+              .roundToPx()
+
+          val minHeight = 3.dp.roundToPx()
+          val placeable =
+            measurable.measure(
+              constraints
+                .offset(vertical = topPadding)
+                .copy(minWidth = targetHandleSize, minHeight = minHeight)
+            )
+
+          layout(width = placeable.width, height = placeable.height + topPadding) {
+            placeable.place(x = 0, y = topPadding)
+          }
+        }
+        .background(AppTheme.colorScheme.onSurfaceVariant, shape = RoundedCornerShape(50))
     )
   }
 }
