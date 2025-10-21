@@ -113,7 +113,8 @@ internal fun FeedsBottomSheet(
               stop = 0.dp,
               fraction = (bottomSheetProgress * 4f).coerceAtMost(1f),
             )
-          val offset = Offset(x = sheetHorizontalPadding.toPx(), 0f)
+          val offset =
+            Offset(x = sheetHorizontalPadding.toPx(), 1.dp.toPx() * bottomSheetProgress.inverse())
           val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
 
           val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
@@ -140,7 +141,7 @@ internal fun FeedsBottomSheet(
               shape = RoundedCornerShape(cornerRadiusDp),
               shadow =
                 Shadow(
-                  offset = DpOffset(x = offset.x.toDp(), y = 16.dp),
+                  offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 16.dp),
                   radius = 32.dp,
                   color = shadowColor1,
                 )
@@ -151,7 +152,7 @@ internal fun FeedsBottomSheet(
               shape = RoundedCornerShape(cornerRadiusDp),
               shadow =
                 Shadow(
-                  offset = DpOffset(x = offset.x.toDp(), y = 4.dp),
+                  offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 4.dp),
                   radius = 8.dp,
                   color = shadowColor2,
                 )
@@ -170,7 +171,7 @@ internal fun FeedsBottomSheet(
 
           drawRoundRect(
             color = borderColor,
-            style = Stroke(width = 2.dp.toPx()),
+            style = Stroke(width = 1.dp.toPx()),
             cornerRadius = cornerRadius,
             size = sheetSize,
             topLeft = offset,
