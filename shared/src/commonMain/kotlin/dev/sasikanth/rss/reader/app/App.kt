@@ -354,6 +354,7 @@ fun App(
           SearchScreen(
             modifier = screenModifier,
             searchViewModel = viewModel,
+            darkTheme = useDarkTheme,
             goBack = { navController.popBackStack() },
             openPost = { searchQuery, sortOrder, index, post ->
               coroutineScope.launch {
@@ -383,6 +384,7 @@ fun App(
           BookmarksScreen(
             modifier = screenModifier,
             bookmarksViewModel = viewModel,
+            darkTheme = useDarkTheme,
             goBack = { navController.popBackStack() },
             openPost = { index, post ->
               coroutineScope.launch {

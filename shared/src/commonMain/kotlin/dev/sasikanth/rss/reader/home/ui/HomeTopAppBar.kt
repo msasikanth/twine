@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -119,6 +120,7 @@ internal fun HomeTopAppBar(
   hasFeeds: Boolean?,
   hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
+  darkTheme: Boolean,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -163,48 +165,27 @@ internal fun HomeTopAppBar(
 
     Spacer(Modifier.requiredWidth(16.dp))
 
-    ActionIconButton(
-      imageVector = Icons.Rounded.Search,
+    IconButton(
+      icon = Icons.Rounded.Search,
       contentDescription = stringResource(Res.string.postsSearchHint),
+      darkTheme = darkTheme,
       onClick = onSearchClicked
     )
 
-    ActionIconButton(
-      imageVector = Icons.Outlined.BookmarkBorder,
+    IconButton(
+      icon = Icons.Outlined.BookmarkBorder,
       contentDescription = stringResource(Res.string.bookmarks),
+      darkTheme = darkTheme,
       onClick = onBookmarksClicked
     )
 
     OverflowMenu(
       hasUnreadPosts = hasUnreadPosts,
       homeViewMode = homeViewMode,
+      darkTheme = darkTheme,
       onSettingsClicked = onSettingsClicked,
       onMarkAllAsRead = { onMarkPostsAsRead(source) },
       onChangeHomeViewMode = onChangeHomeViewMode
-    )
-  }
-}
-
-@Composable
-private fun ActionIconButton(
-  imageVector: ImageVector,
-  contentDescription: String?,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit
-) {
-  Box(
-    modifier =
-      Modifier.requiredSize(40.dp)
-        .clip(MaterialTheme.shapes.small)
-        .clickable(onClick = onClick)
-        .then(modifier),
-    contentAlignment = Alignment.Center
-  ) {
-    Icon(
-      modifier = Modifier.requiredSize(20.dp),
-      imageVector = imageVector,
-      contentDescription = contentDescription,
-      tint = AppTheme.colorScheme.tintedForeground
     )
   }
 }
@@ -386,6 +367,7 @@ private fun getPostTypeLabel(type: PostsType) =
 private fun OverflowMenu(
   hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
+  darkTheme: Boolean,
   onSettingsClicked: () -> Unit,
   onMarkAllAsRead: () -> Unit,
   onChangeHomeViewMode: (HomeViewMode) -> Unit,
@@ -395,13 +377,14 @@ private fun OverflowMenu(
     var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
-    ActionIconButton(
+    IconButton(
       modifier =
         Modifier.onGloballyPositioned { coordinates ->
           buttonHeight = with(density) { coordinates.size.height.toDp() }
         },
-      imageVector = Icons.Rounded.MoreVert,
+      icon = Icons.Rounded.MoreVert,
       contentDescription = stringResource(Res.string.moreMenuOptions),
+      darkTheme = darkTheme,
       onClick = { dropdownExpanded = true }
     )
 

@@ -126,6 +126,7 @@ internal fun PostsList(
         HomeViewMode.Simple -> {
           PostListItem(
             item = post,
+            darkTheme = useDarkTheme,
             reduceReadItemAlpha = true,
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
@@ -138,6 +139,7 @@ internal fun PostsList(
           CompactPostListItem(
             item = post,
             reduceReadItemAlpha = true,
+            darkTheme = useDarkTheme,
             showDivider = index != posts.itemCount - 1,
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },

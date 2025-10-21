@@ -104,6 +104,7 @@ import twine.shared.generated.resources.searchSortOldestFirst
 @Composable
 internal fun SearchScreen(
   searchViewModel: SearchViewModel,
+  darkTheme: Boolean,
   goBack: () -> Unit,
   openPost:
     (
@@ -162,6 +163,7 @@ internal fun SearchScreen(
             if (post != null) {
               PostListItem(
                 item = post,
+                darkTheme = darkTheme,
                 postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
                 reduceReadItemAlpha = true,
                 onClick = {

@@ -47,15 +47,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +60,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
@@ -95,6 +92,7 @@ internal fun PostMetadata(
   postLink: String,
   postBookmarked: Boolean,
   commentsLink: String?,
+  darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
@@ -134,6 +132,7 @@ internal fun PostMetadata(
       postRead = postRead,
       config = config,
       commentsLink = commentsLink,
+      darkTheme = darkTheme,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       togglePostReadClick = onTogglePostReadClick
@@ -200,6 +199,7 @@ internal fun PostOptionsButtonRow(
   postRead: Boolean,
   config: PostMetadataConfig,
   commentsLink: String?,
+  darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit
@@ -207,14 +207,10 @@ internal fun PostOptionsButtonRow(
   Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
       val commentsLabel = stringResource(Res.string.comments)
-      PostOptionIconButton(
-        modifier =
-          Modifier.semantics {
-            role = Role.Button
-            contentDescription = commentsLabel
-          },
+      IconButton(
         icon = TwineIcons.Comments,
-        iconTint = AppTheme.colorScheme.onSurfaceVariant,
+        contentDescription = commentsLabel,
+        darkTheme = darkTheme,
         onClick = onCommentsClick
       )
     }
@@ -225,24 +221,15 @@ internal fun PostOptionsButtonRow(
       } else {
         stringResource(Res.string.bookmark)
       }
-    PostOptionIconButton(
-      modifier =
-        Modifier.semantics {
-          role = Role.Button
-          contentDescription = bookmarkLabel
-        },
+    IconButton(
       icon =
         if (postBookmarked) {
           TwineIcons.Bookmarked
         } else {
           TwineIcons.Bookmark
         },
-      iconTint =
-        if (postBookmarked) {
-          AppTheme.colorScheme.tintedForeground
-        } else {
-          AppTheme.colorScheme.onSurfaceVariant
-        },
+      contentDescription = bookmarkLabel,
+      darkTheme = darkTheme,
       onClick = onBookmarkClick
     )
 
@@ -253,17 +240,14 @@ internal fun PostOptionsButtonRow(
       var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
-      PostOptionIconButton(
+      IconButton(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
-              buttonHeight = with(density) { coordinates.size.height.toDp() }
-            }
-            .semantics {
-              role = Role.Button
-              contentDescription = moreMenuOptionsLabel
-            },
+            buttonHeight = with(density) { coordinates.size.height.toDp() }
+          },
+        contentDescription = moreMenuOptionsLabel,
         icon = Icons.Filled.MoreVert,
-        iconTint = AppTheme.colorScheme.onSurfaceVariant,
+        darkTheme = darkTheme,
         onClick = { showDropdown = true }
       )
 
@@ -366,30 +350,6 @@ internal fun PostOptionsButtonRow(
         )
       }
     }
-  }
-}
-
-@Composable
-private fun PostOptionIconButton(
-  icon: ImageVector,
-  modifier: Modifier = Modifier,
-  iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
-  onClick: () -> Unit,
-) {
-  Box(
-    modifier =
-      Modifier.requiredSize(40.dp)
-        .clip(MaterialTheme.shapes.small)
-        .clickable(onClick = onClick)
-        .then(modifier),
-    contentAlignment = Alignment.Center
-  ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = null,
-      tint = iconTint,
-      modifier = Modifier.size(20.dp)
-    )
   }
 }
 
