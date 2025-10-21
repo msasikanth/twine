@@ -140,6 +140,7 @@ internal fun FeaturedPostItem(
       postRead = item.read,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      darkTheme = darkTheme,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       onSourceClick = onSourceClick,

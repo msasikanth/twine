@@ -261,6 +261,7 @@ internal fun HomeScreen(
                 hasFeeds = hasFeeds,
                 hasUnreadPosts = state.hasUnreadPosts,
                 homeViewMode = state.homeViewMode,
+                darkTheme = useDarkTheme,
                 onSearchClicked = openSearch,
                 onBookmarksClicked = openBookmarks,
                 onSettingsClicked = openSettings,
