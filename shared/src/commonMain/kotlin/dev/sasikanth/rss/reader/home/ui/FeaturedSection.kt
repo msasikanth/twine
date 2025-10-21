@@ -46,8 +46,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.TileMode
@@ -171,6 +169,7 @@ internal fun FeaturedSection(
           FeaturedPostItem(
             modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 8.dp),
             item = postWithMetadata,
+            darkTheme = useDarkTheme,
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
             onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
@@ -229,38 +228,6 @@ private fun FeaturedSectionBackground(
   drawImage: DrawScope.() -> Unit,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
-  val gradientOverlayModifier =
-    if (useDarkTheme) {
-      Modifier.drawWithCache {
-        val gradientColor = Color.Black
-        val radialGradient =
-          Brush.radialGradient(
-            colors =
-              listOf(
-                gradientColor,
-                gradientColor.copy(alpha = 0.0f),
-                gradientColor.copy(alpha = 0.0f)
-              ),
-            center = Offset(x = this.size.width, y = 40f),
-            tileMode = TileMode.Decal,
-          )
-
-        val linearGradient =
-          Brush.verticalGradient(
-            colors = listOf(gradientColor, gradientColor.copy(alpha = 0.0f)),
-            tileMode = TileMode.Decal,
-          )
-
-        onDrawWithContent {
-          drawContent()
-          drawRect(radialGradient)
-          drawRect(linearGradient)
-        }
-      }
-    } else {
-      Modifier
-    }
-
   val overlayColor = AppTheme.colorScheme.inversePrimary
   val imageAspectRatio =
     when {
@@ -278,26 +245,21 @@ private fun FeaturedSectionBackground(
       )
     }
 
-  Box(
-    modifier =
-      modifier.then(gradientOverlayModifier).drawWithContent {
-        drawContent()
+  Canvas(
+    modifier.aspectRatio(imageAspectRatio).drawWithCache {
+      val graphicsLayer = obtainGraphicsLayer()
+      graphicsLayer.apply {
+        record { drawContent() }
+        this.colorFilter = colorFilter
+      }
+
+      onDrawWithContent {
+        drawLayer(graphicsLayer)
         drawRect(color = overlayColor, blendMode = BlendMode.Luminosity)
       }
-  ) {
-    Canvas(
-      Modifier.aspectRatio(imageAspectRatio).drawWithCache {
-        val graphicsLayer = obtainGraphicsLayer()
-        graphicsLayer.apply {
-          record { drawContent() }
-          this.colorFilter = colorFilter
-        }
-
-        onDrawWithContent { drawLayer(graphicsLayer) }
-      }
-    ) {
-      drawImage()
     }
+  ) {
+    drawImage()
   }
 }
 
