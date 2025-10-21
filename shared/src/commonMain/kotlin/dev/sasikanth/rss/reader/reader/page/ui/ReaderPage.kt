@@ -53,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -102,6 +103,7 @@ import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
+import dev.sasikanth.rss.reader.ui.AntonFontFamily
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -132,6 +134,7 @@ internal fun ReaderPage(
   pagerState: PagerState,
   highlightsBuilder: Highlights.Builder,
   loadFullArticle: Boolean,
+  darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
@@ -246,6 +249,7 @@ internal fun ReaderPage(
                 page = page,
                 pagerState = pagerState,
                 excerpt = excerptState,
+                darkTheme = darkTheme,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
@@ -310,6 +314,7 @@ private fun PostHeader(
   page: Int,
   pagerState: PagerState,
   excerpt: String,
+  darkTheme: Boolean,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
@@ -356,10 +361,19 @@ private fun PostHeader(
       }
 
       Text(
-        modifier = Modifier.padding(top = 12.dp),
+        modifier =
+          Modifier.padding(top = 12.dp).graphicsLayer {
+            blendMode =
+              if (darkTheme) {
+                BlendMode.Screen
+              } else {
+                BlendMode.Multiply
+              }
+          },
         text = title.ifBlank { description },
-        style = MaterialTheme.typography.headlineSmall,
-        color = AppTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.headlineMedium,
+        fontFamily = AntonFontFamily,
+        color = AppTheme.colorScheme.secondary,
         overflow = TextOverflow.Ellipsis,
       )
 
