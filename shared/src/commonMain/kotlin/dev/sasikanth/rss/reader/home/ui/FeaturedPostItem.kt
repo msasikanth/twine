@@ -83,6 +83,8 @@ internal fun FeaturedPostItem(
         .alpha(if (item.read) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
   ) {
     val density = LocalDensity.current
+    val titleTextStyle = MaterialTheme.typography.headlineMedium
+    val titleMaxLines = 3
     var descriptionBottomPadding by remember(item.link) { mutableStateOf(0.dp) }
 
     featuredImage()
@@ -91,7 +93,7 @@ internal fun FeaturedPostItem(
 
     Text(
       modifier =
-        Modifier.padding(8.dp).graphicsLayer {
+        Modifier.padding(all = 8.dp).graphicsLayer {
           blendMode =
             if (darkTheme) {
               BlendMode.Screen
@@ -100,19 +102,16 @@ internal fun FeaturedPostItem(
             }
         },
       text = item.title.ifBlank { item.description },
-      style = MaterialTheme.typography.headlineMedium,
+      style = titleTextStyle,
       fontFamily = AntonFontFamily,
       color = AppTheme.colorScheme.secondary,
-      maxLines = 3,
+      maxLines = titleMaxLines,
       overflow = TextOverflow.Ellipsis,
       onTextLayout = { textLayoutResult ->
         val numberOfLines = textLayoutResult.lineCount
-        if (numberOfLines < 3) {
-          val lineTop = textLayoutResult.getLineTop(0)
-          val lineBottom = textLayoutResult.getLineBottom(0)
-          val lineHeight = with(density) { (lineTop + lineBottom).toDp() }
-
-          descriptionBottomPadding = lineHeight * (3 - numberOfLines)
+        if (numberOfLines < titleMaxLines) {
+          val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
+          descriptionBottomPadding = lineHeight * (titleMaxLines - numberOfLines)
         }
       }
     )
