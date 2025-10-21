@@ -377,6 +377,7 @@ internal fun ReaderScreen(
                 pagerState = pagerState,
                 highlightsBuilder = highlightsBuilder,
                 loadFullArticle = showFullArticle,
+                darkTheme = darkTheme,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
