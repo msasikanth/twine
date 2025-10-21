@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import dev.sasikanth.rss.reader.utils.toSp
 import org.jetbrains.compose.resources.Font
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.anton
 import twine.shared.generated.resources.comic_neue_bold
 import twine.shared.generated.resources.comic_neue_regular
 import twine.shared.generated.resources.golos_bold
@@ -241,3 +242,6 @@ internal val RobotoSerifFontFamily: FontFamily
       Font(Res.font.roboto_serif_medium, weight = FontWeight.Medium),
       Font(Res.font.robot_serif_bold, weight = FontWeight.Bold),
     )
+
+internal val AntonFontFamily: FontFamily
+  @Composable get() = FontFamily(Font(Res.font.anton, weight = FontWeight.Normal))
