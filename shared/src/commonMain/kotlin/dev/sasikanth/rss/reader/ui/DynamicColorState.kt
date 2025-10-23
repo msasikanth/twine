@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
 internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
-  useTonalSpotScheme: Boolean = false,
+  useTonalSpotScheme: Boolean = true,
 ): DynamicColorState {
   return remember {
     DynamicColorState(
