@@ -78,9 +78,8 @@ import com.mikepenz.markdown.compose.LocalMarkdownPadding
 import com.mikepenz.markdown.compose.LocalMarkdownTypography
 import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
 import com.mikepenz.markdown.compose.MarkdownElement
+import com.mikepenz.markdown.compose.components.MarkdownComponents
 import com.mikepenz.markdown.compose.components.markdownComponents
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
-import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.ReferenceLinkHandlerImpl
@@ -108,7 +107,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
-import dev.snipme.highlights.Highlights
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -132,7 +130,7 @@ internal fun ReaderPage(
   readerPost: PostWithMetadata,
   page: Int,
   pagerState: PagerState,
-  highlightsBuilder: Highlights.Builder,
+  markdownComponents: MarkdownComponents,
   loadFullArticle: Boolean,
   darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
@@ -148,24 +146,6 @@ internal fun ReaderPage(
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
   val coroutineScope = rememberCoroutineScope()
-  val markdownComponents = remember {
-    markdownComponents(
-      codeBlock = { cm ->
-        MarkdownHighlightedCodeBlock(
-          content = cm.content,
-          node = cm.node,
-          highlightsBuilder = highlightsBuilder
-        )
-      },
-      codeFence = { cm ->
-        MarkdownHighlightedCodeFence(
-          content = cm.content,
-          node = cm.node,
-          highlightsBuilder = highlightsBuilder
-        )
-      },
-    )
-  }
 
   val textSelectionColors =
     TextSelectionColors(

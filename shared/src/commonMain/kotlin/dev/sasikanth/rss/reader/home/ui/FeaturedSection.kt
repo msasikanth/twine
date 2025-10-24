@@ -239,7 +239,7 @@ private fun FeaturedSectionBackground(
     remember(useDarkTheme) {
       ColorFilter.colorMatrix(
         ColorMatrix().apply {
-          val saturation = if (useDarkTheme) 1f else 5f
+          val saturation = if (useDarkTheme) 1f else 1.1f
           setToSaturation(saturation)
         }
       )

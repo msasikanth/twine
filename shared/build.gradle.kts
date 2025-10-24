@@ -135,6 +135,11 @@ kotlin {
   }
 }
 
+composeCompiler {
+  reportsDestination = layout.buildDirectory.dir("compose_compiler")
+  metricsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 android {
   compileSdk = libs.versions.android.sdk.compile.get().toInt()
   namespace = "dev.sasikanth.rss.reader.common"

@@ -339,8 +339,8 @@ internal fun HomeScreen(
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
-                      homeViewModel = viewModel,
                       paddingValues = paddingValues,
+                      onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
                     ) {
                       NoNewPosts()
                     }
@@ -349,8 +349,8 @@ internal fun HomeScreen(
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
-                      homeViewModel = viewModel,
                       paddingValues = paddingValues,
+                      onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
                     ) {
                       PostsList(
                         modifier = Modifier.fillMaxSize(),
@@ -460,14 +460,14 @@ internal fun HomeScreen(
 private fun PullToRefreshContent(
   pullToRefreshState: PullToRefreshState,
   state: HomeState,
-  homeViewModel: HomeViewModel,
   paddingValues: PaddingValues,
+  onRefresh: () -> Unit,
   content: @Composable () -> Unit,
 ) {
   PullToRefreshBox(
     state = pullToRefreshState,
     isRefreshing = state.isSyncing,
-    onRefresh = { homeViewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
+    onRefresh = onRefresh,
     indicator = {
       Indicator(
         modifier =
