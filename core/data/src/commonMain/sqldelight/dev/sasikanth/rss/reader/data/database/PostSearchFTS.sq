@@ -34,7 +34,7 @@ SELECT
   post_search.title,
   post_search.description,
   post.imageUrl,
-  post.date,
+  post.postDate,
   post.link,
   post.commentsLink,
   post.bookmarked,
@@ -48,6 +48,6 @@ INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE post_search MATCH :searchQuery
 ORDER BY
-  CASE WHEN :sortOrder = 'oldest' THEN post.date END ASC,
-  CASE WHEN :sortOrder = 'newest' THEN post.date END DESC
+  CASE WHEN :sortOrder = 'oldest' THEN post.postDate END ASC,
+  CASE WHEN :sortOrder = 'newest' THEN post.postDate END DESC
 LIMIT :limit OFFSET :offset;

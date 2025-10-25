@@ -7,7 +7,9 @@ CREATE TABLE post(
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
-  date INTEGER AS Instant NOT NULL,
+  postDate INTEGER AS Instant NOT NULL,
+  createdAt INTEGER AS Instant NOT NULL,
+  updatedAt INTEGER AS Instant NOT NULL,
   syncedAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
@@ -18,9 +20,10 @@ CREATE TABLE post(
   FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
 );
 
-CREATE INDEX post_date_desc_index ON post (date DESC);
+CREATE INDEX post_date_index ON post (postDate);
+CREATE INDEX post_createdAt_index ON post (createdAt);
 CREATE INDEX post_is_hidden_index ON post(isHidden);
-CREATE INDEX post_date_read_hidden_index ON post(date, read, isHidden);
+CREATE INDEX post_date_read_hidden_index ON post(postDate, read, isHidden);
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
@@ -66,14 +69,14 @@ BEGIN
 END;
 
 upsert:
-INSERT INTO post(id, sourceId, title, description, imageUrl, date, syncedAt, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description, :imageUrl, :date, :syncedAt, :link, :commnetsLink)
+INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink)
+VALUES (:id,  :sourceId, :title, :description, :imageUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commnetsLink)
 ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
     description = excluded.description,
     imageUrl = excluded.imageUrl,
-    date = CASE WHEN :isDateParsedCorrectly == 1 AND date < excluded.date THEN excluded.date ELSE date END;
+    postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END;
 
 allPostsCount:
 SELECT COUNT(post.id) FROM post
@@ -81,7 +84,7 @@ WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
-  post.date > :postsAfter AND
+  post.postDate > :postsAfter AND
   post.syncedAt < :lastSyncedAt;
 
 allPosts:
@@ -92,7 +95,7 @@ WITH featuredPosts AS (
     post.title,
     post.description,
     post.imageUrl,
-    post.date,
+    post.postDate,
     post.link,
     post.commentsLink,
     post.bookmarked,
@@ -109,9 +112,9 @@ WITH featuredPosts AS (
     post.isHidden == 0 AND
     (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
     post.imageUrl IS NOT NULL AND
-    post.date > :postsAfter AND
+    post.postDate > :postsAfter AND
     post.syncedAt < :lastSyncedAt
-  ORDER BY post.date DESC
+  ORDER BY post.postDate DESC
   LIMIT :numberOfFeaturedPosts
 )
 
@@ -125,7 +128,7 @@ SELECT
   post.title,
   post.description,
   post.imageUrl,
-  post.date,
+  post.postDate,
   post.link,
   post.commentsLink,
   post.bookmarked,
@@ -142,9 +145,9 @@ WHERE
   post.isHidden == 0 AND
   (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
   post.id NOT IN (SELECT id FROM featuredPosts) AND
-  post.date > :postsAfter AND
+  post.postDate > :postsAfter AND
   post.syncedAt < :lastSyncedAt
-ORDER BY isFeatured DESC, date DESC
+ORDER BY isFeatured DESC, postDate DESC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
@@ -155,13 +158,13 @@ UPDATE post SET read = :read WHERE id = :id;
 
 deleteReadPosts:
 DELETE FROM post
-WHERE post.read == 1 AND post.date < :before
+WHERE post.read == 1 AND post.postDate < :before
 RETURNING post.sourceId;
 
 markPostsAsRead:
 UPDATE post
 SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE (sourceId = :sourceId OR :sourceId IS NULL) AND date > :after;
+WHERE (sourceId = :sourceId OR :sourceId IS NULL) AND postDate > :after;
 
 post:
 SELECT * FROM post
@@ -173,7 +176,7 @@ WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   read != 1 AND
-  date > :after;
+  postDate > :after;
 
 unreadSinceLastSync:
 SELECT COUNT(post.id),
@@ -187,7 +190,7 @@ SELECT COUNT(post.id),
       ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
       post.isHidden == 0 AND
       read != 1 AND
-      post.date > :postsAfter AND
+      post.postDate > :postsAfter AND
       post.syncedAt > :lastSyncedAt
     ORDER BY post.syncedAt
     LIMIT 3
@@ -203,7 +206,7 @@ SELECT COUNT(post.id),
       ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
       post.isHidden == 0 AND
       read != 1 AND
-      post.date > :postsAfter AND
+      post.postDate > :postsAfter AND
       post.syncedAt > :lastSyncedAt
     ORDER BY post.syncedAt
     LIMIT 3
@@ -214,7 +217,7 @@ WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
   post.isHidden == 0 AND
   read != 1 AND
-  post.date > :postsAfter AND
+  post.postDate > :postsAfter AND
   post.syncedAt > :lastSyncedAt;
 
 countPostsForFeed:
@@ -227,7 +230,7 @@ INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   post.isHidden == 0 AND
   post.read == 0
-ORDER BY date DESC;
+ORDER BY postDate DESC;
 
 widgetUnreadPosts:
 SELECT
@@ -236,7 +239,7 @@ SELECT
   post.title,
   post.description,
   post.imageUrl,
-  post.date,
+  post.postDate,
   post.link,
   post.commentsLink,
   post.bookmarked,
@@ -250,5 +253,5 @@ INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   post.isHidden == 0 AND
   post.read == 0
-ORDER BY date DESC
+ORDER BY postDate DESC
 LIMIT :numberOfPosts OFFSET :offset;
