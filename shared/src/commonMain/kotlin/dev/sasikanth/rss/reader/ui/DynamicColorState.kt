@@ -67,7 +67,7 @@ internal class DynamicColorState(
   var darkAppColorScheme by mutableStateOf(defaultDarkAppColorScheme)
     private set
 
-  private val cache = lruCache<String, AppColorScheme>(maxSize = 4)
+  private val cache = lruCache<String, AppColorScheme>(maxSize = 10)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
     val normalizedProgress =
