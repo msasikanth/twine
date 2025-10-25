@@ -41,7 +41,13 @@ interface DataComponent :
   fun providesDatabase(driver: SqlDriver): ReaderDatabase {
     return ReaderDatabase(
       driver = driver,
-      postAdapter = Post.Adapter(dateAdapter = DateAdapter, syncedAtAdapter = DateAdapter),
+      postAdapter =
+        Post.Adapter(
+          postDateAdapter = DateAdapter,
+          createdAtAdapter = DateAdapter,
+          updatedAtAdapter = DateAdapter,
+          syncedAtAdapter = DateAdapter
+        ),
       feedAdapter =
         Feed.Adapter(
           createdAtAdapter = DateAdapter,

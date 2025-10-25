@@ -45,8 +45,8 @@ SELECT
   COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed_search fs
 INNER JOIN feed f ON f.id = fs.id
-LEFT JOIN post p ON p.sourceId = f.id AND p.date > :postsAfter
+LEFT JOIN post p ON p.sourceId = f.id AND p.postDate > :postsAfter
 WHERE fs.name MATCH :searchQuery
 GROUP BY f.id
-ORDER BY pinnedAt DESC , createdAt DESC
+ORDER BY pinnedAt DESC , f.createdAt DESC
 LIMIT :limit OFFSET :offset;

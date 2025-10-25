@@ -29,6 +29,9 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEATURED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_ITEM
@@ -164,6 +167,22 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         }
         commentsLink.isNullOrBlank() && name == TAG_COMMENTS -> {
           commentsLink = parser.nextText()
+        }
+        name == TAG_MEDIA_GROUP -> {
+          while (parser.next() != EventType.END_TAG) {
+            if (parser.eventType != EventType.START_TAG) continue
+
+            when {
+              parser.name == TAG_MEDIA_THUMBNAIL -> {
+                image = parser.getAttributeValue(parser.namespace, TAG_URL)
+                parser.nextTag()
+              }
+              parser.name == TAG_MEDIA_CONTENT && description.isNullOrBlank() -> {
+                description = description.orEmpty().ifBlank { parser.nextText() }
+              }
+              else -> parser.skipSubTree()
+            }
+          }
         }
         else -> parser.skipSubTree()
       }

@@ -207,6 +207,22 @@ class XmlFeedParserTest {
               commentsLink = "https://example/post-with-comments/comments",
               isDateParsedCorrectly = true
             ),
+            PostPayload(
+              title = "Post with media group",
+              link = "https://example.com/post-with-media-group",
+              description = "Media group description",
+              rawContent =
+                """
+                  <html>
+                   <body>Media group description</body>
+                  </html>
+              """
+                  .trimIndent(),
+              imageUrl = "https://example.com/media/maxresdefault.jpg",
+              date = 1685005200000,
+              commentsLink = null,
+              isDateParsedCorrectly = true
+            ),
           )
       )
 
