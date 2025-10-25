@@ -238,7 +238,7 @@ internal fun HomeScreen(
       animateDpAsState(
         targetValue =
           if (postsListState.isScrollingTowardsUp()) {
-            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding()
+            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
           } else {
             0.dp
           },

@@ -52,7 +52,7 @@ import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.BottomSheetExpandedConte
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 116.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
 private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
 private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
