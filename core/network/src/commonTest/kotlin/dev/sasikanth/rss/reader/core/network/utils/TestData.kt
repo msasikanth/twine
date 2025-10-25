@@ -68,6 +68,17 @@ const val rssXmlContent =
       <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
       <comments>https://example/post-with-comments/comments</comments>
     </item>
+    <item>
+      <title>Post with media group</title>
+      <description>Media group description</description>
+      <link>https://example.com/post-with-media-group</link>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <media:group>
+        <media:title>Post with media group</media:title>
+        <media:description>Media group description</media:description>
+        <media:thumbnail url="https://example.com/media/maxresdefault.jpg" />
+    </media:group>
+    </item>
   </channel>
   </rss>
   """
