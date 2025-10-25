@@ -81,8 +81,8 @@ internal class DynamicColorState(
 
     val (startLight, startDark, endLight, endDark) =
       withContext(Dispatchers.Default) {
-        val defaultLightSeedColor = defaultLightAppColorScheme.tintedForeground
-        val defaultDarkSeedColor = defaultDarkAppColorScheme.tintedForeground
+        val defaultLightSeedColor = defaultLightAppColorScheme.primary
+        val defaultDarkSeedColor = defaultDarkAppColorScheme.primary
 
         val startLight =
           cache["light_$fromSeedColor"]
