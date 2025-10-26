@@ -26,6 +26,13 @@ const val rssXmlContent =
       <media:content url="https://example.com/first-post-media-url" />
     </item>
     <item>
+      <title>Post with media thumbnail</title>
+      <link>https://example.com/post-media-thumbnail</link>
+      <description>Post with media thumbnail</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <media:thumbnail url="https://example.com/media/post-with-media-thumbnail" />
+    </item>
+    <item>
       <title>Post without image</title>
       <link>https://example.com/second-post</link>
       <description>Second post description.</description>

@@ -109,6 +109,22 @@ class XmlFeedParserTest {
               isDateParsedCorrectly = true
             ),
             PostPayload(
+              title = "Post with media thumbnail",
+              link = "https://example.com/post-media-thumbnail",
+              description = "Post with media thumbnail",
+              rawContent =
+                """
+                  <html>
+                   <body>Post with media thumbnail</body>
+                  </html>
+              """
+                  .trimIndent(),
+              imageUrl = "https://example.com/media/post-with-media-thumbnail",
+              date = 1685005200000,
+              commentsLink = null,
+              isDateParsedCorrectly = true
+            ),
+            PostPayload(
               title = "Post without image",
               link = "https://example.com/second-post",
               description = "Second post description.",
