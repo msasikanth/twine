@@ -50,13 +50,13 @@ jobs:
         run: ./gradlew --no-daemon androidApp:bundleRelease androidApp:assembleRelease
 
       - name: Upload Release Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release.aab
           path: androidApp/build/outputs/bundle/release/androidApp-release.aab
 
       - name: Upload Release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release.apk
           path: androidApp/build/outputs/apk/release/androidApp-release.apk
