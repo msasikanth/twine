@@ -81,7 +81,7 @@ class XmlFeedParser(
     private val htmlTag = Regex("<.+?>")
     private val blankLine = Regex("(?m)^[ \t]*\r?\n")
 
-    internal val imageTags = setOf("media:content")
+    internal val imageTags = setOf("media:content", "media:thumbnail")
 
     internal const val TAG_RSS_CHANNEL = "channel"
     internal const val TAG_ATOM_FEED = "feed"
