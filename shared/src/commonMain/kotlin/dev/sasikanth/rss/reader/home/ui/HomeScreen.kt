@@ -356,7 +356,7 @@ internal fun HomeScreen(
                         modifier = Modifier.fillMaxSize(),
                         paddingValues = paddingValues,
                         featuredPosts = featuredPosts,
-                        posts = posts,
+                        posts = { posts },
                         useDarkTheme = useDarkTheme,
                         listState = postsListState,
                         featuredPostsPagerState = featuredPostsPagerState,

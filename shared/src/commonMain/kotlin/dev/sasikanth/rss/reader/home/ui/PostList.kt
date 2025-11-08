@@ -39,11 +39,11 @@ import kotlinx.coroutines.flow.onEach
 internal fun PostsList(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
-  posts: LazyPagingItems<PostWithMetadata>,
   useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
+  posts: () -> LazyPagingItems<PostWithMetadata>,
   postsScrolled: (List<String>) -> Unit,
   markScrolledPostsAsRead: () -> Unit,
   markPostAsReadOnScroll: (String) -> Unit,
@@ -98,6 +98,7 @@ internal fun PostsList(
       }
     }
 
+    val posts = posts.invoke()
     items(
       count = (posts.itemCount - featuredPosts.size).coerceAtLeast(0),
       key = { index ->
