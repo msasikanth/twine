@@ -44,9 +44,9 @@ internal fun PostsList(
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
-  markPostAsRead: (String) -> Unit,
   postsScrolled: (List<String>) -> Unit,
   markScrolledPostsAsRead: () -> Unit,
+  markPostAsReadOnScroll: (String) -> Unit,
   onPostClicked: (post: PostWithMetadata, postIndex: Int) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
@@ -75,18 +75,6 @@ internal fun PostsList(
       .collect { markScrolledPostsAsRead() }
   }
 
-  LaunchedEffect(featuredPostsPagerState) {
-    snapshotFlow { featuredPostsPagerState.settledPage }
-      .debounce(2.seconds)
-      .collect {
-        val featuredPost = featuredPosts.getOrNull(it) ?: return@collect
-
-        if (featuredPost.postWithMetadata.read) return@collect
-
-        markPostAsRead(featuredPost.postWithMetadata.id)
-      }
-  }
-
   LazyColumn(
     modifier = modifier,
     state = listState,
@@ -100,6 +88,7 @@ internal fun PostsList(
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
           useDarkTheme = useDarkTheme,
+          markPostAsReadOnScroll = markPostAsReadOnScroll,
           onItemClick = onPostClicked,
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
