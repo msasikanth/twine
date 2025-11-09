@@ -55,7 +55,6 @@ import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -103,8 +102,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -143,7 +140,8 @@ internal fun HomeScreen(
 
   val posts = state.posts?.collectAsLazyPagingItems()
   val featuredPosts by
-    featuredPosts(posts, state.homeViewMode).collectAsState(initial = persistentListOf())
+    featuredPosts({ posts }, state.homeViewMode)
+      .collectAsStateWithLifecycle(initialValue = persistentListOf())
 
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
@@ -577,11 +575,13 @@ private fun SheetState.progressAsState(): State<Float> {
 
 @Composable
 fun featuredPosts(
-  posts: LazyPagingItems<PostWithMetadata>?,
+  posts: () -> LazyPagingItems<PostWithMetadata>?,
   homeViewMode: HomeViewMode,
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
-  return remember(posts?.itemSnapshotList?.items, homeViewMode) {
+  val posts = posts.invoke()
+
+  return remember(posts?.itemSnapshotList?.hashCode(), homeViewMode) {
     flow {
       if (homeViewMode != HomeViewMode.Default || posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
@@ -593,9 +593,11 @@ fun featuredPosts(
         MutableList(featuredPostsCount) { index ->
           val post = posts[index]
           if (post != null && post.imageUrl.isNullOrBlank().not()) {
+            val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
+
             FeaturedPostItem(
               postWithMetadata = post,
-              seedColor = null,
+              seedColor = existingSeedColor,
             )
           } else {
             null
@@ -605,26 +607,22 @@ fun featuredPosts(
       emit(mutablePostsList.filterNotNull().toImmutableList())
 
       val updatedPosts =
-        mutablePostsList.mapIndexedNotNull { index, item ->
-          item?.let {
-            if (it.seedColor == null && !it.postWithMetadata.imageUrl.isNullOrBlank()) {
-              val deferredSeedColor = coroutineScope {
-                async { seedColorExtractor.calculateSeedColor(it.postWithMetadata.imageUrl) }
-              }
+        mutablePostsList
+          .mapNotNull { item ->
+            if (item == null) return@mapNotNull null
 
-              it to deferredSeedColor
+            if (item.seedColor != null) return@mapNotNull item
+
+            return@mapNotNull if (!item.postWithMetadata.imageUrl.isNullOrBlank()) {
+              val seedColor = seedColorExtractor.calculateSeedColor(item.postWithMetadata.imageUrl)
+              item.copy(seedColor = seedColor)
             } else {
               null
             }
           }
-        }
-
-      val finalFeaturedPosts =
-        updatedPosts
-          .map { (post, deferredSeedColor) -> post.copy(seedColor = deferredSeedColor.await()) }
           .toImmutableList()
 
-      emit(finalFeaturedPosts)
+      emit(updatedPosts)
     }
   }
 }
