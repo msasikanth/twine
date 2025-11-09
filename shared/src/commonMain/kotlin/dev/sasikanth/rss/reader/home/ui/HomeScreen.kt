@@ -313,7 +313,7 @@ internal fun HomeScreen(
 
                 val adjustedIndex =
                   if (firstVisibleItemIndexAfterOffset == 0) {
-                    firstVisibleItemIndexAfterOffset
+                    featuredPostsPagerState.settledPage
                   } else {
                     firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
                   }
