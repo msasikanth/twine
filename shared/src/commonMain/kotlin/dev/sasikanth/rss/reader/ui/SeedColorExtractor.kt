@@ -72,6 +72,8 @@ class SeedColorExtractor(
       }
     }
 
+  fun cachedSeedColor(url: String?) = if (url.isNullOrBlank()) null else lruCache[url]
+
   private fun ImageBitmap.seedColor(): Int {
     val bitmapPixels = IntArray(width * height)
     readPixels(buffer = bitmapPixels)
