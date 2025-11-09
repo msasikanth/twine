@@ -39,14 +39,14 @@ import kotlinx.coroutines.flow.onEach
 internal fun PostsList(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
-  posts: LazyPagingItems<PostWithMetadata>,
   useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
-  markPostAsRead: (String) -> Unit,
+  posts: () -> LazyPagingItems<PostWithMetadata>,
   postsScrolled: (List<String>) -> Unit,
   markScrolledPostsAsRead: () -> Unit,
+  markPostAsReadOnScroll: (String) -> Unit,
   onPostClicked: (post: PostWithMetadata, postIndex: Int) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
@@ -75,18 +75,6 @@ internal fun PostsList(
       .collect { markScrolledPostsAsRead() }
   }
 
-  LaunchedEffect(featuredPostsPagerState) {
-    snapshotFlow { featuredPostsPagerState.settledPage }
-      .debounce(2.seconds)
-      .collect {
-        val featuredPost = featuredPosts.getOrNull(it) ?: return@collect
-
-        if (featuredPost.postWithMetadata.read) return@collect
-
-        markPostAsRead(featuredPost.postWithMetadata.id)
-      }
-  }
-
   LazyColumn(
     modifier = modifier,
     state = listState,
@@ -100,6 +88,7 @@ internal fun PostsList(
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
           useDarkTheme = useDarkTheme,
+          markPostAsReadOnScroll = markPostAsReadOnScroll,
           onItemClick = onPostClicked,
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
@@ -109,6 +98,7 @@ internal fun PostsList(
       }
     }
 
+    val posts = posts.invoke()
     items(
       count = (posts.itemCount - featuredPosts.size).coerceAtLeast(0),
       key = { index ->

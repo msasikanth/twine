@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.layout.onFirstVisible
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
@@ -75,6 +76,7 @@ internal fun FeaturedSection(
   pagerState: PagerState,
   useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
+  markPostAsReadOnScroll: (String) -> Unit,
   onItemClick: (PostWithMetadata, postIndex: Int) -> Unit,
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
@@ -127,7 +129,14 @@ internal fun FeaturedSection(
         val imageGraphicsLayer = rememberGraphicsLayer()
         val blurRadius = 100.dp
 
-        Box {
+        Box(
+          modifier =
+            Modifier.onFirstVisible(minDurationMs = 500) {
+              if (featuredPost.postWithMetadata.read) return@onFirstVisible
+
+              markPostAsReadOnScroll(postWithMetadata.id)
+            }
+        ) {
           if (canBlurImage) {
             FeaturedSectionBackground(
               modifier =

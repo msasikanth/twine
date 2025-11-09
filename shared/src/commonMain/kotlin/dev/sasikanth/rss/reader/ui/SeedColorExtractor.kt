@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.ui
 
 import androidx.collection.LruCache
 import androidx.collection.lruCache
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
@@ -33,6 +34,7 @@ import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@Stable
 class SeedColorExtractor(
   private val imageLoader: Lazy<ImageLoader>,
   private val platformContext: Lazy<PlatformContext>,
@@ -69,6 +71,8 @@ class SeedColorExtractor(
         }
       }
     }
+
+  fun cachedSeedColor(url: String?) = if (url.isNullOrBlank()) null else lruCache[url]
 
   private fun ImageBitmap.seedColor(): Int {
     val bitmapPixels = IntArray(width * height)
