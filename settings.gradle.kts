@@ -50,3 +50,5 @@ include(":core:network")
 include(":core:data")
 
 include(":resources:icons")
+
+include(":baselineprofile")

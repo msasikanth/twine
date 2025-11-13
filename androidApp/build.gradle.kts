@@ -21,6 +21,7 @@ plugins {
   alias(libs.plugins.ksp)
   alias(libs.plugins.bugsnag)
   alias(libs.plugins.kotlin.compose)
+  alias(libs.plugins.baselineprofile)
 }
 
 kotlin {
@@ -93,6 +94,8 @@ android {
 }
 
 dependencies {
+  implementation(libs.profileinstaller)
+  "baselineProfile"(project(":baselineprofile"))
   debugImplementation(libs.leakcanary)
 
   implementation(project(":shared"))
