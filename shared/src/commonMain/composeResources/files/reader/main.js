@@ -12,6 +12,11 @@ function isRedditUrl(url) {
   return redditDomainPattern.test(url);
 }
 
+function isXkcdUrl(url) {
+  const xkcdDomainPattern = /^https?:\/\/(?:www\.)?xkcd\.com/i;
+  return xkcdDomainPattern.test(url);
+}
+
 function formatRedditPost(html) {
 //  const imagePattern = /<a href="([^"]+)">\s*<img src="([^"]+)"\s*alt="([^"]+)" title="([^"]+)"\s*\/>\s*<\/a>/;
   const submitterPattern = /(?:submitted by\s*<a href="([^"]+)">|user\/([^"]+)[^<]*<\/a>)/;
@@ -79,6 +84,15 @@ function removeFirstImageTagByUrl(doc, imageUrl) {
   }
 }
 
+function getImageCaption(markdown) {
+  const captionPattern = /!\[.*\]\(.*\s+"(.*)"\)/;
+  const match = markdown.match(captionPattern);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return null;
+}
+
 async function parseReaderContent(link, bannerImage, html) {
   const cleanedHtml = removeHeadTag(html);
   const sanitizedHtml = isRedditUrl(link)
@@ -90,17 +104,25 @@ async function parseReaderContent(link, bannerImage, html) {
     const parser = new DOMParser();
     const htmlWithBase = `<head><base href="${link}"></head>${sanitizedHtml}`;
     doc = parser.parseFromString(htmlWithBase, 'text/html');
+
+    const turndownService = new TurndownService()
+
+    if (isXkcdUrl(link)) {
+      const markdown = turndownService.turndown(doc.documentElement.outerHTML)
+      const imageCaption = getImageCaption(markdown)
+
+      return JSON.stringify({ content: imageCaption, excerpt: null });
+    } else {
+      removeFirstH1(doc);
+      processIFrames(doc);
+      removeFirstImageTagByUrl(doc, bannerImage);
+
+      const article = new Readability(doc).parse();
+      const markdown = turndownService.turndown(article.content)
+      return JSON.stringify({ content: markdown, excerpt: article.excerpt });
+    }
   } catch (error) {
     console.error("Error parsing HTML:", error);
     return null;
   }
-
-  removeFirstH1(doc);
-  processIFrames(doc);
-  removeFirstImageTagByUrl(doc, bannerImage);
-
-  const article = new Readability(doc).parse();
-  const turndownService = new TurndownService()
-  const markdown = turndownService.turndown(article.content)
-  return JSON.stringify({ content: markdown, excerpt: article.excerpt });
 }
