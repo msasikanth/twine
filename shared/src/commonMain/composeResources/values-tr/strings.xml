@@ -104,6 +104,7 @@
     <string name="deleteTagTitle">Etiketi sil?</string>
     <string name="deleteTagDesc">Etiket silinecek ve atanan tüm akışlardan kaldırılacak. Akışlarınız silinmeyecek</string>
     <string name="feedOptionShare">Paylaş</string>
+    <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Web sitesi</string>
     <string name="feedOptionRemove">Kaldır</string>
     <string name="feedTitleHint">Başlık</string>
