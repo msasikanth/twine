@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -118,6 +119,7 @@ import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
+private val CONTENT_MAX_WIDTH = 640.dp
 private val json = Json {
   ignoreUnknownKeys = true
   isLenient = true
@@ -215,7 +217,7 @@ internal fun ReaderPage(
             ),
         ) {
           LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().requiredWidthIn(max = CONTENT_MAX_WIDTH),
             overscrollEffect = null,
             contentPadding =
               PaddingValues(
