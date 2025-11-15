@@ -18,13 +18,14 @@ package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -39,6 +40,7 @@ private const val PARALLAX_MULTIPLIER = 350f
 fun FeaturedImage(
   imageUrl: String?,
   modifier: Modifier = Modifier,
+  isComicStrip: Boolean = false,
   parallaxProgress: (() -> Float)? = null,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
@@ -49,19 +51,31 @@ fun FeaturedImage(
       else -> Dp.Unspecified
     }
 
+  val comicStripImageModifier =
+    if (isComicStrip) {
+      Modifier.fillMaxWidth().clip(RectangleShape)
+    } else {
+      Modifier.aspectRatio(16f / 9f)
+        .heightIn(max = imageMaxHeight)
+        .clip(MaterialTheme.shapes.extraLarge)
+    }
+  val contentScale =
+    if (isComicStrip) {
+      ContentScale.FillWidth
+    } else {
+      ContentScale.Crop
+    }
+
   imageUrl?.let { imageUrl ->
     AsyncImage(
       url = imageUrl,
       modifier =
-        Modifier.aspectRatio(16f / 9f)
-          .heightIn(max = imageMaxHeight)
-          .clip(MaterialTheme.shapes.extraLarge)
+        Modifier.then(comicStripImageModifier)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .scale(1.15f)
           .graphicsLayer { translationX = (parallaxProgress?.invoke() ?: 0f) * PARALLAX_MULTIPLIER }
           .then(modifier),
       contentDescription = null,
-      contentScale = ContentScale.Crop,
+      contentScale = contentScale,
     )
   }
 }
