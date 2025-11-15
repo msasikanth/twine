@@ -189,19 +189,14 @@ internal fun FeaturedSection(
           ) {
             FeaturedImage(
               modifier =
-                Modifier.graphicsLayer {
-                    val pageOffset = pagerState.getOffsetFractionForPage(page)
-                    translationX = pageOffset * 350f
-                    scaleX = 1.15f
-                    scaleY = 1.15f
-                  }
-                  .drawWithContent {
-                    imageGraphicsLayer.record { this@drawWithContent.drawContent() }
-                    isImageRecorded = true
+                Modifier.drawWithContent {
+                  imageGraphicsLayer.record { this@drawWithContent.drawContent() }
+                  isImageRecorded = true
 
-                    drawLayer(imageGraphicsLayer)
-                  },
-              image = postWithMetadata.imageUrl,
+                  drawLayer(imageGraphicsLayer)
+                },
+              imageUrl = postWithMetadata.imageUrl,
+              parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
             )
           }
         }

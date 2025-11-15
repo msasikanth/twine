@@ -24,6 +24,8 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,31 +33,32 @@ import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
+private const val PARALLAX_MULTIPLIER = 350f
+
 @Composable
 fun FeaturedImage(
-  image: String?,
+  imageUrl: String?,
   modifier: Modifier = Modifier,
+  parallaxProgress: (() -> Float)? = null,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val imageMaxHeight =
     when {
-      sizeClass >= WindowWidthSizeClass.Expanded -> {
-        360.dp
-      }
-      sizeClass >= WindowWidthSizeClass.Medium -> {
-        250.dp
-      }
+      sizeClass >= WindowWidthSizeClass.Expanded -> 360.dp
+      sizeClass >= WindowWidthSizeClass.Medium -> 250.dp
       else -> Dp.Unspecified
     }
 
-  if (!image.isNullOrBlank()) {
+  imageUrl?.let { imageUrl ->
     AsyncImage(
-      url = image,
+      url = imageUrl,
       modifier =
         Modifier.aspectRatio(16f / 9f)
           .heightIn(max = imageMaxHeight)
           .clip(MaterialTheme.shapes.extraLarge)
           .background(AppTheme.colorScheme.surfaceContainerLowest)
+          .scale(1.15f)
+          .graphicsLayer { translationX = (parallaxProgress?.invoke() ?: 0f) * PARALLAX_MULTIPLIER }
           .then(modifier),
       contentDescription = null,
       contentScale = ContentScale.Crop,
