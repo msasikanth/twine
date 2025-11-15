@@ -79,7 +79,6 @@ import com.mikepenz.markdown.compose.LocalMarkdownTypography
 import com.mikepenz.markdown.compose.LocalReferenceLinkHandler
 import com.mikepenz.markdown.compose.MarkdownElement
 import com.mikepenz.markdown.compose.components.MarkdownComponents
-import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import com.mikepenz.markdown.model.ReferenceLinkHandlerImpl
@@ -311,18 +310,8 @@ private fun PostHeader(
     if (!postImage.isNullOrBlank()) {
       Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
         FeaturedImage(
-          modifier =
-            Modifier.graphicsLayer {
-              translationX =
-                if (page in 0..pagerState.pageCount) {
-                  pagerState.getOffsetFractionForPage(page) * 350f
-                } else {
-                  0f
-                }
-              scaleX = 1.15f
-              scaleY = 1.15f
-            },
-          image = postImage
+          imageUrl = postImage,
+          parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
         )
       }
 
