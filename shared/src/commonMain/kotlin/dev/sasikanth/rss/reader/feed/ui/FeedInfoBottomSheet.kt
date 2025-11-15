@@ -68,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -81,15 +82,15 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.feed.FeedEvent
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.resources.icons.CopyLink
 import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
-import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
-import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
+import dev.sasikanth.rss.reader.utils.toClipEntry
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -98,7 +99,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.alwaysFetchSourceArticle
-import twine.shared.generated.resources.feedOptionShare
+import twine.shared.generated.resources.feedOptionCopyLink
 import twine.shared.generated.resources.feedOptionWebsite
 import twine.shared.generated.resources.feedTitleHint
 import twine.shared.generated.resources.markAsRead
@@ -332,15 +333,15 @@ private fun FeedLabelInput(
 private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Modifier = Modifier) {
   val coroutineScope = rememberCoroutineScope()
   val linkHandler = LocalLinkHandler.current
-  val shareHandler = LocalShareHandler.current
+  val clipboard = LocalClipboard.current
   var showConfirmDialog by remember { mutableStateOf(false) }
 
   Row(modifier = modifier) {
     FeedOptionItem(
-      icon = TwineIcons.Share,
-      text = stringResource(Res.string.feedOptionShare),
+      icon = TwineIcons.CopyLink,
+      text = stringResource(Res.string.feedOptionCopyLink),
       modifier = Modifier.weight(1f),
-      onOptionClick = { shareHandler.share(feed.link) }
+      onOptionClick = { coroutineScope.launch { clipboard.setClipEntry(feed.link.toClipEntry()) } }
     )
 
     FeedOptionItem(

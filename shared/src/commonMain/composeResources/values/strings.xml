@@ -104,6 +104,7 @@
     <string name="deleteTagTitle">Delete tag?</string>
     <string name="deleteTagDesc">Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted</string>
     <string name="feedOptionShare">Share</string>
+    <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Website</string>
     <string name="feedOptionRemove">Remove</string>
     <string name="feedTitleHint">Title</string>
