@@ -26,9 +26,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import co.touchlab.kermit.Logger
+
+expect fun String.toClipEntry(): ClipEntry
 
 fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier {
   return this.layout { measurable, constraints ->

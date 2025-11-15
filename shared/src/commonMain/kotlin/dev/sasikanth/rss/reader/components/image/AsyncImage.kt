@@ -15,16 +15,14 @@
  */
 package dev.sasikanth.rss.reader.components.image
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
 
@@ -35,34 +33,24 @@ internal fun AsyncImage(
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500),
-  backgroundColor: Color? = null,
   colorFilter: ColorFilter? = null,
+  alignment: Alignment = Alignment.Center,
 ) {
-  val backgroundColorModifier =
-    if (backgroundColor != null) {
-      Modifier.background(color = backgroundColor)
-    } else {
-      Modifier
-    }
+  val context = LocalPlatformContext.current
 
-  Box(modifier.then(backgroundColorModifier)) {
-    val context = LocalPlatformContext.current
-    val imageRequest =
-      remember(url, context) {
-        ImageRequest.Builder(context)
-          .data(url)
-          .size(size)
-          .diskCacheKey(url)
-          .memoryCacheKey(url)
-          .build()
-      }
-
-    coil3.compose.AsyncImage(
-      model = imageRequest,
-      contentDescription = contentDescription,
-      modifier = Modifier.matchParentSize(),
-      contentScale = contentScale,
-      colorFilter = colorFilter,
-    )
-  }
+  coil3.compose.AsyncImage(
+    model =
+      ImageRequest.Builder(context)
+        .data(url)
+        .size(size)
+        .diskCacheKey(url)
+        .memoryCacheKey(url)
+        .crossfade(true)
+        .build(),
+    contentDescription = contentDescription,
+    modifier = modifier,
+    contentScale = contentScale,
+    colorFilter = colorFilter,
+    alignment = alignment,
+  )
 }
