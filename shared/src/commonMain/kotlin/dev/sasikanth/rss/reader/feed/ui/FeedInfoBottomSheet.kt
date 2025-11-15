@@ -72,6 +72,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -324,6 +325,14 @@ private fun FeedLabelInput(
       HorizontalDivider(
         color = AppTheme.colorScheme.tintedHighlight,
         modifier = Modifier.padding(end = 32.dp)
+      )
+
+      Text(
+        text = feed.link,
+        maxLines = 2,
+        overflow = TextOverflow.MiddleEllipsis,
+        style = MaterialTheme.typography.labelSmall,
+        color = AppTheme.colorScheme.textEmphasisMed
       )
     }
   }
