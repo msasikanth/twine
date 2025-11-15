@@ -89,6 +89,7 @@ import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
@@ -311,6 +312,7 @@ private fun PostHeader(
       Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
         FeaturedImage(
           imageUrl = postImage,
+          isComicStrip = UrlUtils.isComicStrip(postImage),
           parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
         )
       }
