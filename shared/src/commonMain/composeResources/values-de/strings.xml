@@ -104,6 +104,7 @@
     <string name="deleteTagTitle">Tag löschen?</string>
     <string name="deleteTagDesc">Das Tag wird gelöscht und aus allen zugewiesenen Feeds entfernt. Ihre Feeds werden nicht gelöscht</string>
     <string name="feedOptionShare">Teilen</string>
+    <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Website</string>
     <string name="feedOptionRemove">Entfernen</string>
     <string name="feedTitleHint">Titel</string>
