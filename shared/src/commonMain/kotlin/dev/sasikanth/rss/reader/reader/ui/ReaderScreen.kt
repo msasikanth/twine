@@ -237,7 +237,14 @@ internal fun ReaderScreen(
       Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
         topBar = {
+          val topBarScrimColor = AppTheme.colorScheme.backdrop
           CenterAlignedTopAppBar(
+            modifier =
+              Modifier.drawBehind {
+                drawRect(
+                  brush = Brush.verticalGradient(listOf(topBarScrimColor, Color.Transparent))
+                )
+              },
             expandedHeight = 72.dp,
             scrollBehavior = scrollBehaviour,
             colors =
