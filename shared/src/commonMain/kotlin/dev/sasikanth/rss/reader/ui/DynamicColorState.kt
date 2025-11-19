@@ -70,8 +70,6 @@ internal class DynamicColorState(
   private val cache = lruCache<String, AppColorScheme>(maxSize = 10)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
-    if (fromSeedColor == null && toSeedColor == null) return
-
     val normalizedProgress =
       ease(
         if (progress < -EPSILON) {
