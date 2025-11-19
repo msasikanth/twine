@@ -61,6 +61,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -95,6 +96,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -173,55 +176,55 @@ internal fun HomeScreen(
     }
   }
 
-  //  LaunchedEffect(featuredPostsPagerState, featuredPosts) {
-  //    if (featuredPosts.isEmpty()) return@LaunchedEffect
-  //
-  //    snapshotFlow {
-  //        runCatching {
-  //            val settledPage = featuredPostsPagerState.settledPage
-  //            featuredPostsPagerState.getOffsetFractionForPage(settledPage)
-  //          }
-  //          .getOrNull()
-  //          ?: 0f
-  //      }
-  //      .collect { offset ->
-  //        // The default snap position of the pager is 0.5f, that means the targetPage
-  //        // state only changes after reaching half way point. We instead want it to scale
-  //        // as we start swiping.
-  //        //
-  //        // Instead of using EPSILON for snap threshold, we are doing that calculation
-  //        // as the page offset changes
-  //        //
-  //        val settledPage = featuredPostsPagerState.settledPage
-  //        val activePost = runCatching { featuredPosts[settledPage] }.getOrNull()
-  //
-  //        if (activePost == null) return@collect
-  //
-  //        val fromItem =
-  //          when {
-  //            offset < -EPSILON -> {
-  //              runCatching { featuredPosts[settledPage - 1] }.getOrNull() ?: activePost
-  //            }
-  //            else -> activePost
-  //          }
-  //        val toItem =
-  //          when {
-  //            offset > EPSILON -> {
-  //              runCatching { featuredPosts[settledPage + 1] }.getOrNull() ?: activePost
-  //            }
-  //            else -> activePost
-  //          }
-  //
-  //        val fromSeedColor = fromItem.seedColor?.let { Color(it) }
-  //        val toSeedColor = toItem.seedColor?.let { Color(it) }
-  //
-  //        dynamicColorState.animate(
-  //          fromSeedColor = fromSeedColor,
-  //          toSeedColor = toSeedColor,
-  //          progress = offset
-  //        )
-  //      }
-  //  }
+  LaunchedEffect(featuredPostsPagerState, featuredPosts) {
+    if (featuredPosts.isEmpty()) return@LaunchedEffect
+
+    snapshotFlow {
+        runCatching {
+            val settledPage = featuredPostsPagerState.settledPage
+            featuredPostsPagerState.getOffsetFractionForPage(settledPage)
+          }
+          .getOrNull()
+          ?: 0f
+      }
+      .collect { offset ->
+        // The default snap position of the pager is 0.5f, that means the targetPage
+        // state only changes after reaching half way point. We instead want it to scale
+        // as we start swiping.
+        //
+        // Instead of using EPSILON for snap threshold, we are doing that calculation
+        // as the page offset changes
+        //
+        val settledPage = featuredPostsPagerState.settledPage
+        val activePost = runCatching { featuredPosts[settledPage] }.getOrNull()
+
+        if (activePost == null) return@collect
+
+        val fromItem =
+          when {
+            offset < -EPSILON -> {
+              runCatching { featuredPosts[settledPage - 1] }.getOrNull() ?: activePost
+            }
+            else -> activePost
+          }
+        val toItem =
+          when {
+            offset > EPSILON -> {
+              runCatching { featuredPosts[settledPage + 1] }.getOrNull() ?: activePost
+            }
+            else -> activePost
+          }
+
+        val fromSeedColor = fromItem.seedColor?.let { Color(it) }
+        val toSeedColor = toItem.seedColor?.let { Color(it) }
+
+        dynamicColorState.animate(
+          fromSeedColor = fromSeedColor,
+          toSeedColor = toSeedColor,
+          progress = offset
+        )
+      }
+  }
 
   BackHandler(
     enabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
