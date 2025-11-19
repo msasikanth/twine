@@ -133,10 +133,6 @@ internal fun FeaturedSection(
             FeaturedSectionBackground(
               modifier =
                 Modifier.ignoreHorizontalParentPadding(horizontal = 24.dp).graphicsLayer {
-                  val pageOffset = pagerState.getOffsetFractionForPage(page)
-
-                  translationX = size.width * pageOffset
-                  alpha = calculateAlpha(pageOffset)
                   renderEffect =
                     BlurEffect(
                       radiusX = blurRadius.toPx(),
