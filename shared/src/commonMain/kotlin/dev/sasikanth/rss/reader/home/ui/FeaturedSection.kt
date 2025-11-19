@@ -16,8 +16,6 @@
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.EaseInSine
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,7 +29,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -116,11 +113,6 @@ internal fun FeaturedSection(
         val post = featuredPosts.getOrNull(page)
         post?.let { post.postWithMetadata.id + post.postWithMetadata.sourceId } ?: page
       },
-      flingBehavior =
-        PagerDefaults.flingBehavior(
-          state = pagerState,
-          snapAnimationSpec = spring(stiffness = Spring.StiffnessVeryLow)
-        ),
     ) { page ->
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
