@@ -21,7 +21,6 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
-import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
@@ -29,8 +28,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
-import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
-import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.data.database.BookmarkQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupFeedQueries
 import dev.sasikanth.rss.reader.data.database.FeedGroupQueries
@@ -56,7 +54,6 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @AppScope
 class RssRepository(
-  private val feedFetcher: FeedFetcher,
   private val transactionRunner: TransactionRunner,
   private val feedQueries: FeedQueries,
   private val postQueries: PostQueries,
@@ -70,80 +67,60 @@ class RssRepository(
   private val dispatchersProvider: DispatchersProvider
 ) {
 
-  suspend fun fetchAndAddFeed(
-    feedLink: String,
+  suspend fun upsertFeedWithPosts(
+    feedPayload: FeedPayload,
     title: String? = null,
     feedLastCleanUpAt: Instant? = null,
-  ): FeedAddResult {
-    return when (val feedFetchResult = feedFetcher.fetch(url = feedLink)) {
-      is FeedFetchResult.Success -> {
-        try {
-          val feedPayload = feedFetchResult.feedPayload
-          val feedId = nameBasedUuidOf(feedPayload.link).toString()
-          val name = if (title.isNullOrBlank()) feedPayload.name else title
+  ): String {
+    val feedId = nameBasedUuidOf(feedPayload.link).toString()
+    val name = if (title.isNullOrBlank()) feedPayload.name else title
 
-          withContext(dispatchersProvider.databaseWrite) {
-            feedQueries.upsert(
-              name = name,
-              icon = feedPayload.icon,
-              description = feedPayload.description,
-              homepageLink = feedPayload.homepageLink,
-              createdAt = Clock.System.now(),
-              link = feedPayload.link,
-              id = feedId
-            )
+    withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.upsert(
+        name = name,
+        icon = feedPayload.icon,
+        description = feedPayload.description,
+        homepageLink = feedPayload.homepageLink,
+        createdAt = Clock.System.now(),
+        link = feedPayload.link,
+        id = feedId
+      )
 
-            transactionRunner.invoke {
-              val feedLastCleanUpAtEpochMilli =
-                feedLastCleanUpAt?.toEpochMilliseconds()
-                  ?: Instant.DISTANT_PAST.toEpochMilliseconds()
+      transactionRunner.invoke {
+        val feedLastCleanUpAtEpochMilli =
+          feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
-              feedPayload.posts.forEach { postPayload ->
-                if (postPayload.date < feedLastCleanUpAtEpochMilli) return@forEach
+        feedPayload.posts.forEach { postPayload ->
+          if (postPayload.date < feedLastCleanUpAtEpochMilli) return@forEach
 
-                val postId = nameBasedUuidOf(postPayload.link).toString()
-                postQueries.upsert(
-                  id = postId,
-                  sourceId = feedId,
-                  title = postPayload.title,
-                  description = postPayload.description,
-                  imageUrl = postPayload.imageUrl,
-                  postDate = Instant.fromEpochMilliseconds(postPayload.date),
-                  createdAt = Clock.System.now(),
-                  updatedAt = Clock.System.now(),
-                  syncedAt = Clock.System.now(),
-                  link = postPayload.link,
-                  commnetsLink = postPayload.commentsLink,
-                  isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
-                )
+          val postId = nameBasedUuidOf(postPayload.link).toString()
+          postQueries.upsert(
+            id = postId,
+            sourceId = feedId,
+            title = postPayload.title,
+            description = postPayload.description,
+            imageUrl = postPayload.imageUrl,
+            postDate = Instant.fromEpochMilliseconds(postPayload.date),
+            createdAt = Clock.System.now(),
+            updatedAt = Clock.System.now(),
+            syncedAt = Clock.System.now(),
+            link = postPayload.link,
+            commnetsLink = postPayload.commentsLink,
+            isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
+          )
 
-                postContentQueries.upsert(
-                  id = postId,
-                  rawContent = postPayload.rawContent,
-                  rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-                  htmlContent = null,
-                  createdAt = Clock.System.now(),
-                )
-              }
-            }
-          }
-
-          FeedAddResult.Success(feedId)
-        } catch (e: Exception) {
-          FeedAddResult.DatabaseError(e)
+          postContentQueries.upsert(
+            id = postId,
+            rawContent = postPayload.rawContent,
+            rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
+            htmlContent = null,
+            createdAt = Clock.System.now(),
+          )
         }
       }
-      is FeedFetchResult.HttpStatusError -> {
-        FeedAddResult.HttpStatusError(feedFetchResult.statusCode)
-      }
-      is FeedFetchResult.Error -> {
-        Logger.e("FeedFetchException", feedFetchResult.exception)
-        FeedAddResult.NetworkError(feedFetchResult.exception)
-      }
-      FeedFetchResult.TooManyRedirects -> {
-        FeedAddResult.TooManyRedirects
-      }
     }
+
+    return feedId
   }
 
   fun feed(feedId: String): Feed? {

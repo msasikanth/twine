@@ -20,6 +20,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
@@ -35,6 +37,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class AddFeedViewModel(
   private val rssRepository: RssRepository,
+  private val feedFetcher: FeedFetcher,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AddFeedState.DEFAULT)
@@ -85,19 +88,29 @@ class AddFeedViewModel(
 
     viewModelScope.launch {
       _state.update { it.copy(feedFetchingState = FeedFetchingState.Loading) }
+
       try {
-        when (val feedAddResult = rssRepository.fetchAndAddFeed(feedLink, title)) {
-          is FeedAddResult.DatabaseError -> handleDatabaseErrors(feedAddResult, feedLink)
-          is FeedAddResult.HttpStatusError -> handleHttpStatusErrors(feedAddResult)
-          is FeedAddResult.NetworkError -> handleNetworkErrors(feedAddResult, feedLink)
-          FeedAddResult.TooManyRedirects -> {
+        when (val feedFetchResult = feedFetcher.fetch(url = feedLink)) {
+          is FeedFetchResult.Error -> handleNetworkErrors(feedFetchResult, feedLink)
+          is FeedFetchResult.HttpStatusError -> handleHttpStatusErrors(feedFetchResult)
+          is FeedFetchResult.TooManyRedirects -> {
             _state.update { it.copy(error = AddFeedErrorType.TooManyRedirects) }
           }
-          is FeedAddResult.Success -> {
-            rssRepository.addFeedIdsToGroups(
-              groupIds = groups.map { it.id }.toSet(),
-              feedIds = listOf(feedAddResult.feedId)
-            )
+          is FeedFetchResult.Success -> {
+            val feedPayload = feedFetchResult.feedPayload
+            try {
+              val feedId =
+                rssRepository.upsertFeedWithPosts(
+                  feedPayload = feedPayload,
+                  title = title,
+                )
+              rssRepository.addFeedIdsToGroups(
+                groupIds = groups.map { it.id }.toSet(),
+                feedIds = listOf(feedId)
+              )
+            } catch (e: Exception) {
+              handleDatabaseErrors(FeedAddResult.DatabaseError(e), feedLink)
+            }
 
             _state.update { it.copy(goBack = true) }
           }
@@ -112,17 +125,17 @@ class AddFeedViewModel(
     }
   }
 
-  private suspend fun handleNetworkErrors(
-    feedAddResult: FeedAddResult.NetworkError,
+  private fun handleNetworkErrors(
+    error: FeedFetchResult.Error,
     feedLink: String,
   ) {
-    when (feedAddResult.exception) {
+    when (error.exception) {
       is UnsupportedOperationException -> {
         _state.update { it.copy(error = AddFeedErrorType.UnknownFeedType) }
       }
       is XmlParsingError -> {
         BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-        BugsnagKotlin.sendHandledException(feedAddResult.exception)
+        BugsnagKotlin.sendHandledException(error.exception)
         _state.update { it.copy(error = AddFeedErrorType.FailedToParseXML) }
       }
       is ConnectTimeoutException,
@@ -131,14 +144,14 @@ class AddFeedViewModel(
       }
       else -> {
         BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-        BugsnagKotlin.sendHandledException(feedAddResult.exception)
-        _state.update { it.copy(error = AddFeedErrorType.Unknown(feedAddResult.exception)) }
+        BugsnagKotlin.sendHandledException(error.exception)
+        _state.update { it.copy(error = AddFeedErrorType.Unknown(error.exception)) }
       }
     }
   }
 
-  private suspend fun handleHttpStatusErrors(httpStatusError: FeedAddResult.HttpStatusError) {
-    when (val statusCode = httpStatusError.statusCode) {
+  private fun handleHttpStatusErrors(error: FeedFetchResult.HttpStatusError) {
+    when (val statusCode = error.statusCode) {
       HttpStatusCode.BadRequest,
       HttpStatusCode.Unauthorized,
       HttpStatusCode.PaymentRequired,
@@ -161,8 +174,8 @@ class AddFeedViewModel(
     }
   }
 
-  private fun handleDatabaseErrors(databaseError: FeedAddResult.DatabaseError, feedLink: String) {
+  private fun handleDatabaseErrors(error: FeedAddResult.DatabaseError, feedLink: String) {
     BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-    BugsnagKotlin.sendHandledException(databaseError.exception)
+    BugsnagKotlin.sendHandledException(error.exception)
   }
 }

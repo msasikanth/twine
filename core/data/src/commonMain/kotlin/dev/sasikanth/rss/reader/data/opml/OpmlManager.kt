@@ -14,7 +14,8 @@ package dev.sasikanth.rss.reader.data.opml
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
-import dev.sasikanth.rss.reader.data.repository.FeedAddResult
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_EXTENSION
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_NAME
@@ -51,6 +52,7 @@ class OpmlManager(
   private val dispatchersProvider: DispatchersProvider,
   private val sourcesOpml: SourcesOpml,
   private val rssRepository: RssRepository,
+  private val feedFetcher: FeedFetcher,
 ) {
 
   private val job = SupervisorJob()
@@ -223,13 +225,16 @@ class OpmlManager(
   }
 
   private suspend fun addFeed(feed: OpmlFeed): String? {
-    val result = rssRepository.fetchAndAddFeed(feedLink = feed.link, title = feed.title)
-    if (result !is FeedAddResult.Success) {
+    val feedFetcherResult = feedFetcher.fetch(feed.link)
+    if (feedFetcherResult !is FeedFetchResult.Success) {
       Logger.e("OPMLImport") { "Failed to import: ${feed.link}" }
       return null
     }
 
-    return result.feedId
+    return rssRepository.upsertFeedWithPosts(
+      feedPayload = feedFetcherResult.feedPayload,
+      title = feed.title
+    )
   }
 
   private fun calculateProgress(progressIndex: Int, totalFeedCount: Int): Int {

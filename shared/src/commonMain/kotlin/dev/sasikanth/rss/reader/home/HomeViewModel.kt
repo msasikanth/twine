@@ -256,9 +256,9 @@ class HomeViewModel(
   private fun refreshContent() {
     viewModelScope.launch {
       when (val selectedSource = _state.value.activeSource) {
-        is FeedGroup -> syncCoordinator.refreshFeeds(selectedSource.feedIds)
-        is Feed -> syncCoordinator.refreshFeed(selectedSource.id)
-        else -> syncCoordinator.refreshFeeds()
+        is FeedGroup -> syncCoordinator.pull(selectedSource.feedIds)
+        is Feed -> syncCoordinator.pull(selectedSource.id)
+        else -> syncCoordinator.pull()
       }
     }
   }
