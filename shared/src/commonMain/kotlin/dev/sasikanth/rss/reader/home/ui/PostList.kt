@@ -104,7 +104,7 @@ internal fun PostsList(
       key = { index ->
         val adjustedIndex = index + featuredPosts.size
         val post = posts.peek(adjustedIndex)
-        post?.let { it.id + it.sourceId } ?: adjustedIndex
+        post?.id ?: adjustedIndex
       },
       contentType = { "post_item" }
     ) { index ->
