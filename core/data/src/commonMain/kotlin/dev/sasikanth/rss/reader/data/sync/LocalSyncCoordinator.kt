@@ -13,7 +13,8 @@ package dev.sasikanth.rss.reader.data.sync
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
-import dev.sasikanth.rss.reader.data.repository.FeedAddResult
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
+import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -42,6 +43,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 @Inject
 class LocalSyncCoordinator(
+  private val feedFetcher: FeedFetcher,
   private val rssRepository: RssRepository,
   private val dispatchersProvider: DispatchersProvider,
   private val observableActiveSource: ObservableActiveSource,
@@ -135,22 +137,23 @@ class LocalSyncCoordinator(
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {
     val initialPostCount = rssRepository.postsCountForFeed(feed.id)
-    val result =
-      rssRepository.fetchAndAddFeed(
-        feedLink = feed.link,
-        feedLastCleanUpAt = feed.lastCleanUpAt,
-      )
+    val feedFetchResult = feedFetcher.fetch(feed.link)
 
-    if (result is FeedAddResult.Success) {
-      val finalPostCount = rssRepository.postsCountForFeed(feed.id)
-      val hasNewContent = finalPostCount > initialPostCount
+    if (feedFetchResult !is FeedFetchResult.Success) return
 
-      withContext(dispatchersProvider.databaseWrite) {
-        rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
-      }
+    rssRepository.upsertFeedWithPosts(
+      feedPayload = feedFetchResult.feedPayload,
+      feedLastCleanUpAt = feed.lastCleanUpAt,
+    )
 
-      adjustRefreshInterval(feed, hasNewContent)
+    val finalPostCount = rssRepository.postsCountForFeed(feed.id)
+    val hasNewContent = finalPostCount > initialPostCount
+
+    withContext(dispatchersProvider.databaseWrite) {
+      rssRepository.updateFeedLastUpdatedAt(feedId = feed.id, lastUpdatedAt = now)
     }
+
+    adjustRefreshInterval(feed, hasNewContent)
   }
 
   private suspend fun checkAndRefreshLastRefreshTime(block: suspend () -> Unit) {
