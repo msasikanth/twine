@@ -61,7 +61,7 @@ class FeedsRefreshWorker(
 
     return if (lastRefreshedAt.hasExpired()) {
       try {
-        syncCoordinator.refreshFeeds()
+        syncCoordinator.pull()
         Result.success()
       } catch (e: CancellationException) {
         Result.failure()

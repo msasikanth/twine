@@ -106,7 +106,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastRefreshedAt.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
-                    try await applicationComponent.syncCoordinator.refreshFeeds()
+                    try await applicationComponent.syncCoordinator.pull()
                 }
                 
                 WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)

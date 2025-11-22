@@ -26,6 +26,8 @@ import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.DurationAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
+import dev.sasikanth.rss.reader.data.sync.LocalSyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Provides
 
@@ -35,6 +37,10 @@ expect interface DataStorePlatformComponent
 
 interface DataComponent :
   SqlDriverPlatformComponent, DataStorePlatformComponent, UserDataComponent {
+
+  @Provides
+  @AppScope
+  fun providesSyncCoordinator(coordinator: LocalSyncCoordinator): SyncCoordinator = coordinator
 
   @Provides
   @AppScope

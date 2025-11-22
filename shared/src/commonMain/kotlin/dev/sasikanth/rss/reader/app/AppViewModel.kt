@@ -83,7 +83,7 @@ class AppViewModel(
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
       if (lastRefreshedAt.hasExpired()) {
-        syncCoordinator.refreshFeeds()
+        syncCoordinator.pull()
       }
     }
   }
