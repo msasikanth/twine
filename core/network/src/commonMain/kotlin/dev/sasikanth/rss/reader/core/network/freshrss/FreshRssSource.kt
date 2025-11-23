@@ -48,6 +48,7 @@ class FreshRssSource(
 
   companion object {
     private const val USER_STATE_READ = "user/-/state/com.google/read"
+    private const val USER_STATE_UNREAD = "user/-/state/com.google/reading-list"
     private const val USER_STATE_STARRED = "user/-/state/com.google/starred"
   }
 
@@ -304,28 +305,24 @@ class FreshRssSource(
   }
 
   suspend fun readIds(): List<String> {
-    return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient()
-        .get(Reader.ItemIds(state = USER_STATE_READ))
-        .body<ItemIds>()
-        .itemRefs
-        .map { (id) ->
-          return@map toIdString(id)
-        }
-    }
+    return fetchIds(state = USER_STATE_READ)
+  }
+
+  suspend fun unreadIds(): List<String> {
+    return fetchIds(state = USER_STATE_UNREAD)
   }
 
   suspend fun bookmarkIds(): List<String> {
-    return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient()
-        .get(Reader.ItemIds(state = USER_STATE_STARRED))
-        .body<ItemIds>()
-        .itemRefs
-        .map { (id) ->
-          return@map toIdString(id)
-        }
-    }
+    return fetchIds(state = USER_STATE_STARRED)
   }
+
+  private suspend fun fetchIds(state: String): List<String> =
+    withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(Reader.ItemIds(state = state)).body<ItemIds>().itemRefs.map {
+        (id) ->
+        return@map toIdString(id)
+      }
+    }
 
   fun authenticatedHttpClient(): HttpClient {
     return if (_authenticatedHttpClient != null) _authenticatedHttpClient!!
