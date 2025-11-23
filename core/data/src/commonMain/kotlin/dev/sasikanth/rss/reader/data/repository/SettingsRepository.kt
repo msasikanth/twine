@@ -197,11 +197,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   private fun mapToReaderFont(pref: String?): ReaderFont {
-    if (pref.isNullOrBlank()) return ReaderFont.Golos
+    if (pref.isNullOrBlank()) return ReaderFont.RethinkSans
     return try {
       ReaderFont.valueOf(pref)
     } catch (e: Exception) {
-      ReaderFont.Golos
+      ReaderFont.RethinkSans
     }
   }
 }
@@ -242,5 +242,6 @@ enum class ReaderFont(val value: String) {
   Golos("Golos Text"),
   Lora("Lora"),
   Merriweather("Merriweather"),
-  RobotoSerif("Roboto Serif")
+  RethinkSans("Rethink Sans"),
+  RobotoSerif("Roboto Serif"),
 }

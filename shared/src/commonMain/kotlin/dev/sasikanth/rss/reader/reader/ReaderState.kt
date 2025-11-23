@@ -43,7 +43,7 @@ data class ReaderState(
         activePostId = initialPostId,
         posts = emptyFlow(),
         showReaderCustomisations = false,
-        selectedReaderFont = ReaderFont.Golos,
+        selectedReaderFont = ReaderFont.RethinkSans,
         readerFontScaleFactor = 1f,
         readerLineHeightScaleFactor = 1f,
         openPaywall = false,

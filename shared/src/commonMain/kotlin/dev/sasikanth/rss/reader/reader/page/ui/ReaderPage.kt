@@ -220,7 +220,7 @@ internal fun ReaderPage(
             contentPadding =
               PaddingValues(
                 top = contentPaddingValues.calculateTopPadding(),
-                bottom = contentPaddingValues.calculateBottomPadding()
+                bottom = contentPaddingValues.calculateBottomPadding() + 24.dp
               )
           ) {
             item(key = "reader-header") {

@@ -41,6 +41,9 @@ import twine.shared.generated.resources.lora_regular
 import twine.shared.generated.resources.merriweather_bold
 import twine.shared.generated.resources.merriweather_medium
 import twine.shared.generated.resources.merriweather_regular
+import twine.shared.generated.resources.rethink_sans_bold
+import twine.shared.generated.resources.rethink_sans_medium
+import twine.shared.generated.resources.rethink_sans_regular
 import twine.shared.generated.resources.robot_serif_bold
 import twine.shared.generated.resources.roboto_serif_medium
 import twine.shared.generated.resources.roboto_serif_regular
@@ -241,6 +244,15 @@ internal val RobotoSerifFontFamily: FontFamily
       Font(Res.font.roboto_serif_regular, weight = FontWeight.Normal),
       Font(Res.font.roboto_serif_medium, weight = FontWeight.Medium),
       Font(Res.font.robot_serif_bold, weight = FontWeight.Bold),
+    )
+
+internal val RethinkSansFontFamily: FontFamily
+  @Composable
+  get() =
+    FontFamily(
+      Font(Res.font.rethink_sans_regular, weight = FontWeight.Normal),
+      Font(Res.font.rethink_sans_medium, weight = FontWeight.Medium),
+      Font(Res.font.rethink_sans_bold, weight = FontWeight.Bold),
     )
 
 internal val AntonFontFamily: FontFamily

@@ -30,7 +30,7 @@ import androidx.compose.ui.graphics.Color
 @Composable
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
-  typography: Typography = typography(GolosFontFamily),
+  typography: Typography = typography(RethinkSansFontFamily),
   content: @Composable () -> Unit
 ) {
   MaterialTheme(
