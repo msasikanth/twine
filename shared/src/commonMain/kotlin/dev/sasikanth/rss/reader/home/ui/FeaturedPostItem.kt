@@ -131,10 +131,10 @@ internal fun FeaturedPostItem(
     val showFeedFavIcon = LocalShowFeedFavIconSetting.current
     val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
 
-    PostMetadata(
+    PostActionBar(
       feedName = item.feedName,
       feedIcon = feedIconUrl,
-      postPublishedAt = item.date.relativeDurationString(),
+      postRelativeTimestamp = item.date.relativeDurationString(),
       postLink = item.link,
       postRead = item.read,
       postBookmarked = item.bookmarked,

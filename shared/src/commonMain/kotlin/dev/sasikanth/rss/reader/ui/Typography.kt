@@ -64,8 +64,18 @@ internal fun typography(
   fontFamily: FontFamily,
   fontScalingFactor: Float = 1f,
   lineHeightScalingFactor: Float = 1f,
-) =
-  Typography(
+): Typography {
+  val titleLargeFontSize = 20.sp * fontScalingFactor
+  val titleMediumFontSize = 17.sp * fontScalingFactor
+  val titleSmallFontSize = 15.sp * fontScalingFactor
+  val bodyLargeFontSize = 17.sp * fontScalingFactor
+  val bodyMediumFontSize = 15.sp * fontScalingFactor
+  val bodySmallFontSize = 12.sp * fontScalingFactor
+  val labelLargeFontSize = 15.sp * fontScalingFactor
+  val labelMediumFontSize = 12.sp * fontScalingFactor
+  val labelSmallFontSize = 11.sp * fontScalingFactor
+
+  return Typography(
     displayLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
@@ -73,6 +83,7 @@ internal fun typography(
         fontSize = 57.sp * fontScalingFactor,
         lineHeight = 64.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle,
+        letterSpacing = (-0.25).sp
       ),
     displayMedium =
       defaultTextStyle.copy(
@@ -118,83 +129,85 @@ internal fun typography(
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 20.sp * fontScalingFactor,
+        fontSize = titleLargeFontSize,
+        letterSpacing = titleLargeFontSize * 0.02, // applying 2% letter spacing
         lineHeight = 28.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     titleMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 17.sp * fontScalingFactor,
+        fontSize = titleMediumFontSize,
+        letterSpacing = titleMediumFontSize * 0.03, // applying 3% letter spacing
         lineHeight = 24.sp * lineHeightScalingFactor,
-        letterSpacing = 0.15.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     titleSmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 15.sp * fontScalingFactor,
+        fontSize = titleSmallFontSize,
+        letterSpacing = titleSmallFontSize * 0.03, // applying 3% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.1.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     bodyLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 17.sp * fontScalingFactor,
+        fontSize = bodyLargeFontSize,
+        letterSpacing = bodyLargeFontSize * 0.03, // applying 3% letter spacing
         lineHeight = 24.sp * lineHeightScalingFactor,
-        letterSpacing = 0.15.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     bodyMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 15.sp * fontScalingFactor,
+        fontSize = bodyMediumFontSize,
+        letterSpacing = bodyMediumFontSize * 0.02, // applying 2% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.25.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     bodySmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp * fontScalingFactor,
+        fontSize = bodySmallFontSize,
+        letterSpacing = bodySmallFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.4.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 15.sp * fontScalingFactor,
+        fontSize = labelLargeFontSize,
+        letterSpacing = labelLargeFontSize * 0.03, // applying 3% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.1.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 12.sp * fontScalingFactor,
+        fontSize = labelMediumFontSize,
+        letterSpacing = labelMediumFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelSmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
-        fontSize = 11.sp * fontScalingFactor,
+        fontSize = labelSmallFontSize,
+        letterSpacing = labelSmallFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
   )
+}
 
 internal val Typography.bottomSheetItemLabel
   @Composable
