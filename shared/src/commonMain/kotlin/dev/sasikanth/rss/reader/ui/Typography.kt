@@ -73,6 +73,7 @@ internal fun typography(
         fontSize = 57.sp * fontScalingFactor,
         lineHeight = 64.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle,
+        letterSpacing = (-0.25).sp
       ),
     displayMedium =
       defaultTextStyle.copy(
@@ -119,43 +120,44 @@ internal fun typography(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 20.sp * fontScalingFactor,
+        letterSpacing = (20.sp * fontScalingFactor) * 0.02, // applying 2% letter spacing
         lineHeight = 28.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     titleMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 17.sp * fontScalingFactor,
+        letterSpacing = (17.sp * fontScalingFactor) * 0.03, // applying 3% letter spacing
         lineHeight = 24.sp * lineHeightScalingFactor,
-        letterSpacing = 0.15.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     titleSmall =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp * fontScalingFactor,
+        letterSpacing = (15.sp * fontScalingFactor) * 0.03, // applying 3% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.1.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     bodyLarge =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 17.sp * fontScalingFactor,
+        letterSpacing = (17.sp * fontScalingFactor) * 0.03, // applying 3% letter spacing
         lineHeight = 24.sp * lineHeightScalingFactor,
-        letterSpacing = 0.15.sp,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     bodyMedium =
       defaultTextStyle.copy(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp * fontScalingFactor,
+        letterSpacing = (15.sp * fontScalingFactor) * 0.02, // applying 2% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.25.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     bodySmall =
@@ -163,8 +165,8 @@ internal fun typography(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp * fontScalingFactor,
+        letterSpacing = (12.sp * fontScalingFactor) * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.4.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelLarge =
@@ -172,8 +174,8 @@ internal fun typography(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 15.sp * fontScalingFactor,
+        letterSpacing = (15.sp * fontScalingFactor) * 0.03, // applying 3% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        letterSpacing = 0.1.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelMedium =
@@ -181,8 +183,8 @@ internal fun typography(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp * fontScalingFactor,
+        letterSpacing = (12.sp * fontScalingFactor) * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
     labelSmall =
@@ -190,8 +192,8 @@ internal fun typography(
         fontFamily = fontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp * fontScalingFactor,
+        letterSpacing = (11.sp * fontScalingFactor) * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        letterSpacing = 0.5.sp,
         lineHeightStyle = figmaLineHeightStyle
       ),
   )
