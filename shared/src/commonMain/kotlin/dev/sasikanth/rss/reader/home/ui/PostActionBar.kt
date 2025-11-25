@@ -26,12 +26,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
@@ -50,7 +48,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -84,11 +81,11 @@ import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
 @Composable
-internal fun PostMetadata(
+internal fun PostActionBar(
   feedName: String,
   feedIcon: String,
   postRead: Boolean,
-  postPublishedAt: String,
+  postRelativeTimestamp: String,
   postLink: String,
   postBookmarked: Boolean,
   commentsLink: String?,
@@ -119,14 +116,15 @@ internal fun PostMetadata(
 
     Text(
       modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.labelSmall,
       maxLines = 1,
-      text = postPublishedAt,
+      text = postRelativeTimestamp.uppercase(),
       color = AppTheme.colorScheme.outline,
-      textAlign = TextAlign.Start
+      textAlign = TextAlign.Start,
+      overflow = TextOverflow.Ellipsis,
     )
 
-    PostOptionsButtonRow(
+    PostActions(
       postLink = postLink,
       postBookmarked = postBookmarked,
       postRead = postRead,
@@ -193,7 +191,7 @@ private fun PostSourcePill(
 }
 
 @Composable
-internal fun PostOptionsButtonRow(
+internal fun PostActions(
   postLink: String,
   postBookmarked: Boolean,
   postRead: Boolean,

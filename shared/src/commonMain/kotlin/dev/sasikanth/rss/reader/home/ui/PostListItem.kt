@@ -130,10 +130,10 @@ internal fun PostListItem(
     val showFeedFavIcon = LocalShowFeedFavIconSetting.current
     val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
 
-    PostMetadata(
+    PostActionBar(
       feedName = item.feedName,
       feedIcon = feedIconUrl,
-      postPublishedAt = item.date.relativeDurationString(),
+      postRelativeTimestamp = item.date.relativeDurationString(),
       config = postMetadataConfig,
       postLink = item.link,
       postRead = item.read,
@@ -197,7 +197,7 @@ internal fun CompactPostListItem(
 
       Spacer(Modifier.requiredWidth(16.dp))
 
-      PostOptionsButtonRow(
+      PostActions(
         postLink = item.link,
         postBookmarked = item.bookmarked,
         postRead = item.read,
