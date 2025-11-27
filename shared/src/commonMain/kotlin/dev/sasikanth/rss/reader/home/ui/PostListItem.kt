@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -93,6 +95,11 @@ internal fun PostListItem(
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
 
   Column(
     modifier =
@@ -100,10 +107,7 @@ internal fun PostListItem(
         .clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
-        .alpha(
-          if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-          else Constants.ITEM_UNREAD_ALPHA
-        )
+        .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
   ) {
     Row(
@@ -174,6 +178,11 @@ internal fun CompactPostListItem(
   val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
 
   Box {
     Row(
@@ -183,10 +192,7 @@ internal fun CompactPostListItem(
           .clickable { onClick() }
           .padding(vertical = 12.dp)
           .padding(compactPostListPadding)
-          .alpha(
-            if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-            else Constants.ITEM_UNREAD_ALPHA
-          )
+          .graphicsLayer { this.alpha = alpha }
     ) {
       FeedIcon(
         url = feedIconUrl,

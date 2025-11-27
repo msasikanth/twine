@@ -17,6 +17,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -75,6 +76,8 @@ internal fun FeaturedPostItem(
   featuredImage: @Composable () -> Unit,
 ) {
   var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(if (readStatus) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
 
   Column(
     modifier =
@@ -82,7 +85,7 @@ internal fun FeaturedPostItem(
         .padding(featuredItemPadding)
         .clip(MaterialTheme.shapes.extraLarge)
         .clickable(onClick = onClick)
-        .alpha(if (readStatus) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
+        .graphicsLayer { this.alpha = alpha }
   ) {
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
