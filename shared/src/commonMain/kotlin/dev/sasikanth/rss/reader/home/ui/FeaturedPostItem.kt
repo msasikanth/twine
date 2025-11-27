@@ -70,17 +70,19 @@ internal fun FeaturedPostItem(
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   onSourceClick: () -> Unit,
-  onTogglePostReadClick: () -> Unit,
+  updateReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   featuredImage: @Composable () -> Unit,
 ) {
+  var readStatus by remember(item.read) { mutableStateOf(item.read) }
+
   Column(
     modifier =
       Modifier.then(modifier)
         .padding(featuredItemPadding)
         .clip(MaterialTheme.shapes.extraLarge)
         .clickable(onClick = onClick)
-        .alpha(if (item.read) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
+        .alpha(if (readStatus) Constants.ITEM_READ_ALPHA else Constants.ITEM_UNREAD_ALPHA)
   ) {
     val density = LocalDensity.current
     val titleTextStyle = MaterialTheme.typography.headlineMedium
@@ -136,14 +138,17 @@ internal fun FeaturedPostItem(
       feedIcon = feedIconUrl,
       postRelativeTimestamp = item.date.relativeDurationString(),
       postLink = item.link,
-      postRead = item.read,
+      postRead = readStatus,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
       darkTheme = darkTheme,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       onSourceClick = onSourceClick,
-      onTogglePostReadClick = onTogglePostReadClick,
+      onTogglePostReadClick = {
+        readStatus = !readStatus
+        updateReadStatus(readStatus)
+      },
     )
 
     Spacer(modifier = Modifier.height(8.dp))

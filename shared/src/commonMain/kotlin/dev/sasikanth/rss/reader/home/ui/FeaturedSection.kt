@@ -78,7 +78,7 @@ internal fun FeaturedSection(
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
-  onTogglePostReadClick: (String, Boolean) -> Unit,
+  updateReadStatus: (id: String, updatedReadStatus: Boolean) -> Unit,
 ) {
   val layoutDirection = LocalLayoutDirection.current
 
@@ -175,8 +175,8 @@ internal fun FeaturedSection(
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
             onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
             onSourceClick = { onPostSourceClick(postWithMetadata.sourceId) },
-            onTogglePostReadClick = {
-              onTogglePostReadClick(postWithMetadata.id, postWithMetadata.read)
+            updateReadStatus = { updatedReadStatus ->
+              updateReadStatus(postWithMetadata.id, updatedReadStatus)
             }
           ) {
             FeaturedImage(

@@ -44,12 +44,15 @@ class BookmarksViewModel(
   fun dispatch(event: BookmarksEvent) {
     when (event) {
       is BookmarksEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
-      is BookmarksEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
+      is BookmarksEvent.UpdatePostReadStatus ->
+        updatePostReadStatus(event.postId, event.updatedReadStatus)
     }
   }
 
-  private fun togglePostReadStatus(postId: String, postRead: Boolean) {
-    viewModelScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
+  private fun updatePostReadStatus(postId: String, updatedReadStatus: Boolean) {
+    viewModelScope.launch {
+      rssRepository.updatePostReadStatus(read = updatedReadStatus, id = postId)
+    }
   }
 
   private fun onPostBookmarkClicked(post: PostWithMetadata) {

@@ -88,12 +88,15 @@ class SearchViewModel(
         searchQuery = TextFieldValue()
       }
       is SearchEvent.OnPostBookmarkClick -> onPostBookmarkClick(event.post)
-      is SearchEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
+      is SearchEvent.UpdatePostReadStatus ->
+        updatePostReadStatus(event.postId, event.updatedReadStatus)
     }
   }
 
-  private fun togglePostReadStatus(postId: String, postRead: Boolean) {
-    viewModelScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
+  private fun updatePostReadStatus(postId: String, updatedReadStatus: Boolean) {
+    viewModelScope.launch {
+      rssRepository.updatePostReadStatus(read = updatedReadStatus, id = postId)
+    }
   }
 
   private fun onPostBookmarkClick(post: PostWithMetadata) {

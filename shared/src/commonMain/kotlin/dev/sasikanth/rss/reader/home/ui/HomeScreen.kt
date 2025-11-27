@@ -376,8 +376,10 @@ internal fun HomeScreen(
                         onPostSourceClick = { feedId ->
                           viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
                         },
-                        onTogglePostReadClick = { postId, postRead ->
-                          viewModel.dispatch(HomeEvent.TogglePostReadStatus(postId, postRead))
+                        updateReadStatus = { postId, updatedReadStatus ->
+                          viewModel.dispatch(
+                            HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
+                          )
                         }
                       )
                     }
