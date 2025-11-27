@@ -143,9 +143,9 @@ internal fun BookmarksScreen(
                   onPostSourceClick = {
                     // no-op
                   },
-                  togglePostReadClick = {
+                  updatePostReadStatus = { updatedReadStatus ->
                     bookmarksViewModel.dispatch(
-                      BookmarksEvent.TogglePostReadStatus(post.id, post.read)
+                      BookmarksEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
                     )
                   }
                 )

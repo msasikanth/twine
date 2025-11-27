@@ -51,7 +51,7 @@ internal fun PostsList(
   onPostBookmarkClick: (PostWithMetadata) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
-  onTogglePostReadClick: (String, Boolean) -> Unit,
+  updateReadStatus: (String, Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val topContentPadding =
@@ -93,7 +93,7 @@ internal fun PostsList(
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
           onPostSourceClick = onPostSourceClick,
-          onTogglePostReadClick = onTogglePostReadClick,
+          updateReadStatus = updateReadStatus,
         )
       }
     }
@@ -122,7 +122,9 @@ internal fun PostsList(
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             onPostSourceClick = { onPostSourceClick(post.sourceId) },
-            togglePostReadClick = { onTogglePostReadClick(post.id, post.read) }
+            updatePostReadStatus = { updatedReadStatus ->
+              updateReadStatus(post.id, updatedReadStatus)
+            }
           )
         }
         HomeViewMode.Compact -> {
@@ -134,7 +136,9 @@ internal fun PostsList(
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
-            togglePostReadClick = { onTogglePostReadClick(post.id, post.read) }
+            updatePostReadStatus = { updatedReadStatus ->
+              updateReadStatus(post.id, updatedReadStatus)
+            }
           )
         }
       }

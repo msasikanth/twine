@@ -21,5 +21,6 @@ sealed interface BookmarksEvent {
 
   data class OnPostBookmarkClick(val post: PostWithMetadata) : BookmarksEvent
 
-  data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : BookmarksEvent
+  data class UpdatePostReadStatus(val postId: String, val updatedReadStatus: Boolean) :
+    BookmarksEvent
 }

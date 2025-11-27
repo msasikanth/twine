@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,10 +40,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -83,21 +89,25 @@ internal fun PostListItem(
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
   onPostSourceClick: () -> Unit,
-  togglePostReadClick: () -> Unit,
+  updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
+  var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
+
   Column(
     modifier =
       Modifier.then(modifier)
         .clickable(onClick = onClick)
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
-        .alpha(
-          if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-          else Constants.ITEM_UNREAD_ALPHA
-        )
+        .graphicsLayer { this.alpha = alpha }
         .semantics { contentDescription = item.title.ifBlank { item.description } }
   ) {
     Row(
@@ -136,14 +146,17 @@ internal fun PostListItem(
       postRelativeTimestamp = item.date.relativeDurationString(),
       config = postMetadataConfig,
       postLink = item.link,
-      postRead = item.read,
+      postRead = readStatus,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
       darkTheme = darkTheme,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
       onSourceClick = onPostSourceClick,
-      onTogglePostReadClick = togglePostReadClick,
+      onTogglePostReadClick = {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
+      },
       modifier = Modifier.padding(horizontal = 24.dp)
     )
   }
@@ -157,13 +170,19 @@ internal fun CompactPostListItem(
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
-  togglePostReadClick: () -> Unit,
+  updatePostReadStatus: (updatedReadStatus: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   reduceReadItemAlpha: Boolean = false,
   postMetadataConfig: PostMetadataConfig = PostMetadataConfig.DEFAULT,
 ) {
   val showFeedFavIcon = LocalShowFeedFavIconSetting.current
   val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
+  var readStatus by remember(item.read) { mutableStateOf(item.read) }
+  val alpha by
+    animateFloatAsState(
+      if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
+      else Constants.ITEM_UNREAD_ALPHA
+    )
 
   Box {
     Row(
@@ -173,10 +192,7 @@ internal fun CompactPostListItem(
           .clickable { onClick() }
           .padding(vertical = 12.dp)
           .padding(compactPostListPadding)
-          .alpha(
-            if (item.read && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
-            else Constants.ITEM_UNREAD_ALPHA
-          )
+          .graphicsLayer { this.alpha = alpha }
     ) {
       FeedIcon(
         url = feedIconUrl,
@@ -200,13 +216,16 @@ internal fun CompactPostListItem(
       PostActions(
         postLink = item.link,
         postBookmarked = item.bookmarked,
-        postRead = item.read,
+        postRead = readStatus,
         config = postMetadataConfig,
         commentsLink = item.commentsLink,
         darkTheme = darkTheme,
         onBookmarkClick = onPostBookmarkClick,
         onCommentsClick = onPostCommentsClick,
-        togglePostReadClick = togglePostReadClick,
+        togglePostReadClick = {
+          readStatus = !readStatus
+          updatePostReadStatus(readStatus)
+        },
       )
     }
 

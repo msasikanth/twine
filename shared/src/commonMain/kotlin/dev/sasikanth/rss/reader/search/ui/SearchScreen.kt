@@ -183,8 +183,10 @@ internal fun SearchScreen(
                 onPostSourceClick = {
                   // no-op
                 },
-                togglePostReadClick = {
-                  searchViewModel.dispatch(SearchEvent.TogglePostReadStatus(post.id, post.read))
+                updatePostReadStatus = { updatedReadStatus ->
+                  searchViewModel.dispatch(
+                    SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
+                  )
                 }
               )
 

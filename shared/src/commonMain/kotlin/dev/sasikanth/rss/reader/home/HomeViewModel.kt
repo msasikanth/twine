@@ -83,7 +83,8 @@ class HomeViewModel(
       is HomeEvent.OnPostBookmarkClick -> onPostBookmarkClicked(event.post)
       is HomeEvent.OnPostSourceClicked -> postSourceClicked(event.feedId)
       is HomeEvent.OnPostsTypeChanged -> onPostsTypeChanged(event.postsType)
-      is HomeEvent.TogglePostReadStatus -> togglePostReadStatus(event.postId, event.postRead)
+      is HomeEvent.UpdatePostReadStatus ->
+        updatePostReadStatus(event.postId, event.updatedReadStatus)
       is HomeEvent.MarkPostsAsRead -> markPostsAsRead(event.source)
       is HomeEvent.OnPostItemsScrolled -> onPostItemsScrolled(event.postIds)
       HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
@@ -208,8 +209,10 @@ class HomeViewModel(
     }
   }
 
-  private fun togglePostReadStatus(postId: String, postRead: Boolean) {
-    viewModelScope.launch { rssRepository.updatePostReadStatus(read = !postRead, id = postId) }
+  private fun updatePostReadStatus(postId: String, updatedReadStatus: Boolean) {
+    viewModelScope.launch {
+      rssRepository.updatePostReadStatus(read = updatedReadStatus, id = postId)
+    }
   }
 
   private fun onPostsTypeChanged(postsType: PostsType) {

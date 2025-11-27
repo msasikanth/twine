@@ -38,7 +38,7 @@ sealed interface HomeEvent {
 
   data class OnPostsTypeChanged(val postsType: PostsType) : HomeEvent
 
-  data class TogglePostReadStatus(val postId: String, val postRead: Boolean) : HomeEvent
+  data class UpdatePostReadStatus(val postId: String, val updatedReadStatus: Boolean) : HomeEvent
 
   data class MarkPostsAsRead(val source: Source?) : HomeEvent
 
