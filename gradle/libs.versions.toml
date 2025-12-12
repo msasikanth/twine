@@ -1,33 +1,33 @@
 [versions]
 kotlin = "2.2.21"
-android_gradle_plugin = "8.13.1"
-compose = "1.10.0-beta02"
-compose_material3 = "1.10.0-alpha04"
+android_gradle_plugin = "8.13.2"
+compose = "1.10.0-rc02"
+compose_material3 = "1.10.0-alpha05"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "36"
 android_sdk_target = "36"
 android_sdk_min = "26"
 
-sqldelight = "2.1.0"
-ktor = "3.3.2"
+sqldelight = "2.2.1"
+ktor = "3.3.3"
 kotlinx_coroutines = "1.10.2"
 kotlinx_date_time = "0.7.1"
 kotlinx_immutable_collections = "0.4.0"
 kotlinx_serialization_json = "1.9.0"
-kotlinx_io = "0.8.0"
-androidx_activity = "1.11.0"
+kotlinx_io = "0.8.2"
+androidx_activity = "1.12.1"
 androidx_appcompat = "1.7.1"
 androidx_core = "1.17.0"
 androidx_collection = "1.5.0"
 androidx_test_runner = "1.7.0"
 androidx_test_rules = "1.7.0"
 androidx_work = "2.11.0"
-androidx_datastore = "1.1.7"
+androidx_datastore = "1.2.0"
 androidx_browser = "1.9.0"
 androidx_annotation = "1.9.1"
 coil = "3.3.0"
-spotless = "8.0.0"
+spotless = "8.1.0"
 ktfmt = "0.44"
 kotlininject = "0.8.0"
 ksp = "2.3.0"
@@ -36,7 +36,6 @@ ksoup = "0.2.5"
 sqliteAndroid = "3.49.0"
 windowSizeClass = "0.5.0"
 desugarJdk = "2.1.5"
-lyricist = "1.7.0"
 atomicfu = "0.29.0"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
@@ -44,7 +43,7 @@ xmlutil = "0.91.3"
 ktxml = "1.0.0"
 uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
-bugsnag = "6.19.0"
+bugsnag = "6.20.0"
 crashkios-bugsnag = "0.9.0"
 kermit = "2.0.8"
 reorderable = "3.0.0"
@@ -52,10 +51,10 @@ korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.38.1"
-revenuecat = "2.2.6+17.16.0"
+revenuecat = "2.2.13+17.23.0"
 viewmodel = "2.9.6"
 navigation = "2.9.1"
-glance = "1.2.0-beta01"
+glance = "1.2.0-rc01"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -111,8 +110,6 @@ ksoup-kotlinx-io = { module = "com.fleeksoft.ksoup:ksoup-kotlinx", version.ref =
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
 windowSizeClass = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "windowSizeClass" }
 desugarJdk = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugarJdk" }
-lyricist = { module = "cafe.adriel.lyricist:lyricist", version.ref = "lyricist" }
-lyricist-processor = { module = "cafe.adriel.lyricist:lyricist-processor", version.ref = "lyricist" }
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }
