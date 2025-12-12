@@ -206,7 +206,7 @@ internal class DynamicColorState(
       bottomSheetBorder =
         DynamicColor.fromPalette(
             palette = { s -> s.neutralPalette },
-            tone = { s -> 15.0 },
+            tone = { s -> 20.0 },
           )
           .toColor(scheme),
       tintedBackground = bottomSheet,
