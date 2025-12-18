@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.androidLibrary
+
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -25,7 +27,12 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  androidTarget()
+  androidLibrary {
+    namespace = "dev.sasikanth.rss.reader.resources.icons"
+
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    compileSdk = libs.versions.android.sdk.compile.get().toInt()
+  }
   jvm()
   listOf(iosArm64(), iosSimulatorArm64())
 
@@ -38,11 +45,4 @@ kotlin {
     }
     val commonTest by getting { dependencies { implementation(kotlin("test")) } }
   }
-}
-
-android {
-  compileSdk = libs.versions.android.sdk.compile.get().toInt()
-  namespace = "dev.sasikanth.rss.reader.resources.icons"
-
-  defaultConfig { minSdk = libs.versions.android.sdk.min.get().toInt() }
 }

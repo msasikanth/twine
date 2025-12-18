@@ -15,7 +15,7 @@
  */
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
@@ -25,9 +25,6 @@ plugins {
 
 kotlin {
   jvmToolchain(21)
-
-  androidTarget()
-
   compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
