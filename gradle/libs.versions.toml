@@ -60,12 +60,13 @@ glance = "1.2.0-rc01"
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
 compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose_ui_tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
 compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose_material3" }
 compose_material_icons_extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose_material_icons_extended" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
-compose_ui_tooling_preview = { module = "org.jetbrains.compose.components:components-ui-tooling-preview", version.ref = "compose" }
+compose_ui_tooling_preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose_backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose" }
 ktor_core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor_client_okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

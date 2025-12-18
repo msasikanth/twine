@@ -144,7 +144,7 @@ composeCompiler {
 }
 
 dependencies {
-  "androidRuntimeClasspath"(compose.uiTooling)
+  "androidRuntimeClasspath"(libs.compose.ui.tooling)
 
   // https://github.com/google/ksp/pull/1021
   add("kspAndroid", libs.kotlininject.compiler)
