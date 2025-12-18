@@ -17,6 +17,10 @@ package dev.sasikanth.rss.reader.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -152,7 +156,21 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
               )
             }
 
-            AnimatedVisibility(visible = canShowScrollToTop) {
+            AnimatedVisibility(
+              visible = canShowScrollToTop,
+              enter =
+                if (unreadSinceLastSync.hasNewArticles) {
+                  fadeIn() + expandHorizontally()
+                } else {
+                  fadeIn()
+                },
+              exit =
+                if (unreadSinceLastSync.hasNewArticles) {
+                  fadeOut() + shrinkHorizontally()
+                } else {
+                  fadeOut()
+                },
+            ) {
               IconButton(
                 onClick = { coroutineScope.launch { onScrollToTopClick() } },
                 content = {

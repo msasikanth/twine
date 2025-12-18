@@ -16,6 +16,9 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class UnreadSinceLastSync(
   val hasNewArticles: Boolean,
   val feedHomepageLinks: List<String>,
