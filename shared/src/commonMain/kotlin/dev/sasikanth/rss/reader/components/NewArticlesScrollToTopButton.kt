@@ -17,6 +17,10 @@ package dev.sasikanth.rss.reader.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -53,6 +57,7 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -64,7 +69,6 @@ import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.newArticles
 import twine.shared.generated.resources.scrollToTop
@@ -152,7 +156,21 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
               )
             }
 
-            AnimatedVisibility(visible = canShowScrollToTop) {
+            AnimatedVisibility(
+              visible = canShowScrollToTop,
+              enter =
+                if (unreadSinceLastSync.hasNewArticles) {
+                  fadeIn() + expandHorizontally()
+                } else {
+                  fadeIn()
+                },
+              exit =
+                if (unreadSinceLastSync.hasNewArticles) {
+                  fadeOut() + shrinkHorizontally()
+                } else {
+                  fadeOut()
+                },
+            ) {
               IconButton(
                 onClick = { coroutineScope.launch { onScrollToTopClick() } },
                 content = {
