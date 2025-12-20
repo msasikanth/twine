@@ -138,6 +138,7 @@ internal fun HomeTopAppBar(
         }
       }
     }
+  var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
 
   Row(
     modifier =
@@ -168,7 +169,10 @@ internal fun HomeTopAppBar(
       icon = TwineIcons.MarkAllAsRead,
       label = stringResource(Res.string.markAllAsRead),
       enabled = hasUnreadPosts,
-      onClick = { onMarkPostsAsRead(source) }
+      onClick = {
+        hasUnreadPosts = false
+        onMarkPostsAsRead(source)
+      }
     )
 
     OverflowMenu(
