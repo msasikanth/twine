@@ -163,8 +163,10 @@ RETURNING post.sourceId;
 
 markPostsAsRead:
 UPDATE post
-SET read = CASE WHEN read != 1 THEN 1 ELSE read END
-WHERE (sourceId = :sourceId OR :sourceId IS NULL) AND postDate > :after;
+SET read = 1
+WHERE (sourceId = :sourceId OR :sourceId IS NULL)
+  AND postDate > :after
+  AND read != 1;
 
 post:
 SELECT * FROM post
