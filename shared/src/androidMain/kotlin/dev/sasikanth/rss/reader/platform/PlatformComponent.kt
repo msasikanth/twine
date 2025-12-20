@@ -16,17 +16,9 @@
 
 package dev.sasikanth.rss.reader.platform
 
-import android.system.Os
-import android.system.OsConstants
-import dev.sasikanth.rss.reader.core.network.utils.PlatformPageSize
 import me.tatarka.inject.annotations.Provides
 
 actual interface PlatformComponent {
 
   @Provides fun AndroidLinkHandler.bind(): LinkHandler = this
-
-  @Provides
-  fun providesPageSize(): PlatformPageSize {
-    return PlatformPageSize(Os.sysconf(OsConstants._SC_PAGESIZE))
-  }
 }
