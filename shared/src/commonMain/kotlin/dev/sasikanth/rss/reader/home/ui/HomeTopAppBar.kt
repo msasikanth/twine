@@ -43,7 +43,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
@@ -71,9 +70,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -81,6 +80,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
+import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
@@ -120,7 +120,6 @@ internal fun HomeTopAppBar(
   hasFeeds: Boolean?,
   hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
-  darkTheme: Boolean,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -139,6 +138,7 @@ internal fun HomeTopAppBar(
         }
       }
     }
+  var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
 
   Row(
     modifier =
@@ -165,26 +165,21 @@ internal fun HomeTopAppBar(
 
     Spacer(Modifier.requiredWidth(16.dp))
 
-    IconButton(
-      icon = Icons.Rounded.Search,
-      contentDescription = stringResource(Res.string.postsSearchHint),
-      darkTheme = darkTheme,
-      onClick = onSearchClicked
-    )
-
-    IconButton(
-      icon = Icons.Outlined.BookmarkBorder,
-      contentDescription = stringResource(Res.string.bookmarks),
-      darkTheme = darkTheme,
-      onClick = onBookmarksClicked
+    CircularIconButton(
+      icon = TwineIcons.MarkAllAsRead,
+      label = stringResource(Res.string.markAllAsRead),
+      enabled = hasUnreadPosts,
+      onClick = {
+        hasUnreadPosts = false
+        onMarkPostsAsRead(source)
+      }
     )
 
     OverflowMenu(
-      hasUnreadPosts = hasUnreadPosts,
       homeViewMode = homeViewMode,
-      darkTheme = darkTheme,
+      onSearchClicked = onSearchClicked,
       onSettingsClicked = onSettingsClicked,
-      onMarkAllAsRead = { onMarkPostsAsRead(source) },
+      onBookmarksClicked = onBookmarksClicked,
       onChangeHomeViewMode = onChangeHomeViewMode
     )
   }
@@ -302,6 +297,7 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
         FeedIcon(
           url = icon,
           contentDescription = null,
+          shape = MaterialTheme.shapes.small,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )
       }
@@ -365,11 +361,10 @@ private fun getPostTypeLabel(type: PostsType) =
 
 @Composable
 private fun OverflowMenu(
-  hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
-  darkTheme: Boolean,
+  onSearchClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
-  onMarkAllAsRead: () -> Unit,
+  onBookmarksClicked: () -> Unit,
   onChangeHomeViewMode: (HomeViewMode) -> Unit,
 ) {
   BoxWithConstraints {
@@ -377,14 +372,13 @@ private fun OverflowMenu(
     var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
-    IconButton(
+    CircularIconButton(
       modifier =
         Modifier.onGloballyPositioned { coordinates ->
           buttonHeight = with(density) { coordinates.size.height.toDp() }
         },
       icon = Icons.Rounded.MoreVert,
-      contentDescription = stringResource(Res.string.moreMenuOptions),
-      darkTheme = darkTheme,
+      label = stringResource(Res.string.moreMenuOptions),
       onClick = { dropdownExpanded = true }
     )
 
@@ -435,12 +429,20 @@ private fun OverflowMenu(
         )
 
         OverflowMenuItem(
-          label = stringResource(Res.string.markAllAsRead),
-          icon = TwineIcons.MarkAllAsRead,
-          enabled = hasUnreadPosts,
+          icon = Icons.Rounded.Search,
+          label = stringResource(Res.string.postsSearchHint),
           onClick = {
             dropdownExpanded = false
-            onMarkAllAsRead()
+            onSearchClicked()
+          }
+        )
+
+        OverflowMenuItem(
+          label = stringResource(Res.string.bookmarks),
+          icon = TwineIcons.Bookmark,
+          onClick = {
+            dropdownExpanded = false
+            onBookmarksClicked()
           }
         )
 

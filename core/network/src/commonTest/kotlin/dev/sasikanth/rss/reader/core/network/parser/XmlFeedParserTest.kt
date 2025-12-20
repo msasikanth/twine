@@ -76,7 +76,8 @@ class XmlFeedParserTest {
         rdfContentParser = RDFContentParser(articleHtmlParser),
         rssContentParser = RSSContentParser(articleHtmlParser),
         atomContentParser = AtomContentParser(httpClient, articleHtmlParser),
-        dispatchersProvider = TestDispatchersProvider()
+        dispatchersProvider = TestDispatchersProvider(),
+        platformPageSize = 4096L
       )
   }
 

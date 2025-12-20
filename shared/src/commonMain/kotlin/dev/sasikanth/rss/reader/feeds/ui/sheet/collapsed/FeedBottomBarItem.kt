@@ -15,24 +15,22 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -54,71 +52,48 @@ internal fun FeedBottomBarItem(
   Box(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.5f }
   ) {
-    Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected, animationProgress = 1f)
+    Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
       val showFeedFavIcon = LocalShowFeedFavIconSetting.current
       val feedIcon = if (showFeedFavIcon) homePageUrl else feedIconUrl
+      val shape = MaterialTheme.shapes.large
 
       FeedIcon(
         url = feedIcon,
         contentDescription = null,
-        modifier =
-          Modifier.requiredSize(48.dp).clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick)
+        shape = shape,
+        modifier = Modifier.requiredSize(48.dp).clickable(onClick = onClick)
       )
     }
 
     if (badgeCount > 0 && canShowUnreadPostsCount) {
-      Badge(
-        containerColor = AppTheme.colorScheme.tintedForeground,
-        contentColor = AppTheme.colorScheme.tintedBackground,
-        modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd),
-      ) {
-        val badgeText =
-          if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
-            "+$BADGE_COUNT_TRIM_LIMIT"
-          } else {
-            badgeCount.toString()
-          }
-
-        Text(
-          text = badgeText,
-          style = MaterialTheme.typography.labelSmall,
-          modifier =
-            Modifier.align(Alignment.CenterVertically).graphicsLayer {
-              translationY = -2.toDp().toPx()
-            }
-        )
-      }
+      UnreadCountBadge(badgeCount)
     }
   }
 }
 
-/**
- * This component receives animation progress within the threshold of 0..0.2 of the original bottom
- * sheet transition.
- */
 @Composable
-internal fun SelectionIndicator(selected: Boolean, animationProgress: Float) {
-  // Set alpha to 0 once the progress goes below this threshold
-  val threshold = 0.89f
-
-  val size = (56.dp * animationProgress).coerceAtLeast(48.dp)
-  val cornerRadius = (20.dp * animationProgress).coerceAtLeast(16.dp)
-  val alpha = animationProgress.takeIf { it >= threshold } ?: 0f
-
-  Box(
-    Modifier.requiredSize(size).graphicsLayer { this.alpha = alpha },
-    contentAlignment = Alignment.Center
+internal fun BoxScope.UnreadCountBadge(badgeCount: Long, modifier: Modifier = Modifier) {
+  Badge(
+    containerColor = AppTheme.colorScheme.onSurface,
+    contentColor = AppTheme.colorScheme.surface,
+    modifier =
+      modifier
+        .sizeIn(minWidth = 31.dp, minHeight = 24.dp)
+        .align(Alignment.TopEnd)
+        .border(2.dp, AppTheme.colorScheme.bottomSheet, RoundedCornerShape(50))
+        .padding(1.dp),
   ) {
-    AnimatedVisibility(
-      modifier = Modifier.matchParentSize(),
-      visible = selected,
-      enter = scaleIn() + fadeIn(),
-      exit = fadeOut() + scaleOut()
-    ) {
-      Box(
-        Modifier.background(AppTheme.colorScheme.tintedForeground, RoundedCornerShape(cornerRadius))
-      )
-    }
+    val badgeText =
+      if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
+        "+$BADGE_COUNT_TRIM_LIMIT"
+      } else {
+        badgeCount.toString()
+      }
+
+    Text(
+      text = badgeText,
+      style = MaterialTheme.typography.labelMedium,
+      modifier = Modifier.align(Alignment.CenterVertically)
+    )
   }
 }

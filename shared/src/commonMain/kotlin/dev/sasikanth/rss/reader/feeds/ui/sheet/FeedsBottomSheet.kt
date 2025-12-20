@@ -99,7 +99,7 @@ internal fun FeedsBottomSheet(
         modifier.fillMaxSize().drawBehind {
           val bottomSheetProgress = bottomSheetProgress()
 
-          val collapsedSheetHeight = 100.dp.toPx()
+          val collapsedSheetHeight = 108.dp.toPx()
           val targetSheetHeight = size.height
           val sheetHeight =
             lerp(

@@ -16,6 +16,8 @@
 
 package dev.sasikanth.rss.reader.core.network.di
 
+import android.system.Os
+import android.system.OsConstants
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
@@ -41,5 +43,11 @@ actual interface NetworkComponent {
         }
       }
     )
+  }
+
+  @Provides
+  @AppScope
+  fun providesPageSize(): Long {
+    return Os.sysconf(OsConstants._SC_PAGESIZE)
   }
 }

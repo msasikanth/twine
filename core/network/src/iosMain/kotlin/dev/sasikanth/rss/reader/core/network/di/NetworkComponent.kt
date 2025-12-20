@@ -23,6 +23,8 @@ import io.ktor.client.engine.darwin.Darwin
 import io.ktor.client.plugins.timeout
 import io.ktor.client.request.request
 import me.tatarka.inject.annotations.Provides
+import platform.posix._SC_PAGESIZE
+import platform.posix.sysconf
 
 actual interface NetworkComponent {
 
@@ -39,5 +41,11 @@ actual interface NetworkComponent {
         }
       }
     )
+  }
+
+  @Provides
+  @AppScope
+  fun providesPlatformPageSize(): Long {
+    return sysconf(_SC_PAGESIZE)
   }
 }

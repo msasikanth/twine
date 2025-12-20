@@ -197,7 +197,8 @@ internal fun CompactPostListItem(
       FeedIcon(
         url = feedIconUrl,
         contentDescription = null,
-        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        shape = MaterialTheme.shapes.extraSmall,
+        modifier = Modifier.requiredSize(16.dp),
       )
 
       Spacer(Modifier.requiredWidth(16.dp))

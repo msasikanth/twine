@@ -47,9 +47,9 @@ internal fun BottomSheetCollapsedContent(
 ) {
   LazyRow(
     modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
     verticalAlignment = Alignment.CenterVertically,
-    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 24.dp)
+    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 36.dp)
   ) {
     if (activeSource != null && activeSource.pinnedAt == null) {
       item {

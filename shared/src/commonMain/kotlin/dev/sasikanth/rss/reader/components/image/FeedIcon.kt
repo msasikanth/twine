@@ -22,7 +22,9 @@ import androidx.compose.material.icons.rounded.RssFeed
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import coil3.SingletonImageLoader
 import coil3.compose.LocalPlatformContext
@@ -38,12 +40,13 @@ import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 internal fun FeedIcon(
   url: String,
   contentDescription: String?,
+  shape: Shape,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500)
 ) {
   val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-  Box(modifier.background(Color.White)) {
+  Box(Modifier.clip(shape).then(modifier).background(Color.White, shape)) {
     val context = LocalPlatformContext.current
     val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
     val imageLoader =
@@ -70,6 +73,6 @@ private fun PlaceHolderIcon() {
   Icon(
     imageVector = Icons.Rounded.RssFeed,
     contentDescription = null,
-    tint = AppTheme.colorScheme.tintedBackground,
+    tint = AppTheme.colorScheme.primary,
   )
 }

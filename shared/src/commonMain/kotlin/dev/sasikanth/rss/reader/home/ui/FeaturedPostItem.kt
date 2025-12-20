@@ -124,7 +124,7 @@ internal fun FeaturedPostItem(
     Text(
       modifier = Modifier.padding(horizontal = 8.dp),
       text = item.description,
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.bodyMedium,
       color = AppTheme.colorScheme.outline,
       minLines = 3,
       maxLines = 3,
