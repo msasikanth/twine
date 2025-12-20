@@ -71,9 +71,9 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
-import dev.sasikanth.rss.reader.components.IconButton
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -165,17 +165,15 @@ internal fun HomeTopAppBar(
 
     Spacer(Modifier.requiredWidth(16.dp))
 
-    IconButton(
+    CircularIconButton(
       icon = Icons.Rounded.Search,
-      contentDescription = stringResource(Res.string.postsSearchHint),
-      darkTheme = darkTheme,
+      label = stringResource(Res.string.postsSearchHint),
       onClick = onSearchClicked
     )
 
-    IconButton(
+    CircularIconButton(
       icon = Icons.Outlined.BookmarkBorder,
-      contentDescription = stringResource(Res.string.bookmarks),
-      darkTheme = darkTheme,
+      label = stringResource(Res.string.bookmarks),
       onClick = onBookmarksClicked
     )
 
@@ -377,14 +375,13 @@ private fun OverflowMenu(
     var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
     var dropdownExpanded by remember { mutableStateOf(false) }
 
-    IconButton(
+    CircularIconButton(
       modifier =
         Modifier.onGloballyPositioned { coordinates ->
           buttonHeight = with(density) { coordinates.size.height.toDp() }
         },
       icon = Icons.Rounded.MoreVert,
-      contentDescription = stringResource(Res.string.moreMenuOptions),
-      darkTheme = darkTheme,
+      label = stringResource(Res.string.moreMenuOptions),
       onClick = { dropdownExpanded = true }
     )
 

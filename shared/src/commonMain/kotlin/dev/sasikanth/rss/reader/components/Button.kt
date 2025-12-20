@@ -108,7 +108,12 @@ fun IconButton(
 }
 
 @Composable
-fun CircularIconButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+fun CircularIconButton(
+  icon: ImageVector,
+  label: String,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit
+) {
   Box(
     modifier =
       Modifier.padding(start = 20.dp)
@@ -124,7 +129,8 @@ fun CircularIconButton(icon: ImageVector, label: String, onClick: () -> Unit) {
         .semantics {
           contentDescription = label
           role = Role.Button
-        },
+        }
+        .then(modifier),
     contentAlignment = Alignment.Center
   ) {
     Icon(
