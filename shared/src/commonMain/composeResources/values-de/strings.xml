@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">Die angegebene URL enthält zu viele Weiterleitungen. Bitte verwenden Sie eine andere URL.</string>
     <string name="errorUnAuthorized">(%1$s): Sie sind nicht berechtigt, auf Inhalte unter diesem Link zuzugreifen.</string>
     <string name="errorUnknownHttpStatus">Inhalt konnte nicht mit HTTP-Code geladen werden: (%1$s)</string>
-    <string name="postsSearchHint">Beiträge durchsuchen</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">Neueste</string>
     <string name="searchSortNewestFirst">Neueste zuerst</string>
     <string name="searchSortOldest">Älteste</string>
