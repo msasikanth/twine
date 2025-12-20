@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AntonFontFamily
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.RethinkSansFontFamily
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -124,7 +125,8 @@ internal fun FeaturedPostItem(
     Text(
       modifier = Modifier.padding(horizontal = 8.dp),
       text = item.description,
-      style = MaterialTheme.typography.bodySmall,
+      style = MaterialTheme.typography.bodyMedium,
+      fontFamily = RethinkSansFontFamily,
       color = AppTheme.colorScheme.outline,
       minLines = 3,
       maxLines = 3,
