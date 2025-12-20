@@ -23,7 +23,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -36,17 +35,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -84,6 +80,7 @@ import app.cash.paging.compose.collectAsLazyPagingItems
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -112,6 +109,9 @@ import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.buttonGoBack
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -255,27 +255,11 @@ internal fun ReaderScreen(
                 scrolledContainerColor = Color.Transparent,
               ),
             navigationIcon = {
-              Box(
-                modifier =
-                  Modifier.padding(start = 20.dp)
-                    .requiredSize(40.dp)
-                    .clip(CircleShape)
-                    .clickable { onBack() }
-                    .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
-                    .border(
-                      width = 1.dp,
-                      color = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
-                      shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-              ) {
-                Icon(
-                  modifier = Modifier.requiredSize(20.dp),
-                  imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                  contentDescription = null,
-                  tint = AppTheme.colorScheme.onSurface,
-                )
-              }
+              CircularIconButton(
+                icon = Icons.AutoMirrored.Rounded.ArrowBack,
+                label = stringResource(Res.string.buttonGoBack),
+                onClick = onBack
+              )
             },
             title = {
               if (pagerState.pageCount > 1) {

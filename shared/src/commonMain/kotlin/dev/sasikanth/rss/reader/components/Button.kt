@@ -16,11 +16,15 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -35,6 +39,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -96,6 +101,35 @@ fun IconButton(
       imageVector = icon,
       contentDescription = contentDescription,
       tint = AppTheme.colorScheme.secondary
+    )
+  }
+}
+
+@Composable
+fun CircularIconButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+  Box(
+    modifier =
+      Modifier.padding(start = 20.dp)
+        .requiredSize(40.dp)
+        .clip(CircleShape)
+        .clickable { onClick() }
+        .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
+        .border(
+          width = 1.dp,
+          color = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
+          shape = CircleShape
+        )
+        .semantics {
+          contentDescription = label
+          role = Role.Button
+        },
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.onSurface,
     )
   }
 }
