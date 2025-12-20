@@ -103,7 +103,8 @@ internal fun FeedListItem(
       FeedIcon(
         url = icon,
         contentDescription = null,
-        modifier = Modifier.requiredSize(36.dp).clip(RoundedCornerShape(8.dp)),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.requiredSize(36.dp),
         contentScale = ContentScale.Crop,
       )
 

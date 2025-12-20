@@ -267,7 +267,8 @@ private fun FeedLabelInput(
     FeedIcon(
       url = feedIcon,
       contentDescription = feed.name,
-      modifier = Modifier.requiredSize(56.dp).clip(RoundedCornerShape(16.dp)),
+      shape = MaterialTheme.shapes.large,
+      modifier = Modifier.requiredSize(56.dp),
     )
 
     Spacer(Modifier.requiredWidth(16.dp))

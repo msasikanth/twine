@@ -52,7 +52,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -206,7 +205,8 @@ private fun OverlappedFeedIcons(
           FeedIcon(
             url = icon,
             contentDescription = null,
-            modifier = Modifier.requiredSize(20.dp).clip(MaterialTheme.shapes.extraSmall)
+            shape = MaterialTheme.shapes.extraSmall,
+            modifier = Modifier.requiredSize(20.dp)
           )
         }
       }

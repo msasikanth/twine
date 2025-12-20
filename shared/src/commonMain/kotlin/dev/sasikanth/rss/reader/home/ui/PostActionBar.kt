@@ -172,8 +172,9 @@ private fun PostSourcePill(
       verticalAlignment = Alignment.CenterVertically
     ) {
       FeedIcon(
-        modifier = Modifier.requiredSize(16.dp).clip(RoundedCornerShape(4.dp)),
+        modifier = Modifier.requiredSize(16.dp),
         url = feedIcon,
+        shape = MaterialTheme.shapes.extraSmall,
         contentDescription = null,
       )
 

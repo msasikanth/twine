@@ -29,7 +29,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -40,10 +39,10 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 @Composable
 internal fun FeedGroupIconGrid(
   icons: List<String>,
-  iconSize: Dp = 18.dp,
+  iconSize: Dp = 16.dp,
   iconShape: Shape = CircleShape,
-  horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(4.dp),
-  verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(4.dp),
+  horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(2.dp),
+  verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(2.dp),
   modifier: Modifier = Modifier,
 ) {
   if (icons.isNotEmpty()) {
@@ -106,8 +105,8 @@ private fun FeedIcon(icon: String?, iconSize: Dp, iconShape: Shape, modifier: Mo
     FeedIcon(
       url = icon,
       contentDescription = null,
-      modifier =
-        Modifier.requiredSize(iconSize).clip(iconShape).background(Color.White).then(modifier)
+      shape = iconShape,
+      modifier = Modifier.requiredSize(iconSize).background(Color.White).then(modifier)
     )
   } else {
     Box(Modifier.requiredSize(iconSize))

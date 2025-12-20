@@ -297,6 +297,7 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
         FeedIcon(
           url = icon,
           contentDescription = null,
+          shape = MaterialTheme.shapes.small,
           modifier = Modifier.clip(MaterialTheme.shapes.small).requiredSize(24.dp)
         )
       }

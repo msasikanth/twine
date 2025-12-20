@@ -16,12 +16,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
@@ -46,14 +42,13 @@ internal fun FeedGroupBottomBarItem(
   Box(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.5f }
   ) {
-    Box(contentAlignment = Alignment.Center) {
-      SelectionIndicator(selected = selected, animationProgress = 1f)
+    Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
             .clip(RoundedCornerShape(16.dp))
             .clickable { onClick() }
-            .background(AppTheme.colorScheme.tintedSurface)
+            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f))
             .padding(8.dp),
         contentAlignment = Alignment.Center
       ) {
@@ -68,7 +63,7 @@ internal fun FeedGroupBottomBarItem(
 
         val iconSpacing =
           if (icons.size > 2) {
-            4.dp
+            2.dp
           } else {
             0.dp
           }
@@ -76,7 +71,7 @@ internal fun FeedGroupBottomBarItem(
         FeedGroupIconGrid(
           icons = icons,
           iconSize = iconSize,
-          iconShape = CircleShape,
+          iconShape = MaterialTheme.shapes.small,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
         )
@@ -85,27 +80,7 @@ internal fun FeedGroupBottomBarItem(
 
     val badgeCount = feedGroup.numberOfUnreadPosts
     if (badgeCount > 0 && canShowUnreadPostsCount) {
-      Badge(
-        containerColor = AppTheme.colorScheme.tintedForeground,
-        contentColor = AppTheme.colorScheme.tintedBackground,
-        modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp).align(Alignment.TopEnd),
-      ) {
-        val badgeText =
-          if (badgeCount > BADGE_COUNT_TRIM_LIMIT) {
-            "+$BADGE_COUNT_TRIM_LIMIT"
-          } else {
-            badgeCount.toString()
-          }
-
-        Text(
-          text = badgeText,
-          style = MaterialTheme.typography.labelSmall,
-          modifier =
-            Modifier.align(Alignment.CenterVertically).graphicsLayer {
-              translationY = -2.toDp().toPx()
-            }
-        )
-      }
+      UnreadCountBadge(badgeCount)
     }
   }
 }
