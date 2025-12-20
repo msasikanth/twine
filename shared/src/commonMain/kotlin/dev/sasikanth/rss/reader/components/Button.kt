@@ -112,6 +112,7 @@ fun CircularIconButton(
   icon: ImageVector,
   label: String,
   modifier: Modifier = Modifier,
+  enabled: Boolean = true,
   onClick: () -> Unit
 ) {
   Box(
@@ -119,7 +120,7 @@ fun CircularIconButton(
       Modifier.padding(start = 20.dp)
         .requiredSize(40.dp)
         .clip(CircleShape)
-        .clickable { onClick() }
+        .clickable(enabled = enabled) { onClick() }
         .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
         .border(
           width = 1.dp,
@@ -130,6 +131,7 @@ fun CircularIconButton(
           contentDescription = label
           role = Role.Button
         }
+        .graphicsLayer { alpha = if (enabled) 1.0f else 0.12f }
         .then(modifier),
     contentAlignment = Alignment.Center
   ) {
