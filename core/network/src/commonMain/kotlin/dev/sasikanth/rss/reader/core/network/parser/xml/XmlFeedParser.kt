@@ -128,8 +128,6 @@ private fun ByteReadChannel.toCharIterator(
 ): CharIterator {
   return object : CharIterator() {
 
-    private val DEFAULT_BUFFER_SIZE = 1024L
-
     private var encodingCharset: Charset? = null
     private var currentIndex = 0
     private var currentBuffer = ""
@@ -139,7 +137,7 @@ private fun ByteReadChannel.toCharIterator(
       if (currentIndex < currentBuffer.length) return true
       if (this@toCharIterator.isClosedForRead) return false
 
-      val packet = runBlocking(context) { this@toCharIterator.readRemaining(DEFAULT_BUFFER_SIZE) }
+      val packet = runBlocking(context) { this@toCharIterator.readRemaining(getOsPageSize()) }
       val bytes = packet.readByteArray()
       val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
       if (encodingCharset == null) {
@@ -182,5 +180,7 @@ private fun ByteReadChannel.toCharIterator(
     }
   }
 }
+
+expect fun getOsPageSize(): Long
 
 internal class HtmlContentException : Exception()
