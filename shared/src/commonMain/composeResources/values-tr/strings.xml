@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.</string>
     <string name="errorUnAuthorized">(%1$s): Bu bağlantıdaki içeriğe erişim yetkiniz yok.</string>
     <string name="errorUnknownHttpStatus">HTTP kodu ile içerik yüklenemedi: (%1$s)</string>
-    <string name="postsSearchHint">Gönderileri ara</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">En yeni</string>
     <string name="searchSortNewestFirst">Önce en yeni</string>
     <string name="searchSortOldest">En eski</string>
