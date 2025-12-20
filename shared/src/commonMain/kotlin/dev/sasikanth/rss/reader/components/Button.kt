@@ -16,6 +16,7 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,6 +117,8 @@ fun CircularIconButton(
   enabled: Boolean = true,
   onClick: () -> Unit
 ) {
+  val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
+
   Box(
     modifier =
       Modifier.padding(start = 20.dp)
@@ -131,7 +135,7 @@ fun CircularIconButton(
           contentDescription = label
           role = Role.Button
         }
-        .graphicsLayer { alpha = if (enabled) 1.0f else 0.12f }
+        .graphicsLayer { alpha = animatedAlpha }
         .then(modifier),
     contentAlignment = Alignment.Center
   ) {
