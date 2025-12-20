@@ -9,11 +9,11 @@
  *
  */
 
-package dev.sasikanth.rss.reader.core.network.parser.xml
+package dev.sasikanth.rss.reader.core.network.utils
 
-import android.system.Os
-import android.system.OsConstants
+import platform.posix._SC_PAGESIZE
+import platform.posix.sysconf
 
-actual fun getOsPageSize(): Long {
-  return Os.sysconf(OsConstants._SC_PAGESIZE)
+internal actual fun getOsPageSize(): Long {
+  return sysconf(_SC_PAGESIZE)
 }
