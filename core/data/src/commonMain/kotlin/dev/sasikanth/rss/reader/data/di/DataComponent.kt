@@ -24,7 +24,6 @@ import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
-import dev.sasikanth.rss.reader.data.database.adapter.DurationAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.data.sync.LocalSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -60,7 +59,6 @@ interface DataComponent :
           pinnedAtAdapter = DateAdapter,
           lastCleanUpAtAdapter = DateAdapter,
           lastUpdatedAtAdapter = DateAdapter,
-          refreshIntervalAdapter = DurationAdapter,
         ),
       bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
       feedGroupAdapter =

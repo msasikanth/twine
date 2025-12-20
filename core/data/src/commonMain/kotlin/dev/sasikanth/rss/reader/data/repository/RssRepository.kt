@@ -141,7 +141,7 @@ class RssRepository(
           pinnedPosition: Double,
           showFeedFavIcon: Boolean,
           lastUpdatedAt: Instant?,
-          refreshInterval: Duration ->
+          refreshInterval: String ->
           Feed(
             id = id,
             name = name,
@@ -153,7 +153,7 @@ class RssRepository(
             pinnedAt = pinnedAt,
             lastCleanUpAt = lastCleanUpAt,
             lastUpdatedAt = lastUpdatedAt,
-            refreshInterval = refreshInterval,
+            refreshInterval = Duration.parse(refreshInterval),
             alwaysFetchSourceArticle = alwaysFetchSourceArticle,
             pinnedPosition = pinnedPosition,
             showFeedFavIcon = showFeedFavIcon,
@@ -285,7 +285,7 @@ class RssRepository(
             pinnedPosition: Double,
             showFeedFavIcon: Boolean,
             lastUpdatedAt: Instant?,
-            refreshInterval: Duration ->
+            refreshInterval: String ->
             Feed(
               id = id,
               name = name,
@@ -297,7 +297,7 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               lastUpdatedAt = lastUpdatedAt,
-              refreshInterval = refreshInterval,
+              refreshInterval = Duration.parse(refreshInterval),
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               pinnedPosition = pinnedPosition,
               showFeedFavIcon = showFeedFavIcon,
@@ -471,7 +471,7 @@ class RssRepository(
 
   suspend fun updateFeedRefreshInterval(feedId: String, refreshInterval: Duration) {
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateRefreshInterval(refreshInterval = refreshInterval, id = feedId)
+      feedQueries.updateRefreshInterval(refreshInterval = refreshInterval.toString(), id = feedId)
     }
   }
 
