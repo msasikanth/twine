@@ -43,7 +43,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.HorizontalDivider
@@ -81,6 +80,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
+import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
@@ -120,7 +120,6 @@ internal fun HomeTopAppBar(
   hasFeeds: Boolean?,
   hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
-  darkTheme: Boolean,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -166,23 +165,17 @@ internal fun HomeTopAppBar(
     Spacer(Modifier.requiredWidth(16.dp))
 
     CircularIconButton(
-      icon = Icons.Rounded.Search,
-      label = stringResource(Res.string.postsSearchHint),
-      onClick = onSearchClicked
-    )
-
-    CircularIconButton(
-      icon = Icons.Outlined.BookmarkBorder,
-      label = stringResource(Res.string.bookmarks),
-      onClick = onBookmarksClicked
+      icon = TwineIcons.MarkAllAsRead,
+      label = stringResource(Res.string.markAllAsRead),
+      enabled = hasUnreadPosts,
+      onClick = { onMarkPostsAsRead(source) }
     )
 
     OverflowMenu(
-      hasUnreadPosts = hasUnreadPosts,
       homeViewMode = homeViewMode,
-      darkTheme = darkTheme,
+      onSearchClicked = onSearchClicked,
       onSettingsClicked = onSettingsClicked,
-      onMarkAllAsRead = { onMarkPostsAsRead(source) },
+      onBookmarksClicked = onBookmarksClicked,
       onChangeHomeViewMode = onChangeHomeViewMode
     )
   }
@@ -363,11 +356,10 @@ private fun getPostTypeLabel(type: PostsType) =
 
 @Composable
 private fun OverflowMenu(
-  hasUnreadPosts: Boolean,
   homeViewMode: HomeViewMode,
-  darkTheme: Boolean,
+  onSearchClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
-  onMarkAllAsRead: () -> Unit,
+  onBookmarksClicked: () -> Unit,
   onChangeHomeViewMode: (HomeViewMode) -> Unit,
 ) {
   BoxWithConstraints {
@@ -432,12 +424,20 @@ private fun OverflowMenu(
         )
 
         OverflowMenuItem(
-          label = stringResource(Res.string.markAllAsRead),
-          icon = TwineIcons.MarkAllAsRead,
-          enabled = hasUnreadPosts,
+          icon = Icons.Rounded.Search,
+          label = stringResource(Res.string.postsSearchHint),
           onClick = {
             dropdownExpanded = false
-            onMarkAllAsRead()
+            onSearchClicked()
+          }
+        )
+
+        OverflowMenuItem(
+          label = stringResource(Res.string.bookmarks),
+          icon = TwineIcons.Bookmark,
+          onClick = {
+            dropdownExpanded = false
+            onBookmarksClicked()
           }
         )
 
