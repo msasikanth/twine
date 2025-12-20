@@ -64,11 +64,15 @@ internal fun PostsList(
   LaunchedEffect(listState) {
     snapshotFlow { listState.layoutInfo.visibleItemsInfo }
       .onEach { items ->
-        val postIds =
-          items
-            .filter { it.contentType == "post_item" && it.key is String }
-            .map { it.key as String }
-
+        val postIds: List<String> =
+          items.mapNotNull {
+            val keyString = (it.key as? String)
+            if (keyString.isNullOrBlank()) {
+              null
+            } else {
+              PostListKey.decode(keyString).postId
+            }
+          }
         postsScrolled(postIds)
       }
       .debounce(2.seconds)
@@ -104,7 +108,12 @@ internal fun PostsList(
       key = { index ->
         val adjustedIndex = index + featuredPosts.size
         val post = posts.peek(adjustedIndex)
-        post?.id ?: adjustedIndex
+
+        if (post != null) {
+          PostListKey.from(post).encode()
+        } else {
+          adjustedIndex
+        }
       },
       contentType = { "post_item" }
     ) { index ->
