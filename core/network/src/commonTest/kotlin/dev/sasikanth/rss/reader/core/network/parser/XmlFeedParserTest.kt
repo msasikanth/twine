@@ -17,6 +17,7 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.AtomContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RDFContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.RSSContentParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
+import dev.sasikanth.rss.reader.core.network.utils.PlatformPageSize
 import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.core.network.utils.atomXmlContent
@@ -76,7 +77,8 @@ class XmlFeedParserTest {
         rdfContentParser = RDFContentParser(articleHtmlParser),
         rssContentParser = RSSContentParser(articleHtmlParser),
         atomContentParser = AtomContentParser(httpClient, articleHtmlParser),
-        dispatchersProvider = TestDispatchersProvider()
+        dispatchersProvider = TestDispatchersProvider(),
+        platformPageSize = PlatformPageSize(4096L)
       )
   }
 

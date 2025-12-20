@@ -17,11 +17,13 @@ import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.jvm.JvmInline
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.readByteArray
 
 internal fun ByteReadChannel.toCharIterator(
   charset: Charset,
+  platformPageSize: PlatformPageSize,
   context: CoroutineContext = EmptyCoroutineContext
 ): CharIterator {
   return object : CharIterator() {
@@ -35,7 +37,8 @@ internal fun ByteReadChannel.toCharIterator(
       if (currentIndex < currentBuffer.length) return true
       if (this@toCharIterator.isClosedForRead) return false
 
-      val packet = runBlocking(context) { this@toCharIterator.readRemaining(getOsPageSize()) }
+      val packet =
+        runBlocking(context) { this@toCharIterator.readRemaining(platformPageSize.value) }
       val bytes = packet.readByteArray()
       val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
       if (encodingCharset == null) {
@@ -79,4 +82,4 @@ internal fun ByteReadChannel.toCharIterator(
   }
 }
 
-internal expect fun getOsPageSize(): Long
+@JvmInline value class PlatformPageSize(val value: Long)

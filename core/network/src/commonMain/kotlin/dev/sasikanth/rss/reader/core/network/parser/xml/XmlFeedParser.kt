@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.core.network.parser.xml
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.network.utils.PlatformPageSize
 import dev.sasikanth.rss.reader.core.network.utils.toCharIterator
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -33,6 +34,7 @@ class XmlFeedParser(
   private val rssContentParser: RSSContentParser,
   private val atomContentParser: AtomContentParser,
   private val rdfContentParser: RDFContentParser,
+  private val platformPageSize: PlatformPageSize,
 ) {
 
   suspend fun parse(
@@ -44,7 +46,7 @@ class XmlFeedParser(
       withContext(dispatchersProvider.io) {
         val parser =
           MiniXmlPullParser(
-            source = content.toCharIterator(charset),
+            source = content.toCharIterator(charset, platformPageSize),
             relaxed = true,
           )
 

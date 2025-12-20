@@ -16,9 +16,17 @@
 
 package dev.sasikanth.rss.reader.platform
 
+import dev.sasikanth.rss.reader.core.network.utils.PlatformPageSize
 import me.tatarka.inject.annotations.Provides
+import platform.posix._SC_PAGESIZE
+import platform.posix.sysconf
 
 actual interface PlatformComponent {
 
   @Provides fun IOSLinkHandler.bind(): LinkHandler = this
+
+  @Provides
+  fun providesPlatformPageSize(): PlatformPageSize {
+    return PlatformPageSize(sysconf(_SC_PAGESIZE))
+  }
 }
