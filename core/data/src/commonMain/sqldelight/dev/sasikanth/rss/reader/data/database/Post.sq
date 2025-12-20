@@ -173,10 +173,10 @@ WHERE post.id = :id;
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
 WHERE
-  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  post.isHidden == 0 AND
-  read != 1 AND
-  postDate > :after;
+  isHidden = 0 AND
+  read = 0 AND
+  postDate > :after AND
+  (:isSourceIdsEmpty OR post.sourceId IN :sourceIds);
 
 unreadSinceLastSync:
 SELECT COUNT(post.id),
