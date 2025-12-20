@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">给定的链接重定向太多。请使用其他链接。</string>
     <string name="errorUnAuthorized">（%1$s）：你没有访问该链接内容的权限。</string>
     <string name="errorUnknownHttpStatus">使用 HTTP 代码加载内容失败：（%1$s）</string>
-    <string name="postsSearchHint">搜索文章</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">最新</string>
     <string name="searchSortNewestFirst">优先最新</string>
     <string name="searchSortOldest">最旧</string>
