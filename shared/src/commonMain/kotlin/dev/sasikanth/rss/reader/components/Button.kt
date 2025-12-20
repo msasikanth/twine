@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -50,6 +51,7 @@ fun Button(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
+  shape: Shape = MaterialTheme.shapes.medium,
   colors: ButtonColors =
     ButtonDefaults.buttonColors(
       containerColor = AppTheme.colorScheme.tintedForeground,
@@ -63,7 +65,7 @@ fun Button(
     modifier = modifier,
     onClick = onClick,
     colors = colors,
-    shape = MaterialTheme.shapes.medium,
+    shape = shape,
     content = content,
     enabled = enabled
   )
