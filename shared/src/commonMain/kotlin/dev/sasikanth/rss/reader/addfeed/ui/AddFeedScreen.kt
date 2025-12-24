@@ -50,7 +50,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -84,6 +83,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -92,6 +92,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonAddToGroup
+import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.errorFeedNotFound
 import twine.shared.generated.resources.errorMalformedXml
 import twine.shared.generated.resources.errorRequestTimeout
@@ -143,9 +144,11 @@ fun AddFeedScreen(
           CenterAlignedTopAppBar(
             title = {},
             navigationIcon = {
-              IconButton(onClick = { goBack() }) {
-                Icon(TwineIcons.ArrowBack, contentDescription = null)
-              }
+              CircularIconButton(
+                icon = TwineIcons.ArrowBack,
+                label = stringResource(Res.string.buttonGoBack),
+                onClick = { goBack() }
+              )
             },
             colors =
               TopAppBarDefaults.topAppBarColors(

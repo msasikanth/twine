@@ -46,7 +46,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -76,6 +75,7 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.OutlinedButton
@@ -180,12 +180,11 @@ internal fun SettingsScreen(
         CenterAlignedTopAppBar(
           title = { Text(stringResource(Res.string.settings)) },
           navigationIcon = {
-            IconButton(onClick = { goBack() }) {
-              Icon(
-                TwineIcons.ArrowBack,
-                contentDescription = stringResource(Res.string.buttonGoBack)
-              )
-            }
+            CircularIconButton(
+              icon = TwineIcons.ArrowBack,
+              label = stringResource(Res.string.buttonGoBack),
+              onClick = { goBack() }
+            )
           },
           colors =
             TopAppBarDefaults.topAppBarColors(

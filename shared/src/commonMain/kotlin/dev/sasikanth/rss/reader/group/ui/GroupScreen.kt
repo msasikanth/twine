@@ -32,8 +32,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -58,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import app.cash.paging.compose.itemContentType
 import app.cash.paging.compose.itemKey
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
@@ -75,6 +74,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.actionMoveTo
 import twine.shared.generated.resources.actionUngroup
+import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.groupNameHint
 
 @Composable
@@ -104,9 +104,11 @@ fun GroupScreen(
                 )
               },
               navigationIcon = {
-                IconButton(onClick = { goBack() }) {
-                  Icon(TwineIcons.ArrowBack, contentDescription = null)
-                }
+                CircularIconButton(
+                  icon = TwineIcons.ArrowBack,
+                  label = stringResource(Res.string.buttonGoBack),
+                  onClick = { goBack() }
+                )
               },
               actions = { Spacer(Modifier.requiredSize(48.dp)) },
               colors =
