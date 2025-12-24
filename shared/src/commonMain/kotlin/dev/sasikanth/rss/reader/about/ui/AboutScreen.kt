@@ -146,7 +146,13 @@ fun AboutScreen(
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(stringResource(Res.string.about)) },
+          title = {
+            Text(
+              text = stringResource(Res.string.about),
+              color = AppTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium,
+            )
+          },
           navigationIcon = {
             CircularIconButton(
               icon = TwineIcons.ArrowBack,
