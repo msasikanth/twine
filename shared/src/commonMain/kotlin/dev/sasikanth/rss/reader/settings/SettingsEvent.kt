@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.settings
 
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 
@@ -47,4 +48,6 @@ sealed interface SettingsEvent {
   data object LoadSubscriptionStatus : SettingsEvent
 
   data object MarkOpenPaywallAsDone : SettingsEvent
+
+  data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : SettingsEvent
 }

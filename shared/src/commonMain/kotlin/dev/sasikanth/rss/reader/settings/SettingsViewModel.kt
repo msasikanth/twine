@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -57,7 +58,8 @@ class SettingsViewModel(
         settingsRepository.appThemeMode,
         settingsRepository.enableAutoSync,
         settingsRepository.showFeedFavIcon,
-        settingsRepository.markAsReadOn
+        settingsRepository.markAsReadOn,
+        settingsRepository.homeViewMode,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -66,7 +68,8 @@ class SettingsViewModel(
         appThemeMode,
         enableAutoSync,
         showFeedFavIcon,
-        markAsReadOn ->
+        markAsReadOn,
+        homeViewMode ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -76,6 +79,7 @@ class SettingsViewModel(
           enableAutoSync = enableAutoSync,
           showFeedFavIcon = showFeedFavIcon,
           markAsReadOn = markAsReadOn,
+          homeViewMode = homeViewMode
         )
       }
       .onEach { settings ->
@@ -88,7 +92,8 @@ class SettingsViewModel(
             appThemeMode = settings.appThemeMode,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
-            markAsReadOn = settings.markAsReadOn
+            markAsReadOn = settings.markAsReadOn,
+            homeViewMode = settings.homeViewMode,
           )
         }
       }
@@ -121,7 +126,12 @@ class SettingsViewModel(
       is SettingsEvent.MarkOpenPaywallAsDone -> {
         _state.update { it.copy(openPaywall = false) }
       }
+      is SettingsEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
     }
+  }
+
+  private fun changeHomeViewMode(homeViewMode: HomeViewMode) {
+    viewModelScope.launch { settingsRepository.updateHomeViewMode(homeViewMode) }
   }
 
   private fun loadSubscriptionStatus() {
@@ -191,4 +201,5 @@ private data class Settings(
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
+  val homeViewMode: HomeViewMode,
 )

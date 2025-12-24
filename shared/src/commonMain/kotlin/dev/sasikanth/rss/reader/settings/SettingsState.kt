@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 
@@ -39,6 +40,7 @@ data class SettingsState(
   val markAsReadOn: MarkAsReadOn,
   val subscriptionResult: SubscriptionResult?,
   val openPaywall: Boolean,
+  val homeViewMode: HomeViewMode,
 ) {
 
   companion object {
@@ -58,6 +60,7 @@ data class SettingsState(
         markAsReadOn = MarkAsReadOn.Open,
         subscriptionResult = null,
         openPaywall = false,
+        homeViewMode = HomeViewMode.Default
       )
   }
 }
