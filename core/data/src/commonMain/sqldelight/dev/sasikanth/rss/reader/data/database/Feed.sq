@@ -16,7 +16,7 @@ CREATE TABLE feed(
   pinnedPosition REAL NOT NULL DEFAULT 0.0,
   showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1,
   lastUpdatedAt INTEGER AS Instant,
-  refreshInterval TEXT AS Duration NOT NULL DEFAULT '1h'
+  refreshInterval TEXT NOT NULL DEFAULT '1h'
 );
 
 CREATE INDEX feed_link_index ON feed(link);
