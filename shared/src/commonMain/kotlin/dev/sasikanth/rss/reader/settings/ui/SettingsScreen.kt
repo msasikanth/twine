@@ -192,7 +192,13 @@ internal fun SettingsScreen(
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(stringResource(Res.string.settings)) },
+          title = {
+            Text(
+              stringResource(Res.string.settings),
+              color = AppTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium,
+            )
+          },
           navigationIcon = {
             CircularIconButton(
               icon = TwineIcons.ArrowBack,
