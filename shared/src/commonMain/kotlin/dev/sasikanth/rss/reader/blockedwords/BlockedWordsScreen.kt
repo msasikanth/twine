@@ -95,7 +95,13 @@ fun BlockedWordsScreen(
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(stringResource(Res.string.blockedWords)) },
+          title = {
+            Text(
+              text = stringResource(Res.string.blockedWords),
+              color = AppTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium,
+            )
+          },
           navigationIcon = {
             CircularIconButton(
               icon = TwineIcons.ArrowBack,

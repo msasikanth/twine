@@ -86,7 +86,13 @@ internal fun BookmarksScreen(
     topBar = {
       Box {
         CenterAlignedTopAppBar(
-          title = { Text(stringResource(Res.string.bookmarks)) },
+          title = {
+            Text(
+              text = stringResource(Res.string.bookmarks),
+              color = AppTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium,
+            )
+          },
           navigationIcon = {
             IconButton(onClick = { goBack() }) {
               Icon(
