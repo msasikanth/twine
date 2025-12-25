@@ -15,7 +15,6 @@
  */
 package dev.sasikanth.rss.reader.home.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -89,7 +88,6 @@ internal fun PostsList(
     if (featuredPosts.isNotEmpty()) {
       item(contentType = "featured_items") {
         FeaturedSection(
-          modifier = Modifier.animateItem(),
           paddingValues = paddingValues,
           pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
@@ -122,37 +120,35 @@ internal fun PostsList(
       val adjustedIndex = index + featuredPosts.size
       val post = posts[adjustedIndex] ?: return@items
 
-      Box(modifier = Modifier.animateItem()) {
-        when (homeViewMode) {
-          HomeViewMode.Default,
-          HomeViewMode.Simple -> {
-            PostListItem(
-              item = post,
-              darkTheme = useDarkTheme,
-              reduceReadItemAlpha = true,
-              onClick = { onPostClicked(post, adjustedIndex) },
-              onPostBookmarkClick = { onPostBookmarkClick(post) },
-              onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
-              onPostSourceClick = { onPostSourceClick(post.sourceId) },
-              updatePostReadStatus = { updatedReadStatus ->
-                updateReadStatus(post.id, updatedReadStatus)
-              }
-            )
-          }
-          HomeViewMode.Compact -> {
-            CompactPostListItem(
-              item = post,
-              reduceReadItemAlpha = true,
-              darkTheme = useDarkTheme,
-              showDivider = index != posts.itemCount - 1,
-              onClick = { onPostClicked(post, adjustedIndex) },
-              onPostBookmarkClick = { onPostBookmarkClick(post) },
-              onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
-              updatePostReadStatus = { updatedReadStatus ->
-                updateReadStatus(post.id, updatedReadStatus)
-              }
-            )
-          }
+      when (homeViewMode) {
+        HomeViewMode.Default,
+        HomeViewMode.Simple -> {
+          PostListItem(
+            item = post,
+            darkTheme = useDarkTheme,
+            reduceReadItemAlpha = true,
+            onClick = { onPostClicked(post, adjustedIndex) },
+            onPostBookmarkClick = { onPostBookmarkClick(post) },
+            onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
+            onPostSourceClick = { onPostSourceClick(post.sourceId) },
+            updatePostReadStatus = { updatedReadStatus ->
+              updateReadStatus(post.id, updatedReadStatus)
+            }
+          )
+        }
+        HomeViewMode.Compact -> {
+          CompactPostListItem(
+            item = post,
+            reduceReadItemAlpha = true,
+            darkTheme = useDarkTheme,
+            showDivider = index != posts.itemCount - 1,
+            onClick = { onPostClicked(post, adjustedIndex) },
+            onPostBookmarkClick = { onPostBookmarkClick(post) },
+            onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
+            updatePostReadStatus = { updatedReadStatus ->
+              updateReadStatus(post.id, updatedReadStatus)
+            }
+          )
         }
       }
     }
