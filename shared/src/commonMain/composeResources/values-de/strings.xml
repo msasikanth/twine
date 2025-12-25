@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">Abonnieren Sie Premium: Alles freischalten und die zukünftige Entwicklung vorantreiben.</string>
     <string name="twinePremiumSubscribedDesc">Sie haben Twine Premium abonniert. Danke für die Unterstützung ❤️</string>
     <string name="readerCustomisationsTypeface">Schriftart</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
