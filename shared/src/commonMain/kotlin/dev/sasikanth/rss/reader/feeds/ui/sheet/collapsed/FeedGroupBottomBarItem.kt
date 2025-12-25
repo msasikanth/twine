@@ -40,7 +40,7 @@ internal fun FeedGroupBottomBarItem(
   selected: Boolean = false,
 ) {
   Box(
-    modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.5f }
+    modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
   ) {
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
       Box(

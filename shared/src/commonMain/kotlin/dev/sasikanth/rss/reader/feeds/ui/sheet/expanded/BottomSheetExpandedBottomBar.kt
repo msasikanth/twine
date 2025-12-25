@@ -101,7 +101,7 @@ private fun BottomBarItem(
 
       Text(
         text = label,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = AppTheme.colorScheme.textEmphasisHigh
       )
     }

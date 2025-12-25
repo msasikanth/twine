@@ -281,7 +281,8 @@ private fun BlockedWordItem(
     IconButton(onClick = removeClicked) {
       Icon(
         imageVector = TwineIcons.DeleteOutline,
-        contentDescription = stringResource(Res.string.delete)
+        contentDescription = stringResource(Res.string.delete),
+        tint = AppTheme.colorScheme.textEmphasisHigh,
       )
     }
   }
