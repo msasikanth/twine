@@ -98,8 +98,8 @@ internal fun FeaturedSection(
     val contentPadding =
       remember(systemBarsHorizontalPadding) {
         PaddingValues(
-          start = systemBarsHorizontalPadding + 24.dp,
-          end = systemBarsHorizontalPadding + 24.dp,
+          start = systemBarsHorizontalPadding + 16.dp,
+          end = systemBarsHorizontalPadding + 16.dp,
           bottom = 24.dp
         )
       }

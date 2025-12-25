@@ -111,7 +111,7 @@ internal fun PostListItem(
         .semantics { contentDescription = item.title.ifBlank { item.description } }
   ) {
     Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp),
+      modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       Text(
@@ -157,7 +157,7 @@ internal fun PostListItem(
         readStatus = !readStatus
         updatePostReadStatus(readStatus)
       },
-      modifier = Modifier.padding(horizontal = 24.dp)
+      modifier = Modifier.padding(horizontal = 16.dp)
     )
   }
 }
