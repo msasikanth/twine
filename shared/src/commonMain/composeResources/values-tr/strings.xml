@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">Premium'a Geç: Her şeyin kilidini aç ve gelecekteki gelişimi destekle.</string>
     <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
     <string name="readerCustomisationsTypeface">Yazı Tipi</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>
