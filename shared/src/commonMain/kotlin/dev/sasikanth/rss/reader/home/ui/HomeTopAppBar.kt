@@ -45,7 +45,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -78,13 +77,9 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
-import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
-import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
-import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
-import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -96,10 +91,6 @@ import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
-import twine.shared.generated.resources.homeViewMode
-import twine.shared.generated.resources.homeViewModeCompact
-import twine.shared.generated.resources.homeViewModeDefault
-import twine.shared.generated.resources.homeViewModeSimple
 import twine.shared.generated.resources.markAllAsRead
 import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.postsAll
@@ -119,14 +110,12 @@ internal fun HomeTopAppBar(
   listState: LazyListState,
   hasFeeds: Boolean?,
   hasUnreadPosts: Boolean,
-  homeViewMode: HomeViewMode,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
   onPostTypeChanged: (PostsType) -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
-  onChangeHomeViewMode: (HomeViewMode) -> Unit,
 ) {
   val backgroundAlpha by
     remember(listState) {
@@ -176,11 +165,9 @@ internal fun HomeTopAppBar(
     )
 
     OverflowMenu(
-      homeViewMode = homeViewMode,
       onSearchClicked = onSearchClicked,
       onSettingsClicked = onSettingsClicked,
-      onBookmarksClicked = onBookmarksClicked,
-      onChangeHomeViewMode = onChangeHomeViewMode
+      onBookmarksClicked = onBookmarksClicked
     )
   }
 }
@@ -361,11 +348,9 @@ private fun getPostTypeLabel(type: PostsType) =
 
 @Composable
 private fun OverflowMenu(
-  homeViewMode: HomeViewMode,
   onSearchClicked: () -> Unit,
   onSettingsClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
-  onChangeHomeViewMode: (HomeViewMode) -> Unit,
 ) {
   BoxWithConstraints {
     val density = LocalDensity.current
@@ -389,45 +374,6 @@ private fun OverflowMenu(
         expanded = dropdownExpanded,
         onDismissRequest = { dropdownExpanded = false }
       ) {
-        Text(
-          modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-          text = stringResource(Res.string.homeViewMode),
-          style = MaterialTheme.typography.labelMedium,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-          LayoutIconButton(
-            modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.homeViewModeDefault),
-            icon = TwineIcons.LayoutDefault,
-            selected = homeViewMode == HomeViewMode.Default,
-            onClick = { onChangeHomeViewMode(HomeViewMode.Default) }
-          )
-
-          LayoutIconButton(
-            modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.homeViewModeSimple),
-            icon = TwineIcons.LayoutSimple,
-            selected = homeViewMode == HomeViewMode.Simple,
-            onClick = { onChangeHomeViewMode(HomeViewMode.Simple) }
-          )
-
-          LayoutIconButton(
-            modifier = Modifier.weight(1f),
-            label = stringResource(Res.string.homeViewModeCompact),
-            icon = TwineIcons.LayoutCompact,
-            selected = homeViewMode == HomeViewMode.Compact,
-            onClick = { onChangeHomeViewMode(HomeViewMode.Compact) }
-          )
-        }
-
-        HorizontalDivider(
-          modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-          thickness = 2.dp,
-          color = AppTheme.colorScheme.surfaceContainerHigh
-        )
-
         OverflowMenuItem(
           icon = Icons.Rounded.Search,
           label = stringResource(Res.string.postsSearchHint),
