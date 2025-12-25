@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
     <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
     <string name="readerCustomisationsTypeface">排版</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d 个结果</item>
