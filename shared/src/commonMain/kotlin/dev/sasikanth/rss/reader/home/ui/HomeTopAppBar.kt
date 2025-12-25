@@ -19,6 +19,10 @@ package dev.sasikanth.rss.reader.home.ui
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -30,24 +34,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -59,7 +61,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -79,25 +80,25 @@ import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
-import dev.sasikanth.rss.reader.resources.icons.DropdownIcon
 import dev.sasikanth.rss.reader.resources.icons.MarkAllAsRead
 import dev.sasikanth.rss.reader.resources.icons.Settings
+import dev.sasikanth.rss.reader.resources.icons.Sort
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.util.homeAppBarTimestamp
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
-import kotlinx.datetime.LocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.markAllAsRead
 import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.postsAll
+import twine.shared.generated.resources.postsFilter
 import twine.shared.generated.resources.postsLast24Hours
 import twine.shared.generated.resources.postsSearchHint
 import twine.shared.generated.resources.postsToday
 import twine.shared.generated.resources.postsUnread
+import twine.shared.generated.resources.screenHome
 import twine.shared.generated.resources.settings
 
 private const val APP_BAR_OPAQUE_THRESHOLD = 200f
@@ -105,11 +106,10 @@ private const val APP_BAR_OPAQUE_THRESHOLD = 200f
 @Composable
 internal fun HomeTopAppBar(
   source: Source?,
-  currentDateTime: LocalDateTime,
   postsType: PostsType,
   listState: LazyListState,
-  hasFeeds: Boolean?,
   hasUnreadPosts: Boolean,
+  scrollBehavior: TopAppBarScrollBehavior,
   modifier: Modifier = Modifier,
   onSearchClicked: () -> Unit,
   onBookmarksClicked: () -> Unit,
@@ -129,120 +129,99 @@ internal fun HomeTopAppBar(
     }
   var hasUnreadPosts by remember(hasUnreadPosts) { mutableStateOf(hasUnreadPosts) }
 
-  Row(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .pointerInput(Unit) {}
-        .fillMaxWidth()
-        .background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha))
-        .windowInsetsPadding(
-          WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+  CenterAlignedTopAppBar(
+    modifier = modifier.background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha)),
+    scrollBehavior = scrollBehavior,
+    contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
+    title = { SourceInfo(postsType = postsType) },
+    navigationIcon = {
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(0.dp) }
+
+      Box(
+        modifier =
+          Modifier.offset(x = (-8).dp).onGloballyPositioned {
+            buttonHeight = with(density) { it.size.height.toDp() }
+          }
+      ) {
+        var showPostsTypeDropDown by remember { mutableStateOf(false) }
+
+        CircularIconButton(
+          icon = TwineIcons.Sort,
+          label = stringResource(Res.string.postsFilter),
+          onClick = { showPostsTypeDropDown = true }
         )
-        .padding(vertical = 16.dp)
-        .padding(start = 12.dp, end = 24.dp),
-    verticalAlignment = Alignment.CenterVertically
-  ) {
-    SourceInfo(
-      modifier = Modifier.weight(1f),
-      source = source,
-      currentDateTime = currentDateTime,
-      postsType = postsType,
-      hasFeeds = hasFeeds,
-      onPostTypeChanged = onPostTypeChanged
-    )
 
-    Spacer(Modifier.requiredWidth(16.dp))
-
-    CircularIconButton(
-      icon = TwineIcons.MarkAllAsRead,
-      label = stringResource(Res.string.markAllAsRead),
-      enabled = hasUnreadPosts,
-      onClick = {
-        hasUnreadPosts = false
-        onMarkPostsAsRead(source)
+        PostsFilterDropdown(
+          showDropdown = showPostsTypeDropDown,
+          postsType = postsType,
+          onPostTypeChanged = onPostTypeChanged,
+          offset = DpOffset(x = 16.dp, y = -buttonHeight),
+          onDismiss = { showPostsTypeDropDown = false }
+        )
       }
-    )
+    },
+    actions = {
+      AnimatedVisibility(
+        visible = hasUnreadPosts,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut()
+      ) {
+        CircularIconButton(
+          icon = TwineIcons.MarkAllAsRead,
+          label = stringResource(Res.string.markAllAsRead),
+          enabled = hasUnreadPosts,
+          onClick = {
+            hasUnreadPosts = false
+            onMarkPostsAsRead(source)
+          }
+        )
+      }
 
-    OverflowMenu(
-      onSearchClicked = onSearchClicked,
-      onSettingsClicked = onSettingsClicked,
-      onBookmarksClicked = onBookmarksClicked
-    )
-  }
+      OverflowMenu(
+        onSearchClicked = onSearchClicked,
+        onSettingsClicked = onSettingsClicked,
+        onBookmarksClicked = onBookmarksClicked
+      )
+    },
+    colors =
+      TopAppBarDefaults.topAppBarColors(
+        containerColor = Color.Transparent,
+        scrolledContainerColor = Color.Transparent
+      )
+  )
 }
 
 @Composable
 private fun SourceInfo(
-  source: Source?,
-  currentDateTime: LocalDateTime,
   postsType: PostsType,
-  hasFeeds: Boolean?,
   modifier: Modifier = Modifier,
-  onPostTypeChanged: (PostsType) -> Unit,
 ) {
-  val density = LocalDensity.current
-  var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
-  var showPostsTypeDropDown by remember { mutableStateOf(false) }
-
   Box(modifier) {
     Row(
-      modifier =
-        Modifier.clip(MaterialTheme.shapes.small)
-          .clickable(enabled = hasFeeds == true) { showPostsTypeDropDown = true }
-          .onGloballyPositioned { coordinates ->
-            buttonHeight = with(density) { coordinates.size.height.toDp() }
-          },
-      verticalAlignment = Alignment.CenterVertically
+      modifier = Modifier.clip(MaterialTheme.shapes.small),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.Center,
     ) {
-      SourceIcon(source)
-
-      val sourceLabel =
-        when (source) {
-          is FeedGroup -> source.name
-          is Feed -> source.name
-          else -> currentDateTime.homeAppBarTimestamp()
-        }.uppercase()
-
-      Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+      Column(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
         Text(
           modifier = Modifier.basicMarquee(),
-          text = sourceLabel,
-          style = MaterialTheme.typography.labelSmall,
+          text = stringResource(Res.string.screenHome),
+          style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.onSurface,
           maxLines = 1,
         )
 
-        AnimatedVisibility(visible = hasFeeds == true) {
-          val postsTypeLabel = getPostTypeLabel(postsType)
-
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-              text = postsTypeLabel,
-              style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.onSurface,
-            )
-
-            Spacer(Modifier.requiredWidth(4.dp))
-
-            Icon(
-              imageVector = TwineIcons.DropdownIcon,
-              contentDescription = null,
-              modifier = Modifier.requiredSize(20.dp),
-              tint = AppTheme.colorScheme.textEmphasisHigh,
-            )
-          }
-        }
+        Text(
+          text = getPostTypeLabel(postsType),
+          style = MaterialTheme.typography.labelMedium,
+          color = AppTheme.colorScheme.secondary,
+        )
       }
     }
-
-    PostsFilterDropdown(
-      showDropdown = showPostsTypeDropDown,
-      postsType = postsType,
-      offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
-      onPostTypeChanged = onPostTypeChanged,
-      onDismiss = { showPostsTypeDropDown = false }
-    )
   }
 }
 
