@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">The given URL has too many redirects. Please use a different URL.</string>
     <string name="errorUnAuthorized">(%1$s): You are not authorized to access content at this link.</string>
     <string name="errorUnknownHttpStatus">Failed to load content with HTTP code: (%1$s)</string>
-    <string name="postsSearchHint">Search posts</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">Newest</string>
     <string name="searchSortNewestFirst">Newest first</string>
     <string name="searchSortOldest">Oldest</string>
@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
     <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
     <string name="readerCustomisationsTypeface">Typeface</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>

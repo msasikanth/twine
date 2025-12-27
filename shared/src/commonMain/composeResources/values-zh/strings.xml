@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">给定的链接重定向太多。请使用其他链接。</string>
     <string name="errorUnAuthorized">（%1$s）：你没有访问该链接内容的权限。</string>
     <string name="errorUnknownHttpStatus">使用 HTTP 代码加载内容失败：（%1$s）</string>
-    <string name="postsSearchHint">搜索文章</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">最新</string>
     <string name="searchSortNewestFirst">优先最新</string>
     <string name="searchSortOldest">最旧</string>
@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
     <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
     <string name="readerCustomisationsTypeface">排版</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d 个结果</item>
