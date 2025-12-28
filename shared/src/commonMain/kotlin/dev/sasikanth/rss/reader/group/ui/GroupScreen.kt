@@ -105,6 +105,7 @@ fun GroupScreen(
               },
               navigationIcon = {
                 CircularIconButton(
+                  modifier = Modifier.padding(start = 12.dp),
                   icon = TwineIcons.ArrowBack,
                   label = stringResource(Res.string.buttonGoBack),
                   onClick = { goBack() }
