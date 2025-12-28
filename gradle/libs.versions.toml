@@ -139,7 +139,7 @@ glance-material3 = { module = "androidx.glance:glance-material3", version.ref = 
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
-android_library = { id = "com.android.library", version.ref = "android_gradle_plugin" }
+android_library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android_gradle_plugin" }
 kotlin_multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }

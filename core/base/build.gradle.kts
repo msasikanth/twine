@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.androidLibrary
+
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -22,7 +24,15 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  androidTarget()
+  androidLibrary {
+    namespace = "dev.sasikanth.rss.reader.core.base"
+
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    compileSdk = libs.versions.android.sdk.compile.get().toInt()
+
+    withHostTestBuilder {}.configure {}
+  }
+
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
@@ -39,11 +49,4 @@ kotlin {
   }
 
   compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
-}
-
-android {
-  namespace = "dev.sasikanth.rss.reader.core.base"
-  compileSdk = libs.versions.android.sdk.compile.get().toInt()
-
-  defaultConfig { minSdk = libs.versions.android.sdk.min.get().toInt() }
 }
