@@ -43,7 +43,6 @@ import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,7 +54,6 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -165,7 +163,6 @@ internal fun HomeScreen(
   val bottomSheetScaffoldState =
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
 
-  val bottomSheetProgress by bottomSheetState.progressAsState()
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
 
@@ -435,7 +432,13 @@ internal fun HomeScreen(
         FeedsBottomSheet(
           feedsViewModel = feedsViewModel,
           darkTheme = useDarkTheme,
-          bottomSheetProgress = { bottomSheetProgress },
+          bottomSheetProgress =
+            @Suppress("INVISIBLE_REFERENCE") {
+              bottomSheetState.anchoredDraggableState.progress(
+                SheetValue.Hidden,
+                SheetValue.Expanded
+              )
+            },
           openFeedInfoSheet = openFeedInfoSheet,
           openGroupScreen = openGroupScreen,
           openGroupSelectionSheet = openGroupSelectionSheet,
@@ -556,22 +559,6 @@ private fun NoNewPosts() {
       color = AppTheme.colorScheme.textEmphasisMed,
       textAlign = TextAlign.Center
     )
-  }
-}
-
-@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-private fun SheetState.progressAsState(): State<Float> {
-  return derivedStateOf {
-    when {
-      currentValue == SheetValue.Expanded && targetValue == SheetValue.Expanded -> 1f
-      currentValue == SheetValue.Expanded && targetValue == SheetValue.PartiallyExpanded ->
-        1f - anchoredDraggableState.progress
-      currentValue == SheetValue.PartiallyExpanded && targetValue == SheetValue.PartiallyExpanded ->
-        if (anchoredDraggableState.progress == 1f) 0f else anchoredDraggableState.progress
-      currentValue == SheetValue.PartiallyExpanded && targetValue == SheetValue.Expanded ->
-        anchoredDraggableState.progress
-      else -> 0f
-    }
   }
 }
 
