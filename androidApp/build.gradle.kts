@@ -15,8 +15,8 @@
  */
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
+  alias(libs.plugins.kotlin.multiplatform)
   alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.bugsnag)
@@ -25,12 +25,17 @@ plugins {
 
 kotlin {
   jvmToolchain(21)
+
+  androidTarget()
+
   compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
 android {
   compileSdk = libs.versions.android.sdk.compile.get().toInt()
   namespace = "dev.sasikanth.rss.reader"
+
+  sourceSets["main"].manifest.srcFile("src/main/AndroidManifest.xml")
 
   defaultConfig {
     applicationId = "dev.sasikanth.rss.reader"

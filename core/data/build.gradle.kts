@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
-
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
@@ -42,17 +40,7 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
-
-  androidLibrary {
-    namespace = "dev.sasikanth.rss.reader.data"
-
-    minSdk = libs.versions.android.sdk.min.get().toInt()
-    compileSdk = libs.versions.android.sdk.compile.get().toInt()
-
-    withHostTestBuilder {}.configure {}
-    withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
-  }
+  androidTarget()
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
@@ -98,5 +86,15 @@ sqldelight {
       schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
       verifyMigrations.set(true)
     }
+  }
+}
+
+android {
+  namespace = "dev.sasikanth.rss.reader.data"
+  compileSdk = libs.versions.android.sdk.compile.get().toInt()
+
+  defaultConfig {
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 }
