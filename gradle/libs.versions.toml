@@ -1,8 +1,7 @@
 [versions]
 kotlin = "2.3.0"
 android_gradle_plugin = "8.13.2"
-compose = "1.10.0-rc02"
-compose_material3 = "1.10.0-alpha05"
+compose = "1.11.0-alpha01"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "36"
@@ -63,7 +62,7 @@ compose_ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
 compose_ui_tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 compose_ui_util = { module = "org.jetbrains.compose.ui:ui-util", version.ref = "compose" }
 compose_material = { module = "org.jetbrains.compose.material:material", version.ref = "compose" }
-compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose_material3" }
+compose_material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose" }
 compose_material_icons_extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose_material_icons_extended" }
 compose_resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 compose_ui_tooling_preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
