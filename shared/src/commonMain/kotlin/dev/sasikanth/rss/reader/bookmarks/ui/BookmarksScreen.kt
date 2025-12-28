@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.home.ui.PostListItem
@@ -94,12 +94,11 @@ internal fun BookmarksScreen(
             )
           },
           navigationIcon = {
-            IconButton(onClick = { goBack() }) {
-              Icon(
-                TwineIcons.ArrowBack,
-                contentDescription = stringResource(Res.string.buttonGoBack)
-              )
-            }
+            CircularIconButton(
+              icon = TwineIcons.ArrowBack,
+              label = stringResource(Res.string.buttonGoBack),
+              onClick = goBack,
+            )
           },
           colors =
             TopAppBarDefaults.topAppBarColors(

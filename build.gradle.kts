@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@file:Suppress("DSL_SCOPE_VIOLATION")
+
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   // this is necessary to avoid the plugins to be loaded multiple times
   // in each subproject's classloader
   alias(libs.plugins.kotlin.multiplatform).apply(false)
-  alias(libs.plugins.kotlin.android).apply(false)
   alias(libs.plugins.android.application).apply(false)
   alias(libs.plugins.android.library).apply(false)
   alias(libs.plugins.compose).apply(false)
@@ -54,5 +56,9 @@ allprojects {
       trimTrailingWhitespace()
       endWithNewline()
     }
+  }
+
+  tasks.withType<KotlinCompile>().all {
+    compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
   }
 }

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import com.android.build.api.dsl.androidLibrary
+import com.android.build.api.dsl.ManagedVirtualDevice
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
@@ -31,6 +31,8 @@ plugins {
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
   jvmToolchain(21)
+
+  androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
 
   // spotless:off
   val iOSBinaryFlags =
@@ -55,17 +57,6 @@ kotlin {
   applyDefaultHierarchyTemplate()
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
-
-  androidLibrary {
-    namespace = "dev.sasikanth.rss.reader.common"
-
-    minSdk = libs.versions.android.sdk.min.get().toInt()
-    compileSdk = libs.versions.android.sdk.compile.get().toInt()
-
-    androidResources { enable = true }
-    withHostTestBuilder {}.configure {}
-    withDeviceTestBuilder {}.configure {}
-  }
 
   sourceSets {
     all {
@@ -131,6 +122,12 @@ kotlin {
       api(libs.androidx.browser)
       implementation(libs.ktor.client.okhttp)
     }
+    val androidInstrumentedTest by getting {
+      dependencies {
+        implementation(libs.androidx.test.runner)
+        implementation(libs.androidx.test.rules)
+      }
+    }
 
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
 
@@ -143,8 +140,31 @@ composeCompiler {
   metricsDestination = layout.buildDirectory.dir("compose_compiler")
 }
 
+android {
+  compileSdk = libs.versions.android.sdk.compile.get().toInt()
+  namespace = "dev.sasikanth.rss.reader.common"
+
+  defaultConfig {
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  @Suppress("UnstableApiUsage")
+  testOptions {
+    managedDevices {
+      devices {
+        maybeCreate<ManagedVirtualDevice>("pixel2Api31").apply {
+          device = "Pixel 2"
+          apiLevel = 31
+          systemImageSource = "aosp"
+        }
+      }
+    }
+  }
+}
+
 dependencies {
-  "androidRuntimeClasspath"(libs.compose.ui.tooling)
+  debugImplementation(libs.compose.ui.tooling)
 
   // https://github.com/google/ksp/pull/1021
   add("kspAndroid", libs.kotlininject.compiler)

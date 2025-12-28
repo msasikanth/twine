@@ -29,7 +29,7 @@ object TestClock : Clock {
     return LocalDateTime(
         year = 2023,
         month = Month.JANUARY,
-        day = 1,
+        dayOfMonth = 1,
         hour = 8,
         minute = 0,
       )
