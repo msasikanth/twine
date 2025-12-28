@@ -435,7 +435,7 @@ internal fun HomeScreen(
           bottomSheetProgress =
             @Suppress("INVISIBLE_REFERENCE") {
               bottomSheetState.anchoredDraggableState.progress(
-                SheetValue.Hidden,
+                SheetValue.PartiallyExpanded,
                 SheetValue.Expanded
               )
             },
