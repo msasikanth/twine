@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -140,13 +141,12 @@ internal fun HomeTopAppBar(
 
       Box(
         modifier =
-          Modifier.offset(x = (-8).dp).onGloballyPositioned {
-            buttonHeight = with(density) { it.size.height.toDp() }
-          }
+          Modifier.onGloballyPositioned { buttonHeight = with(density) { it.size.height.toDp() } }
       ) {
         var showPostsTypeDropDown by remember { mutableStateOf(false) }
 
         CircularIconButton(
+          modifier = Modifier.padding(start = 12.dp),
           icon = TwineIcons.Sort,
           label = stringResource(Res.string.postsFilter),
           onClick = { showPostsTypeDropDown = true }
@@ -156,7 +156,7 @@ internal fun HomeTopAppBar(
           showDropdown = showPostsTypeDropDown,
           postsType = postsType,
           onPostTypeChanged = onPostTypeChanged,
-          offset = DpOffset(x = 16.dp, y = -buttonHeight),
+          offset = DpOffset(x = 12.dp, y = -buttonHeight),
           onDismiss = { showPostsTypeDropDown = false }
         )
       }
@@ -177,6 +177,8 @@ internal fun HomeTopAppBar(
           }
         )
       }
+
+      Spacer(Modifier.width(8.dp))
 
       OverflowMenu(
         onSearchClicked = onSearchClicked,

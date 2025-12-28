@@ -1,5 +1,4 @@
-import com.android.build.api.dsl.ManagedVirtualDevice
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
+import com.android.build.api.dsl.androidLibrary
 
 /*
  * Copyright 2023 Sasikanth Miriyampalli
@@ -26,8 +25,17 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  @Suppress("OPT_IN_USAGE")
-  androidTarget { instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test) }
+  compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
+
+  androidLibrary {
+    namespace = "dev.sasikanth.rss.reader.core.network"
+
+    minSdk = libs.versions.android.sdk.min.get().toInt()
+    compileSdk = libs.versions.android.sdk.compile.get().toInt()
+
+    withHostTestBuilder {}.configure {}
+    withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+  }
   listOf(iosArm64(), iosSimulatorArm64())
 
   sourceSets {
@@ -68,28 +76,5 @@ kotlin {
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
 
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
-  }
-}
-
-android {
-  namespace = "dev.sasikanth.rss.reader.core.network"
-  compileSdk = libs.versions.android.sdk.compile.get().toInt()
-
-  defaultConfig {
-    minSdk = libs.versions.android.sdk.min.get().toInt()
-    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-  }
-
-  @Suppress("UnstableApiUsage")
-  testOptions {
-    managedDevices {
-      devices {
-        maybeCreate<ManagedVirtualDevice>("pixel2Api31").apply {
-          device = "Pixel 2"
-          apiLevel = 31
-          systemImageSource = "aosp"
-        }
-      }
-    }
   }
 }

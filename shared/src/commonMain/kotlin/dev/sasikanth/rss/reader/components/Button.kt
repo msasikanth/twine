@@ -23,7 +23,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonColors
@@ -121,7 +120,7 @@ fun CircularIconButton(
 
   Box(
     modifier =
-      Modifier.padding(start = 20.dp)
+      modifier
         .requiredSize(40.dp)
         .clip(CircleShape)
         .clickable(enabled = enabled) { onClick() }
@@ -135,8 +134,7 @@ fun CircularIconButton(
           contentDescription = label
           role = Role.Button
         }
-        .graphicsLayer { alpha = animatedAlpha }
-        .then(modifier),
+        .graphicsLayer { alpha = animatedAlpha },
     contentAlignment = Alignment.Center
   ) {
     Icon(

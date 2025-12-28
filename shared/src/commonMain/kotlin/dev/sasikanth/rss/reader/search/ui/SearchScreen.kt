@@ -19,6 +19,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -70,6 +72,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
@@ -249,22 +252,24 @@ private fun SearchBar(
           WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
         )
   ) {
-    Box(
-      modifier =
-        Modifier.padding(all = 16.dp)
-          .background(
-            color = AppTheme.colorScheme.surfaceContainer,
-            shape = RoundedCornerShape(16.dp)
-          )
-          .padding(horizontal = 4.dp)
+    MaterialTheme(
+      colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
     ) {
-      MaterialTheme(
-        colorScheme =
-          MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+      Row(
+        modifier = Modifier.fillMaxWidth().padding(all = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
       ) {
+        CircularIconButton(
+          icon = TwineIcons.ArrowBack,
+          label = stringResource(Res.string.buttonGoBack),
+          onClick = onBackClick,
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
         TextField(
           modifier =
-            Modifier.fillMaxWidth().focusRequester(focusRequester).onFocusChanged {
+            Modifier.weight(1f).focusRequester(focusRequester).onFocusChanged {
               isSearchBarFocused = it.isFocused
             },
           value = query.copy(selection = TextRange(query.text.length)),
@@ -275,15 +280,6 @@ private fun SearchBar(
               color = AppTheme.colorScheme.textEmphasisHigh,
               style = MaterialTheme.typography.bodyLarge
             )
-          },
-          leadingIcon = {
-            IconButton(onClick = onBackClick) {
-              Icon(
-                TwineIcons.ArrowBack,
-                contentDescription = stringResource(Res.string.buttonGoBack),
-                tint = AppTheme.colorScheme.onSurface
-              )
-            }
           },
           trailingIcon = {
             if (query.text.isNotBlank()) {
@@ -304,8 +300,8 @@ private fun SearchBar(
           textStyle = MaterialTheme.typography.bodyLarge,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = Color.Transparent,
-              unfocusedContainerColor = Color.Transparent,
+              focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
+              unfocusedContainerColor = AppTheme.colorScheme.surfaceContainerHighest,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
               unfocusedIndicatorColor = Color.Transparent,
               focusedIndicatorColor = Color.Transparent,
