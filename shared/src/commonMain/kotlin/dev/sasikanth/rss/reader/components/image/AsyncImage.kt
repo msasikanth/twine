@@ -25,6 +25,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Dimension
 import coil3.size.Size
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 
 @Composable
 internal fun AsyncImage(
@@ -37,20 +38,25 @@ internal fun AsyncImage(
   alignment: Alignment = Alignment.Center,
 ) {
   val context = LocalPlatformContext.current
+  val shouldBlockImage = LocalBlockImage.current
 
-  coil3.compose.AsyncImage(
-    model =
-      ImageRequest.Builder(context)
-        .data(url)
-        .size(size)
-        .diskCacheKey(url)
-        .memoryCacheKey(url)
-        .crossfade(true)
-        .build(),
-    contentDescription = contentDescription,
-    modifier = modifier,
-    contentScale = contentScale,
-    colorFilter = colorFilter,
-    alignment = alignment,
-  )
+  if (shouldBlockImage) {
+    // no-op
+  } else {
+    coil3.compose.AsyncImage(
+      model =
+        ImageRequest.Builder(context)
+          .data(url)
+          .size(size)
+          .diskCacheKey(url)
+          .memoryCacheKey(url)
+          .crossfade(true)
+          .build(),
+      contentDescription = contentDescription,
+      modifier = modifier,
+      contentScale = contentScale,
+      colorFilter = colorFilter,
+      alignment = alignment,
+    )
+  }
 }
