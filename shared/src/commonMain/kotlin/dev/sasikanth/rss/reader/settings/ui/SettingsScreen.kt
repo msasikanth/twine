@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -87,7 +88,6 @@ import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -1193,7 +1193,7 @@ private fun AboutProfileImages() {
     val backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
 
     AsyncImage(
-      url = Constants.ABOUT_ED_PIC,
+      model = Constants.ABOUT_ED_PIC,
       contentDescription = null,
       contentScale = ContentScale.Crop,
       modifier =
@@ -1211,7 +1211,7 @@ private fun AboutProfileImages() {
     )
 
     AsyncImage(
-      url = Constants.ABOUT_SASI_PIC,
+      model = Constants.ABOUT_SASI_PIC,
       contentDescription = null,
       contentScale = ContentScale.Crop,
       modifier =

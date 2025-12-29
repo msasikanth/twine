@@ -52,10 +52,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.about.Person
 import dev.sasikanth.rss.reader.about.Social
 import dev.sasikanth.rss.reader.components.CircularIconButton
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.GitHub
@@ -218,7 +218,7 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
           }
           Spacer(Modifier.width(16.dp))
           AsyncImage(
-            url = person.profilePicture,
+            model = person.profilePicture,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.requiredSize(56.dp).clip(CircleShape),
