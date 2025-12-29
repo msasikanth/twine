@@ -55,7 +55,7 @@ import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
-import dev.sasikanth.rss.reader.resources.icons.Bookmarks
+import dev.sasikanth.rss.reader.resources.icons.BookmarkStacks
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import kotlinx.coroutines.launch
@@ -182,7 +182,7 @@ internal fun BookmarksScreen(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-              imageVector = TwineIcons.Bookmarks,
+              imageVector = TwineIcons.BookmarkStacks,
               contentDescription = null,
               modifier = Modifier.size(80.dp),
               tint = AppTheme.colorScheme.textEmphasisHigh

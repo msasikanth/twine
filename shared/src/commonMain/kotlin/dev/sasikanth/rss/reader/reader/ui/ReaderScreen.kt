@@ -374,14 +374,16 @@ internal fun ReaderScreen(
                     MarkdownHighlightedCodeBlock(
                       content = cm.content,
                       node = cm.node,
-                      highlightsBuilder = highlightsBuilder
+                      highlightsBuilder = highlightsBuilder,
+                      showHeader = true
                     )
                   },
                   codeFence = { cm ->
                     MarkdownHighlightedCodeFence(
                       content = cm.content,
                       node = cm.node,
-                      highlightsBuilder = highlightsBuilder
+                      highlightsBuilder = highlightsBuilder,
+                      showHeader = true
                     )
                   },
                 )
