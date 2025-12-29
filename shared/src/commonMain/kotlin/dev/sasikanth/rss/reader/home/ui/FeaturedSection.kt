@@ -51,7 +51,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
-import androidx.compose.ui.layout.onFirstVisible
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
@@ -123,8 +123,8 @@ internal fun FeaturedSection(
 
         Box(
           modifier =
-            Modifier.onFirstVisible(minDurationMs = 500) {
-              if (featuredPost.postWithMetadata.read) return@onFirstVisible
+            Modifier.onVisibilityChanged(minDurationMs = 500) {
+              if (featuredPost.postWithMetadata.read) return@onVisibilityChanged
 
               markPostAsReadOnScroll(postWithMetadata.id)
             }
