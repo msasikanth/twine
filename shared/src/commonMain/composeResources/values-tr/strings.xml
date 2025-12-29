@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">Verilen URL'de çok fazla yönlendirme var. Lütfen farklı bir URL kullanın.</string>
     <string name="errorUnAuthorized">(%1$s): Bu bağlantıdaki içeriğe erişim yetkiniz yok.</string>
     <string name="errorUnknownHttpStatus">HTTP kodu ile içerik yüklenemedi: (%1$s)</string>
-    <string name="postsSearchHint">Gönderileri ara</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">En yeni</string>
     <string name="searchSortNewestFirst">Önce en yeni</string>
     <string name="searchSortOldest">En eski</string>
@@ -68,6 +68,8 @@
     <string name="settingsThemeAuto">Otomatik</string>
     <string name="settingsThemeLight">Açık</string>
     <string name="settingsThemeDark">Koyu</string>
+    <string name="settingsBlockImagesTitle">Block images</string>
+    <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Akışlar</string>
     <string name="editFeeds">Akışları düzenle</string>
     <string name="comments">Yorumlar</string>
@@ -158,6 +160,8 @@
     <string name="twinePremiumDesc">Premium'a Geç: Her şeyin kilidini aç ve gelecekteki gelişimi destekle.</string>
     <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
     <string name="readerCustomisationsTypeface">Yazı Tipi</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>

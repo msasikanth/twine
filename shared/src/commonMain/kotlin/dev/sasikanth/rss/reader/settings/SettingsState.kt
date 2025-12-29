@@ -41,6 +41,7 @@ data class SettingsState(
   val subscriptionResult: SubscriptionResult?,
   val openPaywall: Boolean,
   val homeViewMode: HomeViewMode,
+  val blockImages: Boolean,
 ) {
 
   companion object {
@@ -60,7 +61,8 @@ data class SettingsState(
         markAsReadOn = MarkAsReadOn.Open,
         subscriptionResult = null,
         openPaywall = false,
-        homeViewMode = HomeViewMode.Default
+        homeViewMode = HomeViewMode.Default,
+        blockImages = false,
       )
   }
 }

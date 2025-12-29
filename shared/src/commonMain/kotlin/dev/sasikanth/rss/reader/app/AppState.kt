@@ -25,6 +25,7 @@ data class AppState(
   val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
   val activePostIndex: Int,
+  val blockImages: Boolean,
 ) {
 
   companion object {
@@ -35,6 +36,7 @@ data class AppState(
         homeViewMode = HomeViewMode.Default,
         showReaderView = false,
         activePostIndex = 0,
+        blockImages = false,
       )
   }
 }

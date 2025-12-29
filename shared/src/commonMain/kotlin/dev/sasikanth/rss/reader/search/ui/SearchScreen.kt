@@ -300,8 +300,8 @@ private fun SearchBar(
           textStyle = MaterialTheme.typography.bodyLarge,
           colors =
             TextFieldDefaults.colors(
-              focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-              unfocusedContainerColor = AppTheme.colorScheme.surfaceContainerHighest,
+              focusedContainerColor = Color.Transparent,
+              unfocusedContainerColor = Color.Transparent,
               focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
               unfocusedIndicatorColor = Color.Transparent,
               focusedIndicatorColor = Color.Transparent,

@@ -102,6 +102,7 @@ import dev.sasikanth.rss.reader.ui.darkAppColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.reflect.typeOf
@@ -165,6 +166,7 @@ fun App(
     LocalDynamicColorState provides dynamicColorState,
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
+    LocalBlockImage provides appState.blockImages,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =

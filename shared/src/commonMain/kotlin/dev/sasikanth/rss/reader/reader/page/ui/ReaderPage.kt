@@ -105,6 +105,7 @@ import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AntonFontFamily
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
@@ -145,7 +146,10 @@ internal fun ReaderPage(
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
+  val shouldBlockImage = LocalBlockImage.current
+
   val coroutineScope = rememberCoroutineScope()
+  val imageTransformer = remember { CoilMarkdownTransformer(shouldBlockImage) }
 
   val textSelectionColors =
     TextSelectionColors(
@@ -184,7 +188,7 @@ internal fun ReaderPage(
               block = 12.dp,
             ),
           LocalMarkdownDimens provides markdownDimens(),
-          LocalImageTransformer provides CoilMarkdownTransformer,
+          LocalImageTransformer provides imageTransformer,
           LocalMarkdownAnnotator provides markdownAnnotator(),
           LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
           LocalMarkdownColors provides

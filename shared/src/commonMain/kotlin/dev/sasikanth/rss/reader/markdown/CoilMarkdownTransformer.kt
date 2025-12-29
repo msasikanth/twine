@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
@@ -20,11 +21,16 @@ import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import com.mikepenz.markdown.model.ImageData
 import com.mikepenz.markdown.model.ImageTransformer
+import com.mikepenz.markdown.model.PlaceholderConfig
 
-object CoilMarkdownTransformer : ImageTransformer {
+class CoilMarkdownTransformer(
+  private val shouldBlockImage: Boolean,
+) : ImageTransformer {
 
   @Composable
-  override fun transform(link: String): ImageData {
+  override fun transform(link: String): ImageData? {
+    if (shouldBlockImage) return null
+
     return rememberAsyncImagePainter(
         model =
           ImageRequest.Builder(LocalPlatformContext.current)
@@ -43,6 +49,8 @@ object CoilMarkdownTransformer : ImageTransformer {
 
   @Composable
   override fun intrinsicSize(painter: Painter): Size {
+    if (shouldBlockImage) return Size.Zero
+
     var size by remember(painter) { mutableStateOf(painter.intrinsicSize) }
     if (painter is AsyncImagePainter) {
       val painterState = painter.state.collectAsState()
@@ -50,5 +58,17 @@ object CoilMarkdownTransformer : ImageTransformer {
       intrinsicSize?.also { size = it }
     }
     return size
+  }
+
+  override fun placeholderConfig(
+    density: Density,
+    containerSize: Size,
+    intrinsicImageSize: Size
+  ): PlaceholderConfig {
+    if (shouldBlockImage) {
+      return PlaceholderConfig(size = Size.Zero)
+    }
+
+    return super.placeholderConfig(density, containerSize, intrinsicImageSize)
   }
 }
