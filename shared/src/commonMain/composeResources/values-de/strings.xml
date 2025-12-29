@@ -68,6 +68,8 @@
     <string name="settingsThemeAuto">Automatisch</string>
     <string name="settingsThemeLight">Hell</string>
     <string name="settingsThemeDark">Dunkel</string>
+    <string name="settingsBlockImagesTitle">Block images</string>
+    <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Feeds</string>
     <string name="editFeeds">Feeds bearbeiten</string>
     <string name="comments">Kommentare</string>
