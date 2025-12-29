@@ -90,7 +90,7 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
-import dev.sasikanth.rss.reader.resources.icons.Feed
+import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
@@ -536,7 +536,7 @@ private fun NoNewPosts() {
     verticalArrangement = Arrangement.Center
   ) {
     Icon(
-      imageVector = TwineIcons.Feed,
+      imageVector = TwineIcons.Newsstand,
       contentDescription = null,
       tint = AppTheme.colorScheme.textEmphasisHigh,
       modifier = Modifier.requiredSize(80.dp)
