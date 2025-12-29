@@ -137,7 +137,10 @@ class SettingsViewModel(
 
   private fun toggleBlockImages(value: Boolean) {
     viewModelScope.launch {
-      settingsRepository.updateHomeViewMode(HomeViewMode.Simple)
+      val homeViewMode = state.value.homeViewMode
+      if (homeViewMode == HomeViewMode.Default) {
+        settingsRepository.updateHomeViewMode(HomeViewMode.Simple)
+      }
       settingsRepository.toggleBlockImages(value)
     }
   }
