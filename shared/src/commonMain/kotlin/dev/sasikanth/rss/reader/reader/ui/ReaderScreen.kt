@@ -68,7 +68,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.onFirstVisible
+import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -391,7 +391,7 @@ internal fun ReaderScreen(
 
               ReaderPage(
                 modifier =
-                  Modifier.fillMaxSize().onFirstVisible(minDurationMs = 200L) {
+                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
                     onPostChanged(page)
                     viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
                   },
