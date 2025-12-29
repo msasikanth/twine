@@ -129,6 +129,8 @@ import twine.shared.generated.resources.markArticleAsReadOnScroll
 import twine.shared.generated.resources.settings
 import twine.shared.generated.resources.settingsAboutSubtitle
 import twine.shared.generated.resources.settingsAboutTitle
+import twine.shared.generated.resources.settingsBlockImagesSubtitle
+import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
@@ -377,6 +379,17 @@ internal fun SettingsScreen(
               showFeedFavIcon = state.showFeedFavIcon,
               onValueChanged = { newValue ->
                 viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            BlockImagesSettingItem(
+              blockImages = state.blockImages,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
               }
             )
           }
@@ -817,6 +830,43 @@ private fun PostsDeletionPeriodSettingItem(
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun BlockImagesSettingItem(blockImages: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(blockImages) { mutableStateOf(blockImages) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!blockImages)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsBlockImagesTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsBlockImagesSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
     }
   }
 }
