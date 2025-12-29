@@ -26,7 +26,7 @@
     <string name="errorTooManyRedirects">На данном URL-адресе слишком много перенаправлений. Пожалуйста, используйте другой URL-адрес.</string>
     <string name="errorUnAuthorized">(%1$s): Вы не авторизованы для доступа к контенту по этой ссылке.</string>
     <string name="errorUnknownHttpStatus">Не удалось загрузить содержимое с помощью HTTP-кода: (%1$s)</string>
-    <string name="postsSearchHint">Поиск постов</string>
+    <string name="postsSearchHint">Search</string>
     <string name="searchSortNewest">Сначала новые</string>
     <string name="searchSortNewestFirst">Сначала новые</string>
     <string name="searchSortOldest">Сначала старые</string>
@@ -158,6 +158,8 @@
     <string name="twinePremiumDesc">Переходите на премиум: открывайте все возможности приложения и стимулируйте его дальнейшее развитие.</string>
     <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
     <string name="readerCustomisationsTypeface">Шрифт</string>
+    <string name="postsFilter">Posts filter</string>
+    <string name="screenHome">Home</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
