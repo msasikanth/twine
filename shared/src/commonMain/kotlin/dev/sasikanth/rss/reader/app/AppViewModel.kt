@@ -24,7 +24,7 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.NTuple4
+import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -56,16 +56,18 @@ class AppViewModel(
         settingsRepository.showFeedFavIcon,
         settingsRepository.homeViewMode,
         settingsRepository.showReaderView,
-      ) { appThemeMode, showFeedFavIcon, homeViewMode, showReaderView ->
-        NTuple4(appThemeMode, showFeedFavIcon, homeViewMode, showReaderView)
+        settingsRepository.blockImages,
+      ) { appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages ->
+        NTuple5(appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages)
       }
-      .onEach { (appThemeMode, showFeedFavIcon, homeViewMode, showReaderView) ->
+      .onEach { (appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages) ->
         _state.update {
           it.copy(
             appThemeMode = appThemeMode,
             showFeedFavIcon = showFeedFavIcon,
             homeViewMode = homeViewMode,
             showReaderView = showReaderView,
+            blockImages = blockImages,
           )
         }
       }

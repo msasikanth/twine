@@ -77,6 +77,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.components.CircularIconButton
@@ -87,7 +88,6 @@ import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
-import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -129,6 +129,8 @@ import twine.shared.generated.resources.markArticleAsReadOnScroll
 import twine.shared.generated.resources.settings
 import twine.shared.generated.resources.settingsAboutSubtitle
 import twine.shared.generated.resources.settingsAboutTitle
+import twine.shared.generated.resources.settingsBlockImagesSubtitle
+import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
@@ -377,6 +379,17 @@ internal fun SettingsScreen(
               showFeedFavIcon = state.showFeedFavIcon,
               onValueChanged = { newValue ->
                 viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            BlockImagesSettingItem(
+              blockImages = state.blockImages,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
               }
             )
           }
@@ -822,6 +835,43 @@ private fun PostsDeletionPeriodSettingItem(
 }
 
 @Composable
+private fun BlockImagesSettingItem(blockImages: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(blockImages) { mutableStateOf(blockImages) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!blockImages)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsBlockImagesTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsBlockImagesSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
+    }
+  }
+}
+
+@Composable
 private fun ShowFeedFavIconSettingItem(
   showFeedFavIcon: Boolean,
   onValueChanged: (Boolean) -> Unit
@@ -1143,7 +1193,7 @@ private fun AboutProfileImages() {
     val backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
 
     AsyncImage(
-      url = Constants.ABOUT_ED_PIC,
+      model = Constants.ABOUT_ED_PIC,
       contentDescription = null,
       contentScale = ContentScale.Crop,
       modifier =
@@ -1161,7 +1211,7 @@ private fun AboutProfileImages() {
     )
 
     AsyncImage(
-      url = Constants.ABOUT_SASI_PIC,
+      model = Constants.ABOUT_SASI_PIC,
       contentDescription = null,
       contentScale = ContentScale.Crop,
       modifier =

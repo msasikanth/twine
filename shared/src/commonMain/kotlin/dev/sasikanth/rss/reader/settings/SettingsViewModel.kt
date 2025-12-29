@@ -60,6 +60,7 @@ class SettingsViewModel(
         settingsRepository.showFeedFavIcon,
         settingsRepository.markAsReadOn,
         settingsRepository.homeViewMode,
+        settingsRepository.blockImages,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -69,7 +70,8 @@ class SettingsViewModel(
         enableAutoSync,
         showFeedFavIcon,
         markAsReadOn,
-        homeViewMode ->
+        homeViewMode,
+        blockImages ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -79,7 +81,8 @@ class SettingsViewModel(
           enableAutoSync = enableAutoSync,
           showFeedFavIcon = showFeedFavIcon,
           markAsReadOn = markAsReadOn,
-          homeViewMode = homeViewMode
+          homeViewMode = homeViewMode,
+          blockImages = blockImages,
         )
       }
       .onEach { settings ->
@@ -94,6 +97,7 @@ class SettingsViewModel(
             showFeedFavIcon = settings.showFeedFavIcon,
             markAsReadOn = settings.markAsReadOn,
             homeViewMode = settings.homeViewMode,
+            blockImages = settings.blockImages,
           )
         }
       }
@@ -127,6 +131,17 @@ class SettingsViewModel(
         _state.update { it.copy(openPaywall = false) }
       }
       is SettingsEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
+      is SettingsEvent.ToggleBlockImages -> toggleBlockImages(event.value)
+    }
+  }
+
+  private fun toggleBlockImages(value: Boolean) {
+    viewModelScope.launch {
+      val homeViewMode = state.value.homeViewMode
+      if (homeViewMode == HomeViewMode.Default) {
+        settingsRepository.updateHomeViewMode(HomeViewMode.Simple)
+      }
+      settingsRepository.toggleBlockImages(value)
     }
   }
 
@@ -202,4 +217,5 @@ private data class Settings(
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
   val homeViewMode: HomeViewMode,
+  val blockImages: Boolean,
 )

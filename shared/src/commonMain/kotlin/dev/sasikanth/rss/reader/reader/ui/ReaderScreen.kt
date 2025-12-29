@@ -94,7 +94,6 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
-import dev.sasikanth.rss.reader.ui.LocalAppColorScheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
@@ -104,6 +103,7 @@ import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.snipme.highlights.Highlights
@@ -130,12 +130,15 @@ internal fun ReaderScreen(
   val posts = state.posts.collectAsLazyPagingItems()
   val linkHandler = LocalLinkHandler.current
   val seedColorExtractor = LocalSeedColorExtractor.current
+  val appDynamicColorState = LocalDynamicColorState.current
+  val shouldBlockImage = LocalBlockImage.current
+
   // Using theme colors as default from the home screen
   // before we create dynamic content theme
   val dynamicColorState =
     rememberDynamicColorState(
-      defaultLightAppColorScheme = LocalAppColorScheme.current,
-      defaultDarkAppColorScheme = LocalAppColorScheme.current,
+      defaultLightAppColorScheme = appDynamicColorState.lightAppColorScheme,
+      defaultDarkAppColorScheme = appDynamicColorState.darkAppColorScheme,
     )
   val readerLinkHandler = remember {
     object : UriHandler {
@@ -148,7 +151,9 @@ internal fun ReaderScreen(
   val exitScreen by viewModel.exitScreen.collectAsStateWithLifecycle(false)
 
   LaunchedEffect(pagerState, posts.loadState) {
-    if (posts.itemCount == 0) return@LaunchedEffect
+    if (shouldBlockImage || posts.itemCount == 0) {
+      return@LaunchedEffect
+    }
 
     snapshotFlow {
         runCatching {
