@@ -2,7 +2,6 @@
 
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 [![Crowdin](https://badges.crowdin.net/twine-rss-reader/localized.svg)](https://crowdin.com/project/twine-rss-reader)
-[![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86)](https://github.com/sponsors/msasikanth)
 
 Twine is a cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
 user interface and experience to browse through the feeds, and supports Material 3 content based 
@@ -46,8 +45,8 @@ user interface and experience to browse through the feeds, and supports Material
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
 - [Ktor](https://ktor.io/)
 - [SQLDelight](https://cashapp.github.io/sqldelight/2.0.0-alpha05/)
-- [Decompose](https://arkivanov.github.io/Decompose/)
 - [Kotlin-inject](https://github.com/evant/kotlin-inject)
+- [Jetpack Libraries](https://developer.android.com/kotlin/multiplatform)
 
 For full list of dependencies used, please take a look at the [catalog](/gradle/libs.versions.toml) file.
 
