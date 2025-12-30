@@ -457,6 +457,6 @@ fun DeleteConfirmationDialog(
 
 internal fun bottomPaddingOfSourceItem(index: Int, itemCount: Int) =
   when {
-    index < itemCount -> 8.dp
+    index < itemCount -> 4.dp
     else -> 0.dp
   }

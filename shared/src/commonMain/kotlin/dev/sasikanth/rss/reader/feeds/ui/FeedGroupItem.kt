@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
@@ -76,7 +77,7 @@ internal fun FeedGroupItem(
     if (selected) {
       AppTheme.colorScheme.primaryContainer
     } else {
-      AppTheme.colorScheme.tintedSurface
+      Color.Transparent
     }
 
   Box(
@@ -135,7 +136,7 @@ internal fun FeedGroupItem(
       Column(Modifier.weight(1f)) {
         Text(
           text = feedGroup.name,
-          style = MaterialTheme.typography.labelMedium,
+          style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.textEmphasisHigh,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis
@@ -154,7 +155,7 @@ internal fun FeedGroupItem(
 
         Text(
           text = text,
-          style = MaterialTheme.typography.bodySmall,
+          style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.textEmphasisMed,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis

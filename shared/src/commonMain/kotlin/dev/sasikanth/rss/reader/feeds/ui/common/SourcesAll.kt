@@ -110,14 +110,14 @@ internal fun LazyListScope.allSources(
     ) { index ->
       when (val sourceItem = sources[index]) {
         SourceListItem.Separator -> {
-          Spacer(Modifier.requiredHeight(40.dp))
+          Spacer(Modifier.requiredHeight(8.dp))
         }
         is SourceListItem.SourceItem -> {
           when (val source = sourceItem.source) {
             is FeedGroup -> {
               val startPadding = 24.dp
               val endPadding = 24.dp
-              val topPadding = 8.dp
+              val topPadding = 4.dp
               val bottomPadding = bottomPaddingOfSourceItem(index, sources.itemCount)
 
               FeedGroupItem(
@@ -150,7 +150,7 @@ internal fun LazyListScope.allSources(
                 }
               val startPadding = 24.dp
               val endPadding = 24.dp
-              val topPadding = 8.dp
+              val topPadding = 4.dp
               val bottomPadding = bottomPaddingOfSourceItem(transformedIndex, sources.itemCount)
 
               FeedListItem(
