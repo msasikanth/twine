@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -79,6 +80,7 @@ internal fun FeedGroupItem(
     } else {
       Color.Transparent
     }
+  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
@@ -167,9 +169,9 @@ internal fun FeedGroupItem(
       val numberOfUnreadPosts = feedGroup.numberOfUnreadPosts
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
-          containerColor = AppTheme.colorScheme.tintedForeground,
-          contentColor = AppTheme.colorScheme.tintedBackground,
-          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp)
+          containerColor = translucentStyle.prominent.background,
+          contentColor = AppTheme.colorScheme.secondary,
+          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp)
         ) {
           Text(
             text = feedGroup.numberOfUnreadPosts.toString(),

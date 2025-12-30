@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
@@ -55,6 +56,7 @@ import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.allFeeds
@@ -204,7 +206,7 @@ internal fun AllFeedsHeader(
     ) {
       Text(
         text = allFeedsLabel,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleLarge,
         color = AppTheme.colorScheme.textEmphasisHigh,
       )
 
@@ -212,8 +214,8 @@ internal fun AllFeedsHeader(
 
       Text(
         text = feedsCount.toString(),
-        style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.tintedForeground,
+        style = MaterialTheme.typography.titleLarge,
+        color = AppTheme.colorScheme.primary,
       )
     }
 
@@ -246,7 +248,7 @@ internal fun AllFeedsHeader(
         Text(
           text = orderText,
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground
+          color = AppTheme.colorScheme.primary
         )
 
         Spacer(Modifier.width(8.dp))
@@ -254,16 +256,18 @@ internal fun AllFeedsHeader(
         Icon(
           imageVector = Icons.Filled.ExpandMore,
           contentDescription = stringResource(Res.string.editFeeds),
-          tint = AppTheme.colorScheme.tintedForeground
+          tint = AppTheme.colorScheme.primary
         )
       }
 
       DropdownMenu(
-        modifier = Modifier.requiredWidth(132.dp),
+        modifier = Modifier.widthIn(min = 132.dp),
         expanded = showSortDropdown,
         offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
         onDismissRequest = { showSortDropdown = false }
       ) {
+        val translucentStyle = LocalTranslucentStyles.current
+
         FeedsOrderBy.entries
           .filter { it != FeedsOrderBy.Pinned }
           .forEach { sortOrder ->
@@ -281,13 +285,13 @@ internal fun AllFeedsHeader(
 
             val color =
               if (feedsSortOrder == sortOrder) {
-                AppTheme.colorScheme.tintedHighlight
+                translucentStyle.default.background
               } else {
                 Color.Unspecified
               }
             val labelColor =
               if (feedsSortOrder == sortOrder) {
-                AppTheme.colorScheme.inverseOnSurface
+                AppTheme.colorScheme.secondary
               } else {
                 AppTheme.colorScheme.textEmphasisHigh
               }

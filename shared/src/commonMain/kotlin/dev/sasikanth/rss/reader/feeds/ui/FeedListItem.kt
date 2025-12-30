@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -73,6 +74,7 @@ internal fun FeedListItem(
     } else {
       Color.Transparent
     }
+  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
@@ -125,13 +127,13 @@ internal fun FeedListItem(
       val numberOfUnreadPosts = feed.numberOfUnreadPosts
       if (canShowUnreadPostsCount && numberOfUnreadPosts > 0 && !isInMultiSelectMode) {
         Badge(
-          containerColor = AppTheme.colorScheme.tintedForeground,
-          contentColor = AppTheme.colorScheme.tintedBackground,
-          modifier = Modifier.sizeIn(minWidth = 24.dp, minHeight = 16.dp)
+          containerColor = translucentStyle.prominent.background,
+          contentColor = AppTheme.colorScheme.secondary,
+          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp)
         ) {
           Text(
             text = feed.numberOfUnreadPosts.toString(),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.align(Alignment.CenterVertically)
           )
         }
