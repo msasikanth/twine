@@ -169,4 +169,18 @@ fun darkAppColorScheme(): AppColorScheme {
   )
 }
 
+fun AppColorScheme.amoled(): AppColorScheme {
+  return copy(
+    surface = Color.Black,
+    surfaceContainer = Color.Black,
+    surfaceContainerLow = Color.Black,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerHigh = Color(0xFF1D201F),
+    surfaceContainerHighest = Color(0xFF272B29),
+    backdrop = Color.Black,
+    tintedBackground = Color.Black,
+    bottomSheet = Color.Black,
+  )
+}
+
 internal val LocalAppColorScheme = compositionLocalOf { darkAppColorScheme() }

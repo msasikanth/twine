@@ -97,12 +97,14 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
+import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -568,7 +570,10 @@ fun featuredPosts(
   homeViewMode: HomeViewMode,
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
+  val shouldBlockImage = LocalBlockImage.current
   val posts = posts.invoke()
+
+  if (shouldBlockImage) return emptyFlow()
 
   return remember(posts?.itemSnapshotList?.hashCode(), homeViewMode) {
     flow {

@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
 data class AppState(
   val appThemeMode: AppThemeMode,
+  val useAmoled: Boolean,
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
@@ -32,6 +33,7 @@ data class AppState(
     val DEFAULT =
       AppState(
         appThemeMode = AppThemeMode.Auto,
+        useAmoled = false,
         showFeedFavIcon = true,
         homeViewMode = HomeViewMode.Default,
         showReaderView = false,
