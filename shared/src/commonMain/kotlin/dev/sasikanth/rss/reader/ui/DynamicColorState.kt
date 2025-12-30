@@ -45,12 +45,14 @@ internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
   useTonalSpotScheme: Boolean = true,
+  useAmoled: Boolean = false,
 ): DynamicColorState {
   return remember {
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
-      useTonalSpotScheme = useTonalSpotScheme
+      useTonalSpotScheme = useTonalSpotScheme,
+      useAmoled = useAmoled
     )
   }
 }
@@ -60,6 +62,7 @@ internal class DynamicColorState(
   private val defaultLightAppColorScheme: AppColorScheme,
   private val defaultDarkAppColorScheme: AppColorScheme,
   private val useTonalSpotScheme: Boolean,
+  useAmoled: Boolean,
 ) {
   var lightAppColorScheme by mutableStateOf(defaultLightAppColorScheme)
     private set
@@ -67,9 +70,19 @@ internal class DynamicColorState(
   var darkAppColorScheme by mutableStateOf(defaultDarkAppColorScheme)
     private set
 
+  var useAmoled by mutableStateOf(useAmoled)
+
+  private var lastFromSeedColor: Color? = null
+  private var lastToSeedColor: Color? = null
+  private var lastProgress: Float = 0f
+
   private val cache = lruCache<String, AppColorScheme>(maxSize = 10)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
+    lastFromSeedColor = fromSeedColor
+    lastToSeedColor = toSeedColor
+    lastProgress = progress
+
     val normalizedProgress =
       ease(
         if (progress < -EPSILON) {
@@ -85,36 +98,36 @@ internal class DynamicColorState(
         val defaultDarkSeedColor = defaultDarkAppColorScheme.primary
 
         val startLight =
-          cache["light_$fromSeedColor"]
+          cache["light_${useAmoled}_$fromSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = false,
                 seedColor = fromSeedColor ?: defaultLightSeedColor
               )
-              .also { cache.put("light_$fromSeedColor", it) }
+              .also { cache.put("light_${useAmoled}_$fromSeedColor", it) }
 
         val startDark =
-          cache["dark_$fromSeedColor"]
+          cache["dark_${useAmoled}_$fromSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = true,
                 seedColor = fromSeedColor ?: defaultLightSeedColor
               )
-              .also { cache.put("dark_$fromSeedColor", it) }
+              .also { cache.put("dark_${useAmoled}_$fromSeedColor", it) }
 
         val endLight =
-          cache["light_$toSeedColor"]
+          cache["light_${useAmoled}_$toSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = false,
                 seedColor = toSeedColor ?: defaultDarkSeedColor
               )
-              .also { cache.put("light_$toSeedColor", it) }
+              .also { cache.put("light_${useAmoled}_$toSeedColor", it) }
 
         val endDark =
-          cache["dark_$toSeedColor"]
+          cache["dark_${useAmoled}_$toSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = true,
                 seedColor = toSeedColor ?: defaultDarkSeedColor
               )
-              .also { cache.put("dark_$toSeedColor", it) }
+              .also { cache.put("dark_${useAmoled}_$toSeedColor", it) }
 
         NTuple4(startLight, startDark, endLight, endDark)
       }
@@ -137,9 +150,17 @@ internal class DynamicColorState(
       }
   }
 
+  suspend fun refresh() {
+    animate(lastFromSeedColor, lastToSeedColor, lastProgress)
+  }
+
   fun reset() {
+    lastFromSeedColor = null
+    lastToSeedColor = null
+    lastProgress = 0f
     lightAppColorScheme = defaultLightAppColorScheme
-    darkAppColorScheme = defaultDarkAppColorScheme
+    darkAppColorScheme =
+      if (useAmoled) defaultDarkAppColorScheme.amoled() else defaultDarkAppColorScheme
   }
 
   private fun generateDynamicColorsFromSeedColor(
@@ -169,51 +190,58 @@ internal class DynamicColorState(
         )
         .toColor(scheme)
 
-    return AppColorScheme(
-      primary = dynamicColors.primary().toColor(scheme),
-      secondary = dynamicColors.secondary().toColor(scheme),
-      outline = dynamicColors.outline().toColor(scheme),
-      outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
-      primaryContainer = primaryContainer(dynamicColors).toColor(scheme),
-      onPrimaryContainer =
-        DynamicColor.fromPalette(
-            { s -> s.primaryPalette },
-            { s -> if (s.isDark) 90.0 else 10.0 },
-            { primaryContainer(dynamicColors) },
-            null
-          )
-          .toColor(scheme),
-      surface = dynamicColors.surface().toColor(scheme),
-      onSurface = dynamicColors.onSurface().toColor(scheme),
-      onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
-      surfaceContainer = dynamicColors.surfaceContainer().toColor(scheme),
-      surfaceContainerLow = dynamicColors.surfaceContainerLow().toColor(scheme),
-      surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
-      surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
-      surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
-      inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
-      inverseSurface = dynamicColors.inverseSurface().toColor(scheme),
-      inverseOnSurface = dynamicColors.inverseOnSurface().toColor(scheme),
-      textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
-      textEmphasisMed = defaultColorScheme.textEmphasisMed,
-      backdrop =
-        DynamicColor.fromPalette(
-            palette = { s -> s.neutralPalette },
-            tone = { s -> if (s.isDark) 5.0 else 95.0 },
-          )
-          .toColor(scheme),
-      bottomSheet = bottomSheet,
-      bottomSheetBorder =
-        DynamicColor.fromPalette(
-            palette = { s -> s.neutralPalette },
-            tone = { s -> 20.0 },
-          )
-          .toColor(scheme),
-      tintedBackground = bottomSheet,
-      tintedSurface = dynamicColors.surfaceContainerLow().toColor(scheme),
-      tintedForeground = dynamicColors.primary().toColor(scheme),
-      tintedHighlight = dynamicColors.outline().toColor(scheme),
-    )
+    val colorScheme =
+      AppColorScheme(
+        primary = dynamicColors.primary().toColor(scheme),
+        secondary = dynamicColors.secondary().toColor(scheme),
+        outline = dynamicColors.outline().toColor(scheme),
+        outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
+        primaryContainer = primaryContainer(dynamicColors).toColor(scheme),
+        onPrimaryContainer =
+          DynamicColor.fromPalette(
+              { s -> s.primaryPalette },
+              { s -> if (s.isDark) 90.0 else 10.0 },
+              { primaryContainer(dynamicColors) },
+              null
+            )
+            .toColor(scheme),
+        surface = dynamicColors.surface().toColor(scheme),
+        onSurface = dynamicColors.onSurface().toColor(scheme),
+        onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
+        surfaceContainer = dynamicColors.surfaceContainer().toColor(scheme),
+        surfaceContainerLow = dynamicColors.surfaceContainerLow().toColor(scheme),
+        surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
+        surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
+        surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
+        inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
+        inverseSurface = dynamicColors.inverseSurface().toColor(scheme),
+        inverseOnSurface = dynamicColors.inverseOnSurface().toColor(scheme),
+        textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
+        textEmphasisMed = defaultColorScheme.textEmphasisMed,
+        backdrop =
+          DynamicColor.fromPalette(
+              palette = { s -> s.neutralPalette },
+              tone = { s -> if (s.isDark) 5.0 else 95.0 },
+            )
+            .toColor(scheme),
+        bottomSheet = bottomSheet,
+        bottomSheetBorder =
+          DynamicColor.fromPalette(
+              palette = { s -> s.neutralPalette },
+              tone = { s -> 20.0 },
+            )
+            .toColor(scheme),
+        tintedBackground = bottomSheet,
+        tintedSurface = dynamicColors.surfaceContainerLow().toColor(scheme),
+        tintedForeground = dynamicColors.primary().toColor(scheme),
+        tintedHighlight = dynamicColors.outline().toColor(scheme),
+      )
+
+    return if (useDarkTheme && useAmoled) {
+      colorScheme.amoled()
+    } else {
+      colorScheme
+    }
   }
 
   private fun primaryContainer(dynamicColors: MaterialDynamicColors) =
