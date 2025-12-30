@@ -156,6 +156,7 @@ fun App(
     rememberDynamicColorState(
       defaultLightAppColorScheme = lightAppColorScheme(),
       defaultDarkAppColorScheme = darkAppColorScheme(),
+      useAmoled = appState.useAmoled,
     )
   val coroutineScope = rememberCoroutineScope()
 
@@ -180,8 +181,12 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    LaunchedEffect(appState.homeViewMode) {
-      if (appState.homeViewMode != HomeViewMode.Default) {
+    LaunchedEffect(appState.homeViewMode, appState.useAmoled) {
+      dynamicColorState.useAmoled = appState.useAmoled
+
+      if (appState.homeViewMode == HomeViewMode.Default) {
+        dynamicColorState.refresh()
+      } else {
         dynamicColorState.reset()
       }
     }
