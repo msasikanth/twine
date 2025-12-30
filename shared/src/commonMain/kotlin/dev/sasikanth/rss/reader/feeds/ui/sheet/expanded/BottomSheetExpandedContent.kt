@@ -365,15 +365,15 @@ private fun SearchBar(
       placeholder = {
         Text(
           text = stringResource(Res.string.feedsSearchHint),
-          color = AppTheme.colorScheme.tintedForeground,
-          style = MaterialTheme.typography.bodyLarge
+          color = AppTheme.colorScheme.onSurfaceVariant,
+          style = MaterialTheme.typography.bodyMedium
         )
       },
       leadingIcon = {
         Icon(
           imageVector = Icons.Rounded.Search,
           contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
+          tint = AppTheme.colorScheme.onSurfaceVariant
         )
       },
       trailingIcon = {
@@ -382,21 +382,23 @@ private fun SearchBar(
             Icon(
               Icons.Rounded.Close,
               contentDescription = null,
-              tint = AppTheme.colorScheme.tintedForeground
+              tint = AppTheme.colorScheme.onSurfaceVariant
             )
           }
         }
       },
-      shape = RoundedCornerShape(16.dp),
+      shape = RoundedCornerShape(50),
       singleLine = true,
-      textStyle = MaterialTheme.typography.bodyLarge,
+      textStyle = MaterialTheme.typography.bodyMedium,
       colors =
         OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.primary,
-          unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-          disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
-          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          focusedBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
+          unfocusedBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
+          disabledBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.02f),
+          focusedTextColor = AppTheme.colorScheme.onSurfaceVariant,
           disabledTextColor = Color.Transparent,
+          unfocusedContainerColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
+          focusedContainerColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
         )
     )
   }
