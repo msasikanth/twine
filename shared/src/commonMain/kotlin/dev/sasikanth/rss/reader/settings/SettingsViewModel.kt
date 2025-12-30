@@ -56,6 +56,7 @@ class SettingsViewModel(
         settingsRepository.postsDeletionPeriod,
         settingsRepository.showReaderView,
         settingsRepository.appThemeMode,
+        settingsRepository.useAmoled,
         settingsRepository.enableAutoSync,
         settingsRepository.showFeedFavIcon,
         settingsRepository.markAsReadOn,
@@ -67,6 +68,7 @@ class SettingsViewModel(
         postsDeletionPeriod,
         showReaderView,
         appThemeMode,
+        useAmoled,
         enableAutoSync,
         showFeedFavIcon,
         markAsReadOn,
@@ -78,6 +80,7 @@ class SettingsViewModel(
           postsDeletionPeriod = postsDeletionPeriod,
           showReaderView = showReaderView,
           appThemeMode = appThemeMode,
+          useAmoled = useAmoled,
           enableAutoSync = enableAutoSync,
           showFeedFavIcon = showFeedFavIcon,
           markAsReadOn = markAsReadOn,
@@ -93,6 +96,7 @@ class SettingsViewModel(
             postsDeletionPeriod = settings.postsDeletionPeriod,
             showReaderView = settings.showReaderView,
             appThemeMode = settings.appThemeMode,
+            useAmoled = settings.useAmoled,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
             markAsReadOn = settings.markAsReadOn,
@@ -125,6 +129,7 @@ class SettingsViewModel(
       SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
       is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
+      is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
       is SettingsEvent.MarkOpenPaywallAsDone -> {
@@ -164,6 +169,10 @@ class SettingsViewModel(
 
   private fun onAppThemeModeChanged(appThemeMode: AppThemeMode) {
     viewModelScope.launch { settingsRepository.updateAppTheme(appThemeMode) }
+  }
+
+  private fun toggleAmoled(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleAmoled(value) }
   }
 
   private fun toggleShowReaderView(value: Boolean) {
@@ -207,6 +216,7 @@ private data class Settings(
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
+  val useAmoled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,

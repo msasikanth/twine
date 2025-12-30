@@ -24,7 +24,8 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import dev.sasikanth.rss.reader.utils.NTuple5
+import dev.sasikanth.rss.reader.utils.NTuple6
+import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -53,17 +54,20 @@ class AppViewModel(
     refreshFeedsIfExpired()
     combine(
         settingsRepository.appThemeMode,
+        settingsRepository.useAmoled,
         settingsRepository.showFeedFavIcon,
         settingsRepository.homeViewMode,
         settingsRepository.showReaderView,
         settingsRepository.blockImages,
-      ) { appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages ->
-        NTuple5(appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages)
+      ) { appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages ->
+        NTuple6(appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages)
       }
-      .onEach { (appThemeMode, showFeedFavIcon, homeViewMode, showReaderView, blockImages) ->
+      .onEach {
+        (appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages) ->
         _state.update {
           it.copy(
             appThemeMode = appThemeMode,
+            useAmoled = useAmoled,
             showFeedFavIcon = showFeedFavIcon,
             homeViewMode = homeViewMode,
             showReaderView = showReaderView,
