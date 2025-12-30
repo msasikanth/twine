@@ -110,6 +110,7 @@ import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsEvent.ChangeHomeViewMode
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
@@ -129,6 +130,8 @@ import twine.shared.generated.resources.markArticleAsReadOnScroll
 import twine.shared.generated.resources.settings
 import twine.shared.generated.resources.settingsAboutSubtitle
 import twine.shared.generated.resources.settingsAboutTitle
+import twine.shared.generated.resources.settingsAmoledSubtitle
+import twine.shared.generated.resources.settingsAmoledTitle
 import twine.shared.generated.resources.settingsBlockImagesSubtitle
 import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
@@ -177,6 +180,7 @@ internal fun SettingsScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+  val dynamicColorState = LocalDynamicColorState.current
 
   LaunchedEffect(state.openPaywall) {
     if (state.openPaywall) {
@@ -320,6 +324,23 @@ internal fun SettingsScreen(
                 )
               }
             )
+          }
+
+          item {
+            AnimatedVisibility(
+              visible = state.appThemeMode != AppThemeMode.Light,
+              enter = fadeIn() + expandVertically(),
+              exit = fadeOut() + shrinkVertically()
+            ) {
+              AmoledSettingItem(
+                useAmoled = state.useAmoled,
+                onValueChanged = { newValue ->
+                  dynamicColorState.useAmoled = newValue
+                  coroutineScope.launch { dynamicColorState.refresh() }
+                  viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
+                }
+              )
+            }
           }
 
           item { Divider() }
@@ -718,6 +739,43 @@ private fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: (
         )
         Text(
           stringResource(Res.string.settingsShowReaderViewSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun AmoledSettingItem(useAmoled: Boolean, onValueChanged: (Boolean) -> Unit) {
+  var checked by remember(useAmoled) { mutableStateOf(useAmoled) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!useAmoled)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsAmoledTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsAmoledSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )

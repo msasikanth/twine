@@ -39,6 +39,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
+  private val useAmoledKey = booleanPreferencesKey("use_amoled")
   private val enableAutoSyncKey = booleanPreferencesKey("enable_auto_sync")
   private val showFeedFavIconKey = booleanPreferencesKey("show_feed_fav_icon")
   private val markPostsAsReadOnKey = stringPreferencesKey("mark_posts_as_read_on")
@@ -76,6 +77,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.data.map { preferences ->
       mapToAppThemeMode(preferences[appThemeModeKey]) ?: AppThemeMode.Auto
     }
+
+  val useAmoled: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[useAmoledKey] ?: false }
 
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
@@ -135,6 +139,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updateAppTheme(value: AppThemeMode) {
     dataStore.edit { preferences -> preferences[appThemeModeKey] = value.name }
+  }
+
+  suspend fun toggleAmoled(value: Boolean) {
+    dataStore.edit { preferences -> preferences[useAmoledKey] = value }
   }
 
   suspend fun toggleAutoSync(value: Boolean) {
