@@ -45,14 +45,12 @@ internal fun rememberDynamicColorState(
   defaultLightAppColorScheme: AppColorScheme,
   defaultDarkAppColorScheme: AppColorScheme,
   useTonalSpotScheme: Boolean = true,
-  useAmoled: Boolean = false,
 ): DynamicColorState {
   return remember {
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
-      useTonalSpotScheme = useTonalSpotScheme,
-      useAmoled = useAmoled
+      useTonalSpotScheme = useTonalSpotScheme
     )
   }
 }
@@ -62,15 +60,12 @@ internal class DynamicColorState(
   private val defaultLightAppColorScheme: AppColorScheme,
   private val defaultDarkAppColorScheme: AppColorScheme,
   private val useTonalSpotScheme: Boolean,
-  useAmoled: Boolean,
 ) {
   var lightAppColorScheme by mutableStateOf(defaultLightAppColorScheme)
     private set
 
   var darkAppColorScheme by mutableStateOf(defaultDarkAppColorScheme)
     private set
-
-  var useAmoled by mutableStateOf(useAmoled)
 
   private var lastFromSeedColor: Color? = null
   private var lastToSeedColor: Color? = null
@@ -98,36 +93,36 @@ internal class DynamicColorState(
         val defaultDarkSeedColor = defaultDarkAppColorScheme.primary
 
         val startLight =
-          cache["light_${useAmoled}_$fromSeedColor"]
+          cache["light_$fromSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = false,
                 seedColor = fromSeedColor ?: defaultLightSeedColor
               )
-              .also { cache.put("light_${useAmoled}_$fromSeedColor", it) }
+              .also { cache.put("light_$fromSeedColor", it) }
 
         val startDark =
-          cache["dark_${useAmoled}_$fromSeedColor"]
+          cache["dark_$fromSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = true,
                 seedColor = fromSeedColor ?: defaultLightSeedColor
               )
-              .also { cache.put("dark_${useAmoled}_$fromSeedColor", it) }
+              .also { cache.put("dark_$fromSeedColor", it) }
 
         val endLight =
-          cache["light_${useAmoled}_$toSeedColor"]
+          cache["light_$toSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = false,
                 seedColor = toSeedColor ?: defaultDarkSeedColor
               )
-              .also { cache.put("light_${useAmoled}_$toSeedColor", it) }
+              .also { cache.put("light_$toSeedColor", it) }
 
         val endDark =
-          cache["dark_${useAmoled}_$toSeedColor"]
+          cache["dark_$toSeedColor"]
             ?: generateDynamicColorsFromSeedColor(
                 useDarkTheme = true,
                 seedColor = toSeedColor ?: defaultDarkSeedColor
               )
-              .also { cache.put("dark_${useAmoled}_$toSeedColor", it) }
+              .also { cache.put("dark_$toSeedColor", it) }
 
         NTuple4(startLight, startDark, endLight, endDark)
       }
@@ -159,8 +154,7 @@ internal class DynamicColorState(
     lastToSeedColor = null
     lastProgress = 0f
     lightAppColorScheme = defaultLightAppColorScheme
-    darkAppColorScheme =
-      if (useAmoled) defaultDarkAppColorScheme.amoled() else defaultDarkAppColorScheme
+    darkAppColorScheme = defaultDarkAppColorScheme
   }
 
   private fun generateDynamicColorsFromSeedColor(
@@ -237,11 +231,7 @@ internal class DynamicColorState(
         tintedHighlight = dynamicColors.outline().toColor(scheme),
       )
 
-    return if (useDarkTheme && useAmoled) {
-      colorScheme.amoled()
-    } else {
-      colorScheme
-    }
+    return colorScheme
   }
 
   private fun primaryContainer(dynamicColors: MaterialDynamicColors) =

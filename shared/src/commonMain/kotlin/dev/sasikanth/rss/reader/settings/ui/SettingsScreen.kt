@@ -110,7 +110,6 @@ import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsEvent.ChangeHomeViewMode
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import kotlinx.coroutines.launch
@@ -180,7 +179,6 @@ internal fun SettingsScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
-  val dynamicColorState = LocalDynamicColorState.current
 
   LaunchedEffect(state.openPaywall) {
     if (state.openPaywall) {
@@ -335,8 +333,6 @@ internal fun SettingsScreen(
               AmoledSettingItem(
                 useAmoled = state.useAmoled,
                 onValueChanged = { newValue ->
-                  dynamicColorState.useAmoled = newValue
-                  coroutineScope.launch { dynamicColorState.refresh() }
                   viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
                 }
               )

@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -139,7 +138,6 @@ internal fun ReaderScreen(
     rememberDynamicColorState(
       defaultLightAppColorScheme = appDynamicColorState.lightAppColorScheme,
       defaultDarkAppColorScheme = appDynamicColorState.darkAppColorScheme,
-      useAmoled = appDynamicColorState.useAmoled,
     )
   val readerLinkHandler = remember {
     object : UriHandler {
