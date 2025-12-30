@@ -79,6 +79,8 @@ import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.platform.LocalTextToSpeechHandler
+import dev.sasikanth.rss.reader.platform.TextToSpeechHandler
 import dev.sasikanth.rss.reader.premium.PremiumPaywallScreen
 import dev.sasikanth.rss.reader.premium.PremiumPaywallViewModel
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
@@ -127,6 +129,7 @@ typealias App =
 fun App(
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
+  textToSpeechHandler: TextToSpeechHandler,
   imageLoader: ImageLoader,
   seedColorExtractor: SeedColorExtractor,
   appViewModel: () -> AppViewModel,
@@ -163,6 +166,7 @@ fun App(
     LocalWindowSizeClass provides calculateWindowSizeClass(),
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
+    LocalTextToSpeechHandler provides textToSpeechHandler,
     LocalDynamicColorState provides dynamicColorState,
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,

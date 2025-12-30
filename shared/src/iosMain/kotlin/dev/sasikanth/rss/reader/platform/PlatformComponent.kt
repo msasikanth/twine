@@ -21,4 +21,6 @@ import me.tatarka.inject.annotations.Provides
 actual interface PlatformComponent {
 
   @Provides fun IOSLinkHandler.bind(): LinkHandler = this
+
+  @Provides fun IOSTextToSpeechHandler.bind(): TextToSpeechHandler = this
 }

@@ -21,4 +21,6 @@ import me.tatarka.inject.annotations.Provides
 actual interface PlatformComponent {
 
   @Provides fun AndroidLinkHandler.bind(): LinkHandler = this
+
+  @Provides fun AndroidTextToSpeechHandler.bind(): TextToSpeechHandler = this
 }

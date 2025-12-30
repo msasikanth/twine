@@ -35,6 +35,8 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -47,6 +49,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -93,7 +96,9 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
+import dev.sasikanth.rss.reader.markdown.MarkdownTextExtractor
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
+import dev.sasikanth.rss.reader.platform.LocalTextToSpeechHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.webview.ReaderWebView
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
@@ -116,7 +121,9 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.readAloud
 import twine.shared.generated.resources.share
+import twine.shared.generated.resources.ttsStop
 import twine.shared.generated.resources.unBookmark
 
 private val json = Json {
@@ -146,8 +153,10 @@ internal fun ReaderPage(
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
+  val textToSpeechHandler = LocalTextToSpeechHandler.current
   val shouldBlockImage = LocalBlockImage.current
 
+  val isPlaying by textToSpeechHandler.isPlaying.collectAsStateWithLifecycle()
   val coroutineScope = rememberCoroutineScope()
   val imageTransformer = remember { CoilMarkdownTransformer(shouldBlockImage) }
 
@@ -156,6 +165,8 @@ internal fun ReaderPage(
       handleColor = AppTheme.colorScheme.primary,
       backgroundColor = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
     )
+
+  DisposableEffect(readerPost.id) { onDispose { textToSpeechHandler.stop() } }
 
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     SelectionContainer {
@@ -234,12 +245,35 @@ internal fun ReaderPage(
                 pagerState = pagerState,
                 excerpt = excerptState,
                 darkTheme = darkTheme,
+                isPlaying = isPlaying,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
                 onShareClick = { sharedHandler.share(readerPost.link) },
                 onBookmarkClick = onBookmarkClick,
                 onMarkAsUnread = onMarkAsUnread,
+                onPlayClick = {
+                  if (isPlaying) {
+                    textToSpeechHandler.stop()
+                  } else {
+                    val textToSpeak = buildString {
+                      append(readerPost.title)
+                      append(". ")
+
+                      val contentState = markdownContentState
+                      if (contentState is State.Success) {
+                        val extractedText =
+                          MarkdownTextExtractor.extract(contentState.node, contentState.content)
+                        if (extractedText.isNotBlank()) {
+                          append(extractedText)
+                        }
+                      } else if (excerptState.isNotBlank()) {
+                        append(excerptState)
+                      }
+                    }
+                    textToSpeechHandler.speak(textToSpeak)
+                  }
+                }
               )
             }
 
@@ -299,10 +333,12 @@ private fun PostHeader(
   pagerState: PagerState,
   excerpt: String,
   darkTheme: Boolean,
+  isPlaying: Boolean,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
+  onPlayClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(
@@ -390,10 +426,12 @@ private fun PostHeader(
         PostActions(
           postBookmarked = readerPost.bookmarked,
           commentsLink = readerPost.commentsLink,
+          isPlaying = isPlaying,
           onCommentsClick = onCommentsClick,
           onShareClick = onShareClick,
           onBookmarkClick = onBookmarkClick,
           onMarkAsUnread = onMarkAsUnread,
+          onPlayClick = onPlayClick,
         )
       }
     }
@@ -457,10 +495,12 @@ private fun PostSourcePill(
 private fun PostActions(
   postBookmarked: Boolean,
   commentsLink: String?,
+  isPlaying: Boolean,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
+  onPlayClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
@@ -472,6 +512,17 @@ private fun PostActions(
       icon = markAsUnreadIcon,
       iconTint = AppTheme.colorScheme.onSurfaceVariant,
       onClick = onMarkAsUnread
+    )
+
+    val playLabel =
+      if (isPlaying) stringResource(Res.string.ttsStop) else stringResource(Res.string.readAloud)
+    val playIcon = if (isPlaying) Icons.Filled.Stop else Icons.Filled.PlayArrow
+
+    PostActionButton(
+      label = playLabel,
+      icon = playIcon,
+      iconTint = AppTheme.colorScheme.onSurfaceVariant,
+      onClick = onPlayClick
     )
 
     if (!commentsLink.isNullOrBlank()) {
