@@ -20,8 +20,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -44,7 +44,7 @@ internal fun BottomBarWithGradientShadow(
     modifier =
       modifier
         .fillMaxWidth()
-        .requiredHeight(120.dp)
+        .heightIn(min = 120.dp)
         .background(
           color = translucentStyle.default.background.compositeOver(Color.Black),
           shape = shape
