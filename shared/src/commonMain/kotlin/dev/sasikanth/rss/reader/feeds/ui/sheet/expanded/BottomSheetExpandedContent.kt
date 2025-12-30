@@ -79,6 +79,7 @@ import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -342,6 +343,7 @@ private fun SearchBar(
 ) {
   val keyboardState by keyboardVisibilityAsState()
   val focusManager = LocalFocusManager.current
+  val translucentStyle = LocalTranslucentStyles.current
 
   LaunchedEffect(keyboardState) {
     if (keyboardState == KeyboardState.Closed) {
@@ -392,13 +394,12 @@ private fun SearchBar(
       textStyle = MaterialTheme.typography.bodyMedium,
       colors =
         OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
-          unfocusedBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
-          disabledBorderColor = AppTheme.colorScheme.secondary.copy(alpha = 0.02f),
+          focusedBorderColor = translucentStyle.prominent.background,
+          unfocusedBorderColor = translucentStyle.default.background,
           focusedTextColor = AppTheme.colorScheme.onSurfaceVariant,
           disabledTextColor = Color.Transparent,
-          unfocusedContainerColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
-          focusedContainerColor = AppTheme.colorScheme.secondary.copy(alpha = 0.08f),
+          unfocusedContainerColor = translucentStyle.default.background,
+          focusedContainerColor = translucentStyle.default.background,
         )
     )
   }

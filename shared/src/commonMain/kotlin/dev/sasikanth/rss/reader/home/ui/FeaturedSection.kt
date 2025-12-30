@@ -126,7 +126,9 @@ internal fun FeaturedSection(
             Modifier.onVisibilityChanged(minDurationMs = 500) {
               if (featuredPost.postWithMetadata.read) return@onVisibilityChanged
 
-              markPostAsReadOnScroll(postWithMetadata.id)
+              if (it) {
+                markPostAsReadOnScroll(postWithMetadata.id)
+              }
             }
         ) {
           if (canBlurImage) {

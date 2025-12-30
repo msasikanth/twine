@@ -387,12 +387,13 @@ internal fun ReaderScreen(
                   },
                 )
               }
-
               ReaderPage(
                 modifier =
                   Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
-                    onPostChanged(page)
-                    viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+                    if (it) {
+                      onPostChanged(page)
+                      viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
+                    }
                   },
                 contentPaddingValues = paddingValues,
                 pageViewModel = pageViewModel,

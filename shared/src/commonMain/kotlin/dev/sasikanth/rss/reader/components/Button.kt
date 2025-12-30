@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
 fun Button(
@@ -117,6 +118,7 @@ fun CircularIconButton(
   onClick: () -> Unit
 ) {
   val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
+  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
@@ -124,12 +126,8 @@ fun CircularIconButton(
         .requiredSize(40.dp)
         .clip(CircleShape)
         .clickable(enabled = enabled) { onClick() }
-        .background(AppTheme.colorScheme.secondary.copy(0.08f), CircleShape)
-        .border(
-          width = 1.dp,
-          color = AppTheme.colorScheme.secondary.copy(alpha = 0.16f),
-          shape = CircleShape
-        )
+        .background(translucentStyle.default.background, CircleShape)
+        .border(width = 1.dp, color = translucentStyle.default.outline, shape = CircleShape)
         .semantics {
           contentDescription = label
           role = Role.Button

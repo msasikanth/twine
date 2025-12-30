@@ -62,6 +62,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.RethinkSansFontFamily
@@ -284,6 +285,7 @@ private fun TypefaceChip(
 ) {
   val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
   val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
+  val translucentStyle = LocalTranslucentStyles.current
 
   Box(
     modifier =
@@ -291,7 +293,7 @@ private fun TypefaceChip(
         .clip(RoundedCornerShape(50))
         .clickable { onClick() }
         .padding(vertical = chipOuterPadding)
-        .background(AppTheme.colorScheme.secondary.copy(alpha = 0.08f), RoundedCornerShape(50))
+        .background(translucentStyle.default.background, RoundedCornerShape(50))
         .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
         .padding(chipPadding)
   ) {

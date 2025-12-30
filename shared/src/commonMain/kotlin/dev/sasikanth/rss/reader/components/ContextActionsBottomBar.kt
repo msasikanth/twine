@@ -67,7 +67,7 @@ internal fun ContextActionsBottomBar(
         }
       }
 
-      Row(horizontalArrangement = Arrangement.spacedBy(8.dp), content = content)
+      Row(horizontalArrangement = Arrangement.spacedBy(4.dp), content = content)
 
       Spacer(Modifier.requiredHeight(4.dp))
 

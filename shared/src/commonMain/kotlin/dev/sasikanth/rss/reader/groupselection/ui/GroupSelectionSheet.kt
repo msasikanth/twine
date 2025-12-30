@@ -50,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
@@ -62,6 +63,7 @@ import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.resources.icons.Add
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonConfirm
@@ -78,10 +80,12 @@ fun GroupSelectionSheet(
   modifier: Modifier = Modifier
 ) {
   AppTheme(useDarkTheme = true) {
+    val translucentStyle = LocalTranslucentStyles.current
+
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
       onDismissRequest = { dismiss() },
-      containerColor = AppTheme.colorScheme.tintedBackground,
+      containerColor = translucentStyle.default.background.compositeOver(Color.Black),
       contentColor = Color.Unspecified,
       contentWindowInsets = {
         WindowInsets.systemBars
@@ -167,7 +171,7 @@ fun GroupSelectionSheet(
           modifier = Modifier.weight(1f),
           colors =
             ButtonDefaults.outlinedButtonColors(
-              containerColor = AppTheme.colorScheme.tintedBackground,
+              containerColor = Color.Transparent,
               contentColor = AppTheme.colorScheme.tintedForeground
             ),
           border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),

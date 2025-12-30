@@ -18,57 +18,42 @@ package dev.sasikanth.rss.reader.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 
 @Composable
 internal fun BottomBarWithGradientShadow(
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit
 ) {
-  Column(modifier = modifier) {
-    Box(
-      Modifier.fillMaxWidth()
-        .requiredHeight(120.dp)
-        .offset(y = 24.dp)
-        .background(
-          Brush.verticalGradient(
-            colorStops =
-              arrayOf(
-                0f to Color.Transparent,
-                0.5f to AppTheme.colorScheme.tintedBackground.copy(alpha = 0.5f),
-                0.8f to AppTheme.colorScheme.tintedBackground
-              )
-          )
-        )
-    )
+  val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+  val translucentStyle = LocalTranslucentStyles.current
 
-    Box(
-      modifier =
-        Modifier.fillMaxWidth()
-          .background(
-            color = AppTheme.colorScheme.tintedSurface,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-          )
-          .pointerInput(Unit) {
-            // Consume bottom bar taps
-          }
-          .windowInsetsPadding(WindowInsets.navigationBars)
-    ) {
-      content()
-    }
+  Box(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .requiredHeight(120.dp)
+        .background(
+          color = translucentStyle.default.background.compositeOver(Color.Black),
+          shape = shape
+        )
+        .pointerInput(Unit) {
+          // Consume bottom bar taps
+        }
+        .windowInsetsPadding(WindowInsets.navigationBars)
+  ) {
+    content()
   }
 }
