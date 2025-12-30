@@ -41,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -70,7 +71,7 @@ internal fun FeedListItem(
     if (isFeedSelected) {
       AppTheme.colorScheme.primaryContainer
     } else {
-      AppTheme.colorScheme.tintedSurface
+      Color.Transparent
     }
 
   Box(
@@ -113,7 +114,7 @@ internal fun FeedListItem(
       Text(
         modifier = Modifier.weight(1f),
         text = feed.name,
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.titleSmall,
         color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 1,
         overflow = TextOverflow.Clip

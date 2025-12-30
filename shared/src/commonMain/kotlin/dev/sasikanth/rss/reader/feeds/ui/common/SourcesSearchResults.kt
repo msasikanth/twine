@@ -38,7 +38,7 @@ internal fun LazyListScope.sourcesSearchResults(
     val feed = searchResults[index]
     val startPadding = 24.dp
     val endPadding = 24.dp
-    val topPadding = 8.dp
+    val topPadding = 4.dp
     val bottomPadding = bottomPaddingOfSourceItem(index, searchResults.itemCount)
 
     if (feed != null) {
