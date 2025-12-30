@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 
 @Composable
 internal fun AppTheme(
@@ -33,6 +34,8 @@ internal fun AppTheme(
   typography: Typography = typography(RethinkSansFontFamily),
   content: @Composable () -> Unit
 ) {
+  val useAmoled = LocalAmoledSetting.current
+
   MaterialTheme(
     colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
     typography = typography,
@@ -40,7 +43,8 @@ internal fun AppTheme(
     val dynamicColorState = LocalDynamicColorState.current
     val colorScheme =
       if (useDarkTheme) {
-        dynamicColorState.darkAppColorScheme
+        if (useAmoled) dynamicColorState.darkAppColorScheme.amoled()
+        else dynamicColorState.darkAppColorScheme
       } else {
         dynamicColorState.lightAppColorScheme
       }
