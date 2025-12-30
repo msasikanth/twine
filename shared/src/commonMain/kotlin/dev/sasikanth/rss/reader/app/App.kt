@@ -182,7 +182,7 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    LaunchedEffect(appState.homeViewMode, appState.useAmoled) {
+    LaunchedEffect(appState.homeViewMode) {
       if (appState.homeViewMode == HomeViewMode.Default) {
         dynamicColorState.refresh()
       } else {
