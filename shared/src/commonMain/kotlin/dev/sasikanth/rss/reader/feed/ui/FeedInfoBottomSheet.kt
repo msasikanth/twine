@@ -67,6 +67,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
@@ -88,6 +89,7 @@ import dev.sasikanth.rss.reader.resources.icons.DeleteOutline
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
@@ -124,10 +126,12 @@ fun FeedInfoBottomSheet(
   }
 
   AppTheme(useDarkTheme = true) {
+    val translucentStyle = LocalTranslucentStyles.current
+
     ModalBottomSheet(
       modifier = Modifier.then(modifier),
       onDismissRequest = { dismiss() },
-      containerColor = AppTheme.colorScheme.tintedBackground,
+      containerColor = translucentStyle.default.background.compositeOver(Color.Black),
       contentColor = Color.Unspecified,
       contentWindowInsets = {
         WindowInsets.systemBars
