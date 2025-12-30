@@ -139,6 +139,7 @@ internal fun ReaderScreen(
     rememberDynamicColorState(
       defaultLightAppColorScheme = appDynamicColorState.lightAppColorScheme,
       defaultDarkAppColorScheme = appDynamicColorState.darkAppColorScheme,
+      useAmoled = appDynamicColorState.useAmoled,
     )
   val readerLinkHandler = remember {
     object : UriHandler {
