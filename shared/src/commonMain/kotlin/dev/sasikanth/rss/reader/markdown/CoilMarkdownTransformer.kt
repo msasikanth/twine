@@ -23,14 +23,10 @@ import com.mikepenz.markdown.model.ImageData
 import com.mikepenz.markdown.model.ImageTransformer
 import com.mikepenz.markdown.model.PlaceholderConfig
 
-class CoilMarkdownTransformer(
-  private val shouldBlockImage: Boolean,
-) : ImageTransformer {
+object CoilMarkdownTransformer : ImageTransformer {
 
   @Composable
   override fun transform(link: String): ImageData? {
-    if (shouldBlockImage) return null
-
     return rememberAsyncImagePainter(
         model =
           ImageRequest.Builder(LocalPlatformContext.current)
@@ -49,8 +45,6 @@ class CoilMarkdownTransformer(
 
   @Composable
   override fun intrinsicSize(painter: Painter): Size {
-    if (shouldBlockImage) return Size.Zero
-
     var size by remember(painter) { mutableStateOf(painter.intrinsicSize) }
     if (painter is AsyncImagePainter) {
       val painterState = painter.state.collectAsState()
@@ -65,10 +59,6 @@ class CoilMarkdownTransformer(
     containerSize: Size,
     intrinsicImageSize: Size
   ): PlaceholderConfig {
-    if (shouldBlockImage) {
-      return PlaceholderConfig(size = Size.Zero)
-    }
-
     return super.placeholderConfig(density, containerSize, intrinsicImageSize)
   }
 }

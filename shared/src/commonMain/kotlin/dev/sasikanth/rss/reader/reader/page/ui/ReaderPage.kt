@@ -111,6 +111,7 @@ import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.intellij.markdown.MarkdownElementTypes
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
@@ -149,7 +150,6 @@ internal fun ReaderPage(
   val shouldBlockImage = LocalBlockImage.current
 
   val coroutineScope = rememberCoroutineScope()
-  val imageTransformer = remember { CoilMarkdownTransformer(shouldBlockImage) }
 
   val textSelectionColors =
     TextSelectionColors(
@@ -188,8 +188,14 @@ internal fun ReaderPage(
               block = 12.dp,
             ),
           LocalMarkdownDimens provides markdownDimens(),
-          LocalImageTransformer provides imageTransformer,
-          LocalMarkdownAnnotator provides markdownAnnotator(),
+          LocalImageTransformer provides CoilMarkdownTransformer,
+          LocalMarkdownAnnotator provides
+            markdownAnnotator(
+              annotate = { _, node ->
+                // skipping images when "block images" is enabled
+                node.type == MarkdownElementTypes.IMAGE && shouldBlockImage
+              }
+            ),
           LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
           LocalMarkdownColors provides
             markdownColor(
