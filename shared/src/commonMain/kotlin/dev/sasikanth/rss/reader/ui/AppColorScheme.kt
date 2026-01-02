@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.ui
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 
 @Immutable
 class AppColorScheme(
@@ -73,7 +74,7 @@ class AppColorScheme(
     bottomSheet: Color = this.bottomSheet,
     bottomSheetBorder: Color = this.bottomSheetBorder,
     tintedBackground: Color = this.tintedBackground,
-    tintedSurface: Color = this.surfaceContainer,
+    tintedSurface: Color = this.tintedSurface,
     tintedForeground: Color = this.tintedForeground,
     tintedHighlight: Color = this.tintedHighlight,
   ): AppColorScheme =
@@ -105,6 +106,37 @@ class AppColorScheme(
       tintedForeground = tintedForeground,
       tintedHighlight = tintedHighlight,
     )
+
+  fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
+    return copy(
+      primary = lerp(primary, to.primary, fraction),
+      secondary = lerp(secondary, to.secondary, fraction),
+      outline = lerp(outline, to.outline, fraction),
+      outlineVariant = lerp(outlineVariant, to.outlineVariant, fraction),
+      primaryContainer = lerp(primaryContainer, to.primaryContainer, fraction),
+      onPrimaryContainer = lerp(onPrimaryContainer, to.onPrimaryContainer, fraction),
+      surface = lerp(surface, to.surface, fraction),
+      onSurface = lerp(onSurface, to.onSurface, fraction),
+      onSurfaceVariant = lerp(onSurfaceVariant, to.onSurfaceVariant, fraction),
+      surfaceContainer = lerp(surfaceContainer, to.surfaceContainer, fraction),
+      surfaceContainerLow = lerp(surfaceContainerLow, to.surfaceContainerLow, fraction),
+      surfaceContainerLowest = lerp(surfaceContainerLowest, to.surfaceContainerLowest, fraction),
+      surfaceContainerHigh = lerp(surfaceContainerHigh, to.surfaceContainerHigh, fraction),
+      surfaceContainerHighest = lerp(surfaceContainerHighest, to.surfaceContainerHighest, fraction),
+      inversePrimary = lerp(inversePrimary, to.inversePrimary, fraction),
+      inverseSurface = lerp(inverseSurface, to.inverseSurface, fraction),
+      inverseOnSurface = lerp(inverseOnSurface, to.inverseOnSurface, fraction),
+      textEmphasisHigh = lerp(textEmphasisHigh, to.textEmphasisHigh, fraction),
+      textEmphasisMed = lerp(textEmphasisMed, to.textEmphasisMed, fraction),
+      backdrop = lerp(backdrop, to.backdrop, fraction),
+      bottomSheet = lerp(bottomSheet, to.bottomSheet, fraction),
+      bottomSheetBorder = lerp(bottomSheetBorder, to.bottomSheetBorder, fraction),
+      tintedBackground = lerp(tintedBackground, to.tintedBackground, fraction),
+      tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
+      tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
+      tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
+    )
+  }
 }
 
 fun lightAppColorScheme(): AppColorScheme {

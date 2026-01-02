@@ -20,12 +20,12 @@ import androidx.collection.LruCache
 import androidx.collection.lruCache
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.request.ImageRequest
-import dev.sasikanth.material.color.utilities.quantize.QuantizerCelebi
-import dev.sasikanth.material.color.utilities.score.Score
+import com.materialkolor.ktx.themeColorOrNull
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
 import kotlin.coroutines.resume
@@ -40,9 +40,9 @@ class SeedColorExtractor(
   private val platformContext: Lazy<PlatformContext>,
   private val dispatchersProvider: DispatchersProvider,
 ) {
-  private val lruCache: LruCache<String, Int> = lruCache(maxSize = 100)
+  private val lruCache: LruCache<String, Color> = lruCache(maxSize = 100)
 
-  suspend fun calculateSeedColor(url: String?) =
+  suspend fun calculateSeedColor(url: String?): Color? =
     withContext(dispatchersProvider.io) {
       if (url.isNullOrBlank()) return@withContext null
 
@@ -65,21 +65,12 @@ class SeedColorExtractor(
         imageLoader.value.enqueue(request)
       }
 
-      return@withContext bitmap?.seedColor().also { seedColor ->
-        if (seedColor != null) {
-          lruCache.put(url, seedColor)
-        }
-      }
+      if (bitmap == null) return@withContext null
+
+      return@withContext bitmap.themeColorOrNull()
     }
 
   fun cachedSeedColor(url: String?) = if (url.isNullOrBlank()) null else lruCache[url]
-
-  private fun ImageBitmap.seedColor(): Int {
-    val bitmapPixels = IntArray(width * height)
-    readPixels(buffer = bitmapPixels)
-
-    return Score.score(QuantizerCelebi.quantize(bitmapPixels, maxColors = 128)).first()
-  }
 
   private companion object {
     const val DEFAULT_REQUEST_SIZE = 64
