@@ -30,7 +30,6 @@ spotless = "8.1.0"
 ktfmt = "0.44"
 kotlininject = "0.8.0"
 ksp = "2.3.4"
-material_color_utilities = "1.0.0-alpha01"
 ksoup = "0.2.5"
 sqliteAndroid = "3.49.0"
 windowSizeClass = "0.5.0"
@@ -54,6 +53,7 @@ revenuecat = "2.2.13+17.23.0"
 viewmodel = "2.9.6"
 navigation = "2.9.1"
 glance = "1.2.0-rc01"
+material-kolor = "4.0.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -104,7 +104,6 @@ coil_network = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "
 coil_svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
 kotlininject-compiler = { module = 'me.tatarka.inject:kotlin-inject-compiler-ksp', version.ref = 'kotlininject' }
 kotlininject-runtime = { module = 'me.tatarka.inject:kotlin-inject-runtime', version.ref = 'kotlininject' }
-material_color_utilities = { module = "dev.sasikanth:material-color-utilities", version.ref = "material_color_utilities" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 ksoup-kotlinx-io = { module = "com.fleeksoft.ksoup:ksoup-kotlinx", version.ref = "ksoup" }
 sqliteAndroid = { module = "com.github.requery:sqlite-android", version.ref = "sqliteAndroid" }
@@ -136,6 +135,7 @@ viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-com
 navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
+material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

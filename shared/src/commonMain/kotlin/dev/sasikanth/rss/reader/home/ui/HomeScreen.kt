@@ -68,6 +68,7 @@ import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -591,7 +592,7 @@ fun featuredPosts(
 
             FeaturedPostItem(
               postWithMetadata = post,
-              seedColor = existingSeedColor,
+              seedColor = existingSeedColor?.toArgb(),
             )
           } else {
             null
@@ -608,8 +609,11 @@ fun featuredPosts(
             if (item.seedColor != null) return@mapNotNull item
 
             return@mapNotNull if (!item.postWithMetadata.imageUrl.isNullOrBlank()) {
-              val seedColor = seedColorExtractor.calculateSeedColor(item.postWithMetadata.imageUrl)
-              item.copy(seedColor = seedColor)
+              val seedColor =
+                seedColorExtractor.calculateSeedColor(
+                  url = item.postWithMetadata.imageUrl,
+                )
+              item.copy(seedColor = seedColor?.toArgb())
             } else {
               null
             }

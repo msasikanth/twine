@@ -189,9 +189,8 @@ internal fun ReaderScreen(
             activePost
           }
 
-        val fromSeedColor =
-          seedColorExtractor.calculateSeedColor(fromItem.imageUrl)?.let { Color(it) }
-        val toSeedColor = seedColorExtractor.calculateSeedColor(toItem.imageUrl)?.let { Color(it) }
+        val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem.imageUrl)
+        val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem.imageUrl)
 
         dynamicColorState.animate(
           fromSeedColor = fromSeedColor,

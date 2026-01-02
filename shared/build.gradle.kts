@@ -89,7 +89,6 @@ kotlin {
       implementation(libs.ktor.client.logging)
       implementation(libs.kotlininject.runtime)
       implementation(libs.androidx.collection)
-      implementation(libs.material.color.utilities)
       implementation(libs.ksoup)
       implementation(libs.ksoup.kotlinx.io)
       implementation(libs.windowSizeClass)
@@ -117,6 +116,7 @@ kotlin {
       implementation(libs.purchases.ui)
       implementation(libs.viewmodel)
       implementation(libs.navigation)
+      implementation(libs.material.kolor)
     }
     commonTest.dependencies {
       implementation(libs.kotlin.test)
