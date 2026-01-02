@@ -40,7 +40,7 @@ class SeedColorExtractor(
   private val platformContext: Lazy<PlatformContext>,
   private val dispatchersProvider: DispatchersProvider,
 ) {
-  private val lruCache: LruCache<String, Color> = lruCache(maxSize = 100)
+  private val lruCache: LruCache<String, Color> = lruCache(maxSize = 1000)
 
   suspend fun calculateSeedColor(url: String?): Color? =
     withContext(dispatchersProvider.io) {
