@@ -92,7 +92,9 @@ import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
@@ -238,7 +240,13 @@ internal fun HomeScreen(
       animateDpAsState(
         targetValue =
           if (postsListState.isScrollingTowardsUp()) {
-            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
+            val scaffoldBottomPadding =
+              if (platform == Platform.Android) {
+                scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
+              } else {
+                16.dp
+              }
+            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldBottomPadding
           } else {
             0.dp
           },
