@@ -46,7 +46,6 @@ import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -212,7 +211,6 @@ internal fun FeedsBottomSheet(
                 .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
                 .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
             pinnedSources = state.pinnedSources,
-            numberOfFeeds = state.numberOfFeeds,
             activeSource = state.activeSource,
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },

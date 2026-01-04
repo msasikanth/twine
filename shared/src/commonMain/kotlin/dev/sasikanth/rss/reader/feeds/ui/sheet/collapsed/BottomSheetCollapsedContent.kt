@@ -52,7 +52,6 @@ import twine.shared.generated.resources.noPinnedSources
 @Composable
 internal fun BottomSheetCollapsedContent(
   pinnedSources: List<Source>,
-  numberOfFeeds: Int,
   activeSource: Source?,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
@@ -96,7 +95,7 @@ internal fun BottomSheetCollapsedContent(
         )
       }
 
-      if (pinnedSources.isEmpty() && numberOfFeeds > 0 && activeSource == null) {
+      if (pinnedSources.isEmpty() && activeSource == null) {
         item {
           Text(
             text = stringResource(Res.string.noPinnedSources),
