@@ -94,36 +94,34 @@ internal fun BottomSheetCollapsedContent(
           onSourceClick = onSourceClick
         )
       }
-
-      if (pinnedSources.isEmpty() && activeSource == null) {
-        item {
-          Text(
-            text = stringResource(Res.string.noPinnedSources),
-            color = AppTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillParentMaxWidth()
-          )
-        }
-      }
     }
 
-    val bottomSheetBackground = AppTheme.colorScheme.bottomSheet
-    Row(
-      modifier =
-        Modifier.align(Alignment.BottomEnd)
-          .fillMaxHeight()
-          .background(
-            Brush.horizontalGradient(
-              0f to Color.Transparent,
-              0.2f to bottomSheetBackground,
-              1f to bottomSheetBackground,
+    if (pinnedSources.isEmpty() && activeSource == null) {
+      Text(
+        text = stringResource(Res.string.noPinnedSources),
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().align(Alignment.Center),
+      )
+    }
+
+    if (pinnedSources.isNotEmpty() || activeSource != null) {
+      val bottomSheetBackground = AppTheme.colorScheme.bottomSheet
+      Row(
+        modifier =
+          Modifier.align(Alignment.BottomEnd)
+            .fillMaxHeight()
+            .background(
+              Brush.horizontalGradient(
+                0f to Color.Transparent,
+                0.2f to bottomSheetBackground,
+                1f to bottomSheetBackground,
+              )
             )
-          )
-          .pointerInput(Unit) {},
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      if (pinnedSources.isNotEmpty() || activeSource != null) {
+            .pointerInput(Unit) {},
+        verticalAlignment = Alignment.CenterVertically
+      ) {
         Spacer(modifier = Modifier.width(16.dp))
 
         CircularIconButton(
