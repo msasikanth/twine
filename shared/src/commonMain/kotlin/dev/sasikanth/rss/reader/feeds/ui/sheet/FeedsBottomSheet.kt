@@ -17,8 +17,11 @@ package dev.sasikanth.rss.reader.feeds.ui.sheet
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -52,8 +56,8 @@ import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.BottomSheetExpandedConte
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
-private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 80.dp
+private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -67,6 +71,8 @@ internal fun FeedsBottomSheet(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
+  openFeeds: () -> Unit,
+  closeFeeds: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val focusManager = LocalFocusManager.current
@@ -99,7 +105,7 @@ internal fun FeedsBottomSheet(
         modifier.fillMaxSize().drawBehind {
           val bottomSheetProgress = bottomSheetProgress()
 
-          val collapsedSheetHeight = 108.dp.toPx()
+          val collapsedSheetHeight = BOTTOM_SHEET_PEEK_HEIGHT.toPx()
           val targetSheetHeight = size.height
           val sheetHeight =
             lerp(
@@ -178,13 +184,15 @@ internal fun FeedsBottomSheet(
           )
         },
     ) {
-      BottomSheetHandle(progress = bottomSheetProgress)
-
-      Box(modifier = Modifier.weight(1f)) {
+      Box(modifier = Modifier.fillMaxSize()) {
         if (isExpanding) {
+          val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+          val paddingTop =
+            lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = bottomSheetProgress())
+
           BottomSheetExpandedContent(
             modifier =
-              Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
+              Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
                 alpha = bottomSheetProgress()
               },
             viewModel = feedsViewModel,
@@ -193,21 +201,23 @@ internal fun FeedsBottomSheet(
             openGroupSelectionSheet = openGroupSelectionSheet,
             openAddFeedScreen = openAddFeedScreen,
             openPaywall = openPaywall,
+            closeFeeds = closeFeeds
           )
         }
 
         if (isCollapsing) {
           BottomSheetCollapsedContent(
             modifier =
-              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING).graphicsLayer {
-                alpha = (bottomSheetProgress() * 5f).inverse()
-              },
+              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
+                .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
+                .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
             pinnedSources = state.pinnedSources,
             numberOfFeeds = state.numberOfFeeds,
             activeSource = state.activeSource,
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
             onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+            openFeeds = openFeeds
           )
         }
       }

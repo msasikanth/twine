@@ -455,6 +455,8 @@ internal fun HomeScreen(
           openGroupSelectionSheet = openGroupSelectionSheet,
           openAddFeedScreen = openAddFeedScreen,
           openPaywall = openPaywall,
+          openFeeds = { coroutineScope.launch { bottomSheetState.expand() } },
+          closeFeeds = { coroutineScope.launch { bottomSheetState.partialExpand() } }
         )
       },
       containerColor = Color.Transparent,

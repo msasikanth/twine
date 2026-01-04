@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -64,6 +66,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -74,6 +77,7 @@ import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
 import dev.sasikanth.rss.reader.feeds.ui.common.allSources
 import dev.sasikanth.rss.reader.feeds.ui.common.pinnedSources
 import dev.sasikanth.rss.reader.feeds.ui.common.sourcesSearchResults
+import dev.sasikanth.rss.reader.resources.icons.CollapseContent
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
@@ -94,6 +98,7 @@ import twine.shared.generated.resources.actionUnpin
 import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.delete
 import twine.shared.generated.resources.edit
+import twine.shared.generated.resources.feeds
 import twine.shared.generated.resources.feedsSearchHint
 import twine.shared.generated.resources.removeSources
 import twine.shared.generated.resources.removeSourcesDesc
@@ -107,6 +112,7 @@ internal fun BottomSheetExpandedContent(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
+  closeFeeds: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -144,10 +150,36 @@ internal fun BottomSheetExpandedContent(
   Scaffold(
     modifier = Modifier.consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
-      SearchBar(
-        query = searchQuery,
-        onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+      CenterAlignedTopAppBar(
+        modifier =
+          Modifier.windowInsetsPadding(
+            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+          ),
+        title = {
+          SearchBar(
+            query = searchQuery,
+            onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+            onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+          )
+        },
+        actions = {
+          CircularIconButton(
+            modifier = Modifier.padding(end = 20.dp),
+            icon = TwineIcons.CollapseContent,
+            label = stringResource(Res.string.feeds),
+            onClick = closeFeeds
+          )
+        },
+        contentPadding =
+          PaddingValues(
+            top = 8.dp,
+            bottom = 8.dp,
+          ),
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent,
+          )
       )
     },
     bottomBar = {
@@ -295,6 +327,7 @@ internal fun BottomSheetExpandedContent(
           ),
       state = lazyListState,
       contentPadding = listContentPadding,
+      overscrollEffect = null
     ) {
       if (isInSearchMode) {
         sourcesSearchResults(
@@ -355,13 +388,7 @@ private fun SearchBar(
     colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
   ) {
     OutlinedTextField(
-      modifier =
-        Modifier.fillMaxWidth()
-          .windowInsetsPadding(
-            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-          )
-          .padding(vertical = 8.dp)
-          .padding(start = 24.dp, end = 24.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
       value = query.copy(selection = TextRange(query.text.length)),
       onValueChange = onQueryChange,
       placeholder = {
