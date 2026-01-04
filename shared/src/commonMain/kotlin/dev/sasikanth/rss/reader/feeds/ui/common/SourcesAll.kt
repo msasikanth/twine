@@ -202,11 +202,12 @@ internal fun AllFeedsHeader(
       modifier =
         Modifier.weight(1f).clearAndSetSemantics {
           contentDescription = "${allFeedsLabel}: ${feedsCount}"
-        }
+        },
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(
         text = allFeedsLabel,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.textEmphasisHigh,
       )
 
@@ -214,7 +215,7 @@ internal fun AllFeedsHeader(
 
       Text(
         text = feedsCount.toString(),
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.primary,
       )
     }
