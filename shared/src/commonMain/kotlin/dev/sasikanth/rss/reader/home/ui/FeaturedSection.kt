@@ -170,7 +170,7 @@ internal fun FeaturedSection(
           }
 
           FeaturedPostItem(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding() + 8.dp),
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             item = postWithMetadata,
             darkTheme = useDarkTheme,
             onClick = { onItemClick(postWithMetadata, page) },
