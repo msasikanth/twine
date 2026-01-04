@@ -56,7 +56,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
 internal val BOTTOM_SHEET_PEEK_HEIGHT = 80.dp
-private val BOTTOM_SHEET_CORNER_SIZE = 32.dp
+internal val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
