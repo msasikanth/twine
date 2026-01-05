@@ -56,6 +56,7 @@ import twine.shared.generated.resources.noPinnedSources
 internal fun BottomSheetCollapsedContent(
   pinnedSources: List<Source>,
   activeSource: Source?,
+  isParentThemeDark: Boolean,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
@@ -110,7 +111,13 @@ internal fun BottomSheetCollapsedContent(
     }
 
     if (pinnedSources.isNotEmpty() || activeSource != null) {
-      val bottomSheetBackground = AppTheme.colorScheme.bottomSheet
+      val bottomSheetBackground =
+        if (isParentThemeDark) {
+          AppTheme.colorScheme.bottomSheet
+        } else {
+          AppTheme.colorScheme.bottomSheetInverse
+        }
+
       Row(
         modifier =
           Modifier.align(Alignment.BottomEnd)

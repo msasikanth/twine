@@ -82,6 +82,7 @@ internal fun FeedsBottomSheet(
     feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
+  val isParentThemeDark = AppTheme.isDark
   val collapsedSheetBackgroundColor = AppTheme.colorScheme.bottomSheet
   val collapsedSheetBorderColor = AppTheme.colorScheme.bottomSheetBorder
   val (shadowColor1, shadowColor2) =
@@ -212,6 +213,7 @@ internal fun FeedsBottomSheet(
                 .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
             pinnedSources = state.pinnedSources,
             activeSource = state.activeSource,
+            isParentThemeDark = isParentThemeDark,
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
             onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
