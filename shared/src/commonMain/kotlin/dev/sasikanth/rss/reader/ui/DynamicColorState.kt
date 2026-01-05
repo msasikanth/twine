@@ -123,17 +123,27 @@ internal class DynamicColorState(
       }
     }
 
-    val normalizedProgress =
-      ease(
-        if (progress < -EPSILON) {
-          progress.absoluteValue.inverse()
-        } else {
-          progress
-        }
-      )
+    withContext(Dispatchers.Default) {
+      val normalizedProgress =
+        ease(
+          if (progress < -EPSILON) {
+            progress.absoluteValue.inverse()
+          } else {
+            progress
+          }
+        )
 
-    lightAppColorScheme = startLight.lerp(to = endLight, fraction = normalizedProgress)
-    darkAppColorScheme = startDark.lerp(to = endDark, fraction = normalizedProgress)
+      if (normalizedProgress < EPSILON) {
+        lightAppColorScheme = startLight
+        darkAppColorScheme = startDark
+      } else if (normalizedProgress > 1f - EPSILON) {
+        lightAppColorScheme = endLight
+        darkAppColorScheme = endDark
+      } else {
+        lightAppColorScheme = startLight.lerp(to = endLight, fraction = normalizedProgress)
+        darkAppColorScheme = startDark.lerp(to = endDark, fraction = normalizedProgress)
+      }
+    }
   }
 
   suspend fun refresh() {
