@@ -326,7 +326,7 @@ internal fun SettingsScreen(
 
           item {
             AnimatedVisibility(
-              visible = state.appThemeMode != AppThemeMode.Light,
+              visible = AppTheme.isDark,
               enter = fadeIn() + expandVertically(),
               exit = fadeOut() + shrinkVertically()
             ) {
