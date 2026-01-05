@@ -63,7 +63,6 @@ private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 @Composable
 internal fun FeedsBottomSheet(
   feedsViewModel: FeedsViewModel,
-  darkTheme: Boolean,
   bottomSheetProgress: () -> Float,
   openFeedInfoSheet: (id: String) -> Unit,
   openGroupScreen: (id: String) -> Unit,
@@ -87,7 +86,7 @@ internal fun FeedsBottomSheet(
   val collapsedSheetBorderColor = AppTheme.colorScheme.bottomSheetBorder
   val (shadowColor1, shadowColor2) =
     remember {
-      if (darkTheme) {
+      if (isParentThemeDark) {
         Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
       } else {
         Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))

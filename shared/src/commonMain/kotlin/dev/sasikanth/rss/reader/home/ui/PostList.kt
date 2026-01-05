@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.onEach
 internal fun PostsList(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
-  useDarkTheme: Boolean,
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
@@ -89,9 +88,8 @@ internal fun PostsList(
       item(contentType = "featured_items") {
         FeaturedSection(
           paddingValues = paddingValues,
-          pagerState = featuredPostsPagerState,
           featuredPosts = featuredPosts,
-          useDarkTheme = useDarkTheme,
+          pagerState = featuredPostsPagerState,
           markPostAsReadOnScroll = markPostAsReadOnScroll,
           onItemClick = onPostClicked,
           onPostBookmarkClick = onPostBookmarkClick,
@@ -125,29 +123,27 @@ internal fun PostsList(
         HomeViewMode.Simple -> {
           PostListItem(
             item = post,
-            darkTheme = useDarkTheme,
-            reduceReadItemAlpha = true,
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             onPostSourceClick = { onPostSourceClick(post.sourceId) },
             updatePostReadStatus = { updatedReadStatus ->
               updateReadStatus(post.id, updatedReadStatus)
-            }
+            },
+            reduceReadItemAlpha = true
           )
         }
         HomeViewMode.Compact -> {
           CompactPostListItem(
             item = post,
-            reduceReadItemAlpha = true,
-            darkTheme = useDarkTheme,
             showDivider = index != posts.itemCount - 1,
             onClick = { onPostClicked(post, adjustedIndex) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             updatePostReadStatus = { updatedReadStatus ->
               updateReadStatus(post.id, updatedReadStatus)
-            }
+            },
+            reduceReadItemAlpha = true
           )
         }
       }

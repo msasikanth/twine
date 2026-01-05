@@ -263,13 +263,9 @@ fun App(
           }
 
           HomeScreen(
-            modifier = screenModifier,
-            useDarkTheme = useDarkTheme,
             viewModel = viewModel,
             feedsViewModel = feedsViewModel,
             onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
-            openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
-            openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
             openSearch = { navController.navigate(Screen.Search) },
             openBookmarks = { navController.navigate(Screen.Bookmarks) },
             openSettings = { navController.navigate(Screen.Settings) },
@@ -286,6 +282,8 @@ fun App(
               }
             },
             openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
+            openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
+            openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
             openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
             openPaywall = { navController.navigate(Screen.Paywall) },
             onBottomSheetStateChanged = { sheetValue ->
@@ -299,6 +297,7 @@ fun App(
               toggleLightStatusBar(!showDarkSystemBars)
               toggleLightNavBar(!showDarkSystemBars)
             },
+            modifier = screenModifier,
           )
         }
 
@@ -316,8 +315,6 @@ fun App(
           val fromScreen = it.toRoute<Screen.Reader>().readerScreenArgs.fromScreen
 
           ReaderScreen(
-            modifier = screenModifier,
-            darkTheme = useDarkTheme,
             viewModel = viewModel,
             pageViewModelFactory = { post ->
               viewModel(key = post.id) { readerPageViewModel(post) }
@@ -328,7 +325,8 @@ fun App(
               }
             },
             onBack = { navController.popBackStack() },
-            openPaywall = { navController.navigate(Screen.Paywall) }
+            openPaywall = { navController.navigate(Screen.Paywall) },
+            modifier = screenModifier
           )
         }
 
@@ -360,7 +358,6 @@ fun App(
           SearchScreen(
             modifier = screenModifier,
             searchViewModel = viewModel,
-            darkTheme = useDarkTheme,
             goBack = { navController.popBackStack() },
             openPost = { searchQuery, sortOrder, index, post ->
               coroutineScope.launch {
@@ -390,7 +387,6 @@ fun App(
           BookmarksScreen(
             modifier = screenModifier,
             bookmarksViewModel = viewModel,
-            darkTheme = useDarkTheme,
             goBack = { navController.popBackStack() },
             openPost = { index, post ->
               coroutineScope.launch {

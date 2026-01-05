@@ -135,7 +135,7 @@ internal fun ReaderPage(
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
   loadFullArticle: Boolean,
-  darkTheme: Boolean,
+  isDarkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
@@ -240,7 +240,7 @@ internal fun ReaderPage(
                 page = page,
                 pagerState = pagerState,
                 excerpt = excerptState,
-                darkTheme = darkTheme,
+                darkTheme = isDarkTheme,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },

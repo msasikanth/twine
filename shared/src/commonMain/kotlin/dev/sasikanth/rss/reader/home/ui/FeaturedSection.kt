@@ -72,7 +72,6 @@ internal fun FeaturedSection(
   paddingValues: PaddingValues,
   featuredPosts: ImmutableList<FeaturedPostItem>,
   pagerState: PagerState,
-  useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   markPostAsReadOnScroll: (String) -> Unit,
   onItemClick: (PostWithMetadata, postIndex: Int) -> Unit,
@@ -147,7 +146,6 @@ internal fun FeaturedSection(
                       edgeTreatment = TileMode.Decal,
                     )
                 },
-              useDarkTheme = useDarkTheme,
             ) {
               if (isImageRecorded) {
                 val imageWidth = imageGraphicsLayer.size.width
@@ -171,35 +169,35 @@ internal fun FeaturedSection(
           }
 
           FeaturedPostItem(
-            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
             item = postWithMetadata,
-            darkTheme = useDarkTheme,
             onClick = { onItemClick(postWithMetadata, page) },
             onBookmarkClick = { onPostBookmarkClick(postWithMetadata) },
             onCommentsClick = { onPostCommentsClick(postWithMetadata.commentsLink!!) },
             onSourceClick = { onPostSourceClick(postWithMetadata.sourceId) },
             updateReadStatus = { updatedReadStatus ->
               updateReadStatus(postWithMetadata.id, updatedReadStatus)
-            }
-          ) {
-            FeaturedImage(
-              modifier =
-                Modifier.drawWithContent {
-                  imageGraphicsLayer.record { this@drawWithContent.drawContent() }
-                  isImageRecorded = true
+            },
+            modifier = Modifier.padding(top = paddingValues.calculateTopPadding()),
+            {
+              FeaturedImage(
+                modifier =
+                  Modifier.drawWithContent {
+                    imageGraphicsLayer.record { this@drawWithContent.drawContent() }
+                    isImageRecorded = true
 
-                  drawLayer(imageGraphicsLayer)
-                },
-              imageUrl = postWithMetadata.imageUrl,
-              alignment =
-                remember(pagerState) {
-                  ParallaxAlignment(
-                    horizontalBias = { pagerState.getOffsetFractionForPage(page) },
-                    multiplier = 2f,
-                  )
-                }
-            )
-          }
+                    drawLayer(imageGraphicsLayer)
+                  },
+                imageUrl = postWithMetadata.imageUrl,
+                alignment =
+                  remember(pagerState) {
+                    ParallaxAlignment(
+                      horizontalBias = { pagerState.getOffsetFractionForPage(page) },
+                      multiplier = 2f,
+                    )
+                  }
+              )
+            }
+          )
         }
       }
     }
@@ -228,7 +226,6 @@ internal fun FeaturedSection(
 
 @Composable
 private fun FeaturedSectionBackground(
-  useDarkTheme: Boolean,
   modifier: Modifier = Modifier,
   drawImage: DrawScope.() -> Unit,
 ) {
@@ -240,11 +237,12 @@ private fun FeaturedSectionBackground(
       sizeClass >= WindowWidthSizeClass.Medium -> 1.5f
       else -> 1f
     }
+  val isDarkTheme = AppTheme.isDark
   val colorFilter =
-    remember(useDarkTheme) {
+    remember(isDarkTheme) {
       ColorFilter.colorMatrix(
         ColorMatrix().apply {
-          val saturation = if (useDarkTheme) 1f else 1.1f
+          val saturation = if (isDarkTheme) 1f else 1.1f
           setToSaturation(saturation)
         }
       )

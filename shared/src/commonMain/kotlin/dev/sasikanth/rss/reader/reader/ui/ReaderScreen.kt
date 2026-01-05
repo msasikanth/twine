@@ -114,7 +114,6 @@ import twine.shared.generated.resources.buttonGoBack
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
 internal fun ReaderScreen(
-  darkTheme: Boolean,
   viewModel: ReaderViewModel,
   pageViewModelFactory: @Composable (PostWithMetadata) -> ReaderPageViewModel,
   onPostChanged: (Int) -> Unit,
@@ -202,7 +201,10 @@ internal fun ReaderScreen(
         lineHeightScalingFactor = state.readerLineHeightScaleFactor,
       )
 
-    AppTheme(useDarkTheme = darkTheme, typography = typography) {
+    val isParentThemeDark = AppTheme.isDark
+    AppTheme(useDarkTheme = isParentThemeDark, typography = typography) {
+      val isDarkTheme = AppTheme.isDark
+
       Scaffold(
         modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
         topBar = {
@@ -263,7 +265,7 @@ internal fun ReaderScreen(
             val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
             ReaderActionsPanel(
-              darkTheme = darkTheme,
+              isDarkTheme = isDarkTheme,
               loadFullArticle = showFullArticle,
               showReaderCustomisations = state.showReaderCustomisations,
               selectedFont = state.selectedReaderFont,
@@ -326,8 +328,8 @@ internal fun ReaderScreen(
               val pageViewModel = pageViewModelFactory.invoke(readerPost)
               val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
               val highlightsBuilder =
-                remember(darkTheme) {
-                  Highlights.Builder().theme(SyntaxThemes.atom(darkMode = darkTheme))
+                remember(isDarkTheme) {
+                  Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
                 }
               val markdownComponents = remember {
                 markdownComponents(
@@ -364,7 +366,7 @@ internal fun ReaderScreen(
                 pagerState = pagerState,
                 markdownComponents = markdownComponents,
                 loadFullArticle = showFullArticle,
-                darkTheme = darkTheme,
+                isDarkTheme = isDarkTheme,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
@@ -399,7 +401,7 @@ internal fun ReaderScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReaderActionsPanel(
-  darkTheme: Boolean,
+  isDarkTheme: Boolean,
   loadFullArticle: Boolean,
   showReaderCustomisations: Boolean,
   selectedFont: ReaderFont,
@@ -436,7 +438,7 @@ private fun ReaderActionsPanel(
       contentAlignment = Alignment.Center
     ) {
       val (shadowColor1, shadowColor2) =
-        if (darkTheme) {
+        if (isDarkTheme) {
           Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
         } else {
           Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))

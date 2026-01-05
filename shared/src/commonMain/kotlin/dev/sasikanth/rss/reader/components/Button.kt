@@ -77,10 +77,9 @@ fun Button(
 fun IconButton(
   icon: ImageVector,
   contentDescription: String?,
-  darkTheme: Boolean,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
-  blendMode: BlendMode = if (darkTheme) BlendMode.Screen else BlendMode.Multiply,
+  blendMode: BlendMode = if (AppTheme.isDark) BlendMode.Screen else BlendMode.Multiply,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }

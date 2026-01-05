@@ -37,7 +37,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.graphicsLayer
@@ -66,7 +65,6 @@ private val featuredItemPadding
 @Composable
 internal fun FeaturedPostItem(
   item: PostWithMetadata,
-  darkTheme: Boolean,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -96,11 +94,12 @@ internal fun FeaturedPostItem(
 
     Spacer(modifier = Modifier.requiredHeight(8.dp))
 
+    val isDarkTheme = AppTheme.isDark
     Text(
       modifier =
         Modifier.padding(all = 8.dp).graphicsLayer {
           blendMode =
-            if (darkTheme) {
+            if (isDarkTheme) {
               BlendMode.Screen
             } else {
               BlendMode.Multiply
@@ -139,19 +138,18 @@ internal fun FeaturedPostItem(
     PostActionBar(
       feedName = item.feedName,
       feedIcon = feedIconUrl,
+      postRead = readStatus,
       postRelativeTimestamp = item.date.relativeDurationString(),
       postLink = item.link,
-      postRead = readStatus,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
-      darkTheme = darkTheme,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
-      onSourceClick = onSourceClick,
       onTogglePostReadClick = {
         readStatus = !readStatus
         updateReadStatus(readStatus)
       },
+      onSourceClick = onSourceClick,
     )
 
     Spacer(modifier = Modifier.height(8.dp))

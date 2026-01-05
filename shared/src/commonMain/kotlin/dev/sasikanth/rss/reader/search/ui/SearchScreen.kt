@@ -107,7 +107,6 @@ import twine.shared.generated.resources.searchSortOldestFirst
 @Composable
 internal fun SearchScreen(
   searchViewModel: SearchViewModel,
-  darkTheme: Boolean,
   goBack: () -> Unit,
   openPost:
     (
@@ -166,9 +165,6 @@ internal fun SearchScreen(
             if (post != null) {
               PostListItem(
                 item = post,
-                darkTheme = darkTheme,
-                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
-                reduceReadItemAlpha = true,
                 onClick = {
                   openPost(
                     searchViewModel.searchQuery.text,
@@ -190,7 +186,9 @@ internal fun SearchScreen(
                   searchViewModel.dispatch(
                     SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
                   )
-                }
+                },
+                reduceReadItemAlpha = true,
+                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false)
               )
 
               if (index != searchResults.itemCount - 1) {

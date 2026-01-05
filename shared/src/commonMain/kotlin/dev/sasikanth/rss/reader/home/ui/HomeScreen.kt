@@ -134,7 +134,6 @@ internal fun HomeScreen(
   openPaywall: () -> Unit,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
   modifier: Modifier = Modifier,
-  useDarkTheme: Boolean = false,
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -323,20 +322,18 @@ internal fun HomeScreen(
                       onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
                     ) {
                       PostsList(
-                        modifier = Modifier.fillMaxSize(),
                         paddingValues = paddingValues,
                         featuredPosts = featuredPosts,
-                        posts = { posts },
-                        useDarkTheme = useDarkTheme,
                         listState = postsListState,
                         featuredPostsPagerState = featuredPostsPagerState,
                         homeViewMode = state.homeViewMode,
-                        markPostAsReadOnScroll = {
-                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                        },
+                        posts = { posts },
                         postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
                         markScrolledPostsAsRead = {
                           viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                        },
+                        markPostAsReadOnScroll = {
+                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                         },
                         onPostClicked = { post, postIndex -> openPost(postIndex, post) },
                         onPostBookmarkClick = {
@@ -352,7 +349,8 @@ internal fun HomeScreen(
                           viewModel.dispatch(
                             HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
                           )
-                        }
+                        },
+                        modifier = Modifier.fillMaxSize()
                       )
                     }
                   }
@@ -421,7 +419,6 @@ internal fun HomeScreen(
       sheetContent = {
         FeedsBottomSheet(
           feedsViewModel = feedsViewModel,
-          darkTheme = useDarkTheme,
           bottomSheetProgress =
             @Suppress("INVISIBLE_REFERENCE") {
               bottomSheetState.anchoredDraggableState.progress(
