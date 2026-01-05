@@ -38,6 +38,14 @@ internal object TwineDynamicColors {
       isBackground = true,
     )
 
+  private val bottomSheetInverse: DynamicColor =
+    DynamicColor.fromPalette(
+      name = "bottomSheet",
+      palette = { s: DynamicScheme -> s.primaryPalette },
+      tone = { s: DynamicScheme -> if (s.isDark) 5.0 else 0.0 },
+      isBackground = true,
+    )
+
   private val backdrop: DynamicColor =
     DynamicColor.fromPalette(
       name = "backdrop",
@@ -89,6 +97,7 @@ internal object TwineDynamicColors {
       textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop = backdrop.getColor(scheme),
       bottomSheet = bottomSheet.getColor(scheme),
+      bottomSheetInverse = bottomSheetInverse.getColor(scheme),
       bottomSheetBorder = bottomSheetBorder.getColor(scheme),
       tintedBackground = bottomSheet.getColor(scheme),
       tintedSurface = dynamicColors.surfaceContainerLow().getColor(scheme),
