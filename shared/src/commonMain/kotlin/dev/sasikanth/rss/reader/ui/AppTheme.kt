@@ -25,6 +25,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 
@@ -36,47 +37,49 @@ internal fun AppTheme(
 ) {
   val useAmoled = LocalAmoledSetting.current
 
-  MaterialTheme(
-    colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
-    typography = typography,
-  ) {
-    val dynamicColorState = LocalDynamicColorState.current
-    val colorScheme =
-      if (useDarkTheme) {
-        if (useAmoled) dynamicColorState.darkAppColorScheme.amoled()
-        else dynamicColorState.darkAppColorScheme
-      } else {
-        dynamicColorState.lightAppColorScheme
-      }
-
-    val secondary = colorScheme.secondary
-    val onSurface = colorScheme.onSurface
-    val localTranslucentStyles =
-      TranslucentStyles(
-        default =
-          TranslucentStyle(
-            background = secondary.copy(alpha = 0.08f),
-            outline = secondary.copy(alpha = 0.16f),
-            foreground = onSurface,
-          ),
-        prominent =
-          TranslucentStyle(
-            background = secondary.copy(alpha = 0.16f),
-            outline = secondary.copy(alpha = 0.16f),
-            foreground = onSurface,
-          )
-      )
-
-    CompositionLocalProvider(
-      LocalAppColorScheme provides colorScheme,
-      LocalRippleConfiguration provides
-        RippleConfiguration(
-          color = colorScheme.secondary,
-          rippleAlpha = DefaultRippleAlpha,
-        ),
-      LocalTranslucentStyles provides localTranslucentStyles
+  CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
+    MaterialTheme(
+      colorScheme = if (useDarkTheme) darkColorScheme() else lightColorScheme(),
+      typography = typography,
     ) {
-      content()
+      val dynamicColorState = LocalDynamicColorState.current
+      val colorScheme =
+        if (useDarkTheme) {
+          if (useAmoled) dynamicColorState.darkAppColorScheme.amoled()
+          else dynamicColorState.darkAppColorScheme
+        } else {
+          dynamicColorState.lightAppColorScheme
+        }
+
+      val secondary = colorScheme.secondary
+      val onSurface = colorScheme.onSurface
+      val localTranslucentStyles =
+        TranslucentStyles(
+          default =
+            TranslucentStyle(
+              background = secondary.copy(alpha = 0.08f),
+              outline = secondary.copy(alpha = 0.16f),
+              foreground = onSurface,
+            ),
+          prominent =
+            TranslucentStyle(
+              background = secondary.copy(alpha = 0.16f),
+              outline = secondary.copy(alpha = 0.16f),
+              foreground = onSurface,
+            )
+        )
+
+      CompositionLocalProvider(
+        LocalAppColorScheme provides colorScheme,
+        LocalRippleConfiguration provides
+          RippleConfiguration(
+            color = colorScheme.secondary,
+            rippleAlpha = DefaultRippleAlpha,
+          ),
+        LocalTranslucentStyles provides localTranslucentStyles
+      ) {
+        content()
+      }
     }
   }
 }
@@ -85,6 +88,9 @@ internal object AppTheme {
 
   val colorScheme: AppColorScheme
     @Composable @ReadOnlyComposable get() = LocalAppColorScheme.current
+
+  val isDark: Boolean
+    @Composable @ReadOnlyComposable get() = LocalIsDarkTheme.current
 }
 
 internal val DefaultRippleAlpha =
@@ -96,3 +102,5 @@ internal val DefaultRippleAlpha =
   )
 
 internal val SYSTEM_SCRIM = Color.Black.copy(alpha = 0.8f)
+
+internal val LocalIsDarkTheme = staticCompositionLocalOf { false }
