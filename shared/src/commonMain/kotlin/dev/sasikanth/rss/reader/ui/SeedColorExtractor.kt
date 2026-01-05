@@ -21,59 +21,86 @@ import androidx.collection.lruCache
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import com.materialkolor.ktx.themeColorOrNull
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.toComposeImageBitmap
-import kotlin.coroutines.resume
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @Stable
 class SeedColorExtractor(
+  dispatchersProvider: DispatchersProvider,
   private val imageLoader: Lazy<ImageLoader>,
   private val platformContext: Lazy<PlatformContext>,
-  private val dispatchersProvider: DispatchersProvider,
 ) {
-  private val lruCache: LruCache<String, Color> = lruCache(maxSize = 1000)
+  private val lruCache: LruCache<String, Color> = lruCache(maxSize = MAX_CACHE_SIZE)
+  private val mutex = Mutex()
+  private val inFlightRequests = mutableMapOf<String, Deferred<Color?>>()
+  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.io)
 
-  suspend fun calculateSeedColor(url: String?): Color? =
-    withContext(dispatchersProvider.io) {
-      if (url.isNullOrBlank()) return@withContext null
+  suspend fun calculateSeedColor(url: String?): Color? {
+    if (url.isNullOrBlank()) return null
 
-      val cache = lruCache[url]
-      if (cache != null) return@withContext cache
+    val cachedColor = lruCache[url]
+    if (cachedColor != null) return cachedColor
 
-      val bitmap: ImageBitmap? = suspendCancellableCoroutine { cont ->
-        val request =
-          ImageRequest.Builder(platformContext.value)
-            .data(url)
-            .size(DEFAULT_REQUEST_SIZE)
-            .target(
-              onSuccess = { result ->
-                cont.resume(result.toComposeImageBitmap(platformContext.value))
-              },
-              onError = { cont.resume(null) },
-            )
-            .build()
-
-        imageLoader.value.enqueue(request)
+    val deferred =
+      mutex.withLock {
+        inFlightRequests.getOrPut(url) {
+          scope.async {
+            try {
+              val color = extractSeedColor(url)
+              if (color != null) {
+                lruCache.put(url, color)
+              }
+              color
+            } finally {
+              mutex.withLock { inFlightRequests.remove(url) }
+            }
+          }
+        }
       }
 
-      if (bitmap == null) return@withContext null
+    return try {
+      deferred.await()
+    } catch (e: Exception) {
+      null
+    }
+  }
 
-      return@withContext bitmap.themeColorOrNull()
+  fun cachedSeedColor(url: String?) =
+    if (url.isNullOrBlank()) {
+      null
+    } else {
+      lruCache[url]
     }
 
-  fun cachedSeedColor(url: String?) = if (url.isNullOrBlank()) null else lruCache[url]
+  private suspend fun extractSeedColor(url: String): Color? {
+    val request =
+      ImageRequest.Builder(platformContext.value).data(url).size(DEFAULT_REQUEST_SIZE).build()
+
+    val result = imageLoader.value.execute(request)
+    return if (result is SuccessResult) {
+      val bitmap = result.image.toComposeImageBitmap(platformContext.value)
+      bitmap.themeColorOrNull()
+    } else {
+      null
+    }
+  }
 
   private companion object {
     const val DEFAULT_REQUEST_SIZE = 64
+    const val MAX_CACHE_SIZE = 1000
   }
 }
 
