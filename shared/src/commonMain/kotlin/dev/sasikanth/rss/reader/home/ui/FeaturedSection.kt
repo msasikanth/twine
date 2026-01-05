@@ -60,6 +60,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import dev.sasikanth.rss.reader.utils.inverse
@@ -190,7 +191,13 @@ internal fun FeaturedSection(
                   drawLayer(imageGraphicsLayer)
                 },
               imageUrl = postWithMetadata.imageUrl,
-              parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
+              alignment =
+                remember(pagerState) {
+                  ParallaxAlignment(
+                    horizontalBias = { pagerState.getOffsetFractionForPage(page) },
+                    multiplier = 2f,
+                  )
+                }
             )
           }
         }

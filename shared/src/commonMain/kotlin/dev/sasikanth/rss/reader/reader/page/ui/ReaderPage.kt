@@ -107,6 +107,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -323,7 +324,13 @@ private fun PostHeader(
         FeaturedImage(
           imageUrl = postImage,
           isComicStrip = UrlUtils.isComicStrip(postImage),
-          parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
+          alignment =
+            remember(pagerState) {
+              ParallaxAlignment(
+                horizontalBias = { pagerState.getOffsetFractionForPage(page) },
+                multiplier = 2f,
+              )
+            }
         )
       }
 
