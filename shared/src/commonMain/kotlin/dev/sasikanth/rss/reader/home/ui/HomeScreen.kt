@@ -65,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -98,6 +99,7 @@ import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
@@ -430,14 +432,26 @@ internal fun HomeScreen(
           }
         }
 
-        if (bottomSheetState.currentValue == SheetValue.Expanded) {
-          Box(
-            modifier =
-              Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+        Box(
+          modifier =
+            Modifier.fillMaxSize()
+              .drawBehind @Suppress("INVISIBLE_REFERENCE") {
+                val bottomSheetProgress =
+                  bottomSheetState.anchoredDraggableState.progress(
+                    SheetValue.PartiallyExpanded,
+                    SheetValue.Expanded
+                  )
+
+                drawRect(color = SYSTEM_SCRIM, alpha = bottomSheetProgress)
               }
-          )
-        }
+              .pointerInput(Unit) {
+                detectTapGestures {
+                  if (bottomSheetState.currentValue == SheetValue.Expanded) {
+                    coroutineScope.launch { bottomSheetState.partialExpand() }
+                  }
+                }
+              }
+        )
       },
       sheetContent = {
         FeedsBottomSheet(
