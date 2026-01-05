@@ -432,6 +432,15 @@ internal fun HomeScreen(
           }
         }
 
+        val bottomSheetScrimPointerInput =
+          if (bottomSheetState.currentValue == SheetValue.Expanded) {
+            Modifier.pointerInput(Unit) {
+              detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+            }
+          } else {
+            Modifier
+          }
+
         Box(
           modifier =
             Modifier.fillMaxSize()
@@ -444,13 +453,7 @@ internal fun HomeScreen(
 
                 drawRect(color = SYSTEM_SCRIM, alpha = bottomSheetProgress)
               }
-              .pointerInput(Unit) {
-                detectTapGestures {
-                  if (bottomSheetState.currentValue == SheetValue.Expanded) {
-                    coroutineScope.launch { bottomSheetState.partialExpand() }
-                  }
-                }
-              }
+              .then(bottomSheetScrimPointerInput)
         )
       },
       sheetContent = {
