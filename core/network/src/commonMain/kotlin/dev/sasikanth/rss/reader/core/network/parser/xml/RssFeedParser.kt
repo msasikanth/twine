@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ENCLOSURE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEATURED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEED_IMAGE
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
@@ -80,7 +81,8 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           val host = UrlUtils.extractHost(link ?: feedUrl)
           posts.add(readRssItem(parser, host))
         }
-        TAG_FEED_IMAGE -> {
+        TAG_FEED_IMAGE,
+        TAG_ITUNES_IMAGE -> {
           iconUrl = readFeedIcon(parser)
         }
         else -> parser.skipSubTree()
@@ -103,16 +105,21 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
   }
 
   private fun readFeedIcon(parser: XmlPullParser): String? {
-    parser.require(EventType.START_TAG, parser.namespace, TAG_FEED_IMAGE)
+    parser.require(EventType.START_TAG, parser.namespace, parser.name)
 
     var imageUrl: String? = null
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-      if (parser.name == TAG_URL) {
-        imageUrl = parser.nextText()
-      } else {
-        parser.skipSubTree()
+    if (parser.name == TAG_ITUNES_IMAGE) {
+      imageUrl = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_HREF)
+      parser.nextTag()
+    } else {
+      while (parser.next() != EventType.END_TAG) {
+        if (parser.eventType != EventType.START_TAG) continue
+        if (parser.name == TAG_URL) {
+          imageUrl = parser.nextText()
+        } else {
+          parser.skipSubTree()
+        }
       }
     }
 
@@ -157,6 +164,10 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         }
         name == TAG_PUB_DATE -> {
           date = parser.nextText()
+        }
+        image.isNullOrBlank() && name == TAG_ITUNES_IMAGE -> {
+          image = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_HREF)
+          parser.nextTag()
         }
         image.isNullOrBlank() && hasRssImageUrl(name, parser) -> {
           image = parser.getAttributeValue(parser.namespace, ATTR_URL)

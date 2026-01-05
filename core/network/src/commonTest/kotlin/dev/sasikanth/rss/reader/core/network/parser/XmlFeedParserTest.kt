@@ -21,6 +21,10 @@ import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.core.network.utils.atomXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.feedUrl
+import dev.sasikanth.rss.reader.core.network.utils.podcastAtomFeedUrl
+import dev.sasikanth.rss.reader.core.network.utils.podcastAtomXmlContent
+import dev.sasikanth.rss.reader.core.network.utils.podcastRssFeedUrl
+import dev.sasikanth.rss.reader.core.network.utils.podcastRssXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rdfXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.rssXmlContent
 import dev.sasikanth.rss.reader.core.network.utils.youtubeAtomFeed
@@ -435,6 +439,84 @@ class XmlFeedParserTest {
     // when
     val content = ByteReadChannel(youtubeAtomFeed.toByteArray())
     val payload = xmlFeedParser.parse(content, youtubeFeedUrl, Charsets.UTF8)
+
+    // then
+    assertEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingRssFeedWithItunesImageShouldWorkCorrectly() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Podcast title",
+        icon = "https://example.com/podcast-icon.jpg",
+        description = "Podcast description",
+        link = podcastRssFeedUrl,
+        homepageLink = "https://example.com/podcast",
+        posts =
+          listOf(
+            PostPayload(
+              title = "Episode 1",
+              link = "https://example.com/episode-1",
+              description = "Episode 1 description",
+              rawContent =
+                """
+                  <html>
+                   <body>Episode 1 description</body>
+                  </html>
+                """
+                  .trimIndent(),
+              imageUrl = "https://example.com/episode-1-image.jpg",
+              date = 1685005200000,
+              commentsLink = null,
+              isDateParsedCorrectly = true
+            ),
+          )
+      )
+
+    // when
+    val content = ByteReadChannel(podcastRssXmlContent.toByteArray())
+    val payload = xmlFeedParser.parse(content, podcastRssFeedUrl, Charsets.UTF8)
+
+    // then
+    assertEquals(expectedFeedPayload, payload)
+  }
+
+  @Test
+  fun parsingAtomFeedWithItunesImageShouldWorkCorrectly() = runTest {
+    // given
+    val expectedFeedPayload =
+      FeedPayload(
+        name = "Podcast title",
+        icon = "https://example.com/podcast-icon.jpg",
+        description = "Podcast description",
+        link = podcastAtomFeedUrl,
+        homepageLink = "https://example.com/podcast",
+        posts =
+          listOf(
+            PostPayload(
+              title = "Episode 1",
+              link = "https://example.com/episode-1",
+              description = "Episode 1 description",
+              rawContent =
+                """
+                  <html>
+                   <body>Episode 1 description</body>
+                  </html>
+                """
+                  .trimIndent(),
+              imageUrl = "https://example.com/episode-1-image.jpg",
+              date = 1685008800000,
+              commentsLink = null,
+              isDateParsedCorrectly = true
+            ),
+          )
+      )
+
+    // when
+    val content = ByteReadChannel(podcastAtomXmlContent.toByteArray())
+    val payload = xmlFeedParser.parse(content, podcastAtomFeedUrl, Charsets.UTF8)
 
     // then
     assertEquals(expectedFeedPayload, payload)

@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_FEED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
@@ -91,6 +92,10 @@ class AtomContentParser(
         }
         TAG_ICON -> {
           iconUrl = parser.nextText()
+        }
+        TAG_ITUNES_IMAGE -> {
+          iconUrl = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          parser.nextTag()
         }
         else -> parser.skipSubTree()
       }
@@ -168,6 +173,10 @@ class AtomContentParser(
           } else {
             parser.skipSubTree()
           }
+        }
+        TAG_ITUNES_IMAGE -> {
+          image = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          parser.nextTag()
         }
         TAG_MEDIA_GROUP -> {
           while (parser.next() != EventType.END_TAG) {
