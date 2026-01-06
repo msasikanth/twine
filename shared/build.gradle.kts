@@ -129,6 +129,7 @@ kotlin {
       api(libs.androidx.appcompat)
       api(libs.androidx.core)
       api(libs.androidx.browser)
+      implementation(libs.googlePlayReview)
       implementation(libs.ktor.client.okhttp)
     }
 
