@@ -33,7 +33,7 @@ import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
 @Composable
@@ -67,11 +67,13 @@ fun FeaturedImage(
     }
 
   imageUrl?.let { imageUrl ->
+    val translucentStyle = LocalTranslucentStyles.current
+
     AsyncImage(
       url = imageUrl,
       modifier =
         Modifier.then(comicStripImageModifier)
-          .background(AppTheme.colorScheme.surfaceContainerLowest)
+          .background(translucentStyle.prominent.background)
           .then(modifier),
       contentDescription = null,
       contentScale = contentScale,
