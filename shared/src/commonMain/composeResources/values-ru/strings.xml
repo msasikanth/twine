@@ -164,6 +164,8 @@
     <string name="readerCustomisationsTypeface">Шрифт</string>
     <string name="postsFilter">Фильтр постов</string>
     <string name="screenHome">Домашняя страница</string>
+    <string name="settingsEnableNotificationsTitle">Enable notifications</string>
+    <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
