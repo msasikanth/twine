@@ -49,6 +49,98 @@
       },
       "shouldTranslate" : false
     },
+    "notification_new_articles_content" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        }
+      }
+    },
+    "notification_new_articles_title" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ new articles found"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%@ new articles found"
+          }
+        }
+      }
+    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -331,5 +423,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }
