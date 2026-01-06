@@ -15,9 +15,15 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import me.tatarka.inject.annotations.Inject
+import platform.Foundation.NSURL
+import platform.UIKit.UIApplication
+import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
 import platform.UserNotifications.UNAuthorizationOptionSound
+import platform.UserNotifications.UNAuthorizationStatusAuthorized
+import platform.UserNotifications.UNAuthorizationStatusDenied
+import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNUserNotificationCenter
@@ -49,12 +55,40 @@ class IosNotifier : Notifier {
 
   override suspend fun requestPermission(): Boolean {
     return suspendCancellableCoroutine { continuation ->
-      UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptions(
-        options =
-          UNAuthorizationOptionAlert or UNAuthorizationOptionBadge or UNAuthorizationOptionSound
-      ) { granted, error ->
-        continuation.resume(granted)
+      val container = UNUserNotificationCenter.currentNotificationCenter()
+      container.getNotificationSettingsWithCompletionHandler { settings ->
+        when (settings?.authorizationStatus) {
+          UNAuthorizationStatusAuthorized,
+          UNAuthorizationStatusProvisional -> {
+            continuation.resume(true)
+          }
+          UNAuthorizationStatusDenied -> {
+            openSettings()
+            continuation.resume(false)
+          }
+          else -> {
+            container.requestAuthorizationWithOptions(
+              options =
+                UNAuthorizationOptionAlert or
+                  UNAuthorizationOptionBadge or
+                  UNAuthorizationOptionSound
+            ) { granted, _ ->
+              continuation.resume(granted)
+            }
+          }
+        }
       }
+    }
+  }
+
+  override fun openSettings() {
+    val url = NSURL(string = UIApplicationOpenSettingsURLString)
+    if (UIApplication.sharedApplication.canOpenURL(url)) {
+      UIApplication.sharedApplication.openURL(
+        url = url,
+        options = emptyMap<Any?, Any>(),
+        completionHandler = null
+      )
     }
   }
 }

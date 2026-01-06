@@ -17,7 +17,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.content.PermissionChecker
 import dev.sasikanth.rss.reader.core.base.R
@@ -37,8 +39,7 @@ class AndroidNotifier(private val context: Context) : Notifier {
   }
 
   init {
-    val channel =
-      NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+    val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH)
     notificationManager.createNotificationChannel(channel)
   }
 
@@ -71,8 +72,24 @@ class AndroidNotifier(private val context: Context) : Notifier {
     if (Build.VERSION.SDK_INT >= 33) {
       val status =
         PermissionChecker.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
-      return status == PermissionChecker.PERMISSION_GRANTED
+
+      if (status != PermissionChecker.PERMISSION_GRANTED) {
+        val result = PermissionRequestBridge.requestPermission()?.await()
+        if (result == PermissionRequestBridge.PermissionResult.PermanentlyDenied) {
+          openSettings()
+        }
+        return result == PermissionRequestBridge.PermissionResult.Granted
+      }
     }
     return true
+  }
+
+  override fun openSettings() {
+    val intent =
+      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.fromParts("package", context.packageName, null)
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+      }
+    context.startActivity(intent)
   }
 }

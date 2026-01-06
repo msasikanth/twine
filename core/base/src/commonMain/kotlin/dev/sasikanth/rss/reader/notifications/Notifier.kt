@@ -19,4 +19,6 @@ interface Notifier {
   )
 
   suspend fun requestPermission(): Boolean
+
+  fun openSettings()
 }
