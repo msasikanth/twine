@@ -55,6 +55,15 @@ android {
       }
   }
 
+  flavorDimensions += "version"
+  productFlavors {
+    create("full") { dimension = "version" }
+    create("foss") {
+      dimension = "version"
+      applicationIdSuffix = ".foss"
+    }
+  }
+
   compileOptions { isCoreLibraryDesugaringEnabled = true }
 
   signingConfigs {
@@ -97,7 +106,7 @@ dependencies {
   coreLibraryDesugaring(libs.desugarJdk)
   implementation(libs.kotlinx.datetime)
   implementation(libs.bugsnag)
-  implementation(libs.purchases.core)
+  "fullImplementation"(libs.purchases.core)
   implementation(libs.glance)
   implementation(libs.glance.material3)
 }

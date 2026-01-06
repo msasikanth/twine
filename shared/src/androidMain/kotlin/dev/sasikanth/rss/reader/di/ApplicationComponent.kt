@@ -19,6 +19,7 @@ import android.content.Context
 import android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE
 import android.os.Build
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -64,6 +65,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
       versionName = packageInfo.versionName ?: "0.0.1",
       versionCode = versionCode,
       isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
+      isFoss = isFoss,
       cachePath = { context.cacheDir.absolutePath }
     )
   }

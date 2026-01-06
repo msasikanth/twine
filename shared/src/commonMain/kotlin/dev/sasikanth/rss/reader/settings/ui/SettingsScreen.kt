@@ -241,7 +241,7 @@ internal fun SettingsScreen(
         ) {
           item {
             AnimatedVisibility(
-              visible = state.subscriptionResult != null,
+              visible = !state.appInfo.isFoss && state.subscriptionResult != null,
               enter = fadeIn() + expandVertically(),
               exit = fadeOut() + shrinkVertically()
             ) {

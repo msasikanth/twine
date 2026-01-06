@@ -47,19 +47,27 @@ jobs:
         run: gpg --batch --yes --quiet --decrypt --passphrase=${{ secrets.KEYSTORE_ENCRYPT_KEY }} --output release/reader.jks release/reader.gpg
 
       - name: Build release artifacts
-        run: ./gradlew --no-daemon androidApp:bundleRelease androidApp:assembleRelease
+        run: |
+          ./gradlew --no-daemon androidApp:bundleFullRelease androidApp:assembleFullRelease -Ptwine.isFoss=false
+          ./gradlew --no-daemon androidApp:assembleFossRelease -Ptwine.isFoss=true
 
-      - name: Upload Release Bundle
+      - name: Upload Full Release Bundle
         uses: actions/upload-artifact@v4
         with:
-          name: release.aab
-          path: androidApp/build/outputs/bundle/release/androidApp-release.aab
+          name: full-release.aab
+          path: androidApp/build/outputs/bundle/fullRelease/androidApp-full-release.aab
 
-      - name: Upload Release APK
+      - name: Upload Full Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: release.apk
-          path: androidApp/build/outputs/apk/release/androidApp-release.apk
+          name: full-release.apk
+          path: androidApp/build/outputs/apk/full/release/androidApp-full-release.apk
+
+      - name: Upload FOSS Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: foss-release.apk
+          path: androidApp/build/outputs/apk/foss/release/androidApp-foss-release.apk
 
       - name: Clean secrets
         run: |
