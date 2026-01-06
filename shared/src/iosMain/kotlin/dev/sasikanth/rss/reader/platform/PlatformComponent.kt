@@ -16,9 +16,13 @@
 
 package dev.sasikanth.rss.reader.platform
 
+import dev.sasikanth.rss.reader.utils.InAppRating
+import dev.sasikanth.rss.reader.utils.IosInAppRating
 import me.tatarka.inject.annotations.Provides
 
 actual interface PlatformComponent {
 
   @Provides fun IOSLinkHandler.bind(): LinkHandler = this
+
+  @Provides fun IosInAppRating.bind(): InAppRating = this
 }

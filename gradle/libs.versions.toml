@@ -42,6 +42,7 @@ ktxml = "1.0.0"
 uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
 bugsnag = "6.20.0"
+google-play-review = "2.0.2"
 crashkios-bugsnag = "0.9.0"
 kermit = "2.0.8"
 reorderable = "3.0.0"
@@ -117,6 +118,7 @@ xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlu
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil" }
 ktxml = { module = "org.kobjects.ktxml:core", version.ref = "ktxml" }
 uuid = { module = "com.benasher44:uuid", version.ref = "uuid" }
+googlePlayReview = { module = "com.google.android.play:review", version.ref = "google-play-review" }
 bugsnag = { module = "com.bugsnag:bugsnag-android", version.ref = "bugsnag" }
 crashkios-bugsnag = { module = "co.touchlab.crashkios:bugsnag", version.ref = "crashkios-bugsnag" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }

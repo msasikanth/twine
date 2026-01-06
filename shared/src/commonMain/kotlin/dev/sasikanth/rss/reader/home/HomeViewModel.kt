@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.AllPostsPager
+import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.NTuple5
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
@@ -59,6 +60,7 @@ class HomeViewModel(
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
+  private val inAppRating: InAppRating,
 ) : ViewModel() {
 
   private val scrolledPostItems = mutableSetOf<String>()
@@ -155,6 +157,7 @@ class HomeViewModel(
     viewModelScope.launch {
       _state.update { it.copy(unreadSinceLastSync = null) }
       lastRefreshedAt.refresh()
+      inAppRating.request()
     }
   }
 
