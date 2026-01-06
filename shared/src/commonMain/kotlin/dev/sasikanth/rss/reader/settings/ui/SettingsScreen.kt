@@ -135,6 +135,8 @@ import twine.shared.generated.resources.settingsBlockImagesSubtitle
 import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
+import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
+import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
 import twine.shared.generated.resources.settingsHeaderFeedback
 import twine.shared.generated.resources.settingsHeaderOpml
@@ -407,6 +409,17 @@ internal fun SettingsScreen(
               blockImages = state.blockImages,
               onValueChanged = { newValue ->
                 viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            NotificationsSettingItem(
+              enableNotifications = state.enableNotifications,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
               }
             )
           }
@@ -960,6 +973,40 @@ private fun ShowFeedFavIconSettingItem(
       Switch(
         checked = checked,
         onCheckedChange = { checked -> onValueChanged(checked) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun NotificationsSettingItem(
+  enableNotifications: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  Box(
+    modifier =
+      Modifier.clickable { onValueChanged(!enableNotifications) }
+        .padding(horizontal = 24.dp, vertical = 16.dp)
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          text = stringResource(Res.string.settingsEnableNotificationsTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          text = stringResource(Res.string.settingsEnableNotificationsSubtitle),
+          style = MaterialTheme.typography.bodySmall,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = enableNotifications,
+        onCheckedChange = onValueChanged,
       )
     }
   }

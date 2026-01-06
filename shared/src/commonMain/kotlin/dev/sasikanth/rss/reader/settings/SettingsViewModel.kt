@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +44,7 @@ class SettingsViewModel(
   private val settingsRepository: SettingsRepository,
   private val opmlManager: OpmlManager,
   private val billingHandler: BillingHandler,
+  private val notifier: Notifier,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
@@ -62,6 +64,7 @@ class SettingsViewModel(
         settingsRepository.markAsReadOn,
         settingsRepository.homeViewMode,
         settingsRepository.blockImages,
+        settingsRepository.enableNotifications,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -73,7 +76,8 @@ class SettingsViewModel(
         showFeedFavIcon,
         markAsReadOn,
         homeViewMode,
-        blockImages ->
+        blockImages,
+        enableNotifications ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -86,6 +90,7 @@ class SettingsViewModel(
           markAsReadOn = markAsReadOn,
           homeViewMode = homeViewMode,
           blockImages = blockImages,
+          enableNotifications = enableNotifications,
         )
       }
       .onEach { settings ->
@@ -102,6 +107,7 @@ class SettingsViewModel(
             markAsReadOn = settings.markAsReadOn,
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
+            enableNotifications = settings.enableNotifications,
           )
         }
       }
@@ -137,6 +143,18 @@ class SettingsViewModel(
       }
       is SettingsEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is SettingsEvent.ToggleBlockImages -> toggleBlockImages(event.value)
+      is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
+    }
+  }
+
+  private fun toggleNotifications(value: Boolean) {
+    viewModelScope.launch {
+      if (value) {
+        val granted = notifier.requestPermission()
+        settingsRepository.toggleNotifications(granted)
+      } else {
+        settingsRepository.toggleNotifications(false)
+      }
     }
   }
 
@@ -222,4 +240,5 @@ private data class Settings(
   val markAsReadOn: MarkAsReadOn,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
+  val enableNotifications: Boolean,
 )

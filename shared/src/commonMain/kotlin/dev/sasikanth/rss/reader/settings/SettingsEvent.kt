@@ -54,4 +54,6 @@ sealed interface SettingsEvent {
   data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : SettingsEvent
 
   data class ToggleBlockImages(val value: Boolean) : SettingsEvent
+
+  data class ToggleNotifications(val value: Boolean) : SettingsEvent
 }
