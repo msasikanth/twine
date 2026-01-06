@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
  * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,13 +11,13 @@
 
 package dev.sasikanth.rss.reader.billing
 
-import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-@AppScope
-expect class BillingHandler {
-  suspend fun isSubscribed(): Boolean
+actual class BillingInitializer : Initializer {
 
-  suspend fun customerResult(): SubscriptionResult
+  actual override fun initialize() {
+    // No-op
+  }
 }

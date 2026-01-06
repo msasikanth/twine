@@ -20,5 +20,6 @@ data class AppInfo(
   val versionCode: Int,
   val versionName: String,
   val isDebugBuild: Boolean,
+  val isFoss: Boolean,
   val cachePath: () -> String,
 )

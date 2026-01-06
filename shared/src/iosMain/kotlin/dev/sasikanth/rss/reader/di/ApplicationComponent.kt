@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -61,6 +62,7 @@ abstract class ApplicationComponent(
       versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
           ?: "",
       isDebugBuild = Platform.isDebugBinary,
+      isFoss = isFoss,
       cachePath = { NSFileManager.defaultManager.cacheDir }
     )
 

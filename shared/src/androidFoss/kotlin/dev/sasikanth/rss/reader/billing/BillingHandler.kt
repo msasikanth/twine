@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
  * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,13 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-expect class BillingHandler {
-  suspend fun isSubscribed(): Boolean
+actual class BillingHandler {
 
-  suspend fun customerResult(): SubscriptionResult
+  actual suspend fun isSubscribed(): Boolean {
+    return true
+  }
+
+  actual suspend fun customerResult(): SubscriptionResult {
+    return SubscriptionResult.Subscribed
+  }
 }

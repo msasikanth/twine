@@ -30,6 +30,10 @@ plugins {
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 kotlin {
+  val isFoss =
+    project.findProperty("twine.isFoss")?.toString()?.toBoolean()
+      ?: gradle.startParameter.taskNames.any { it.contains("Foss", ignoreCase = true) }
+
   jvmToolchain(21)
 
   // spotless:off
@@ -124,13 +128,24 @@ kotlin {
       implementation(libs.ktor.client.mock)
     }
 
-    androidMain.dependencies {
-      api(libs.androidx.activity.compose)
-      api(libs.androidx.appcompat)
-      api(libs.androidx.core)
-      api(libs.androidx.browser)
-      implementation(libs.googlePlayReview)
-      implementation(libs.ktor.client.okhttp)
+    androidMain {
+      if (isFoss) {
+        kotlin.srcDir("src/androidFoss/kotlin")
+      } else {
+        kotlin.srcDir("src/androidFull/kotlin")
+      }
+
+      dependencies {
+        api(libs.androidx.activity.compose)
+        api(libs.androidx.appcompat)
+        api(libs.androidx.core)
+        api(libs.androidx.browser)
+        implementation(libs.ktor.client.okhttp)
+
+        if (!isFoss) {
+          implementation(libs.googlePlayReview)
+        }
+      }
     }
 
     iosMain.dependencies { implementation(libs.ktor.client.darwin) }
