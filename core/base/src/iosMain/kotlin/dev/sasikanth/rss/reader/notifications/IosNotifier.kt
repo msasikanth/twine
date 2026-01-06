@@ -17,7 +17,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import me.tatarka.inject.annotations.Inject
 import platform.Foundation.NSURL
 import platform.UIKit.UIApplication
-import platform.UIKit.UIApplicationOpenSettingsURLString
+import platform.UIKit.UIApplicationOpenNotificationSettingsURLString
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
 import platform.UserNotifications.UNAuthorizationOptionSound
@@ -82,7 +82,7 @@ class IosNotifier : Notifier {
   }
 
   override fun openSettings() {
-    val url = NSURL(string = UIApplicationOpenSettingsURLString)
+    val url = NSURL(string = UIApplicationOpenNotificationSettingsURLString)
     if (UIApplication.sharedApplication.canOpenURL(url)) {
       UIApplication.sharedApplication.openURL(
         url = url,
