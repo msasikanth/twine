@@ -164,6 +164,8 @@
     <string name="readerCustomisationsTypeface">Typeface</string>
     <string name="postsFilter">Posts filter</string>
     <string name="screenHome">Home</string>
+    <string name="settingsEnableNotificationsTitle">Enable notifications</string>
+    <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>
