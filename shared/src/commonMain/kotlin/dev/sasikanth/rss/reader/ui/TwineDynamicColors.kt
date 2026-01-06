@@ -93,6 +93,7 @@ internal object TwineDynamicColors {
       inversePrimary = dynamicColors.inversePrimary().getColor(scheme),
       inverseSurface = dynamicColors.inverseSurface().getColor(scheme),
       inverseOnSurface = dynamicColors.inverseOnSurface().getColor(scheme),
+      error = dynamicColors.error().getColor(scheme),
       textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
       textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop = backdrop.getColor(scheme),

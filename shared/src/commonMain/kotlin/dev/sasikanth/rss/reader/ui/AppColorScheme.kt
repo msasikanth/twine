@@ -49,6 +49,7 @@ class AppColorScheme(
   val tintedSurface: Color,
   val tintedForeground: Color,
   val tintedHighlight: Color,
+  val error: Color,
 ) {
 
   fun copy(
@@ -79,6 +80,7 @@ class AppColorScheme(
     tintedSurface: Color = this.tintedSurface,
     tintedForeground: Color = this.tintedForeground,
     tintedHighlight: Color = this.tintedHighlight,
+    error: Color = this.error,
   ): AppColorScheme =
     AppColorScheme(
       primary = primary,
@@ -108,6 +110,7 @@ class AppColorScheme(
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
       tintedHighlight = tintedHighlight,
+      error = error,
     )
 
   fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
@@ -139,6 +142,7 @@ class AppColorScheme(
       tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
       tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
       tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
+      error = lerp(error, to.error, fraction),
     )
   }
 }
@@ -172,6 +176,7 @@ fun lightAppColorScheme(): AppColorScheme {
     tintedSurface = Color(0xFFEFF5F0),
     tintedForeground = Color(0xFF37693C),
     tintedHighlight = Color(0xFF6A7771),
+    error = Color(0xFFB3261E),
   )
 }
 
@@ -204,6 +209,7 @@ fun darkAppColorScheme(): AppColorScheme {
     tintedSurface = Color(0xFF191C1B),
     tintedForeground = Color(0xFF9DD49D),
     tintedHighlight = Color(0xFF89938E),
+    error = Color(0xFFF2B8B5),
   )
 }
 
