@@ -1071,6 +1071,7 @@ class RssRepository(
         lastSyncedAt = lastSyncedAt,
         mapper = { count, feedHomepageLinks, feedIcons ->
           UnreadSinceLastSync(
+            newArticleCount = count,
             hasNewArticles = count > 0,
             feedHomepageLinks = feedHomepageLinks.orEmpty().split(",").filterNot { it.isBlank() },
             feedIcons = feedIcons.orEmpty().split(",").filterNot { it.isBlank() }

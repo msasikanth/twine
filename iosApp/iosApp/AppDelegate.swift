@@ -12,8 +12,9 @@ import BackgroundTasks
 import Bugsnag
 import RevenueCat
 import WidgetKit
+import UserNotifications
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     static let unreadWidgetKind = "TwineUnreadWidget"
 
@@ -27,6 +28,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let config = BugsnagConfiguration.loadConfig()
         BugsnagConfigKt.startBugsnag(config: config)
         #endif
+
+        UNUserNotificationCenter.currentNotificationCenter().delegate = self
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
@@ -107,6 +110,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastRefreshedAt.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
                     try await applicationComponent.syncCoordinator.pull()
+
+                    try await applicationComponent.newArticleNotifier.notifyIfNewArticles(
+                        title: { count in
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title \(count)", comment: ""), count)
+                        },
+                        content: {
+                            return NSLocalizedString("notification_new_articles_content", comment: "")
+                        }
+                    )
                 }
                 
                 WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
@@ -116,6 +128,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 task.setTaskCompleted(success: false)
             }
         }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
     }
 }
 

@@ -22,12 +22,18 @@ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.logging.LoggingComponent
+import dev.sasikanth.rss.reader.notifications.di.NotificationsComponent
 import dev.sasikanth.rss.reader.util.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import me.tatarka.inject.annotations.Provides
 
 abstract class SharedApplicationComponent :
-  DataComponent, NetworkComponent, LoggingComponent, ImageLoaderComponent, BillingComponent {
+  DataComponent,
+  NetworkComponent,
+  LoggingComponent,
+  ImageLoaderComponent,
+  BillingComponent,
+  NotificationsComponent {
 
   abstract val initializers: Set<Initializer>
 

@@ -20,7 +20,8 @@ import androidx.compose.runtime.Immutable
 
 @Immutable
 data class UnreadSinceLastSync(
+  val newArticleCount: Long,
   val hasNewArticles: Boolean,
   val feedHomepageLinks: List<String>,
-  val feedIcons: List<String>
+  val feedIcons: List<String>,
 )

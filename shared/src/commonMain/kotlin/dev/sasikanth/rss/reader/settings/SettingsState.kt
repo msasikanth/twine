@@ -43,6 +43,7 @@ data class SettingsState(
   val openPaywall: Boolean,
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
+  val enableNotifications: Boolean,
 ) {
 
   companion object {
@@ -65,6 +66,7 @@ data class SettingsState(
         openPaywall = false,
         homeViewMode = HomeViewMode.Default,
         blockImages = false,
+        enableNotifications = false,
       )
   }
 }

@@ -1,0 +1,60 @@
+/*
+ * Copyright 2026 Sasikanth Miriyampalli
+ *
+ * Licensed under the GPL, Version 3.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ */
+
+package dev.sasikanth.rss.reader.notifications
+
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
+import me.tatarka.inject.annotations.Inject
+import platform.UserNotifications.UNAuthorizationOptionAlert
+import platform.UserNotifications.UNAuthorizationOptionBadge
+import platform.UserNotifications.UNAuthorizationOptionSound
+import platform.UserNotifications.UNMutableNotificationContent
+import platform.UserNotifications.UNNotificationRequest
+import platform.UserNotifications.UNUserNotificationCenter
+
+@Inject
+@AppScope
+class IosNotifier : Notifier {
+
+  override fun show(title: String, content: String, notificationId: Int) {
+    val notificationContent =
+      UNMutableNotificationContent().apply {
+        setTitle(title)
+        setBody(content)
+      }
+
+    val request =
+      UNNotificationRequest.requestWithIdentifier(
+        identifier = notificationId.toString(),
+        content = notificationContent,
+        trigger = null
+      )
+
+    UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(request) { error ->
+      if (error != null) {
+        // no-op
+      }
+    }
+  }
+
+  override suspend fun requestPermission(): Boolean {
+    return suspendCancellableCoroutine { continuation ->
+      UNUserNotificationCenter.currentNotificationCenter().requestAuthorizationWithOptions(
+        options =
+          UNAuthorizationOptionAlert or UNAuthorizationOptionBadge or UNAuthorizationOptionSound
+      ) { granted, error ->
+        continuation.resume(granted)
+      }
+    }
+  }
+}

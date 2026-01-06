@@ -61,6 +61,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     syncCoordinator = appComponent.syncCoordinator,
                     lastRefreshedAt = appComponent.lastRefreshedAt,
                     settingsRepository = appComponent.settingsRepository,
+                    newArticleNotifier = appComponent.newArticleNotifier,
                   )
                 }
                 PostsCleanUpWorker::class.qualifiedName -> {
