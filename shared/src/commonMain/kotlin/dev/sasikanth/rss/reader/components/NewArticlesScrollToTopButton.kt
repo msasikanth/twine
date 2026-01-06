@@ -247,6 +247,7 @@ internal fun NewArticlesScrollToTopButtonPreview_OnlyNewArticles() {
         NewArticlesScrollToTopButton(
           unreadSinceLastSync =
             UnreadSinceLastSync(
+              newArticleCount = 0,
               hasNewArticles = true,
               feedHomepageLinks = listOf("https://theverge.com", "https://wired.com"),
               feedIcons = listOf("https://icon.horse/theverge.com", "https://icon.horse/wired.com")
@@ -271,6 +272,7 @@ internal fun NewArticlesScrollToTopButtonPreview_OnlyScrollToTop() {
       NewArticlesScrollToTopButton(
         unreadSinceLastSync =
           UnreadSinceLastSync(
+            newArticleCount = 0,
             hasNewArticles = false,
             feedHomepageLinks = emptyList(),
             feedIcons = emptyList()
@@ -294,6 +296,7 @@ internal fun NewArticlesScrollToTopButtonPreview_Both() {
       NewArticlesScrollToTopButton(
         unreadSinceLastSync =
           UnreadSinceLastSync(
+            newArticleCount = 0,
             hasNewArticles = true,
             feedHomepageLinks = listOf("https://theverge.com", "https://wired.com"),
             feedIcons = listOf("https://icon.horse/theverge.com", "https://icon.horse/wired.com")
