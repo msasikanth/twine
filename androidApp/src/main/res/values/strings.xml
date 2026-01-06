@@ -13,4 +13,7 @@
     <string name="widget_unread_add">Add feed</string>
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
+
+    <string name="notification_new_articles_title">%1$s new articles found</string>
+    <string name="notification_new_articles_content">New articles have been found since your last visit. Tap to view.</string>
 </resources>
