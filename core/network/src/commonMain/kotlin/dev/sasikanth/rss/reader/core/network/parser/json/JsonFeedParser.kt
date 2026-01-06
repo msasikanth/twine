@@ -47,6 +47,40 @@ class JsonFeedParser(
           UrlUtils.extractHost(
             urlString = jsonFeedPayload.homePageUrl ?: jsonFeedPayload.url ?: feedUrl
           )
+
+        val posts =
+          jsonFeedPayload.items.map { jsonFeedPost ->
+            val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
+
+            val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
+            val image = htmlContent?.heroImage
+
+            val description =
+              jsonFeedPost.summary
+                .let {
+                  if (it.isNullOrBlank()) {
+                    jsonFeedPost.contentText ?: htmlContent?.textContent
+                  } else {
+                    it
+                  }
+                }
+                .orEmpty()
+            val rawContent =
+              htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
+
+            PostPayload(
+              title = jsonFeedPost.title.orEmpty(),
+              link = jsonFeedPost.url.orEmpty(),
+              description = description,
+              rawContent = rawContent,
+              fullContent = null,
+              imageUrl = jsonFeedPost.imageUrl ?: image,
+              date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
+              commentsLink = null,
+              isDateParsedCorrectly = postPublishedAt != null
+            )
+          }
+
         val feedPayload =
           FeedPayload(
             name = jsonFeedPayload.title,
@@ -55,37 +89,7 @@ class JsonFeedParser(
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts =
-              jsonFeedPayload.items.map { jsonFeedPost ->
-                val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
-
-                val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
-                val image = htmlContent?.heroImage
-
-                val description =
-                  jsonFeedPost.summary
-                    .let {
-                      if (it.isNullOrBlank()) {
-                        jsonFeedPost.contentText ?: htmlContent?.textContent
-                      } else {
-                        it
-                      }
-                    }
-                    .orEmpty()
-                val rawContent =
-                  htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
-
-                PostPayload(
-                  title = jsonFeedPost.title.orEmpty(),
-                  link = jsonFeedPost.url.orEmpty(),
-                  description = description,
-                  rawContent = rawContent,
-                  imageUrl = jsonFeedPost.imageUrl ?: image,
-                  date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
-                  commentsLink = null,
-                  isDateParsedCorrectly = postPublishedAt != null
-                )
-              }
+            posts = posts
           )
 
         return@withContext feedPayload

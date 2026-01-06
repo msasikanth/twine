@@ -113,7 +113,7 @@ class RssRepository(
             id = postId,
             rawContent = postPayload.rawContent,
             rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-            htmlContent = null,
+            htmlContent = postPayload.fullContent,
             createdAt = Clock.System.now(),
           )
         }
