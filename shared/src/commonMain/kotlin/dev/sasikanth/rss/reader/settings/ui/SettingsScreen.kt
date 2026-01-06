@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -135,6 +136,9 @@ import twine.shared.generated.resources.settingsBlockImagesSubtitle
 import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
+import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
+import twine.shared.generated.resources.settingsDownloadFullContentTitle
+import twine.shared.generated.resources.settingsDownloadFullContentWarning
 import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
@@ -420,6 +424,17 @@ internal fun SettingsScreen(
               enableNotifications = state.enableNotifications,
               onValueChanged = { newValue ->
                 viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
+              }
+            )
+          }
+
+          item { Divider(24.dp) }
+
+          item {
+            DownloadFullContentSettingItem(
+              downloadFullContent = state.downloadFullContent,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
               }
             )
           }
@@ -1007,6 +1022,46 @@ private fun NotificationsSettingItem(
       Switch(
         checked = enableNotifications,
         onCheckedChange = onValueChanged,
+      )
+    }
+  }
+}
+
+@Composable
+private fun DownloadFullContentSettingItem(
+  downloadFullContent: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  Box(modifier = Modifier.clickable { onValueChanged(!downloadFullContent) }) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsDownloadFullContentTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsDownloadFullContentSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+          stringResource(Res.string.settingsDownloadFullContentWarning),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.error
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = downloadFullContent,
+        onCheckedChange = { checked -> onValueChanged(checked) },
       )
     }
   }

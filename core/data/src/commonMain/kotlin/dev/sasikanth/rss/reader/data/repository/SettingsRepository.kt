@@ -49,6 +49,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val readerFontStyleKey = stringPreferencesKey("reader_font_style")
   private val blockImagesKey = booleanPreferencesKey("block_images")
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
+  private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -108,6 +109,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val enableNotifications: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableNotificationsKey] ?: false }
+
+  val downloadFullContent: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[downloadFullContentKey] ?: false }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -183,6 +187,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun toggleNotifications(value: Boolean) {
     dataStore.edit { preferences -> preferences[enableNotificationsKey] = value }
+  }
+
+  suspend fun toggleDownloadFullContent(value: Boolean) {
+    dataStore.edit { preferences -> preferences[downloadFullContentKey] = value }
   }
 
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {

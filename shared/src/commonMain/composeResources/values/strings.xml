@@ -166,6 +166,9 @@
     <string name="screenHome">Home</string>
     <string name="settingsEnableNotificationsTitle">Enable notifications</string>
     <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
+    <string name="settingsDownloadFullContentTitle">Download full articles</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
+    <string name="settingsDownloadFullContentWarning">This can increase feed loading times, memory and storage consumption.</string>
 
     <!-- Plurals -->
     <plurals name="searchResultsCount">
