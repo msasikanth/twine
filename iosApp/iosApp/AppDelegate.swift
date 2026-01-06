@@ -14,7 +14,7 @@ import RevenueCat
 import WidgetKit
 import UserNotifications
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     static let unreadWidgetKind = "TwineUnreadWidget"
 
@@ -28,6 +28,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         let config = BugsnagConfiguration.loadConfig()
         BugsnagConfigKt.startBugsnag(config: config)
         #endif
+
+        UNUserNotificationCenter.currentNotificationCenter().delegate = self
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
@@ -126,6 +128,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 task.setTaskCompleted(success: false)
             }
         }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
     }
 }
 

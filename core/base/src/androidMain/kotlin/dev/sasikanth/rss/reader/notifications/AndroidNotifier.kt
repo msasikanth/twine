@@ -14,7 +14,9 @@ package dev.sasikanth.rss.reader.notifications
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.PermissionChecker
@@ -41,11 +43,25 @@ class AndroidNotifier(private val context: Context) : Notifier {
   }
 
   override fun show(title: String, content: String, notificationId: Int) {
+    val intent =
+      context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+      }
+
+    val pendingIntent =
+      PendingIntent.getActivity(
+        context,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+      )
+
     val notificationBuilder =
       NotificationCompat.Builder(context, CHANNEL_ID)
         .setContentTitle(title)
         .setContentText(content)
         .setSmallIcon(R.drawable.rss_feed)
+        .setContentIntent(pendingIntent)
         .setAutoCancel(true)
 
     notificationManager.notify(notificationId, notificationBuilder.build())
