@@ -29,7 +29,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         BugsnagConfigKt.startBugsnag(config: config)
         #endif
 
-        UNUserNotificationCenter.currentNotificationCenter().delegate = self
+        UNUserNotificationCenter.current().delegate = self
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
