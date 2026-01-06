@@ -986,7 +986,7 @@ private fun NotificationsSettingItem(
   Box(
     modifier =
       Modifier.clickable { onValueChanged(!enableNotifications) }
-        .padding(horizontal = 24.dp, vertical = 16.dp)
+        .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       Column(modifier = Modifier.weight(1f)) {
@@ -997,7 +997,7 @@ private fun NotificationsSettingItem(
         )
         Text(
           text = stringResource(Res.string.settingsEnableNotificationsSubtitle),
-          style = MaterialTheme.typography.bodySmall,
+          style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
       }
