@@ -20,9 +20,12 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -50,6 +53,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val blockImagesKey = booleanPreferencesKey("block_images")
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
+  private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
+  private val installDateKey = longPreferencesKey("install_date")
+  private val userSessionCountKey = intPreferencesKey("user_session_count")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -112,6 +118,19 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val downloadFullContent: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[downloadFullContentKey] ?: false }
+
+  val lastReviewPromptDate: Flow<Instant?> =
+    dataStore.data.map { preferences ->
+      preferences[lastReviewPromptDateKey]?.let(Instant::fromEpochMilliseconds)
+    }
+
+  val installDate: Flow<Instant?> =
+    dataStore.data.map { preferences ->
+      preferences[installDateKey]?.let(Instant::fromEpochMilliseconds)
+    }
+
+  val userSessionCount: Flow<Int> =
+    dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -191,6 +210,27 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun toggleDownloadFullContent(value: Boolean) {
     dataStore.edit { preferences -> preferences[downloadFullContentKey] = value }
+  }
+
+  suspend fun updateLastReviewPromptDate(value: Instant) {
+    dataStore.edit { preferences ->
+      preferences[lastReviewPromptDateKey] = value.toEpochMilliseconds()
+    }
+  }
+
+  suspend fun updateInstallDate(value: Instant) {
+    dataStore.edit { preferences -> preferences[installDateKey] = value.toEpochMilliseconds() }
+  }
+
+  suspend fun updateUserSessionCount(value: Int) {
+    dataStore.edit { preferences -> preferences[userSessionCountKey] = value }
+  }
+
+  suspend fun incrementUserSessionCount() {
+    dataStore.edit { preferences ->
+      val currentSessionCount = preferences[userSessionCountKey] ?: 0
+      preferences[userSessionCountKey] = currentSessionCount + 1
+    }
   }
 
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {

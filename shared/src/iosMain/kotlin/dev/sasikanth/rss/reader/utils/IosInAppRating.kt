@@ -11,7 +11,11 @@
 
 package dev.sasikanth.rss.reader.utils
 
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import kotlin.time.Clock
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import me.tatarka.inject.annotations.Inject
 import platform.StoreKit.SKStoreReviewController
 import platform.UIKit.UIApplication
@@ -19,7 +23,9 @@ import platform.UIKit.UIWindowScene
 
 @Inject
 @AppScope
-class IosInAppRating : InAppRating {
+class IosInAppRating(
+  private val settingsRepository: SettingsRepository,
+) : InAppRating {
 
   override suspend fun request() {
     val scene =
@@ -27,7 +33,19 @@ class IosInAppRating : InAppRating {
         .mapNotNull { it as? UIWindowScene }
         .firstOrNull { it.activationState == platform.UIKit.UISceneActivationStateForegroundActive }
 
-    if (scene != null) {
+    val now = Clock.System.now()
+    val installDate = settingsRepository.installDate.firstOrNull() ?: now
+    val lastPromptDate = settingsRepository.lastReviewPromptDate.firstOrNull() ?: now
+    val sessionCount = settingsRepository.userSessionCount.first()
+    val canShowReviewPrompt =
+      canShowReviewPrompt(
+        currentTime = Clock.System.now(),
+        installDate = installDate,
+        lastPromptDate = lastPromptDate,
+        sessionCount = sessionCount,
+      )
+
+    if (scene != null && canShowReviewPrompt) {
       SKStoreReviewController.requestReviewInScene(scene)
     }
   }
