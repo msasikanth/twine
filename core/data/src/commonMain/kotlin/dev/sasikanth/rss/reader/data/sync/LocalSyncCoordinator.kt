@@ -137,7 +137,8 @@ class LocalSyncCoordinator(
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {
     val initialPostCount = rssRepository.postsCountForFeed(feed.id)
-    val feedFetchResult = feedFetcher.fetch(feed.link)
+    val fetchFullContent = settingsRepository.downloadFullContent.first()
+    val feedFetchResult = feedFetcher.fetch(url = feed.link, fetchFullContent = fetchFullContent)
 
     if (feedFetchResult !is FeedFetchResult.Success) return
 

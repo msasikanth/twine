@@ -65,6 +65,7 @@ class SettingsViewModel(
         settingsRepository.homeViewMode,
         settingsRepository.blockImages,
         settingsRepository.enableNotifications,
+        settingsRepository.downloadFullContent,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -77,7 +78,8 @@ class SettingsViewModel(
         markAsReadOn,
         homeViewMode,
         blockImages,
-        enableNotifications ->
+        enableNotifications,
+        downloadFullContent ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -91,6 +93,7 @@ class SettingsViewModel(
           homeViewMode = homeViewMode,
           blockImages = blockImages,
           enableNotifications = enableNotifications,
+          downloadFullContent = downloadFullContent,
         )
       }
       .onEach { settings ->
@@ -108,6 +111,7 @@ class SettingsViewModel(
             homeViewMode = settings.homeViewMode,
             blockImages = settings.blockImages,
             enableNotifications = settings.enableNotifications,
+            downloadFullContent = settings.downloadFullContent,
           )
         }
       }
@@ -144,7 +148,12 @@ class SettingsViewModel(
       is SettingsEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is SettingsEvent.ToggleBlockImages -> toggleBlockImages(event.value)
       is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
+      is SettingsEvent.ToggleDownloadFullContent -> toggleDownloadFullContent(event.value)
     }
+  }
+
+  private fun toggleDownloadFullContent(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleDownloadFullContent(value) }
   }
 
   private fun toggleNotifications(value: Boolean) {
@@ -241,4 +250,5 @@ private data class Settings(
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
   val enableNotifications: Boolean,
+  val downloadFullContent: Boolean,
 )

@@ -56,4 +56,6 @@ sealed interface SettingsEvent {
   data class ToggleBlockImages(val value: Boolean) : SettingsEvent
 
   data class ToggleNotifications(val value: Boolean) : SettingsEvent
+
+  data class ToggleDownloadFullContent(val value: Boolean) : SettingsEvent
 }

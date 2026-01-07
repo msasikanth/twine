@@ -210,6 +210,7 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
       link = XmlFeedParser.cleanText(link)!!,
       description = description.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
+      fullContent = null,
       imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),

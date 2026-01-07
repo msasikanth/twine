@@ -108,6 +108,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/first-post-media-url",
               date = 1685005200000,
               commentsLink = null,
@@ -124,6 +125,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/media/post-with-media-thumbnail",
               date = 1685005200000,
               commentsLink = null,
@@ -140,6 +142,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1684999800000,
               commentsLink = null,
@@ -156,6 +159,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1684924200000,
               commentsLink = null,
@@ -172,6 +176,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/enclosure-image",
               date = 1684924200000,
               commentsLink = null,
@@ -191,6 +196,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000,
               commentsLink = null,
@@ -207,6 +213,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "http://example.com/relative-media-url",
               date = 1685005200000,
               commentsLink = null,
@@ -223,6 +230,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1685005200000,
               commentsLink = "https://example/post-with-comments/comments",
@@ -239,6 +247,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/media/maxresdefault.jpg",
               date = 1685005200000,
               commentsLink = null,
@@ -278,6 +287,7 @@ class XmlFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1685005200000,
               commentsLink = null,
@@ -297,6 +307,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/encoded-image",
               date = 1684924200000,
               commentsLink = null,
@@ -339,6 +350,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/image.jpg",
               date = 1685008800000,
               commentsLink = null,
@@ -357,6 +369,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1684917000000,
               commentsLink = null,
@@ -375,6 +388,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1684936800000,
               commentsLink = null,
@@ -394,6 +408,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "http://example.com/resources/image.jpg",
               date = 1685008800000,
               commentsLink = null,
@@ -428,6 +443,7 @@ class XmlFeedParserTest {
               link = "https://www.youtube.com/watch?v=2QpWq3iQdC4",
               description = "Subscribe to watch more videos about Android development",
               rawContent = null,
+              fullContent = null,
               imageUrl = "https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg",
               date = 1698260988000,
               commentsLink = null,
@@ -467,6 +483,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/episode-1-image.jpg",
               date = 1685005200000,
               commentsLink = null,
@@ -506,6 +523,7 @@ class XmlFeedParserTest {
                   </html>
                 """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/episode-1-image.jpg",
               date = 1685008800000,
               commentsLink = null,

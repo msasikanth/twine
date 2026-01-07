@@ -209,6 +209,7 @@ class AtomContentParser(
       link = XmlFeedParser.cleanText(link)!!,
       description = content.orEmpty().decodeHTMLString(),
       rawContent = rawContent,
+      fullContent = null,
       imageUrl = UrlUtils.safeUrl(hostLink, image),
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = null,

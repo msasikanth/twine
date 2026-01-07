@@ -44,6 +44,7 @@ data class SettingsState(
   val homeViewMode: HomeViewMode,
   val blockImages: Boolean,
   val enableNotifications: Boolean,
+  val downloadFullContent: Boolean,
 ) {
 
   companion object {
@@ -67,6 +68,7 @@ data class SettingsState(
         homeViewMode = HomeViewMode.Default,
         blockImages = false,
         enableNotifications = false,
+        downloadFullContent = false,
       )
   }
 }

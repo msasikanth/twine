@@ -56,6 +56,7 @@ class JsonFeedParserTest {
                </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = "https://example.com/images/quantum-2025.jpg",
               date = 1740734100000,
               commentsLink = null,
@@ -76,6 +77,7 @@ class JsonFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1739629800000,
               commentsLink = null,
@@ -88,6 +90,7 @@ class JsonFeedParserTest {
                 "Edge computing continues to grow as IoT devices proliferate. This shift is changing how we think about network architecture and data processing.\n\nIn this article, we explore the implications for businesses and consumers alike.",
               rawContent =
                 "Edge computing continues to grow as IoT devices proliferate. This shift is changing how we think about network architecture and data processing.\n\nIn this article, we explore the implications for businesses and consumers alike.",
+              fullContent = null,
               imageUrl = "https://example.com/images/edge-computing.jpg",
               date = 1738410300000,
               commentsLink = null,
@@ -108,6 +111,7 @@ class JsonFeedParserTest {
                   </html>
               """
                   .trimIndent(),
+              fullContent = null,
               imageUrl = null,
               date = 1737388800000,
               commentsLink = null,
