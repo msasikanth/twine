@@ -129,7 +129,7 @@ internal fun SearchScreen(
         query = searchViewModel.searchQuery,
         sortOrder = searchViewModel.searchSortOrder,
         onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
-        onBackClick = { goBack() },
+        onBackClick = goBack,
         onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
         onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
@@ -227,7 +227,7 @@ private fun SearchBar(
   onQueryChange: (TextFieldValue) -> Unit,
   onBackClick: () -> Unit,
   onClearClick: () -> Unit,
-  onSortOrderChanged: (SearchSortOrder) -> Unit
+  onSortOrderChanged: (SearchSortOrder) -> Unit,
 ) {
   val focusRequester = remember { FocusRequester() }
   val keyboardState by keyboardVisibilityAsState()
