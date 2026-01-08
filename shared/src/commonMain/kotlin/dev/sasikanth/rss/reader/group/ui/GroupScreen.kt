@@ -125,7 +125,8 @@ fun GroupScreen(
               modifier = Modifier.background(AppTheme.colorScheme.tintedBackground),
               feedsCount = feeds.itemCount,
               feedsSortOrder = state.feedsOrderBy,
-              onFeedsSortChanged = { viewModel.dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) }
+              showAddButton = false,
+              onFeedsSortChanged = { viewModel.dispatch(GroupEvent.OnFeedsSortOrderChanged(it)) },
             )
           }
 

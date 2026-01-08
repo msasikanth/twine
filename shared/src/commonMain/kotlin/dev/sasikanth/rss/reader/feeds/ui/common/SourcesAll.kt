@@ -46,6 +46,7 @@ import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemKey
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.FilledIconButton
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -55,6 +56,8 @@ import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
+import dev.sasikanth.rss.reader.resources.icons.Add
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
@@ -75,15 +78,17 @@ internal fun LazyListScope.allSources(
   isInMultiSelectMode: Boolean,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onSourceClick: (Source) -> Unit,
-  onToggleSourceSelection: (Source) -> Unit
+  onToggleSourceSelection: (Source) -> Unit,
+  onAddNewFeedClick: () -> Unit,
 ) {
   if (sources.itemCount > 0) {
-    item(key = "AllFeedsHeader") {
+    stickyHeader(key = "AllFeedsHeader") {
       AllFeedsHeader(
         modifier = Modifier.animateItem(),
         feedsCount = numberOfFeeds,
         feedsSortOrder = feedsSortOrder,
-        onFeedsSortChanged = onFeedsSortChanged
+        onFeedsSortChanged = onFeedsSortChanged,
+        onAddNewFeedClick = onAddNewFeedClick,
       )
     }
 
@@ -188,11 +193,15 @@ internal fun AllFeedsHeader(
   feedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  showAddButton: Boolean = true,
+  onAddNewFeedClick: (() -> Unit)? = null,
 ) {
   Row(
     modifier =
-      Modifier.then(modifier).padding(start = 32.dp, end = 20.dp).padding(vertical = 12.dp),
+      Modifier.then(modifier)
+        .background(AppTheme.colorScheme.bottomSheet)
+        .padding(horizontal = 32.dp, vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
@@ -307,6 +316,18 @@ internal fun AllFeedsHeader(
             )
           }
       }
+    }
+
+    if (showAddButton) {
+      Spacer(Modifier.width(4.dp))
+
+      FilledIconButton(
+        icon = TwineIcons.Add,
+        contentDescription = null,
+        containerColor = AppTheme.colorScheme.inverseSurface,
+        iconTint = AppTheme.colorScheme.inverseOnSurface,
+        onClick = { onAddNewFeedClick?.invoke() }
+      )
     }
   }
 }

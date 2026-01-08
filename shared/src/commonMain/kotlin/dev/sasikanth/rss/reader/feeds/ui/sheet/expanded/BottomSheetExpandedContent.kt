@@ -185,17 +185,6 @@ internal fun BottomSheetExpandedContent(
     bottomBar = {
       Box(contentAlignment = Alignment.BottomCenter) {
         AnimatedVisibility(
-          visible = !state.isInMultiSelectMode,
-          enter = slideInVertically { it },
-          exit = slideOutVertically { it }
-        ) {
-          BottomSheetExpandedBottomBar(
-            onNewGroupClick = { showNewGroupDialog = true },
-            onNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
-          )
-        }
-
-        AnimatedVisibility(
           visible = state.isInMultiSelectMode,
           enter = slideInVertically { it },
           exit = slideOutVertically { it }
@@ -361,7 +350,8 @@ internal fun BottomSheetExpandedContent(
           isInMultiSelectMode = state.isInMultiSelectMode,
           onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
           onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+          onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
         )
       }
     }
