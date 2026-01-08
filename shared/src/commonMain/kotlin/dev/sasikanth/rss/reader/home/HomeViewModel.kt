@@ -103,9 +103,7 @@ class HomeViewModel(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    allPostsPager.allPostsPagingData
-      .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
-      .launchIn(viewModelScope)
+    _state.update { it.copy(posts = allPostsPager.allPostsPagingData) }
 
     syncCoordinator.syncState
       .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }

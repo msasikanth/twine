@@ -149,9 +149,7 @@ class ReaderViewModel(
   private fun init() {
     coroutineScope.launch {
       if (readerScreenArgs.fromScreen == Home) {
-        allPostsPager.allPostsPagingData
-          .onEach { postsPagingData -> _state.update { it.copy(posts = postsPagingData) } }
-          .launchIn(coroutineScope)
+        _state.update { it.copy(posts = allPostsPager.allPostsPagingData) }
       } else {
         val posts =
           createPager(
