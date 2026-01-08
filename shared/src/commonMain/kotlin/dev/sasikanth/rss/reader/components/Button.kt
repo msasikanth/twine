@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -71,6 +72,43 @@ fun Button(
     content = content,
     enabled = enabled
   )
+}
+
+@Composable
+fun FilledIconButton(
+  icon: ImageVector,
+  contentDescription: String?,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  containerColor: Color = AppTheme.colorScheme.surface,
+  iconTint: Color = AppTheme.colorScheme.onSurface,
+  onClick: () -> Unit,
+) {
+  val interactionSource = remember { MutableInteractionSource() }
+
+  Box(
+    modifier =
+      Modifier.semantics { role = Role.Button }
+        .requiredSize(40.dp)
+        .graphicsLayer { this.blendMode = blendMode }
+        .clip(MaterialTheme.shapes.extraLarge)
+        .background(containerColor)
+        .clickable(
+          interactionSource = interactionSource,
+          indication = ripple(color = AppTheme.colorScheme.secondary),
+          enabled = enabled,
+          onClick = onClick
+        )
+        .then(modifier),
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = icon,
+      contentDescription = contentDescription,
+      tint = iconTint
+    )
+  }
 }
 
 @Composable
