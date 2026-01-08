@@ -47,7 +47,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -83,6 +85,11 @@ internal fun MainScreen(
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
 
+  @OptIn(ExperimentalComposeUiApi::class)
+  BackHandler(enabled = selectedDestination != MainDestination.Home) {
+    selectedDestination = MainDestination.Home
+  }
+
   val openDrawer = {
     if (useNavigationRail) {
       isNavigationRailVisible = !isNavigationRailVisible
@@ -91,6 +98,8 @@ internal fun MainScreen(
     }
     Unit
   }
+
+  val goBackToHome = { selectedDestination = MainDestination.Home }
 
   if (useNavigationRail) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -134,9 +143,9 @@ internal fun MainScreen(
       Box(modifier = Modifier.weight(1f)) {
         when (selectedDestination) {
           MainDestination.Home -> homeContent(openDrawer)
-          MainDestination.Search -> searchContent(openDrawer)
-          MainDestination.Bookmarks -> bookmarksContent(openDrawer)
-          MainDestination.Settings -> settingsContent(openDrawer)
+          MainDestination.Search -> searchContent(goBackToHome)
+          MainDestination.Bookmarks -> bookmarksContent(goBackToHome)
+          MainDestination.Settings -> settingsContent(goBackToHome)
         }
       }
     }
@@ -217,9 +226,9 @@ internal fun MainScreen(
     ) {
       when (selectedDestination) {
         MainDestination.Home -> homeContent(openDrawer)
-        MainDestination.Search -> searchContent(openDrawer)
-        MainDestination.Bookmarks -> bookmarksContent(openDrawer)
-        MainDestination.Settings -> settingsContent(openDrawer)
+        MainDestination.Search -> searchContent(goBackToHome)
+        MainDestination.Bookmarks -> bookmarksContent(goBackToHome)
+        MainDestination.Settings -> settingsContent(goBackToHome)
       }
     }
   }

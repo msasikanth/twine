@@ -289,13 +289,12 @@ fun App(
                 modifier = screenModifier,
               )
             },
-            searchContent = { openDrawer ->
+            searchContent = { goBack ->
               val viewModel = viewModel { searchViewModel() }
 
               SearchScreen(
                 searchViewModel = viewModel,
-                onMenuClicked = openDrawer,
-                goBack = { navController.popBackStack() },
+                goBack = goBack,
                 openPost = { searchQuery, sortOrder, index, post ->
                   coroutineScope.launch {
                     openPost(
@@ -311,13 +310,12 @@ fun App(
                 modifier = screenModifier
               )
             },
-            bookmarksContent = { openDrawer ->
+            bookmarksContent = { goBack ->
               val viewModel = viewModel { bookmarksViewModel() }
 
               BookmarksScreen(
                 bookmarksViewModel = viewModel,
-                onMenuClicked = openDrawer,
-                goBack = { navController.popBackStack() },
+                goBack = goBack,
                 openPost = { index, post ->
                   coroutineScope.launch {
                     openPost(
@@ -333,13 +331,12 @@ fun App(
                 modifier = screenModifier
               )
             },
-            settingsContent = { openDrawer ->
+            settingsContent = { goBack ->
               val viewModel = viewModel { settingsViewModel() }
 
               SettingsScreen(
                 viewModel = viewModel,
-                onMenuClicked = openDrawer,
-                goBack = { navController.popBackStack() },
+                goBack = goBack,
                 openAbout = { navController.navigate(Screen.About) },
                 openBlockedWords = { navController.navigate(Screen.BlockedWords) },
                 openPaywall = { navController.navigate(Screen.Paywall) },
