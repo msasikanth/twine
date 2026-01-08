@@ -9,25 +9,25 @@ CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
 AFTER INSERT ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
-  SET isHidden = 1
+  SET flags = flags | 4
   WHERE
     (title LIKE '%' || new.content || '%' OR
     description LIKE '%' || new.content || '%') AND
-    isHidden = 0;
+    (flags & 4) == 0;
 END;
 
 CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
 AFTER DELETE ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
-  SET isHidden = 0
+  SET flags = flags & ~4
   WHERE EXISTS (
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
            post.description LIKE '%' || blockedWord.content || '%')
   )
-  AND isHidden = 1;
+  AND (flags & 4) != 0;
 END;
 
 insert:

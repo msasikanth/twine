@@ -1,0 +1,146 @@
+import dev.sasikanth.rss.reader.core.model.local.PostFlag;
+import kotlin.collections.Set;
+import kotlin.time.Instant;
+
+-- Drop indexes
+DROP INDEX IF EXISTS post_date_index;
+DROP INDEX IF EXISTS post_createdAt_index;
+DROP INDEX IF EXISTS post_is_hidden_index;
+DROP INDEX IF EXISTS post_date_read_hidden_index;
+
+-- Drop triggers
+DROP TRIGGER IF EXISTS hide_post_if_blocked_word_is_present_AFTER_INSERT;
+DROP TRIGGER IF EXISTS hide_post_if_blocked_word_is_present_BEFORE_UPDATE;
+DROP TRIGGER IF EXISTS unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE;
+DROP TRIGGER IF EXISTS post_search_fts_BEFORE_DELETE;
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS post_search_fts_AFTER_INSERT;
+DROP TRIGGER IF EXISTS delete_post_content_AFTER_DELETE;
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_INSERT;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_DELETE;
+
+-- Recreate post table with flags column
+CREATE TABLE post_new (
+  id TEXT NOT NULL,
+  sourceId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  imageUrl TEXT,
+  postDate INTEGER AS Instant NOT NULL,
+  createdAt INTEGER AS Instant NOT NULL,
+  updatedAt INTEGER AS Instant NOT NULL,
+  syncedAt INTEGER AS Instant NOT NULL,
+  link TEXT NOT NULL,
+  commentsLink TEXT DEFAULT NULL,
+  flags INTEGER AS Set<PostFlag> NOT NULL DEFAULT 0,
+  PRIMARY KEY (id, sourceId),
+  FOREIGN KEY(sourceId) REFERENCES feed(id)
+);
+
+-- Migrate data
+-- Bookmarked: bit 0 (1), Read: bit 1 (2), Hidden: bit 2 (4)
+INSERT INTO post_new (
+  id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags
+)
+SELECT
+  id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink,
+  (bookmarked * 1) | (read * 2) | (isHidden * 4)
+FROM post;
+
+DROP TABLE post;
+
+ALTER TABLE post_new RENAME TO post;
+
+-- Recreate indexes
+CREATE INDEX post_date_index ON post (postDate);
+CREATE INDEX post_createdAt_index ON post (createdAt);
+
+-- Recreate triggers with bitwise operations
+CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
+AFTER INSERT ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%'
+) IS NOT NULL
+BEGIN
+  UPDATE post SET flags = flags | 4 WHERE id = new.id;
+END;
+
+CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
+BEFORE UPDATE OF title, description ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%') AND
+    (new.flags & 4) == 0
+) IS NOT NULL
+BEGIN
+  UPDATE post SET flags = flags | 4 WHERE id = new.id;
+END;
+
+CREATE TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE
+UPDATE OF title, description ON post
+FOR EACH ROW
+WHEN (
+  SELECT 1
+  FROM blockedWord
+  WHERE
+    (new.title LIKE '%' || blockedWord.content || '%' OR
+    new.description LIKE '%' || blockedWord.content || '%')
+) IS NULL AND (old.flags & 4) != 0
+BEGIN
+  UPDATE post SET flags = flags & ~4 WHERE id = new.id;
+END;
+
+CREATE TRIGGER post_search_fts_BEFORE_DELETE
+BEFORE DELETE ON post
+BEGIN DELETE FROM post_search WHERE id = old.id;
+END;
+
+CREATE TRIGGER post_search_fts_AFTER_UPDATE
+AFTER UPDATE ON post
+BEGIN UPDATE OR IGNORE post_search SET title = new.title, description = new.description WHERE id = new.id;
+END;
+
+CREATE TRIGGER post_search_fts_AFTER_INSERT
+AFTER INSERT ON post
+BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (new.id, new.title, new.description, new.link);
+END;
+
+CREATE TRIGGER delete_post_content_AFTER_DELETE
+AFTER DELETE ON post
+BEGIN
+  DELETE FROM postContent WHERE id = old.id;
+END;
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags | 4
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%') AND
+    (flags & 4) == 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags & ~4
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%')
+  )
+  AND (flags & 4) != 0;
+END;

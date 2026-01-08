@@ -16,7 +16,8 @@ CREATE TABLE feed(
   pinnedPosition REAL NOT NULL DEFAULT 0.0,
   showFeedFavIcon INTEGER AS Boolean NOT NULL DEFAULT 1,
   lastUpdatedAt INTEGER AS Instant,
-  refreshInterval TEXT NOT NULL DEFAULT '1h'
+  refreshInterval TEXT NOT NULL DEFAULT '1h',
+  isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -29,18 +30,19 @@ INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO
 UPDATE SET icon = excluded.icon, description = excluded.description,
-homepageLink = excluded.homepageLink;
+homepageLink = excluded.homepageLink, isDeleted = 0;
 
 remove:
-DELETE FROM feed WHERE id = :id;
+UPDATE feed SET isDeleted = 1 WHERE id = :id;
 
 feeds:
 SELECT * FROM feed
+WHERE isDeleted = 0
 ORDER BY pinnedAt DESC, createdAt DESC;
 
 feed:
 SELECT * FROM feed
-WHERE id = :id
+WHERE id = :id AND isDeleted = 0
 ORDER BY pinnedAt DESC, createdAt DESC LIMIT 1;
 
 feedWithUnreadPostsCount:
@@ -55,24 +57,24 @@ SELECT
   f.pinnedAt,
   f.lastCleanUpAt,
   f.alwaysFetchSourceArticle,
-  COUNT(CASE WHEN p.read = 0 AND p.isHidden == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+  COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
   f.showFeedFavIcon
 FROM feed f
 LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
-WHERE f.id = :id
+WHERE f.id = :id AND f.isDeleted = 0
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
 
 updateFeedName:
 UPDATE feed SET name = :newFeedName WHERE id = :id;
 
 hasFeed:
-SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id);
+SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id AND isDeleted = 0);
 
 updatePinnedAt:
 UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
 
 numberOfFeeds:
-SELECT COUNT(*) FROM feed;
+SELECT COUNT(*) FROM feed WHERE isDeleted = 0;
 
 updateLastCleanUpAt:
 UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
@@ -82,7 +84,7 @@ UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = 
 
 feedsInGroupPaginatedCount:
 SELECT COUNT(*) FROM feed
-WHERE id IN :feedIds;
+WHERE id IN :feedIds AND isDeleted = 0;
 
 feedsInGroupPaginated:
 SELECT
@@ -98,7 +100,7 @@ SELECT
   0 AS numberOfUnreadPosts,
   f.showFeedFavIcon
 FROM feed f
-WHERE f.id IN :feedIds
+WHERE f.id IN :feedIds AND f.isDeleted = 0
 ORDER BY
   CASE WHEN :orderBy = 'latest' THEN f.createdAt END DESC,
   CASE WHEN :orderBy = 'oldest' THEN f.createdAt END ASC,

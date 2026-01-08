@@ -30,7 +30,14 @@ data class Post(
   val syncedAt: Instant,
   val link: String,
   val commentsLink: String?,
-  val bookmarked: Boolean,
-  val read: Boolean,
-  val isHidden: Boolean,
-)
+  val flags: Set<PostFlag>,
+) {
+  val bookmarked: Boolean
+    get() = PostFlag.Bookmarked in flags
+
+  val read: Boolean
+    get() = PostFlag.Read in flags
+
+  val hidden: Boolean
+    get() = PostFlag.Hidden in flags
+}

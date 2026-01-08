@@ -38,4 +38,5 @@ data class Feed(
   override val sourceType: SourceType = SourceType.Feed,
   override val pinnedPosition: Double = 0.0,
   val showFeedFavIcon: Boolean = true,
+  val isDeleted: Boolean = false,
 ) : Source

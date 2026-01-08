@@ -1,51 +1,29 @@
 import kotlin.Boolean;
 import kotlin.time.Instant;
 
-CREATE TABLE bookmark (
-  id TEXT NOT NULL PRIMARY KEY,
-  sourceId TEXT NOT NULL,
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  imageUrl TEXT,
-  date INTEGER AS Instant NOT NULL,
-  link TEXT NOT NULL,
-  commentsLink TEXT DEFAULT NULL,
-  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
-  read INTEGER AS Boolean NOT NULL DEFAULT 0,
-  feedName TEXT NOT NULL,
-  feedIcon TEXT NOT NULL,
-  feedHomepageLink TEXT DEFAULT '' NOT NULL
-);
-
-CREATE TRIGGER IF NOT EXISTS
-post_bookmarked
-AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 1
-BEGIN
-  INSERT OR REPLACE INTO bookmark(id, sourceId, title, description, imageUrl, date, link, commentsLink, bookmarked, read, feedName, feedIcon, feedHomepageLink)
-  SELECT new.id, new.sourceId, new.title, new.description, new.imageUrl, new.postDate, new.link, new.commentsLink, new.bookmarked, new.read, feed.name, feed.icon, feed.homepageLink
-  FROM feed WHERE feed.id == new.sourceId;
-END;
-
-CREATE TRIGGER IF NOT EXISTS
-post_unbookmarked
-AFTER UPDATE OF bookmarked ON post WHEN new.bookmarked == 0
-BEGIN DELETE FROM bookmark WHERE id = new.id;
-END;
-
-CREATE TRIGGER IF NOT EXISTS
-post_content_update
-AFTER UPDATE OF title, description, imageUrl, postDate, read ON post WHEN new.bookmarked == 1
-BEGIN
-  UPDATE OR IGNORE bookmark SET title = new.title, description = new.description, imageUrl = new.imageUrl, date = new.postDate, commentsLink = new.commentsLink, read = new.read
-  WHERE id = new.id;
-END;
-
 countBookmarks:
-SELECT COUNT(*) FROM bookmark;
+SELECT COUNT(*) FROM post
+WHERE (flags & 1) != 0;
 
 bookmarks:
-SELECT * FROM bookmark ORDER BY date DESC
+SELECT
+  post.id,
+  post.sourceId,
+  post.title,
+  post.description,
+  post.imageUrl,
+  post.postDate AS date,
+  post.link,
+  post.commentsLink,
+  post.flags,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink
+FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE (post.flags & 1) != 0
+ORDER BY date DESC
 LIMIT :limit OFFSET :offset;
 
 deleteBookmark:
-DELETE FROM bookmark WHERE id = :id;
+UPDATE post SET flags = flags & ~1 WHERE id = :id;

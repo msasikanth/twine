@@ -17,13 +17,13 @@ package dev.sasikanth.rss.reader.data.di
 
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
-import dev.sasikanth.rss.reader.data.database.Bookmark
 import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
+import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.data.sync.LocalSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -51,7 +51,8 @@ interface DataComponent :
           postDateAdapter = DateAdapter,
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
-          syncedAtAdapter = DateAdapter
+          syncedAtAdapter = DateAdapter,
+          flagsAdapter = PostFlagsAdapter
         ),
       feedAdapter =
         Feed.Adapter(
@@ -60,7 +61,6 @@ interface DataComponent :
           lastCleanUpAtAdapter = DateAdapter,
           lastUpdatedAtAdapter = DateAdapter,
         ),
-      bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
       feedGroupAdapter =
         FeedGroup.Adapter(
           createdAtAdapter = DateAdapter,

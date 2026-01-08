@@ -25,7 +25,10 @@ BEGIN INSERT OR IGNORE INTO post_search(id, title, description, link) VALUES (ne
 END;
 
 countSearchResults:
-SELECT COUNT(*) FROM post_search WHERE post_search MATCH :searchQuery;
+SELECT COUNT(*) FROM post_search ps
+INNER JOIN post p ON p.id = ps.id
+INNER JOIN feed f ON p.sourceId = f.id
+WHERE ps.post_search MATCH :searchQuery AND f.isDeleted = 0 AND (p.flags & 4) == 0;
 
 search:
 SELECT
@@ -37,8 +40,7 @@ SELECT
   post.postDate,
   post.link,
   post.commentsLink,
-  post.bookmarked,
-  post.read,
+  post.flags,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
@@ -46,7 +48,7 @@ SELECT
 FROM post_search
 INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id
-WHERE post_search MATCH :searchQuery
+WHERE post_search MATCH :searchQuery AND feed.isDeleted = 0 AND (post.flags & 4) == 0
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.postDate END ASC,
   CASE WHEN :sortOrder = 'newest' THEN post.postDate END DESC

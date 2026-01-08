@@ -1,4 +1,5 @@
-import kotlin.Boolean;
+import dev.sasikanth.rss.reader.core.model.local.PostFlag;
+import kotlin.collections.Set;
 import kotlin.time.Instant;
 
 CREATE TABLE post(
@@ -13,17 +14,19 @@ CREATE TABLE post(
   syncedAt INTEGER AS Instant NOT NULL,
   link TEXT NOT NULL,
   commentsLink TEXT DEFAULT NULL,
-  bookmarked INTEGER AS Boolean NOT NULL DEFAULT 0,
-  read INTEGER AS Boolean NOT NULL DEFAULT 0,
-  isHidden INTEGER AS Boolean NOT NULL DEFAULT 0,
+  flags INTEGER AS Set<PostFlag> NOT NULL DEFAULT 0,
   PRIMARY KEY (id, sourceId),
-  FOREIGN KEY(sourceId) REFERENCES feed(id) ON DELETE CASCADE
+  FOREIGN KEY(sourceId) REFERENCES feed(id)
 );
+
+CREATE TRIGGER IF NOT EXISTS delete_post_content_AFTER_DELETE
+AFTER DELETE ON post
+BEGIN
+  DELETE FROM postContent WHERE id = old.id;
+END;
 
 CREATE INDEX post_date_index ON post (postDate);
 CREATE INDEX post_createdAt_index ON post (createdAt);
-CREATE INDEX post_is_hidden_index ON post(isHidden);
-CREATE INDEX post_date_read_hidden_index ON post(postDate, read, isHidden);
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
@@ -36,7 +39,7 @@ WHEN (
     new.description LIKE '%' || blockedWord.content || '%'
 ) IS NOT NULL
 BEGIN
-  UPDATE post SET isHidden = 1 WHERE id = new.id;
+  UPDATE post SET flags = flags | 4 WHERE id = new.id;
 END;
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_BEFORE_UPDATE
@@ -48,10 +51,10 @@ WHEN (
   WHERE
     (new.title LIKE '%' || blockedWord.content || '%' OR
     new.description LIKE '%' || blockedWord.content || '%') AND
-    new.isHidden == 0
+    (new.flags & 4) == 0
 ) IS NOT NULL
 BEGIN
-  UPDATE post SET isHidden = 1 WHERE id = new.id;
+  UPDATE post SET flags = flags | 4 WHERE id = new.id;
 END;
 
 CREATE TRIGGER unhide_post_if_no_blocked_words_present_and_post_is_hidden_BEFORE_UPDATE
@@ -63,14 +66,14 @@ WHEN (
   WHERE
     (new.title LIKE '%' || blockedWord.content || '%' OR
     new.description LIKE '%' || blockedWord.content || '%')
-) IS NULL AND old.isHidden == 1
+) IS NULL AND (old.flags & 4) != 0
 BEGIN
-  UPDATE post SET isHidden = 0 WHERE id = new.id;
+  UPDATE post SET flags = flags & ~4 WHERE id = new.id;
 END;
 
 upsert:
 INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description, :imageUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commnetsLink)
+VALUES (:id,  :sourceId, :title, :description, :imageUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink)
 ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
@@ -80,10 +83,12 @@ UPDATE SET
 
 allPostsCount:
 SELECT COUNT(post.id) FROM post
+INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  post.isHidden == 0 AND
-  (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
   post.syncedAt < :lastSyncedAt;
 
@@ -98,8 +103,7 @@ WITH featuredPosts AS (
     post.postDate,
     post.link,
     post.commentsLink,
-    post.bookmarked,
-    post.read,
+    post.flags,
     feed.name AS feedName,
     feed.icon AS feedIcon,
     feed.homepageLink AS feedHomepageLink,
@@ -109,8 +113,9 @@ WITH featuredPosts AS (
   INNER JOIN feed ON post.sourceId == feed.id
   WHERE
     ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-    post.isHidden == 0 AND
-    (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+    (post.flags & 4) == 0 AND
+    feed.isDeleted = 0 AND
+    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
     post.imageUrl IS NOT NULL AND
     post.postDate > :postsAfter AND
     post.syncedAt < :lastSyncedAt
@@ -131,8 +136,7 @@ SELECT
   post.postDate,
   post.link,
   post.commentsLink,
-  post.bookmarked,
-  post.read,
+  post.flags,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
@@ -142,8 +146,9 @@ FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  post.isHidden == 0 AND
-  (:unreadOnly IS NULL OR post.read != :unreadOnly) AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.id NOT IN (SELECT id FROM featuredPosts) AND
   post.postDate > :postsAfter AND
   post.syncedAt < :lastSyncedAt
@@ -151,22 +156,22 @@ ORDER BY isFeatured DESC, postDate DESC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
-UPDATE post SET bookmarked = :bookmarked WHERE id = :id;
+UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END WHERE id = :id;
 
 updateReadStatus:
-UPDATE post SET read = :read WHERE id = :id;
+UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END WHERE id = :id;
 
 deleteReadPosts:
 DELETE FROM post
-WHERE post.read == 1 AND post.postDate < :before
+WHERE (post.flags & 2) != 0 AND post.postDate < :before
 RETURNING post.sourceId;
 
 markPostsAsRead:
 UPDATE post
-SET read = 1
+SET flags = flags | 2
 WHERE (sourceId = :sourceId OR :sourceId IS NULL)
   AND postDate > :after
-  AND read != 1;
+  AND (flags & 2) == 0;
 
 post:
 SELECT * FROM post
@@ -174,10 +179,12 @@ WHERE post.id = :id;
 
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
+INNER JOIN feed ON post.sourceId == feed.id
 WHERE
-  isHidden = 0 AND
-  read = 0 AND
-  postDate > :after AND
+  (post.flags & 4) == 0 AND
+  (post.flags & 2) == 0 AND
+  feed.isDeleted = 0 AND
+  post.postDate > :after AND
   (:isSourceIdsEmpty OR post.sourceId IN :sourceIds);
 
 unreadSinceLastSync:
@@ -190,8 +197,9 @@ SELECT COUNT(post.id),
     INNER JOIN feed ON post.sourceId == feed.id
     WHERE
       ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-      post.isHidden == 0 AND
-      read != 1 AND
+      (post.flags & 4) == 0 AND
+      feed.isDeleted = 0 AND
+      (post.flags & 2) == 0 AND
       post.postDate > :postsAfter AND
       post.syncedAt > :lastSyncedAt
     ORDER BY post.syncedAt
@@ -201,13 +209,14 @@ SELECT COUNT(post.id),
 (
   SELECT GROUP_CONCAT(icon, ',')
   FROM (
-    SELECT DISTINCT feed.icon
+    SELECT DISTINCT f.icon
     FROM post
-    INNER JOIN feed ON post.sourceId == feed.id
+    INNER JOIN feed ON post.sourceId == f.id
     WHERE
       ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-      post.isHidden == 0 AND
-      read != 1 AND
+      (post.flags & 4) == 0 AND
+      f.isDeleted = 0 AND
+      (post.flags & 2) == 0 AND
       post.postDate > :postsAfter AND
       post.syncedAt > :lastSyncedAt
     ORDER BY post.syncedAt
@@ -215,10 +224,12 @@ SELECT COUNT(post.id),
   )
 ) AS feedIcons
 FROM post
+INNER JOIN feed f ON post.sourceId == f.id
 WHERE
   ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  post.isHidden == 0 AND
-  read != 1 AND
+  (post.flags & 4) == 0 AND
+  f.isDeleted = 0 AND
+  (post.flags & 2) == 0 AND
   post.postDate > :postsAfter AND
   post.syncedAt > :lastSyncedAt;
 
@@ -230,8 +241,9 @@ widgetUnreadPostsCount:
 SELECT COUNT(*) FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
-  post.isHidden == 0 AND
-  post.read == 0
+  (post.flags & 4) == 0 AND
+  (post.flags & 2) == 0 AND
+  feed.isDeleted = 0
 ORDER BY postDate DESC;
 
 widgetUnreadPosts:
@@ -244,8 +256,7 @@ SELECT
   post.postDate,
   post.link,
   post.commentsLink,
-  post.bookmarked,
-  post.read,
+  post.flags,
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
@@ -253,7 +264,12 @@ SELECT
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
-  post.isHidden == 0 AND
-  post.read == 0
+  (post.flags & 4) == 0 AND
+  (post.flags & 2) == 0 AND
+  feed.isDeleted = 0
 ORDER BY postDate DESC
 LIMIT :numberOfPosts OFFSET :offset;
+
+deletePostsForFeed:
+DELETE FROM post
+WHERE sourceId = :feedId AND (flags & 1) == 0;
