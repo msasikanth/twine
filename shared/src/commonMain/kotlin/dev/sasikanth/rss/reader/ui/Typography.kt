@@ -35,6 +35,7 @@ import twine.shared.generated.resources.comic_neue_regular
 import twine.shared.generated.resources.golos_bold
 import twine.shared.generated.resources.golos_medium
 import twine.shared.generated.resources.golos_regular
+import twine.shared.generated.resources.google_sans
 import twine.shared.generated.resources.lora_bold
 import twine.shared.generated.resources.lora_medium
 import twine.shared.generated.resources.lora_regular
@@ -222,6 +223,9 @@ internal val ComicNeueFontFamily: FontFamily
       Font(Res.font.comic_neue_regular, weight = FontWeight.Medium),
       Font(Res.font.comic_neue_bold, weight = FontWeight.Bold),
     )
+
+internal val GoogleSansFontFamily: FontFamily
+  @Composable get() = FontFamily(Font(Res.font.google_sans))
 
 internal val GolosFontFamily: FontFamily
   @Composable

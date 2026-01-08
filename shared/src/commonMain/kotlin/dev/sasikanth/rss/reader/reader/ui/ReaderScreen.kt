@@ -92,6 +92,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
@@ -188,6 +189,7 @@ internal fun ReaderScreen(
     val fontFamily =
       when (state.selectedReaderFont) {
         ReaderFont.ComicNeue -> ComicNeueFontFamily
+        ReaderFont.GoogleSans -> GoogleSansFontFamily
         ReaderFont.Golos -> GolosFontFamily
         ReaderFont.Lora -> LoraFontFamily
         ReaderFont.Merriweather -> MerriWeatherFontFamily
