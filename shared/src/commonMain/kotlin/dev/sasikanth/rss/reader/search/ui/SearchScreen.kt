@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,6 +98,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.postsSearchHint
 import twine.shared.generated.resources.searchResultsCount
 import twine.shared.generated.resources.searchSortNewest
@@ -107,6 +109,7 @@ import twine.shared.generated.resources.searchSortOldestFirst
 @Composable
 internal fun SearchScreen(
   searchViewModel: SearchViewModel,
+  onMenuClicked: (() -> Unit)? = null,
   goBack: () -> Unit,
   openPost:
     (
@@ -129,9 +132,10 @@ internal fun SearchScreen(
         query = searchViewModel.searchQuery,
         sortOrder = searchViewModel.searchSortOrder,
         onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
-        onBackClick = { goBack() },
+        onBackClick = onMenuClicked ?: goBack,
         onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
-        onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
+        onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) },
+        isMainDestination = onMenuClicked != null
       )
     },
     content = { padding ->
@@ -227,7 +231,8 @@ private fun SearchBar(
   onQueryChange: (TextFieldValue) -> Unit,
   onBackClick: () -> Unit,
   onClearClick: () -> Unit,
-  onSortOrderChanged: (SearchSortOrder) -> Unit
+  onSortOrderChanged: (SearchSortOrder) -> Unit,
+  isMainDestination: Boolean = false,
 ) {
   val focusRequester = remember { FocusRequester() }
   val keyboardState by keyboardVisibilityAsState()
@@ -258,8 +263,10 @@ private fun SearchBar(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         CircularIconButton(
-          icon = TwineIcons.ArrowBack,
-          label = stringResource(Res.string.buttonGoBack),
+          icon = if (isMainDestination) Icons.Rounded.Menu else TwineIcons.ArrowBack,
+          label =
+            if (isMainDestination) stringResource(Res.string.moreMenuOptions)
+            else stringResource(Res.string.buttonGoBack),
           onClick = onBackClick,
         )
 

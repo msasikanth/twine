@@ -123,15 +123,13 @@ internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
   onVisiblePostChanged: (Int) -> Unit,
-  openSearch: () -> Unit,
-  openBookmarks: () -> Unit,
-  openSettings: () -> Unit,
   openPost: (Int, PostWithMetadata) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
   openAddFeedScreen: () -> Unit,
   openGroupScreen: (groupId: String) -> Unit,
   openPaywall: () -> Unit,
+  onMenuClicked: (() -> Unit)? = null,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -232,9 +230,7 @@ internal fun HomeScreen(
                 listState = postsListState,
                 hasUnreadPosts = state.hasUnreadPosts,
                 scrollBehavior = appBarScrollBehaviour,
-                onSearchClicked = openSearch,
-                onBookmarksClicked = openBookmarks,
-                onSettingsClicked = openSettings,
+                onMenuClicked = onMenuClicked,
                 onPostTypeChanged = { viewModel.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
                 onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) }
               )

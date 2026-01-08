@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -64,10 +66,12 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmarks
 import twine.shared.generated.resources.bookmarksPlaceholder
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.moreMenuOptions
 
 @Composable
 internal fun BookmarksScreen(
   bookmarksViewModel: BookmarksViewModel,
+  onMenuClicked: (() -> Unit)? = null,
   goBack: () -> Unit,
   openPost: (postIndex: Int, post: PostWithMetadata) -> Unit,
   modifier: Modifier = Modifier
@@ -95,9 +99,11 @@ internal fun BookmarksScreen(
           navigationIcon = {
             CircularIconButton(
               modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack,
+              icon = if (onMenuClicked != null) Icons.Rounded.Menu else TwineIcons.ArrowBack,
+              label =
+                if (onMenuClicked != null) stringResource(Res.string.moreMenuOptions)
+                else stringResource(Res.string.buttonGoBack),
+              onClick = onMenuClicked ?: goBack,
             )
           },
           colors =

@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -112,9 +113,7 @@ internal fun HomeTopAppBar(
   hasUnreadPosts: Boolean,
   scrollBehavior: TopAppBarScrollBehavior,
   modifier: Modifier = Modifier,
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit,
+  onMenuClicked: (() -> Unit)? = null,
   onPostTypeChanged: (PostsType) -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
 ) {
@@ -136,28 +135,12 @@ internal fun HomeTopAppBar(
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
     title = { SourceInfo(postsType = postsType) },
     navigationIcon = {
-      val density = LocalDensity.current
-      var buttonHeight by remember { mutableStateOf(0.dp) }
-
-      Box(
-        modifier =
-          Modifier.onGloballyPositioned { buttonHeight = with(density) { it.size.height.toDp() } }
-      ) {
-        var showPostsTypeDropDown by remember { mutableStateOf(false) }
-
+      if (onMenuClicked != null) {
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = TwineIcons.Sort,
-          label = stringResource(Res.string.postsFilter),
-          onClick = { showPostsTypeDropDown = true }
-        )
-
-        PostsFilterDropdown(
-          showDropdown = showPostsTypeDropDown,
-          postsType = postsType,
-          onPostTypeChanged = onPostTypeChanged,
-          offset = DpOffset(x = 12.dp, y = -buttonHeight),
-          onDismiss = { showPostsTypeDropDown = false }
+          icon = Icons.Rounded.Menu,
+          label = stringResource(Res.string.moreMenuOptions),
+          onClick = onMenuClicked
         )
       }
     },
@@ -180,11 +163,29 @@ internal fun HomeTopAppBar(
 
       Spacer(Modifier.width(8.dp))
 
-      OverflowMenu(
-        onSearchClicked = onSearchClicked,
-        onSettingsClicked = onSettingsClicked,
-        onBookmarksClicked = onBookmarksClicked
-      )
+      val density = LocalDensity.current
+      var buttonHeight by remember { mutableStateOf(0.dp) }
+
+      Box(
+        modifier =
+          Modifier.onGloballyPositioned { buttonHeight = with(density) { it.size.height.toDp() } }
+      ) {
+        var showPostsTypeDropDown by remember { mutableStateOf(false) }
+
+        CircularIconButton(
+          icon = TwineIcons.Sort,
+          label = stringResource(Res.string.postsFilter),
+          onClick = { showPostsTypeDropDown = true }
+        )
+
+        PostsFilterDropdown(
+          showDropdown = showPostsTypeDropDown,
+          postsType = postsType,
+          onPostTypeChanged = onPostTypeChanged,
+          offset = DpOffset(x = 0.dp, y = -buttonHeight),
+          onDismiss = { showPostsTypeDropDown = false }
+        )
+      }
     },
     colors =
       TopAppBarDefaults.topAppBarColors(

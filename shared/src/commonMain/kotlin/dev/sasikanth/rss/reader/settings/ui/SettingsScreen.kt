@@ -45,6 +45,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -127,6 +128,7 @@ import twine.shared.generated.resources.homeViewModeSimple
 import twine.shared.generated.resources.markArticleAsRead
 import twine.shared.generated.resources.markArticleAsReadOnOpen
 import twine.shared.generated.resources.markArticleAsReadOnScroll
+import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.settings
 import twine.shared.generated.resources.settingsAboutSubtitle
 import twine.shared.generated.resources.settingsAboutTitle
@@ -175,6 +177,7 @@ import twine.shared.generated.resources.twinePremiumSubscribedDesc
 @Composable
 internal fun SettingsScreen(
   viewModel: SettingsViewModel,
+  onMenuClicked: (() -> Unit)? = null,
   goBack: () -> Unit,
   openAbout: () -> Unit,
   openBlockedWords: () -> Unit,
@@ -212,9 +215,11 @@ internal fun SettingsScreen(
           navigationIcon = {
             CircularIconButton(
               modifier = Modifier.padding(start = 12.dp),
-              icon = TwineIcons.ArrowBack,
-              label = stringResource(Res.string.buttonGoBack),
-              onClick = { goBack() }
+              icon = if (onMenuClicked != null) Icons.Rounded.Menu else TwineIcons.ArrowBack,
+              label =
+                if (onMenuClicked != null) stringResource(Res.string.moreMenuOptions)
+                else stringResource(Res.string.buttonGoBack),
+              onClick = onMenuClicked ?: goBack,
             )
           },
           colors =
