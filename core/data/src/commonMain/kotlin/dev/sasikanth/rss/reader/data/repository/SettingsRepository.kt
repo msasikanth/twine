@@ -269,11 +269,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   private fun mapToReaderFont(pref: String?): ReaderFont {
-    if (pref.isNullOrBlank()) return ReaderFont.RethinkSans
+    if (pref.isNullOrBlank()) return ReaderFont.Golos
     return try {
       ReaderFont.valueOf(pref)
     } catch (e: Exception) {
-      ReaderFont.RethinkSans
+      ReaderFont.Golos
     }
   }
 }

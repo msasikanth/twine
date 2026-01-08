@@ -32,7 +32,7 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 @Composable
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
-  typography: Typography = typography(RethinkSansFontFamily),
+  typography: Typography = typography(GolosFontFamily),
   content: @Composable () -> Unit
 ) {
   val useAmoled = LocalAmoledSetting.current
