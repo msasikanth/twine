@@ -102,8 +102,8 @@ import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
-import dev.sasikanth.rss.reader.ui.AntonFontFamily
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
@@ -360,7 +360,8 @@ private fun PostHeader(
           },
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineMedium,
-        fontFamily = AntonFontFamily,
+        fontFamily = GolosFontFamily,
+        fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.secondary,
         overflow = TextOverflow.Ellipsis,
       )
