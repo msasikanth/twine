@@ -198,7 +198,8 @@ internal fun AllFeedsHeader(
     modifier =
       Modifier.then(modifier)
         .background(AppTheme.colorScheme.bottomSheet)
-        .padding(horizontal = 32.dp, vertical = 12.dp),
+        .padding(start = 32.dp, end = 24.dp)
+        .padding(vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
