@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -80,7 +81,7 @@ internal fun MainScreen(
   val windowSizeClass = LocalWindowSizeClass.current
   val useNavigationRail = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
 
-  var selectedDestination by remember { mutableStateOf(MainDestination.Home) }
+  var selectedDestination by rememberSaveable { mutableStateOf(MainDestination.Home) }
   var isNavigationRailVisible by remember { mutableStateOf(true) }
   val drawerState = rememberDrawerState(DrawerValue.Closed)
   val scope = rememberCoroutineScope()
