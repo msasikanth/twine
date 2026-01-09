@@ -30,35 +30,29 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_FEED_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUB_DATE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_CHANNEL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
-import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
-import dev.sasikanth.rss.reader.util.decodeHTMLString
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
-class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
+class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
     parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_CHANNEL)
 
-    val posts = mutableListOf<PostPayload?>()
-
     var title: String? = null
     var link: String? = null
     var description: String? = null
     var iconUrl: String? = null
+    var firstPost: PostPayload? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -77,30 +71,34 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
         TAG_DESCRIPTION -> {
           description = parser.nextText()
         }
-        TAG_RSS_ITEM -> {
-          val host = UrlUtils.extractHost(link ?: feedUrl)
-          posts.add(readRssItem(parser, host))
-        }
         TAG_FEED_IMAGE,
         TAG_ITUNES_IMAGE -> {
           iconUrl = readFeedIcon(parser)
+        }
+        TAG_RSS_ITEM -> {
+          val host = UrlUtils.extractHost(link ?: feedUrl)
+          firstPost = readRssItem(parser, host)
+          if (firstPost != null) {
+            break
+          }
         }
         else -> parser.skipSubTree()
       }
     }
 
-    val host = UrlUtils.extractHost(link ?: feedUrl)
-    if (iconUrl.isNullOrBlank()) {
-      iconUrl = UrlUtils.fallbackFeedIcon(host)
-    }
-
-    return FeedPayload(
-      name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
-      description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
+    return createFeedPayload(
+      name = title,
+      description = description,
       icon = iconUrl,
-      homepageLink = link ?: feedUrl,
+      homepageLink = link,
       link = feedUrl,
-      posts = posts.filterNotNull()
+      posts =
+        postsFlow(
+          parser = parser,
+          firstPost = firstPost,
+          itemTag = TAG_RSS_ITEM,
+          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) }
+        )
     )
   }
 
@@ -155,12 +153,11 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           parser.nextTag()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          val postContent = parser.nextText().trimIndent()
-          val htmlContent = articleHtmlParser.parse(htmlContent = postContent)
+          val postContent = parsePostContent(parser)
 
-          rawContent = htmlContent?.cleanedHtml
-          image = htmlContent?.heroImage ?: image
-          description = htmlContent?.textContent?.ifBlank { null } ?: rawContent?.trim()
+          rawContent = postContent.rawContent
+          image = postContent.heroImage ?: image
+          description = postContent.textContent
         }
         name == TAG_PUB_DATE -> {
           date = parser.nextText()
@@ -180,41 +177,23 @@ class RSSContentParser(private val articleHtmlParser: ArticleHtmlParser) : XmlCo
           commentsLink = parser.nextText()
         }
         name == TAG_MEDIA_GROUP -> {
-          while (parser.next() != EventType.END_TAG) {
-            if (parser.eventType != EventType.START_TAG) continue
-
-            when {
-              parser.name == TAG_MEDIA_THUMBNAIL -> {
-                image = parser.getAttributeValue(parser.namespace, TAG_URL)
-                parser.nextTag()
-              }
-              parser.name == TAG_MEDIA_CONTENT && description.isNullOrBlank() -> {
-                description = description.orEmpty().ifBlank { parser.nextText() }
-              }
-              else -> parser.skipSubTree()
-            }
-          }
+          val mediaGroupResult = readMediaGroup(parser)
+          image = mediaGroupResult.image ?: image
+          description = description.orEmpty().ifBlank { mediaGroupResult.description }
         }
         else -> parser.skipSubTree()
       }
     }
 
-    val postPubDateInMillis = date?.dateStringToEpochMillis()
-
-    if (link.isNullOrBlank() || (title.isNullOrBlank() && description.isNullOrBlank())) {
-      return null
-    }
-
-    return PostPayload(
-      title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = XmlFeedParser.cleanText(link)!!,
-      description = description.orEmpty().decodeHTMLString(),
+    return createPostPayload(
+      title = title,
+      link = link,
+      description = description,
       rawContent = rawContent,
-      fullContent = null,
-      imageUrl = UrlUtils.safeUrl(hostLink, image),
-      date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-      commentsLink = commentsLink?.trim(),
-      isDateParsedCorrectly = postPubDateInMillis != null
+      imageUrl = image,
+      date = date,
+      commentsLink = commentsLink,
+      hostLink = hostLink
     )
   }
 

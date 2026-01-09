@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import kotlin.time.Clock
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.withContext
 import kotlinx.io.Source
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -93,7 +94,7 @@ class JsonFeedParser(
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts = posts
+            posts = posts.asFlow()
           )
 
         return@withContext feedPayload

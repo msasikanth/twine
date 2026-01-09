@@ -48,6 +48,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
@@ -86,15 +87,20 @@ class RssRepository(
         link = feedPayload.link,
         id = feedId
       )
+    }
 
-      transactionRunner.invoke {
-        val feedLastCleanUpAtEpochMilli =
-          feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
+    val feedLastCleanUpAtEpochMilli =
+      feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
-        feedPayload.posts.forEach { postPayload ->
-          if (postPayload.date < feedLastCleanUpAtEpochMilli) return@forEach
+    feedPayload.posts.collect { postPayload ->
+      if (postPayload.date < feedLastCleanUpAtEpochMilli) return@collect
 
-          val postId = nameBasedUuidOf(postPayload.link).toString()
+      val postId = nameBasedUuidOf(postPayload.link).toString()
+      withContext(dispatchersProvider.databaseWrite) {
+        transactionRunner.invoke {
+          val postExists = postQueries.post(postId).executeAsOneOrNull() != null
+          if (postExists) return@invoke
+
           postQueries.upsert(
             id = postId,
             sourceId = feedId,

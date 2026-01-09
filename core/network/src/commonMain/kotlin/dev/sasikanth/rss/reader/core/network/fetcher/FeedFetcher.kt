@@ -44,12 +44,13 @@ import io.ktor.utils.io.asSource
 import io.ktor.utils.io.readBuffer
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Inject
 class FeedFetcher(
   private val httpClient: HttpClient,
@@ -196,20 +197,16 @@ class FeedFetcher(
     throw UnsupportedOperationException("Unsupported content type: $contentType")
   }
 
-  private suspend fun fetchFullContentForPosts(feedPayload: FeedPayload): FeedPayload {
-    return withContext(networkDispatcher) {
-      val postsWithFullContent =
-        feedPayload.posts
-          .map { post ->
-            async {
-              val fullContent = fullArticleFetcher.fetch(post.link).getOrNull()
-              post.copy(fullContent = fullContent)
-            }
-          }
-          .awaitAll()
+  private fun fetchFullContentForPosts(feedPayload: FeedPayload): FeedPayload {
+    val postsWithFullContent =
+      feedPayload.posts.flatMapMerge(concurrency = 10) { post ->
+        flow {
+          val fullContent = fullArticleFetcher.fetch(post.link).getOrNull()
+          emit(post.copy(fullContent = fullContent))
+        }
+      }
 
-      feedPayload.copy(posts = postsWithFullContent)
-    }
+    return feedPayload.copy(posts = postsWithFullContent)
   }
 
   private suspend fun handleHttpRedirect(
