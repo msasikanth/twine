@@ -271,7 +271,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private fun mapToPostsSortOrder(pref: String?): PostsSortOrder? {
     if (pref.isNullOrBlank()) return null
-    return PostsSortOrder.valueOf(pref)
+    return try {
+      when (pref) {
+        "UploadedLatest" -> PostsSortOrder.AddedLatest
+        "UploadedOldest" -> PostsSortOrder.AddedOldest
+        else -> PostsSortOrder.valueOf(pref)
+      }
+    } catch (e: Exception) {
+      null
+    }
   }
 
   private fun mapToMarkAsReadOnType(pref: String?): MarkAsReadOn {

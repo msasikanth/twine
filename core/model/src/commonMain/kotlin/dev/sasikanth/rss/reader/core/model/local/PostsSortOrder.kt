@@ -19,4 +19,6 @@ package dev.sasikanth.rss.reader.core.model.local
 enum class PostsSortOrder {
   Latest,
   Oldest,
+  AddedLatest,
+  AddedOldest,
 }

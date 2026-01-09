@@ -38,6 +38,7 @@ SELECT
   post_search.description,
   post.imageUrl,
   post.postDate,
+  post.createdAt,
   post.link,
   post.commentsLink,
   post.flags,

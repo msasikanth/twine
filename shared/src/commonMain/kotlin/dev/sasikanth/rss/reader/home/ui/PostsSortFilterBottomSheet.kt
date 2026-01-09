@@ -58,6 +58,9 @@ import twine.shared.generated.resources.buttonApply
 import twine.shared.generated.resources.filter
 import twine.shared.generated.resources.postsAll
 import twine.shared.generated.resources.postsLast24Hours
+import twine.shared.generated.resources.postsSortBy
+import twine.shared.generated.resources.postsSortByPostAdded
+import twine.shared.generated.resources.postsSortByPostDate
 import twine.shared.generated.resources.postsSortLatest
 import twine.shared.generated.resources.postsSortOldest
 import twine.shared.generated.resources.postsToday
@@ -81,7 +84,28 @@ internal fun PostsSortFilterBottomSheet(
     dragHandle = null,
   ) {
     var selectedPostsType by remember(postsType) { mutableStateOf(postsType) }
-    var selectedPostsSortOrder by remember(postsSortOrder) { mutableStateOf(postsSortOrder) }
+    var selectedSortBy by
+      remember(postsSortOrder) {
+        mutableStateOf(
+          when (postsSortOrder) {
+            PostsSortOrder.Latest,
+            PostsSortOrder.Oldest -> SortBy.Date
+            PostsSortOrder.AddedLatest,
+            PostsSortOrder.AddedOldest -> SortBy.Added
+          }
+        )
+      }
+    var selectedSortDirection by
+      remember(postsSortOrder) {
+        mutableStateOf(
+          when (postsSortOrder) {
+            PostsSortOrder.Latest,
+            PostsSortOrder.AddedLatest -> SortDirection.Newest
+            PostsSortOrder.Oldest,
+            PostsSortOrder.AddedOldest -> SortDirection.Oldest
+          }
+        )
+      }
 
     Column(
       modifier =
@@ -90,6 +114,30 @@ internal fun PostsSortFilterBottomSheet(
           .padding(top = 24.dp, bottom = 16.dp)
           .navigationBarsPadding()
     ) {
+      SectionHeader(text = stringResource(Res.string.postsSortBy), icon = TwineIcons.Sort)
+
+      Spacer(Modifier.requiredHeight(12.dp))
+
+      ToggleableButtonGroup(
+        modifier = Modifier.fillMaxWidth(),
+        items =
+          listOf(
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsSortByPostDate),
+              isSelected = selectedSortBy == SortBy.Date,
+              identifier = SortBy.Date,
+            ),
+            ToggleableButtonItem(
+              label = stringResource(Res.string.postsSortByPostAdded),
+              isSelected = selectedSortBy == SortBy.Added,
+              identifier = SortBy.Added,
+            ),
+          ),
+        onItemSelected = { selectedSortBy = it.identifier as SortBy },
+      )
+
+      Spacer(Modifier.requiredHeight(16.dp))
+
       SectionHeader(text = stringResource(Res.string.sort), icon = TwineIcons.Sort)
 
       Spacer(Modifier.requiredHeight(12.dp))
@@ -100,16 +148,16 @@ internal fun PostsSortFilterBottomSheet(
           listOf(
             ToggleableButtonItem(
               label = stringResource(Res.string.postsSortLatest),
-              isSelected = selectedPostsSortOrder == PostsSortOrder.Latest,
-              identifier = PostsSortOrder.Latest,
+              isSelected = selectedSortDirection == SortDirection.Newest,
+              identifier = SortDirection.Newest,
             ),
             ToggleableButtonItem(
               label = stringResource(Res.string.postsSortOldest),
-              isSelected = selectedPostsSortOrder == PostsSortOrder.Oldest,
-              identifier = PostsSortOrder.Oldest,
+              isSelected = selectedSortDirection == SortDirection.Oldest,
+              identifier = SortDirection.Oldest,
             ),
           ),
-        onItemSelected = { selectedPostsSortOrder = it.identifier as PostsSortOrder },
+        onItemSelected = { selectedSortDirection = it.identifier as SortDirection },
       )
 
       Spacer(Modifier.requiredHeight(24.dp))
@@ -127,7 +175,18 @@ internal fun PostsSortFilterBottomSheet(
 
       TextButton(
         modifier = Modifier.fillMaxWidth().requiredHeight(56.dp),
-        onClick = { onApply(selectedPostsType, selectedPostsSortOrder) },
+        onClick = {
+          val postsSortOrder =
+            when (selectedSortBy) {
+              SortBy.Date ->
+                if (selectedSortDirection == SortDirection.Newest) PostsSortOrder.Latest
+                else PostsSortOrder.Oldest
+              SortBy.Added ->
+                if (selectedSortDirection == SortDirection.Newest) PostsSortOrder.AddedLatest
+                else PostsSortOrder.AddedOldest
+            }
+          onApply(selectedPostsType, postsSortOrder)
+        },
         colors =
           ButtonDefaults.textButtonColors(
             contentColor = AppTheme.colorScheme.tintedForeground,
@@ -265,3 +324,13 @@ private fun getPostTypeLabel(type: PostsType) =
     PostsType.TODAY -> stringResource(Res.string.postsToday)
     PostsType.LAST_24_HOURS -> stringResource(Res.string.postsLast24Hours)
   }
+
+private enum class SortBy {
+  Date,
+  Added
+}
+
+private enum class SortDirection {
+  Newest,
+  Oldest
+}

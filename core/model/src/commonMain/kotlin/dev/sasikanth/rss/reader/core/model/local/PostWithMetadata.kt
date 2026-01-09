@@ -28,6 +28,7 @@ data class PostWithMetadata(
   val description: String,
   val imageUrl: String?,
   val date: Instant,
+  val createdAt: Instant,
   val link: String,
   val commentsLink: String?,
   val flags: Set<PostFlag>,

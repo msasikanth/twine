@@ -13,6 +13,7 @@ SELECT
   post.description,
   post.imageUrl,
   post.postDate AS date,
+  post.createdAt,
   post.link,
   post.commentsLink,
   post.flags,

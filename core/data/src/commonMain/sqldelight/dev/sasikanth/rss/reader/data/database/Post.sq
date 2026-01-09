@@ -102,6 +102,7 @@ WITH baseQuery AS (
     post.description AS description,
     post.imageUrl AS imageUrl,
     post.postDate AS postDate,
+    post.createdAt AS createdAt,
     post.link AS link,
     post.commentsLink AS commentsLink,
     post.flags AS flags,
@@ -127,7 +128,9 @@ featuredPosts AS (
   WHERE imageUrl IS NOT NULL
   ORDER BY
     CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-    CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
+    CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
+    CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
+    CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
   LIMIT :numberOfFeaturedPosts
 )
 SELECT * FROM (
@@ -143,14 +146,18 @@ SELECT * FROM (
     WHERE id NOT IN (SELECT id FROM featuredPosts)
     ORDER BY
       CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-      CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
+      CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
+      CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
+      CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
     LIMIT :limit + :offset
   )
 )
 ORDER BY
   isFeatured DESC,
   CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-  CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
+  CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
+  CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
+  CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
@@ -243,6 +250,7 @@ SELECT
   post.description,
   post.imageUrl,
   post.postDate,
+  post.createdAt,
   post.link,
   post.commentsLink,
   post.flags,
