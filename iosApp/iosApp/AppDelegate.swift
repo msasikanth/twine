@@ -72,7 +72,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
                 let feedsDeletedFrom = try await applicationComponent.rssRepository.deleteReadPosts(before: before)
                 if !feedsDeletedFrom.isEmpty {
-                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom, lastCleanUpAt: KotlinInstant.companion.now())
+                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom, lastCleanUpAt: KotlinInstant.companion.currentMoment())
                 }
                 task.setTaskCompleted(success: true)
             } catch {

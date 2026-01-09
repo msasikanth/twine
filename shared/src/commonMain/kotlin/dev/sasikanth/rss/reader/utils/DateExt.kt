@@ -43,7 +43,7 @@ fun Period.calculateInstantBeforePeriod(): Instant {
   return currentMoment.minus(period, TimeZone.currentSystemDefault())
 }
 
-fun Instant.Companion.now(): Instant {
+fun Instant.Companion.currentMoment(): Instant {
   return Clock.System.now()
 }
 
