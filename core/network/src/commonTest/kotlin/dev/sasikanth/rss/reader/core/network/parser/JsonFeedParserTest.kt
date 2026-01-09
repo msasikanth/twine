@@ -17,6 +17,8 @@ import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
 import dev.sasikanth.rss.reader.core.network.utils.TestDispatchersProvider
 import dev.sasikanth.rss.reader.core.network.utils.jsonFeed
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.readBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -119,6 +121,7 @@ class JsonFeedParserTest {
             )
           )
       )
+    val jsonFeed = ByteReadChannel(jsonFeed).readBuffer()
 
     // when
     val payload = parser.parse(jsonFeed, "https://example.com/feed.json")

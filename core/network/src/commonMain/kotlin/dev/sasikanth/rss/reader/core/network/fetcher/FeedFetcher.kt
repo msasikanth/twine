@@ -32,7 +32,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.BadContentTypeFormatException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -42,6 +41,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isRelativePath
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.asSource
+import io.ktor.utils.io.readBuffer
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import kotlinx.coroutines.async
@@ -133,9 +133,10 @@ class FeedFetcher(
         ContentType.Text.Xml
       }
 
+    val responseChannel = response.bodyAsChannel()
     when (contentType) {
       ContentType.Text.Html -> {
-        val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
+        val feedUrl = fetchFeedLinkFromHtmlIfExists(responseChannel, url)
 
         if (feedUrl != url && !feedUrl.isNullOrBlank()) {
           return fetch(
@@ -155,7 +156,6 @@ class FeedFetcher(
       ContentType("text", "atom+xml"),
       ContentType("text", "rss+xml"),
       null -> {
-        val content = response.bodyAsChannel()
         val responseCharset =
           try {
             response.contentType()?.parameter("charset")
@@ -167,7 +167,7 @@ class FeedFetcher(
         var feedPayload =
           xmlFeedParser.parse(
             feedUrl = url,
-            content = content,
+            content = responseChannel,
             charset = charset,
           )
 
@@ -178,12 +178,10 @@ class FeedFetcher(
         return FeedFetchResult.Success(feedPayload)
       }
       ContentType.Application.Json -> {
-        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform
-        //  streaming
-        val content = response.bodyAsText()
+        val jsonBuffer = responseChannel.readBuffer()
         var feedPayload =
           jsonFeedParser.parse(
-            content = content,
+            content = jsonBuffer,
             feedUrl = url,
           )
 
