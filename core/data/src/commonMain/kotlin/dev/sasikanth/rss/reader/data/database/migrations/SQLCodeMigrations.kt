@@ -26,7 +26,19 @@ import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 object SQLCodeMigrations {
 
   fun migrations(): Array<AfterVersion> {
-    return arrayOf(afterVersion12(), afterVersion13())
+    return arrayOf(afterVersion12(), afterVersion13(), afterVersion35())
+  }
+
+  private fun afterVersion35(): AfterVersion {
+    return AfterVersion(35) { driver ->
+      driver.execute(
+        identifier = null,
+        sql =
+          "INSERT OR IGNORE INTO appConfig(id, syncFormatVersion, lastSyncedFormatVersion) VALUES (0, 1, 0)",
+        parameters = 0,
+        binders = null
+      )
+    }
   }
 
   private fun afterVersion13(): AfterVersion {

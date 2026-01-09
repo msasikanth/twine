@@ -1,0 +1,1 @@
+UPDATE appConfig SET syncFormatVersion = 2 WHERE id = 0;
