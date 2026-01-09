@@ -92,7 +92,7 @@
     <string name="postsAll">Все статьи</string>
     <string name="postsUnread">Непрочитанные</string>
     <string name="postsToday">За сегодня</string>
-    <string name="postsLast24Hours">За последние 24 часа</string>
+    <string name="postsLast24Hours">Last 24H</string>
     <string name="markAsRead">Отметить как прочитанное</string>
     <string name="markAsUnRead">Отметить как непрочитанное</string>
     <string name="removeFeed">Удалить новостную ленту</string>
@@ -163,12 +163,17 @@
     <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
     <string name="readerCustomisationsTypeface">Шрифт</string>
     <string name="postsFilter">Фильтр постов</string>
+    <string name="postsSortLatest">Newest</string>
+    <string name="postsSortOldest">Oldest</string>
+    <string name="buttonApply">Apply</string>
     <string name="screenHome">Домашняя страница</string>
     <string name="settingsEnableNotificationsTitle">Enable notifications</string>
     <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
     <string name="settingsDownloadFullContentTitle">Download full articles</string>
     <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
     <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data, memory and storage consumption. It can potentially impact your user experience.</string>
+    <string name="sort">Sort</string>
+    <string name="filter">Filter</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
