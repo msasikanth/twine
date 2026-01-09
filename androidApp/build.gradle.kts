@@ -100,6 +100,7 @@ dependencies {
   debugImplementation(libs.leakcanary)
 
   implementation(project(":shared"))
+  api(project(":core:data"))
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
   implementation(libs.androidx.work)
