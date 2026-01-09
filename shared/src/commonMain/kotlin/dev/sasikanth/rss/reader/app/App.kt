@@ -177,6 +177,32 @@ fun App(
           AppThemeMode.Auto -> isSystemInDarkTheme
         }
       }
+    val navController = rememberNavController()
+    val openPost: (Int, PostWithMetadata, FromScreen) -> Unit =
+      remember(navController, linkHandler, appViewModel, coroutineScope) {
+        { index, post, fromScreen ->
+          navController.navigateToReaderOrOpenLink(
+            showReader = appState.showReaderView,
+            index = index,
+            post = post,
+            fromScreen = fromScreen,
+            openLink = {
+              coroutineScope.launch {
+                linkHandler.openLink(post.link)
+                appViewModel.onPostOpened(post.id, index)
+              }
+            }
+          )
+        }
+      }
+    val screenCornerRadius =
+      if (platform == Platform.Apple) {
+        38.dp
+      } else {
+        24.dp
+      }
+    val screenModifier = Modifier.fillMaxSize()
+    val roundedCornerScreenModifier = screenModifier.clip(RoundedCornerShape(screenCornerRadius))
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
@@ -188,27 +214,17 @@ fun App(
       }
     }
 
-    AppTheme(useDarkTheme = useDarkTheme) {
-      val navController = rememberNavController()
-      val screenCornerRadius =
-        if (platform == Platform.Apple) {
-          38.dp
-        } else {
-          24.dp
-        }
-      val screenModifier = Modifier.fillMaxSize()
-      val roundedCornerScreenModifier = screenModifier.clip(RoundedCornerShape(screenCornerRadius))
-
-      DisposableEffect(Unit) {
-        ExternalUriHandler.listener = { uri ->
-          navController.handleDeepLink(
-            NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-          )
-        }
-
-        onDispose { ExternalUriHandler.listener = null }
+    DisposableEffect(Unit) {
+      ExternalUriHandler.listener = { uri ->
+        navController.handleDeepLink(
+          NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+        )
       }
 
+      onDispose { ExternalUriHandler.listener = null }
+    }
+
+    AppTheme(useDarkTheme = useDarkTheme) {
       NavHost(
         navController = navController,
         startDestination = Screen.Placeholder,
@@ -257,18 +273,7 @@ fun App(
                 viewModel = viewModel,
                 feedsViewModel = feedsViewModel,
                 onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
-                openPost = { index, post ->
-                  coroutineScope.launch {
-                    openPost(
-                      state = appState,
-                      navController = navController,
-                      index = index,
-                      post = post,
-                      linkHandler = linkHandler,
-                      appViewModel = appViewModel
-                    )
-                  }
-                },
+                openPost = { index, post -> openPost(index, post, FromScreen.Home) },
                 openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
                 openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
                 openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
@@ -296,16 +301,7 @@ fun App(
                 searchViewModel = viewModel,
                 goBack = goBack,
                 openPost = { searchQuery, sortOrder, index, post ->
-                  coroutineScope.launch {
-                    openPost(
-                      state = appState,
-                      navController = navController,
-                      index = index,
-                      post = post,
-                      linkHandler = linkHandler,
-                      appViewModel = appViewModel
-                    )
-                  }
+                  openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
                 },
                 modifier = screenModifier
               )
@@ -316,18 +312,7 @@ fun App(
               BookmarksScreen(
                 bookmarksViewModel = viewModel,
                 goBack = goBack,
-                openPost = { index, post ->
-                  coroutineScope.launch {
-                    openPost(
-                      state = appState,
-                      navController = navController,
-                      index = index,
-                      post = post,
-                      linkHandler = linkHandler,
-                      appViewModel = appViewModel
-                    )
-                  }
-                },
+                openPost = { index, post -> openPost(index, post, FromScreen.Bookmarks) },
                 modifier = screenModifier
               )
             },
@@ -470,30 +455,25 @@ fun App(
   }
 }
 
-// TODO: Move this to individual screens
-private suspend fun openPost(
-  state: AppState,
-  navController: NavHostController,
+private fun NavHostController.navigateToReaderOrOpenLink(
+  showReader: Boolean,
   index: Int,
   post: PostWithMetadata,
-  linkHandler: LinkHandler,
-  appViewModel: AppViewModel,
+  fromScreen: FromScreen,
+  openLink: () -> Unit,
 ) {
-  if (state.showReaderView) {
-    navController.navigate(
+  if (showReader) {
+    val route =
       Screen.Reader(
         ReaderScreenArgs(
           postIndex = index,
           postId = post.id,
-          fromScreen = FromScreen.Home,
+          fromScreen = fromScreen,
         )
       )
-    )
+
+    navigate(route)
   } else {
-    linkHandler.openLink(post.link)
-    appViewModel.run {
-      updateActivePostIndex(index)
-      markPostAsRead(post.id)
-    }
+    openLink()
   }
 }

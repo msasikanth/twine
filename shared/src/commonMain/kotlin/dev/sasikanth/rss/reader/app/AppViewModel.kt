@@ -77,6 +77,11 @@ class AppViewModel(
       .launchIn(viewModelScope)
   }
 
+  fun onPostOpened(postId: String, index: Int) {
+    updateActivePostIndex(index)
+    markPostAsRead(postId)
+  }
+
   fun markPostAsRead(id: String) {
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
   }
