@@ -23,6 +23,7 @@ import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -70,16 +71,18 @@ class AllPostsPager(
     val activeSourceIds: List<String>,
     val postsAfter: Instant,
     val lastSyncedAt: Instant,
-    val unreadOnly: Boolean?
+    val unreadOnly: Boolean?,
+    val postsSortOrder: PostsSortOrder,
   )
 
   private val baseParameters =
     combine(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
+        settingsRepository.postsSortOrder,
         lastRefreshedAt.dateTimeFlow
-      ) { activeSource, postsType, dateTime ->
-        computeParameters(activeSource, postsType, dateTime)
+      ) { activeSource, postsType, postsSortOrder, dateTime ->
+        computeParameters(activeSource, postsType, postsSortOrder, dateTime)
       }
       .distinctUntilChanged()
 
@@ -134,6 +137,7 @@ class AllPostsPager(
           createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
               rssRepository.allPosts(
                 activeSourceIds = params.activeSourceIds,
+                postsSortOrder = params.postsSortOrder,
                 unreadOnly = params.unreadOnly,
                 after = params.postsAfter,
                 lastSyncedAt = params.lastSyncedAt
@@ -150,13 +154,15 @@ class AllPostsPager(
   private fun computeParameters(
     activeSource: Source?,
     postsType: PostsType,
+    postsSortOrder: PostsSortOrder,
     dateTime: LocalDateTime
   ): PostsParameters {
     return PostsParameters(
       activeSourceIds = activeSourceIds(activeSource),
       postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime),
       lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault()),
-      unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType)
+      unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType),
+      postsSortOrder = postsSortOrder,
     )
   }
 

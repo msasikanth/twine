@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -192,6 +193,7 @@ class RssRepository(
 
   fun allPosts(
     activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
@@ -215,6 +217,7 @@ class RssRepository(
           postsAfter = after,
           numberOfFeaturedPosts = Constants.NUMBER_OF_FEATURED_POSTS,
           lastSyncedAt = lastSyncedAt,
+          orderBy = postsSortOrder.name,
           limit = limit,
           offset = offset,
           mapper = {

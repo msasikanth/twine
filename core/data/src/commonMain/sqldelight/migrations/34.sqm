@@ -1,0 +1,1 @@
+CREATE INDEX post_sourceId_index ON post (sourceId);

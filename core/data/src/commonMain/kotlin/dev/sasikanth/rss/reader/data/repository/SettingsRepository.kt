@@ -23,6 +23,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Instant
@@ -39,6 +40,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
+  private val postsSortOrderKey = stringPreferencesKey("posts_sort_order")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
@@ -75,6 +77,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val postsType: Flow<PostsType> =
     dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
+
+  val postsSortOrder: Flow<PostsSortOrder> =
+    dataStore.data.map { preferences ->
+      mapToPostsSortOrder(preferences[postsSortOrderKey]) ?: PostsSortOrder.Latest
+    }
 
   val feedsSortOrder: Flow<FeedsOrderBy> =
     dataStore.data.map { preferences ->
@@ -158,6 +165,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   suspend fun updatePostsType(postsType: PostsType) {
     dataStore.edit { preferences -> preferences[postsTypeKey] = postsType.name }
+  }
+
+  suspend fun updatePostsSortOrder(postsSortOrder: PostsSortOrder) {
+    dataStore.edit { preferences -> preferences[postsSortOrderKey] = postsSortOrder.name }
   }
 
   suspend fun toggleShowReaderView(value: Boolean) {
@@ -256,6 +267,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private fun mapToPostsType(pref: String?): PostsType? {
     if (pref.isNullOrBlank()) return null
     return PostsType.valueOf(pref)
+  }
+
+  private fun mapToPostsSortOrder(pref: String?): PostsSortOrder? {
+    if (pref.isNullOrBlank()) return null
+    return PostsSortOrder.valueOf(pref)
   }
 
   private fun mapToMarkAsReadOnType(pref: String?): MarkAsReadOn {

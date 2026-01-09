@@ -92,7 +92,7 @@
     <string name="postsAll">All articles</string>
     <string name="postsUnread">Unread</string>
     <string name="postsToday">Today</string>
-    <string name="postsLast24Hours">Last 24 hours</string>
+    <string name="postsLast24Hours">Last 24H</string>
     <string name="markAsRead">Mark as read</string>
     <string name="markAsUnRead">Mark as unread</string>
     <string name="removeFeed">Remove feed</string>
@@ -163,12 +163,17 @@
     <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
     <string name="readerCustomisationsTypeface">Typeface</string>
     <string name="postsFilter">Posts filter</string>
+    <string name="postsSortLatest">Newest</string>
+    <string name="postsSortOldest">Oldest</string>
+    <string name="buttonApply">Apply</string>
     <string name="screenHome">Home</string>
     <string name="settingsEnableNotificationsTitle">Enable notifications</string>
     <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
     <string name="settingsDownloadFullContentTitle">Download full articles</string>
     <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
     <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data, memory and storage consumption. It can potentially impact your user experience.</string>
+    <string name="sort">Sort</string>
+    <string name="filter">Filter</string>
 
     <!-- Plurals -->
     <plurals name="searchResultsCount">

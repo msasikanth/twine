@@ -114,7 +114,7 @@ internal fun HomeTopAppBar(
   scrollBehavior: TopAppBarScrollBehavior,
   modifier: Modifier = Modifier,
   onMenuClicked: (() -> Unit)? = null,
-  onPostTypeChanged: (PostsType) -> Unit,
+  onShowPostsSortFilter: () -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
 ) {
   val backgroundAlpha by
@@ -163,29 +163,11 @@ internal fun HomeTopAppBar(
 
       Spacer(Modifier.width(8.dp))
 
-      val density = LocalDensity.current
-      var buttonHeight by remember { mutableStateOf(0.dp) }
-
-      Box(
-        modifier =
-          Modifier.onGloballyPositioned { buttonHeight = with(density) { it.size.height.toDp() } }
-      ) {
-        var showPostsTypeDropDown by remember { mutableStateOf(false) }
-
-        CircularIconButton(
-          icon = TwineIcons.Sort,
-          label = stringResource(Res.string.postsFilter),
-          onClick = { showPostsTypeDropDown = true }
-        )
-
-        PostsFilterDropdown(
-          showDropdown = showPostsTypeDropDown,
-          postsType = postsType,
-          onPostTypeChanged = onPostTypeChanged,
-          offset = DpOffset(x = 0.dp, y = -buttonHeight),
-          onDismiss = { showPostsTypeDropDown = false }
-        )
-      }
+      CircularIconButton(
+        icon = TwineIcons.Sort,
+        label = stringResource(Res.string.postsFilter),
+        onClick = onShowPostsSortFilter
+      )
     },
     colors =
       TopAppBarDefaults.topAppBarColors(
@@ -272,48 +254,6 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
       }
       else -> {
         // no-op
-      }
-    }
-  }
-}
-
-@Composable
-private fun PostsFilterDropdown(
-  showDropdown: Boolean,
-  postsType: PostsType,
-  onPostTypeChanged: (PostsType) -> Unit,
-  onDismiss: () -> Unit,
-  offset: DpOffset = DpOffset.Zero,
-) {
-  DropdownMenu(
-    modifier = Modifier.requiredWidth(158.dp),
-    expanded = showDropdown,
-    offset = offset,
-    onDismissRequest = onDismiss,
-  ) {
-    PostsType.entries.forEach { type ->
-      val label = getPostTypeLabel(type)
-      val color =
-        if (postsType == type) {
-          AppTheme.colorScheme.tintedHighlight
-        } else {
-          Color.Unspecified
-        }
-      val labelColor =
-        if (postsType == type) {
-          AppTheme.colorScheme.inverseOnSurface
-        } else {
-          AppTheme.colorScheme.textEmphasisHigh
-        }
-
-      DropdownMenuItem(
-        onClick = {
-          onPostTypeChanged(type)
-          onDismiss()
-        },
-        modifier = Modifier.background(color)
-      ) {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
       }
     }
   }

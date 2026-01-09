@@ -33,13 +33,13 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
-import dev.sasikanth.rss.reader.utils.NTuple5
+import dev.sasikanth.rss.reader.utils.NTuple6
+import dev.sasikanth.rss.reader.utils.combine
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -96,6 +96,20 @@ class HomeViewModel(
       is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
       is HomeEvent.UpdateDate -> updateDate()
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
+      is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
+      is HomeEvent.ShowPostsSortFilter -> showPostsSortFilter(event.show)
+    }
+  }
+
+  private fun showPostsSortFilter(show: Boolean) {
+    _state.update { it.copy(showPostsSortFilter = show) }
+  }
+
+  private fun onPostsSortFilterApplied(event: HomeEvent.OnPostsSortFilterApplied) {
+    viewModelScope.launch {
+      settingsRepository.updatePostsType(event.postsType)
+      settingsRepository.updatePostsSortOrder(event.postsSortOrder)
+      _state.update { it.copy(showPostsSortFilter = false) }
     }
   }
 
@@ -118,18 +132,30 @@ class HomeViewModel(
     combine(
         activeSourceFlow,
         postsTypeFlow,
+        settingsRepository.postsSortOrder,
         settingsRepository.homeViewMode,
         allPostsPager.hasUnreadPosts,
         allPostsPager.unreadSinceLastSync,
-      ) { activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync ->
-        NTuple5(activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync)
+      ) { activeSource, postsType, postsSortOrder, homeViewMode, hasUnreadPosts, unreadSinceLastSync
+        ->
+        NTuple6(
+          activeSource,
+          postsType,
+          postsSortOrder,
+          homeViewMode,
+          hasUnreadPosts,
+          unreadSinceLastSync
+        )
       }
       .distinctUntilChanged()
-      .onEach { (activeSource, postsType, homeViewMode, hasUnreadPosts, unreadSinceLastSync) ->
+      .onEach {
+        (activeSource, postsType, postsSortOrder, homeViewMode, hasUnreadPosts, unreadSinceLastSync)
+        ->
         _state.update {
           it.copy(
             activeSource = activeSource,
             postsType = postsType,
+            postsSortOrder = postsSortOrder,
             homeViewMode = homeViewMode,
             hasUnreadPosts = hasUnreadPosts,
             unreadSinceLastSync = unreadSinceLastSync,

@@ -27,6 +27,7 @@ END;
 
 CREATE INDEX post_date_index ON post (postDate);
 CREATE INDEX post_createdAt_index ON post (createdAt);
+CREATE INDEX post_sourceId_index ON post (sourceId);
 
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
@@ -93,22 +94,21 @@ WHERE
   post.syncedAt < :lastSyncedAt;
 
 allPosts:
-WITH featuredPosts AS (
+WITH baseQuery AS (
   SELECT
-    post.id,
-    sourceId,
-    post.title,
-    post.description,
-    post.imageUrl,
-    post.postDate,
-    post.link,
-    post.commentsLink,
-    post.flags,
+    post.id AS id,
+    post.sourceId AS sourceId,
+    post.title AS title,
+    post.description AS description,
+    post.imageUrl AS imageUrl,
+    post.postDate AS postDate,
+    post.link AS link,
+    post.commentsLink AS commentsLink,
+    post.flags AS flags,
     feed.name AS feedName,
     feed.icon AS feedIcon,
     feed.homepageLink AS feedHomepageLink,
-    feed.alwaysFetchSourceArticle,
-    1 AS isFeatured
+    feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle
   FROM post
   INNER JOIN feed ON post.sourceId == feed.id
   WHERE
@@ -116,43 +116,41 @@ WITH featuredPosts AS (
     (post.flags & 4) == 0 AND
     feed.isDeleted = 0 AND
     (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
-    post.imageUrl IS NOT NULL AND
     post.postDate > :postsAfter AND
     post.syncedAt < :lastSyncedAt
-  ORDER BY post.postDate DESC
+),
+featuredPosts AS (
+  SELECT
+    *,
+    1 AS isFeatured
+  FROM baseQuery
+  WHERE imageUrl IS NOT NULL
+  ORDER BY
+    CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
+    CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
   LIMIT :numberOfFeaturedPosts
 )
+SELECT * FROM (
+  SELECT * FROM featuredPosts
 
-SELECT * FROM featuredPosts
+  UNION ALL
 
-UNION ALL
-
-SELECT
-  post.id,
-  sourceId,
-  post.title,
-  post.description,
-  post.imageUrl,
-  post.postDate,
-  post.link,
-  post.commentsLink,
-  post.flags,
-  feed.name AS feedName,
-  feed.icon AS feedIcon,
-  feed.homepageLink AS feedHomepageLink,
-  feed.alwaysFetchSourceArticle,
-  0 AS isFeatured
-FROM post
-INNER JOIN feed ON post.sourceId == feed.id
-WHERE
-  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  (post.flags & 4) == 0 AND
-  feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
-  post.id NOT IN (SELECT id FROM featuredPosts) AND
-  post.postDate > :postsAfter AND
-  post.syncedAt < :lastSyncedAt
-ORDER BY isFeatured DESC, postDate DESC
+  SELECT * FROM (
+    SELECT
+      *,
+      0 AS isFeatured
+    FROM baseQuery
+    WHERE id NOT IN (SELECT id FROM featuredPosts)
+    ORDER BY
+      CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
+      CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
+    LIMIT :limit + :offset
+  )
+)
+ORDER BY
+  isFeatured DESC,
+  CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
+  CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
@@ -188,50 +186,41 @@ WHERE
   (:isSourceIdsEmpty OR post.sourceId IN :sourceIds);
 
 unreadSinceLastSync:
-SELECT COUNT(post.id),
+WITH unreadPosts AS (
+  SELECT
+    feed.homepageLink,
+    feed.icon,
+    post.syncedAt
+  FROM post
+  INNER JOIN feed ON post.sourceId == feed.id
+  WHERE
+    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+    (post.flags & 4) == 0 AND
+    feed.isDeleted = 0 AND
+    (post.flags & 2) == 0 AND
+    post.postDate > :postsAfter AND
+    post.syncedAt > :lastSyncedAt
+)
+SELECT COUNT(*),
 (
   SELECT GROUP_CONCAT(homepageLink, ',')
   FROM (
-    SELECT DISTINCT feed.homepageLink
-    FROM post
-    INNER JOIN feed ON post.sourceId == feed.id
-    WHERE
-      ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-      (post.flags & 4) == 0 AND
-      feed.isDeleted = 0 AND
-      (post.flags & 2) == 0 AND
-      post.postDate > :postsAfter AND
-      post.syncedAt > :lastSyncedAt
-    ORDER BY post.syncedAt
+    SELECT DISTINCT homepageLink
+    FROM unreadPosts
+    ORDER BY syncedAt
     LIMIT 3
   )
 ) AS feedHomepageLinks,
 (
   SELECT GROUP_CONCAT(icon, ',')
   FROM (
-    SELECT DISTINCT f.icon
-    FROM post
-    INNER JOIN feed ON post.sourceId == f.id
-    WHERE
-      ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-      (post.flags & 4) == 0 AND
-      f.isDeleted = 0 AND
-      (post.flags & 2) == 0 AND
-      post.postDate > :postsAfter AND
-      post.syncedAt > :lastSyncedAt
-    ORDER BY post.syncedAt
+    SELECT DISTINCT icon
+    FROM unreadPosts
+    ORDER BY syncedAt
     LIMIT 3
   )
 ) AS feedIcons
-FROM post
-INNER JOIN feed f ON post.sourceId == f.id
-WHERE
-  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-  (post.flags & 4) == 0 AND
-  f.isDeleted = 0 AND
-  (post.flags & 2) == 0 AND
-  post.postDate > :postsAfter AND
-  post.syncedAt > :lastSyncedAt;
+FROM unreadPosts;
 
 countPostsForFeed:
 SELECT COUNT(*) FROM post
