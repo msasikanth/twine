@@ -27,10 +27,15 @@ import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.CloudSyncService
+import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -45,7 +50,12 @@ class SettingsViewModel(
   private val opmlManager: OpmlManager,
   private val billingHandler: BillingHandler,
   private val notifier: Notifier,
+  private val cloudSyncService: CloudSyncService,
+  private val oAuthManager: OAuthManager,
+  dropboxSyncProvider: DropboxSyncProvider,
 ) : ViewModel() {
+
+  val availableProviders = listOf(dropboxSyncProvider)
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
   val state: StateFlow<SettingsState>
@@ -66,6 +76,8 @@ class SettingsViewModel(
         settingsRepository.blockImages,
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
+        settingsRepository.lastSyncedAt,
+        settingsRepository.lastSyncStatus,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -79,7 +91,9 @@ class SettingsViewModel(
         homeViewMode,
         blockImages,
         enableNotifications,
-        downloadFullContent ->
+        downloadFullContent,
+        lastSyncedAt,
+        lastSyncStatus ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -94,6 +108,13 @@ class SettingsViewModel(
           blockImages = blockImages,
           enableNotifications = enableNotifications,
           downloadFullContent = downloadFullContent,
+          lastSyncedAt = lastSyncedAt,
+          lastSyncStatus =
+            when (lastSyncStatus) {
+              "SUCCESS" -> SettingsState.SyncProgress.Success
+              "FAILURE" -> SettingsState.SyncProgress.Failure
+              else -> SettingsState.SyncProgress.Idle
+            }
         )
       }
       .onEach { settings ->
@@ -112,6 +133,13 @@ class SettingsViewModel(
             blockImages = settings.blockImages,
             enableNotifications = settings.enableNotifications,
             downloadFullContent = settings.downloadFullContent,
+            lastSyncedAt = settings.lastSyncedAt,
+            syncProgress =
+              if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
+                SettingsState.SyncProgress.Syncing
+              } else {
+                settings.lastSyncStatus
+              }
           )
         }
       }
@@ -149,6 +177,36 @@ class SettingsViewModel(
       is SettingsEvent.ToggleBlockImages -> toggleBlockImages(event.value)
       is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
       is SettingsEvent.ToggleDownloadFullContent -> toggleDownloadFullContent(event.value)
+      is SettingsEvent.SyncClicked -> syncClicked(event.provider)
+      is SettingsEvent.SignOutClicked -> signOutClicked(event.provider)
+      SettingsEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
+    }
+  }
+
+  private fun syncClicked(provider: CloudSyncProvider) {
+    viewModelScope.launch {
+      val isSignedIn = provider.isSignedIn().first()
+      if (isSignedIn) {
+        _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
+        val result = cloudSyncService.sync(provider)
+        _state.update {
+          it.copy(
+            syncProgress =
+              if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
+          )
+        }
+      } else {
+        oAuthManager.setPendingProvider(provider.id)
+        val authUrl = oAuthManager.getAuthUrl(provider.id)
+        _state.update { it.copy(authUrlToOpen = authUrl) }
+      }
+    }
+  }
+
+  private fun signOutClicked(provider: CloudSyncProvider) {
+    viewModelScope.launch {
+      provider.signOut()
+      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
     }
   }
 
@@ -251,4 +309,6 @@ private data class Settings(
   val blockImages: Boolean,
   val enableNotifications: Boolean,
   val downloadFullContent: Boolean,
+  val lastSyncedAt: kotlin.time.Instant?,
+  val lastSyncStatus: SettingsState.SyncProgress,
 )
