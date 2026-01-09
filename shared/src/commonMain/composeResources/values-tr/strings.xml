@@ -92,7 +92,7 @@
     <string name="postsAll">Tüm gönderiler</string>
     <string name="postsUnread">Okunmamış</string>
     <string name="postsToday">Bugün</string>
-    <string name="postsLast24Hours">Son 24 saat</string>
+    <string name="postsLast24Hours">Last 24H</string>
     <string name="markAsRead">Okundu olarak işaretle</string>
     <string name="markAsUnRead">Okunmadı olarak işaretle</string>
     <string name="removeFeed">Akışı kaldır</string>
@@ -163,12 +163,17 @@
     <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
     <string name="readerCustomisationsTypeface">Yazı Tipi</string>
     <string name="postsFilter">Posts filter</string>
+    <string name="postsSortLatest">Newest</string>
+    <string name="postsSortOldest">Oldest</string>
+    <string name="buttonApply">Apply</string>
     <string name="screenHome">Home</string>
     <string name="settingsEnableNotificationsTitle">Enable notifications</string>
     <string name="settingsEnableNotificationsSubtitle">When turned on, you will receive notifications when new articles are found during background sync</string>
     <string name="settingsDownloadFullContentTitle">Download full articles</string>
     <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
     <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data, memory and storage consumption. It can potentially impact your user experience.</string>
+    <string name="sort">Sort</string>
+    <string name="filter">Filter</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>
