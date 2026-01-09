@@ -169,7 +169,7 @@ internal fun HomeScreen(
   val unreadSinceLastSync = state.unreadSinceLastSync
 
   if (state.showPostsSortFilter) {
-    PostsSortFilterBottomSheet(
+    PostsPreferencesSheet(
       postsType = state.postsType,
       postsSortOrder = state.postsSortOrder,
       onApply = { postsType, postsSortOrder ->

@@ -70,7 +70,7 @@ import twine.shared.generated.resources.postsUnread
 import twine.shared.generated.resources.sort
 
 @Composable
-internal fun PostsSortFilterBottomSheet(
+internal fun PostsPreferencesSheet(
   postsType: PostsType,
   postsSortOrder: PostsSortOrder,
   onApply: (PostsType, PostsSortOrder) -> Unit,
