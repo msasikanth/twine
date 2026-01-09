@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -111,6 +113,7 @@ internal fun PostsPreferencesSheet(
     Column(
       modifier =
         Modifier.fillMaxWidth()
+          .verticalScroll(rememberScrollState())
           .padding(horizontal = 24.dp)
           .padding(top = 24.dp, bottom = 16.dp)
           .navigationBarsPadding()
