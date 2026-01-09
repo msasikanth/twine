@@ -49,6 +49,8 @@ class LocalSyncCoordinator(
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
   private val lastRefreshedAt: LastRefreshedAt,
+  private val cloudSyncService: CloudSyncService,
+  private val dropboxSyncProvider: DropboxSyncProvider,
 ) : SyncCoordinator {
 
   companion object {
@@ -63,9 +65,16 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
+
+        if (dropboxSyncProvider.isSignedIn().first()) {
+          cloudSyncService.sync(dropboxSyncProvider)
+        }
+
         checkAndRefreshLastRefreshTime {
           val allFeeds =
-            withContext(dispatchersProvider.databaseRead) { rssRepository.allFeedsBlocking() }
+            withContext(dispatchersProvider.databaseRead) {
+              rssRepository.allFeedsBlocking().filterNot { it.isDeleted }
+            }
           val now = Clock.System.now()
           val feedsToRefresh = allFeeds.filter { feed -> shouldRefreshFeed(feed, now) }
           val feedsChunks = feedsToRefresh.chunked(SYNC_CHUNK_SIZE)
@@ -90,6 +99,10 @@ class LocalSyncCoordinator(
       try {
         updateSyncState(SyncState.InProgress(0f))
 
+        if (dropboxSyncProvider.isSignedIn().first()) {
+          cloudSyncService.sync(dropboxSyncProvider)
+        }
+
         val now = Clock.System.now()
         feedIds.forEachIndexed { index, feedId ->
           val feed =
@@ -113,6 +126,11 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
+
+        if (dropboxSyncProvider.isSignedIn().first()) {
+          cloudSyncService.sync(dropboxSyncProvider)
+        }
+
         val feed =
           withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = feedId) }
         val now = Clock.System.now()
@@ -132,7 +150,11 @@ class LocalSyncCoordinator(
   }
 
   override suspend fun push() {
-    // no-op
+    withContext(dispatchersProvider.default) {
+      if (dropboxSyncProvider.isSignedIn().first()) {
+        cloudSyncService.sync(dropboxSyncProvider)
+      }
+    }
   }
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {
