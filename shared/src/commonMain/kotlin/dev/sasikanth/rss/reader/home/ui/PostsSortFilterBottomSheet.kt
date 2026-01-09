@@ -81,7 +81,6 @@ internal fun PostsSortFilterBottomSheet(
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = AppTheme.colorScheme.onSurface,
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    dragHandle = null,
   ) {
     var selectedPostsType by remember(postsType) { mutableStateOf(postsType) }
     var selectedSortBy by
