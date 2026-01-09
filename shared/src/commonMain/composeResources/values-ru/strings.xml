@@ -163,6 +163,9 @@
     <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
     <string name="readerCustomisationsTypeface">Шрифт</string>
     <string name="postsFilter">Фильтр постов</string>
+    <string name="postsSortBy">Sort by</string>
+    <string name="postsSortByPostDate">Post date</string>
+    <string name="postsSortByPostAdded">Post added</string>
     <string name="postsSortLatest">Newest</string>
     <string name="postsSortOldest">Oldest</string>
     <string name="buttonApply">Apply</string>
