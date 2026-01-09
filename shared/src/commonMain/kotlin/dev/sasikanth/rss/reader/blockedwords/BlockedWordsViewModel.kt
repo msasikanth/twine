@@ -56,6 +56,9 @@ class BlockedWordsViewModel(
   }
 
   private fun addBlockedWord(word: String) {
-    viewModelScope.launch { blockedWordsRepository.addWord(word.trim()) }
+    val word = word.trim()
+    if (word.isBlank()) return
+
+    viewModelScope.launch { blockedWordsRepository.addWord(word) }
   }
 }
