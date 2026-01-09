@@ -216,7 +216,7 @@ internal fun HomeScreen(
               if (platform == Platform.Android) {
                 scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
               } else {
-                8.dp
+                12.dp
               }
             BOTTOM_SHEET_PEEK_HEIGHT + scaffoldBottomPadding
           } else {
