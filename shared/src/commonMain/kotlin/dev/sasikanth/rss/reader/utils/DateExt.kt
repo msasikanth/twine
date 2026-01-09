@@ -43,6 +43,10 @@ fun Period.calculateInstantBeforePeriod(): Instant {
   return currentMoment.minus(period, TimeZone.currentSystemDefault())
 }
 
+fun Instant.Companion.now(): Instant {
+  return Clock.System.now()
+}
+
 internal fun getTodayStartInstant(): Instant {
   return Clock.System.todayIn(TimeZone.currentSystemDefault())
     .atStartOfDayIn(TimeZone.currentSystemDefault())
