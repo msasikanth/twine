@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -251,29 +253,36 @@ private fun PostsFilterButton(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val backgroundColor =
-    if (isSelected) {
-      AppTheme.colorScheme.tintedForeground
-    } else {
-      Color.Transparent
-    }
-  val borderColor =
-    if (isSelected) {
-      Color.Transparent
-    } else {
-      AppTheme.colorScheme.surfaceContainerHigh
-    }
-  val textColor =
-    if (isSelected) {
-      AppTheme.colorScheme.tintedSurface
-    } else {
-      AppTheme.colorScheme.tintedForeground
-    }
+  val backgroundColor by
+    animateColorAsState(
+      if (isSelected) {
+        AppTheme.colorScheme.tintedForeground
+      } else {
+        Color.Transparent
+      }
+    )
+  val borderColor by
+    animateColorAsState(
+      if (isSelected) {
+        Color.Transparent
+      } else {
+        AppTheme.colorScheme.surfaceContainerHigh
+      }
+    )
+  val textColor by
+    animateColorAsState(
+      if (isSelected) {
+        AppTheme.colorScheme.tintedSurface
+      } else {
+        AppTheme.colorScheme.tintedForeground
+      }
+    )
 
   Box(
     modifier =
       modifier
         .requiredHeight(56.dp)
+        .clip(MaterialTheme.shapes.medium)
         .background(color = backgroundColor, shape = MaterialTheme.shapes.medium)
         .border(width = 1.dp, color = borderColor, shape = MaterialTheme.shapes.medium)
         .clickable(onClick = onClick)
