@@ -216,9 +216,17 @@ fun App(
 
     DisposableEffect(Unit) {
       ExternalUriHandler.listener = { uri ->
-        navController.handleDeepLink(
-          NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-        )
+        val deepLinkRequest = NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+        if (navController.graph.hasDeepLink(deepLinkRequest)) {
+          if (!navController.popBackStack(Screen.Main, inclusive = false)) {
+            navController.navigate(Screen.Main) {
+              popUpTo(Screen.Placeholder) { inclusive = true }
+              launchSingleTop = true
+            }
+          }
+
+          navController.navigate(NavUri(uri))
+        }
       }
 
       onDispose { ExternalUriHandler.listener = null }
