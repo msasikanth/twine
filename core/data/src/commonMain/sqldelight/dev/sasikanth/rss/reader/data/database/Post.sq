@@ -278,6 +278,9 @@ WHERE sourceId = :feedId AND (flags & 1) == 0;
 allPostsBlocking:
 SELECT * FROM post;
 
+allReadPostsBlocking:
+SELECT id, updatedAt FROM post WHERE (flags & 2) != 0;
+
 upsertSyncPost:
 INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags)
 VALUES (:id, :sourceId, :title, :description, :imageUrl, :postDate, :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :flags)

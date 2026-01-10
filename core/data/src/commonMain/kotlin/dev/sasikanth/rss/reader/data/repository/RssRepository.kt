@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
+import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
 import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -278,6 +279,16 @@ class RssRepository(
         id = id,
         updatedAt = Clock.System.now()
       )
+    }
+  }
+
+  suspend fun allReadPostsBlocking(): List<ReadPostSyncEntity> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .allReadPostsBlocking { id, updatedAt ->
+          ReadPostSyncEntity(id, updatedAt.toEpochMilliseconds())
+        }
+        .executeAsList()
     }
   }
 

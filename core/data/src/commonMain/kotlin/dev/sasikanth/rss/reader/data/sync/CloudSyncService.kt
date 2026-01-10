@@ -125,6 +125,8 @@ class CloudSyncService(
           )
         }
 
+      val readPosts = rssRepository.allReadPostsBlocking()
+
       val bookmarkedPosts =
         rssRepository.allBookmarkIdsBlocking().mapNotNull { rssRepository.postOrNull(it) }
       val postChunks = mutableListOf<String>()
@@ -167,7 +169,8 @@ class CloudSyncService(
           blockedWords = blockedWords,
           posts = emptyList(),
           postChunks = postChunks,
-          user = userSyncEntity
+          user = userSyncEntity,
+          readPosts = readPosts
         )
 
       val serializedData = json.encodeToString(syncData)
@@ -275,6 +278,18 @@ class CloudSyncService(
         )
       }
     rssRepository.upsertPosts(remotePosts)
+
+    remoteData.readPosts.forEach { remoteReadPost ->
+      val localPost = rssRepository.postOrNull(remoteReadPost.id)
+      if (localPost != null) {
+        val remoteUpdatedAt = Instant.fromEpochMilliseconds(remoteReadPost.updatedAt)
+        val localUpdatedAt = localPost.updatedAt
+
+        if (remoteUpdatedAt > localUpdatedAt) {
+          rssRepository.updatePostReadStatus(read = true, id = remoteReadPost.id)
+        }
+      }
+    }
 
     filteredRemotePosts.forEach { remotePost ->
       if (remotePost.rawContent != null || remotePost.htmlContent != null) {

@@ -55,8 +55,11 @@ data class SyncData(
   val blockedWords: List<BlockedWordSyncEntity> = emptyList(),
   val posts: List<PostSyncEntity> = emptyList(),
   val postChunks: List<String> = emptyList(),
-  val user: UserSyncEntity? = null
+  val user: UserSyncEntity? = null,
+  val readPosts: List<ReadPostSyncEntity> = emptyList()
 )
+
+@Serializable data class ReadPostSyncEntity(val id: String, val updatedAt: Long)
 
 @Serializable
 data class PostSyncEntity(

@@ -131,6 +131,7 @@ class PostSyncTest {
             )
           ),
         bookmarks = listOf("post-1"),
+        readPosts = listOf(ReadPostSyncEntity("post-1", 123456789L)),
         blockedWords =
           listOf(
             BlockedWordSyncEntity(
@@ -167,6 +168,8 @@ class PostSyncTest {
     assertEquals(syncData, deserialized)
     assertEquals(1, deserialized.posts.size)
     assertEquals(setOf(PostFlag.Bookmarked, PostFlag.Read), deserialized.posts[0].flags)
+    assertEquals(1, deserialized.readPosts.size)
+    assertEquals("post-1", deserialized.readPosts[0].id)
   }
 
   @Test
@@ -209,6 +212,8 @@ class PostSyncTest {
     assertEquals(emptyList<String>(), deserialized.groups[0].feedIds)
     assertEquals(false, deserialized.groups[0].isDeleted)
     assertEquals(null, deserialized.groups[0].updatedAt)
+
+    assertEquals(emptyList<ReadPostSyncEntity>(), deserialized.readPosts)
   }
 
   @Test
