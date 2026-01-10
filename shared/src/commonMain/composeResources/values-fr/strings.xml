@@ -16,6 +16,7 @@
     <string name="newArticles">New articles</string>
     <string name="noFeeds">No feeds present!</string>
     <string name="swipeUpGetStarted">Swipe up to get started</string>
+    <string name="feedsLetsStart">You will see all your feeds here, let's start by adding a feed.\n\nClick the button.</string>
     <string name="feedNameHint">Feed name</string>
     <string name="editFeedName">Edit</string>
     <string name="errorUnsupportedFeed">Link doesn't contain any RSS/Atom feed.</string>
