@@ -37,6 +37,8 @@ class DropboxTokenRefreshTest {
   ) : OAuthTokenProvider {
     override fun isSignedIn(providerId: String): Flow<Boolean> = flowOf(accessToken != null)
 
+    override suspend fun isSignedInImmediate(providerId: String): Boolean = accessToken != null
+
     override suspend fun getAccessToken(providerId: String): String? = accessToken
 
     override suspend fun saveAccessToken(providerId: String, token: String?) {
