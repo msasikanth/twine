@@ -165,11 +165,13 @@ internal fun BottomSheetExpandedContent(
             WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
           ),
         title = {
-          SearchBar(
-            query = searchQuery,
-            onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-            onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
-          )
+          AnimatedVisibility(visible = state.numberOfFeeds > 0) {
+            SearchBar(
+              query = searchQuery,
+              onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+              onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+            )
+          }
         },
         actions = {
           CircularIconButton(
