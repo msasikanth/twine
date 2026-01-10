@@ -19,4 +19,8 @@ interface OAuthTokenProvider {
   suspend fun getAccessToken(providerId: String): String?
 
   suspend fun saveAccessToken(providerId: String, token: String?)
+
+  suspend fun getRefreshToken(providerId: String): String?
+
+  suspend fun saveRefreshToken(providerId: String, token: String?)
 }

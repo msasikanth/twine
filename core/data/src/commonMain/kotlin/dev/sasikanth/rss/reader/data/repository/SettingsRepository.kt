@@ -65,6 +65,7 @@ class SettingsRepository(
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
   private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
   private val dropboxAccessTokenKey = stringPreferencesKey("dropbox_access_token")
+  private val dropboxRefreshTokenKey = stringPreferencesKey("dropbox_refresh_token")
   private val lastSyncedAtKey = longPreferencesKey("last_synced_at")
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
@@ -159,6 +160,9 @@ class SettingsRepository(
   val dropboxAccessToken: Flow<String?> =
     dataStore.data.map { preferences -> preferences[dropboxAccessTokenKey] }
 
+  val dropboxRefreshToken: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[dropboxRefreshTokenKey] }
+
   val userSessionCount: Flow<Int> =
     dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
 
@@ -252,6 +256,16 @@ class SettingsRepository(
         preferences.remove(dropboxAccessTokenKey)
       } else {
         preferences[dropboxAccessTokenKey] = token
+      }
+    }
+  }
+
+  suspend fun updateDropboxRefreshToken(token: String?) {
+    dataStore.edit { preferences ->
+      if (token == null) {
+        preferences.remove(dropboxRefreshTokenKey)
+      } else {
+        preferences[dropboxRefreshTokenKey] = token
       }
     }
   }

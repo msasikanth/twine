@@ -38,4 +38,17 @@ class RealOAuthTokenProvider(private val settingsRepository: SettingsRepository)
       "dropbox" -> settingsRepository.updateDropboxAccessToken(token)
     }
   }
+
+  override suspend fun getRefreshToken(providerId: String): String? {
+    return when (providerId) {
+      "dropbox" -> settingsRepository.dropboxRefreshToken.first()
+      else -> null
+    }
+  }
+
+  override suspend fun saveRefreshToken(providerId: String, token: String?) {
+    when (providerId) {
+      "dropbox" -> settingsRepository.updateDropboxRefreshToken(token)
+    }
+  }
 }

@@ -185,8 +185,10 @@ interface DataComponent :
 
   @Provides
   @AppScope
-  fun providesOAuthManager(tokenProvider: OAuthTokenProvider): OAuthManager =
-    RealOAuthManager(tokenProvider as RealOAuthTokenProvider)
+  fun providesOAuthManager(
+    httpClient: HttpClient,
+    tokenProvider: OAuthTokenProvider
+  ): OAuthManager = RealOAuthManager(httpClient, tokenProvider)
 
   @Provides
   @AppScope
