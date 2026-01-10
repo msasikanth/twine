@@ -202,36 +202,54 @@ class CloudSyncService(
   }
 
   internal suspend fun merge(remoteData: SyncData) {
-    val remoteFeeds =
-      remoteData.feeds.map {
-        Feed(
-          id = it.id,
-          name = it.name,
-          icon = it.icon,
-          description = it.description,
-          link = it.link,
-          homepageLink = it.homepageLink,
-          createdAt = Clock.System.now(),
-          pinnedAt = it.pinnedAt?.let(Instant::fromEpochMilliseconds),
-          lastCleanUpAt = it.lastCleanUpAt?.let(Instant::fromEpochMilliseconds),
-          alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
-          pinnedPosition = 0.0,
-          showFeedFavIcon = true,
-          lastUpdatedAt = it.lastUpdatedAt?.let(Instant::fromEpochMilliseconds),
-          refreshInterval = 1.hours,
-          isDeleted = it.isDeleted
-        )
+    val initialFeeds = rssRepository.allFeedsBlocking()
+    val allLocalFeeds = initialFeeds.associateBy { it.id }
+
+    val remoteFeedsToUpsert =
+      remoteData.feeds.mapNotNull {
+        val localFeed = allLocalFeeds[it.id]
+        val remoteUpdatedAt =
+          it.lastUpdatedAt?.let(Instant::fromEpochMilliseconds) ?: Instant.DISTANT_PAST
+        val localUpdatedAt = localFeed?.lastUpdatedAt ?: Instant.DISTANT_PAST
+
+        if (localFeed == null || remoteUpdatedAt > localUpdatedAt) {
+          Feed(
+            id = it.id,
+            name = it.name,
+            icon = it.icon,
+            description = it.description,
+            link = it.link,
+            homepageLink = it.homepageLink,
+            createdAt = localFeed?.createdAt ?: Clock.System.now(),
+            pinnedAt = it.pinnedAt?.let(Instant::fromEpochMilliseconds),
+            lastCleanUpAt = it.lastCleanUpAt?.let(Instant::fromEpochMilliseconds),
+            alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
+            pinnedPosition = localFeed?.pinnedPosition ?: 0.0,
+            showFeedFavIcon = localFeed?.showFeedFavIcon ?: true,
+            lastUpdatedAt = it.lastUpdatedAt?.let(Instant::fromEpochMilliseconds),
+            refreshInterval = localFeed?.refreshInterval ?: 1.hours,
+            isDeleted = it.isDeleted
+          )
+        } else {
+          null
+        }
       }
-    rssRepository.upsertFeeds(remoteFeeds)
+    rssRepository.upsertFeeds(remoteFeedsToUpsert)
 
     remoteData.feeds.forEach { remoteFeed ->
-      val localFeed = rssRepository.feed(remoteFeed.id)
+      val localFeed = allLocalFeeds[remoteFeed.id]
       if (localFeed != null && remoteFeed.lastCleanUpAt != null) {
         val remoteCleanUpAt = Instant.fromEpochMilliseconds(remoteFeed.lastCleanUpAt)
         val localCleanUpAt = localFeed.lastCleanUpAt ?: Instant.DISTANT_PAST
         if (remoteCleanUpAt > localCleanUpAt) {
           rssRepository.deleteReadPostsForFeedOlderThan(remoteFeed.id, remoteCleanUpAt)
-          rssRepository.updateFeedsLastCleanUpAt(listOf(remoteFeed.id), remoteCleanUpAt)
+
+          val remoteUpdatedAt =
+            remoteFeed.lastUpdatedAt?.let(Instant::fromEpochMilliseconds) ?: Instant.DISTANT_PAST
+          val localUpdatedAt = localFeed.lastUpdatedAt ?: Instant.DISTANT_PAST
+          if (remoteUpdatedAt <= localUpdatedAt) {
+            rssRepository.updateFeedsLastCleanUpAt(listOf(remoteFeed.id), remoteCleanUpAt)
+          }
         }
       }
     }
