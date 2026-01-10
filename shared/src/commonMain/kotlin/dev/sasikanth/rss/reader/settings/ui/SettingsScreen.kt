@@ -1447,56 +1447,55 @@ private fun CloudSyncSettingItem(
           .fillMaxWidth()
           .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
-      Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
           val alpha = if (provider.isSupported) 1f else 0.38f
           Text(
-            modifier = Modifier.weight(1f),
             text = label,
             style = MaterialTheme.typography.titleMedium,
             color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = alpha)
           )
 
-          if (provider.isSupported) {
-            if (isSignedIn) {
-              TextButton(
-                onClick = { onSignOutClicked(provider) },
-              ) {
-                Text(
-                  text = stringResource(Res.string.settingsSyncSignOut),
-                  style = MaterialTheme.typography.bodyMedium,
-                  color = AppTheme.colorScheme.primary
-                )
-              }
+          var statusString =
+            when (syncProgress) {
+              SettingsState.SyncProgress.Idle -> stringResource(Res.string.settingsSyncStatusIdle)
+              SettingsState.SyncProgress.Syncing ->
+                stringResource(Res.string.settingsSyncStatusSyncing)
+              SettingsState.SyncProgress.Success ->
+                stringResource(Res.string.settingsSyncStatusSuccess)
+              SettingsState.SyncProgress.Failure ->
+                stringResource(Res.string.settingsSyncStatusFailure)
+            }
+
+          if (
+            syncProgress != SettingsState.SyncProgress.Idle &&
+              syncProgress != SettingsState.SyncProgress.Syncing &&
+              lastSyncedAt != null
+          ) {
+            statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
+          }
+
+          AnimatedVisibility(visible = syncProgress != SettingsState.SyncProgress.Idle) {
+            Text(
+              text = statusString,
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.textEmphasisMed
+            )
+          }
+        }
+
+        if (provider.isSupported) {
+          if (isSignedIn) {
+            TextButton(
+              onClick = { onSignOutClicked(provider) },
+            ) {
+              Text(
+                text = stringResource(Res.string.settingsSyncSignOut),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.primary
+              )
             }
           }
-        }
-
-        var statusString =
-          when (syncProgress) {
-            SettingsState.SyncProgress.Idle -> stringResource(Res.string.settingsSyncStatusIdle)
-            SettingsState.SyncProgress.Syncing ->
-              stringResource(Res.string.settingsSyncStatusSyncing)
-            SettingsState.SyncProgress.Success ->
-              stringResource(Res.string.settingsSyncStatusSuccess)
-            SettingsState.SyncProgress.Failure ->
-              stringResource(Res.string.settingsSyncStatusFailure)
-          }
-
-        if (
-          syncProgress != SettingsState.SyncProgress.Idle &&
-            syncProgress != SettingsState.SyncProgress.Syncing &&
-            lastSyncedAt != null
-        ) {
-          statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
-        }
-
-        AnimatedVisibility(visible = syncProgress != SettingsState.SyncProgress.Idle) {
-          Text(
-            text = statusString,
-            style = MaterialTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
         }
       }
     }
