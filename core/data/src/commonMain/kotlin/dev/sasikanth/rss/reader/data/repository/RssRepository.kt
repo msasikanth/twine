@@ -898,6 +898,7 @@ class RssRepository(
           feedIds.forEach { feedId ->
             feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
           }
+          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
         }
       }
     }
@@ -910,6 +911,7 @@ class RssRepository(
           feedIds.forEach { feedId ->
             feedGroupFeedQueries.removeFeedFromGroup(feedId = feedId, feedGroupId = groupId)
           }
+          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
         }
       }
     }
