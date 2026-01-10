@@ -20,6 +20,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 
 interface LinkHandler {
   suspend fun openLink(link: String?)
+
+  suspend fun close()
 }
 
 val LocalLinkHandler =

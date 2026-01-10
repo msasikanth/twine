@@ -219,7 +219,10 @@ fun App(
     DisposableEffect(Unit) {
       ExternalUriHandler.listener = { uri ->
         if (uri.startsWith("twine://oauth")) {
-          coroutineScope.launch { oAuthManager.handleRedirect(uri) }
+          coroutineScope.launch {
+            oAuthManager.handleRedirect(uri)
+            linkHandler.close()
+          }
         }
 
         val deepLinkRequest = NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)

@@ -57,6 +57,15 @@ class IOSLinkHandler(
     }
   }
 
+  override suspend fun close() {
+    dispatch_async(dispatch_get_main_queue()) {
+      val viewController = uiViewControllerProvider()
+      if (viewController is SFSafariViewController) {
+        viewController.dismissViewControllerAnimated(flag = true, completion = null)
+      }
+    }
+  }
+
   private fun openBrowser(url: NSURL) {
     dispatch_async(dispatch_get_main_queue()) {
       UIApplication.sharedApplication().openURL(url, emptyMap<Any?, Any?>(), {})
