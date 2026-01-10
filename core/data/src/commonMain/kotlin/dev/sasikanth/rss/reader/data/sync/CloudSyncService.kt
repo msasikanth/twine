@@ -296,15 +296,7 @@ class CloudSyncService(
       }
     }
 
-    // 6. Merge bookmarks (for backward compatibility and explicit status update)
-    remoteData.bookmarks.forEach { bookmarkId ->
-      val localPost = rssRepository.postOrNull(bookmarkId)
-      if (localPost == null || !localPost.flags.contains(PostFlag.Bookmarked)) {
-        rssRepository.updateBookmarkStatus(bookmarked = true, id = bookmarkId)
-      }
-    }
-
-    // 7. Merge user
+    // 6. Merge user
     val remoteUser = remoteData.user
     if (remoteUser != null && userRepository.userBlocking() == null) {
       userRepository.createUser(

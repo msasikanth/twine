@@ -341,6 +341,7 @@ class RssRepository(
           mapper = {
             id: String,
             name: String,
+            feedIds: String?,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -349,7 +350,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = emptyList(), // Not needed for this check
+              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
               feedHomepageLinks = emptyList(),
               feedIconLinks = emptyList(),
               createdAt = createdAt,
@@ -812,6 +813,7 @@ class RssRepository(
           mapper = {
             id: String,
             name: String,
+            feedIds: String?,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -820,7 +822,7 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = emptyList(), // Not needed for this check
+              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
               feedHomepageLinks = emptyList(),
               feedIconLinks = emptyList(),
               createdAt = createdAt,

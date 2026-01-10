@@ -88,7 +88,20 @@ updatePinnedAt:
 UPDATE feedGroup SET pinnedAt = :pinnedAt, pinnedPosition = 0.0, updatedAt = :updatedAt WHERE id = :id;
 
 group:
-SELECT * FROM feedGroup WHERE id = :id AND isDeleted = 0;
+SELECT
+  id,
+  name,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       JOIN feed f ON gf.feedId = f.id
+       WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  createdAt,
+  updatedAt,
+  pinnedAt,
+  pinnedPosition,
+  isDeleted
+FROM feedGroup fg
+WHERE id = :id AND isDeleted = 0;
 
 groupsByIds:
 SELECT
@@ -119,7 +132,19 @@ updatedPinnedPosition:
 UPDATE feedGroup SET pinnedPosition = :pinnedPosition, updatedAt = :updatedAt WHERE id = :id;
 
 allGroupsBlocking:
-SELECT * FROM feedGroup;
+SELECT
+  id,
+  name,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       JOIN feed f ON gf.feedId = f.id
+       WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  createdAt,
+  updatedAt,
+  pinnedAt,
+  pinnedPosition,
+  isDeleted
+FROM feedGroup fg;
 
 upsertSyncGroup:
 INSERT INTO feedGroup(id, name, createdAt, updatedAt, pinnedAt, isDeleted)

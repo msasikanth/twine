@@ -279,4 +279,63 @@ class PostSyncTest {
     assertEquals("HTML content", deserialized.posts[0].htmlContent)
     assertEquals("user-id", deserialized.user?.id)
   }
+
+  @Test
+  fun filterPostsShouldKeepBookmarkedPostsRegardlessOfDate() {
+    val feedId = "feed-1"
+    val cleanUpAt = Instant.fromEpochMilliseconds(1000)
+    val cleanUpAtByFeed = mapOf(feedId to cleanUpAt)
+
+    val posts =
+      listOf(
+        PostSyncEntity(
+          id = "post-1",
+          sourceId = feedId,
+          title = "Post 1",
+          description = "",
+          imageUrl = null,
+          postDate = 500L,
+          createdAt = 0L,
+          updatedAt = 0L,
+          syncedAt = 0L,
+          link = "",
+          commentsLink = null,
+          flags = setOf(PostFlag.Bookmarked)
+        )
+      )
+
+    val filtered = CloudSyncService.filterPosts(posts, cleanUpAtByFeed)
+
+    assertEquals(1, filtered.size)
+    assertEquals("post-1", filtered[0].id)
+  }
+
+  @Test
+  fun syncDataSerializationWithGroupFeedIds() {
+    val syncData =
+      SyncData(
+        version = 2,
+        feeds = emptyList(),
+        groups =
+          listOf(
+            GroupSyncEntity(
+              id = "group-1",
+              name = "Group 1",
+              feedIds = listOf("feed-1", "feed-2"),
+              pinnedAt = null,
+              updatedAt = 1000L,
+              isDeleted = false
+            )
+          ),
+        bookmarks = emptyList(),
+        blockedWords = emptyList(),
+        posts = emptyList()
+      )
+
+    val serialized = json.encodeToString(syncData)
+    val deserialized = json.decodeFromString<SyncData>(serialized)
+
+    assertEquals(syncData, deserialized)
+    assertEquals(listOf("feed-1", "feed-2"), deserialized.groups[0].feedIds)
+  }
 }
