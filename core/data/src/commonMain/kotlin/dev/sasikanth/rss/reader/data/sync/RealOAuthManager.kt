@@ -15,7 +15,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 
 class RealOAuthManager(private val tokenProvider: RealOAuthTokenProvider) : OAuthManager {
-  // Use placeholders for client IDs. In a real app these would be in build config or secured.
   private val dropboxClientId = "qtxdwxyzi69tuxp"
 
   private val redirectUri = "twine://oauth"

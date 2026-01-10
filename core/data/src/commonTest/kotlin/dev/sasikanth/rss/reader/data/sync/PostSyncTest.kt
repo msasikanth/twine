@@ -115,7 +115,8 @@ class PostSyncTest {
               pinnedAt = 123456789L,
               lastCleanUpAt = 123456789L,
               alwaysFetchSourceArticle = true,
-              lastUpdatedAt = 123456789L
+              lastUpdatedAt = 123456789L,
+              isDeleted = false
             )
           ),
         groups =
@@ -125,7 +126,8 @@ class PostSyncTest {
               name = "Group",
               feedIds = listOf("feed-id"),
               pinnedAt = null,
-              updatedAt = 123456789L
+              updatedAt = 123456789L,
+              isDeleted = false
             )
           ),
         bookmarks = listOf("post-1"),
@@ -152,9 +154,11 @@ class PostSyncTest {
               syncedAt = 123456789L,
               link = "https://example.com/post-1",
               commentsLink = null,
-              flags = setOf(PostFlag.Bookmarked, PostFlag.Read)
+              flags = setOf(PostFlag.Bookmarked, PostFlag.Read),
+              isDeleted = false
             )
-          )
+          ),
+        postChunks = listOf("/twine_posts_chunk_0.json")
       )
 
     val serialized = json.encodeToString(syncData)
@@ -199,9 +203,12 @@ class PostSyncTest {
     assertEquals("", deserialized.feeds[0].description)
     assertEquals(false, deserialized.feeds[0].alwaysFetchSourceArticle)
     assertEquals(null, deserialized.feeds[0].lastCleanUpAt)
+    assertEquals(false, deserialized.feeds[0].isDeleted)
 
     assertEquals(1, deserialized.groups.size)
     assertEquals(emptyList<String>(), deserialized.groups[0].feedIds)
+    assertEquals(false, deserialized.groups[0].isDeleted)
+    assertEquals(null, deserialized.groups[0].updatedAt)
   }
 
   @Test
@@ -256,6 +263,7 @@ class PostSyncTest {
               link = "",
               commentsLink = null,
               flags = emptySet(),
+              isDeleted = false,
               rawContent = "Raw content",
               htmlContent = "HTML content"
             )
@@ -277,6 +285,7 @@ class PostSyncTest {
     assertEquals(syncData, deserialized)
     assertEquals("Raw content", deserialized.posts[0].rawContent)
     assertEquals("HTML content", deserialized.posts[0].htmlContent)
+    assertEquals(false, deserialized.posts[0].isDeleted)
     assertEquals("user-id", deserialized.user?.id)
   }
 

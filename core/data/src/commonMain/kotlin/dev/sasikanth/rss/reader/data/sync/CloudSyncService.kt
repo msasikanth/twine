@@ -48,7 +48,6 @@ class CloudSyncService(
       val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
       val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
 
-      // 1. Download remote data
       val metadataFileName = "/twine_sync_metadata.json"
       val remoteDataString =
         provider.download(metadataFileName) ?: provider.download("/twine_sync_data.json")
@@ -69,11 +68,9 @@ class CloudSyncService(
           }
         }
 
-        // 2. Merge remote data into local
         merge(remoteData.copy(posts = remotePosts))
       }
 
-      // 3. Export local data
       val feeds =
         rssRepository.allFeedsBlocking().map {
           FeedSyncEntity(
@@ -115,11 +112,25 @@ class CloudSyncService(
           )
         }
 
-      val allPosts = rssRepository.allPostsBlocking()
+      val user = userRepository.userBlocking()
+      val userSyncEntity =
+        user?.let {
+          UserSyncEntity(
+            id = it.id,
+            name = it.name,
+            profileId = it.profileId,
+            email = it.email,
+            token = it.token,
+            serverUrl = it.serverUrl
+          )
+        }
+
+      val bookmarkedPosts =
+        rssRepository.allBookmarkIdsBlocking().mapNotNull { rssRepository.postOrNull(it) }
       val postChunks = mutableListOf<String>()
       val chunkSize = 500
 
-      allPosts.chunked(chunkSize).forEachIndexed { index, postsChunk ->
+      bookmarkedPosts.chunked(chunkSize).forEachIndexed { index, postsChunk ->
         val chunkFileName = "/twine_posts_chunk_$index.json"
         val postsSyncEntities =
           postsChunk.map {
@@ -147,19 +158,6 @@ class CloudSyncService(
         }
       }
 
-      val user = userRepository.userBlocking()
-      val userSyncEntity =
-        user?.let {
-          UserSyncEntity(
-            id = it.id,
-            name = it.name,
-            profileId = it.profileId,
-            email = it.email,
-            token = it.token,
-            serverUrl = it.serverUrl
-          )
-        }
-
       val syncData =
         SyncData(
           version = currentSyncVersion,
@@ -173,15 +171,13 @@ class CloudSyncService(
         )
 
       val serializedData = json.encodeToString(syncData)
-
-      // 4. Upload merged data
       val result = provider.upload(metadataFileName, serializedData)
+
       if (result) {
         appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
         appConfigQueries.updateLastSyncStatus("SUCCESS")
         settingsRepository.updateLastSyncedAt(Clock.System.now())
 
-        // Clean up old chunks and old sync file
         val allFiles = provider.listFiles("/twine_")
         val activeFiles = postChunks + metadataFileName
         allFiles.forEach { file ->
@@ -203,7 +199,6 @@ class CloudSyncService(
   }
 
   internal suspend fun merge(remoteData: SyncData) {
-    // 1. Merge feeds
     val remoteFeeds =
       remoteData.feeds.map {
         Feed(
@@ -226,7 +221,6 @@ class CloudSyncService(
       }
     rssRepository.upsertFeeds(remoteFeeds)
 
-    // 2. Propagation of post deletions using lastCleanUpAt
     remoteData.feeds.forEach { remoteFeed ->
       val localFeed = rssRepository.feed(remoteFeed.id)
       if (localFeed != null && remoteFeed.lastCleanUpAt != null) {
@@ -239,7 +233,6 @@ class CloudSyncService(
       }
     }
 
-    // 3. Merge groups
     remoteData.groups.forEach { remoteGroup ->
       val remoteUpdatedAt =
         remoteGroup.updatedAt?.let(Instant::fromEpochMilliseconds) ?: Clock.System.now()
@@ -258,10 +251,8 @@ class CloudSyncService(
       }
     }
 
-    // 4. Merge blocked words
     blockedWordsRepository.upsertBlockedWords(remoteData.blockedWords)
 
-    // 5. Merge posts
     val allFeeds = rssRepository.allFeedsBlocking()
     val cleanUpAtByFeed = allFeeds.associate { it.id to (it.lastCleanUpAt ?: Instant.DISTANT_PAST) }
 
@@ -296,7 +287,6 @@ class CloudSyncService(
       }
     }
 
-    // 6. Merge user
     val remoteUser = remoteData.user
     if (remoteUser != null && userRepository.userBlocking() == null) {
       userRepository.createUser(

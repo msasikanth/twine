@@ -50,7 +50,7 @@ data class SyncData(
   val version: Int = 2,
   val feeds: List<FeedSyncEntity>,
   val groups: List<GroupSyncEntity>,
-  val bookmarks: List<String>, // post ids
+  val bookmarks: List<String>,
   @Serializable(with = BlockedWordSyncEntityListSerializer::class)
   val blockedWords: List<BlockedWordSyncEntity> = emptyList(),
   val posts: List<PostSyncEntity> = emptyList(),
