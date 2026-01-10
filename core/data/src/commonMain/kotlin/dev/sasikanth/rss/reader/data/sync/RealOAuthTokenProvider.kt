@@ -26,6 +26,13 @@ class RealOAuthTokenProvider(private val settingsRepository: SettingsRepository)
     }
   }
 
+  override suspend fun isSignedInImmediate(providerId: String): Boolean {
+    return when (providerId) {
+      "dropbox" -> settingsRepository.dropboxAccessToken.first() != null
+      else -> false
+    }
+  }
+
   override suspend fun getAccessToken(providerId: String): String? {
     return when (providerId) {
       "dropbox" -> settingsRepository.dropboxAccessToken.first()

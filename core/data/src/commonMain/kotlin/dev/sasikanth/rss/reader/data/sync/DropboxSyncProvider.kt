@@ -34,6 +34,8 @@ class DropboxSyncProvider(
 
   override fun isSignedIn(): Flow<Boolean> = tokenProvider.isSignedIn(id)
 
+  override suspend fun isSignedInImmediate(): Boolean = tokenProvider.isSignedInImmediate(id)
+
   override suspend fun signOut() {
     tokenProvider.saveAccessToken(id, null)
     tokenProvider.saveRefreshToken(id, null)

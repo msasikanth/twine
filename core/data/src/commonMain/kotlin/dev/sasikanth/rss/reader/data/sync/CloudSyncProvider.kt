@@ -34,6 +34,8 @@ interface CloudSyncProvider {
 
   fun isSignedIn(): Flow<Boolean>
 
+  suspend fun isSignedInImmediate(): Boolean
+
   suspend fun signOut()
 
   suspend fun upload(fileName: String, data: String): Boolean

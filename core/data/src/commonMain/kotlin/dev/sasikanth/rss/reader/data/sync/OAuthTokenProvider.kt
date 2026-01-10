@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 interface OAuthTokenProvider {
   fun isSignedIn(providerId: String): Flow<Boolean>
 
+  suspend fun isSignedInImmediate(providerId: String): Boolean
+
   suspend fun getAccessToken(providerId: String): String?
 
   suspend fun saveAccessToken(providerId: String, token: String?)
