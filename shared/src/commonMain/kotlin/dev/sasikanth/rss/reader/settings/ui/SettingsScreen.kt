@@ -168,7 +168,6 @@ import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsSyncDropbox
-import twine.shared.generated.resources.settingsSyncSignIn
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.settingsSyncStatusIdle
@@ -1460,21 +1459,15 @@ private fun CloudSyncSettingItem(
 
           if (provider.isSupported) {
             if (isSignedIn) {
-              Text(
-                modifier =
-                  Modifier.padding(vertical = 8.dp, horizontal = 4.dp).clickable {
-                    onSignOutClicked(provider)
-                  },
-                text = stringResource(Res.string.settingsSyncSignOut),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.primary
-              )
-            } else {
-              Text(
-                text = stringResource(Res.string.settingsSyncSignIn),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.primary
-              )
+              TextButton(
+                onClick = { onSignOutClicked(provider) },
+              ) {
+                Text(
+                  text = stringResource(Res.string.settingsSyncSignOut),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = AppTheme.colorScheme.primary
+                )
+              }
             }
           }
         }
