@@ -78,7 +78,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
@@ -306,12 +305,10 @@ internal fun HomeScreen(
                   hasFeeds == null || posts == null -> {
                     // no-op
                   }
-                  !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
+                  !hasFeeds -> {
                     NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
                   }
-                  featuredPosts.isEmpty() &&
-                    posts.itemCount == 0 &&
-                    posts.loadState.refresh is LoadState.NotLoading -> {
+                  featuredPosts.isEmpty() && posts.itemCount == 0 -> {
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
