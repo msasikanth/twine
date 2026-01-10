@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -82,6 +83,7 @@ fun FilledIconButton(
   enabled: Boolean = true,
   containerColor: Color = AppTheme.colorScheme.surface,
   iconTint: Color = AppTheme.colorScheme.onSurface,
+  size: IconButtonSize = IconButtonSize.Default,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
@@ -89,7 +91,7 @@ fun FilledIconButton(
   Box(
     modifier =
       Modifier.semantics { role = Role.Button }
-        .requiredSize(40.dp)
+        .requiredSize(size.containerSize)
         .graphicsLayer { this.blendMode = blendMode }
         .clip(MaterialTheme.shapes.extraLarge)
         .background(containerColor)
@@ -103,7 +105,7 @@ fun FilledIconButton(
     contentAlignment = Alignment.Center
   ) {
     Icon(
-      modifier = Modifier.requiredSize(20.dp),
+      modifier = Modifier.requiredSize(size.iconSize),
       imageVector = icon,
       contentDescription = contentDescription,
       tint = iconTint
@@ -179,4 +181,12 @@ fun CircularIconButton(
       tint = AppTheme.colorScheme.onSurface,
     )
   }
+}
+
+enum class IconButtonSize(
+  val containerSize: Dp,
+  val iconSize: Dp,
+) {
+  Default(containerSize = 40.dp, iconSize = 20.dp),
+  Large(containerSize = 56.dp, iconSize = 24.dp)
 }
