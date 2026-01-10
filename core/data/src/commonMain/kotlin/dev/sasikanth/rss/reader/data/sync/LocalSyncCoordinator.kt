@@ -49,8 +49,6 @@ class LocalSyncCoordinator(
   private val observableActiveSource: ObservableActiveSource,
   private val settingsRepository: SettingsRepository,
   private val lastRefreshedAt: LastRefreshedAt,
-  private val cloudSyncService: CloudSyncService,
-  private val dropboxSyncProvider: DropboxSyncProvider,
 ) : SyncCoordinator {
 
   companion object {
@@ -65,10 +63,6 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
-
-        if (dropboxSyncProvider.isSignedIn().first()) {
-          cloudSyncService.sync(dropboxSyncProvider)
-        }
 
         checkAndRefreshLastRefreshTime {
           val allFeeds =
@@ -99,10 +93,6 @@ class LocalSyncCoordinator(
       try {
         updateSyncState(SyncState.InProgress(0f))
 
-        if (dropboxSyncProvider.isSignedIn().first()) {
-          cloudSyncService.sync(dropboxSyncProvider)
-        }
-
         val now = Clock.System.now()
         feedIds.forEachIndexed { index, feedId ->
           val feed =
@@ -127,10 +117,6 @@ class LocalSyncCoordinator(
       try {
         updateSyncState(SyncState.InProgress(0f))
 
-        if (dropboxSyncProvider.isSignedIn().first()) {
-          cloudSyncService.sync(dropboxSyncProvider)
-        }
-
         val feed =
           withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = feedId) }
         val now = Clock.System.now()
@@ -150,11 +136,7 @@ class LocalSyncCoordinator(
   }
 
   override suspend fun push() {
-    withContext(dispatchersProvider.default) {
-      if (dropboxSyncProvider.isSignedIn().first()) {
-        cloudSyncService.sync(dropboxSyncProvider)
-      }
-    }
+    // no-op
   }
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {
