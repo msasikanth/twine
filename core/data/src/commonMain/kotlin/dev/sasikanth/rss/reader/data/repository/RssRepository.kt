@@ -80,13 +80,14 @@ class RssRepository(
 
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.upsert(
+        id = feedId,
         name = name,
         icon = feedPayload.icon,
         description = feedPayload.description,
         homepageLink = feedPayload.homepageLink,
-        createdAt = Clock.System.now(),
         link = feedPayload.link,
-        id = feedId
+        createdAt = Clock.System.now(),
+        lastUpdatedAt = Clock.System.now(),
       )
     }
 

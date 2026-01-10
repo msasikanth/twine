@@ -30,7 +30,7 @@ INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO
 UPDATE SET icon = excluded.icon, description = excluded.description,
-homepageLink = excluded.homepageLink, isDeleted = 0;
+homepageLink = excluded.homepageLink, isDeleted = 0, lastUpdatedAt = :lastUpdatedAt;
 
 remove:
 UPDATE feed SET isDeleted = 1, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
