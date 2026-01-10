@@ -16,6 +16,7 @@
     <string name="newArticles">Новые статьи</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
+    <string name="feedsLetsStart">You will see all your feeds here, let's start by adding a feed.\n\nClick the button.</string>
     <string name="feedNameHint">Название канала</string>
     <string name="editFeedName">Редактировать</string>
     <string name="errorUnsupportedFeed">Ссылка не содержит никакой RSS-ленты/Atom-канала.</string>
