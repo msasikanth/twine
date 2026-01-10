@@ -16,6 +16,7 @@
     <string name="newArticles">新文章</string>
     <string name="noFeeds">没有可呈现的来源！</string>
     <string name="swipeUpGetStarted">上滑以开始</string>
+    <string name="feedsLetsStart">You will see all your feeds here, let's start by adding a feed.\n\nClick the button.</string>
     <string name="feedNameHint">来源名称</string>
     <string name="editFeedName">编辑</string>
     <string name="errorUnsupportedFeed">链接不包含任何 RSS/Atom 来源。</string>
