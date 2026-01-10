@@ -16,7 +16,7 @@ CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
 CREATE INDEX feed_group_pinned_name ON feedGroup(pinnedAt DESC, name);
 
 count:
-SELECT COUNT(*) FROM feedGroup;
+SELECT COUNT(*) FROM feedGroup WHERE isDeleted = 0;
 
 groups:
 SELECT

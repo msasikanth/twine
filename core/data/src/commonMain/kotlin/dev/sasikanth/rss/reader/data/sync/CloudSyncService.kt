@@ -219,7 +219,7 @@ class CloudSyncService(
           showFeedFavIcon = true,
           lastUpdatedAt = it.lastUpdatedAt?.let(Instant::fromEpochMilliseconds),
           refreshInterval = 1.hours,
-          isDeleted = false
+          isDeleted = it.isDeleted
         )
       }
     rssRepository.upsertFeeds(remoteFeeds)
