@@ -177,6 +177,15 @@
     <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
     <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data, memory and storage consumption. It can potentially impact your user experience.</string>
     <string name="sort">Sort</string>
+    <string name="settingsHeaderSync">Cloud sync (Alpha ⚠)</string>
+    <string name="settingsSyncDropbox">Dropbox</string>
+    <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>
+    <string name="settingsSyncStatusIdle">Not synced</string>
+    <string name="settingsSyncStatusSyncing">Syncing...</string>
+    <string name="settingsSyncStatusSuccess">Last sync: Success</string>
+    <string name="settingsSyncStatusFailure">Last sync: Failed</string>
+    <string name="settingsSyncSignIn">Sign in</string>
+    <string name="settingsSyncSignOut">Sign out</string>
     <string name="filter">Filter</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
