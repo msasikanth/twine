@@ -23,6 +23,18 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     )
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
+            self.refreshFeeds(task: task as! BGProcessingTask)
+        }
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
+            self.cleanUpPosts(task: task as! BGProcessingTask)
+        }
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.dropbox_sync", using: nil) { (task) in
+            self.syncDropbox(task: task as! BGProcessingTask)
+        }
+
         #if !DEBUG
         Bugsnag.start()
         let config = BugsnagConfiguration.loadConfig()
@@ -37,17 +49,41 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 initializer.initialize()
             }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
-            self.refreshFeeds(task: task as! BGProcessingTask)
-        }
-        
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
-            self.cleanUpPosts(task: task as! BGProcessingTask)
-        }
-        
         return true
     }
 
+    func scheduleDropboxSync(earliest: Date) {
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.dropbox_sync")
+        request.earliestBeginDate = earliest
+        request.requiresNetworkConnectivity = true
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule dropbox sync \(error)")
+        }
+    }
+    
+    func syncDropbox(task: BGProcessingTask) {
+        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
+
+        // Schedule next sync task 15 minutes in future
+        scheduleDropboxSync(earliest: Date(timeIntervalSinceNow: 15 * 60))
+        
+        Task(priority: .background) {
+            do {
+                let isDropboxSignedIn = try await applicationComponent.dropboxSyncProvider.isSignedInImmediate().boolValue
+                if isDropboxSignedIn {
+                    try await applicationComponent.cloudSyncService.sync(provider: applicationComponent.dropboxSyncProvider)
+                }
+                task.setTaskCompleted(success: true)
+            } catch {
+                Bugsnag.notifyError(error)
+                task.setTaskCompleted(success: false)
+            }
+        }
+    }
+    
     func scheduleCleanUpPosts(earliest: Date) {
         let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
         request.earliestBeginDate = earliest
@@ -72,7 +108,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
                 let feedsDeletedFrom = try await applicationComponent.rssRepository.deleteReadPosts(before: before)
                 if !feedsDeletedFrom.isEmpty {
-                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom)
+                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom, lastCleanUpAt: KotlinInstant.companion.currentMoment())
                 }
                 task.setTaskCompleted(success: true)
             } catch {

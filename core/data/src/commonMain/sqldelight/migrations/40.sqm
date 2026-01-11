@@ -1,14 +1,8 @@
-import kotlin.Boolean;
-import kotlin.time.Instant;
-
-CREATE TABLE blockedWord (
-  id TEXT NOT NULL PRIMARY KEY,
-  content TEXT NOT NULL,
-  isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
-  updatedAt INTEGER AS Instant NOT NULL DEFAULT 0
-);
-
-CREATE INDEX blocked_word_value_index ON blockedWord(content);
+-- Migration 40
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_INSERT;
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_DELETE;
 
 CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
 AFTER INSERT ON blockedWord
@@ -64,28 +58,3 @@ BEGIN
   )
   AND (flags & 4) != 0;
 END;
-
-insert:
-INSERT INTO blockedWord(id, content, updatedAt, isDeleted)
-VALUES (?, ?, ?, 0)
-ON CONFLICT(id) DO
-UPDATE SET isDeleted = 0, updatedAt = excluded.updatedAt;
-
-remove:
-UPDATE blockedWord SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id;
-
-words:
-SELECT * FROM blockedWord WHERE isDeleted = 0 ORDER BY rowid DESC;
-
-allBlockedWords:
-SELECT * FROM blockedWord;
-
-upsertSyncBlockedWord:
-INSERT INTO blockedWord(id, content, isDeleted, updatedAt)
-VALUES (:id, :content, :isDeleted, :updatedAt)
-ON CONFLICT(id) DO
-UPDATE SET
-    content = excluded.content,
-    isDeleted = excluded.isDeleted,
-    updatedAt = excluded.updatedAt
-WHERE excluded.updatedAt > blockedWord.updatedAt;

@@ -27,7 +27,6 @@ kotlin {
     commonMain.dependencies {
       implementation(libs.kotlinx.datetime)
       implementation(libs.kotlinx.serialization.json)
-      // Require this for `@Immutable` annotation for models
       implementation(libs.compose.runtime)
       implementation(libs.uuid)
     }

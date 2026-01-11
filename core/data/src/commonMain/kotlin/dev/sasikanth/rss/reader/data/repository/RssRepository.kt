@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.data.database.PostSearchFTSQueries
 import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
+import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
 import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -79,13 +80,14 @@ class RssRepository(
 
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.upsert(
+        id = feedId,
         name = name,
         icon = feedPayload.icon,
         description = feedPayload.description,
         homepageLink = feedPayload.homepageLink,
-        createdAt = Clock.System.now(),
         link = feedPayload.link,
-        id = feedId
+        createdAt = Clock.System.now(),
+        lastUpdatedAt = Clock.System.now(),
       )
     }
 
@@ -98,9 +100,6 @@ class RssRepository(
       val postId = nameBasedUuidOf(postPayload.link).toString()
       withContext(dispatchersProvider.databaseWrite) {
         transactionRunner.invoke {
-          val postExists = postQueries.post(postId).executeAsOneOrNull() != null
-          if (postExists) return@invoke
-
           postQueries.upsert(
             id = postId,
             sourceId = feedId,
@@ -266,13 +265,31 @@ class RssRepository(
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, id: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateBookmarkStatus(bookmarked = if (bookmarked) 1L else 0L, id = id)
+      postQueries.updateBookmarkStatus(
+        bookmarked = if (bookmarked) 1L else 0L,
+        id = id,
+        updatedAt = Clock.System.now()
+      )
     }
   }
 
   suspend fun updatePostReadStatus(read: Boolean, id: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.updateReadStatus(read = if (read) 1L else 0L, id = id)
+      postQueries.updateReadStatus(
+        read = if (read) 1L else 0L,
+        id = id,
+        updatedAt = Clock.System.now()
+      )
+    }
+  }
+
+  suspend fun allReadPostsBlocking(): List<ReadPostSyncEntity> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .allReadPostsBlocking { id, updatedAt ->
+          ReadPostSyncEntity(id, updatedAt.toEpochMilliseconds())
+        }
+        .executeAsList()
     }
   }
 
@@ -280,10 +297,16 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) { bookmarkQueries.deleteBookmark(id) }
   }
 
+  suspend fun allBookmarkIdsBlocking(): List<String> {
+    return withContext(dispatchersProvider.databaseRead) {
+      bookmarkQueries.allBookmarkIds().executeAsList()
+    }
+  }
+
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(dispatchersProvider.databaseRead) {
       feedQueries
-        .feeds(
+        .allFeedsBlocking(
           mapper = {
             id: String,
             name: String,
@@ -326,27 +349,27 @@ class RssRepository(
   suspend fun allFeedGroupsBlocking(): List<FeedGroup> {
     return withContext(dispatchersProvider.databaseRead) {
       feedGroupQueries
-        .groupsBlocking(
+        .allGroupsBlocking(
           mapper = {
             id: String,
             name: String,
             feedIds: String?,
-            feedHomepageLinks: String,
-            feedIconLinks: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
-            pinnedPosition: Double ->
+            pinnedPosition: Double,
+            isDeleted: Boolean ->
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
-              feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
-              feedIconLinks = feedIconLinks.split(",").filterNot { it.isBlank() },
+              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
+              feedHomepageLinks = emptyList(),
+              feedIconLinks = emptyList(),
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
-              pinnedPosition = pinnedPosition
+              pinnedPosition = pinnedPosition,
+              isDeleted = isDeleted,
             )
           }
         )
@@ -494,7 +517,7 @@ class RssRepository(
   suspend fun removeFeed(feedId: String) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.transaction {
-        feedQueries.remove(feedId)
+        feedQueries.remove(id = feedId, lastUpdatedAt = Clock.System.now())
         postQueries.deletePostsForFeed(feedId)
       }
     }
@@ -502,13 +525,23 @@ class RssRepository(
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updateFeedName(newFeedName, feedId)
+      feedQueries.updateFeedName(
+        newFeedName = newFeedName,
+        id = feedId,
+        lastUpdatedAt = Clock.System.now()
+      )
     }
   }
 
   suspend fun updateFeedLastUpdatedAt(feedId: String, lastUpdatedAt: Instant) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateLastUpdatedAt(lastUpdatedAt = lastUpdatedAt, id = feedId)
+    }
+  }
+
+  suspend fun updateFeedGroupUpdatedAt(groupId: String, updatedAt: Instant) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedGroupQueries.updateUpdatedAt(updatedAt, groupId)
     }
   }
 
@@ -631,7 +664,7 @@ class RssRepository(
         null
       }
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id)
+      feedQueries.updatePinnedAt(pinnedAt = now, id = feed.id, lastUpdatedAt = Clock.System.now())
     }
   }
 
@@ -651,11 +684,14 @@ class RssRepository(
       .distinct()
   }
 
-  suspend fun updateFeedsLastCleanUpAt(feedIds: List<String>) {
+  suspend fun updateFeedsLastCleanUpAt(
+    feedIds: List<String>,
+    lastCleanUpAt: Instant = Clock.System.now()
+  ) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         feedIds.forEach { feedId ->
-          feedQueries.updateLastCleanUpAt(lastCleanUpAt = Clock.System.now(), id = feedId)
+          feedQueries.updateLastCleanUpAt(lastCleanUpAt = lastCleanUpAt, id = feedId)
         }
       }
     }
@@ -663,14 +699,20 @@ class RssRepository(
 
   suspend fun markPostsAsRead(postsAfter: Instant = Instant.DISTANT_PAST) {
     withContext(dispatchersProvider.databaseWrite) {
-      postQueries.markPostsAsRead(sourceId = null, after = postsAfter)
+      postQueries.markPostsAsRead(
+        sourceId = null,
+        after = postsAfter,
+        updatedAt = Clock.System.now()
+      )
     }
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIds.forEach { postId -> postQueries.updateReadStatus(read = 1L, id = postId) }
+        postIds.forEach { postId ->
+          postQueries.updateReadStatus(read = 1L, id = postId, updatedAt = Clock.System.now())
+        }
       }
     }
   }
@@ -682,7 +724,11 @@ class RssRepository(
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         feedIds.forEach { feedId ->
-          postQueries.markPostsAsRead(sourceId = feedId, after = postsAfter)
+          postQueries.markPostsAsRead(
+            sourceId = feedId,
+            after = postsAfter,
+            updatedAt = Clock.System.now()
+          )
         }
       }
     }
@@ -691,6 +737,132 @@ class RssRepository(
   suspend fun post(postId: String): Post {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.post(postId, ::Post).executeAsOne()
+    }
+  }
+
+  suspend fun postOrNull(postId: String): Post? {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.post(postId, ::Post).executeAsOneOrNull()
+    }
+  }
+
+  suspend fun allPostsBlocking(): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.allPostsBlocking(::Post).executeAsList()
+    }
+  }
+
+  suspend fun upsertPosts(posts: List<Post>) {
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        posts.forEach { post ->
+          postQueries.upsertSyncPost(
+            id = post.id,
+            sourceId = post.sourceId,
+            title = post.title,
+            description = post.description,
+            imageUrl = post.imageUrl,
+            postDate = post.postDate,
+            createdAt = post.createdAt,
+            updatedAt = post.updatedAt,
+            syncedAt = post.syncedAt,
+            link = post.link,
+            commentsLink = post.commentsLink,
+            flags = post.flags
+          )
+        }
+      }
+    }
+  }
+
+  suspend fun upsertFeeds(feeds: List<Feed>) {
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        feeds.forEach { feed ->
+          feedQueries.upsertSyncFeed(
+            id = feed.id,
+            name = feed.name,
+            icon = feed.icon,
+            description = feed.description,
+            link = feed.link,
+            homepageLink = feed.homepageLink,
+            createdAt = feed.createdAt,
+            pinnedAt = feed.pinnedAt,
+            lastCleanUpAt = feed.lastCleanUpAt,
+            alwaysFetchSourceArticle = feed.alwaysFetchSourceArticle,
+            lastUpdatedAt = feed.lastUpdatedAt,
+            isDeleted = feed.isDeleted
+          )
+        }
+      }
+    }
+  }
+
+  suspend fun upsertGroup(
+    id: String,
+    name: String,
+    pinnedAt: Instant?,
+    updatedAt: Instant,
+    isDeleted: Boolean
+  ) {
+    withContext(dispatchersProvider.databaseWrite) {
+      feedGroupQueries.upsertSyncGroup(
+        id = id,
+        name = name,
+        createdAt = Clock.System.now(),
+        updatedAt = updatedAt,
+        pinnedAt = pinnedAt,
+        isDeleted = isDeleted
+      )
+    }
+  }
+
+  suspend fun feedGroupBlocking(id: String): FeedGroup? {
+    return withContext(dispatchersProvider.databaseRead) {
+      feedGroupQueries
+        .group(
+          id,
+          mapper = {
+            id: String,
+            name: String,
+            feedIds: String?,
+            createdAt: Instant,
+            updatedAt: Instant,
+            pinnedAt: Instant?,
+            pinnedPosition: Double,
+            isDeleted: Boolean ->
+            FeedGroup(
+              id = id,
+              name = name,
+              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
+              feedHomepageLinks = emptyList(),
+              feedIconLinks = emptyList(),
+              createdAt = createdAt,
+              updatedAt = updatedAt,
+              pinnedAt = pinnedAt,
+              pinnedPosition = pinnedPosition,
+              isDeleted = isDeleted,
+            )
+          }
+        )
+        .executeAsOneOrNull()
+    }
+  }
+
+  suspend fun replaceFeedsInGroup(groupId: String, feedIds: List<String>) {
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        feedGroupFeedQueries.removeAllFeedsFromGroup(groupId)
+        feedIds.forEach { feedId ->
+          feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
+        }
+      }
+    }
+  }
+
+  suspend fun deleteReadPostsForFeedOlderThan(feedId: String, before: Instant) {
+    withContext(dispatchersProvider.databaseWrite) {
+      postQueries.deleteReadPostsForFeed(feedId = feedId, before = before)
     }
   }
 
@@ -716,7 +888,7 @@ class RssRepository(
 
   suspend fun updateGroupName(groupId: String, name: String) {
     withContext(dispatchersProvider.databaseWrite) {
-      feedGroupQueries.updateGroupName(name, groupId)
+      feedGroupQueries.updateGroupName(name = name, id = groupId, updatedAt = Clock.System.now())
     }
   }
 
@@ -727,6 +899,7 @@ class RssRepository(
           feedIds.forEach { feedId ->
             feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
           }
+          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
         }
       }
     }
@@ -739,6 +912,7 @@ class RssRepository(
           feedIds.forEach { feedId ->
             feedGroupFeedQueries.removeFeedFromGroup(feedId = feedId, feedGroupId = groupId)
           }
+          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
         }
       }
     }
@@ -747,10 +921,10 @@ class RssRepository(
   suspend fun pinSources(sources: Set<Source>) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val now = Clock.System.now()
         sources.forEach { source ->
-          val pinnedAt = Clock.System.now()
-          feedQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
-          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = pinnedAt)
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = now, lastUpdatedAt = now)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = now, updatedAt = now)
         }
       }
     }
@@ -759,9 +933,10 @@ class RssRepository(
   suspend fun unpinSources(sources: Set<Source>) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val now = Clock.System.now()
         sources.forEach { source ->
-          feedQueries.updatePinnedAt(id = source.id, pinnedAt = null)
-          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = null)
+          feedQueries.updatePinnedAt(id = source.id, pinnedAt = null, lastUpdatedAt = now)
+          feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = null, updatedAt = now)
         }
       }
     }
@@ -769,11 +944,12 @@ class RssRepository(
 
   suspend fun deleteSources(sources: Set<Source>) {
     withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.transaction {
+      transactionRunner.invoke {
+        val now = Clock.System.now()
         sources.forEach { source ->
-          feedQueries.remove(id = source.id)
+          feedQueries.remove(id = source.id, lastUpdatedAt = now)
           postQueries.deletePostsForFeed(source.id)
-          feedGroupQueries.deleteGroup(id = source.id)
+          feedGroupQueries.deleteGroup(id = source.id, updatedAt = now)
         }
       }
     }
@@ -1110,9 +1286,18 @@ class RssRepository(
   suspend fun updatedSourcePinnedPosition(sources: List<Source>) {
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val now = Clock.System.now()
         sources.forEachIndexed { index, source ->
-          feedQueries.updatedPinnedPosition(index.toDouble(), source.id)
-          feedGroupQueries.updatedPinnedPosition(index.toDouble(), source.id)
+          feedQueries.updatedPinnedPosition(
+            pinnedPosition = index.toDouble(),
+            id = source.id,
+            lastUpdatedAt = now
+          )
+          feedGroupQueries.updatedPinnedPosition(
+            pinnedPosition = index.toDouble(),
+            id = source.id,
+            updatedAt = now
+          )
         }
       }
     }

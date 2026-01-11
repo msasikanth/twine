@@ -98,6 +98,11 @@ class MainActivity : ComponentActivity() {
     }
   }
 
+  override fun onNewIntent(intent: android.content.Intent) {
+    super.onNewIntent(intent)
+    intent.data?.let { ExternalUriHandler.onNewUri(it.toString()) }
+  }
+
   override fun onDestroy() {
     PermissionRequestBridge.unregister()
     super.onDestroy()

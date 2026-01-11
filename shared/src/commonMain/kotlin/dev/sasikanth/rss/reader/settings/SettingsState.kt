@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
+import kotlin.time.Instant
 
 @Immutable
 data class SettingsState(
@@ -45,7 +46,17 @@ data class SettingsState(
   val blockImages: Boolean,
   val enableNotifications: Boolean,
   val downloadFullContent: Boolean,
+  val syncProgress: SyncProgress,
+  val lastSyncedAt: Instant?,
+  val authUrlToOpen: String?,
 ) {
+
+  enum class SyncProgress {
+    Idle,
+    Syncing,
+    Success,
+    Failure
+  }
 
   companion object {
 
@@ -69,6 +80,9 @@ data class SettingsState(
         blockImages = false,
         enableNotifications = false,
         downloadFullContent = false,
+        syncProgress = SyncProgress.Idle,
+        lastSyncedAt = null,
+        authUrlToOpen = null,
       )
   }
 }

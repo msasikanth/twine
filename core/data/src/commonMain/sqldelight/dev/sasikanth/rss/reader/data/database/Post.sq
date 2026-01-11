@@ -161,19 +161,23 @@ ORDER BY
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
-UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END WHERE id = :id;
+UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END, updatedAt = :updatedAt WHERE id = :id;
 
 updateReadStatus:
-UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END WHERE id = :id;
+UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END, updatedAt = :updatedAt WHERE id = :id;
 
 deleteReadPosts:
 DELETE FROM post
 WHERE (post.flags & 2) != 0 AND post.postDate < :before
 RETURNING post.sourceId;
 
+deleteReadPostsForFeed:
+DELETE FROM post
+WHERE sourceId = :feedId AND (post.flags & 2) != 0 AND post.postDate < :before;
+
 markPostsAsRead:
 UPDATE post
-SET flags = flags | 2
+SET flags = flags | 2, updatedAt = :updatedAt
 WHERE (sourceId = :sourceId OR :sourceId IS NULL)
   AND postDate > :after
   AND (flags & 2) == 0;
@@ -270,3 +274,23 @@ LIMIT :numberOfPosts OFFSET :offset;
 deletePostsForFeed:
 DELETE FROM post
 WHERE sourceId = :feedId AND (flags & 1) == 0;
+
+allPostsBlocking:
+SELECT * FROM post;
+
+allReadPostsBlocking:
+SELECT id, updatedAt FROM post WHERE (flags & 2) != 0;
+
+upsertSyncPost:
+INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags)
+VALUES (:id, :sourceId, :title, :description, :imageUrl, :postDate, :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :flags)
+ON CONFLICT(id, sourceId) DO
+UPDATE SET
+    title = excluded.title,
+    description = excluded.description,
+    imageUrl = excluded.imageUrl,
+    postDate = excluded.postDate,
+    updatedAt = excluded.updatedAt,
+    syncedAt = excluded.syncedAt,
+    flags = excluded.flags
+WHERE excluded.updatedAt > post.updatedAt;

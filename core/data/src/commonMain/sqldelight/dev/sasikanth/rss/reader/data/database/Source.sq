@@ -3,7 +3,7 @@ WITH feeds AS (
   SELECT COUNT(*) AS count FROM feed WHERE isDeleted = 0
 ),
 feedGroups AS (
-  SELECT COUNT(*) AS count FROM feedGroup
+  SELECT COUNT(*) AS count FROM feedGroup WHERE isDeleted = 0
 )
 SELECT feeds.count + feedGroups.count
 FROM feeds, feedGroups;
@@ -15,7 +15,8 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
@@ -98,6 +99,7 @@ FROM (
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
+  WHERE fg.isDeleted = 0
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
@@ -110,7 +112,8 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
@@ -190,6 +193,7 @@ FROM (
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
+  WHERE fg.isDeleted = 0
   GROUP BY fg.id
 )
 ORDER BY type DESC,
@@ -207,7 +211,8 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
@@ -287,6 +292,6 @@ FROM (
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
-  WHERE fg.id = :id
+  WHERE fg.id = :id AND fg.isDeleted = 0
   GROUP BY fg.id
 );

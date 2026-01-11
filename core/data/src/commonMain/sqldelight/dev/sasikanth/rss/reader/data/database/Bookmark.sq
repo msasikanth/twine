@@ -26,5 +26,8 @@ WHERE (post.flags & 1) != 0
 ORDER BY date DESC
 LIMIT :limit OFFSET :offset;
 
+allBookmarkIds:
+SELECT id FROM post WHERE (flags & 1) != 0;
+
 deleteBookmark:
 UPDATE post SET flags = flags & ~1 WHERE id = :id;

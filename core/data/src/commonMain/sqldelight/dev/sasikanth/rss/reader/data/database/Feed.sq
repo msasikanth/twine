@@ -30,10 +30,10 @@ INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
 VALUES (?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO
 UPDATE SET icon = excluded.icon, description = excluded.description,
-homepageLink = excluded.homepageLink, isDeleted = 0;
+homepageLink = excluded.homepageLink, isDeleted = 0, lastUpdatedAt = :lastUpdatedAt;
 
 remove:
-UPDATE feed SET isDeleted = 1 WHERE id = :id;
+UPDATE feed SET isDeleted = 1, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 feeds:
 SELECT * FROM feed
@@ -65,13 +65,13 @@ WHERE f.id = :id AND f.isDeleted = 0
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
 
 updateFeedName:
-UPDATE feed SET name = :newFeedName WHERE id = :id;
+UPDATE feed SET name = :newFeedName, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 hasFeed:
 SELECT EXISTS(SELECT 1 FROM feed WHERE id = :id AND isDeleted = 0);
 
 updatePinnedAt:
-UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
+UPDATE feed SET pinnedAt = :pinnedAt, pinnedPosition = 0.0, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 numberOfFeeds:
 SELECT COUNT(*) FROM feed WHERE isDeleted = 0;
@@ -109,10 +109,29 @@ ORDER BY
 LIMIT :limit OFFSET :offset;
 
 updatedPinnedPosition:
-UPDATE feed SET pinnedPosition = :pinnedPosition WHERE id = :id;
+UPDATE feed SET pinnedPosition = :pinnedPosition, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 updateLastUpdatedAt:
 UPDATE feed SET lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 updateRefreshInterval:
 UPDATE feed SET refreshInterval = :refreshInterval WHERE id = :id;
+
+allFeedsBlocking:
+SELECT * FROM feed;
+
+upsertSyncFeed:
+INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted)
+VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted)
+ON CONFLICT(id) DO
+UPDATE SET
+    name = excluded.name,
+    icon = excluded.icon,
+    description = excluded.description,
+    homepageLink = excluded.homepageLink,
+    pinnedAt = excluded.pinnedAt,
+    lastCleanUpAt = excluded.lastCleanUpAt,
+    alwaysFetchSourceArticle = excluded.alwaysFetchSourceArticle,
+    lastUpdatedAt = excluded.lastUpdatedAt,
+    isDeleted = excluded.isDeleted
+WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL;

@@ -101,6 +101,7 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
+import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
@@ -109,10 +110,13 @@ import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsEvent.ChangeHomeViewMode
+import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
+import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -144,6 +148,7 @@ import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
 import twine.shared.generated.resources.settingsHeaderFeedback
 import twine.shared.generated.resources.settingsHeaderOpml
+import twine.shared.generated.resources.settingsHeaderSync
 import twine.shared.generated.resources.settingsHeaderTheme
 import twine.shared.generated.resources.settingsOpmlCancel
 import twine.shared.generated.resources.settingsOpmlExport
@@ -162,6 +167,12 @@ import twine.shared.generated.resources.settingsShowReaderViewSubtitle
 import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
+import twine.shared.generated.resources.settingsSyncDropbox
+import twine.shared.generated.resources.settingsSyncSignOut
+import twine.shared.generated.resources.settingsSyncStatusFailure
+import twine.shared.generated.resources.settingsSyncStatusIdle
+import twine.shared.generated.resources.settingsSyncStatusSuccess
+import twine.shared.generated.resources.settingsSyncStatusSyncing
 import twine.shared.generated.resources.settingsThemeAuto
 import twine.shared.generated.resources.settingsThemeDark
 import twine.shared.generated.resources.settingsThemeLight
@@ -185,6 +196,13 @@ internal fun SettingsScreen(
   val state by viewModel.state.collectAsStateWithLifecycle()
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
+
+  LaunchedEffect(state.authUrlToOpen) {
+    state.authUrlToOpen?.let { url ->
+      linkHandler.openLink(url)
+      viewModel.dispatch(SettingsEvent.ClearAuthUrl)
+    }
+  }
 
   LaunchedEffect(state.openPaywall) {
     if (state.openPaywall) {
@@ -471,6 +489,24 @@ internal fun SettingsScreen(
               onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
               onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
               onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) }
+            )
+          }
+
+          item { Divider() }
+
+          item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
+
+          item {
+            CloudSyncSettingItem(
+              syncProgress = state.syncProgress,
+              lastSyncedAt = state.lastSyncedAt,
+              availableProviders = viewModel.availableProviders,
+              onSyncClicked = { provider ->
+                viewModel.dispatch(SettingsEvent.SyncClicked(provider))
+              },
+              onSignOutClicked = { provider ->
+                viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
+              }
             )
           }
 
@@ -1382,6 +1418,87 @@ private fun AboutProfileImages() {
           .padding(8.dp)
           .clip(CircleShape)
     )
+  }
+}
+
+@Composable
+private fun CloudSyncSettingItem(
+  syncProgress: SettingsState.SyncProgress,
+  lastSyncedAt: Instant?,
+  availableProviders: List<CloudSyncProvider>,
+  onSyncClicked: (CloudSyncProvider) -> Unit,
+  onSignOutClicked: (CloudSyncProvider) -> Unit
+) {
+  availableProviders.forEach { provider ->
+    val label =
+      when (provider.name) {
+        "Dropbox" -> stringResource(Res.string.settingsSyncDropbox)
+        else -> provider.name
+      }
+    val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
+
+    Box(
+      modifier =
+        Modifier.clickable(
+            enabled = provider.isSupported && syncProgress != SettingsState.SyncProgress.Syncing
+          ) {
+            onSyncClicked(provider)
+          }
+          .fillMaxWidth()
+          .padding(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+      Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.weight(1f)) {
+          val alpha = if (provider.isSupported) 1f else 0.38f
+          Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = alpha)
+          )
+
+          var statusString =
+            when (syncProgress) {
+              SettingsState.SyncProgress.Idle -> stringResource(Res.string.settingsSyncStatusIdle)
+              SettingsState.SyncProgress.Syncing ->
+                stringResource(Res.string.settingsSyncStatusSyncing)
+              SettingsState.SyncProgress.Success ->
+                stringResource(Res.string.settingsSyncStatusSuccess)
+              SettingsState.SyncProgress.Failure ->
+                stringResource(Res.string.settingsSyncStatusFailure)
+            }
+
+          if (
+            syncProgress != SettingsState.SyncProgress.Idle &&
+              syncProgress != SettingsState.SyncProgress.Syncing &&
+              lastSyncedAt != null
+          ) {
+            statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
+          }
+
+          AnimatedVisibility(visible = syncProgress != SettingsState.SyncProgress.Idle) {
+            Text(
+              text = statusString,
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.textEmphasisMed
+            )
+          }
+        }
+
+        if (provider.isSupported) {
+          if (isSignedIn) {
+            TextButton(
+              onClick = { onSignOutClicked(provider) },
+            ) {
+              Text(
+                text = stringResource(Res.string.settingsSyncSignOut),
+                style = MaterialTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.primary
+              )
+            }
+          }
+        }
+      }
+    }
   }
 }
 

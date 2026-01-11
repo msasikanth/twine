@@ -30,4 +30,5 @@ data class FeedGroup(
   override val pinnedAt: Instant?,
   override val sourceType: SourceType = SourceType.FeedGroup,
   override val pinnedPosition: Double = 0.0,
+  val isDeleted: Boolean = false,
 ) : Source

@@ -1,3 +1,4 @@
+import kotlin.Boolean;
 import kotlin.time.Instant;
 
 CREATE TABLE IF NOT EXISTS feedGroup(
@@ -6,7 +7,8 @@ CREATE TABLE IF NOT EXISTS feedGroup(
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL,
   pinnedAt INTEGER AS Instant,
-  pinnedPosition REAL NOT NULL DEFAULT 0.0
+  pinnedPosition REAL NOT NULL DEFAULT 0.0,
+  isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0
 );
 
 CREATE INDEX feed_group_pinned_at ON feedGroup(pinnedAt);
@@ -14,7 +16,7 @@ CREATE INDEX feed_group_pinned_position ON feedGroup(pinnedPosition);
 CREATE INDEX feed_group_pinned_name ON feedGroup(pinnedAt DESC, name);
 
 count:
-SELECT COUNT(*) FROM feedGroup;
+SELECT COUNT(*) FROM feedGroup WHERE isDeleted = 0;
 
 groups:
 SELECT
@@ -39,7 +41,7 @@ SELECT
   pinnedAt,
   pinnedPosition
 FROM feedGroup fg
-LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+WHERE isDeleted = 0
 GROUP BY fg.id
 LIMIT :limit OFFSET :offset;
 
@@ -66,7 +68,7 @@ SELECT
   pinnedAt,
   pinnedPosition
 FROM feedGroup fg
-LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
+WHERE isDeleted = 0
 GROUP BY fg.id;
 
 createGroup:
@@ -74,16 +76,32 @@ INSERT OR IGNORE INTO feedGroup(id, name, createdAt, updatedAt)
 VALUES (:id,  :name, :createdAt, :updatedAt);
 
 updateGroupName:
-UPDATE feedGroup SET name = :name WHERE id = :id;
+UPDATE feedGroup SET name = :name, updatedAt = :updatedAt WHERE id = :id;
+
+updateUpdatedAt:
+UPDATE feedGroup SET updatedAt = :updatedAt WHERE id = :id;
 
 deleteGroup:
-DELETE FROM feedGroup WHERE id = :id;
+UPDATE feedGroup SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id;
 
 updatePinnedAt:
-UPDATE feedGroup SET pinnedAt = :pinnedAt, pinnedPosition = 0.0 WHERE id = :id;
+UPDATE feedGroup SET pinnedAt = :pinnedAt, pinnedPosition = 0.0, updatedAt = :updatedAt WHERE id = :id;
 
 group:
-SELECT * FROM feedGroup WHERE id = :id;
+SELECT
+  id,
+  name,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       JOIN feed f ON gf.feedId = f.id
+       WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  createdAt,
+  updatedAt,
+  pinnedAt,
+  pinnedPosition,
+  isDeleted
+FROM feedGroup fg
+WHERE id = :id AND isDeleted = 0;
 
 groupsByIds:
 SELECT
@@ -107,9 +125,34 @@ SELECT
   updatedAt,
   pinnedAt
 FROM feedGroup fg
-LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-WHERE id IN :ids
+WHERE id IN :ids AND isDeleted = 0
 GROUP BY fg.id;
 
 updatedPinnedPosition:
-UPDATE feedGroup SET pinnedPosition = :pinnedPosition WHERE id = :id;
+UPDATE feedGroup SET pinnedPosition = :pinnedPosition, updatedAt = :updatedAt WHERE id = :id;
+
+allGroupsBlocking:
+SELECT
+  id,
+  name,
+  (SELECT GROUP_CONCAT(gf.feedId)
+       FROM feedGroupFeed gf
+       JOIN feed f ON gf.feedId = f.id
+       WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  createdAt,
+  updatedAt,
+  pinnedAt,
+  pinnedPosition,
+  isDeleted
+FROM feedGroup fg;
+
+upsertSyncGroup:
+INSERT INTO feedGroup(id, name, createdAt, updatedAt, pinnedAt, isDeleted)
+VALUES (:id, :name, :createdAt, :updatedAt, :pinnedAt, :isDeleted)
+ON CONFLICT(id) DO
+UPDATE SET
+    name = excluded.name,
+    pinnedAt = excluded.pinnedAt,
+    updatedAt = excluded.updatedAt,
+    isDeleted = excluded.isDeleted
+WHERE excluded.updatedAt > feedGroup.updatedAt;
