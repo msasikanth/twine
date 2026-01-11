@@ -113,6 +113,7 @@ class SettingsViewModel(
             when (lastSyncStatus) {
               "SUCCESS" -> SettingsState.SyncProgress.Success
               "FAILURE" -> SettingsState.SyncProgress.Failure
+              "SYNCING" -> SettingsState.SyncProgress.Syncing
               else -> SettingsState.SyncProgress.Idle
             }
         )

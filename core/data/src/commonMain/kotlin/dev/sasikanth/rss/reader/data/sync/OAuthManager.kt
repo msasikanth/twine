@@ -16,5 +16,5 @@ interface OAuthManager {
 
   fun setPendingProvider(providerId: String)
 
-  suspend fun handleRedirect(uri: String)
+  suspend fun handleRedirect(uri: String): String?
 }

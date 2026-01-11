@@ -59,7 +59,6 @@ import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
-import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -144,7 +143,6 @@ fun App(
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
-  oAuthManager: OAuthManager,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -219,10 +217,7 @@ fun App(
     DisposableEffect(Unit) {
       ExternalUriHandler.listener = { uri ->
         if (uri.startsWith("twine://oauth")) {
-          coroutineScope.launch {
-            oAuthManager.handleRedirect(uri)
-            linkHandler.close()
-          }
+          appViewModel.onOAuthRedirect(uri)
         }
 
         val deepLinkRequest = NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)

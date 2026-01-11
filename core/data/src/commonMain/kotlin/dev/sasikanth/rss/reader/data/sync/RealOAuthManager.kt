@@ -61,7 +61,7 @@ class RealOAuthManager(
     pendingProviderId = providerId
   }
 
-  override suspend fun handleRedirect(uri: String) {
+  override suspend fun handleRedirect(uri: String): String? {
     val url = Url(uri.replace("#", "?"))
     val code = url.parameters["code"]
     if (code != null && pendingProviderId != null && codeVerifier != null) {
@@ -89,10 +89,14 @@ class RealOAuthManager(
         }
         pendingProviderId = null
         codeVerifier = null
+
+        return providerId
       } catch (e: Exception) {
         Logger.e("AuthError", e)
       }
     }
+
+    return null
   }
 
   @OptIn(ExperimentalEncodingApi::class)

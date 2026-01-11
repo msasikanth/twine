@@ -45,6 +45,7 @@ class CloudSyncService(
 
   suspend fun sync(provider: CloudSyncProvider): Boolean {
     try {
+      appConfigQueries.updateLastSyncStatus("SYNCING")
       val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
       val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
 
