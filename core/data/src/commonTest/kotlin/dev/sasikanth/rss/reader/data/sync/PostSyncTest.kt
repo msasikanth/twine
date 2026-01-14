@@ -245,7 +245,7 @@ class PostSyncTest {
   }
 
   @Test
-  fun syncDataSerializationWithPostContentAndUser() {
+  fun syncDataSerializationWithPostContent() {
     val syncData =
       SyncData(
         version = 2,
@@ -273,15 +273,6 @@ class PostSyncTest {
               htmlContent = "HTML content"
             )
           ),
-        user =
-          UserSyncEntity(
-            id = "user-id",
-            name = "User",
-            profileId = "profile-id",
-            email = "user@example.com",
-            token = "token",
-            serverUrl = "https://example.com"
-          )
       )
 
     val serialized = json.encodeToString(syncData)
@@ -291,7 +282,6 @@ class PostSyncTest {
     assertEquals("Raw content", deserialized.posts[0].rawContent)
     assertEquals("HTML content", deserialized.posts[0].htmlContent)
     assertEquals(false, deserialized.posts[0].isDeleted)
-    assertEquals("user-id", deserialized.user?.id)
   }
 
   @Test
