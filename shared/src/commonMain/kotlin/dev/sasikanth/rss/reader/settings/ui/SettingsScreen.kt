@@ -79,6 +79,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -701,7 +702,7 @@ private fun AppIconPreview(
     }
   val backgroundBrush =
     Brush.radialGradient(
-      0.17f to backgroundColor.copy(alpha = 0.55f),
+      0.17f to backgroundColor.copy(alpha = 0.55f).compositeOver(Color.White),
       1f to backgroundColor,
       center = Offset(20f, 24f)
     )
