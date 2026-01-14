@@ -133,7 +133,7 @@ internal fun HomeTopAppBar(
     modifier = modifier.background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha)),
     scrollBehavior = scrollBehavior,
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
-    title = { SourceInfo(postsType = postsType) },
+    title = { SourceInfo(source = source, postsType = postsType) },
     navigationIcon = {
       if (onMenuClicked != null) {
         CircularIconButton(
@@ -179,6 +179,7 @@ internal fun HomeTopAppBar(
 
 @Composable
 private fun SourceInfo(
+  source: Source?,
   postsType: PostsType,
   modifier: Modifier = Modifier,
 ) {
@@ -192,9 +193,16 @@ private fun SourceInfo(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
+        val title =
+          when (source) {
+            is Feed -> source.name
+            is FeedGroup -> source.name
+            else -> stringResource(Res.string.screenHome)
+          }
+
         Text(
           modifier = Modifier.basicMarquee(),
-          text = stringResource(Res.string.screenHome),
+          text = title,
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.onSurface,
           maxLines = 1,
