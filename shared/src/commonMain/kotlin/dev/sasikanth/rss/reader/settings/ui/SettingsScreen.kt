@@ -690,7 +690,7 @@ private fun AppIconPreview(
       AppIcon.DeepTeal -> Color(0xFF00838F)
       AppIcon.DustyRose -> Color(0xFFC98CA7)
       AppIcon.RoyalPlum -> Color(0xFF693764)
-      AppIcon.SlateBlue -> Color(0xFF5C6BC0)
+      AppIcon.SlateBlue -> Color(0xFF375069)
       AppIcon.SoftSage -> Color(0xFF9BB49D)
       AppIcon.StormySky -> Color(0xFF607D8B)
     }
