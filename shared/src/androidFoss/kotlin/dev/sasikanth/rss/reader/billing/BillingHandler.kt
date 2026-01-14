@@ -22,6 +22,10 @@ actual class BillingHandler {
     return true
   }
 
+  actual suspend fun canSubscribe(): Boolean {
+    return false
+  }
+
   actual suspend fun customerResult(): SubscriptionResult {
     return SubscriptionResult.Subscribed
   }

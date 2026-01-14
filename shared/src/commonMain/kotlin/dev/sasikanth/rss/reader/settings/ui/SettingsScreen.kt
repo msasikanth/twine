@@ -371,13 +371,16 @@ internal fun SettingsScreen(
           }
         }
 
-        item { Divider(24.dp) }
+        if (state.canSubscribe) {
+          item { Divider(24.dp) }
 
-        item {
-          AppIconSettingItem(
-            appIcon = state.appIcon,
-            onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) }
-          )
+          item {
+            AppIconSettingItem(
+              appIcon = state.appIcon,
+              isSubscribed = state.isSubscribed,
+              onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) }
+            )
+          }
         }
 
         item { Divider() }
@@ -564,6 +567,7 @@ internal fun SettingsScreen(
 @Composable
 private fun AppIconSettingItem(
   appIcon: AppIcon,
+  isSubscribed: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -584,14 +588,16 @@ private fun AppIconSettingItem(
           color = AppTheme.colorScheme.textEmphasisHigh
         )
 
-        Spacer(Modifier.width(8.dp))
+        if (!isSubscribed) {
+          Spacer(Modifier.width(8.dp))
 
-        Icon(
-          modifier = Modifier.size(16.dp),
-          imageVector = Icons.Rounded.WorkspacePremium,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.primary
-        )
+          Icon(
+            modifier = Modifier.size(16.dp),
+            imageVector = Icons.Rounded.WorkspacePremium,
+            contentDescription = null,
+            tint = AppTheme.colorScheme.primary
+          )
+        }
       }
 
       Text(

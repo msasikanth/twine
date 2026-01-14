@@ -249,7 +249,10 @@ class SettingsViewModel(
   private fun loadSubscriptionStatus() {
     viewModelScope.launch {
       val subscriptionResult = billingHandler.customerResult()
-      _state.update { it.copy(subscriptionResult = subscriptionResult) }
+      val canSubscribe = billingHandler.canSubscribe()
+      _state.update {
+        it.copy(subscriptionResult = subscriptionResult, canSubscribe = canSubscribe)
+      }
     }
   }
 

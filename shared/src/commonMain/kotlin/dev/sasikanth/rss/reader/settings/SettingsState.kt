@@ -52,7 +52,11 @@ data class SettingsState(
   val authUrlToOpen: String?,
   val appIcon: AppIcon,
   val showAppIconSelectionSheet: Boolean,
+  val canSubscribe: Boolean,
 ) {
+
+  val isSubscribed: Boolean
+    get() = subscriptionResult == SubscriptionResult.Subscribed
 
   enum class SyncProgress {
     Idle,
@@ -88,6 +92,7 @@ data class SettingsState(
         authUrlToOpen = null,
         appIcon = AppIcon.DarkJade,
         showAppIconSelectionSheet = false,
+        canSubscribe = true,
       )
   }
 }

@@ -33,6 +33,10 @@ actual class BillingHandler(private val dispatchersProvider: DispatchersProvider
     return customerResult() is SubscriptionResult.Subscribed
   }
 
+  actual suspend fun canSubscribe(): Boolean {
+    return true
+  }
+
   actual suspend fun customerResult(): SubscriptionResult {
     try {
       val customerInfo =
