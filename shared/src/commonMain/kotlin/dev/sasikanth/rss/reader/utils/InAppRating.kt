@@ -28,7 +28,7 @@ interface InAppRating {
 
     if (daysSinceInstall < 7.days) return false
 
-    if (daysSinceLastPrompt == 0.days || daysSinceLastPrompt < 30.days) return false
+    if (daysSinceLastPrompt < 7.days) return false
 
     if (sessionCount < 5) return false
 
