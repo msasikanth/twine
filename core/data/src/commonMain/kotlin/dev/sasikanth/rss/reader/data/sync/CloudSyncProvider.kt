@@ -90,6 +90,7 @@ data class FeedSyncEntity(
   val description: String = "",
   val link: String,
   val homepageLink: String,
+  val pinnedPosition: Double = 0.0,
   val pinnedAt: Long? = null,
   val lastCleanUpAt: Long? = null,
   val alwaysFetchSourceArticle: Boolean = false,
@@ -102,6 +103,7 @@ data class GroupSyncEntity(
   val id: String,
   val name: String,
   val feedIds: List<String> = emptyList(),
+  val pinnedPosition: Double = 0.0,
   val pinnedAt: Long? = null,
   val updatedAt: Long? = null,
   val isDeleted: Boolean = false

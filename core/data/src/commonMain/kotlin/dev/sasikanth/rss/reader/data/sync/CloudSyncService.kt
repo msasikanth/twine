@@ -81,6 +81,7 @@ class CloudSyncService(
             description = it.description,
             link = it.link,
             homepageLink = it.homepageLink,
+            pinnedPosition = it.pinnedPosition,
             pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
             lastCleanUpAt = it.lastCleanUpAt?.toEpochMilliseconds(),
             alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
@@ -95,6 +96,7 @@ class CloudSyncService(
             id = it.id,
             name = it.name,
             feedIds = it.feedIds,
+            pinnedPosition = it.pinnedPosition,
             pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
             updatedAt = it.updatedAt.toEpochMilliseconds(),
             isDeleted = it.isDeleted
