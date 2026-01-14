@@ -251,288 +251,282 @@ internal fun SettingsScreen(
       }
     },
     content = { padding ->
-      Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-          contentPadding =
-            PaddingValues(
-              start = padding.calculateStartPadding(layoutDirection),
-              top = padding.calculateTopPadding() + 8.dp,
-              end = padding.calculateEndPadding(layoutDirection),
-              bottom = padding.calculateBottomPadding() + 80.dp
-            ),
-        ) {
-          item {
-            AnimatedVisibility(
-              visible = !state.appInfo.isFoss && state.subscriptionResult != null,
-              enter = fadeIn() + expandVertically(),
-              exit = fadeOut() + shrinkVertically()
-            ) {
-              Column {
-                TwinePremiumBanner(
-                  modifier = Modifier.animateItem(),
-                  subscriptionResult = state.subscriptionResult,
-                  onClick = { openPaywall() }
-                )
-
-                Divider()
-              }
-            }
-          }
-
-          item { SubHeader(text = stringResource(Res.string.homeViewMode)) }
-
-          item {
-            Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-              LayoutIconButton(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.homeViewModeDefault),
-                icon = TwineIcons.LayoutDefault,
-                selected = state.homeViewMode == HomeViewMode.Default,
-                onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Default)) }
+      LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding =
+          PaddingValues(
+            start = padding.calculateStartPadding(layoutDirection),
+            top = padding.calculateTopPadding() + 8.dp,
+            end = padding.calculateEndPadding(layoutDirection),
+            bottom = padding.calculateBottomPadding() + 80.dp
+          ),
+      ) {
+        item {
+          AnimatedVisibility(
+            visible = !state.appInfo.isFoss && state.subscriptionResult != null,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+          ) {
+            Column {
+              TwinePremiumBanner(
+                modifier = Modifier.animateItem(),
+                subscriptionResult = state.subscriptionResult,
+                onClick = { openPaywall() }
               )
 
-              LayoutIconButton(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.homeViewModeSimple),
-                icon = TwineIcons.LayoutSimple,
-                selected = state.homeViewMode == HomeViewMode.Simple,
-                onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Simple)) }
-              )
-
-              LayoutIconButton(
-                modifier = Modifier.weight(1f),
-                label = stringResource(Res.string.homeViewModeCompact),
-                icon = TwineIcons.LayoutCompact,
-                selected = state.homeViewMode == HomeViewMode.Compact,
-                onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Compact)) }
-              )
+              Divider()
             }
           }
-
-          item { Divider() }
-
-          item {
-            SubHeader(
-              text = stringResource(Res.string.settingsHeaderTheme),
-            )
-          }
-
-          item {
-            val appThemeMode = state.appThemeMode
-            ToggleableButtonGroup(
-              modifier =
-                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp),
-              items =
-                listOf(
-                  ToggleableButtonItem(
-                    label = stringResource(Res.string.settingsThemeAuto),
-                    isSelected = appThemeMode == AppThemeMode.Auto,
-                    identifier = AppThemeMode.Auto,
-                  ),
-                  ToggleableButtonItem(
-                    label = stringResource(Res.string.settingsThemeLight),
-                    isSelected = appThemeMode == AppThemeMode.Light,
-                    identifier = AppThemeMode.Light
-                  ),
-                  ToggleableButtonItem(
-                    label = stringResource(Res.string.settingsThemeDark),
-                    isSelected = appThemeMode == AppThemeMode.Dark,
-                    identifier = AppThemeMode.Dark
-                  )
-                ),
-              onItemSelected = {
-                viewModel.dispatch(
-                  SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode)
-                )
-              }
-            )
-          }
-
-          item {
-            AnimatedVisibility(
-              visible = AppTheme.isDark,
-              enter = fadeIn() + expandVertically(),
-              exit = fadeOut() + shrinkVertically()
-            ) {
-              AmoledSettingItem(
-                useAmoled = state.useAmoled,
-                onValueChanged = { newValue ->
-                  viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
-                }
-              )
-            }
-          }
-
-          item { Divider() }
-
-          item {
-            SubHeader(
-              text = stringResource(Res.string.settingsHeaderBehaviour),
-            )
-          }
-
-          item {
-            ShowReaderViewSettingItem(
-              showReaderView = state.showReaderView,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            BrowserTypeSettingItem(
-              browserType = state.browserType,
-              onBrowserTypeChanged = { newBrowserType ->
-                viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            UnreadPostsCountSettingItem(
-              showUnreadCountEnabled = state.showUnreadPostsCount,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            AutoSyncSettingItem(
-              enableAutoSync = state.enableAutoSync,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            ShowFeedFavIconSettingItem(
-              showFeedFavIcon = state.showFeedFavIcon,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            BlockImagesSettingItem(
-              blockImages = state.blockImages,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            NotificationsSettingItem(
-              enableNotifications = state.enableNotifications,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            DownloadFullContentSettingItem(
-              downloadFullContent = state.downloadFullContent,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item { BlockedWordsSettingItem { openBlockedWords() } }
-
-          item { Divider(24.dp) }
-
-          item {
-            MarkArticleAsReadOnSetting(articleMarkAsReadOn = state.markAsReadOn) {
-              viewModel.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
-            }
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            PostsDeletionPeriodSettingItem(
-              postsDeletionPeriod = state.postsDeletionPeriod,
-              onValueChanged = { newValue ->
-                viewModel.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
-              }
-            )
-          }
-
-          item { Divider(24.dp) }
-
-          item {
-            OPMLSettingItem(
-              opmlResult = state.opmlResult,
-              hasFeeds = state.hasFeeds,
-              onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
-              onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
-              onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) }
-            )
-          }
-
-          item { Divider() }
-
-          item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
-
-          item {
-            CloudSyncSettingItem(
-              syncProgress = state.syncProgress,
-              lastSyncedAt = state.lastSyncedAt,
-              availableProviders = viewModel.availableProviders,
-              onSyncClicked = { provider ->
-                viewModel.dispatch(SettingsEvent.SyncClicked(provider))
-              },
-              onSignOutClicked = { provider ->
-                viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
-              }
-            )
-          }
-
-          item { Divider() }
-
-          item {
-            SubHeader(
-              text = stringResource(Res.string.settingsHeaderFeedback),
-            )
-          }
-
-          item {
-            ReportIssueItem(
-              appInfo = state.appInfo,
-              onClick = {
-                coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
-              }
-            )
-          }
-
-          item { Divider() }
-
-          item { AboutItem { openAbout() } }
-
-          item { Divider() }
         }
+
+        item { SubHeader(text = stringResource(Res.string.homeViewMode)) }
+
+        item {
+          Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+            LayoutIconButton(
+              modifier = Modifier.weight(1f),
+              label = stringResource(Res.string.homeViewModeDefault),
+              icon = TwineIcons.LayoutDefault,
+              selected = state.homeViewMode == HomeViewMode.Default,
+              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Default)) }
+            )
+
+            LayoutIconButton(
+              modifier = Modifier.weight(1f),
+              label = stringResource(Res.string.homeViewModeSimple),
+              icon = TwineIcons.LayoutSimple,
+              selected = state.homeViewMode == HomeViewMode.Simple,
+              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Simple)) }
+            )
+
+            LayoutIconButton(
+              modifier = Modifier.weight(1f),
+              label = stringResource(Res.string.homeViewModeCompact),
+              icon = TwineIcons.LayoutCompact,
+              selected = state.homeViewMode == HomeViewMode.Compact,
+              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Compact)) }
+            )
+          }
+        }
+
+        item { Divider() }
+
+        item {
+          SubHeader(
+            text = stringResource(Res.string.settingsHeaderTheme),
+          )
+        }
+
+        item {
+          val appThemeMode = state.appThemeMode
+          ToggleableButtonGroup(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp),
+            items =
+              listOf(
+                ToggleableButtonItem(
+                  label = stringResource(Res.string.settingsThemeAuto),
+                  isSelected = appThemeMode == AppThemeMode.Auto,
+                  identifier = AppThemeMode.Auto,
+                ),
+                ToggleableButtonItem(
+                  label = stringResource(Res.string.settingsThemeLight),
+                  isSelected = appThemeMode == AppThemeMode.Light,
+                  identifier = AppThemeMode.Light
+                ),
+                ToggleableButtonItem(
+                  label = stringResource(Res.string.settingsThemeDark),
+                  isSelected = appThemeMode == AppThemeMode.Dark,
+                  identifier = AppThemeMode.Dark
+                )
+              ),
+            onItemSelected = {
+              viewModel.dispatch(SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode))
+            }
+          )
+        }
+
+        item {
+          AnimatedVisibility(
+            visible = AppTheme.isDark,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+          ) {
+            AmoledSettingItem(
+              useAmoled = state.useAmoled,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
+              }
+            )
+          }
+        }
+
+        item { Divider() }
+
+        item {
+          SubHeader(
+            text = stringResource(Res.string.settingsHeaderBehaviour),
+          )
+        }
+
+        item {
+          ShowReaderViewSettingItem(
+            showReaderView = state.showReaderView,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          BrowserTypeSettingItem(
+            browserType = state.browserType,
+            onBrowserTypeChanged = { newBrowserType ->
+              viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          UnreadPostsCountSettingItem(
+            showUnreadCountEnabled = state.showUnreadPostsCount,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          AutoSyncSettingItem(
+            enableAutoSync = state.enableAutoSync,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          ShowFeedFavIconSettingItem(
+            showFeedFavIcon = state.showFeedFavIcon,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          BlockImagesSettingItem(
+            blockImages = state.blockImages,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          NotificationsSettingItem(
+            enableNotifications = state.enableNotifications,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          DownloadFullContentSettingItem(
+            downloadFullContent = state.downloadFullContent,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item { BlockedWordsSettingItem { openBlockedWords() } }
+
+        item { Divider(24.dp) }
+
+        item {
+          MarkArticleAsReadOnSetting(articleMarkAsReadOn = state.markAsReadOn) {
+            viewModel.dispatch(SettingsEvent.MarkAsReadOnChanged(it))
+          }
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          PostsDeletionPeriodSettingItem(
+            postsDeletionPeriod = state.postsDeletionPeriod,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
+            }
+          )
+        }
+
+        item { Divider(24.dp) }
+
+        item {
+          OPMLSettingItem(
+            opmlResult = state.opmlResult,
+            hasFeeds = state.hasFeeds,
+            onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
+            onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
+            onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) }
+          )
+        }
+
+        item { Divider() }
+
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
+
+        item {
+          CloudSyncSettingItem(
+            syncProgress = state.syncProgress,
+            lastSyncedAt = state.lastSyncedAt,
+            availableProviders = viewModel.availableProviders,
+            onSyncClicked = { provider -> viewModel.dispatch(SettingsEvent.SyncClicked(provider)) },
+            onSignOutClicked = { provider ->
+              viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
+            }
+          )
+        }
+
+        item { Divider() }
+
+        item {
+          SubHeader(
+            text = stringResource(Res.string.settingsHeaderFeedback),
+          )
+        }
+
+        item {
+          ReportIssueItem(
+            appInfo = state.appInfo,
+            onClick = {
+              coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
+            }
+          )
+        }
+
+        item { Divider() }
+
+        item { AboutItem { openAbout() } }
+
+        item { Divider() }
       }
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
