@@ -742,13 +742,7 @@ class RssRepository(
 
   suspend fun postOrNull(postId: String): Post? {
     return withContext(dispatchersProvider.databaseRead) {
-      postQueries.post(postId, ::Post).executeAsOneOrNull()
-    }
-  }
-
-  suspend fun allPostsBlocking(): List<Post> {
-    return withContext(dispatchersProvider.databaseRead) {
-      postQueries.allPostsBlocking(::Post).executeAsList()
+      postQueries.post(postId, ::Post).executeAsList().firstOrNull()
     }
   }
 

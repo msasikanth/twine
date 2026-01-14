@@ -275,9 +275,6 @@ deletePostsForFeed:
 DELETE FROM post
 WHERE sourceId = :feedId AND (flags & 1) == 0;
 
-allPostsBlocking:
-SELECT * FROM post;
-
 allReadPostsBlocking:
 SELECT id, updatedAt FROM post WHERE (flags & 2) != 0;
 
