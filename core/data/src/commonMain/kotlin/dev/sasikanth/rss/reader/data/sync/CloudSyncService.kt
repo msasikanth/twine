@@ -115,19 +115,6 @@ class CloudSyncService(
           )
         }
 
-      val user = userRepository.userBlocking()
-      val userSyncEntity =
-        user?.let {
-          UserSyncEntity(
-            id = it.id,
-            name = it.name,
-            profileId = it.profileId,
-            email = it.email,
-            token = it.token,
-            serverUrl = it.serverUrl
-          )
-        }
-
       val readPosts = rssRepository.allReadPostsBlocking()
 
       val bookmarkedPosts =
@@ -170,9 +157,7 @@ class CloudSyncService(
           groups = groups,
           bookmarks = bookmarks,
           blockedWords = blockedWords,
-          posts = emptyList(),
           postChunks = postChunks,
-          user = userSyncEntity,
           readPosts = readPosts
         )
 
@@ -321,18 +306,6 @@ class CloudSyncService(
           createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt)
         )
       }
-    }
-
-    val remoteUser = remoteData.user
-    if (remoteUser != null && userRepository.userBlocking() == null) {
-      userRepository.createUser(
-        id = remoteUser.id,
-        name = remoteUser.name,
-        profileId = remoteUser.profileId,
-        email = remoteUser.email,
-        token = remoteUser.token,
-        serverUrl = remoteUser.serverUrl
-      )
     }
   }
 

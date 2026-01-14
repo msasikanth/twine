@@ -57,7 +57,6 @@ data class SyncData(
   val blockedWords: List<BlockedWordSyncEntity> = emptyList(),
   val posts: List<PostSyncEntity> = emptyList(),
   val postChunks: List<String> = emptyList(),
-  val user: UserSyncEntity? = null,
   val readPosts: List<ReadPostSyncEntity> = emptyList()
 )
 
