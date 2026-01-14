@@ -74,7 +74,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -640,13 +644,13 @@ private fun AppIconSelectionSheet(
               .padding(8.dp)
         ) {
           Box(contentAlignment = Alignment.Center) {
-            AppIconPreview(appIcon = appIcon, modifier = Modifier.size(64.dp))
+            val shape = RoundedCornerShape(28.dp)
+
+            AppIconPreview(appIcon = appIcon, shape = shape, modifier = Modifier.size(64.dp))
 
             if (isSelected) {
               Box(
-                Modifier.matchParentSize()
-                  .clip(CircleShape)
-                  .background(Color.Black.copy(alpha = 0.4f)),
+                Modifier.matchParentSize().clip(shape).background(Color.Black.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
               ) {
                 Icon(
@@ -680,6 +684,7 @@ private fun AppIconSelectionSheet(
 private fun AppIconPreview(
   appIcon: AppIcon,
   modifier: Modifier = Modifier,
+  shape: Shape = CircleShape,
 ) {
   val backgroundColor =
     when (appIcon) {
@@ -694,16 +699,22 @@ private fun AppIconPreview(
       AppIcon.SoftSage -> Color(0xFF9BB49D)
       AppIcon.StormySky -> Color(0xFF607D8B)
     }
+  val backgroundBrush =
+    Brush.radialGradient(
+      0.17f to backgroundColor.copy(alpha = 0.55f),
+      1f to backgroundColor,
+      center = Offset(20f, 24f)
+    )
 
   Box(
-    modifier = modifier.clip(CircleShape).background(backgroundColor),
+    modifier = modifier.clip(shape).background(backgroundBrush),
     contentAlignment = Alignment.Center
   ) {
     Icon(
       painter = painterResource(Res.drawable.ic_launcher_foreground),
       contentDescription = null,
       tint = Color.Unspecified,
-      modifier = Modifier.fillMaxSize()
+      modifier = Modifier.scale(1.2f).fillMaxSize()
     )
   }
 }
