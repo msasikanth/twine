@@ -21,10 +21,9 @@ git log nightly -1 --oneline
 ```
 
 ## Next Steps
-To make this branch available on the remote repository, you need to push it:
+The branch has been created within the sandboxed PR environment. Due to authentication constraints in this environment, the branch could not be automatically pushed to the remote repository. 
+
+To make this branch available on the remote repository, someone with appropriate permissions needs to push it:
 ```bash
 git push origin nightly
 ```
-
-## Note
-The branch has been created within the sandboxed PR environment. Due to authentication constraints in this environment, the branch could not be automatically pushed to the remote repository. Once this PR is reviewed and if needed, someone with appropriate permissions can push the branch using the command above.
