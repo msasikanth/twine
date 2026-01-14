@@ -1,0 +1,11 @@
+Nightly Branch Information
+==========================
+
+Branch Name: nightly
+Target Commit: a1709f181a49f6a57c3ce4d4d5999721ab3b5a82
+Commit Message: Improve app icon preview background color in settings screen
+Author: Sasikanth Miriyampalli <hello@sasikanth.dev>
+Date: Wed Jan 14 16:45:59 2026 +0530
+
+The nightly branch has been created locally and points to the specified commit.
+To push to remote, use: git push origin nightly
