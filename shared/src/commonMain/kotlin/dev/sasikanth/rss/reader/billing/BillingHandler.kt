@@ -17,7 +17,10 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @AppScope
 expect class BillingHandler {
+
   suspend fun isSubscribed(): Boolean
+
+  suspend fun canSubscribe(): Boolean
 
   suspend fun customerResult(): SubscriptionResult
 }

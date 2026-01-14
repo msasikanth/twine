@@ -16,6 +16,7 @@
 package dev.sasikanth.rss.reader.settings
 
 import androidx.compose.runtime.Immutable
+import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
@@ -49,7 +50,13 @@ data class SettingsState(
   val syncProgress: SyncProgress,
   val lastSyncedAt: Instant?,
   val authUrlToOpen: String?,
+  val appIcon: AppIcon,
+  val showAppIconSelectionSheet: Boolean,
+  val canSubscribe: Boolean,
 ) {
+
+  val isSubscribed: Boolean
+    get() = subscriptionResult == SubscriptionResult.Subscribed
 
   enum class SyncProgress {
     Idle,
@@ -83,6 +90,9 @@ data class SettingsState(
         syncProgress = SyncProgress.Idle,
         lastSyncedAt = null,
         authUrlToOpen = null,
+        appIcon = AppIcon.DarkJade,
+        showAppIconSelectionSheet = false,
+        canSubscribe = true,
       )
   }
 }
