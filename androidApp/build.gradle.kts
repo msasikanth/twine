@@ -55,6 +55,15 @@ android {
       }
   }
 
+  flavorDimensions += "version"
+  productFlavors {
+    create("full") { dimension = "version" }
+    create("foss") {
+      dimension = "version"
+      applicationIdSuffix = ".foss"
+    }
+  }
+
   compileOptions { isCoreLibraryDesugaringEnabled = true }
 
   signingConfigs {
@@ -91,13 +100,14 @@ dependencies {
   debugImplementation(libs.leakcanary)
 
   implementation(project(":shared"))
+  api(project(":core:data"))
   implementation(libs.kotlininject.runtime)
   ksp(libs.kotlininject.compiler)
   implementation(libs.androidx.work)
   coreLibraryDesugaring(libs.desugarJdk)
   implementation(libs.kotlinx.datetime)
   implementation(libs.bugsnag)
-  implementation(libs.purchases.core)
+  "fullImplementation"(libs.purchases.core)
   implementation(libs.glance)
   implementation(libs.glance.material3)
 }

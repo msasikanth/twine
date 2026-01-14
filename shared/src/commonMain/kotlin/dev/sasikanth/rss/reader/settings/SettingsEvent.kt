@@ -15,11 +15,13 @@
  */
 package dev.sasikanth.rss.reader.settings
 
+import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
+import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
 
 sealed interface SettingsEvent {
 
@@ -54,4 +56,20 @@ sealed interface SettingsEvent {
   data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : SettingsEvent
 
   data class ToggleBlockImages(val value: Boolean) : SettingsEvent
+
+  data class ToggleNotifications(val value: Boolean) : SettingsEvent
+
+  data class ToggleDownloadFullContent(val value: Boolean) : SettingsEvent
+
+  data class SyncClicked(val provider: CloudSyncProvider) : SettingsEvent
+
+  data class SignOutClicked(val provider: CloudSyncProvider) : SettingsEvent
+
+  data object ClearAuthUrl : SettingsEvent
+
+  data object AppIconClicked : SettingsEvent
+
+  data object CloseAppIconSelectionSheet : SettingsEvent
+
+  data class OnAppIconChanged(val appIcon: AppIcon) : SettingsEvent
 }

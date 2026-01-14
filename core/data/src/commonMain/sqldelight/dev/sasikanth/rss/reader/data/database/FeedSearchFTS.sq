@@ -24,12 +24,13 @@ BEGIN INSERT OR IGNORE INTO feed_search(id, name, link) VALUES (new.id, new.name
 END;
 
 countSearchResults:
-SELECT COUNT(*) FROM feed_search
+SELECT COUNT(*) FROM feed_search fs
+INNER JOIN feed f ON f.id = fs.id
 WHERE (
   :searchQuery = '""'
   OR
-  id IN (SELECT id FROM feed_search WHERE feed_search MATCH :searchQuery)
-);
+  fs.id IN (SELECT id FROM feed_search WHERE feed_search MATCH :searchQuery)
+) AND f.isDeleted = 0;
 
 search:
 SELECT
@@ -42,11 +43,11 @@ SELECT
   f.createdAt,
   f.pinnedAt,
   f.lastCleanUpAt,
-  COUNT(CASE WHEN p.read = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
+  COUNT(CASE WHEN (p.flags & 2) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts
 FROM feed_search fs
 INNER JOIN feed f ON f.id = fs.id
 LEFT JOIN post p ON p.sourceId = f.id AND p.postDate > :postsAfter
-WHERE fs.name MATCH :searchQuery
+WHERE fs.name MATCH :searchQuery AND f.isDeleted = 0
 GROUP BY f.id
 ORDER BY pinnedAt DESC , f.createdAt DESC
 LIMIT :limit OFFSET :offset;

@@ -21,12 +21,8 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,8 +40,10 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.itemKey
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
+import dev.sasikanth.rss.reader.components.FilledIconButton
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
@@ -55,12 +53,14 @@ import dev.sasikanth.rss.reader.feeds.SourceListItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupItem
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.bottomPaddingOfSourceItem
+import dev.sasikanth.rss.reader.resources.icons.Add
+import dev.sasikanth.rss.reader.resources.icons.Sort
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.allFeeds
-import twine.shared.generated.resources.editFeeds
 import twine.shared.generated.resources.feedsSortAlphabetical
 import twine.shared.generated.resources.feedsSortLatest
 import twine.shared.generated.resources.feedsSortOldest
@@ -75,15 +75,17 @@ internal fun LazyListScope.allSources(
   isInMultiSelectMode: Boolean,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
   onSourceClick: (Source) -> Unit,
-  onToggleSourceSelection: (Source) -> Unit
+  onToggleSourceSelection: (Source) -> Unit,
+  onAddNewFeedClick: () -> Unit,
 ) {
   if (sources.itemCount > 0) {
-    item(key = "AllFeedsHeader") {
+    stickyHeader(key = "AllFeedsHeader") {
       AllFeedsHeader(
         modifier = Modifier.animateItem(),
         feedsCount = numberOfFeeds,
         feedsSortOrder = feedsSortOrder,
-        onFeedsSortChanged = onFeedsSortChanged
+        onFeedsSortChanged = onFeedsSortChanged,
+        onAddNewFeedClick = onAddNewFeedClick,
       )
     }
 
@@ -188,11 +190,16 @@ internal fun AllFeedsHeader(
   feedsCount: Int,
   feedsSortOrder: FeedsOrderBy,
   onFeedsSortChanged: (FeedsOrderBy) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  showAddButton: Boolean = true,
+  onAddNewFeedClick: (() -> Unit)? = null,
 ) {
   Row(
     modifier =
-      Modifier.then(modifier).padding(start = 32.dp, end = 20.dp).padding(vertical = 12.dp),
+      Modifier.then(modifier)
+        .background(AppTheme.colorScheme.bottomSheet)
+        .padding(start = 32.dp, end = 24.dp)
+        .padding(vertical = 12.dp),
     verticalAlignment = Alignment.CenterVertically
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
@@ -202,11 +209,12 @@ internal fun AllFeedsHeader(
       modifier =
         Modifier.weight(1f).clearAndSetSemantics {
           contentDescription = "${allFeedsLabel}: ${feedsCount}"
-        }
+        },
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Text(
         text = allFeedsLabel,
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.textEmphasisHigh,
       )
 
@@ -214,7 +222,7 @@ internal fun AllFeedsHeader(
 
       Text(
         text = feedsCount.toString(),
-        style = MaterialTheme.typography.titleLarge,
+        style = MaterialTheme.typography.titleMedium,
         color = AppTheme.colorScheme.primary,
       )
     }
@@ -225,40 +233,15 @@ internal fun AllFeedsHeader(
       val density = LocalDensity.current
       var buttonHeight by remember { mutableStateOf(Dp.Unspecified) }
 
-      TextButton(
+      CircularIconButton(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
-        onClick = { showSortDropdown = true },
-        shape = MaterialTheme.shapes.large
-      ) {
-        val orderText =
-          when (feedsSortOrder) {
-            FeedsOrderBy.Latest -> stringResource(Res.string.feedsSortLatest)
-            FeedsOrderBy.Oldest -> stringResource(Res.string.feedsSortOldest)
-            FeedsOrderBy.Alphabetical -> stringResource(Res.string.feedsSortAlphabetical)
-            FeedsOrderBy.Pinned -> {
-              throw IllegalStateException(
-                "Cannot use the following feed sort order here: $feedsSortOrder"
-              )
-            }
-          }
-
-        Text(
-          text = orderText,
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.primary
-        )
-
-        Spacer(Modifier.width(8.dp))
-
-        Icon(
-          imageVector = Icons.Filled.ExpandMore,
-          contentDescription = stringResource(Res.string.editFeeds),
-          tint = AppTheme.colorScheme.primary
-        )
-      }
+        icon = TwineIcons.Sort,
+        label = "",
+        onClick = { showSortDropdown = true }
+      )
 
       DropdownMenu(
         modifier = Modifier.widthIn(min = 132.dp),
@@ -306,6 +289,18 @@ internal fun AllFeedsHeader(
             )
           }
       }
+    }
+
+    if (showAddButton) {
+      Spacer(Modifier.width(12.dp))
+
+      FilledIconButton(
+        icon = TwineIcons.Add,
+        contentDescription = null,
+        containerColor = AppTheme.colorScheme.inverseSurface,
+        iconTint = AppTheme.colorScheme.inverseOnSurface,
+        onClick = { onAddNewFeedClick?.invoke() }
+      )
     }
   }
 }

@@ -16,9 +16,6 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,6 +72,7 @@ import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
 import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
+import dev.sasikanth.rss.reader.main.ui.MainScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
@@ -179,6 +177,32 @@ fun App(
           AppThemeMode.Auto -> isSystemInDarkTheme
         }
       }
+    val navController = rememberNavController()
+    val openPost: (Int, PostWithMetadata, FromScreen) -> Unit =
+      remember(navController, linkHandler, appViewModel, coroutineScope) {
+        { index, post, fromScreen ->
+          navController.navigateToReaderOrOpenLink(
+            showReader = appState.showReaderView,
+            index = index,
+            post = post,
+            fromScreen = fromScreen,
+            openLink = {
+              coroutineScope.launch {
+                linkHandler.openLink(post.link)
+                appViewModel.onPostOpened(post.id, index)
+              }
+            }
+          )
+        }
+      }
+    val screenCornerRadius =
+      if (platform == Platform.Apple) {
+        38.dp
+      } else {
+        24.dp
+      }
+    val screenModifier = Modifier.fillMaxSize()
+    val roundedCornerScreenModifier = screenModifier.clip(RoundedCornerShape(screenCornerRadius))
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
@@ -190,26 +214,29 @@ fun App(
       }
     }
 
-    AppTheme(useDarkTheme = useDarkTheme) {
-      val navController = rememberNavController()
-      val screenCornerRadius =
-        if (platform == Platform.Apple) {
-          38.dp
-        } else {
-          24.dp
-        }
-      val screenModifier = Modifier.fillMaxSize().clip(RoundedCornerShape(screenCornerRadius))
-
-      DisposableEffect(Unit) {
-        ExternalUriHandler.listener = { uri ->
-          navController.handleDeepLink(
-            NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-          )
+    DisposableEffect(Unit) {
+      ExternalUriHandler.listener = { uri ->
+        if (uri.startsWith("twine://oauth")) {
+          appViewModel.onOAuthRedirect(uri)
         }
 
-        onDispose { ExternalUriHandler.listener = null }
+        val deepLinkRequest = NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+        if (navController.graph.hasDeepLink(deepLinkRequest)) {
+          if (!navController.popBackStack(Screen.Main, inclusive = false)) {
+            navController.navigate(Screen.Main) {
+              popUpTo(Screen.Placeholder) { inclusive = true }
+              launchSingleTop = true
+            }
+          }
+
+          navController.navigate(NavUri(uri))
+        }
       }
 
+      onDispose { ExternalUriHandler.listener = null }
+    }
+
+    AppTheme(useDarkTheme = useDarkTheme) {
       NavHost(
         navController = navController,
         startDestination = Screen.Placeholder,
@@ -224,81 +251,95 @@ fun App(
         composable<Screen.Placeholder> {
           val viewModel = viewModel { placeholderViewModel() }
           PlaceholderScreen(
-            modifier = screenModifier,
+            modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             navigateHome = {
-              navController.navigate(Screen.Home) {
+              navController.navigate(Screen.Main) {
                 popUpTo(Screen.Placeholder) { inclusive = true }
               }
             }
           )
         }
 
-        composable<Screen.Home>(
-          enterTransition = {
-            fadeIn(
-              animationSpec =
-                tween(
-                  durationMillis = 200,
-                  easing = LinearEasing,
-                )
-            )
-          }
-        ) {
-          val viewModel = viewModel { homeViewModel() }
-          val feedsViewModel = viewModel { feedsViewModel() }
+        composable<Screen.Main> {
+          MainScreen(
+            homeContent = { openDrawer ->
+              val viewModel = viewModel { homeViewModel() }
+              val feedsViewModel = viewModel { feedsViewModel() }
 
-          LaunchedEffect(Unit) {
-            it.savedStateHandle
-              .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
-              .filterNotNull()
-              .onEach { selectedGroupIds ->
-                feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+              LaunchedEffect(Unit) {
+                it.savedStateHandle
+                  .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
+                  .filterNotNull()
+                  .onEach { selectedGroupIds ->
+                    feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                  }
+                  .launchIn(this)
               }
-              .launchIn(this)
-          }
 
-          LaunchedEffect(Unit) {
-            viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
-          }
-
-          HomeScreen(
-            modifier = screenModifier,
-            useDarkTheme = useDarkTheme,
-            viewModel = viewModel,
-            feedsViewModel = feedsViewModel,
-            onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
-            openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
-            openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
-            openSearch = { navController.navigate(Screen.Search) },
-            openBookmarks = { navController.navigate(Screen.Bookmarks) },
-            openSettings = { navController.navigate(Screen.Settings) },
-            openPost = { index, post ->
-              coroutineScope.launch {
-                openPost(
-                  state = appState,
-                  navController = navController,
-                  index = index,
-                  post = post,
-                  linkHandler = linkHandler,
-                  appViewModel = appViewModel
-                )
+              LaunchedEffect(Unit) {
+                viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
               }
-            },
-            openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
-            openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
-            openPaywall = { navController.navigate(Screen.Paywall) },
-            onBottomSheetStateChanged = { sheetValue ->
-              val showDarkSystemBars =
-                if (sheetValue == SheetValue.Expanded) {
-                  true
-                } else {
-                  useDarkTheme
-                }
 
-              toggleLightStatusBar(!showDarkSystemBars)
-              toggleLightNavBar(!showDarkSystemBars)
+              HomeScreen(
+                viewModel = viewModel,
+                feedsViewModel = feedsViewModel,
+                onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
+                openPost = { index, post -> openPost(index, post, FromScreen.Home) },
+                openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
+                openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
+                openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
+                openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
+                openPaywall = { navController.navigate(Screen.Paywall) },
+                onMenuClicked = openDrawer,
+                onBottomSheetStateChanged = { sheetValue ->
+                  val showDarkSystemBars =
+                    if (sheetValue == SheetValue.Expanded) {
+                      true
+                    } else {
+                      useDarkTheme
+                    }
+
+                  toggleLightStatusBar(!showDarkSystemBars)
+                  toggleLightNavBar(!showDarkSystemBars)
+                },
+                modifier = screenModifier,
+              )
             },
+            searchContent = { goBack ->
+              val viewModel = viewModel { searchViewModel() }
+
+              SearchScreen(
+                searchViewModel = viewModel,
+                goBack = goBack,
+                openPost = { searchQuery, sortOrder, index, post ->
+                  openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
+                },
+                modifier = screenModifier
+              )
+            },
+            bookmarksContent = { goBack ->
+              val viewModel = viewModel { bookmarksViewModel() }
+
+              BookmarksScreen(
+                bookmarksViewModel = viewModel,
+                goBack = goBack,
+                openPost = { index, post -> openPost(index, post, FromScreen.Bookmarks) },
+                modifier = screenModifier
+              )
+            },
+            settingsContent = { goBack ->
+              val viewModel = viewModel { settingsViewModel() }
+
+              SettingsScreen(
+                viewModel = viewModel,
+                goBack = goBack,
+                openAbout = { navController.navigate(Screen.About) },
+                openBlockedWords = { navController.navigate(Screen.BlockedWords) },
+                openPaywall = { navController.navigate(Screen.Paywall) },
+                modifier = screenModifier
+              )
+            }
           )
         }
 
@@ -316,8 +357,6 @@ fun App(
           val fromScreen = it.toRoute<Screen.Reader>().readerScreenArgs.fromScreen
 
           ReaderScreen(
-            modifier = screenModifier,
-            darkTheme = useDarkTheme,
             viewModel = viewModel,
             pageViewModelFactory = { post ->
               viewModel(key = post.id) { readerPageViewModel(post) }
@@ -328,7 +367,8 @@ fun App(
               }
             },
             onBack = { navController.popBackStack() },
-            openPaywall = { navController.navigate(Screen.Paywall) }
+            openPaywall = { navController.navigate(Screen.Paywall) },
+            modifier = roundedCornerScreenModifier
           )
         }
 
@@ -348,87 +388,18 @@ fun App(
           }
 
           AddFeedScreen(
-            modifier = screenModifier,
+            modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }
           )
         }
 
-        composable<Screen.Search> {
-          val viewModel = viewModel { searchViewModel() }
-          SearchScreen(
-            modifier = screenModifier,
-            searchViewModel = viewModel,
-            darkTheme = useDarkTheme,
-            goBack = { navController.popBackStack() },
-            openPost = { searchQuery, sortOrder, index, post ->
-              coroutineScope.launch {
-                if (appState.showReaderView) {
-                  navController.navigate(
-                    Screen.Reader(
-                      readerScreenArgs =
-                        ReaderScreenArgs(
-                          postIndex = index,
-                          postId = post.id,
-                          fromScreen = FromScreen.Search(searchQuery, sortOrder)
-                        )
-                    )
-                  )
-                } else {
-                  linkHandler.openLink(post.link)
-                  appViewModel.markPostAsRead(post.id)
-                }
-              }
-            }
-          )
-        }
-
-        composable<Screen.Bookmarks> {
-          val viewModel = viewModel { bookmarksViewModel() }
-
-          BookmarksScreen(
-            modifier = screenModifier,
-            bookmarksViewModel = viewModel,
-            darkTheme = useDarkTheme,
-            goBack = { navController.popBackStack() },
-            openPost = { index, post ->
-              coroutineScope.launch {
-                if (appState.showReaderView) {
-                  navController.navigate(
-                    Screen.Reader(
-                      readerScreenArgs =
-                        ReaderScreenArgs(
-                          postIndex = index,
-                          postId = post.id,
-                          fromScreen = FromScreen.Bookmarks
-                        )
-                    )
-                  )
-                } else {
-                  linkHandler.openLink(post.link)
-                  appViewModel.markPostAsRead(post.id)
-                }
-              }
-            }
-          )
-        }
-
-        composable<Screen.Settings> {
-          val viewModel = viewModel { settingsViewModel() }
-
-          SettingsScreen(
-            modifier = screenModifier,
-            viewModel = viewModel,
-            goBack = { navController.popBackStack() },
-            openBlockedWords = { navController.navigate(Screen.BlockedWords) },
-            openPaywall = { navController.navigate(Screen.Paywall) },
-            openAbout = { navController.navigate(Screen.About) }
-          )
-        }
-
         composable<Screen.About> {
-          AboutScreen(modifier = screenModifier, goBack = { navController.popBackStack() })
+          AboutScreen(
+            modifier = roundedCornerScreenModifier,
+            goBack = { navController.popBackStack() }
+          )
         }
 
         composable<Screen.FeedGroup> {
@@ -445,7 +416,7 @@ fun App(
           }
 
           GroupScreen(
-            modifier = screenModifier,
+            modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
             openGroupSelection = { navController.navigate(Modals.GroupSelection) }
@@ -455,7 +426,7 @@ fun App(
         composable<Screen.BlockedWords> {
           val viewModel = viewModel { blockedWordsViewModel() }
           BlockedWordsScreen(
-            modifier = screenModifier,
+            modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() }
           )
@@ -466,7 +437,7 @@ fun App(
           val hasPremium by viewModel.hasPremium.collectAsStateWithLifecycle()
 
           PremiumPaywallScreen(
-            modifier = screenModifier,
+            modifier = roundedCornerScreenModifier,
             hasPremium = hasPremium,
             goBack = { navController.popBackStack() }
           )
@@ -496,30 +467,25 @@ fun App(
   }
 }
 
-// TODO: Move this to individual screens
-private suspend fun openPost(
-  state: AppState,
-  navController: NavHostController,
+private fun NavHostController.navigateToReaderOrOpenLink(
+  showReader: Boolean,
   index: Int,
   post: PostWithMetadata,
-  linkHandler: LinkHandler,
-  appViewModel: AppViewModel,
+  fromScreen: FromScreen,
+  openLink: () -> Unit,
 ) {
-  if (state.showReaderView) {
-    navController.navigate(
+  if (showReader) {
+    val route =
       Screen.Reader(
         ReaderScreenArgs(
           postIndex = index,
           postId = post.id,
-          fromScreen = FromScreen.Home,
+          fromScreen = fromScreen,
         )
       )
-    )
+
+    navigate(route)
   } else {
-    linkHandler.openLink(post.link)
-    appViewModel.run {
-      updateActivePostIndex(index)
-      markPostAsRead(post.id)
-    }
+    openLink()
   }
 }

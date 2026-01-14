@@ -17,8 +17,11 @@ package dev.sasikanth.rss.reader.feeds.ui.sheet
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -42,7 +46,6 @@ import androidx.compose.ui.platform.LocalGraphicsContext
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
-import androidx.compose.ui.unit.offset
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -52,21 +55,22 @@ import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.BottomSheetExpandedConte
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.inverse
 
-internal val BOTTOM_SHEET_PEEK_HEIGHT = 100.dp
-private val BOTTOM_SHEET_CORNER_SIZE = 36.dp
+internal val BOTTOM_SHEET_PEEK_HEIGHT = 80.dp
+internal val BOTTOM_SHEET_CORNER_SIZE = 32.dp
 private val BOTTOM_SHEET_HORIZONTAL_PADDING = 32.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun FeedsBottomSheet(
   feedsViewModel: FeedsViewModel,
-  darkTheme: Boolean,
   bottomSheetProgress: () -> Float,
   openFeedInfoSheet: (id: String) -> Unit,
   openGroupScreen: (id: String) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
+  openFeeds: () -> Unit,
+  closeFeeds: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val focusManager = LocalFocusManager.current
@@ -77,11 +81,12 @@ internal fun FeedsBottomSheet(
     feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
+  val isParentThemeDark = AppTheme.isDark
   val collapsedSheetBackgroundColor = AppTheme.colorScheme.bottomSheet
   val collapsedSheetBorderColor = AppTheme.colorScheme.bottomSheetBorder
   val (shadowColor1, shadowColor2) =
     remember {
-      if (darkTheme) {
+      if (isParentThemeDark) {
         Pair(Color.Black.copy(alpha = 0.6f), Color.Black.copy(alpha = 0.24f))
       } else {
         Pair(Color.Black.copy(alpha = 0.4f), Color.Black.copy(alpha = 0.16f))
@@ -99,7 +104,7 @@ internal fun FeedsBottomSheet(
         modifier.fillMaxSize().drawBehind {
           val bottomSheetProgress = bottomSheetProgress()
 
-          val collapsedSheetHeight = 108.dp.toPx()
+          val collapsedSheetHeight = BOTTOM_SHEET_PEEK_HEIGHT.toPx()
           val targetSheetHeight = size.height
           val sheetHeight =
             lerp(
@@ -178,13 +183,15 @@ internal fun FeedsBottomSheet(
           )
         },
     ) {
-      BottomSheetHandle(progress = bottomSheetProgress)
-
-      Box(modifier = Modifier.weight(1f)) {
+      Box(modifier = Modifier.fillMaxSize()) {
         if (isExpanding) {
+          val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+          val paddingTop =
+            lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = bottomSheetProgress())
+
           BottomSheetExpandedContent(
             modifier =
-              Modifier.fillMaxSize().padding(top = 12.dp).graphicsLayer {
+              Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
                 alpha = bottomSheetProgress()
               },
             viewModel = feedsViewModel,
@@ -193,21 +200,23 @@ internal fun FeedsBottomSheet(
             openGroupSelectionSheet = openGroupSelectionSheet,
             openAddFeedScreen = openAddFeedScreen,
             openPaywall = openPaywall,
+            closeFeeds = closeFeeds
           )
         }
 
         if (isCollapsing) {
           BottomSheetCollapsedContent(
             modifier =
-              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING).graphicsLayer {
-                alpha = (bottomSheetProgress() * 5f).inverse()
-              },
+              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
+                .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
+                .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
             pinnedSources = state.pinnedSources,
-            numberOfFeeds = state.numberOfFeeds,
             activeSource = state.activeSource,
+            isParentThemeDark = isParentThemeDark,
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
             onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+            openFeeds = openFeeds
           )
         }
       }

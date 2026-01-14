@@ -89,7 +89,6 @@ internal fun PostActionBar(
   postLink: String,
   postBookmarked: Boolean,
   commentsLink: String?,
-  darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
@@ -130,7 +129,6 @@ internal fun PostActionBar(
       postRead = postRead,
       config = config,
       commentsLink = commentsLink,
-      darkTheme = darkTheme,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       togglePostReadClick = onTogglePostReadClick
@@ -198,7 +196,6 @@ internal fun PostActions(
   postRead: Boolean,
   config: PostMetadataConfig,
   commentsLink: String?,
-  darkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit
@@ -209,7 +206,6 @@ internal fun PostActions(
       IconButton(
         icon = TwineIcons.Comments,
         contentDescription = commentsLabel,
-        darkTheme = darkTheme,
         onClick = onCommentsClick
       )
     }
@@ -228,7 +224,6 @@ internal fun PostActions(
           TwineIcons.Bookmark
         },
       contentDescription = bookmarkLabel,
-      darkTheme = darkTheme,
       onClick = onBookmarkClick
     )
 
@@ -240,15 +235,15 @@ internal fun PostActions(
       val moreMenuOptionsLabel = stringResource(Res.string.moreMenuOptions)
 
       IconButton(
+        icon = Icons.Filled.MoreVert,
+        contentDescription = moreMenuOptionsLabel,
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
             buttonHeight = with(density) { coordinates.size.height.toDp() }
-          },
-        contentDescription = moreMenuOptionsLabel,
-        icon = Icons.Filled.MoreVert,
-        darkTheme = darkTheme,
-        onClick = { showDropdown = true }
-      )
+          }
+      ) {
+        showDropdown = true
+      }
 
       DropdownMenu(
         modifier = Modifier.width(IntrinsicSize.Min),

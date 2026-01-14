@@ -68,6 +68,8 @@
     <string name="settingsThemeAuto">Automatisch</string>
     <string name="settingsThemeLight">Hell</string>
     <string name="settingsThemeDark">Dunkel</string>
+    <string name="settingsAmoledTitle">Amoled mode</string>
+    <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Feeds</string>
@@ -162,6 +164,9 @@
     <string name="readerCustomisationsTypeface">Schriftart</string>
     <string name="postsFilter">Posts filter</string>
     <string name="screenHome">Home</string>
+    <string name="settingsEnableNotificationsTitle">Benachrichtigungen aktivieren</string>
+    <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
+
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>

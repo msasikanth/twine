@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.ComicNeue
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Golos
+import dev.sasikanth.rss.reader.data.repository.ReaderFont.GoogleSans
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RethinkSans
@@ -62,6 +63,7 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
@@ -107,6 +109,7 @@ internal fun ReaderCustomizationsContent(
         val fontFamily =
           when (fontStyle) {
             ComicNeue -> ComicNeueFontFamily
+            GoogleSans -> GoogleSansFontFamily
             Golos -> GolosFontFamily
             Lora -> LoraFontFamily
             Merriweather -> MerriWeatherFontFamily

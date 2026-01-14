@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.feeds.ui.common
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -61,7 +62,7 @@ internal fun LazyListScope.pinnedSources(
   onToggleSourceSelection: (Source) -> Unit,
 ) {
   if (pinnedSources.isNotEmpty()) {
-    item(key = "PinnedFeedsHeader") {
+    stickyHeader(key = "PinnedFeedsHeader") {
       PinnedFeedsHeader(
         modifier = Modifier.animateItem(),
         isPinnedSectionExpanded = isPinnedSectionExpanded,
@@ -172,7 +173,10 @@ private fun PinnedFeedsHeader(
 ) {
   Row(
     modifier =
-      Modifier.padding(start = 32.dp, end = 20.dp).padding(vertical = 12.dp).then(modifier),
+      Modifier.background(AppTheme.colorScheme.bottomSheet)
+        .padding(start = 32.dp, end = 20.dp)
+        .padding(vertical = 12.dp)
+        .then(modifier),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(

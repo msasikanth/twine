@@ -1,0 +1,62 @@
+{
+  "fill" : {
+    "automatic-gradient" : "display-p3:0.21569,0.31373,0.41176,1.00000",
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 0
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.7
+      }
+    }
+  },
+  "groups" : [
+    {
+      "blur-material" : 0.5,
+      "layers" : [
+        {
+          "fill" : {
+            "automatic-gradient" : "extended-gray:1.00000,1.00000",
+            "orientation" : {
+              "start" : {
+                "x" : 0.5,
+                "y" : 1
+              },
+              "stop" : {
+                "x" : 0.5,
+                "y" : 0.3
+              }
+            }
+          },
+          "glass" : true,
+          "image-name" : "rss_feed_24dp_1F1F1F_FILL0_wght700_GRAD200_opsz24.svg",
+          "name" : "rss_feed_24dp_1F1F1F_FILL0_wght700_GRAD200_opsz24",
+          "position" : {
+            "scale" : 30,
+            "translation-in-points" : [
+              -5.236866090613603,
+              -1.5157354820877345
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

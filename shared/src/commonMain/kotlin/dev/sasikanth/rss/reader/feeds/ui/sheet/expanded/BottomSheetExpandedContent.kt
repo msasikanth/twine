@@ -15,7 +15,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -27,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -39,6 +42,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +51,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -61,11 +66,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.cash.paging.compose.collectAsLazyPagingItems
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
+import dev.sasikanth.rss.reader.components.FilledIconButton
+import dev.sasikanth.rss.reader.components.IconButtonSize
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.SourceType
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -74,6 +83,8 @@ import dev.sasikanth.rss.reader.feeds.ui.CreateGroupDialog
 import dev.sasikanth.rss.reader.feeds.ui.common.allSources
 import dev.sasikanth.rss.reader.feeds.ui.common.pinnedSources
 import dev.sasikanth.rss.reader.feeds.ui.common.sourcesSearchResults
+import dev.sasikanth.rss.reader.resources.icons.Add
+import dev.sasikanth.rss.reader.resources.icons.CollapseContent
 import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.Pin
@@ -91,9 +102,12 @@ import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.actionGroupsTooltip
 import twine.shared.generated.resources.actionPin
 import twine.shared.generated.resources.actionUnpin
+import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.delete
 import twine.shared.generated.resources.edit
+import twine.shared.generated.resources.feeds
+import twine.shared.generated.resources.feedsLetsStart
 import twine.shared.generated.resources.feedsSearchHint
 import twine.shared.generated.resources.removeSources
 import twine.shared.generated.resources.removeSourcesDesc
@@ -107,6 +121,7 @@ internal fun BottomSheetExpandedContent(
   openGroupSelectionSheet: () -> Unit,
   openAddFeedScreen: () -> Unit,
   openPaywall: () -> Unit,
+  closeFeeds: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -144,25 +159,42 @@ internal fun BottomSheetExpandedContent(
   Scaffold(
     modifier = Modifier.consumeWindowInsets(WindowInsets.statusBars).then(modifier),
     topBar = {
-      SearchBar(
-        query = searchQuery,
-        onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
-        onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+      CenterAlignedTopAppBar(
+        modifier =
+          Modifier.windowInsetsPadding(
+            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
+          ),
+        title = {
+          AnimatedVisibility(visible = state.numberOfFeeds > 0) {
+            SearchBar(
+              query = searchQuery,
+              onQueryChange = { viewModel.dispatch(FeedsEvent.SearchQueryChanged(it)) },
+              onClearClick = { viewModel.dispatch(FeedsEvent.ClearSearchQuery) },
+            )
+          }
+        },
+        actions = {
+          CircularIconButton(
+            modifier = Modifier.padding(end = 20.dp),
+            icon = TwineIcons.CollapseContent,
+            label = stringResource(Res.string.feeds),
+            onClick = closeFeeds
+          )
+        },
+        contentPadding =
+          PaddingValues(
+            top = 8.dp,
+            bottom = 8.dp,
+          ),
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent,
+            scrolledContainerColor = Color.Transparent,
+          )
       )
     },
     bottomBar = {
       Box(contentAlignment = Alignment.BottomCenter) {
-        AnimatedVisibility(
-          visible = !state.isInMultiSelectMode,
-          enter = slideInVertically { it },
-          exit = slideOutVertically { it }
-        ) {
-          BottomSheetExpandedBottomBar(
-            onNewGroupClick = { showNewGroupDialog = true },
-            onNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
-          )
-        }
-
         AnimatedVisibility(
           visible = state.isInMultiSelectMode,
           enter = slideInVertically { it },
@@ -284,52 +316,58 @@ internal fun BottomSheetExpandedContent(
         )
       }
 
-    LazyColumn(
-      modifier =
-        Modifier.fillMaxSize()
-          .padding(
-            bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
-            // doing this so that the dividers in sticky headers can go below the search bar and
-            // not overlap with each other
-            top = padding.calculateTopPadding()
-          ),
-      state = lazyListState,
-      contentPadding = listContentPadding,
-    ) {
-      if (isInSearchMode) {
-        sourcesSearchResults(
-          searchResults = searchResults,
-          selectedSources = state.selectedSources,
-          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          isInMultiSelectMode = state.isInMultiSelectMode,
-          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
-        )
-      } else {
-        pinnedSources(
-          reorderableLazyListState = reorderableLazyGridState,
-          pinnedSources = pinnedSources,
-          selectedSources = state.selectedSources,
-          isPinnedSectionExpanded = state.isPinnedSectionExpanded,
-          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          isInMultiSelectMode = state.isInMultiSelectMode,
-          onTogglePinnedSection = { viewModel.dispatch(FeedsEvent.TogglePinnedSection) },
-          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
-        )
+    if (state.numberOfFeeds == 0 && state.numberOfFeedGroups == 0 && !isInSearchMode) {
+      NoFeeds(onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) })
+    } else {
+      LazyColumn(
+        modifier =
+          Modifier.fillMaxSize()
+            .padding(
+              bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
+              // doing this so that the dividers in sticky headers can go below the search bar and
+              // not overlap with each other
+              top = padding.calculateTopPadding()
+            ),
+        state = lazyListState,
+        contentPadding = listContentPadding,
+        overscrollEffect = null
+      ) {
+        if (isInSearchMode) {
+          sourcesSearchResults(
+            searchResults = searchResults,
+            selectedSources = state.selectedSources,
+            canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+            isInMultiSelectMode = state.isInMultiSelectMode,
+            onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+          )
+        } else {
+          pinnedSources(
+            reorderableLazyListState = reorderableLazyGridState,
+            pinnedSources = pinnedSources,
+            selectedSources = state.selectedSources,
+            isPinnedSectionExpanded = state.isPinnedSectionExpanded,
+            canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+            isInMultiSelectMode = state.isInMultiSelectMode,
+            onTogglePinnedSection = { viewModel.dispatch(FeedsEvent.TogglePinnedSection) },
+            onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+          )
 
-        allSources(
-          numberOfFeeds = state.numberOfFeeds,
-          numberOfFeedGroups = state.numberOfFeedGroups,
-          sources = allSources,
-          selectedSources = state.selectedSources,
-          feedsSortOrder = state.feedsSortOrder,
-          canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-          isInMultiSelectMode = state.isInMultiSelectMode,
-          onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
-          onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-          onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
-        )
+          allSources(
+            numberOfFeeds = state.numberOfFeeds,
+            numberOfFeedGroups = state.numberOfFeedGroups,
+            sources = allSources,
+            selectedSources = state.selectedSources,
+            feedsSortOrder = state.feedsSortOrder,
+            canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+            isInMultiSelectMode = state.isInMultiSelectMode,
+            onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
+            onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
+            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
+            onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
+          )
+        }
       }
     }
   }
@@ -355,13 +393,7 @@ private fun SearchBar(
     colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
   ) {
     OutlinedTextField(
-      modifier =
-        Modifier.fillMaxWidth()
-          .windowInsetsPadding(
-            WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
-          )
-          .padding(vertical = 8.dp)
-          .padding(start = 24.dp, end = 24.dp),
+      modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
       value = query.copy(selection = TextRange(query.text.length)),
       onValueChange = onQueryChange,
       placeholder = {
@@ -461,3 +493,29 @@ internal fun bottomPaddingOfSourceItem(index: Int, itemCount: Int) =
     index < itemCount -> 4.dp
     else -> 0.dp
   }
+
+@Composable
+private fun NoFeeds(onAddNewFeedClick: () -> Unit) {
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Text(
+        modifier = Modifier.padding(horizontal = 32.dp),
+        text = stringResource(Res.string.feedsLetsStart),
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.textEmphasisMed,
+        textAlign = TextAlign.Center,
+      )
+
+      Spacer(Modifier.requiredHeight(48.dp))
+
+      FilledIconButton(
+        icon = TwineIcons.Add,
+        contentDescription = stringResource(Res.string.buttonAddFeed),
+        containerColor = AppTheme.colorScheme.inverseSurface,
+        iconTint = AppTheme.colorScheme.inverseOnSurface,
+        size = IconButtonSize.Large,
+        onClick = onAddNewFeedClick
+      )
+    }
+  }
+}

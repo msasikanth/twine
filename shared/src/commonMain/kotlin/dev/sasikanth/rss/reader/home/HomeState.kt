@@ -22,6 +22,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -38,12 +39,14 @@ data class HomeState(
   val activeSource: Source?,
   val hasFeeds: Boolean?,
   val postsType: PostsType,
+  val postsSortOrder: PostsSortOrder,
   val hasUnreadPosts: Boolean,
   val currentDateTime: LocalDateTime,
   val homeViewMode: HomeViewMode,
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
   val activePostIndex: Int,
+  val showPostsSortFilter: Boolean,
 ) {
 
   companion object {
@@ -56,12 +59,14 @@ data class HomeState(
         activeSource = null,
         hasFeeds = null,
         postsType = PostsType.ALL,
+        postsSortOrder = PostsSortOrder.Latest,
         hasUnreadPosts = false,
         currentDateTime = currentDateTime,
         homeViewMode = HomeViewMode.Default,
         unreadSinceLastSync = null,
         prevActiveSource = null,
         activePostIndex = 0,
+        showPostsSortFilter = false,
       )
   }
 

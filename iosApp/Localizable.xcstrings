@@ -49,6 +49,26 @@
       },
       "shouldTranslate" : false
     },
+    "notification_new_articles_content" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New articles have been found since your last visit. Tap to view."
+          }
+        }
+      }
+    },
+    "notification_new_articles_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ new articles found"
+          }
+        }
+      }
+    },
     "unread_no_posts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -331,5 +351,5 @@
       }
     }
   },
-  "version" : "1.0"
+  "version" : "1.1"
 }

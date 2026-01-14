@@ -1,0 +1,60 @@
+-- Migration 40
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_INSERT;
+DROP TRIGGER IF EXISTS hide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_UPDATE;
+DROP TRIGGER IF EXISTS unhide_posts_with_blocked_words_AFTER_DELETE;
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
+AFTER INSERT ON blockedWord
+WHEN (new.isDeleted = 0)
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags | 4
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%') AND
+    (flags & 4) == 0;
+END;
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_UPDATE
+AFTER UPDATE ON blockedWord
+WHEN (new.isDeleted = 0 AND old.isDeleted = 1)
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags | 4
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%') AND
+    (flags & 4) == 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_UPDATE
+AFTER UPDATE ON blockedWord
+WHEN (new.isDeleted = 1 AND old.isDeleted = 0)
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags & ~4
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%')
+    AND isDeleted = 0
+  )
+  AND (flags & 4) != 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
+AFTER DELETE ON blockedWord
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags & ~4
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%')
+    AND isDeleted = 0
+  )
+  AND (flags & 4) != 0;
+END;

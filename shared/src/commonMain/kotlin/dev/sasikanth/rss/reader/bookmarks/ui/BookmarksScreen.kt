@@ -68,7 +68,6 @@ import twine.shared.generated.resources.buttonGoBack
 @Composable
 internal fun BookmarksScreen(
   bookmarksViewModel: BookmarksViewModel,
-  darkTheme: Boolean,
   goBack: () -> Unit,
   openPost: (postIndex: Int, post: PostWithMetadata) -> Unit,
   modifier: Modifier = Modifier
@@ -132,13 +131,6 @@ internal fun BookmarksScreen(
               if (post != null) {
                 PostListItem(
                   item = post,
-                  darkTheme = darkTheme,
-                  postMetadataConfig =
-                    PostMetadataConfig.DEFAULT.copy(
-                      showUnreadIndicator = false,
-                      showToggleReadUnreadOption = false,
-                      enablePostSource = false
-                    ),
                   onClick = { openPost(index, post) },
                   onPostBookmarkClick = {
                     bookmarksViewModel.dispatch(BookmarksEvent.OnPostBookmarkClick(post))
@@ -153,7 +145,13 @@ internal fun BookmarksScreen(
                     bookmarksViewModel.dispatch(
                       BookmarksEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
                     )
-                  }
+                  },
+                  postMetadataConfig =
+                    PostMetadataConfig.DEFAULT.copy(
+                      showUnreadIndicator = false,
+                      showToggleReadUnreadOption = false,
+                      enablePostSource = false
+                    )
                 )
                 if (index != bookmarks.itemCount - 1) {
                   HorizontalDivider(

@@ -11,45 +11,16 @@
 
 package dev.sasikanth.rss.reader.billing
 
-import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
-import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
+expect class BillingHandler {
 
-  companion object {
-    private const val ENTITLEMENT_PREMIUM = "Premium"
-  }
+  suspend fun isSubscribed(): Boolean
 
-  private val purchases by lazy { Purchases.sharedInstance }
+  suspend fun canSubscribe(): Boolean
 
-  suspend fun isSubscribed(): Boolean {
-    return customerResult() is SubscriptionResult.Subscribed
-  }
-
-  suspend fun customerResult(): SubscriptionResult {
-    try {
-      val customerInfo =
-        withContext(dispatchersProvider.io) {
-          purchases.awaitCustomerInfo(fetchPolicy = CacheFetchPolicy.default())
-        }
-
-      val entitlementInfo = customerInfo.entitlements.all[ENTITLEMENT_PREMIUM]
-      val isPremium = entitlementInfo?.isActive
-
-      if (isPremium == true) {
-        return SubscriptionResult.Subscribed
-      }
-    } catch (e: Exception) {
-      return SubscriptionResult.Error(e)
-    }
-
-    return SubscriptionResult.NotSubscribed
-  }
+  suspend fun customerResult(): SubscriptionResult
 }

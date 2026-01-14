@@ -30,23 +30,18 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_RSS_ITEM
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
-import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
-import dev.sasikanth.rss.reader.util.decodeHTMLString
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
 class RDFContentParser(
-  private val articleHtmlParser: ArticleHtmlParser,
+  override val articleHtmlParser: ArticleHtmlParser,
 ) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
     parser.require(EventType.START_TAG, parser.namespace, TAG_RSS_CHANNEL)
-
-    val posts = mutableListOf<PostPayload?>()
 
     var title: String? = null
     var link: String? = null
@@ -78,30 +73,18 @@ class RDFContentParser(
       }
     }
 
-    while (parser.next() != EventType.END_TAG) {
-      if (parser.eventType != EventType.START_TAG) continue
-
-      when (parser.name) {
-        TAG_RSS_ITEM -> {
-          val host = UrlUtils.extractHost(link ?: feedUrl)
-          posts.add(readRssItem(parser, host))
-        }
-        else -> parser.skipSubTree()
-      }
-    }
-
-    val host = UrlUtils.extractHost(link ?: feedUrl)
-    if (iconUrl.isNullOrBlank()) {
-      iconUrl = UrlUtils.fallbackFeedIcon(host)
-    }
-
-    return FeedPayload(
-      name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
-      description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
+    return createFeedPayload(
+      name = title,
+      description = description,
       icon = iconUrl,
-      homepageLink = link ?: feedUrl,
+      homepageLink = link,
       link = feedUrl,
-      posts = posts.filterNotNull()
+      posts =
+        postsFlow(
+          parser = parser,
+          itemTag = TAG_RSS_ITEM,
+          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) }
+        )
     )
   }
 
@@ -122,7 +105,6 @@ class RDFContentParser(
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
-    val commentsLink: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -136,12 +118,11 @@ class RDFContentParser(
           link = parser.nextText()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
-          val postHtmlContent = parser.nextText().trimIndent()
-          val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
+          val postContent = parsePostContent(parser)
 
-          rawContent = htmlContent?.cleanedHtml
-          image = htmlContent?.heroImage ?: image
-          description = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim()
+          rawContent = postContent.rawContent
+          image = postContent.heroImage ?: image
+          description = postContent.textContent
         }
         name == TAG_PUB_DATE || name == TAG_DC_DATE -> {
           date = parser.nextText()
@@ -150,21 +131,14 @@ class RDFContentParser(
       }
     }
 
-    val postPubDateInMillis = date?.dateStringToEpochMillis()
-
-    if (link.isNullOrBlank() || (title.isNullOrBlank() && description.isNullOrBlank())) {
-      return null
-    }
-
-    return PostPayload(
-      title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = XmlFeedParser.cleanText(link)!!,
-      description = description.orEmpty().decodeHTMLString(),
+    return createPostPayload(
+      title = title,
+      link = link,
+      description = description,
       rawContent = rawContent,
-      imageUrl = UrlUtils.safeUrl(hostLink, image),
-      date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-      commentsLink = commentsLink?.trim(),
-      isDateParsedCorrectly = postPubDateInMillis != null
+      imageUrl = image,
+      date = date,
+      hostLink = hostLink
     )
   }
 }

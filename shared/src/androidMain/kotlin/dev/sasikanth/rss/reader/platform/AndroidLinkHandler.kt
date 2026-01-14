@@ -51,6 +51,10 @@ class AndroidLinkHandler(
     }
   }
 
+  override suspend fun close() {
+    // no-op
+  }
+
   private fun openDefaultBrowserIfExists(link: String) {
     val packageManager = activity.packageManager
     val intent = Intent(Intent.ACTION_VIEW, link.toUri())

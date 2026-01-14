@@ -72,11 +72,18 @@ kotlin {
       api(libs.androidx.datastore.okio)
       api(libs.uuid)
       api(libs.ktor.core)
+      implementation(libs.ktor.content.negotiation)
+      implementation(libs.ktor.json)
+      api(libs.kotlinx.serialization.json)
       implementation(libs.filekit)
       implementation(libs.bundles.xmlutil)
       implementation(libs.stately.isolate)
     }
-    commonTest.dependencies { implementation(libs.kotlin.test) }
+    commonTest.dependencies {
+      implementation(libs.kotlin.test)
+      implementation(libs.kotlinx.coroutines.test)
+      implementation(libs.ktor.client.mock)
+    }
 
     androidMain.dependencies {
       implementation(libs.androidx.annotation)

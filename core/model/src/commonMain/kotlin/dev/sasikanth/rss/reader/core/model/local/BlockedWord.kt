@@ -17,8 +17,11 @@
 package dev.sasikanth.rss.reader.core.model.local
 
 import com.benasher44.uuid.Uuid
+import kotlin.time.Instant
 
 data class BlockedWord(
   val id: Uuid,
   val content: String,
+  val isDeleted: Boolean = false,
+  val updatedAt: Instant = Instant.DISTANT_PAST,
 )

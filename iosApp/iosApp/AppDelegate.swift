@@ -12,8 +12,9 @@ import BackgroundTasks
 import Bugsnag
 import RevenueCat
 import WidgetKit
+import UserNotifications
 
-class AppDelegate: NSObject, UIApplicationDelegate {
+class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
     static let unreadWidgetKind = "TwineUnreadWidget"
 
@@ -22,11 +23,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     )
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
+            self.handleRefreshFeeds(task: task as! BGProcessingTask)
+        }
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
+            self.handlePostsCleanup(task: task as! BGProcessingTask)
+        }
+        
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.dropbox_sync", using: nil) { (task) in
+            self.handleDropboxSync(task: task as! BGProcessingTask)
+        }
+
         #if !DEBUG
         Bugsnag.start()
         let config = BugsnagConfiguration.loadConfig()
         BugsnagConfigKt.startBugsnag(config: config)
         #endif
+
+        UNUserNotificationCenter.current().delegate = self
 
         applicationComponent.initializers
             .compactMap { ($0 as! any Initializer) }
@@ -34,54 +49,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 initializer.initialize()
             }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
-            self.refreshFeeds(task: task as! BGProcessingTask)
-        }
-        
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
-            self.cleanUpPosts(task: task as! BGProcessingTask)
-        }
+        scheduledRefreshFeeds()
+        scheduleCleanUpPosts()
+        scheduleDropboxSync()
         
         return true
     }
 
-    func scheduleCleanUpPosts(earliest: Date) {
-        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
-        request.earliestBeginDate = earliest
-        
-        do {
-            try BGTaskScheduler.shared.submit(request)
-        } catch {
-            print("Could not schedule posts cleanup \(error)")
-        }
-    }
-    
-    func cleanUpPosts(task: BGProcessingTask) {
-        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
-
-        // Schedule next clean up task 24 hours in future
-        scheduleCleanUpPosts(earliest: Date(timeIntervalSinceNow: 60 * 60 * 24))
-        
-        Task(priority: .background) {
-            do {
-                let postsDeletionPeriod = try await applicationComponent.settingsRepository.postsDeletionPeriodImmediate()
-                let before = postsDeletionPeriod.calculateInstantBeforePeriod()
-
-                let feedsDeletedFrom = try await applicationComponent.rssRepository.deleteReadPosts(before: before)
-                if !feedsDeletedFrom.isEmpty {
-                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom)
-                }
-                task.setTaskCompleted(success: true)
-            } catch {
-                Bugsnag.notifyError(error)
-                task.setTaskCompleted(success: false)
-            }
-        }
-    }
-
-    func scheduledRefreshFeeds(earliest: Date) {
+    func scheduledRefreshFeeds() {
         let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
-        request.earliestBeginDate = earliest
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
         request.requiresNetworkConnectivity = true
         
         do {
@@ -91,10 +68,33 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         }
     }
     
-    func refreshFeeds(task: BGProcessingTask) {
+    func scheduleCleanUpPosts() {
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60 * 24)
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule posts cleanup \(error)")
+        }
+    }
+    
+    func scheduleDropboxSync() {
+        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.dropbox_sync")
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
+        request.requiresNetworkConnectivity = true
+        
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule dropbox sync \(error)")
+        }
+    }
+
+    func handleRefreshFeeds(task: BGProcessingTask) {
         Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
 
-        scheduledRefreshFeeds(earliest: Date(timeIntervalSinceNow: 60 * 60)) // 1 hour
+        scheduledRefreshFeeds()
         Task(priority: .background) {
             do {
                 let isAutoSyncEnabled = try await applicationComponent.settingsRepository.enableAutoSyncImmediate().boolValue
@@ -107,6 +107,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 let hasLastUpdatedAtExpired = try await applicationComponent.lastRefreshedAt.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
                     try await applicationComponent.syncCoordinator.pull()
+
+                    try await applicationComponent.newArticleNotifier.notifyIfNewArticles(
+                        title: { count in
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title", comment: ""), count)
+                        },
+                        content: {
+                            return NSLocalizedString("notification_new_articles_content", comment: "")
+                        }
+                    )
                 }
                 
                 WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)
@@ -116,6 +125,51 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 task.setTaskCompleted(success: false)
             }
         }
+    }
+
+    func handlePostsCleanup(task: BGProcessingTask) {
+        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
+
+        scheduleCleanUpPosts()
+        
+        Task(priority: .background) {
+            do {
+                let postsDeletionPeriod = try await applicationComponent.settingsRepository.postsDeletionPeriodImmediate()
+                let before = postsDeletionPeriod.calculateInstantBeforePeriod()
+
+                let feedsDeletedFrom = try await applicationComponent.rssRepository.deleteReadPosts(before: before)
+                if !feedsDeletedFrom.isEmpty {
+                    try await applicationComponent.rssRepository.updateFeedsLastCleanUpAt(feedIds: feedsDeletedFrom, lastCleanUpAt: KotlinInstant.companion.currentMoment())
+                }
+                task.setTaskCompleted(success: true)
+            } catch {
+                Bugsnag.notifyError(error)
+                task.setTaskCompleted(success: false)
+            }
+        }
+    }
+    
+    func handleDropboxSync(task: BGProcessingTask) {
+        Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
+
+        scheduleDropboxSync()
+        
+        Task(priority: .background) {
+            do {
+                let isDropboxSignedIn = try await applicationComponent.dropboxSyncProvider.isSignedInImmediate().boolValue
+                if isDropboxSignedIn {
+                    try await applicationComponent.cloudSyncService.sync(provider: applicationComponent.dropboxSyncProvider)
+                }
+                task.setTaskCompleted(success: true)
+            } catch {
+                Bugsnag.notifyError(error)
+                task.setTaskCompleted(success: false)
+            }
+        }
+    }
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
     }
 }
 

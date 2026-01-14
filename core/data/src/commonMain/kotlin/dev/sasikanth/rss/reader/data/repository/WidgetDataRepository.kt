@@ -17,6 +17,7 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -67,6 +68,7 @@ class WidgetDataRepository(
         lastSyncedAt = Instant.DISTANT_FUTURE,
         limit = numberOfPosts.toLong(),
         offset = 0,
+        orderBy = PostsSortOrder.Latest.name,
         mapper = {
           id,
           sourceId,
@@ -74,10 +76,10 @@ class WidgetDataRepository(
           description,
           imageUrl,
           date,
+          createdAt,
           link,
           commentsLink,
-          bookmarked,
-          read,
+          flags,
           feedName,
           feedIcon,
           feedHomepageLink,
@@ -111,10 +113,10 @@ class WidgetDataRepository(
             description,
             imageUrl,
             date,
+            createdAt,
             link,
             commentsLink,
-            bookmarked,
-            read,
+            flags,
             feedName,
             feedIcon,
             feedHomepageLink,
@@ -150,10 +152,10 @@ class WidgetDataRepository(
             description,
             imageUrl,
             date,
+            createdAt,
             link,
             commentsLink,
-            bookmarked,
-            read,
+            flags,
             feedName,
             feedIcon,
             feedHomepageLink,
@@ -165,10 +167,10 @@ class WidgetDataRepository(
               description = description,
               imageUrl = imageUrl,
               date = date,
+              createdAt = createdAt,
               link = link,
               commentsLink = commentsLink,
-              bookmarked = bookmarked,
-              read = read,
+              flags = flags,
               feedName = feedName,
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,

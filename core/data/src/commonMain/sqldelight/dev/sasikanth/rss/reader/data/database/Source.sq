@@ -1,9 +1,9 @@
 sourcesCount:
 WITH feeds AS (
-  SELECT COUNT(*) AS count FROM feed
+  SELECT COUNT(*) AS count FROM feed WHERE isDeleted = 0
 ),
 feedGroups AS (
-  SELECT COUNT(*) AS count FROM feedGroup
+  SELECT COUNT(*) AS count FROM feedGroup WHERE isDeleted = 0
 )
 SELECT feeds.count + feedGroups.count
 FROM feeds, feedGroups;
@@ -15,20 +15,21 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
@@ -61,7 +62,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -71,6 +72,7 @@ FROM (
     f.pinnedPosition
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  WHERE f.isDeleted = 0
   GROUP BY f.id
 
   UNION ALL
@@ -84,7 +86,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
@@ -94,8 +96,10 @@ FROM (
     fg.pinnedPosition
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
+  WHERE fg.isDeleted = 0
   GROUP BY fg.id
 )
 WHERE pinnedAt IS NOT NULL
@@ -108,20 +112,21 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
@@ -153,7 +158,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -162,6 +167,7 @@ FROM (
     NULL AS updatedAt
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  WHERE f.isDeleted = 0
   GROUP BY f.id
 
   UNION ALL
@@ -175,7 +181,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
@@ -184,8 +190,10 @@ FROM (
     fg.updatedAt
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
+  WHERE fg.isDeleted = 0
   GROUP BY fg.id
 )
 ORDER BY type DESC,
@@ -203,20 +211,21 @@ WITH feed_group_metadata AS (
     (
       SELECT GROUP_CONCAT(gf.feedId)
       FROM feedGroupFeed gf
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
       SELECT GROUP_CONCAT(f.homepageLink)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
       SELECT GROUP_CONCAT(f.icon)
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
-      WHERE gf.feedGroupId = distinct_groups.feedGroupId
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
@@ -248,7 +257,7 @@ FROM (
     f.link,
     f.homepageLink,
     f.lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
@@ -257,7 +266,7 @@ FROM (
     NULL AS updatedAt
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
-  WHERE f.id = :id
+  WHERE f.id = :id AND f.isDeleted = 0
   GROUP BY f.id
 
   UNION ALL
@@ -271,7 +280,7 @@ FROM (
     NULL AS link,
     NULL AS homepageLink,
     NULL AS lastCleanUpAt,
-    COUNT(CASE WHEN p.read = 0 AND p.isHidden = 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
+    COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
@@ -280,8 +289,9 @@ FROM (
     fg.updatedAt
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
-  LEFT JOIN post p ON gf.feedId = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
-  WHERE fg.id = :id
+  WHERE fg.id = :id AND fg.isDeleted = 0
   GROUP BY fg.id
 );

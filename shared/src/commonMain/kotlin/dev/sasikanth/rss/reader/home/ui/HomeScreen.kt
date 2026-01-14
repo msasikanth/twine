@@ -60,14 +60,15 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -77,7 +78,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
@@ -91,14 +91,16 @@ import dev.sasikanth.rss.reader.home.HomeState
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.Newsstand
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
+import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
+import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.Constants.EPSILON
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -120,18 +122,15 @@ internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
   onVisiblePostChanged: (Int) -> Unit,
-  openSearch: () -> Unit,
-  openBookmarks: () -> Unit,
-  openSettings: () -> Unit,
   openPost: (Int, PostWithMetadata) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
   openAddFeedScreen: () -> Unit,
   openGroupScreen: (groupId: String) -> Unit,
   openPaywall: () -> Unit,
+  onMenuClicked: (() -> Unit)? = null,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
   modifier: Modifier = Modifier,
-  useDarkTheme: Boolean = false,
 ) {
   val coroutineScope = rememberCoroutineScope()
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -168,6 +167,17 @@ internal fun HomeScreen(
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
 
+  if (state.showPostsSortFilter) {
+    PostsPreferencesSheet(
+      postsType = state.postsType,
+      postsSortOrder = state.postsSortOrder,
+      onApply = { postsType, postsSortOrder ->
+        viewModel.dispatch(HomeEvent.OnPostsSortFilterApplied(postsType, postsSortOrder))
+      },
+      onDismiss = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(show = false)) }
+    )
+  }
+
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {
       bottomSheetState.partialExpand()
@@ -177,54 +187,18 @@ internal fun HomeScreen(
     }
   }
 
-  LaunchedEffect(featuredPostsPagerState, featuredPosts) {
-    if (featuredPosts.isEmpty()) return@LaunchedEffect
+  featuredPostsPagerState.CollectItemTransition(
+    key = featuredPosts,
+    itemProvider = { index -> featuredPosts.getOrNull(index) }
+  ) { fromItem, toItem, offset ->
+    val fromSeedColor = fromItem?.seedColor?.let { Color(it) }
+    val toSeedColor = toItem?.seedColor?.let { Color(it) }
 
-    snapshotFlow {
-        runCatching {
-            val settledPage = featuredPostsPagerState.settledPage
-            featuredPostsPagerState.getOffsetFractionForPage(settledPage)
-          }
-          .getOrNull()
-          ?: 0f
-      }
-      .collect { offset ->
-        // The default snap position of the pager is 0.5f, that means the targetPage
-        // state only changes after reaching half way point. We instead want it to scale
-        // as we start swiping.
-        //
-        // Instead of using EPSILON for snap threshold, we are doing that calculation
-        // as the page offset changes
-        //
-        val settledPage = featuredPostsPagerState.settledPage
-        val activePost = runCatching { featuredPosts[settledPage] }.getOrNull()
-
-        if (activePost == null) return@collect
-
-        val fromItem =
-          when {
-            offset < -EPSILON -> {
-              runCatching { featuredPosts[settledPage - 1] }.getOrNull() ?: activePost
-            }
-            else -> activePost
-          }
-        val toItem =
-          when {
-            offset > EPSILON -> {
-              runCatching { featuredPosts[settledPage + 1] }.getOrNull() ?: activePost
-            }
-            else -> activePost
-          }
-
-        val fromSeedColor = fromItem.seedColor?.let { Color(it) }
-        val toSeedColor = toItem.seedColor?.let { Color(it) }
-
-        dynamicColorState.animate(
-          fromSeedColor = fromSeedColor,
-          toSeedColor = toSeedColor,
-          progress = offset
-        )
-      }
+    dynamicColorState.animate(
+      fromSeedColor = fromSeedColor,
+      toSeedColor = toSeedColor,
+      progress = offset
+    )
   }
 
   BackHandler(
@@ -237,7 +211,13 @@ internal fun HomeScreen(
       animateDpAsState(
         targetValue =
           if (postsListState.isScrollingTowardsUp()) {
-            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
+            val scaffoldBottomPadding =
+              if (platform == Platform.Android) {
+                scaffoldPadding.calculateBottomPadding().coerceAtLeast(16.dp)
+              } else {
+                12.dp
+              }
+            BOTTOM_SHEET_PEEK_HEIGHT + scaffoldBottomPadding
           } else {
             0.dp
           },
@@ -260,10 +240,8 @@ internal fun HomeScreen(
                 listState = postsListState,
                 hasUnreadPosts = state.hasUnreadPosts,
                 scrollBehavior = appBarScrollBehaviour,
-                onSearchClicked = openSearch,
-                onBookmarksClicked = openBookmarks,
-                onSettingsClicked = openSettings,
-                onPostTypeChanged = { viewModel.dispatch(HomeEvent.OnPostsTypeChanged(it)) },
+                onMenuClicked = onMenuClicked,
+                onShowPostsSortFilter = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(true)) },
                 onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) }
               )
             },
@@ -327,12 +305,10 @@ internal fun HomeScreen(
                   hasFeeds == null || posts == null -> {
                     // no-op
                   }
-                  !hasFeeds && posts.loadState.refresh is LoadState.NotLoading -> {
+                  !hasFeeds -> {
                     NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
                   }
-                  featuredPosts.isEmpty() &&
-                    posts.itemCount == 0 &&
-                    posts.loadState.refresh is LoadState.NotLoading -> {
+                  featuredPosts.isEmpty() && posts.itemCount == 0 -> {
                     PullToRefreshContent(
                       pullToRefreshState = pullToRefreshState,
                       state = state,
@@ -350,20 +326,18 @@ internal fun HomeScreen(
                       onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
                     ) {
                       PostsList(
-                        modifier = Modifier.fillMaxSize(),
                         paddingValues = paddingValues,
                         featuredPosts = featuredPosts,
-                        posts = { posts },
-                        useDarkTheme = useDarkTheme,
                         listState = postsListState,
                         featuredPostsPagerState = featuredPostsPagerState,
                         homeViewMode = state.homeViewMode,
-                        markPostAsReadOnScroll = {
-                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                        },
+                        posts = { posts },
                         postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
                         markScrolledPostsAsRead = {
                           viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                        },
+                        markPostAsReadOnScroll = {
+                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                         },
                         onPostClicked = { post, postIndex -> openPost(postIndex, post) },
                         onPostBookmarkClick = {
@@ -379,7 +353,8 @@ internal fun HomeScreen(
                           viewModel.dispatch(
                             HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
                           )
-                        }
+                        },
+                        modifier = Modifier.fillMaxSize()
                       )
                     }
                   }
@@ -421,19 +396,33 @@ internal fun HomeScreen(
           }
         }
 
-        if (bottomSheetState.currentValue == SheetValue.Expanded) {
-          Box(
-            modifier =
-              Modifier.fillMaxSize().pointerInput(Unit) {
-                detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+        val bottomSheetScrimPointerInput =
+          if (bottomSheetState.currentValue == SheetValue.Expanded) {
+            Modifier.pointerInput(Unit) {
+              detectTapGestures { coroutineScope.launch { bottomSheetState.partialExpand() } }
+            }
+          } else {
+            Modifier
+          }
+
+        Box(
+          modifier =
+            Modifier.fillMaxSize()
+              .drawBehind @Suppress("INVISIBLE_REFERENCE") {
+                val bottomSheetProgress =
+                  bottomSheetState.anchoredDraggableState.progress(
+                    SheetValue.PartiallyExpanded,
+                    SheetValue.Expanded
+                  )
+
+                drawRect(color = SYSTEM_SCRIM, alpha = bottomSheetProgress)
               }
-          )
-        }
+              .then(bottomSheetScrimPointerInput)
+        )
       },
       sheetContent = {
         FeedsBottomSheet(
           feedsViewModel = feedsViewModel,
-          darkTheme = useDarkTheme,
           bottomSheetProgress =
             @Suppress("INVISIBLE_REFERENCE") {
               bottomSheetState.anchoredDraggableState.progress(
@@ -446,6 +435,8 @@ internal fun HomeScreen(
           openGroupSelectionSheet = openGroupSelectionSheet,
           openAddFeedScreen = openAddFeedScreen,
           openPaywall = openPaywall,
+          openFeeds = { coroutineScope.launch { bottomSheetState.expand() } },
+          closeFeeds = { coroutineScope.launch { bottomSheetState.partialExpand() } }
         )
       },
       containerColor = Color.Transparent,
@@ -591,7 +582,7 @@ fun featuredPosts(
 
             FeaturedPostItem(
               postWithMetadata = post,
-              seedColor = existingSeedColor,
+              seedColor = existingSeedColor?.toArgb(),
             )
           } else {
             null
@@ -608,8 +599,11 @@ fun featuredPosts(
             if (item.seedColor != null) return@mapNotNull item
 
             return@mapNotNull if (!item.postWithMetadata.imageUrl.isNullOrBlank()) {
-              val seedColor = seedColorExtractor.calculateSeedColor(item.postWithMetadata.imageUrl)
-              item.copy(seedColor = seedColor)
+              val seedColor =
+                seedColorExtractor.calculateSeedColor(
+                  url = item.postWithMetadata.imageUrl,
+                )
+              item.copy(seedColor = seedColor?.toArgb())
             } else {
               null
             }

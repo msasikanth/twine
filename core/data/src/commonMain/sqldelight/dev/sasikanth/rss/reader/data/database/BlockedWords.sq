@@ -1,41 +1,91 @@
+import kotlin.Boolean;
+import kotlin.time.Instant;
+
 CREATE TABLE blockedWord (
   id TEXT NOT NULL PRIMARY KEY,
-  content TEXT NOT NULL
+  content TEXT NOT NULL,
+  isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
+  updatedAt INTEGER AS Instant NOT NULL DEFAULT 0
 );
 
 CREATE INDEX blocked_word_value_index ON blockedWord(content);
 
 CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
 AFTER INSERT ON blockedWord
+WHEN (new.isDeleted = 0)
 BEGIN
   UPDATE OR IGNORE post
-  SET isHidden = 1
+  SET flags = flags | 4
   WHERE
     (title LIKE '%' || new.content || '%' OR
     description LIKE '%' || new.content || '%') AND
-    isHidden = 0;
+    (flags & 4) == 0;
+END;
+
+CREATE TRIGGER hide_posts_with_blocked_words_AFTER_UPDATE
+AFTER UPDATE ON blockedWord
+WHEN (new.isDeleted = 0 AND old.isDeleted = 1)
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags | 4
+  WHERE
+    (title LIKE '%' || new.content || '%' OR
+    description LIKE '%' || new.content || '%') AND
+    (flags & 4) == 0;
+END;
+
+CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_UPDATE
+AFTER UPDATE ON blockedWord
+WHEN (new.isDeleted = 1 AND old.isDeleted = 0)
+BEGIN
+  UPDATE OR IGNORE post
+  SET flags = flags & ~4
+  WHERE EXISTS (
+    SELECT 1
+    FROM blockedWord
+    WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
+           post.description LIKE '%' || blockedWord.content || '%')
+    AND isDeleted = 0
+  )
+  AND (flags & 4) != 0;
 END;
 
 CREATE TRIGGER unhide_posts_with_blocked_words_AFTER_DELETE
 AFTER DELETE ON blockedWord
 BEGIN
   UPDATE OR IGNORE post
-  SET isHidden = 0
+  SET flags = flags & ~4
   WHERE EXISTS (
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
            post.description LIKE '%' || blockedWord.content || '%')
+    AND isDeleted = 0
   )
-  AND isHidden = 1;
+  AND (flags & 4) != 0;
 END;
 
 insert:
-INSERT OR IGNORE INTO blockedWord(id, content)
-VALUES (?, ?);
+INSERT INTO blockedWord(id, content, updatedAt, isDeleted)
+VALUES (?, ?, ?, 0)
+ON CONFLICT(id) DO
+UPDATE SET isDeleted = 0, updatedAt = excluded.updatedAt;
 
 remove:
-DELETE FROM blockedWord WHERE id = :id;
+UPDATE blockedWord SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id;
 
 words:
-SELECT * FROM blockedWord ORDER BY rowid DESC;
+SELECT * FROM blockedWord WHERE isDeleted = 0 ORDER BY rowid DESC;
+
+allBlockedWords:
+SELECT * FROM blockedWord;
+
+upsertSyncBlockedWord:
+INSERT INTO blockedWord(id, content, isDeleted, updatedAt)
+VALUES (:id, :content, :isDeleted, :updatedAt)
+ON CONFLICT(id) DO
+UPDATE SET
+    content = excluded.content,
+    isDeleted = excluded.isDeleted,
+    updatedAt = excluded.updatedAt
+WHERE excluded.updatedAt > blockedWord.updatedAt;

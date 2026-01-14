@@ -116,8 +116,8 @@ class OpmlManager(
 
       val opmlString =
         withContext(dispatchersProvider.io + job) {
-          val feeds = rssRepository.allFeedsBlocking()
-          val feedGroups = rssRepository.allFeedGroupsBlocking()
+          val feeds = rssRepository.allFeedsBlocking().filterNot { it.isDeleted }
+          val feedGroups = rssRepository.allFeedGroupsBlocking().filterNot { it.isDeleted }
           val opmlSources = mutableListOf<OpmlSource>()
 
           val feedsById = feeds.associateBy { it.id }

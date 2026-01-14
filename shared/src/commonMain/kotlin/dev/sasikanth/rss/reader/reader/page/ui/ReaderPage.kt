@@ -102,15 +102,17 @@ import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.share.LocalShareHandler
-import dev.sasikanth.rss.reader.ui.AntonFontFamily
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
+import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.intellij.markdown.MarkdownElementTypes
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
@@ -133,7 +135,7 @@ internal fun ReaderPage(
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
   loadFullArticle: Boolean,
-  darkTheme: Boolean,
+  isDarkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
@@ -149,7 +151,6 @@ internal fun ReaderPage(
   val shouldBlockImage = LocalBlockImage.current
 
   val coroutineScope = rememberCoroutineScope()
-  val imageTransformer = remember { CoilMarkdownTransformer(shouldBlockImage) }
 
   val textSelectionColors =
     TextSelectionColors(
@@ -188,8 +189,14 @@ internal fun ReaderPage(
               block = 12.dp,
             ),
           LocalMarkdownDimens provides markdownDimens(),
-          LocalImageTransformer provides imageTransformer,
-          LocalMarkdownAnnotator provides markdownAnnotator(),
+          LocalImageTransformer provides CoilMarkdownTransformer,
+          LocalMarkdownAnnotator provides
+            markdownAnnotator(
+              annotate = { _, node ->
+                // skipping images when "block images" is enabled
+                node.type == MarkdownElementTypes.IMAGE && shouldBlockImage
+              }
+            ),
           LocalMarkdownAnimations provides markdownAnimations(animateTextSize = { this }),
           LocalMarkdownColors provides
             markdownColor(
@@ -233,7 +240,7 @@ internal fun ReaderPage(
                 page = page,
                 pagerState = pagerState,
                 excerpt = excerptState,
-                darkTheme = darkTheme,
+                darkTheme = isDarkTheme,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
@@ -317,7 +324,13 @@ private fun PostHeader(
         FeaturedImage(
           imageUrl = postImage,
           isComicStrip = UrlUtils.isComicStrip(postImage),
-          parallaxProgress = { pagerState.getOffsetFractionForPage(page) }
+          alignment =
+            remember(pagerState) {
+              ParallaxAlignment(
+                horizontalBias = { pagerState.getOffsetFractionForPage(page) },
+                multiplier = 2f,
+              )
+            }
         )
       }
 
@@ -347,7 +360,8 @@ private fun PostHeader(
           },
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineMedium,
-        fontFamily = AntonFontFamily,
+        fontFamily = GolosFontFamily,
+        fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.secondary,
         overflow = TextOverflow.Ellipsis,
       )

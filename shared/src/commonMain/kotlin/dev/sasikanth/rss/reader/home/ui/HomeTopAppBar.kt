@@ -43,6 +43,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -112,10 +113,8 @@ internal fun HomeTopAppBar(
   hasUnreadPosts: Boolean,
   scrollBehavior: TopAppBarScrollBehavior,
   modifier: Modifier = Modifier,
-  onSearchClicked: () -> Unit,
-  onBookmarksClicked: () -> Unit,
-  onSettingsClicked: () -> Unit,
-  onPostTypeChanged: (PostsType) -> Unit,
+  onMenuClicked: (() -> Unit)? = null,
+  onShowPostsSortFilter: () -> Unit,
   onMarkPostsAsRead: (Source?) -> Unit,
 ) {
   val backgroundAlpha by
@@ -134,30 +133,14 @@ internal fun HomeTopAppBar(
     modifier = modifier.background(AppTheme.colorScheme.surface.copy(alpha = backgroundAlpha)),
     scrollBehavior = scrollBehavior,
     contentPadding = PaddingValues(start = 0.dp, top = 8.dp, end = 12.dp, bottom = 8.dp),
-    title = { SourceInfo(postsType = postsType) },
+    title = { SourceInfo(source = source, postsType = postsType) },
     navigationIcon = {
-      val density = LocalDensity.current
-      var buttonHeight by remember { mutableStateOf(0.dp) }
-
-      Box(
-        modifier =
-          Modifier.onGloballyPositioned { buttonHeight = with(density) { it.size.height.toDp() } }
-      ) {
-        var showPostsTypeDropDown by remember { mutableStateOf(false) }
-
+      if (onMenuClicked != null) {
         CircularIconButton(
           modifier = Modifier.padding(start = 12.dp),
-          icon = TwineIcons.Sort,
-          label = stringResource(Res.string.postsFilter),
-          onClick = { showPostsTypeDropDown = true }
-        )
-
-        PostsFilterDropdown(
-          showDropdown = showPostsTypeDropDown,
-          postsType = postsType,
-          onPostTypeChanged = onPostTypeChanged,
-          offset = DpOffset(x = 12.dp, y = -buttonHeight),
-          onDismiss = { showPostsTypeDropDown = false }
+          icon = Icons.Rounded.Menu,
+          label = stringResource(Res.string.moreMenuOptions),
+          onClick = onMenuClicked
         )
       }
     },
@@ -180,10 +163,10 @@ internal fun HomeTopAppBar(
 
       Spacer(Modifier.width(8.dp))
 
-      OverflowMenu(
-        onSearchClicked = onSearchClicked,
-        onSettingsClicked = onSettingsClicked,
-        onBookmarksClicked = onBookmarksClicked
+      CircularIconButton(
+        icon = TwineIcons.Sort,
+        label = stringResource(Res.string.postsFilter),
+        onClick = onShowPostsSortFilter
       )
     },
     colors =
@@ -196,6 +179,7 @@ internal fun HomeTopAppBar(
 
 @Composable
 private fun SourceInfo(
+  source: Source?,
   postsType: PostsType,
   modifier: Modifier = Modifier,
 ) {
@@ -209,9 +193,16 @@ private fun SourceInfo(
         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
       ) {
+        val title =
+          when (source) {
+            is Feed -> source.name
+            is FeedGroup -> source.name
+            else -> stringResource(Res.string.screenHome)
+          }
+
         Text(
           modifier = Modifier.basicMarquee(),
-          text = stringResource(Res.string.screenHome),
+          text = title,
           style = MaterialTheme.typography.titleMedium,
           color = AppTheme.colorScheme.onSurface,
           maxLines = 1,
@@ -271,48 +262,6 @@ private fun SourceIcon(source: Source?, modifier: Modifier = Modifier) {
       }
       else -> {
         // no-op
-      }
-    }
-  }
-}
-
-@Composable
-private fun PostsFilterDropdown(
-  showDropdown: Boolean,
-  postsType: PostsType,
-  onPostTypeChanged: (PostsType) -> Unit,
-  onDismiss: () -> Unit,
-  offset: DpOffset = DpOffset.Zero,
-) {
-  DropdownMenu(
-    modifier = Modifier.requiredWidth(158.dp),
-    expanded = showDropdown,
-    offset = offset,
-    onDismissRequest = onDismiss,
-  ) {
-    PostsType.entries.forEach { type ->
-      val label = getPostTypeLabel(type)
-      val color =
-        if (postsType == type) {
-          AppTheme.colorScheme.tintedHighlight
-        } else {
-          Color.Unspecified
-        }
-      val labelColor =
-        if (postsType == type) {
-          AppTheme.colorScheme.inverseOnSurface
-        } else {
-          AppTheme.colorScheme.textEmphasisHigh
-        }
-
-      DropdownMenuItem(
-        onClick = {
-          onPostTypeChanged(type)
-          onDismiss()
-        },
-        modifier = Modifier.background(color)
-      ) {
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, color = labelColor)
       }
     }
   }

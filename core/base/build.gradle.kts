@@ -30,6 +30,8 @@ kotlin {
     minSdk = libs.versions.android.sdk.min.get().toInt()
     compileSdk = libs.versions.android.sdk.compile.get().toInt()
 
+    androidResources { enable = true }
+
     withHostTestBuilder {}.configure {}
   }
 
@@ -45,7 +47,11 @@ kotlin {
 
     commonTest.dependencies { implementation(libs.kotlin.test) }
 
-    androidMain.dependencies { implementation(libs.androidx.annotation) }
+    androidMain.dependencies {
+      implementation(libs.androidx.annotation)
+      api(libs.androidx.activity.compose)
+      api(libs.androidx.core)
+    }
   }
 
   compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }

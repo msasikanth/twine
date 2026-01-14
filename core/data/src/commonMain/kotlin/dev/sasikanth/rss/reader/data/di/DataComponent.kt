@@ -17,17 +17,25 @@ package dev.sasikanth.rss.reader.data.di
 
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
-import dev.sasikanth.rss.reader.data.database.Bookmark
+import dev.sasikanth.rss.reader.data.database.BlockedWord
 import dev.sasikanth.rss.reader.data.database.Feed
 import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
+import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.LocalSyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.OAuthManager
+import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
+import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
+import dev.sasikanth.rss.reader.data.sync.RealOAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import io.ktor.client.HttpClient
 import me.tatarka.inject.annotations.Provides
 
 expect interface SqlDriverPlatformComponent
@@ -51,7 +59,8 @@ interface DataComponent :
           postDateAdapter = DateAdapter,
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
-          syncedAtAdapter = DateAdapter
+          syncedAtAdapter = DateAdapter,
+          flagsAdapter = PostFlagsAdapter
         ),
       feedAdapter =
         Feed.Adapter(
@@ -60,7 +69,6 @@ interface DataComponent :
           lastCleanUpAtAdapter = DateAdapter,
           lastUpdatedAtAdapter = DateAdapter,
         ),
-      bookmarkAdapter = Bookmark.Adapter(dateAdapter = DateAdapter),
       feedGroupAdapter =
         FeedGroup.Adapter(
           createdAtAdapter = DateAdapter,
@@ -70,6 +78,10 @@ interface DataComponent :
       postContentAdapter =
         PostContent.Adapter(
           createdAtAdapter = DateAdapter,
+        ),
+      blockedWordAdapter =
+        BlockedWord.Adapter(
+          updatedAtAdapter = DateAdapter,
         )
     )
   }
@@ -166,5 +178,26 @@ interface DataComponent :
 
   @Provides fun providesUserQueries(database: ReaderDatabase) = database.userQueries
 
+  @Provides
+  @AppScope
+  fun providesOAuthTokenProvider(settingsRepository: SettingsRepository): OAuthTokenProvider =
+    RealOAuthTokenProvider(settingsRepository)
+
+  @Provides
+  @AppScope
+  fun providesOAuthManager(
+    httpClient: HttpClient,
+    tokenProvider: OAuthTokenProvider
+  ): OAuthManager = RealOAuthManager(httpClient, tokenProvider)
+
+  @Provides
+  @AppScope
+  fun providesDropboxSyncProvider(
+    httpClient: HttpClient,
+    tokenProvider: OAuthTokenProvider
+  ): DropboxSyncProvider = DropboxSyncProvider(httpClient, tokenProvider)
+
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
+
+  @Provides fun providesAppConfigQueries(database: ReaderDatabase) = database.appConfigQueries
 }

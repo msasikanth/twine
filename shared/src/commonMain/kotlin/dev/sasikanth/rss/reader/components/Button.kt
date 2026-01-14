@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,6 +45,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
@@ -74,13 +76,50 @@ fun Button(
 }
 
 @Composable
+fun FilledIconButton(
+  icon: ImageVector,
+  contentDescription: String?,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+  containerColor: Color = AppTheme.colorScheme.surface,
+  iconTint: Color = AppTheme.colorScheme.onSurface,
+  size: IconButtonSize = IconButtonSize.Default,
+  onClick: () -> Unit,
+) {
+  val interactionSource = remember { MutableInteractionSource() }
+
+  Box(
+    modifier =
+      Modifier.semantics { role = Role.Button }
+        .requiredSize(size.containerSize)
+        .graphicsLayer { this.blendMode = blendMode }
+        .clip(MaterialTheme.shapes.extraLarge)
+        .background(containerColor)
+        .clickable(
+          interactionSource = interactionSource,
+          indication = ripple(color = AppTheme.colorScheme.secondary),
+          enabled = enabled,
+          onClick = onClick
+        )
+        .then(modifier),
+    contentAlignment = Alignment.Center
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(size.iconSize),
+      imageVector = icon,
+      contentDescription = contentDescription,
+      tint = iconTint
+    )
+  }
+}
+
+@Composable
 fun IconButton(
   icon: ImageVector,
   contentDescription: String?,
-  darkTheme: Boolean,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
-  blendMode: BlendMode = if (darkTheme) BlendMode.Screen else BlendMode.Multiply,
+  blendMode: BlendMode = if (AppTheme.isDark) BlendMode.Screen else BlendMode.Multiply,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
@@ -142,4 +181,12 @@ fun CircularIconButton(
       tint = AppTheme.colorScheme.onSurface,
     )
   }
+}
+
+enum class IconButtonSize(
+  val containerSize: Dp,
+  val iconSize: Dp,
+) {
+  Default(containerSize = 40.dp, iconSize = 20.dp),
+  Large(containerSize = 56.dp, iconSize = 24.dp)
 }

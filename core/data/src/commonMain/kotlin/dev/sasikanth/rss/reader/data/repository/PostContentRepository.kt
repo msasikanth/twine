@@ -17,6 +17,7 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.PostContent
 import dev.sasikanth.rss.reader.data.database.PostContentQueries
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.withContext
@@ -44,6 +45,23 @@ class PostContentRepository(
   suspend fun updateFullArticleContent(postId: String, htmlContent: String?) {
     withContext(dispatcherProvider.databaseWrite) {
       postContentQueries.updateHtmlContent(htmlContent, postId)
+    }
+  }
+
+  suspend fun upsert(
+    postId: String,
+    rawContent: String?,
+    htmlContent: String?,
+    createdAt: Instant,
+  ) {
+    withContext(dispatcherProvider.databaseWrite) {
+      postContentQueries.upsert(
+        id = postId,
+        rawContent = rawContent,
+        rawContentLen = rawContent?.length?.toLong() ?: 0L,
+        htmlContent = htmlContent,
+        createdAt = createdAt,
+      )
     }
   }
 }

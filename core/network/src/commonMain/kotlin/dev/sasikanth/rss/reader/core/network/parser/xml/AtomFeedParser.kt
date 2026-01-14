@@ -29,24 +29,19 @@ import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ATOM_FEED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ICON
+import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_ITUNES_IMAGE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_LINK
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_CONTENT
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_GROUP
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_MEDIA_THUMBNAIL
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_PUBLISHED
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUBTITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_SUMMARY
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_TITLE
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_UPDATED
-import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.TAG_URL
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
-import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
-import dev.sasikanth.rss.reader.util.decodeHTMLString
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.utils.io.asSource
-import kotlin.time.Clock
 import me.tatarka.inject.annotations.Inject
 import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
@@ -54,7 +49,7 @@ import org.kobjects.ktxml.api.XmlPullParser
 @Inject
 class AtomContentParser(
   httpClient: HttpClient,
-  private val articleHtmlParser: ArticleHtmlParser,
+  override val articleHtmlParser: ArticleHtmlParser,
 ) : XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
@@ -62,12 +57,11 @@ class AtomContentParser(
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.require(EventType.START_TAG, parser.namespace, TAG_ATOM_FEED)
 
-    val posts = mutableListOf<PostPayload?>()
-
     var title: String? = null
     var description: String? = null
     var link: String? = null
     var iconUrl: String? = null
+    var firstPost: PostPayload? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -85,12 +79,19 @@ class AtomContentParser(
         TAG_SUBTITLE -> {
           description = parser.nextText()
         }
-        TAG_ATOM_ENTRY -> {
-          val host = UrlUtils.extractHost(link ?: feedUrl)
-          posts.add(readAtomEntry(parser, host))
-        }
         TAG_ICON -> {
           iconUrl = parser.nextText()
+        }
+        TAG_ITUNES_IMAGE -> {
+          iconUrl = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          parser.nextTag()
+        }
+        TAG_ATOM_ENTRY -> {
+          val host = UrlUtils.extractHost(link ?: feedUrl)
+          firstPost = readAtomEntry(parser, host)
+          if (firstPost != null) {
+            break
+          }
         }
         else -> parser.skipSubTree()
       }
@@ -100,16 +101,22 @@ class AtomContentParser(
       if (UrlUtils.isYouTubeLink(feedUrl)) {
         youtubeChannelImage(link!!)
       } else {
-        feedDefaultFallbackIcon(link, feedUrl, iconUrl)
+        iconUrl
       }
 
-    return FeedPayload(
-      name = XmlFeedParser.cleanText(title ?: link)!!.decodeHTMLString(),
-      description = XmlFeedParser.cleanText(description).orEmpty().decodeHTMLString(),
+    return createFeedPayload(
+      name = title,
+      description = description,
       icon = iconUrl,
-      homepageLink = link ?: feedUrl,
+      homepageLink = link,
       link = feedUrl,
-      posts = posts.filterNotNull()
+      posts =
+        postsFlow(
+          parser = parser,
+          firstPost = firstPost,
+          itemTag = TAG_ATOM_ENTRY,
+          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) }
+        )
     )
   }
 
@@ -119,21 +126,12 @@ class AtomContentParser(
       .ogImage!!
   }
 
-  private fun feedDefaultFallbackIcon(link: String?, feedUrl: String, iconUrl: String?): String {
-    var iconUrl1 = iconUrl
-    val host = UrlUtils.extractHost(link ?: feedUrl)
-    if (iconUrl1.isNullOrBlank()) {
-      iconUrl1 = UrlUtils.fallbackFeedIcon(host)
-    }
-    return iconUrl1
-  }
-
   private fun readAtomEntry(parser: XmlPullParser, hostLink: String?): PostPayload? {
     parser.require(EventType.START_TAG, null, "entry")
 
     var title: String? = null
     var link: String? = null
-    var content: String? = null
+    var description: String? = null
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
@@ -154,12 +152,11 @@ class AtomContentParser(
         }
         TAG_CONTENT,
         TAG_SUMMARY -> {
-          val postHtmlContent = parser.nextText().trimIndent()
-          val htmlContent = articleHtmlParser.parse(htmlContent = postHtmlContent)
+          val postContent = parsePostContent(parser)
 
-          rawContent = htmlContent?.cleanedHtml
-          image = htmlContent?.heroImage ?: image
-          content = htmlContent?.textContent?.ifBlank { null } ?: rawContent?.trim()
+          rawContent = postContent.rawContent
+          image = postContent.heroImage ?: image
+          description = postContent.textContent
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {
@@ -169,41 +166,27 @@ class AtomContentParser(
             parser.skipSubTree()
           }
         }
+        TAG_ITUNES_IMAGE -> {
+          image = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          parser.nextTag()
+        }
         TAG_MEDIA_GROUP -> {
-          while (parser.next() != EventType.END_TAG) {
-            if (parser.eventType != EventType.START_TAG) continue
-
-            when (parser.name) {
-              TAG_MEDIA_THUMBNAIL -> {
-                image = parser.getAttributeValue(parser.namespace, TAG_URL)
-                parser.nextTag()
-              }
-              TAG_MEDIA_CONTENT -> {
-                content = content.orEmpty().ifBlank { parser.nextText() }
-              }
-              else -> parser.skipSubTree()
-            }
-          }
+          val mediaGroupResult = readMediaGroup(parser)
+          image = mediaGroupResult.image ?: image
+          description = description.orEmpty().ifBlank { mediaGroupResult.description }
         }
         else -> parser.skipSubTree()
       }
     }
 
-    val postPubDateInMillis = date?.dateStringToEpochMillis()
-
-    if (link.isNullOrBlank() || (title.isNullOrBlank() && content.isNullOrBlank())) {
-      return null
-    }
-
-    return PostPayload(
-      title = XmlFeedParser.cleanText(title).orEmpty().decodeHTMLString(),
-      link = XmlFeedParser.cleanText(link)!!,
-      description = content.orEmpty().decodeHTMLString(),
+    return createPostPayload(
+      title = title,
+      link = link,
+      description = description,
       rawContent = rawContent,
-      imageUrl = UrlUtils.safeUrl(hostLink, image),
-      date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-      commentsLink = null,
-      isDateParsedCorrectly = postPubDateInMillis != null
+      imageUrl = image,
+      date = date,
+      hostLink = hostLink
     )
   }
 

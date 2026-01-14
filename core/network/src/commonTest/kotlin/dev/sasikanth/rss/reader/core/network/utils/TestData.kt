@@ -200,6 +200,44 @@ const val youtubeChannelHtml =
 </html>
 """
 
+const val podcastRssFeedUrl = "https://example.com/podcast.xml"
+const val podcastRssXmlContent =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Podcast title</title>
+    <link>https://example.com/podcast</link>
+    <description>Podcast description</description>
+    <itunes:image href="https://example.com/podcast-icon.jpg" />
+    <item>
+      <title>Episode 1</title>
+      <link>https://example.com/episode-1</link>
+      <description>Episode 1 description</description>
+      <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
+      <itunes:image href="https://example.com/episode-1-image.jpg" />
+    </item>
+  </channel>
+  </rss>
+  """
+
+const val podcastAtomFeedUrl = "https://example.com/podcast-atom.xml"
+const val podcastAtomXmlContent =
+  """<?xml version="1.0" encoding="UTF-8"?>
+  <feed xmlns="http://www.w3.org/2005/Atom" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+    <title>Podcast title</title>
+    <subtitle>Podcast description</subtitle>
+    <link href="https://example.com/podcast" rel="alternate" />
+    <itunes:image href="https://example.com/podcast-icon.jpg" />
+    <entry>
+      <title>Episode 1</title>
+      <link rel="alternate" href="https://example.com/episode-1" />
+      <published>2023-05-25T10:00:00Z</published>
+      <content type="html">Episode 1 description</content>
+      <itunes:image href="https://example.com/episode-1-image.jpg" />
+    </entry>
+  </feed>
+  """
+
 // language=JSON
 const val jsonFeed =
   """

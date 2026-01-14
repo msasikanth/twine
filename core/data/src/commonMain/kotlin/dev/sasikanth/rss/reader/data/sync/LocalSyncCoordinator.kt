@@ -63,9 +63,12 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
+
         checkAndRefreshLastRefreshTime {
           val allFeeds =
-            withContext(dispatchersProvider.databaseRead) { rssRepository.allFeedsBlocking() }
+            withContext(dispatchersProvider.databaseRead) {
+              rssRepository.allFeedsBlocking().filterNot { it.isDeleted }
+            }
           val now = Clock.System.now()
           val feedsToRefresh = allFeeds.filter { feed -> shouldRefreshFeed(feed, now) }
           val feedsChunks = feedsToRefresh.chunked(SYNC_CHUNK_SIZE)
@@ -113,6 +116,7 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
+
         val feed =
           withContext(dispatchersProvider.databaseRead) { rssRepository.feed(feedId = feedId) }
         val now = Clock.System.now()
@@ -137,7 +141,8 @@ class LocalSyncCoordinator(
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {
     val initialPostCount = rssRepository.postsCountForFeed(feed.id)
-    val feedFetchResult = feedFetcher.fetch(feed.link)
+    val fetchFullContent = settingsRepository.downloadFullContent.first()
+    val feedFetchResult = feedFetcher.fetch(url = feed.link, fetchFullContent = fetchFullContent)
 
     if (feedFetchResult !is FeedFetchResult.Success) return
 

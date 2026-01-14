@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -84,7 +83,6 @@ private val compactPostListPadding
 @Composable
 internal fun PostListItem(
   item: PostWithMetadata,
-  darkTheme: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
@@ -143,21 +141,20 @@ internal fun PostListItem(
     PostActionBar(
       feedName = item.feedName,
       feedIcon = feedIconUrl,
-      postRelativeTimestamp = item.date.relativeDurationString(),
-      config = postMetadataConfig,
-      postLink = item.link,
       postRead = readStatus,
+      postRelativeTimestamp = item.date.relativeDurationString(),
+      postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
-      darkTheme = darkTheme,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
-      onSourceClick = onPostSourceClick,
       onTogglePostReadClick = {
         readStatus = !readStatus
         updatePostReadStatus(readStatus)
       },
-      modifier = Modifier.padding(horizontal = 16.dp)
+      modifier = Modifier.padding(horizontal = 16.dp),
+      config = postMetadataConfig,
+      onSourceClick = onPostSourceClick
     )
   }
 }
@@ -166,7 +163,6 @@ internal fun PostListItem(
 internal fun CompactPostListItem(
   item: PostWithMetadata,
   showDivider: Boolean,
-  darkTheme: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
@@ -220,14 +216,12 @@ internal fun CompactPostListItem(
         postRead = readStatus,
         config = postMetadataConfig,
         commentsLink = item.commentsLink,
-        darkTheme = darkTheme,
         onBookmarkClick = onPostBookmarkClick,
         onCommentsClick = onPostCommentsClick,
-        togglePostReadClick = {
-          readStatus = !readStatus
-          updatePostReadStatus(readStatus)
-        },
-      )
+      ) {
+        readStatus = !readStatus
+        updatePostReadStatus(readStatus)
+      }
     }
 
     if (showDivider) {

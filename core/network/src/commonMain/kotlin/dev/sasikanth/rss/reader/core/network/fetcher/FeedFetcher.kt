@@ -17,6 +17,8 @@ package dev.sasikanth.rss.reader.core.network.fetcher
 
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.parseSource
+import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.parser.json.JsonFeedParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser
 import dev.sasikanth.rss.reader.core.network.parser.xml.XmlFeedParser.Companion.ATOM_MEDIA_TYPE
@@ -30,7 +32,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsChannel
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.BadContentTypeFormatException
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -40,16 +41,22 @@ import io.ktor.http.contentType
 import io.ktor.http.isRelativePath
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.asSource
+import io.ktor.utils.io.readBuffer
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Inject
 class FeedFetcher(
   private val httpClient: HttpClient,
   private val xmlFeedParser: XmlFeedParser,
   private val jsonFeedParser: JsonFeedParser,
+  private val fullArticleFetcher: FullArticleFetcher,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
@@ -59,12 +66,13 @@ class FeedFetcher(
     private const val MAX_REDIRECTS_ALLOWED = 5
   }
 
-  suspend fun fetch(url: String): FeedFetchResult {
-    return withContext(networkDispatcher) { fetch(url, redirectCount = 0) }
+  suspend fun fetch(url: String, fetchFullContent: Boolean = false): FeedFetchResult {
+    return withContext(networkDispatcher) { fetch(url, fetchFullContent, redirectCount = 0) }
   }
 
   private suspend fun fetch(
     url: String,
+    fetchFullContent: Boolean,
     redirectCount: Int,
   ): FeedFetchResult {
     if (redirectCount >= MAX_REDIRECTS_ALLOWED) {
@@ -77,7 +85,7 @@ class FeedFetcher(
 
       when (response.status) {
         HttpStatusCode.OK -> {
-          parseContent(response, transformedUrl.toString(), redirectCount)
+          parseContent(response, transformedUrl.toString(), fetchFullContent, redirectCount)
         }
         HttpStatusCode.MultipleChoices,
         HttpStatusCode.MovedPermanently,
@@ -85,7 +93,7 @@ class FeedFetcher(
         HttpStatusCode.SeeOther,
         HttpStatusCode.TemporaryRedirect,
         HttpStatusCode.PermanentRedirect -> {
-          handleHttpRedirect(response, transformedUrl, redirectCount)
+          handleHttpRedirect(response, transformedUrl, fetchFullContent, redirectCount)
         }
         else -> {
           FeedFetchResult.HttpStatusError(statusCode = response.status)
@@ -114,6 +122,7 @@ class FeedFetcher(
   private suspend fun parseContent(
     response: HttpResponse,
     url: String,
+    fetchFullContent: Boolean,
     redirectCount: Int
   ): FeedFetchResult {
     val contentType =
@@ -125,12 +134,17 @@ class FeedFetcher(
         ContentType.Text.Xml
       }
 
+    val responseChannel = response.bodyAsChannel()
     when (contentType) {
       ContentType.Text.Html -> {
-        val feedUrl = fetchFeedLinkFromHtmlIfExists(response.bodyAsChannel(), url)
+        val feedUrl = fetchFeedLinkFromHtmlIfExists(responseChannel, url)
 
         if (feedUrl != url && !feedUrl.isNullOrBlank()) {
-          return fetch(url = feedUrl, redirectCount = redirectCount + 1)
+          return fetch(
+            url = feedUrl,
+            fetchFullContent = fetchFullContent,
+            redirectCount = redirectCount + 1
+          )
         }
       }
 
@@ -143,7 +157,6 @@ class FeedFetcher(
       ContentType("text", "atom+xml"),
       ContentType("text", "rss+xml"),
       null -> {
-        val content = response.bodyAsChannel()
         val responseCharset =
           try {
             response.contentType()?.parameter("charset")
@@ -152,15 +165,30 @@ class FeedFetcher(
           }
         val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
 
-        val feedPayload = xmlFeedParser.parse(feedUrl = url, content = content, charset = charset)
+        var feedPayload =
+          xmlFeedParser.parse(
+            feedUrl = url,
+            content = responseChannel,
+            charset = charset,
+          )
+
+        if (fetchFullContent) {
+          feedPayload = fetchFullContentForPosts(feedPayload)
+        }
 
         return FeedFetchResult.Success(feedPayload)
       }
       ContentType.Application.Json -> {
-        // TODO: Replace it with a stream once KotlinX Serialization supports multiplatform
-        //  streaming
-        val content = response.bodyAsText()
-        val feedPayload = jsonFeedParser.parse(content = content, feedUrl = url)
+        val jsonBuffer = responseChannel.readBuffer()
+        var feedPayload =
+          jsonFeedParser.parse(
+            content = jsonBuffer,
+            feedUrl = url,
+          )
+
+        if (fetchFullContent) {
+          feedPayload = fetchFullContentForPosts(feedPayload)
+        }
 
         return FeedFetchResult.Success(feedPayload)
       }
@@ -169,9 +197,22 @@ class FeedFetcher(
     throw UnsupportedOperationException("Unsupported content type: $contentType")
   }
 
+  private fun fetchFullContentForPosts(feedPayload: FeedPayload): FeedPayload {
+    val postsWithFullContent =
+      feedPayload.posts.flatMapMerge(concurrency = 10) { post ->
+        flow {
+          val fullContent = fullArticleFetcher.fetch(post.link).getOrNull()
+          emit(post.copy(fullContent = fullContent))
+        }
+      }
+
+    return feedPayload.copy(posts = postsWithFullContent)
+  }
+
   private suspend fun handleHttpRedirect(
     response: HttpResponse,
     url: Url,
+    fetchFullContent: Boolean,
     redirectCount: Int
   ): FeedFetchResult {
     val headerLocation = response.headers["Location"]
@@ -181,7 +222,11 @@ class FeedFetcher(
       return FeedFetchResult.Error(Exception("Failed to fetch the feed"))
     }
 
-    return fetch(url = redirectToUrl, redirectCount = redirectCount + 1)
+    return fetch(
+      url = redirectToUrl,
+      fetchFullContent = fetchFullContent,
+      redirectCount = redirectCount + 1
+    )
   }
 
   private fun fetchFeedLinkFromHtmlIfExists(

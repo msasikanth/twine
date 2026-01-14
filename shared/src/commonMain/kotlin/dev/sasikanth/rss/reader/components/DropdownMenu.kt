@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.ui.AppTheme
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DropdownMenu(
   expanded: Boolean,
@@ -45,7 +47,7 @@ internal fun DropdownMenu(
     expanded = expanded,
     onDismissRequest = onDismissRequest,
     offset = offset,
-    shape = MaterialTheme.shapes.extraLarge,
+    shape = MaterialTheme.shapes.largeIncreased,
     modifier =
       modifier.background(color = AppTheme.colorScheme.surface, shape = MaterialTheme.shapes.large),
     content = content

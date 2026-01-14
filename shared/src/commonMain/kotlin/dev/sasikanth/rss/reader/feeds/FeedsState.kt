@@ -53,7 +53,7 @@ data class FeedsState(
         activeSource = null,
         canShowUnreadPostsCount = false,
         feedsSortOrder = FeedsOrderBy.Latest,
-        isPinnedSectionExpanded = true,
+        isPinnedSectionExpanded = false,
         selectedSources = emptySet(),
         numberOfFeeds = 0,
         numberOfFeedGroups = 0,

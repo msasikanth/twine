@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader
 
+import android.Manifest
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
@@ -22,10 +23,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowCompat
 import dev.sasikanth.rss.reader.app.App
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
+import dev.sasikanth.rss.reader.notifications.PermissionRequestBridge
 import dev.sasikanth.rss.reader.platform.PlatformComponent
 import dev.sasikanth.rss.reader.share.ShareComponent
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
@@ -35,8 +38,34 @@ import me.tatarka.inject.annotations.Provides
 
 class MainActivity : ComponentActivity() {
 
+  private val permissionLauncher =
+    registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+      val result =
+        if (granted) {
+          PermissionRequestBridge.PermissionResult.Granted
+        } else {
+          val shouldShowRationale =
+            shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
+          if (shouldShowRationale) {
+            PermissionRequestBridge.PermissionResult.Denied
+          } else {
+            PermissionRequestBridge.PermissionResult.PermanentlyDenied
+          }
+        }
+      currentPermissionDeferred?.complete(result)
+    }
+
+  private var currentPermissionDeferred:
+    kotlinx.coroutines.CompletableDeferred<PermissionRequestBridge.PermissionResult>? =
+    null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
+    PermissionRequestBridge.register { deferred ->
+      currentPermissionDeferred = deferred
+      permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
 
     FileKit.init(this)
 
@@ -67,6 +96,16 @@ class MainActivity : ComponentActivity() {
         }
       )
     }
+  }
+
+  override fun onNewIntent(intent: android.content.Intent) {
+    super.onNewIntent(intent)
+    intent.data?.let { ExternalUriHandler.onNewUri(it.toString()) }
+  }
+
+  override fun onDestroy() {
+    PermissionRequestBridge.unregister()
+    super.onDestroy()
   }
 }
 

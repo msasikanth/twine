@@ -12,83 +12,140 @@
 package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_CORNER_SIZE
+import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
+import dev.sasikanth.rss.reader.resources.icons.ExpandContent
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.feeds
 import twine.shared.generated.resources.noPinnedSources
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun BottomSheetCollapsedContent(
   pinnedSources: List<Source>,
-  numberOfFeeds: Int,
   activeSource: Source?,
+  isParentThemeDark: Boolean,
   canShowUnreadPostsCount: Boolean,
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
+  openFeeds: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  LazyRow(
-    modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(4.dp),
-    verticalAlignment = Alignment.CenterVertically,
-    contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 13.dp, bottom = 36.dp)
-  ) {
-    if (activeSource != null && activeSource.pinnedAt == null) {
-      item {
+  Box(modifier.height(IntrinsicSize.Min)) {
+    LazyRow(
+      modifier = Modifier.fillMaxWidth().height(BOTTOM_SHEET_PEEK_HEIGHT).padding(end = 16.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      contentPadding = PaddingValues(start = 8.dp, end = 64.dp),
+      overscrollEffect = null
+    ) {
+      if (activeSource != null && activeSource.pinnedAt == null) {
+        item {
+          SourceItem(
+            source = activeSource,
+            activeSource = activeSource,
+            canShowUnreadPostsCount = canShowUnreadPostsCount,
+            onHomeSelected = onHomeSelected,
+            onSourceClick = onSourceClick
+          )
+        }
+
+        item {
+          VerticalDivider(
+            modifier = Modifier.requiredHeight(24.dp),
+            color = AppTheme.colorScheme.outlineVariant,
+          )
+        }
+      }
+
+      items(pinnedSources.size) { index ->
         SourceItem(
-          source = activeSource,
+          source = pinnedSources[index],
           activeSource = activeSource,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           onHomeSelected = onHomeSelected,
           onSourceClick = onSourceClick
         )
       }
-
-      item {
-        VerticalDivider(
-          modifier = Modifier.requiredHeight(24.dp),
-          color = AppTheme.colorScheme.outlineVariant,
-        )
-      }
     }
 
-    items(pinnedSources.size) { index ->
-      SourceItem(
-        source = pinnedSources[index],
-        activeSource = activeSource,
-        canShowUnreadPostsCount = canShowUnreadPostsCount,
-        onHomeSelected = onHomeSelected,
-        onSourceClick = onSourceClick
+    if (pinnedSources.isEmpty() && activeSource == null) {
+      Text(
+        text = stringResource(Res.string.noPinnedSources),
+        color = AppTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().align(Alignment.Center),
       )
     }
 
-    if (pinnedSources.isEmpty() && numberOfFeeds > 0 && activeSource == null) {
-      item {
-        Text(
-          text = stringResource(Res.string.noPinnedSources),
-          color = AppTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium,
-          textAlign = TextAlign.Center,
-          modifier = Modifier.fillParentMaxWidth().padding(top = 16.dp)
+    if (pinnedSources.isNotEmpty() || activeSource != null) {
+      val bottomSheetBackground =
+        if (isParentThemeDark) {
+          AppTheme.colorScheme.bottomSheet
+        } else {
+          AppTheme.colorScheme.bottomSheetInverse
+        }
+
+      Row(
+        modifier =
+          Modifier.align(Alignment.BottomEnd)
+            .padding(top = 2.dp, end = 2.dp, bottom = 2.dp)
+            .fillMaxHeight()
+            .background(
+              Brush.horizontalGradient(
+                0f to Color.Transparent,
+                0.2f to bottomSheetBackground,
+                1f to bottomSheetBackground,
+              ),
+              RoundedCornerShape(
+                topEnd = BOTTOM_SHEET_CORNER_SIZE,
+                bottomEnd = BOTTOM_SHEET_CORNER_SIZE
+              )
+            )
+            .pointerInput(Unit) {},
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Spacer(modifier = Modifier.width(16.dp))
+
+        CircularIconButton(
+          icon = TwineIcons.ExpandContent,
+          label = stringResource(Res.string.feeds),
+          onClick = openFeeds,
         )
+
+        Spacer(modifier = Modifier.width(12.dp))
       }
     }
   }

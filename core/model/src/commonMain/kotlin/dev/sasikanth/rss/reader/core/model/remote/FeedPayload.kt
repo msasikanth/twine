@@ -15,13 +15,13 @@
  */
 package dev.sasikanth.rss.reader.core.model.remote
 
+import kotlinx.coroutines.flow.Flow
+
 data class FeedPayload(
   val name: String,
   val icon: String,
   val description: String,
   val homepageLink: String,
   val link: String,
-  val posts: List<PostPayload>,
-) {
-  companion object
-}
+  val posts: Flow<PostPayload>,
+)

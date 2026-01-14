@@ -16,10 +16,14 @@
 package dev.sasikanth.rss.reader.di
 
 import dev.sasikanth.rss.reader.app.AppInfo
+import dev.sasikanth.rss.reader.app.isFoss
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
+import dev.sasikanth.rss.reader.data.sync.CloudSyncService
+import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.experimental.ExperimentalNativeApi
@@ -44,6 +48,12 @@ abstract class ApplicationComponent(
 
   abstract val syncCoordinator: SyncCoordinator
 
+  abstract val cloudSyncService: CloudSyncService
+
+  abstract val dropboxSyncProvider: DropboxSyncProvider
+
+  abstract val newArticleNotifier: NewArticleNotifier
+
   abstract val widgetDataRepository: WidgetDataRepository
 
   abstract val billingHandler: BillingHandler
@@ -58,6 +68,7 @@ abstract class ApplicationComponent(
       versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
           ?: "",
       isDebugBuild = Platform.isDebugBinary,
+      isFoss = isFoss,
       cachePath = { NSFileManager.defaultManager.cacheDir }
     )
 

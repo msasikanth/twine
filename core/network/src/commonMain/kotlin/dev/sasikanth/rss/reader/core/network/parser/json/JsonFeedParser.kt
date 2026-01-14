@@ -24,10 +24,14 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import kotlin.time.Clock
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.withContext
+import kotlinx.io.Source
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.io.decodeFromSource
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -38,15 +42,50 @@ class JsonFeedParser(
 
   private val json = Json { ignoreUnknownKeys = true }
 
-  suspend fun parse(content: String, feedUrl: String): FeedPayload {
+  @OptIn(ExperimentalSerializationApi::class)
+  suspend fun parse(content: Source, feedUrl: String): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
-        val jsonFeedPayload = json.decodeFromString<JsonFeedPayload>(content)
+        val jsonFeedPayload = json.decodeFromSource<JsonFeedPayload>(content)
 
         val host =
           UrlUtils.extractHost(
             urlString = jsonFeedPayload.homePageUrl ?: jsonFeedPayload.url ?: feedUrl
           )
+
+        val posts =
+          jsonFeedPayload.items.map { jsonFeedPost ->
+            val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
+
+            val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
+            val image = htmlContent?.heroImage
+
+            val description =
+              jsonFeedPost.summary
+                .let {
+                  if (it.isNullOrBlank()) {
+                    jsonFeedPost.contentText ?: htmlContent?.textContent
+                  } else {
+                    it
+                  }
+                }
+                .orEmpty()
+            val rawContent =
+              htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
+
+            PostPayload(
+              title = jsonFeedPost.title.orEmpty(),
+              link = jsonFeedPost.url.orEmpty(),
+              description = description,
+              rawContent = rawContent,
+              fullContent = null,
+              imageUrl = jsonFeedPost.imageUrl ?: image,
+              date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
+              commentsLink = null,
+              isDateParsedCorrectly = postPublishedAt != null
+            )
+          }
+
         val feedPayload =
           FeedPayload(
             name = jsonFeedPayload.title,
@@ -55,37 +94,7 @@ class JsonFeedParser(
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts =
-              jsonFeedPayload.items.map { jsonFeedPost ->
-                val postPublishedAt = jsonFeedPost.publishedAt?.dateStringToEpochMillis()
-
-                val htmlContent = articleHtmlParser.parse(jsonFeedPost.contentHtml.orEmpty())
-                val image = htmlContent?.heroImage
-
-                val description =
-                  jsonFeedPost.summary
-                    .let {
-                      if (it.isNullOrBlank()) {
-                        jsonFeedPost.contentText ?: htmlContent?.textContent
-                      } else {
-                        it
-                      }
-                    }
-                    .orEmpty()
-                val rawContent =
-                  htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
-
-                PostPayload(
-                  title = jsonFeedPost.title.orEmpty(),
-                  link = jsonFeedPost.url.orEmpty(),
-                  description = description,
-                  rawContent = rawContent,
-                  imageUrl = jsonFeedPost.imageUrl ?: image,
-                  date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
-                  commentsLink = null,
-                  isDateParsedCorrectly = postPublishedAt != null
-                )
-              }
+            posts = posts.asFlow()
           )
 
         return@withContext feedPayload

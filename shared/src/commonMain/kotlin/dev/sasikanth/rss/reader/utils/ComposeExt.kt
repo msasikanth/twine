@@ -19,11 +19,14 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ClipEntry
@@ -78,4 +81,42 @@ internal fun LogCompositions(msg: String) {
 
 fun PagerState.getOffsetFractionForPage(page: Int): Float {
   return (currentPage - page) + currentPageOffsetFraction
+}
+
+@Composable
+fun <T> PagerState.CollectItemTransition(
+  key: Any? = null,
+  itemProvider: (Int) -> T?,
+  onTransition: suspend (from: T?, to: T?, progress: Float) -> Unit
+) {
+  val currentItemProvider by rememberUpdatedState(itemProvider)
+  val currentOnTransition by rememberUpdatedState(onTransition)
+
+  LaunchedEffect(this, key) {
+    snapshotFlow {
+        val settledPage = settledPage
+        val offset = getOffsetFractionForPage(settledPage)
+        settledPage to offset
+      }
+      .collect { (settledPage, offset) ->
+        val activePost = currentItemProvider(settledPage)
+        if (activePost == null) return@collect
+
+        val fromItem =
+          if (offset < -Constants.EPSILON) {
+            currentItemProvider(settledPage - 1) ?: activePost
+          } else {
+            activePost
+          }
+
+        val toItem =
+          if (offset > Constants.EPSILON) {
+            currentItemProvider(settledPage + 1) ?: activePost
+          } else {
+            activePost
+          }
+
+        currentOnTransition(fromItem, toItem, offset)
+      }
+  }
 }

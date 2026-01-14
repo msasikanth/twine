@@ -20,9 +20,18 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToOneOrNull
+import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.data.database.AppConfigQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -30,12 +39,17 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class SettingsRepository(private val dataStore: DataStore<Preferences>) {
+class SettingsRepository(
+  private val dataStore: DataStore<Preferences>,
+  private val appConfigQueries: AppConfigQueries,
+  private val dispatchersProvider: DispatchersProvider,
+) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
   private val postsDeletionPeriodKey = stringPreferencesKey("posts_cleanup_frequency")
   private val postsTypeKey = stringPreferencesKey("posts_type")
+  private val postsSortOrderKey = stringPreferencesKey("posts_sort_order")
   private val showReaderViewKey = booleanPreferencesKey("pref_show_reader_view")
   private val feedsSortOrderKey = stringPreferencesKey("pref_feeds_sort_order")
   private val appThemeModeKey = stringPreferencesKey("pref_app_theme_mode_v2")
@@ -48,6 +62,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
   private val readerFontStyleKey = stringPreferencesKey("reader_font_style")
   private val blockImagesKey = booleanPreferencesKey("block_images")
+  private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
+  private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
+  private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
+  private val dropboxAccessTokenKey = stringPreferencesKey("dropbox_access_token")
+  private val dropboxRefreshTokenKey = stringPreferencesKey("dropbox_refresh_token")
+  private val lastSyncedAtKey = longPreferencesKey("last_synced_at")
+  private val installDateKey = longPreferencesKey("install_date")
+  private val userSessionCountKey = intPreferencesKey("user_session_count")
+  private val appIconKey = stringPreferencesKey("app_icon")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -67,6 +90,11 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val postsType: Flow<PostsType> =
     dataStore.data.map { preferences -> mapToPostsType(preferences[postsTypeKey]) ?: PostsType.ALL }
+
+  val postsSortOrder: Flow<PostsSortOrder> =
+    dataStore.data.map { preferences ->
+      mapToPostsSortOrder(preferences[postsSortOrderKey]) ?: PostsSortOrder.Latest
+    }
 
   val feedsSortOrder: Flow<FeedsOrderBy> =
     dataStore.data.map { preferences ->
@@ -105,6 +133,44 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val blockImages: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[blockImagesKey] ?: false }
 
+  val enableNotifications: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[enableNotificationsKey] ?: false }
+
+  val downloadFullContent: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[downloadFullContentKey] ?: false }
+
+  val lastReviewPromptDate: Flow<Instant?> =
+    dataStore.data.map { preferences ->
+      preferences[lastReviewPromptDateKey]?.let(Instant::fromEpochMilliseconds)
+    }
+
+  val lastSyncedAt: Flow<Instant?> =
+    dataStore.data.map { preferences ->
+      preferences[lastSyncedAtKey]?.let(Instant::fromEpochMilliseconds)
+    }
+
+  val lastSyncStatus: Flow<String> =
+    appConfigQueries.getSyncConfig().asFlow().mapToOneOrNull(dispatchersProvider.databaseRead).map {
+      it?.lastSyncStatus ?: "IDLE"
+    }
+
+  val installDate: Flow<Instant?> =
+    dataStore.data.map { preferences ->
+      preferences[installDateKey]?.let(Instant::fromEpochMilliseconds)
+    }
+
+  val dropboxAccessToken: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[dropboxAccessTokenKey] }
+
+  val dropboxRefreshToken: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[dropboxRefreshTokenKey] }
+
+  val userSessionCount: Flow<Int> =
+    dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
+
+  val appIcon: Flow<AppIcon> =
+    dataStore.data.map { preferences -> mapToAppIcon(preferences[appIconKey]) }
+
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
   }
@@ -133,12 +199,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[postsTypeKey] = postsType.name }
   }
 
+  suspend fun updatePostsSortOrder(postsSortOrder: PostsSortOrder) {
+    dataStore.edit { preferences -> preferences[postsSortOrderKey] = postsSortOrder.name }
+  }
+
   suspend fun toggleShowReaderView(value: Boolean) {
     dataStore.edit { preferences -> preferences[showReaderViewKey] = value }
   }
 
   suspend fun updateAppTheme(value: AppThemeMode) {
     dataStore.edit { preferences -> preferences[appThemeModeKey] = value.name }
+  }
+
+  suspend fun updateAppIcon(value: AppIcon) {
+    dataStore.edit { preferences -> preferences[appIconKey] = value.name }
   }
 
   suspend fun toggleAmoled(value: Boolean) {
@@ -177,6 +251,59 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[blockImagesKey] = value }
   }
 
+  suspend fun toggleNotifications(value: Boolean) {
+    dataStore.edit { preferences -> preferences[enableNotificationsKey] = value }
+  }
+
+  suspend fun toggleDownloadFullContent(value: Boolean) {
+    dataStore.edit { preferences -> preferences[downloadFullContentKey] = value }
+  }
+
+  suspend fun updateDropboxAccessToken(token: String?) {
+    dataStore.edit { preferences ->
+      if (token == null) {
+        preferences.remove(dropboxAccessTokenKey)
+      } else {
+        preferences[dropboxAccessTokenKey] = token
+      }
+    }
+  }
+
+  suspend fun updateDropboxRefreshToken(token: String?) {
+    dataStore.edit { preferences ->
+      if (token == null) {
+        preferences.remove(dropboxRefreshTokenKey)
+      } else {
+        preferences[dropboxRefreshTokenKey] = token
+      }
+    }
+  }
+
+  suspend fun updateLastReviewPromptDate(value: Instant) {
+    dataStore.edit { preferences ->
+      preferences[lastReviewPromptDateKey] = value.toEpochMilliseconds()
+    }
+  }
+
+  suspend fun updateLastSyncedAt(value: Instant) {
+    dataStore.edit { preferences -> preferences[lastSyncedAtKey] = value.toEpochMilliseconds() }
+  }
+
+  suspend fun updateInstallDate(value: Instant) {
+    dataStore.edit { preferences -> preferences[installDateKey] = value.toEpochMilliseconds() }
+  }
+
+  suspend fun updateUserSessionCount(value: Int) {
+    dataStore.edit { preferences -> preferences[userSessionCountKey] = value }
+  }
+
+  suspend fun incrementUserSessionCount() {
+    dataStore.edit { preferences ->
+      val currentSessionCount = preferences[userSessionCountKey] ?: 0
+      preferences[userSessionCountKey] = currentSessionCount + 1
+    }
+  }
+
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
     if (pref.isNullOrBlank()) return null
     return AppThemeMode.valueOf(pref)
@@ -202,6 +329,19 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     return PostsType.valueOf(pref)
   }
 
+  private fun mapToPostsSortOrder(pref: String?): PostsSortOrder? {
+    if (pref.isNullOrBlank()) return null
+    return try {
+      when (pref) {
+        "UploadedLatest" -> PostsSortOrder.AddedLatest
+        "UploadedOldest" -> PostsSortOrder.AddedOldest
+        else -> PostsSortOrder.valueOf(pref)
+      }
+    } catch (e: Exception) {
+      null
+    }
+  }
+
   private fun mapToMarkAsReadOnType(pref: String?): MarkAsReadOn {
     if (pref.isNullOrBlank()) return MarkAsReadOn.Open
     return MarkAsReadOn.valueOf(pref)
@@ -213,11 +353,20 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   }
 
   private fun mapToReaderFont(pref: String?): ReaderFont {
-    if (pref.isNullOrBlank()) return ReaderFont.RethinkSans
+    if (pref.isNullOrBlank()) return ReaderFont.Golos
     return try {
       ReaderFont.valueOf(pref)
     } catch (e: Exception) {
-      ReaderFont.RethinkSans
+      ReaderFont.Golos
+    }
+  }
+
+  private fun mapToAppIcon(pref: String?): AppIcon {
+    if (pref.isNullOrBlank()) return AppIcon.DarkJade
+    return try {
+      AppIcon.valueOf(pref)
+    } catch (e: Exception) {
+      AppIcon.DarkJade
     }
   }
 }
@@ -255,6 +404,7 @@ enum class HomeViewMode {
 
 enum class ReaderFont(val value: String) {
   ComicNeue("Comic Neue"),
+  GoogleSans("Google Sans"),
   Golos("Golos Text"),
   Lora("Lora"),
   Merriweather("Merriweather"),

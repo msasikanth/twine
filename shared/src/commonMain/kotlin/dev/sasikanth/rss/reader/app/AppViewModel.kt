@@ -19,16 +19,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.CloudSyncService
+import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
-import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.NTuple6
 import dev.sasikanth.rss.reader.utils.combine
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -38,12 +41,14 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @ActivityScope
 class AppViewModel(
-  private val dispatchersProvider: DispatchersProvider,
   private val lastRefreshedAt: LastRefreshedAt,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
-  private val linkHandler: LinkHandler,
   private val syncCoordinator: SyncCoordinator,
+  private val oAuthManager: OAuthManager,
+  private val cloudSyncService: CloudSyncService,
+  private val dropboxSyncProvider: DropboxSyncProvider,
+  private val linkHandler: LinkHandler,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AppState.DEFAULT)
@@ -52,6 +57,8 @@ class AppViewModel(
 
   init {
     refreshFeedsIfExpired()
+    setupSessionTracking()
+
     combine(
         settingsRepository.appThemeMode,
         settingsRepository.useAmoled,
@@ -78,6 +85,11 @@ class AppViewModel(
       .launchIn(viewModelScope)
   }
 
+  fun onPostOpened(postId: String, index: Int) {
+    updateActivePostIndex(index)
+    markPostAsRead(postId)
+  }
+
   fun markPostAsRead(id: String) {
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
   }
@@ -86,11 +98,36 @@ class AppViewModel(
     _state.update { it.copy(activePostIndex = index) }
   }
 
+  fun onOAuthRedirect(uri: String) {
+    viewModelScope.launch {
+      val providerId = oAuthManager.handleRedirect(uri)
+      if (providerId != null) {
+        when (providerId) {
+          dropboxSyncProvider.id -> cloudSyncService.sync(dropboxSyncProvider)
+        }
+      }
+      linkHandler.close()
+    }
+  }
+
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
       if (lastRefreshedAt.hasExpired()) {
         syncCoordinator.pull()
       }
+    }
+  }
+
+  private fun setupSessionTracking() {
+    viewModelScope.launch {
+      val currentTime = Clock.System.now()
+      val installDate = settingsRepository.installDate.first()
+
+      if (installDate == null) {
+        settingsRepository.updateInstallDate(currentTime)
+      }
+
+      settingsRepository.incrementUserSessionCount()
     }
   }
 }

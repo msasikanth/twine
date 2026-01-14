@@ -33,8 +33,10 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -51,16 +53,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -131,7 +129,7 @@ fun BlockedWordsScreen(
     Column(modifier = Modifier.padding(innerPadding).imePadding()) {
       Spacer(Modifier.requiredHeight(16.dp))
 
-      var newBlockedWord by remember { mutableStateOf(TextFieldValue()) }
+      val newBlockedWord = rememberTextFieldState()
       val keyboardState by keyboardVisibilityAsState()
       val focusManager = LocalFocusManager.current
 
@@ -143,22 +141,16 @@ fun BlockedWordsScreen(
 
       TextField(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).requiredHeight(56.dp),
-        value = newBlockedWord,
-        onValueChange = { newBlockedWord = it },
+        state = newBlockedWord,
         keyboardOptions =
           KeyboardOptions(
-            autoCorrectEnabled = false,
-            keyboardType = KeyboardType.Text,
-            imeAction = ImeAction.Done
+            imeAction = ImeAction.Done,
           ),
-        keyboardActions =
-          KeyboardActions(
-            onDone = {
-              viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
-              newBlockedWord = TextFieldValue()
-            }
-          ),
-        singleLine = true,
+        onKeyboardAction = {
+          viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text.toString()))
+          newBlockedWord.clearText()
+        },
+        lineLimits = TextFieldLineLimits.SingleLine,
         textStyle = MaterialTheme.typography.labelLarge,
         shape = RoundedCornerShape(16.dp),
         enabled = true,
@@ -194,8 +186,8 @@ fun BlockedWordsScreen(
           ) {
             IconButton(
               onClick = {
-                viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text))
-                newBlockedWord = TextFieldValue()
+                viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text.toString()))
+                newBlockedWord.clearText()
               }
             ) {
               Icon(

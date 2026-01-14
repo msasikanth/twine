@@ -23,25 +23,25 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.AsyncImage
-import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-
-private const val PARALLAX_MULTIPLIER = 350f
 
 @Composable
 fun FeaturedImage(
   imageUrl: String?,
   modifier: Modifier = Modifier,
+  alignment: Alignment = Alignment.Center,
   isComicStrip: Boolean = false,
-  parallaxProgress: (() -> Float)? = null,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val imageMaxHeight =
@@ -63,19 +63,32 @@ fun FeaturedImage(
     if (isComicStrip) {
       ContentScale.FillWidth
     } else {
-      ContentScale.Crop
+      widthBiasedScale
     }
 
   imageUrl?.let { imageUrl ->
+    val translucentStyle = LocalTranslucentStyles.current
+
     AsyncImage(
       url = imageUrl,
       modifier =
         Modifier.then(comicStripImageModifier)
-          .background(AppTheme.colorScheme.surfaceContainerLowest)
-          .graphicsLayer { translationX = (parallaxProgress?.invoke() ?: 0f) * PARALLAX_MULTIPLIER }
+          .background(translucentStyle.prominent.background)
           .then(modifier),
       contentDescription = null,
       contentScale = contentScale,
+      alignment = alignment
     )
   }
 }
+
+private val widthBiasedScale =
+  object : ContentScale {
+    override fun computeScaleFactor(srcSize: Size, dstSize: Size): ScaleFactor {
+      val heightScale = dstSize.height / srcSize.height
+      val widthScale = dstSize.width / srcSize.width
+      val scale = maxOf(heightScale, widthScale * 1.2f)
+
+      return ScaleFactor(scale, scale)
+    }
+  }

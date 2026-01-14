@@ -1,0 +1,5 @@
+-- Migration 39
+UPDATE blockedWord SET updatedAt = 0 WHERE updatedAt IS NULL;
+UPDATE feedGroup SET updatedAt = 0 WHERE updatedAt IS NULL;
+UPDATE blockedWord SET isDeleted = 0 WHERE isDeleted IS NULL;
+UPDATE feedGroup SET isDeleted = 0 WHERE isDeleted IS NULL;

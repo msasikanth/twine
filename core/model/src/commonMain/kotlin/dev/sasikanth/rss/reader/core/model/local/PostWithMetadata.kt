@@ -28,12 +28,18 @@ data class PostWithMetadata(
   val description: String,
   val imageUrl: String?,
   val date: Instant,
+  val createdAt: Instant,
   val link: String,
   val commentsLink: String?,
-  val bookmarked: Boolean,
-  val read: Boolean,
+  val flags: Set<PostFlag>,
   val feedName: String,
   val feedIcon: String,
   val feedHomepageLink: String,
   val alwaysFetchFullArticle: Boolean,
-)
+) {
+  val bookmarked: Boolean
+    get() = PostFlag.Bookmarked in flags
+
+  val read: Boolean
+    get() = PostFlag.Read in flags
+}

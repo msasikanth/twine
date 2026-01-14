@@ -3,9 +3,8 @@
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 [![Crowdin](https://badges.crowdin.net/twine-rss-reader/localized.svg)](https://crowdin.com/project/twine-rss-reader)
 
-Twine is a cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features an nice
-user interface and experience to browse through the feeds, and supports Material 3 content based 
-[dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color).
+Twine is a modern cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features a nice user experience
+to browse through your feeds, with Material 3 [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color) changing app ambient color based on content. .
 
 ## Download
 
@@ -34,6 +33,7 @@ user interface and experience to browse through the feeds, and supports Material
 - Bookmark posts to read later
 - Search posts
 - Background sync
+- Cloud sync support with Dropbox (Alpha ⚠)
 - Import and exports your feeds with OPML
 - Dynamic content theming
 - Light/Dark mode support

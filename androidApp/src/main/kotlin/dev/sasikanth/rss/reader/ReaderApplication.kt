@@ -61,6 +61,15 @@ class ReaderApplication : Application(), Configuration.Provider {
                     syncCoordinator = appComponent.syncCoordinator,
                     lastRefreshedAt = appComponent.lastRefreshedAt,
                     settingsRepository = appComponent.settingsRepository,
+                    newArticleNotifier = appComponent.newArticleNotifier,
+                  )
+                }
+                DropboxSyncWorker::class.qualifiedName -> {
+                  DropboxSyncWorker(
+                    context = appContext,
+                    workerParameters = workerParameters,
+                    cloudSyncService = appComponent.cloudSyncService,
+                    dropboxSyncProvider = appComponent.dropboxSyncProvider,
                   )
                 }
                 PostsCleanUpWorker::class.qualifiedName -> {
@@ -88,8 +97,17 @@ class ReaderApplication : Application(), Configuration.Provider {
 
     enqueuePeriodicFeedsRefresh()
     enqueuePeriodicPostsCleanUp()
+    enqueuePeriodicDropboxSync()
 
     appComponent.initializers.forEach { it.initialize() }
+  }
+
+  private fun enqueuePeriodicDropboxSync() {
+    workManager.enqueueUniquePeriodicWork(
+      DropboxSyncWorker.TAG,
+      ExistingPeriodicWorkPolicy.KEEP,
+      DropboxSyncWorker.periodicRequest()
+    )
   }
 
   private fun enqueuePeriodicPostsCleanUp() {

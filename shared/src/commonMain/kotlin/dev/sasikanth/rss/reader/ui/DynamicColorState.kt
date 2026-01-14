@@ -25,16 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.toArgb
-import dev.sasikanth.material.color.utilities.dynamiccolor.DynamicColor
-import dev.sasikanth.material.color.utilities.dynamiccolor.MaterialDynamicColors
-import dev.sasikanth.material.color.utilities.hct.Hct
-import dev.sasikanth.material.color.utilities.scheme.DynamicScheme
-import dev.sasikanth.material.color.utilities.scheme.SchemeContent
-import dev.sasikanth.material.color.utilities.scheme.SchemeTonalSpot
 import dev.sasikanth.rss.reader.utils.Constants.EPSILON
-import dev.sasikanth.rss.reader.utils.NTuple4
 import dev.sasikanth.rss.reader.utils.inverse
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.Dispatchers
@@ -71,78 +62,88 @@ internal class DynamicColorState(
   private var lastToSeedColor: Color? = null
   private var lastProgress: Float = 0f
 
+  private var startLight: AppColorScheme = defaultLightAppColorScheme
+  private var startDark: AppColorScheme = defaultDarkAppColorScheme
+  private var endLight: AppColorScheme = defaultLightAppColorScheme
+  private var endDark: AppColorScheme = defaultDarkAppColorScheme
+
   private val cache = lruCache<String, AppColorScheme>(maxSize = 10)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
+    val seedColorsChanged = fromSeedColor != lastFromSeedColor || toSeedColor != lastToSeedColor
+
     lastFromSeedColor = fromSeedColor
     lastToSeedColor = toSeedColor
     lastProgress = progress
 
-    val normalizedProgress =
-      ease(
-        if (progress < -EPSILON) {
-          progress.absoluteValue.inverse()
-        } else {
-          progress
-        }
-      )
-
-    val (startLight, startDark, endLight, endDark) =
+    if (seedColorsChanged) {
       withContext(Dispatchers.Default) {
         val defaultLightSeedColor = defaultLightAppColorScheme.primary
         val defaultDarkSeedColor = defaultDarkAppColorScheme.primary
 
-        val startLight =
+        startLight =
           cache["light_$fromSeedColor"]
-            ?: generateDynamicColorsFromSeedColor(
+            ?: TwineDynamicColors.calculateColorScheme(
+                seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = false,
-                seedColor = fromSeedColor ?: defaultLightSeedColor
+                useTonalSpotScheme = useTonalSpotScheme,
+                defaultColorScheme = defaultLightAppColorScheme
               )
               .also { cache.put("light_$fromSeedColor", it) }
 
-        val startDark =
+        startDark =
           cache["dark_$fromSeedColor"]
-            ?: generateDynamicColorsFromSeedColor(
+            ?: TwineDynamicColors.calculateColorScheme(
+                seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = true,
-                seedColor = fromSeedColor ?: defaultLightSeedColor
+                useTonalSpotScheme = useTonalSpotScheme,
+                defaultColorScheme = defaultDarkAppColorScheme
               )
               .also { cache.put("dark_$fromSeedColor", it) }
 
-        val endLight =
+        endLight =
           cache["light_$toSeedColor"]
-            ?: generateDynamicColorsFromSeedColor(
+            ?: TwineDynamicColors.calculateColorScheme(
+                seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = false,
-                seedColor = toSeedColor ?: defaultDarkSeedColor
+                useTonalSpotScheme = useTonalSpotScheme,
+                defaultColorScheme = defaultLightAppColorScheme
               )
               .also { cache.put("light_$toSeedColor", it) }
 
-        val endDark =
+        endDark =
           cache["dark_$toSeedColor"]
-            ?: generateDynamicColorsFromSeedColor(
+            ?: TwineDynamicColors.calculateColorScheme(
+                seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = true,
-                seedColor = toSeedColor ?: defaultDarkSeedColor
+                useTonalSpotScheme = useTonalSpotScheme,
+                defaultColorScheme = defaultDarkAppColorScheme
               )
               .also { cache.put("dark_$toSeedColor", it) }
-
-        NTuple4(startLight, startDark, endLight, endDark)
       }
+    }
 
-    lightAppColorScheme =
-      if (startLight == endLight) {
-        startLight
-      } else {
-        startLight.animate(to = endLight, progress = normalizedProgress)
-      }
-
-    darkAppColorScheme =
-      if (startDark == endDark) {
-        startDark
-      } else {
-        startDark.animate(
-          to = endDark,
-          progress = normalizedProgress,
+    withContext(Dispatchers.Default) {
+      val normalizedProgress =
+        ease(
+          if (progress < -EPSILON) {
+            progress.absoluteValue.inverse()
+          } else {
+            progress
+          }
         )
+
+      if (normalizedProgress < EPSILON) {
+        lightAppColorScheme = startLight
+        darkAppColorScheme = startDark
+      } else if (normalizedProgress > 1f - EPSILON) {
+        lightAppColorScheme = endLight
+        darkAppColorScheme = endDark
+      } else {
+        lightAppColorScheme = startLight.lerp(to = endLight, fraction = normalizedProgress)
+        darkAppColorScheme = startDark.lerp(to = endDark, fraction = normalizedProgress)
       }
+    }
   }
 
   suspend fun refresh() {
@@ -153,146 +154,12 @@ internal class DynamicColorState(
     lastFromSeedColor = null
     lastToSeedColor = null
     lastProgress = 0f
+    startLight = defaultLightAppColorScheme
+    startDark = defaultDarkAppColorScheme
+    endLight = defaultLightAppColorScheme
+    endDark = defaultDarkAppColorScheme
     lightAppColorScheme = defaultLightAppColorScheme
     darkAppColorScheme = defaultDarkAppColorScheme
-  }
-
-  private fun generateDynamicColorsFromSeedColor(
-    useDarkTheme: Boolean,
-    seedColor: Color,
-  ): AppColorScheme {
-    val sourceColorHct = Hct.fromInt(seedColor.toArgb())
-    val scheme =
-      if (useTonalSpotScheme) {
-        SchemeTonalSpot(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
-      } else {
-        SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
-      }
-    val dynamicColors = MaterialDynamicColors()
-    val defaultColorScheme =
-      if (useDarkTheme) {
-        defaultDarkAppColorScheme
-      } else {
-        defaultLightAppColorScheme
-      }
-
-    val bottomSheet =
-      DynamicColor.fromPalette(
-          palette = { s -> s.primaryPalette },
-          tone = { s -> if (s.isDark) 0.0 else 5.0 },
-          background = { s -> dynamicColors.highestSurface(s) },
-        )
-        .toColor(scheme)
-
-    val colorScheme =
-      AppColorScheme(
-        primary = dynamicColors.primary().toColor(scheme),
-        secondary = dynamicColors.secondary().toColor(scheme),
-        outline = dynamicColors.outline().toColor(scheme),
-        outlineVariant = dynamicColors.outlineVariant().toColor(scheme),
-        primaryContainer = primaryContainer(dynamicColors).toColor(scheme),
-        onPrimaryContainer =
-          DynamicColor.fromPalette(
-              { s -> s.primaryPalette },
-              { s -> if (s.isDark) 90.0 else 10.0 },
-              { primaryContainer(dynamicColors) },
-              null
-            )
-            .toColor(scheme),
-        surface = dynamicColors.surface().toColor(scheme),
-        onSurface = dynamicColors.onSurface().toColor(scheme),
-        onSurfaceVariant = dynamicColors.onSurfaceVariant().toColor(scheme),
-        surfaceContainer = dynamicColors.surfaceContainer().toColor(scheme),
-        surfaceContainerLow = dynamicColors.surfaceContainerLow().toColor(scheme),
-        surfaceContainerLowest = dynamicColors.surfaceContainerLowest().toColor(scheme),
-        surfaceContainerHigh = dynamicColors.surfaceContainerHigh().toColor(scheme),
-        surfaceContainerHighest = dynamicColors.surfaceContainerHighest().toColor(scheme),
-        inversePrimary = dynamicColors.inversePrimary().toColor(scheme),
-        inverseSurface = dynamicColors.inverseSurface().toColor(scheme),
-        inverseOnSurface = dynamicColors.inverseOnSurface().toColor(scheme),
-        textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
-        textEmphasisMed = defaultColorScheme.textEmphasisMed,
-        backdrop =
-          DynamicColor.fromPalette(
-              palette = { s -> s.neutralPalette },
-              tone = { s -> if (s.isDark) 5.0 else 95.0 },
-            )
-            .toColor(scheme),
-        bottomSheet = bottomSheet,
-        bottomSheetBorder =
-          DynamicColor.fromPalette(
-              palette = { s -> s.neutralPalette },
-              tone = { s -> 20.0 },
-            )
-            .toColor(scheme),
-        tintedBackground = bottomSheet,
-        tintedSurface = dynamicColors.surfaceContainerLow().toColor(scheme),
-        tintedForeground = dynamicColors.primary().toColor(scheme),
-        tintedHighlight = dynamicColors.outline().toColor(scheme),
-      )
-
-    return colorScheme
-  }
-
-  private fun primaryContainer(dynamicColors: MaterialDynamicColors) =
-    DynamicColor.fromPalette({ s -> s.primaryPalette }, { s -> if (s.isDark) 40.0 else 90.0 }) {
-      s: DynamicScheme ->
-      dynamicColors.highestSurface(s)
-    }
-
-  private fun DynamicColor.toColor(scheme: DynamicScheme): Color {
-    return Color(getArgb(scheme))
-  }
-
-  private fun AppColorScheme.animate(
-    to: AppColorScheme?,
-    progress: Float,
-  ): AppColorScheme {
-    if (to == null) return this
-
-    return copy(
-      primary = lerp(start = primary, stop = to.primary, fraction = progress),
-      secondary = lerp(start = secondary, stop = to.secondary, fraction = progress),
-      outline = lerp(start = outline, stop = to.outline, fraction = progress),
-      outlineVariant = lerp(start = outlineVariant, stop = to.outlineVariant, fraction = progress),
-      primaryContainer =
-        lerp(start = primaryContainer, stop = to.primaryContainer, fraction = progress),
-      onPrimaryContainer =
-        lerp(start = onPrimaryContainer, stop = to.onPrimaryContainer, fraction = progress),
-      surface = lerp(start = surface, stop = to.surface, fraction = progress),
-      onSurface = lerp(start = onSurface, stop = to.onSurface, fraction = progress),
-      onSurfaceVariant =
-        lerp(start = onSurfaceVariant, stop = to.onSurfaceVariant, fraction = progress),
-      surfaceContainer =
-        lerp(start = surfaceContainer, stop = to.surfaceContainer, fraction = progress),
-      surfaceContainerLow =
-        lerp(start = surfaceContainerLow, stop = to.surfaceContainerLow, fraction = progress),
-      surfaceContainerLowest =
-        lerp(start = surfaceContainerLowest, stop = to.surfaceContainerLowest, fraction = progress),
-      surfaceContainerHigh =
-        lerp(start = surfaceContainerHigh, stop = to.surfaceContainerHigh, fraction = progress),
-      surfaceContainerHighest =
-        lerp(
-          start = surfaceContainerHighest,
-          stop = to.surfaceContainerHighest,
-          fraction = progress
-        ),
-      inversePrimary = lerp(start = inversePrimary, stop = to.inversePrimary, fraction = progress),
-      inverseSurface = lerp(start = inverseSurface, stop = to.inverseSurface, fraction = progress),
-      inverseOnSurface =
-        lerp(start = inverseOnSurface, stop = to.inverseOnSurface, fraction = progress),
-      backdrop = lerp(start = backdrop, stop = to.backdrop, fraction = progress),
-      bottomSheet = lerp(start = bottomSheet, stop = to.bottomSheet, fraction = progress),
-      bottomSheetBorder =
-        lerp(start = bottomSheetBorder, stop = to.bottomSheetBorder, fraction = progress),
-      tintedBackground =
-        lerp(start = tintedBackground, stop = to.tintedBackground, fraction = progress),
-      tintedSurface = lerp(start = tintedSurface, stop = to.tintedSurface, fraction = progress),
-      tintedForeground =
-        lerp(start = tintedForeground, stop = to.tintedForeground, fraction = progress),
-      tintedHighlight =
-        lerp(start = tintedHighlight, stop = to.tintedHighlight, fraction = progress),
-    )
   }
 
   private fun ease(progress: Float): Float {

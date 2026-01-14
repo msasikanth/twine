@@ -11,6 +11,26 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		228D98582A1B706200695A83 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228D98572A1B706200695A83 /* AppDelegate.swift */; };
+		22983CE52F1756B30087F846 /* AppIconDeepTeal.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDF2F1756B30087F846 /* AppIconDeepTeal.icon */; };
+		22983CE62F1756B30087F846 /* AppIconDeepIce.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDE2F1756B30087F846 /* AppIconDeepIce.icon */; };
+		22983CE72F1756B30087F846 /* AppIconStormySky.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE42F1756B30087F846 /* AppIconStormySky.icon */; };
+		22983CE82F1756B30087F846 /* AppIconAntiqueGold.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDB2F1756B30087F846 /* AppIconAntiqueGold.icon */; };
+		22983CE92F1756B30087F846 /* AppIconCranberry.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDC2F1756B30087F846 /* AppIconCranberry.icon */; };
+		22983CEA2F1756B30087F846 /* AppIconDarkJade.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDD2F1756B30087F846 /* AppIconDarkJade.icon */; };
+		22983CEB2F1756B30087F846 /* AppIconDustyRose.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE02F1756B30087F846 /* AppIconDustyRose.icon */; };
+		22983CEC2F1756B30087F846 /* AppIconRoyalPlum.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE12F1756B30087F846 /* AppIconRoyalPlum.icon */; };
+		22983CED2F1756B30087F846 /* AppIconSlateBlue.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE22F1756B30087F846 /* AppIconSlateBlue.icon */; };
+		22983CEE2F1756B30087F846 /* AppIconSoftSage.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE32F1756B30087F846 /* AppIconSoftSage.icon */; };
+		22983CEF2F1756B30087F846 /* AppIconDeepTeal.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDF2F1756B30087F846 /* AppIconDeepTeal.icon */; };
+		22983CF02F1756B30087F846 /* AppIconDeepIce.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDE2F1756B30087F846 /* AppIconDeepIce.icon */; };
+		22983CF12F1756B30087F846 /* AppIconStormySky.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE42F1756B30087F846 /* AppIconStormySky.icon */; };
+		22983CF22F1756B30087F846 /* AppIconAntiqueGold.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDB2F1756B30087F846 /* AppIconAntiqueGold.icon */; };
+		22983CF32F1756B30087F846 /* AppIconCranberry.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDC2F1756B30087F846 /* AppIconCranberry.icon */; };
+		22983CF42F1756B30087F846 /* AppIconDarkJade.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CDD2F1756B30087F846 /* AppIconDarkJade.icon */; };
+		22983CF52F1756B30087F846 /* AppIconDustyRose.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE02F1756B30087F846 /* AppIconDustyRose.icon */; };
+		22983CF62F1756B30087F846 /* AppIconRoyalPlum.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE12F1756B30087F846 /* AppIconRoyalPlum.icon */; };
+		22983CF72F1756B30087F846 /* AppIconSlateBlue.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE22F1756B30087F846 /* AppIconSlateBlue.icon */; };
+		22983CF82F1756B30087F846 /* AppIconSoftSage.icon in Resources */ = {isa = PBXBuildFile; fileRef = 22983CE32F1756B30087F846 /* AppIconSoftSage.icon */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 		CD6AEE242C51E57700486A95 /* Bugsnag in Frameworks */ = {isa = PBXBuildFile; productRef = CD6AEE232C51E57700486A95 /* Bugsnag */; };
 		CD6AEE262C51E57700486A95 /* BugsnagNetworkRequestPlugin in Frameworks */ = {isa = PBXBuildFile; productRef = CD6AEE252C51E57700486A95 /* BugsnagNetworkRequestPlugin */; };
@@ -56,6 +76,16 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		228D98572A1B706200695A83 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		22983CDB2F1756B30087F846 /* AppIconAntiqueGold.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconAntiqueGold.icon; sourceTree = "<group>"; };
+		22983CDC2F1756B30087F846 /* AppIconCranberry.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconCranberry.icon; sourceTree = "<group>"; };
+		22983CDD2F1756B30087F846 /* AppIconDarkJade.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconDarkJade.icon; sourceTree = "<group>"; };
+		22983CDE2F1756B30087F846 /* AppIconDeepIce.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconDeepIce.icon; sourceTree = "<group>"; };
+		22983CDF2F1756B30087F846 /* AppIconDeepTeal.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconDeepTeal.icon; sourceTree = "<group>"; };
+		22983CE02F1756B30087F846 /* AppIconDustyRose.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconDustyRose.icon; sourceTree = "<group>"; };
+		22983CE12F1756B30087F846 /* AppIconRoyalPlum.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconRoyalPlum.icon; sourceTree = "<group>"; };
+		22983CE22F1756B30087F846 /* AppIconSlateBlue.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconSlateBlue.icon; sourceTree = "<group>"; };
+		22983CE32F1756B30087F846 /* AppIconSoftSage.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconSoftSage.icon; sourceTree = "<group>"; };
+		22983CE42F1756B30087F846 /* AppIconStormySky.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIconStormySky.icon; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Twine (Debug).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Twine (Debug).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -136,6 +166,16 @@
 				CDBE05C72E129DDB00CC593E /* TwineWidget */,
 				7555FF7C242A565900829871 /* Products */,
 				42799AB246E5F90AF97AA0EF /* Frameworks */,
+				22983CDB2F1756B30087F846 /* AppIconAntiqueGold.icon */,
+				22983CDC2F1756B30087F846 /* AppIconCranberry.icon */,
+				22983CDD2F1756B30087F846 /* AppIconDarkJade.icon */,
+				22983CDE2F1756B30087F846 /* AppIconDeepIce.icon */,
+				22983CDF2F1756B30087F846 /* AppIconDeepTeal.icon */,
+				22983CE02F1756B30087F846 /* AppIconDustyRose.icon */,
+				22983CE12F1756B30087F846 /* AppIconRoyalPlum.icon */,
+				22983CE22F1756B30087F846 /* AppIconSlateBlue.icon */,
+				22983CE32F1756B30087F846 /* AppIconSoftSage.icon */,
+				22983CE42F1756B30087F846 /* AppIconStormySky.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -277,6 +317,16 @@
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 				CD9827932E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
+				22983CEF2F1756B30087F846 /* AppIconDeepTeal.icon in Resources */,
+				22983CF02F1756B30087F846 /* AppIconDeepIce.icon in Resources */,
+				22983CF12F1756B30087F846 /* AppIconStormySky.icon in Resources */,
+				22983CF22F1756B30087F846 /* AppIconAntiqueGold.icon in Resources */,
+				22983CF32F1756B30087F846 /* AppIconCranberry.icon in Resources */,
+				22983CF42F1756B30087F846 /* AppIconDarkJade.icon in Resources */,
+				22983CF52F1756B30087F846 /* AppIconDustyRose.icon in Resources */,
+				22983CF62F1756B30087F846 /* AppIconRoyalPlum.icon in Resources */,
+				22983CF72F1756B30087F846 /* AppIconSlateBlue.icon in Resources */,
+				22983CF82F1756B30087F846 /* AppIconSoftSage.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +334,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22983CE52F1756B30087F846 /* AppIconDeepTeal.icon in Resources */,
+				22983CE62F1756B30087F846 /* AppIconDeepIce.icon in Resources */,
+				22983CE72F1756B30087F846 /* AppIconStormySky.icon in Resources */,
+				22983CE82F1756B30087F846 /* AppIconAntiqueGold.icon in Resources */,
+				22983CE92F1756B30087F846 /* AppIconCranberry.icon in Resources */,
+				22983CEA2F1756B30087F846 /* AppIconDarkJade.icon in Resources */,
+				22983CEB2F1756B30087F846 /* AppIconDustyRose.icon in Resources */,
+				22983CEC2F1756B30087F846 /* AppIconRoyalPlum.icon in Resources */,
+				22983CED2F1756B30087F846 /* AppIconSlateBlue.icon in Resources */,
+				22983CEE2F1756B30087F846 /* AppIconSoftSage.icon in Resources */,
 				CD9827922E13C8E400D17D40 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -503,7 +563,8 @@
 		7555FFA6242A565B00829871 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconAntiqueGold;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -542,7 +603,8 @@
 		7555FFA7242A565B00829871 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconDarkJade;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Manual;
@@ -708,7 +770,7 @@
 			repositoryURL = "https://github.com/RevenueCat/purchases-hybrid-common";
 			requirement = {
 				kind = exactVersion;
-				version = 17.23.0;
+				version = 17.26.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

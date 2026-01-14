@@ -107,7 +107,6 @@ import twine.shared.generated.resources.searchSortOldestFirst
 @Composable
 internal fun SearchScreen(
   searchViewModel: SearchViewModel,
-  darkTheme: Boolean,
   goBack: () -> Unit,
   openPost:
     (
@@ -130,7 +129,7 @@ internal fun SearchScreen(
         query = searchViewModel.searchQuery,
         sortOrder = searchViewModel.searchSortOrder,
         onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
-        onBackClick = { goBack() },
+        onBackClick = goBack,
         onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
         onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
       )
@@ -166,9 +165,6 @@ internal fun SearchScreen(
             if (post != null) {
               PostListItem(
                 item = post,
-                darkTheme = darkTheme,
-                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
-                reduceReadItemAlpha = true,
                 onClick = {
                   openPost(
                     searchViewModel.searchQuery.text,
@@ -190,7 +186,9 @@ internal fun SearchScreen(
                   searchViewModel.dispatch(
                     SearchEvent.UpdatePostReadStatus(post.id, updatedReadStatus)
                   )
-                }
+                },
+                reduceReadItemAlpha = true,
+                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false)
               )
 
               if (index != searchResults.itemCount - 1) {
@@ -229,7 +227,7 @@ private fun SearchBar(
   onQueryChange: (TextFieldValue) -> Unit,
   onBackClick: () -> Unit,
   onClearClick: () -> Unit,
-  onSortOrderChanged: (SearchSortOrder) -> Unit
+  onSortOrderChanged: (SearchSortOrder) -> Unit,
 ) {
   val focusRequester = remember { FocusRequester() }
   val keyboardState by keyboardVisibilityAsState()

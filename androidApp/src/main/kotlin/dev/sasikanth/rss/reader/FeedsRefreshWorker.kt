@@ -25,6 +25,7 @@ import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import java.time.Duration
@@ -37,6 +38,7 @@ class FeedsRefreshWorker(
   private val lastRefreshedAt: LastRefreshedAt,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
+  private val newArticleNotifier: NewArticleNotifier,
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
@@ -62,6 +64,14 @@ class FeedsRefreshWorker(
     return if (lastRefreshedAt.hasExpired()) {
       try {
         syncCoordinator.pull()
+
+        newArticleNotifier.notifyIfNewArticles(
+          title = { count ->
+            applicationContext.getString(R.string.notification_new_articles_title, count)
+          },
+          content = { applicationContext.getString(R.string.notification_new_articles_content) }
+        )
+
         Result.success()
       } catch (e: CancellationException) {
         Result.failure()

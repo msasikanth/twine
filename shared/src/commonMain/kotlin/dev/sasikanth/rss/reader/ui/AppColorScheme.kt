@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.ui
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 
 @Immutable
 class AppColorScheme(
@@ -42,11 +43,13 @@ class AppColorScheme(
   val textEmphasisMed: Color,
   val backdrop: Color,
   val bottomSheet: Color,
+  val bottomSheetInverse: Color,
   val bottomSheetBorder: Color,
   val tintedBackground: Color,
   val tintedSurface: Color,
   val tintedForeground: Color,
   val tintedHighlight: Color,
+  val error: Color,
 ) {
 
   fun copy(
@@ -71,11 +74,13 @@ class AppColorScheme(
     textEmphasisMed: Color = this.textEmphasisMed,
     backdrop: Color = this.backdrop,
     bottomSheet: Color = this.bottomSheet,
+    bottomSheetInverse: Color = this.bottomSheetInverse,
     bottomSheetBorder: Color = this.bottomSheetBorder,
     tintedBackground: Color = this.tintedBackground,
-    tintedSurface: Color = this.surfaceContainer,
+    tintedSurface: Color = this.tintedSurface,
     tintedForeground: Color = this.tintedForeground,
     tintedHighlight: Color = this.tintedHighlight,
+    error: Color = this.error,
   ): AppColorScheme =
     AppColorScheme(
       primary = primary,
@@ -99,12 +104,47 @@ class AppColorScheme(
       textEmphasisMed = textEmphasisMed,
       backdrop = backdrop,
       bottomSheet = bottomSheet,
+      bottomSheetInverse = bottomSheetInverse,
       bottomSheetBorder = bottomSheetBorder,
       tintedBackground = tintedBackground,
       tintedSurface = tintedSurface,
       tintedForeground = tintedForeground,
       tintedHighlight = tintedHighlight,
+      error = error,
     )
+
+  fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
+    return copy(
+      primary = lerp(primary, to.primary, fraction),
+      secondary = lerp(secondary, to.secondary, fraction),
+      outline = lerp(outline, to.outline, fraction),
+      outlineVariant = lerp(outlineVariant, to.outlineVariant, fraction),
+      primaryContainer = lerp(primaryContainer, to.primaryContainer, fraction),
+      onPrimaryContainer = lerp(onPrimaryContainer, to.onPrimaryContainer, fraction),
+      surface = lerp(surface, to.surface, fraction),
+      onSurface = lerp(onSurface, to.onSurface, fraction),
+      onSurfaceVariant = lerp(onSurfaceVariant, to.onSurfaceVariant, fraction),
+      surfaceContainer = lerp(surfaceContainer, to.surfaceContainer, fraction),
+      surfaceContainerLow = lerp(surfaceContainerLow, to.surfaceContainerLow, fraction),
+      surfaceContainerLowest = lerp(surfaceContainerLowest, to.surfaceContainerLowest, fraction),
+      surfaceContainerHigh = lerp(surfaceContainerHigh, to.surfaceContainerHigh, fraction),
+      surfaceContainerHighest = lerp(surfaceContainerHighest, to.surfaceContainerHighest, fraction),
+      inversePrimary = lerp(inversePrimary, to.inversePrimary, fraction),
+      inverseSurface = lerp(inverseSurface, to.inverseSurface, fraction),
+      inverseOnSurface = lerp(inverseOnSurface, to.inverseOnSurface, fraction),
+      textEmphasisHigh = lerp(textEmphasisHigh, to.textEmphasisHigh, fraction),
+      textEmphasisMed = lerp(textEmphasisMed, to.textEmphasisMed, fraction),
+      backdrop = lerp(backdrop, to.backdrop, fraction),
+      bottomSheet = lerp(bottomSheet, to.bottomSheet, fraction),
+      bottomSheetInverse = lerp(bottomSheetInverse, to.bottomSheetInverse, fraction),
+      bottomSheetBorder = lerp(bottomSheetBorder, to.bottomSheetBorder, fraction),
+      tintedBackground = lerp(tintedBackground, to.tintedBackground, fraction),
+      tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
+      tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
+      tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
+      error = lerp(error, to.error, fraction),
+    )
+  }
 }
 
 fun lightAppColorScheme(): AppColorScheme {
@@ -130,11 +170,13 @@ fun lightAppColorScheme(): AppColorScheme {
     textEmphasisMed = Color.Black.copy(alpha = 0.7f),
     backdrop = Color(0xFFECF3E7),
     bottomSheet = Color(0xFF001503),
+    bottomSheetInverse = Color.Black,
     bottomSheetBorder = Color(0xFF2B322A),
     tintedBackground = Color(0xFF001503),
     tintedSurface = Color(0xFFEFF5F0),
     tintedForeground = Color(0xFF37693C),
     tintedHighlight = Color(0xFF6A7771),
+    error = Color(0xFFB3261E),
   )
 }
 
@@ -161,11 +203,13 @@ fun darkAppColorScheme(): AppColorScheme {
     textEmphasisMed = Color.White.copy(alpha = 0.7f),
     backdrop = Color(0xFF0C120C),
     bottomSheet = Color.Black,
+    bottomSheetInverse = Color(0xFF001503),
     bottomSheetBorder = Color(0xFF2B322A),
     tintedBackground = Color.Black,
     tintedSurface = Color(0xFF191C1B),
     tintedForeground = Color(0xFF9DD49D),
     tintedHighlight = Color(0xFF89938E),
+    error = Color(0xFFF2B8B5),
   )
 }
 
