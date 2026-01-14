@@ -17,6 +17,8 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
@@ -45,13 +47,14 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class SettingsViewModel(
   rssRepository: RssRepository,
-  appInfo: AppInfo,
+  val appInfo: AppInfo,
   private val settingsRepository: SettingsRepository,
   private val opmlManager: OpmlManager,
   private val billingHandler: BillingHandler,
   private val notifier: Notifier,
   private val cloudSyncService: CloudSyncService,
   private val oAuthManager: OAuthManager,
+  private val appIconManager: AppIconManager,
   dropboxSyncProvider: DropboxSyncProvider,
 ) : ViewModel() {
 
@@ -78,6 +81,7 @@ class SettingsViewModel(
         settingsRepository.downloadFullContent,
         settingsRepository.lastSyncedAt,
         settingsRepository.lastSyncStatus,
+        settingsRepository.appIcon,
       ) {
         browserType,
         showUnreadPostsCount,
@@ -93,7 +97,8 @@ class SettingsViewModel(
         enableNotifications,
         downloadFullContent,
         lastSyncedAt,
-        lastSyncStatus ->
+        lastSyncStatus,
+        appIcon ->
         Settings(
           browserType = browserType,
           showUnreadPostsCount = showUnreadPostsCount,
@@ -115,7 +120,8 @@ class SettingsViewModel(
               "FAILURE" -> SettingsState.SyncProgress.Failure
               "SYNCING" -> SettingsState.SyncProgress.Syncing
               else -> SettingsState.SyncProgress.Idle
-            }
+            },
+          appIcon = appIcon,
         )
       }
       .onEach { settings ->
@@ -135,6 +141,7 @@ class SettingsViewModel(
             enableNotifications = settings.enableNotifications,
             downloadFullContent = settings.downloadFullContent,
             lastSyncedAt = settings.lastSyncedAt,
+            appIcon = settings.appIcon,
             syncProgress =
               if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
                 SettingsState.SyncProgress.Syncing
@@ -181,6 +188,11 @@ class SettingsViewModel(
       is SettingsEvent.SyncClicked -> syncClicked(event.provider)
       is SettingsEvent.SignOutClicked -> signOutClicked(event.provider)
       SettingsEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
+      is SettingsEvent.OnAppIconChanged -> onAppIconChanged(event.appIcon)
+      SettingsEvent.AppIconClicked -> appIconClicked()
+      SettingsEvent.CloseAppIconSelectionSheet -> {
+        _state.update { it.copy(showAppIconSelectionSheet = false) }
+      }
     }
   }
 
@@ -291,6 +303,23 @@ class SettingsViewModel(
     }
   }
 
+  private fun onAppIconChanged(appIcon: AppIcon) {
+    viewModelScope.launch {
+      settingsRepository.updateAppIcon(appIcon)
+      appIconManager.setIcon(appIcon)
+    }
+  }
+
+  private fun appIconClicked() {
+    viewModelScope.launch {
+      if (billingHandler.isSubscribed()) {
+        _state.update { it.copy(showAppIconSelectionSheet = true) }
+      } else {
+        _state.update { it.copy(openPaywall = true) }
+      }
+    }
+  }
+
   private fun updateBrowserType(browserType: BrowserType) {
     viewModelScope.launch { settingsRepository.updateBrowserType(browserType) }
   }
@@ -312,4 +341,5 @@ private data class Settings(
   val downloadFullContent: Boolean,
   val lastSyncedAt: kotlin.time.Instant?,
   val lastSyncStatus: SettingsState.SyncProgress,
+  val appIcon: AppIcon,
 )

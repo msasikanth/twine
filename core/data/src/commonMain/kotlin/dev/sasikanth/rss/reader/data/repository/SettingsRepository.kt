@@ -25,6 +25,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
@@ -69,6 +70,7 @@ class SettingsRepository(
   private val lastSyncedAtKey = longPreferencesKey("last_synced_at")
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
+  private val appIconKey = stringPreferencesKey("app_icon")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -166,6 +168,9 @@ class SettingsRepository(
   val userSessionCount: Flow<Int> =
     dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
 
+  val appIcon: Flow<AppIcon> =
+    dataStore.data.map { preferences -> mapToAppIcon(preferences[appIconKey]) }
+
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
   }
@@ -204,6 +209,10 @@ class SettingsRepository(
 
   suspend fun updateAppTheme(value: AppThemeMode) {
     dataStore.edit { preferences -> preferences[appThemeModeKey] = value.name }
+  }
+
+  suspend fun updateAppIcon(value: AppIcon) {
+    dataStore.edit { preferences -> preferences[appIconKey] = value.name }
   }
 
   suspend fun toggleAmoled(value: Boolean) {
@@ -349,6 +358,15 @@ class SettingsRepository(
       ReaderFont.valueOf(pref)
     } catch (e: Exception) {
       ReaderFont.Golos
+    }
+  }
+
+  private fun mapToAppIcon(pref: String?): AppIcon {
+    if (pref.isNullOrBlank()) return AppIcon.DarkJade
+    return try {
+      AppIcon.valueOf(pref)
+    } catch (e: Exception) {
+      AppIcon.DarkJade
     }
   }
 }

@@ -187,6 +187,8 @@
     <string name="settingsSyncSignIn">Sign in</string>
     <string name="settingsSyncSignOut">Sign out</string>
     <string name="settingsCustomisations">Customisations</string>
+    <string name="settingsAppIconTitle">App icon</string>
+    <string name="settingsAppIconSubtitle">Choose how Twine looks on your home screen</string>
     <string name="filter">Filter</string>
 
     <!-- Plurals -->

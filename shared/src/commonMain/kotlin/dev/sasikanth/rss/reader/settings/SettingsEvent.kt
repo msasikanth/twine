@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.settings
 
+import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -65,4 +66,10 @@ sealed interface SettingsEvent {
   data class SignOutClicked(val provider: CloudSyncProvider) : SettingsEvent
 
   data object ClearAuthUrl : SettingsEvent
+
+  data object AppIconClicked : SettingsEvent
+
+  data object CloseAppIconSelectionSheet : SettingsEvent
+
+  data class OnAppIconChanged(val appIcon: AppIcon) : SettingsEvent
 }
