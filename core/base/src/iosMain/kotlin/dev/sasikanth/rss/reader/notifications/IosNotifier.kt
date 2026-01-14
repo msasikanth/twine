@@ -26,6 +26,7 @@ import platform.UserNotifications.UNAuthorizationStatusDenied
 import platform.UserNotifications.UNAuthorizationStatusProvisional
 import platform.UserNotifications.UNMutableNotificationContent
 import platform.UserNotifications.UNNotificationRequest
+import platform.UserNotifications.UNNotificationSound
 import platform.UserNotifications.UNUserNotificationCenter
 
 @Inject
@@ -37,6 +38,7 @@ class IosNotifier : Notifier {
       UNMutableNotificationContent().apply {
         setTitle(title)
         setBody(content)
+        setSound(UNNotificationSound.defaultSound())
       }
 
     val request =
