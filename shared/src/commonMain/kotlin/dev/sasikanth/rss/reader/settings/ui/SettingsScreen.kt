@@ -140,6 +140,7 @@ import twine.shared.generated.resources.settingsBlockImagesSubtitle
 import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
+import twine.shared.generated.resources.settingsCustomisations
 import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
 import twine.shared.generated.resources.settingsDownloadFullContentTitle
 import twine.shared.generated.resources.settingsDownloadFullContentWarning
@@ -261,6 +262,7 @@ internal fun SettingsScreen(
             bottom = padding.calculateBottomPadding() + 80.dp
           ),
       ) {
+        // region Twine Premium banner
         item {
           AnimatedVisibility(
             visible = !state.appInfo.isFoss && state.subscriptionResult != null,
@@ -278,38 +280,21 @@ internal fun SettingsScreen(
             }
           }
         }
+        // endregion
+
+        // region Customisation settings
+        item { SubHeader(text = stringResource(Res.string.settingsCustomisations)) }
 
         item { SubHeader(text = stringResource(Res.string.homeViewMode)) }
 
         item {
-          Row(modifier = Modifier.padding(horizontal = 8.dp)) {
-            LayoutIconButton(
-              modifier = Modifier.weight(1f),
-              label = stringResource(Res.string.homeViewModeDefault),
-              icon = TwineIcons.LayoutDefault,
-              selected = state.homeViewMode == HomeViewMode.Default,
-              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Default)) }
-            )
-
-            LayoutIconButton(
-              modifier = Modifier.weight(1f),
-              label = stringResource(Res.string.homeViewModeSimple),
-              icon = TwineIcons.LayoutSimple,
-              selected = state.homeViewMode == HomeViewMode.Simple,
-              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Simple)) }
-            )
-
-            LayoutIconButton(
-              modifier = Modifier.weight(1f),
-              label = stringResource(Res.string.homeViewModeCompact),
-              icon = TwineIcons.LayoutCompact,
-              selected = state.homeViewMode == HomeViewMode.Compact,
-              onClick = { viewModel.dispatch(ChangeHomeViewMode(HomeViewMode.Compact)) }
-            )
-          }
+          HomeLayoutSelector(
+            homeViewMode = state.homeViewMode,
+            onClick = { viewModel.dispatch(ChangeHomeViewMode(it)) }
+          )
         }
 
-        item { Divider() }
+        item { Divider(24.dp) }
 
         item {
           SubHeader(
@@ -361,7 +346,27 @@ internal fun SettingsScreen(
         }
 
         item { Divider() }
+        // endregion
 
+        // region Sync settings
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
+
+        item {
+          CloudSyncSettingItem(
+            syncProgress = state.syncProgress,
+            lastSyncedAt = state.lastSyncedAt,
+            availableProviders = viewModel.availableProviders,
+            onSyncClicked = { provider -> viewModel.dispatch(SettingsEvent.SyncClicked(provider)) },
+            onSignOutClicked = { provider ->
+              viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
+            }
+          )
+        }
+
+        item { Divider() }
+        // endregion
+
+        // region Behaviour settings
         item {
           SubHeader(
             text = stringResource(Res.string.settingsHeaderBehaviour),
@@ -490,23 +495,9 @@ internal fun SettingsScreen(
         }
 
         item { Divider() }
+        // endregion
 
-        item { SubHeader(text = stringResource(Res.string.settingsHeaderSync)) }
-
-        item {
-          CloudSyncSettingItem(
-            syncProgress = state.syncProgress,
-            lastSyncedAt = state.lastSyncedAt,
-            availableProviders = viewModel.availableProviders,
-            onSyncClicked = { provider -> viewModel.dispatch(SettingsEvent.SyncClicked(provider)) },
-            onSignOutClicked = { provider ->
-              viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
-            }
-          )
-        }
-
-        item { Divider() }
-
+        // region Feedback and about
         item {
           SubHeader(
             text = stringResource(Res.string.settingsHeaderFeedback),
@@ -527,11 +518,44 @@ internal fun SettingsScreen(
         item { AboutItem { openAbout() } }
 
         item { Divider() }
+        // endregion
       }
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
     contentColor = Color.Unspecified,
   )
+}
+
+@Composable
+private fun HomeLayoutSelector(
+  homeViewMode: HomeViewMode,
+  onClick: (HomeViewMode) -> Unit,
+) {
+  Row(modifier = Modifier.padding(horizontal = 8.dp)) {
+    LayoutIconButton(
+      modifier = Modifier.weight(1f),
+      label = stringResource(Res.string.homeViewModeDefault),
+      icon = TwineIcons.LayoutDefault,
+      selected = homeViewMode == HomeViewMode.Default,
+      onClick = { onClick(HomeViewMode.Default) }
+    )
+
+    LayoutIconButton(
+      modifier = Modifier.weight(1f),
+      label = stringResource(Res.string.homeViewModeSimple),
+      icon = TwineIcons.LayoutSimple,
+      selected = homeViewMode == HomeViewMode.Simple,
+      onClick = { onClick(HomeViewMode.Simple) }
+    )
+
+    LayoutIconButton(
+      modifier = Modifier.weight(1f),
+      label = stringResource(Res.string.homeViewModeCompact),
+      icon = TwineIcons.LayoutCompact,
+      selected = homeViewMode == HomeViewMode.Compact,
+      onClick = { onClick(HomeViewMode.Compact) }
+    )
+  }
 }
 
 @Composable
