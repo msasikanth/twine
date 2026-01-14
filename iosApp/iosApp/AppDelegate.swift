@@ -110,7 +110,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
 
                     try await applicationComponent.newArticleNotifier.notifyIfNewArticles(
                         title: { count in
-                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title \(count)", comment: ""), count)
+                            return String.localizedStringWithFormat(NSLocalizedString("notification_new_articles_title", comment: ""), count)
                         },
                         content: {
                             return NSLocalizedString("notification_new_articles_content", comment: "")
