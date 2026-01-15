@@ -63,8 +63,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -131,6 +133,7 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -202,6 +205,15 @@ import twine.shared.generated.resources.showFeedFavIconTitle
 import twine.shared.generated.resources.twinePremium
 import twine.shared.generated.resources.twinePremiumDesc
 import twine.shared.generated.resources.twinePremiumSubscribedDesc
+
+private val settingsItemPadding
+  @Composable
+  @ReadOnlyComposable
+  get() =
+    when (LocalWindowSizeClass.current.widthSizeClass) {
+      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
+      else -> PaddingValues(0.dp)
+    }
 
 @Composable
 internal fun SettingsScreen(
@@ -287,9 +299,13 @@ internal fun SettingsScreen(
         modifier = Modifier.fillMaxSize(),
         contentPadding =
           PaddingValues(
-            start = padding.calculateStartPadding(layoutDirection),
+            start =
+              padding.calculateStartPadding(layoutDirection) +
+                settingsItemPadding.calculateStartPadding(layoutDirection),
             top = padding.calculateTopPadding() + 8.dp,
-            end = padding.calculateEndPadding(layoutDirection),
+            end =
+              padding.calculateEndPadding(layoutDirection) +
+                settingsItemPadding.calculateEndPadding(layoutDirection),
             bottom = padding.calculateBottomPadding() + 80.dp
           ),
       ) {
