@@ -22,16 +22,20 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
       uiViewControllerProvider: { UIApplication.topViewController()! }
     )
     
+    private let feedsRefreshTaskIdentifier = "dev.sasikanth.reader.feeds_refresh"
+    private let postsCleanupTaskIdentifier = "dev.sasikanth.reader.posts_cleanup"
+    private let dropboxSyncTaskIdentifier = "dev.sasikanth.reader.dropbox_sync"
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.feeds_refresh", using: nil) { (task) in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: feedsRefreshTaskIdentifier, using: nil) { (task) in
             self.handleRefreshFeeds(task: task as! BGProcessingTask)
         }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.posts_cleanup", using: nil) { (task) in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: postsCleanupTaskIdentifier, using: nil) { (task) in
             self.handlePostsCleanup(task: task as! BGProcessingTask)
         }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: "dev.sasikanth.reader.dropbox_sync", using: nil) { (task) in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: dropboxSyncTaskIdentifier, using: nil) { (task) in
             self.handleDropboxSync(task: task as! BGProcessingTask)
         }
 
@@ -48,16 +52,20 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             .forEach { initializer in
                 initializer.initialize()
             }
-        
-        scheduledRefreshFeeds()
-        scheduleCleanUpPosts()
-        scheduleDropboxSync()
+
+        BGTaskScheduler.shared.getPendingTaskRequests { requests in
+            guard requests.isEmpty else { return }
+            
+            self.scheduledRefreshFeeds()
+            self.scheduleCleanUpPosts()
+            self.scheduleDropboxSync()
+        }
         
         return true
     }
 
     func scheduledRefreshFeeds() {
-        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.feeds_refresh")
+        let request = BGProcessingTaskRequest(identifier: feedsRefreshTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
         request.requiresNetworkConnectivity = true
         
@@ -69,7 +77,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
     
     func scheduleCleanUpPosts() {
-        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.posts_cleanup")
+        let request = BGProcessingTaskRequest(identifier: postsCleanupTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60 * 24)
         
         do {
@@ -80,7 +88,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
     
     func scheduleDropboxSync() {
-        let request = BGProcessingTaskRequest(identifier: "dev.sasikanth.reader.dropbox_sync")
+        let request = BGProcessingTaskRequest(identifier: dropboxSyncTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
         request.requiresNetworkConnectivity = true
         
