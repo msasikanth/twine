@@ -298,65 +298,63 @@ internal fun HomeScreen(
                 onVisiblePostChanged(adjustedIndex)
               }
 
-              Box(modifier = Modifier.fillMaxSize()) {
-                val pullToRefreshState = rememberPullToRefreshState()
+              val pullToRefreshState = rememberPullToRefreshState()
 
-                when {
-                  hasFeeds == null || posts == null -> {
-                    // no-op
+              when {
+                hasFeeds == null || posts == null -> {
+                  // no-op
+                }
+                !hasFeeds -> {
+                  NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
+                }
+                featuredPosts.isEmpty() && posts.itemCount == 0 -> {
+                  PullToRefreshContent(
+                    pullToRefreshState = pullToRefreshState,
+                    state = state,
+                    paddingValues = paddingValues,
+                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
+                  ) {
+                    NoNewPosts()
                   }
-                  !hasFeeds -> {
-                    NoFeeds { coroutineScope.launch { bottomSheetState.expand() } }
-                  }
-                  featuredPosts.isEmpty() && posts.itemCount == 0 -> {
-                    PullToRefreshContent(
-                      pullToRefreshState = pullToRefreshState,
-                      state = state,
+                }
+                else -> {
+                  PullToRefreshContent(
+                    pullToRefreshState = pullToRefreshState,
+                    state = state,
+                    paddingValues = paddingValues,
+                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
+                  ) {
+                    PostsList(
                       paddingValues = paddingValues,
-                      onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
-                    ) {
-                      NoNewPosts()
-                    }
-                  }
-                  else -> {
-                    PullToRefreshContent(
-                      pullToRefreshState = pullToRefreshState,
-                      state = state,
-                      paddingValues = paddingValues,
-                      onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
-                    ) {
-                      PostsList(
-                        paddingValues = paddingValues,
-                        featuredPosts = featuredPosts,
-                        listState = postsListState,
-                        featuredPostsPagerState = featuredPostsPagerState,
-                        homeViewMode = state.homeViewMode,
-                        posts = { posts },
-                        postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
-                        markScrolledPostsAsRead = {
-                          viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
-                        },
-                        markPostAsReadOnScroll = {
-                          viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
-                        },
-                        onPostClicked = { post, postIndex -> openPost(postIndex, post) },
-                        onPostBookmarkClick = {
-                          viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
-                        },
-                        onPostCommentsClick = { commentsLink ->
-                          coroutineScope.launch { linkHandler.openLink(commentsLink) }
-                        },
-                        onPostSourceClick = { feedId ->
-                          viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
-                        },
-                        updateReadStatus = { postId, updatedReadStatus ->
-                          viewModel.dispatch(
-                            HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
-                          )
-                        },
-                        modifier = Modifier.fillMaxSize()
-                      )
-                    }
+                      featuredPosts = featuredPosts,
+                      listState = postsListState,
+                      featuredPostsPagerState = featuredPostsPagerState,
+                      homeViewMode = state.homeViewMode,
+                      posts = { posts },
+                      postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
+                      markScrolledPostsAsRead = {
+                        viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                      },
+                      markPostAsReadOnScroll = {
+                        viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                      },
+                      onPostClicked = { post, postIndex -> openPost(postIndex, post) },
+                      onPostBookmarkClick = {
+                        viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
+                      },
+                      onPostCommentsClick = { commentsLink ->
+                        coroutineScope.launch { linkHandler.openLink(commentsLink) }
+                      },
+                      onPostSourceClick = { feedId ->
+                        viewModel.dispatch(HomeEvent.OnPostSourceClicked(feedId))
+                      },
+                      updateReadStatus = { postId, updatedReadStatus ->
+                        viewModel.dispatch(
+                          HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
+                        )
+                      },
+                      modifier = Modifier.fillMaxSize()
+                    )
                   }
                 }
               }
