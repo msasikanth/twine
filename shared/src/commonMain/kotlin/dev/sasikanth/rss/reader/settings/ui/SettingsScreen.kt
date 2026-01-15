@@ -134,6 +134,7 @@ import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
+import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import kotlin.time.Instant
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -1296,11 +1297,13 @@ private fun DownloadFullContentSettingItem(
   downloadFullContent: Boolean,
   onValueChanged: (Boolean) -> Unit
 ) {
-  Box(modifier = Modifier.clickable { onValueChanged(!downloadFullContent) }) {
-    Row(
-      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
+  val translucentStyles = LocalTranslucentStyles.current
+  Column(
+    modifier =
+      Modifier.clickable { onValueChanged(!downloadFullContent) }
+        .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp)
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsDownloadFullContentTitle),
@@ -1312,13 +1315,6 @@ private fun DownloadFullContentSettingItem(
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-          stringResource(Res.string.settingsDownloadFullContentWarning),
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.error
-        )
       }
 
       Spacer(Modifier.width(16.dp))
@@ -1328,6 +1324,22 @@ private fun DownloadFullContentSettingItem(
         onCheckedChange = { checked -> onValueChanged(checked) },
       )
     }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+      modifier =
+        Modifier.ignoreHorizontalParentPadding(horizontal = 12.dp)
+          .background(
+            AppTheme.colorScheme.error.copy(alpha = translucentStyles.default.background.alpha),
+            MaterialTheme.shapes.small
+          )
+          .border(1.dp, AppTheme.colorScheme.error, MaterialTheme.shapes.small)
+          .padding(horizontal = 12.dp, vertical = 8.dp),
+      text = stringResource(Res.string.settingsDownloadFullContentWarning),
+      style = MaterialTheme.typography.labelLarge,
+      color = AppTheme.colorScheme.error
+    )
   }
 }
 
