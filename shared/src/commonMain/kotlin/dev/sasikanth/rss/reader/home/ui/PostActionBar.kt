@@ -65,6 +65,8 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.Visibility
+import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -272,9 +274,9 @@ internal fun PostActions(
             leadingIcon = {
               val icon =
                 if (postRead) {
-                  Icons.Outlined.VisibilityOff
+                  TwineIcons.VisibilityOff
                 } else {
-                  Icons.Outlined.Visibility
+                  TwineIcons.Visibility
                 }
 
               Icon(

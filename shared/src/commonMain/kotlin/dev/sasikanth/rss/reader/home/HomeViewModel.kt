@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.home
 import androidx.compose.material3.SheetValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -116,8 +117,9 @@ class HomeViewModel(
   private fun init() {
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
+    val allPostsPagingData = allPostsPager.allPostsPagingData.cachedIn(viewModelScope)
 
-    _state.update { it.copy(posts = allPostsPager.allPostsPagingData) }
+    _state.update { it.copy(posts = allPostsPagingData) }
 
     syncCoordinator.syncState
       .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }

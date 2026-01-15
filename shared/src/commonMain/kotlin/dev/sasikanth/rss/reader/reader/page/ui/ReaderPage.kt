@@ -34,7 +34,6 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -101,6 +100,7 @@ import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
@@ -479,7 +479,7 @@ private fun PostActions(
 ) {
   Row(modifier = modifier.semantics { isTraversalGroup = true }) {
     val markAsUnreadLabel = stringResource(Res.string.markAsUnRead)
-    val markAsUnreadIcon = Icons.Filled.VisibilityOff
+    val markAsUnreadIcon = TwineIcons.VisibilityOff
 
     PostActionButton(
       label = markAsUnreadLabel,

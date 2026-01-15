@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
@@ -58,6 +57,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
+import dev.sasikanth.rss.reader.resources.icons.Home
+import dev.sasikanth.rss.reader.resources.icons.Search
+import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -239,8 +241,8 @@ private enum class MainDestination(
   val icon: ImageVector,
   val label: StringResource,
 ) {
-  Home(icon = Icons.Rounded.Home, label = Res.string.screenHome),
-  Search(icon = Icons.Rounded.Search, label = Res.string.postsSearchHint),
+  Home(icon = TwineIcons.Home, label = Res.string.screenHome),
+  Search(icon = TwineIcons.Search, label = Res.string.postsSearchHint),
   Bookmarks(icon = TwineIcons.Bookmark, label = Res.string.bookmarks),
-  Settings(icon = Icons.Rounded.Settings, label = Res.string.settings),
+  Settings(icon = TwineIcons.Settings, label = Res.string.settings),
 }
