@@ -100,6 +100,7 @@ internal fun BookmarksScreen(
               onClick = goBack,
             )
           },
+          contentPadding = PaddingValues(vertical = 8.dp),
           colors =
             TopAppBarDefaults.topAppBarColors(
               containerColor = AppTheme.colorScheme.surface,

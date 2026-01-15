@@ -254,7 +254,7 @@ private fun SearchBar(
       colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
     ) {
       Row(
-        modifier = Modifier.fillMaxWidth().padding(all = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         CircularIconButton(
