@@ -286,8 +286,8 @@ internal fun PostActions(
               )
             },
             onClick = {
-              togglePostReadClick()
               showDropdown = false
+              togglePostReadClick()
             }
           )
         }
@@ -314,8 +314,8 @@ internal fun PostActions(
             )
           },
           onClick = {
-            coroutineScope.launch { linkHandler.openLink(postLink) }
             showDropdown = false
+            coroutineScope.launch { linkHandler.openLink(postLink) }
           }
         )
 
@@ -340,8 +340,8 @@ internal fun PostActions(
             )
           },
           onClick = {
-            shareHandler.share(postLink)
             showDropdown = false
+            shareHandler.share(postLink)
           }
         )
       }
