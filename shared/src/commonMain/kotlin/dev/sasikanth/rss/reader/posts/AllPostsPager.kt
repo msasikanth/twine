@@ -17,7 +17,6 @@
 package dev.sasikanth.rss.reader.posts
 
 import androidx.paging.PagingData
-import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -86,11 +84,19 @@ class AllPostsPager(
       }
       .distinctUntilChanged()
 
-  private val _allPostsPagingData: MutableStateFlow<Flow<PagingData<PostWithMetadata>>> =
-    MutableStateFlow(emptyFlow())
-
-  val allPostsPagingData: Flow<PagingData<PostWithMetadata>>
-    get() = _allPostsPagingData.flatMapLatest { it }
+  val allPostsPagingData: Flow<PagingData<PostWithMetadata>> =
+    baseParameters.flatMapLatest { params ->
+      createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
+          rssRepository.allPosts(
+            activeSourceIds = params.activeSourceIds,
+            postsSortOrder = params.postsSortOrder,
+            unreadOnly = params.unreadOnly,
+            after = params.postsAfter,
+            lastSyncedAt = params.lastSyncedAt
+          )
+        }
+        .flow
+    }
 
   private val _hasUnreadPosts = MutableStateFlow(false)
   val hasUnreadPosts: StateFlow<Boolean> = _hasUnreadPosts.asStateFlow()
@@ -99,7 +105,6 @@ class AllPostsPager(
   val unreadSinceLastSync: StateFlow<UnreadSinceLastSync?> = _unreadSinceLastSync.asStateFlow()
 
   init {
-    observeAllPosts()
     observeHasUnreadPosts()
     observeHasNewerArticles()
   }
@@ -127,27 +132,6 @@ class AllPostsPager(
         )
       }
       .onEach { _hasUnreadPosts.value = it }
-      .launchIn(coroutineScope)
-  }
-
-  private fun observeAllPosts() {
-    baseParameters
-      .onEach { params ->
-        val postsPagingDataFlow =
-          createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
-              rssRepository.allPosts(
-                activeSourceIds = params.activeSourceIds,
-                postsSortOrder = params.postsSortOrder,
-                unreadOnly = params.unreadOnly,
-                after = params.postsAfter,
-                lastSyncedAt = params.lastSyncedAt
-              )
-            }
-            .flow
-            .cachedIn(coroutineScope)
-
-        _allPostsPagingData.value = postsPagingDataFlow
-      }
       .launchIn(coroutineScope)
   }
 
