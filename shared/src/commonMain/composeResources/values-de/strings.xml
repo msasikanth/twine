@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Unbekannt</string>
+    <string name="postSourceUnknown">Unbekannt</string>
     <string name="buttonAll">ALLE</string>
     <string name="buttonAddFeed">Feed hinzufügen</string>
     <string name="buttonGoBack">Zurück</string>
@@ -38,7 +38,7 @@
     <string name="settings">Einstellungen</string>
     <string name="moreMenuOptions">Weitere Menüoptionen</string>
     <string name="settingsHeaderBehaviour">Verhalten</string>
-  <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
+    <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
     <string name="settingsHeaderTheme">Thema</string>
     <string name="settingsBrowserTypeTitle">In-App-Browser verwenden</string>
     <string name="settingsBrowserTypeSubtitle">Wenn ausgeschaltet, werden Links in Ihrem Standardbrowser geöffnet.</string>
@@ -77,7 +77,7 @@
     <string name="about">Über</string>
     <string name="aboutRoleDeveloper">Entwickler</string>
     <string name="aboutRoleDesigner">Designer</string>
-  <string name="aboutSocialWebsite">Website</string>
+    <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
@@ -173,7 +173,7 @@
     <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
     <string name="sort">Sortieren</string>
     <string name="settingsHeaderSync">Cloud-Synchronisierung (Alpha ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
+    <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
     <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
     <string name="settingsSyncStatusSyncing">Synchronisierung...</string>
     <string name="settingsSyncStatusSuccess">Letzte Synchronisierung: Erfolgreich</string>
@@ -185,7 +185,6 @@
     <string name="settingsAppIconSubtitle">Wählen Sie aus, wie Twine auf Ihrem Startbildschirm aussieht</string>
     <string name="filter">Filter</string>
     <string name="settingsNotificationWarningAndroid">Probleme mit Benachrichtigungen? Ihr Gerät schließt die App möglicherweise im Hintergrund. Tippen Sie hier, um zu erfahren, wie Sie das beheben können.</string>
-
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
