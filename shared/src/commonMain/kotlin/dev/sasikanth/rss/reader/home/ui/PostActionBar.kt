@@ -96,6 +96,8 @@ internal fun PostActionBar(
   onCommentsClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
   modifier: Modifier = Modifier,
+  showDropdown: Boolean = false,
+  onDropdownChange: (Boolean) -> Unit = {},
   config: PostMetadataConfig = PostMetadataConfig.DEFAULT,
   onSourceClick: () -> Unit,
 ) {
@@ -132,6 +134,8 @@ internal fun PostActionBar(
       postRead = postRead,
       config = config,
       commentsLink = commentsLink,
+      showDropdown = showDropdown,
+      onDropdownChange = onDropdownChange,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       togglePostReadClick = onTogglePostReadClick
@@ -199,6 +203,8 @@ internal fun PostActions(
   postRead: Boolean,
   config: PostMetadataConfig,
   commentsLink: String?,
+  showDropdown: Boolean = false,
+  onDropdownChange: (Boolean) -> Unit = {},
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   togglePostReadClick: () -> Unit
@@ -230,7 +236,6 @@ internal fun PostActions(
       onClick = onBookmarkClick
     )
 
-    var showDropdown by remember { mutableStateOf(false) }
     Box {
       val coroutineScope = rememberCoroutineScope()
       val density = LocalDensity.current
@@ -245,13 +250,13 @@ internal fun PostActions(
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           }
       ) {
-        showDropdown = true
+        onDropdownChange(true)
       }
 
       DropdownMenu(
         modifier = Modifier.width(IntrinsicSize.Min),
         expanded = showDropdown,
-        onDismissRequest = { showDropdown = false },
+        onDismissRequest = { onDropdownChange(false) },
         offset = DpOffset(x = 0.dp, y = buttonHeight.unaryMinus()),
       ) {
         if (config.showToggleReadUnreadOption) {
@@ -288,7 +293,7 @@ internal fun PostActions(
             },
             onClick = {
               coroutineScope.launch {
-                showDropdown = false
+                onDropdownChange(false)
                 togglePostReadClick()
               }
             }
@@ -318,7 +323,7 @@ internal fun PostActions(
           },
           onClick = {
             coroutineScope.launch {
-              showDropdown = false
+              onDropdownChange(false)
               delay(150)
               linkHandler.openLink(postLink)
             }
@@ -347,7 +352,7 @@ internal fun PostActions(
           },
           onClick = {
             coroutineScope.launch {
-              showDropdown = false
+              onDropdownChange(false)
               delay(150)
               shareHandler.share(postLink)
             }
