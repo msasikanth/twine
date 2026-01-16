@@ -175,7 +175,7 @@
     <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
     <string name="settingsDownloadFullContentTitle">Download full articles</string>
     <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync.</string>
-    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data, memory and storage consumption. It can potentially impact your user experience.</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience.</string>
     <string name="sort">Sort</string>
     <string name="settingsHeaderSync">Cloud sync (Alpha ⚠)</string>
     <string name="settingsSyncDropbox">Dropbox</string>
@@ -190,6 +190,7 @@
     <string name="settingsAppIconTitle">App icon</string>
     <string name="settingsAppIconSubtitle">Choose how Twine looks on your home screen</string>
     <string name="filter">Filter</string>
+    <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
