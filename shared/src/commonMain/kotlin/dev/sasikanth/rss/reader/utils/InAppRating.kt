@@ -26,7 +26,7 @@ interface InAppRating {
     val daysSinceInstall = currentTime - installDate
     val daysSinceLastPrompt = currentTime - lastPromptDate
 
-    if (daysSinceInstall < 7.days) return false
+    if (daysSinceInstall < 2.days) return false
 
     if (daysSinceLastPrompt < 7.days) return false
 

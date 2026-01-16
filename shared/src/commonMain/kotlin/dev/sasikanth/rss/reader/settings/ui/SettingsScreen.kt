@@ -1307,7 +1307,8 @@ private fun NotificationsSettingItem(
 
         Text(
           modifier =
-            Modifier.clickable {
+            Modifier.clip(MaterialTheme.shapes.small)
+              .clickable {
                 coroutineScope.launch { linkHandler.openLink(Constants.DONT_KILL_MY_APP_LINK) }
               }
               .background(translucentStyles.default.background, MaterialTheme.shapes.small)

@@ -1,17 +1,12 @@
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package dev.sasikanth.rss.reader.app
 
@@ -73,6 +68,8 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.main.ui.MainScreen
+import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
+import dev.sasikanth.rss.reader.onboarding.ui.OnboardingScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderViewModel
 import dev.sasikanth.rss.reader.platform.LinkHandler
@@ -130,6 +127,7 @@ fun App(
   seedColorExtractor: SeedColorExtractor,
   appViewModel: () -> AppViewModel,
   placeholderViewModel: () -> PlaceholderViewModel,
+  onboardingViewModel: () -> OnboardingViewModel,
   homeViewModel: () -> HomeViewModel,
   feedsViewModel: () -> FeedsViewModel,
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
@@ -256,6 +254,23 @@ fun App(
             navigateHome = {
               navController.navigate(Screen.Main) {
                 popUpTo(Screen.Placeholder) { inclusive = true }
+              }
+            },
+            navigateOnboarding = {
+              navController.navigate(Screen.Onboarding) {
+                popUpTo(Screen.Placeholder) { inclusive = true }
+              }
+            }
+          )
+        }
+
+        composable<Screen.Onboarding> {
+          val viewModel = viewModel { onboardingViewModel() }
+          OnboardingScreen(
+            viewModel = viewModel,
+            onOnboardingDone = {
+              navController.navigate(Screen.Main) {
+                popUpTo(Screen.Onboarding) { inclusive = true }
               }
             }
           )

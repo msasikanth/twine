@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package dev.sasikanth.rss.reader.home.ui
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -98,11 +101,15 @@ internal fun PostListItem(
       if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
       else Constants.ITEM_UNREAD_ALPHA
     )
+  var showDropdown by remember { mutableStateOf(false) }
 
   Column(
     modifier =
       Modifier.then(modifier)
-        .clickable(onClick = onClick)
+        .combinedClickable(
+          onClick = onClick,
+          onLongClick = { showDropdown = true },
+        )
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
         .graphicsLayer { this.alpha = alpha }
@@ -153,6 +160,8 @@ internal fun PostListItem(
         updatePostReadStatus(readStatus)
       },
       modifier = Modifier.padding(horizontal = 16.dp),
+      showDropdown = showDropdown,
+      onDropdownChange = { showDropdown = it },
       config = postMetadataConfig,
       onSourceClick = onPostSourceClick
     )
@@ -179,13 +188,17 @@ internal fun CompactPostListItem(
       if (readStatus && reduceReadItemAlpha) Constants.ITEM_READ_ALPHA
       else Constants.ITEM_UNREAD_ALPHA
     )
+  var showDropdown by remember { mutableStateOf(false) }
 
   Box {
     Row(
       verticalAlignment = Alignment.CenterVertically,
       modifier =
         Modifier.then(modifier)
-          .clickable { onClick() }
+          .combinedClickable(
+            onClick = onClick,
+            onLongClick = { showDropdown = true },
+          )
           .padding(vertical = 12.dp)
           .padding(compactPostListPadding)
           .graphicsLayer { this.alpha = alpha }
@@ -216,6 +229,8 @@ internal fun CompactPostListItem(
         postRead = readStatus,
         config = postMetadataConfig,
         commentsLink = item.commentsLink,
+        showDropdown = showDropdown,
+        onDropdownChange = { showDropdown = it },
         onBookmarkClick = onPostBookmarkClick,
         onCommentsClick = onPostCommentsClick,
       ) {

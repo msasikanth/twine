@@ -14,23 +14,41 @@ package dev.sasikanth.rss.reader.placeholder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class PlaceholderViewModel(private val rssRepository: RssRepository) : ViewModel() {
+class PlaceholderViewModel(
+  private val rssRepository: RssRepository,
+  private val settingsRepository: SettingsRepository
+) : ViewModel() {
 
   private val _navigateToHome = MutableStateFlow(false)
-  val navigateToHome: MutableStateFlow<Boolean>
+  val navigateToHome: StateFlow<Boolean>
     get() = _navigateToHome
+
+  private val _navigateToOnboarding = MutableStateFlow(false)
+  val navigateToOnboarding: StateFlow<Boolean>
+    get() = _navigateToOnboarding
 
   init {
     viewModelScope.launch {
-      val numberOfFeeds = numberOfFeeds()
-      if (numberOfFeeds != null) {
+      val isOnboardingDone = settingsRepository.isOnboardingDone.first()
+      if (isOnboardingDone) {
         _navigateToHome.value = true
+      } else {
+        val numberOfFeeds = numberOfFeeds() ?: 0
+        if (numberOfFeeds > 0) {
+          settingsRepository.completeOnboarding()
+          _navigateToHome.value = true
+        } else {
+          _navigateToOnboarding.value = true
+        }
       }
     }
   }
@@ -41,5 +59,9 @@ class PlaceholderViewModel(private val rssRepository: RssRepository) : ViewModel
 
   fun markNavigateToHomeAsDone() {
     _navigateToHome.value = false
+  }
+
+  fun markNavigateToOnboardingAsDone() {
+    _navigateToOnboarding.value = false
   }
 }

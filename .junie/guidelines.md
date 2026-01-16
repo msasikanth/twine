@@ -27,7 +27,7 @@ The project follows a modular Kotlin Multiplatform structure:
 ## Coding Standards
 - **Code Style**: The project uses `ktfmt` with Google style for formatting.
 - **Spotless**: Managed via the Spotless Gradle plugin.
-- **License Headers**: Files should include the appropriate license header.
+- **License Headers**: Files should include the appropriate license header. We are using GPL license as specified in LICENSE.txt
 - **Formatting**: Always run `./gradlew spotlessApply` before committing or submitting changes to ensure compliance.
 
 ## Testing
