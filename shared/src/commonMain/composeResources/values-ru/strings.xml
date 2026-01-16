@@ -185,6 +185,9 @@
     <string name="settingsAppIconSubtitle">Выберите, как Twine будет выглядеть на вашем домашнем экране</string>
     <string name="filter">Фильтр</string>
     <string name="settingsNotificationWarningAndroid">Проблемы с уведомлениями? Ваше устройство может закрывать приложение в фоновом режиме. Нажмите здесь, чтобы узнать, как это исправить.</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
