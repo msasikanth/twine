@@ -70,6 +70,7 @@ import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -286,8 +287,10 @@ internal fun PostActions(
               )
             },
             onClick = {
-              showDropdown = false
-              togglePostReadClick()
+              coroutineScope.launch {
+                showDropdown = false
+                togglePostReadClick()
+              }
             }
           )
         }
@@ -314,8 +317,11 @@ internal fun PostActions(
             )
           },
           onClick = {
-            showDropdown = false
-            coroutineScope.launch { linkHandler.openLink(postLink) }
+            coroutineScope.launch {
+              showDropdown = false
+              delay(150)
+              linkHandler.openLink(postLink)
+            }
           }
         )
 
@@ -340,8 +346,11 @@ internal fun PostActions(
             )
           },
           onClick = {
-            showDropdown = false
-            shareHandler.share(postLink)
+            coroutineScope.launch {
+              showDropdown = false
+              delay(150)
+              shareHandler.share(postLink)
+            }
           }
         )
       }
