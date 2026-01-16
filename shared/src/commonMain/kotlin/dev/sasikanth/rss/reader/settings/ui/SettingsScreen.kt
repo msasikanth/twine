@@ -124,7 +124,9 @@ import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsEvent.ChangeHomeViewMode
 import dev.sasikanth.rss.reader.settings.SettingsState
@@ -174,6 +176,7 @@ import twine.shared.generated.resources.settingsHeaderFeedback
 import twine.shared.generated.resources.settingsHeaderOpml
 import twine.shared.generated.resources.settingsHeaderSync
 import twine.shared.generated.resources.settingsHeaderTheme
+import twine.shared.generated.resources.settingsNotificationWarningAndroid
 import twine.shared.generated.resources.settingsOpmlCancel
 import twine.shared.generated.resources.settingsOpmlExport
 import twine.shared.generated.resources.settingsOpmlExporting
@@ -1264,7 +1267,11 @@ private fun NotificationsSettingItem(
   enableNotifications: Boolean,
   onValueChanged: (Boolean) -> Unit
 ) {
-  Box(
+  val translucentStyles = LocalTranslucentStyles.current
+  val linkHandler = LocalLinkHandler.current
+  val coroutineScope = rememberCoroutineScope()
+
+  Column(
     modifier =
       Modifier.clickable { onValueChanged(!enableNotifications) }
         .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
@@ -1289,6 +1296,28 @@ private fun NotificationsSettingItem(
         checked = enableNotifications,
         onCheckedChange = onValueChanged,
       )
+    }
+
+    AnimatedVisibility(
+      modifier = Modifier.ignoreHorizontalParentPadding(horizontal = 12.dp),
+      visible = platform == Platform.Android && enableNotifications
+    ) {
+      Column {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+          modifier =
+            Modifier.clickable {
+                coroutineScope.launch { linkHandler.openLink(Constants.DONT_KILL_MY_APP_LINK) }
+              }
+              .background(translucentStyles.default.background, MaterialTheme.shapes.small)
+              .border(1.dp, AppTheme.colorScheme.secondary, MaterialTheme.shapes.small)
+              .padding(horizontal = 12.dp, vertical = 8.dp),
+          text = stringResource(Res.string.settingsNotificationWarningAndroid),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.secondary
+        )
+      }
     }
   }
 }
