@@ -25,13 +25,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -72,6 +72,7 @@ import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -185,11 +186,14 @@ fun AddFeedScreen(
       bottomBar = {
         Button(
           modifier =
-            Modifier.fillMaxWidth()
-              .padding(horizontal = 24.dp)
-              .windowInsetsPadding(WindowInsets.navigationBars),
+            Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+              .navigationBarsPadding()
+              .imePadding()
+              .fillMaxWidth()
+              .requiredHeight(56.dp),
           enabled =
             feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
+          shape = MaterialTheme.shapes.extraLarge,
           onClick = {
             viewModel.dispatch(
               AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text)
@@ -204,8 +208,9 @@ fun AddFeedScreen(
             )
           } else {
             Text(
-              text = stringResource(Res.string.buttonAddFeed),
-              style = MaterialTheme.typography.labelLarge
+              text = stringResource(Res.string.buttonAddFeed).uppercase(),
+              style = MaterialTheme.typography.labelLarge,
+              fontWeight = FontWeight.Medium,
             )
           }
         }
