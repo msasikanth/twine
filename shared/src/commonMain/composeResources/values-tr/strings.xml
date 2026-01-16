@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Bilinmeyen</string>
+    <string name="postSourceUnknown">Bilinmeyen</string>
     <string name="buttonAll">TÜMÜ</string>
     <string name="buttonAddFeed">Akış ekle</string>
     <string name="buttonGoBack">Geri dön</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">Yeni makaleler</string>
     <string name="noFeeds">Akışlar yok!</string>
     <string name="swipeUpGetStarted">Başlamak için yukarı kaydırın</string>
+    <string name="feedsLetsStart">Tüm akışlarınızı burada göreceksiniz, bir akış ekleyerek başlayalım.\n\nDüğmeye tıklayın.</string>
     <string name="feedNameHint">Akış adı</string>
     <string name="editFeedName">Düzenle</string>
     <string name="errorUnsupportedFeed">Bağlantı herhangi bir RSS/Atom akışı içermiyor.</string>
@@ -37,7 +38,7 @@
     <string name="settings">Ayarlar</string>
     <string name="moreMenuOptions">Daha fazla seçenek</string>
     <string name="settingsHeaderBehaviour">Davranış</string>
-  <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
+    <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
     <string name="settingsHeaderTheme">Tema</string>
     <string name="settingsBrowserTypeTitle">Uygulama içi tarayıcıyı kullan</string>
     <string name="settingsBrowserTypeSubtitle">Kapalı olduğunda, bağlantılar varsayılan tarayıcınızda açılır.</string>
@@ -76,7 +77,7 @@
     <string name="about">Hakkında</string>
     <string name="aboutRoleDeveloper">Geliştirici</string>
     <string name="aboutRoleDesigner">Tasarımcı</string>
-  <string name="aboutSocialWebsite">Web sitesi</string>
+    <string name="aboutSocialWebsite">Web sitesi</string>
     <string name="feedsSearchHint">Filtrele</string>
     <string name="allFeeds">Akışlar</string>
     <string name="pinnedFeeds">Sabitlenenler</string>
@@ -164,6 +165,7 @@
     <string name="postsSortLatest">En yeni</string>
     <string name="postsSortOldest">En eski</string>
     <string name="buttonApply">Uygula</string>
+    <string name="screenHome">Ana Sayfa</string>
     <string name="settingsEnableNotificationsTitle">Bildirimleri etkinleştir</string>
     <string name="settingsEnableNotificationsSubtitle">Açıldığında, arka plan senkronizasyonu sırasında yeni makaleler bulunduğunda bildirim alacaksınız</string>
     <string name="settingsDownloadFullContentTitle">Tam makaleleri indir</string>
@@ -171,7 +173,7 @@
     <string name="settingsDownloadFullContentWarning">Uyarı!: Bu, akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi potansiyel olarak etkileyebilir.</string>
     <string name="sort">Sırala</string>
     <string name="settingsHeaderSync">Bulut senkronizasyonu (Alpha ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
+    <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
     <string name="settingsSyncStatusIdle">Senkronize edilmedi</string>
     <string name="settingsSyncStatusSyncing">Senkronize ediliyor...</string>
     <string name="settingsSyncStatusSuccess">Son senkronizasyon: Başarılı</string>
@@ -180,11 +182,9 @@
     <string name="settingsSyncSignOut">Çıkış yap</string>
     <string name="settingsCustomisations">Özelleştirmeler</string>
     <string name="settingsAppIconTitle">Uygulama simgesi</string>
-    <string name="settingsAppIconSubtitle">Twine\'ın ana ekranınızda nasıl görüneceğini seçin</string>
+    <string name="settingsAppIconSubtitle">Twine'ın ana ekranınızda nasıl görüneceğini seçin</string>
     <string name="filter">Filtrele</string>
     <string name="settingsNotificationWarningAndroid">Bildirim sorunları mı yaşıyorsunuz? Cihazınız uygulamayı arka planda kapatıyor olabilir. Nasıl düzelteceğinizi öğrenmek için buraya dokunun.</string>
-    <string name="screenHome">Ana Sayfa</string>
-    <string name="feedsLetsStart">Tüm akışlarınızı burada göreceksiniz, bir akış ekleyerek başlayalım.\n\nDüğmeye tıklayın.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>
