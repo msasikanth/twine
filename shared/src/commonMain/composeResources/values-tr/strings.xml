@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">Twine</string>
-    <string name="postSourceUnknown">Bilinmeyen</string>
+  <string name="postSourceUnknown">Bilinmeyen</string>
     <string name="buttonAll">TÜMÜ</string>
     <string name="buttonAddFeed">Akış ekle</string>
     <string name="buttonGoBack">Geri dön</string>
@@ -38,8 +37,7 @@
     <string name="settings">Ayarlar</string>
     <string name="moreMenuOptions">Daha fazla seçenek</string>
     <string name="settingsHeaderBehaviour">Davranış</string>
-    <string name="settingsHeaderOpml">OPML</string>
-    <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
+  <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
     <string name="settingsHeaderTheme">Tema</string>
     <string name="settingsBrowserTypeTitle">Uygulama içi tarayıcıyı kullan</string>
     <string name="settingsBrowserTypeSubtitle">Kapalı olduğunda, bağlantılar varsayılan tarayıcınızda açılır.</string>
@@ -49,7 +47,7 @@
     <string name="settingsShowUnreadCountSubtitle">Akışların üzerinde bir baloncuk gösterir</string>
     <string name="settingsReportIssue">Bir sorun bildir</string>
     <string name="settingsVersion">%1$s (%2$s)</string>
-    <string name="settingsAboutTitle">Twine Hakkında</string>
+    <string name="settingsAboutTitle">Hakkında</string>
     <string name="settingsAboutSubtitle">Yazarları tanıyın</string>
     <string name="settingsOpmlImport">İçe aktar</string>
     <string name="settingsOpmlExport">Dışa aktar</string>
@@ -78,10 +76,7 @@
     <string name="about">Hakkında</string>
     <string name="aboutRoleDeveloper">Geliştirici</string>
     <string name="aboutRoleDesigner">Tasarımcı</string>
-    <string name="aboutSocialTwitter">Twitter</string>
-    <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGitHub">GitHub</string>
-    <string name="aboutSocialWebsite">Web sitesi</string>
+  <string name="aboutSocialWebsite">Web sitesi</string>
     <string name="feedsSearchHint">Filtrele</string>
     <string name="allFeeds">Akışlar</string>
     <string name="pinnedFeeds">Sabitlenenler</string>
@@ -162,8 +157,34 @@
     <string name="twinePremiumDesc">Premium'a Geç: Her şeyin kilidini aç ve gelecekteki gelişimi destekle.</string>
     <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
     <string name="readerCustomisationsTypeface">Yazı Tipi</string>
-    <string name="postsFilter">Posts filter</string>
-    <string name="screenHome">Home</string>
+    <string name="postsFilter">Gönderi filtresi</string>
+    <string name="postsSortBy">Sırala</string>
+    <string name="postsSortByPostDate">Yayın tarihi</string>
+    <string name="postsSortByPostAdded">Eklenme tarihi</string>
+    <string name="postsSortLatest">En yeni</string>
+    <string name="postsSortOldest">En eski</string>
+    <string name="buttonApply">Uygula</string>
+    <string name="settingsEnableNotificationsTitle">Bildirimleri etkinleştir</string>
+    <string name="settingsEnableNotificationsSubtitle">Açıldığında, arka plan senkronizasyonu sırasında yeni makaleler bulunduğunda bildirim alacaksınız</string>
+    <string name="settingsDownloadFullContentTitle">Tam makaleleri indir</string>
+    <string name="settingsDownloadFullContentSubtitle">Etkinleştirildiğinde, uygulama senkronizasyon sırasında tam makaleleri indirmeye çalışacaktır.</string>
+    <string name="settingsDownloadFullContentWarning">Uyarı!: Bu, akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi potansiyel olarak etkileyebilir.</string>
+    <string name="sort">Sırala</string>
+    <string name="settingsHeaderSync">Bulut senkronizasyonu (Alpha ⚠)</string>
+  <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
+    <string name="settingsSyncStatusIdle">Senkronize edilmedi</string>
+    <string name="settingsSyncStatusSyncing">Senkronize ediliyor...</string>
+    <string name="settingsSyncStatusSuccess">Son senkronizasyon: Başarılı</string>
+    <string name="settingsSyncStatusFailure">Son senkronizasyon: Başarısız</string>
+    <string name="settingsSyncSignIn">Giriş yap</string>
+    <string name="settingsSyncSignOut">Çıkış yap</string>
+    <string name="settingsCustomisations">Özelleştirmeler</string>
+    <string name="settingsAppIconTitle">Uygulama simgesi</string>
+    <string name="settingsAppIconSubtitle">Twine\'ın ana ekranınızda nasıl görüneceğini seçin</string>
+    <string name="filter">Filtrele</string>
+    <string name="settingsNotificationWarningAndroid">Bildirim sorunları mı yaşıyorsunuz? Cihazınız uygulamayı arka planda kapatıyor olabilir. Nasıl düzelteceğinizi öğrenmek için buraya dokunun.</string>
+    <string name="screenHome">Ana Sayfa</string>
+    <string name="feedsLetsStart">Tüm akışlarınızı burada göreceksiniz, bir akış ekleyerek başlayalım.\n\nDüğmeye tıklayın.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>

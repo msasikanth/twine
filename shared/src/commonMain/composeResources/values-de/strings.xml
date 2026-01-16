@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">Twine</string>
-    <string name="postSourceUnknown">Unbekannt</string>
+  <string name="postSourceUnknown">Unbekannt</string>
     <string name="buttonAll">ALLE</string>
     <string name="buttonAddFeed">Feed hinzufügen</string>
     <string name="buttonGoBack">Zurück</string>
@@ -16,6 +15,7 @@
     <string name="newArticles">Neue Beiträge</string>
     <string name="noFeeds">Keine Feeds vorhanden!</string>
     <string name="swipeUpGetStarted">Wischen Sie nach oben, um zu beginnen</string>
+    <string name="feedsLetsStart">Hier werden alle Ihre Feeds angezeigt. Beginnen wir mit dem Hinzufügen eines Feeds.\n\nKlicken Sie auf die Schaltfläche.</string>
     <string name="feedNameHint">Feed-Name</string>
     <string name="editFeedName">Bearbeiten</string>
     <string name="errorUnsupportedFeed">Der Link enthält keinen RSS-/Atom-Feed.</string>
@@ -38,8 +38,7 @@
     <string name="settings">Einstellungen</string>
     <string name="moreMenuOptions">Weitere Menüoptionen</string>
     <string name="settingsHeaderBehaviour">Verhalten</string>
-    <string name="settingsHeaderOpml">OPML</string>
-    <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
+  <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
     <string name="settingsHeaderTheme">Thema</string>
     <string name="settingsBrowserTypeTitle">In-App-Browser verwenden</string>
     <string name="settingsBrowserTypeSubtitle">Wenn ausgeschaltet, werden Links in Ihrem Standardbrowser geöffnet.</string>
@@ -49,7 +48,7 @@
     <string name="settingsShowUnreadCountSubtitle">Zeigt eine Blase über der Feed-Auswahl an</string>
     <string name="settingsReportIssue">Ein Problem melden</string>
     <string name="settingsVersion">%1$s (%2$s)</string>
-    <string name="settingsAboutTitle">Über Twine</string>
+    <string name="settingsAboutTitle">Über</string>
     <string name="settingsAboutSubtitle">Lernen Sie die Autoren kennen</string>
     <string name="settingsOpmlImport">Importieren</string>
     <string name="settingsOpmlExport">Exportieren</string>
@@ -78,10 +77,7 @@
     <string name="about">Über</string>
     <string name="aboutRoleDeveloper">Entwickler</string>
     <string name="aboutRoleDesigner">Designer</string>
-    <string name="aboutSocialTwitter">Twitter</string>
-    <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGitHub">GitHub</string>
-    <string name="aboutSocialWebsite">Website</string>
+  <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
@@ -162,10 +158,33 @@
     <string name="twinePremiumDesc">Abonnieren Sie Premium: Alles freischalten und die zukünftige Entwicklung vorantreiben.</string>
     <string name="twinePremiumSubscribedDesc">Sie haben Twine Premium abonniert. Danke für die Unterstützung ❤️</string>
     <string name="readerCustomisationsTypeface">Schriftart</string>
-    <string name="postsFilter">Posts filter</string>
-    <string name="screenHome">Home</string>
+    <string name="postsFilter">Beitragsfilter</string>
+    <string name="postsSortBy">Sortieren nach</string>
+    <string name="postsSortByPostDate">Beitragsdatum</string>
+    <string name="postsSortByPostAdded">Beitrag hinzugefügt</string>
+    <string name="postsSortLatest">Neueste</string>
+    <string name="postsSortOldest">Älteste</string>
+    <string name="buttonApply">Anwenden</string>
+    <string name="screenHome">Startseite</string>
     <string name="settingsEnableNotificationsTitle">Benachrichtigungen aktivieren</string>
     <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
+    <string name="settingsDownloadFullContentTitle">Vollständige Artikel herunterladen</string>
+    <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
+    <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
+    <string name="sort">Sortieren</string>
+    <string name="settingsHeaderSync">Cloud-Synchronisierung (Alpha ⚠)</string>
+  <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
+    <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
+    <string name="settingsSyncStatusSyncing">Synchronisierung...</string>
+    <string name="settingsSyncStatusSuccess">Letzte Synchronisierung: Erfolgreich</string>
+    <string name="settingsSyncStatusFailure">Letzte Synchronisierung: Fehlgeschlagen</string>
+    <string name="settingsSyncSignIn">Anmelden</string>
+    <string name="settingsSyncSignOut">Abmelden</string>
+    <string name="settingsCustomisations">Anpassungen</string>
+    <string name="settingsAppIconTitle">App-Symbol</string>
+    <string name="settingsAppIconSubtitle">Wählen Sie aus, wie Twine auf Ihrem Startbildschirm aussieht</string>
+    <string name="filter">Filter</string>
+    <string name="settingsNotificationWarningAndroid">Probleme mit Benachrichtigungen? Ihr Gerät schließt die App möglicherweise im Hintergrund. Tippen Sie hier, um zu erfahren, wie Sie das beheben können.</string>
 
     <!-- Plurals -->
     <plurals name="searchResultsCount">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Twine</string>
-    <plurals name="widget_unread_posts">
+  <plurals name="widget_unread_posts">
         <item quantity="other">未读（%1$d 篇文章）</item>
     </plurals>
     <string name="widget_no_title">无标题</string>
@@ -11,4 +10,8 @@
     <string name="widget_unread_add">添加来源</string>
     <string name="widget_required_premium">微件仅面向高级版用户。请在应用内订阅。</string>
     <string name="widget_no_posts">没有文章</string>
+    <plurals name="notification_new_articles_title">
+        <item quantity="other">您今天有 %1$d 篇未读文章</item>
+    </plurals>
+    <string name="notification_new_articles_content">看看您的订阅源中有什么新内容。</string>
 </resources>
