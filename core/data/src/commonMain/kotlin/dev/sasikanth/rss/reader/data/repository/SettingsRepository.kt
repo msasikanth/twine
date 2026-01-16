@@ -1,17 +1,12 @@
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 package dev.sasikanth.rss.reader.data.repository
 
@@ -71,6 +66,7 @@ class SettingsRepository(
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
   private val appIconKey = stringPreferencesKey("app_icon")
+  private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -108,6 +104,9 @@ class SettingsRepository(
 
   val useAmoled: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[useAmoledKey] ?: false }
+
+  val isOnboardingDone: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[isOnboardingDoneKey] ?: false }
 
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
@@ -217,6 +216,10 @@ class SettingsRepository(
 
   suspend fun toggleAmoled(value: Boolean) {
     dataStore.edit { preferences -> preferences[useAmoledKey] = value }
+  }
+
+  suspend fun completeOnboarding() {
+    dataStore.edit { preferences -> preferences[isOnboardingDoneKey] = true }
   }
 
   suspend fun toggleAutoSync(value: Boolean) {
