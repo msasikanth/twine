@@ -53,14 +53,23 @@ import twine.shared.generated.resources.databaseMaintainenceTitle
 fun PlaceholderScreen(
   viewModel: PlaceholderViewModel,
   navigateHome: () -> Unit,
+  navigateOnboarding: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   val navigateToHome by viewModel.navigateToHome.collectAsStateWithLifecycle()
+  val navigateToOnboarding by viewModel.navigateToOnboarding.collectAsStateWithLifecycle()
 
   LaunchedEffect(navigateToHome) {
     if (navigateToHome) {
       navigateHome()
       viewModel.markNavigateToHomeAsDone()
+    }
+  }
+
+  LaunchedEffect(navigateToOnboarding) {
+    if (navigateToOnboarding) {
+      navigateOnboarding()
+      viewModel.markNavigateToOnboardingAsDone()
     }
   }
 
