@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">Twine</string>
-    <string name="postSourceUnknown">Unknown</string>
+  <string name="postSourceUnknown">Unknown</string>
     <string name="buttonAll">ALL</string>
     <string name="buttonAddFeed">Add feed</string>
     <string name="buttonGoBack">Go back</string>
@@ -38,8 +37,7 @@
     <string name="settings">Settings</string>
     <string name="moreMenuOptions">More menu options</string>
     <string name="settingsHeaderBehaviour">Behavior</string>
-    <string name="settingsHeaderOpml">OPML</string>
-    <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
+  <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
     <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser.</string>
@@ -49,7 +47,7 @@
     <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
     <string name="settingsReportIssue">Report an issue</string>
     <string name="settingsVersion">%1$s (%2$s)</string>
-    <string name="settingsAboutTitle">About Twine</string>
+    <string name="settingsAboutTitle">About</string>
     <string name="settingsAboutSubtitle">Get to know the authors</string>
     <string name="settingsOpmlImport">Import</string>
     <string name="settingsOpmlExport">Export</string>
@@ -78,10 +76,7 @@
     <string name="about">About</string>
     <string name="aboutRoleDeveloper">Developer</string>
     <string name="aboutRoleDesigner">Designer</string>
-    <string name="aboutSocialTwitter">Twitter</string>
-    <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGitHub">GitHub</string>
-    <string name="aboutSocialWebsite">Website</string>
+  <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Pinned</string>
@@ -162,8 +157,34 @@
     <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
     <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
     <string name="readerCustomisationsTypeface">Typeface</string>
-    <string name="postsFilter">Posts filter</string>
-    <string name="screenHome">Home</string>
+    <string name="postsFilter">Filtre des publications</string>
+    <string name="postsSortBy">Trier par</string>
+    <string name="postsSortByPostDate">Date de publication</string>
+    <string name="postsSortByPostAdded">Poste ajouté</string>
+    <string name="postsSortLatest">Le plus récent</string>
+    <string name="postsSortOldest">Le plus ancien</string>
+    <string name="buttonApply">Appliquer</string>
+    <string name="settingsEnableNotificationsTitle">Activer les notifications</string>
+    <string name="settingsEnableNotificationsSubtitle">Une fois activé, vous recevrez des notifications lorsque de nouveaux articles seront trouvés lors de la synchronisation en arrière-plan</string>
+    <string name="settingsDownloadFullContentTitle">Télécharger les articles complets</string>
+    <string name="settingsDownloadFullContentSubtitle">Une fois activé, l'application tentera de télécharger les articles complets pendant la synchronisation.</string>
+    <string name="settingsDownloadFullContentWarning">Attention ! : cela peut augmenter le temps de chargement des flux, l'utilisation des données, la consommation de mémoire et de stockage. Cela peut potentiellement affecter votre expérience utilisateur.</string>
+    <string name="sort">Trier</string>
+    <string name="settingsHeaderSync">Synchronisation cloud (Alpha ⚠)</string>
+  <string name="settingsSyncDropboxDesc">Synchronisation multiplateforme cohérente</string>
+    <string name="settingsSyncStatusIdle">Non synchronisé</string>
+    <string name="settingsSyncStatusSyncing">Synchronisation...</string>
+    <string name="settingsSyncStatusSuccess">Dernière synchronisation : Réussie</string>
+    <string name="settingsSyncStatusFailure">Dernière synchronisation : Échouée</string>
+    <string name="settingsSyncSignIn">Se connecter</string>
+    <string name="settingsSyncSignOut">Se déconnecter</string>
+    <string name="settingsCustomisations">Personnalisations</string>
+    <string name="settingsAppIconTitle">Icône de l'application</string>
+    <string name="settingsAppIconSubtitle">Choisissez l'apparence de Twine sur votre écran d'accueil</string>
+    <string name="filter">Filtrer</string>
+    <string name="settingsNotificationWarningAndroid">Des problèmes de notification ? Votre appareil ferme peut-être l'application en arrière-plan. Appuyez ici pour savoir comment y remédier.</string>
+    <string name="screenHome">Accueil</string>
+    <string name="feedsLetsStart">Vous verrez tous vos flux ici, commençons par ajouter un flux.\n\nCliquez sur le bouton.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>

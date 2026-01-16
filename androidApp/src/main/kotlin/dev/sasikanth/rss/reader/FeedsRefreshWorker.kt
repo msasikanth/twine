@@ -67,7 +67,11 @@ class FeedsRefreshWorker(
 
         newArticleNotifier.notifyIfNewArticles(
           title = { count ->
-            applicationContext.getString(R.string.notification_new_articles_title, count)
+            applicationContext.resources.getQuantityString(
+              R.plurals.notification_new_articles_title,
+              count,
+              count,
+            )
           },
           content = { applicationContext.getString(R.string.notification_new_articles_content) }
         )

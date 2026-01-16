@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">Twine</string>
+    <string name="appName" translatable="false">Twine</string>
     <string name="postSourceUnknown">Unknown</string>
     <string name="buttonAll">ALL</string>
     <string name="buttonAddFeed">Add feed</string>
@@ -39,7 +39,7 @@
     <string name="settings">Settings</string>
     <string name="moreMenuOptions">More menu options</string>
     <string name="settingsHeaderBehaviour">Behavior</string>
-    <string name="settingsHeaderOpml">OPML</string>
+    <string name="settingsHeaderOpml" translatable="false">OPML</string>
     <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
@@ -50,7 +50,7 @@
     <string name="settingsShowUnreadCountSubtitle">Displays a bubble above feed selections</string>
     <string name="settingsReportIssue">Report an issue</string>
     <string name="settingsVersion">%1$s (%2$s)</string>
-    <string name="settingsAboutTitle">About Twine</string>
+    <string name="settingsAboutTitle">About</string>
     <string name="settingsAboutSubtitle">Get to know the authors</string>
     <string name="settingsOpmlImport">Import</string>
     <string name="settingsOpmlExport">Export</string>
@@ -79,9 +79,9 @@
     <string name="about">About</string>
     <string name="aboutRoleDeveloper">Developer</string>
     <string name="aboutRoleDesigner">Designer</string>
-    <string name="aboutSocialTwitter">Twitter</string>
-    <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGitHub">GitHub</string>
+    <string name="aboutSocialTwitter" translatable="false">Twitter</string>
+    <string name="aboutSocialThreads" translatable="false">Threads</string>
+    <string name="aboutSocialGitHub" translatable="false">GitHub</string>
     <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
@@ -178,7 +178,7 @@
     <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience.</string>
     <string name="sort">Sort</string>
     <string name="settingsHeaderSync">Cloud sync (Alpha ⚠)</string>
-    <string name="settingsSyncDropbox">Dropbox</string>
+    <string name="settingsSyncDropbox" translatable="false">Dropbox</string>
     <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>
     <string name="settingsSyncStatusIdle">Not synced</string>
     <string name="settingsSyncStatusSyncing">Syncing...</string>

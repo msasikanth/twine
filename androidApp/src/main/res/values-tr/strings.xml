@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Twine</string>
-    <plurals name="widget_unread_posts">
+  <plurals name="widget_unread_posts">
         <item quantity="one">Okunmamış (%1$d gönderi)</item>
         <item quantity="other">Okunmamış (%1$d gönderi)</item>
     </plurals>
@@ -12,4 +11,9 @@
     <string name="widget_unread_add">Akış ekle</string>
     <string name="widget_required_premium">Widget\'lar sadece premium kullanıcılar için kullanılabilir. Lütfen uygulama içinden abone olun.</string>
     <string name="widget_no_posts">Gönderi yok</string>
+    <plurals name="notification_new_articles_title">
+        <item quantity="one">Bugün %1$d yeni makaleniz var</item>
+        <item quantity="other">Bugün %1$d yeni makaleniz var</item>
+    </plurals>
+    <string name="notification_new_articles_content">Akışlarınızdaki yeniliklere göz atın.</string>
 </resources>

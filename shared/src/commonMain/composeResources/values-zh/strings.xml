@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="appName">Twine</string>
-    <string name="postSourceUnknown">未知</string>
+  <string name="postSourceUnknown">未知</string>
     <string name="buttonAll">全部</string>
     <string name="buttonAddFeed">添加来源</string>
     <string name="buttonGoBack">返回</string>
@@ -38,8 +37,7 @@
     <string name="settings">设置</string>
     <string name="moreMenuOptions">更多菜单选项</string>
     <string name="settingsHeaderBehaviour">行为</string>
-    <string name="settingsHeaderOpml">OPML</string>
-    <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
+  <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
     <string name="settingsHeaderTheme">主题</string>
     <string name="settingsBrowserTypeTitle">使用应用内浏览器</string>
     <string name="settingsBrowserTypeSubtitle">关闭时，链接将在你的默认浏览器中打开。</string>
@@ -49,7 +47,7 @@
     <string name="settingsShowUnreadCountSubtitle">在选中的订阅源上方显示未读气泡</string>
     <string name="settingsReportIssue">报告问题</string>
     <string name="settingsVersion">%1$s（%2$s）</string>
-    <string name="settingsAboutTitle">关于 Twine</string>
+    <string name="settingsAboutTitle">关于</string>
     <string name="settingsAboutSubtitle">了解开发者</string>
     <string name="settingsOpmlImport">导入</string>
     <string name="settingsOpmlExport">导出</string>
@@ -78,10 +76,7 @@
     <string name="about">关于</string>
     <string name="aboutRoleDeveloper">开发者</string>
     <string name="aboutRoleDesigner">设计师</string>
-    <string name="aboutSocialTwitter">Twitter</string>
-    <string name="aboutSocialThreads">Threads</string>
-    <string name="aboutSocialGitHub">GitHub</string>
-    <string name="aboutSocialWebsite">网站</string>
+  <string name="aboutSocialWebsite">网站</string>
     <string name="feedsSearchHint">过滤器</string>
     <string name="allFeeds">来源</string>
     <string name="pinnedFeeds">已钉选</string>
@@ -162,8 +157,34 @@
     <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
     <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
     <string name="readerCustomisationsTypeface">排版</string>
-    <string name="postsFilter">Posts filter</string>
-    <string name="screenHome">Home</string>
+    <string name="postsFilter">文章过滤</string>
+    <string name="postsSortBy">排序方式</string>
+    <string name="postsSortByPostDate">发布日期</string>
+    <string name="postsSortByPostAdded">添加日期</string>
+    <string name="postsSortLatest">最新</string>
+    <string name="postsSortOldest">最早</string>
+    <string name="buttonApply">应用</string>
+    <string name="settingsEnableNotificationsTitle">启用通知</string>
+    <string name="settingsEnableNotificationsSubtitle">开启后，后台同步发现新文章时您将收到通知</string>
+    <string name="settingsDownloadFullContentTitle">下载完整文章</string>
+    <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
+    <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
+    <string name="sort">排序</string>
+    <string name="settingsHeaderSync">云同步 (Alpha ⚠)</string>
+  <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
+    <string name="settingsSyncStatusIdle">未同步</string>
+    <string name="settingsSyncStatusSyncing">同步中...</string>
+    <string name="settingsSyncStatusSuccess">最后一次同步：成功</string>
+    <string name="settingsSyncStatusFailure">最后一次同步：失败</string>
+    <string name="settingsSyncSignIn">登录</string>
+    <string name="settingsSyncSignOut">退出登录</string>
+    <string name="settingsCustomisations">定制</string>
+    <string name="settingsAppIconTitle">应用图标</string>
+    <string name="settingsAppIconSubtitle">选择 Twine 在主屏幕上的外观</string>
+    <string name="filter">过滤</string>
+    <string name="settingsNotificationWarningAndroid">通知有问题？您的设备可能会在后台关闭应用。点击此处了解如何修复。</string>
+    <string name="screenHome">首页</string>
+    <string name="feedsLetsStart">您将在这里看到所有的订阅源，让我们从添加一个订阅源开始吧。\n\n点击按钮。</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d 个结果</item>

@@ -51,20 +51,182 @@
     },
     "notification_new_articles_content" : {
       "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sehen Sie nach, was es Neues in Ihren Feeds gibt."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "New articles have been found since your last visit. Tap to view."
+            "value" : "See what's new in your feeds."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voyez ce qu'il y a de nouveau dans vos flux."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "देखें कि आपके फीड में नया क्या है।"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотрите, что нового в ваших фидах."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akışlarınızdaki yeniliklere göz atın."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "看看您的订阅源中有什么新内容。"
           }
         }
       }
     },
     "notification_new_articles_title" : {
       "localizations" : {
+        "de" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sie haben heute einen ungelesenen Artikel"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sie haben heute %lld ungelesene Artikel"
+                }
+              }
+            }
+          }
+        },
         "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ new articles found"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "You have a unread article today"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "You have %lld unread articles today"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vous avez un article non lu aujourd'hui"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vous avez %lld articles non lus aujourd'hui"
+                }
+              }
+            }
+          }
+        },
+        "hi" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "आपके पास आज एक अपठित लेख है"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "आपके पास आज %lld अपठित लेख हैं"
+                }
+              }
+            }
+          }
+        },
+        "ru" : {
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "У вас сегодня есть %lld непрочитанные статьи"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "У вас сегодня есть %lld непрочитанных статей"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "У вас сегодня есть %lld непрочитанная статья"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "У вас сегодня есть %lld непрочитанных статей"
+                }
+              }
+            }
+          }
+        },
+        "tr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bugün %lld yeni makaleniz var"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Bugün %lld yeni makaleniz var"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hans" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "您今天有 %lld 篇未读文章"
+                }
+              }
+            }
           }
         }
       }
@@ -86,14 +248,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "Pas d'articles non lus"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No unread posts"
+            "state" : "translated",
+            "value" : "कोई अपठित लेख नहीं"
           }
         },
         "ru" : {
@@ -121,8 +283,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "Kein Feed-Name"
           }
         },
         "en" : {
@@ -133,14 +295,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "Pas de nom de flux"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No feed name"
+            "state" : "translated",
+            "value" : "कोई फीड नाम नहीं"
           }
         },
         "ru" : {
@@ -168,8 +330,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "Kein Titel"
           }
         },
         "en" : {
@@ -180,14 +342,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "Pas de titre"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "No title"
+            "state" : "translated",
+            "value" : "कोई शीर्षक नहीं"
           }
         },
         "ru" : {
@@ -215,8 +377,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "Ungelesene Beiträge"
           }
         },
         "en" : {
@@ -227,14 +389,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "Articles non lus"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Unread posts"
+            "state" : "translated",
+            "value" : "अपठित लेख"
           }
         },
         "ru" : {
@@ -262,8 +424,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "Widgets sind nur für Premium-Benutzer verfügbar. Bitte abonnieren Sie in der App."
           }
         },
         "en" : {
@@ -274,14 +436,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "Les widgets ne sont disponibles que pour les utilisateurs premium. Veuillez vous abonner dans l'application."
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "Widgets are only available for premium users. Please subscribe in the app."
+            "state" : "translated",
+            "value" : "विजेट केवल प्रीमियम उपयोगकर्ताओं के लिए उपलब्ध हैं। कृपया ऐप में सब्सक्राइब करें।"
           }
         },
         "ru" : {
@@ -308,8 +470,8 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ ungelesen…"
           }
         },
         "en" : {
@@ -320,14 +482,14 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ non lus…"
           }
         },
         "hi" : {
           "stringUnit" : {
-            "state" : "new",
-            "value" : "+%@ unread…"
+            "state" : "translated",
+            "value" : "+%@ अपठित…"
           }
         },
         "ru" : {

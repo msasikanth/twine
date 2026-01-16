@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Twine</string>
-    <plurals name="widget_unread_posts">
+  <plurals name="widget_unread_posts">
         <item quantity="one">Один</item>
         <item quantity="few">Несколько</item>
         <item quantity="many">Много</item>
@@ -14,4 +13,11 @@
     <string name="widget_unread_add">Добавить канал</string>
     <string name="widget_required_premium">Виджеты доступны только для премиум-пользователей. Пожалуйста, подпишитесь в приложении.</string>
     <string name="widget_no_posts">Постов нет</string>
+    <plurals name="notification_new_articles_title">
+        <item quantity="one">У вас сегодня есть %1$d непрочитанная статья</item>
+        <item quantity="few">У вас сегодня есть %1$d непрочитанные статьи</item>
+        <item quantity="many">У вас сегодня есть %1$d непрочитанных статей</item>
+        <item quantity="other">У вас сегодня есть %1$d непрочитанных статей</item>
+    </plurals>
+    <string name="notification_new_articles_content">Посмотрите, что нового в ваших фидах.</string>
 </resources>

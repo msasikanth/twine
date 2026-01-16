@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Twine</string>
+    <string name="app_name" translatable="false">Twine</string>
 
     <plurals name="widget_unread_posts">
         <item quantity="zero">Unread</item>
@@ -14,6 +14,9 @@
     <string name="widget_required_premium">Widgets are only available for premium users. Please subscribe in the app.</string>
     <string name="widget_no_posts">No posts</string>
 
-    <string name="notification_new_articles_title">%1$s new articles found</string>
-    <string name="notification_new_articles_content">New articles have been found since your last visit. Tap to view.</string>
+    <plurals name="notification_new_articles_title">
+      <item quantity="one">You have a unread article today</item>
+      <item quantity="other">You have %1$d unread articles today</item>
+    </plurals>
+    <string name="notification_new_articles_content">See what\'s new in your feeds.</string>
 </resources>

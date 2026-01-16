@@ -1709,11 +1709,7 @@ private fun CloudSyncSettingItem(
 
     Box(
       modifier =
-        Modifier.clickable(
-            enabled = provider.isSupported && syncProgress != SettingsState.SyncProgress.Syncing
-          ) {
-            onSyncClicked(provider)
-          }
+        Modifier.clickable(enabled = provider.isSupported) { onSyncClicked(provider) }
           .fillMaxWidth()
           .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
