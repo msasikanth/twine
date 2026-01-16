@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Неизвестный</string>
+    <string name="postSourceUnknown">Неизвестный</string>
     <string name="buttonAll">ВСЕ</string>
     <string name="buttonAddFeed">Добавить канал</string>
     <string name="buttonGoBack">Назад</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">Новые статьи</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
+    <string name="feedsLetsStart">Вы увидите все свои фиды здесь, давайте начнем с добавления фида.\n\nНажмите кнопку.</string>
     <string name="feedNameHint">Название канала</string>
     <string name="editFeedName">Редактировать</string>
     <string name="errorUnsupportedFeed">Ссылка не содержит никакой RSS-ленты/Atom-канала.</string>
@@ -37,7 +38,7 @@
     <string name="settings">Настройки</string>
     <string name="moreMenuOptions">Дополнительные опции меню</string>
     <string name="settingsHeaderBehaviour">Настройки приложения</string>
-  <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
+    <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
     <string name="settingsHeaderTheme">Тема</string>
     <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
     <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию</string>
@@ -76,7 +77,7 @@
     <string name="about">О приложении</string>
     <string name="aboutRoleDeveloper">Разработчик</string>
     <string name="aboutRoleDesigner">Дизайнер</string>
-  <string name="aboutSocialWebsite">Вебсайт</string>
+    <string name="aboutSocialWebsite">Вебсайт</string>
     <string name="feedsSearchHint">Фильтр</string>
     <string name="allFeeds">Новостные ленты</string>
     <string name="pinnedFeeds">Закреплённые</string>
@@ -164,6 +165,7 @@
     <string name="postsSortLatest">Сначала новые</string>
     <string name="postsSortOldest">Сначала старые</string>
     <string name="buttonApply">Применить</string>
+    <string name="screenHome">Главная</string>
     <string name="settingsEnableNotificationsTitle">Включить уведомления</string>
     <string name="settingsEnableNotificationsSubtitle">Если функция включена, вы будете получать уведомления при обнаружении новых статей во время фоновой синхронизации</string>
     <string name="settingsDownloadFullContentTitle">Скачивать полные статьи</string>
@@ -171,7 +173,7 @@
     <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
     <string name="sort">Сортировка</string>
     <string name="settingsHeaderSync">Облачная синхронизация (Альфа ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
+    <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
     <string name="settingsSyncStatusIdle">Не синхронизировано</string>
     <string name="settingsSyncStatusSyncing">Синхронизация...</string>
     <string name="settingsSyncStatusSuccess">Последняя синхронизация: Успешно</string>
@@ -183,8 +185,6 @@
     <string name="settingsAppIconSubtitle">Выберите, как Twine будет выглядеть на вашем домашнем экране</string>
     <string name="filter">Фильтр</string>
     <string name="settingsNotificationWarningAndroid">Проблемы с уведомлениями? Ваше устройство может закрывать приложение в фоновом режиме. Нажмите здесь, чтобы узнать, как это исправить.</string>
-    <string name="screenHome">Главная</string>
-    <string name="feedsLetsStart">Вы увидите все свои фиды здесь, давайте начнем с добавления фида.\n\nНажмите кнопку.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>
