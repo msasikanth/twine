@@ -53,14 +53,6 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 initializer.initialize()
             }
 
-        BGTaskScheduler.shared.getPendingTaskRequests { requests in
-            guard requests.isEmpty else { return }
-            
-            self.scheduledRefreshFeeds()
-            self.scheduleCleanUpPosts()
-            self.scheduleDropboxSync()
-        }
-        
         return true
     }
 
