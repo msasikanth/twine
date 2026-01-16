@@ -185,6 +185,9 @@
     <string name="settingsAppIconSubtitle">चुनें कि ट्विन आपकी होम स्क्रीन पर कैसा दिखता है</string>
     <string name="filter">फ़िल्टर</string>
     <string name="settingsNotificationWarningAndroid">सूचना संबंधी समस्याएं? आपका डिवाइस बैकग्राउंड में ऐप को बंद कर सकता है। इसे ठीक करने का तरीका जानने के लिए यहाँ टैप करें।</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>
