@@ -14,12 +14,14 @@ package dev.sasikanth.rss.reader.data.sync
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
-import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -32,30 +34,29 @@ class NewArticleNotifier(
 ) {
 
   suspend fun notifyIfNewArticles(
-    title: (count: String) -> String,
+    title: (count: Int) -> String,
     content: () -> String,
   ) {
     if (settingsRepository.enableNotifications.first()) {
       val lastRefreshedAtDateTime = lastRefreshedAt.dateTimeFlow.first()
-      val postsType = settingsRepository.postsType.first()
-      val postsAfter =
-        PostsFilterUtils.postsThresholdTime(
-          postsType = postsType,
-          dateTime = lastRefreshedAtDateTime
-        )
+      val now = Clock.System.now()
+      val tz = TimeZone.currentSystemDefault()
+
+      val today = now.toLocalDateTime(tz).date
+      val startOfDay = today.atStartOfDayIn(tz)
 
       val unreadSinceLastSync =
         rssRepository
           .unreadSinceLastSync(
             sources = emptyList(),
-            postsAfter = postsAfter,
+            postsAfter = startOfDay,
             lastSyncedAt = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault())
           )
           .first()
 
       if (unreadSinceLastSync.hasNewArticles) {
         notifier.show(
-          title = title(unreadSinceLastSync.newArticleCount.toString()),
+          title = title(unreadSinceLastSync.newArticleCount.toInt()),
           content = content(),
         )
       }
