@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Unknown</string>
+    <string name="postSourceUnknown">Unknown</string>
     <string name="buttonAll">ALL</string>
     <string name="buttonAddFeed">Add feed</string>
     <string name="buttonGoBack">Go back</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">New articles</string>
     <string name="noFeeds">No feeds present!</string>
     <string name="swipeUpGetStarted">Swipe up to get started</string>
+    <string name="feedsLetsStart">आप यहाँ अपने सभी फीड्स देखेंगे, चलिए एक फीड जोड़कर शुरुआत करते हैं।\n\nबटन पर क्लिक करें।</string>
     <string name="feedNameHint">Feed name</string>
     <string name="editFeedName">Edit</string>
     <string name="errorUnsupportedFeed">Link doesn't contain any RSS/Atom feed.</string>
@@ -37,7 +38,7 @@
     <string name="settings">Settings</string>
     <string name="moreMenuOptions">More menu options</string>
     <string name="settingsHeaderBehaviour">Behavior</string>
-  <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
+    <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
     <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser.</string>
@@ -76,7 +77,7 @@
     <string name="about">About</string>
     <string name="aboutRoleDeveloper">Developer</string>
     <string name="aboutRoleDesigner">Designer</string>
-  <string name="aboutSocialWebsite">Website</string>
+    <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Pinned</string>
@@ -164,6 +165,7 @@
     <string name="postsSortLatest">नवीनतम</string>
     <string name="postsSortOldest">सबसे पुराना</string>
     <string name="buttonApply">लागू करें</string>
+    <string name="screenHome">होम</string>
     <string name="settingsEnableNotificationsTitle">सूचनाएं सक्षम करें</string>
     <string name="settingsEnableNotificationsSubtitle">चालू होने पर, बैकग्राउंड सिंक के दौरान नए लेख मिलने पर आपको सूचनाएं मिलेंगी</string>
     <string name="settingsDownloadFullContentTitle">पूरे लेख डाउनलोड करें</string>
@@ -171,7 +173,7 @@
     <string name="settingsDownloadFullContentWarning">चेतावनी!: इससे फीड लोड होने का समय, डेटा उपयोग, मेमोरी और स्टोरेज की खपत बढ़ सकती है। यह आपके उपयोगकर्ता अनुभव को संभावित रूप से प्रभावित कर सकता है।</string>
     <string name="sort">क्रम</string>
     <string name="settingsHeaderSync">क्लाउड सिंक (अल्फा ⚠)</string>
-  <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
+    <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
     <string name="settingsSyncStatusIdle">सिंक नहीं किया गया</string>
     <string name="settingsSyncStatusSyncing">सिंक हो रहा है...</string>
     <string name="settingsSyncStatusSuccess">पिछला सिंक: सफल</string>
@@ -183,8 +185,6 @@
     <string name="settingsAppIconSubtitle">चुनें कि ट्विन आपकी होम स्क्रीन पर कैसा दिखता है</string>
     <string name="filter">फ़िल्टर</string>
     <string name="settingsNotificationWarningAndroid">सूचना संबंधी समस्याएं? आपका डिवाइस बैकग्राउंड में ऐप को बंद कर सकता है। इसे ठीक करने का तरीका जानने के लिए यहाँ टैप करें।</string>
-    <string name="screenHome">होम</string>
-    <string name="feedsLetsStart">आप यहाँ अपने सभी फीड्स देखेंगे, चलिए एक फीड जोड़कर शुरुआत करते हैं।\n\nबटन पर क्लिक करें।</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>
