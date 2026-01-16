@@ -23,6 +23,8 @@ sealed interface Screen {
 
   @Serializable data object Placeholder : Screen
 
+  @Serializable data object Onboarding : Screen
+
   @Serializable data object Main : Screen
 
   @Serializable data object Home : Screen
