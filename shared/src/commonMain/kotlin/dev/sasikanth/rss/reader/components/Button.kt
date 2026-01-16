@@ -1,17 +1,12 @@
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package dev.sasikanth.rss.reader.components
@@ -27,6 +22,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
@@ -63,6 +59,7 @@ fun Button(
       disabledContainerColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.12f),
       disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     ),
+  elevation: ButtonElevation? = null,
   content: @Composable RowScope.() -> Unit
 ) {
   androidx.compose.material3.Button(
@@ -70,8 +67,9 @@ fun Button(
     onClick = onClick,
     colors = colors,
     shape = shape,
+    enabled = enabled,
+    elevation = elevation,
     content = content,
-    enabled = enabled
   )
 }
 
@@ -84,6 +82,7 @@ fun FilledIconButton(
   containerColor: Color = AppTheme.colorScheme.surface,
   iconTint: Color = AppTheme.colorScheme.onSurface,
   size: IconButtonSize = IconButtonSize.Default,
+  blendMode: BlendMode = if (AppTheme.isDark) BlendMode.Screen else BlendMode.Multiply,
   onClick: () -> Unit,
 ) {
   val interactionSource = remember { MutableInteractionSource() }
