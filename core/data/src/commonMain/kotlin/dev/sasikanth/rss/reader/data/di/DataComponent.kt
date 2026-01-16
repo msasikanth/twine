@@ -137,21 +137,6 @@ interface DataComponent :
         );
       """
         .trimIndent(),
-      // New York Times > World News
-      """
-        INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
-        VALUES (
-            '9ef86906-12bd-573a-bc19-ca1f2381793a',
-            'NYT > World News',
-            'New York Times world news',
-            'https://static01.nyt.com/images/misc/NYT_logo_rss_250x40.png',
-            'https://rss.nytimes.com/services/xml/rss/nyt/World.xml',
-            'https://www.nytimes.com/section/world',
-            (strftime('%s', 'now') * 1000),
-            (strftime('%s', 'now') * 1000)
-        );
-      """
-        .trimIndent()
     )
   }
 
