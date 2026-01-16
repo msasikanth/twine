@@ -192,7 +192,13 @@ internal fun FeedsBottomSheet(
           BottomSheetExpandedContent(
             modifier =
               Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
-                alpha = bottomSheetProgress()
+                val progress = bottomSheetProgress()
+                alpha =
+                  if (progress <= 0.25f) {
+                    0f
+                  } else {
+                    bottomSheetProgress()
+                  }
               },
             viewModel = feedsViewModel,
             openFeedInfoSheet = openFeedInfoSheet,
