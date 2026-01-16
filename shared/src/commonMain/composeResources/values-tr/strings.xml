@@ -185,6 +185,9 @@
     <string name="settingsAppIconSubtitle">Twine'ın ana ekranınızda nasıl görüneceğini seçin</string>
     <string name="filter">Filtrele</string>
     <string name="settingsNotificationWarningAndroid">Bildirim sorunları mı yaşıyorsunuz? Cihazınız uygulamayı arka planda kapatıyor olabilir. Nasıl düzelteceğinizi öğrenmek için buraya dokunun.</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>
