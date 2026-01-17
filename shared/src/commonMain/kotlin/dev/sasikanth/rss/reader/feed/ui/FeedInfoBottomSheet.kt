@@ -91,7 +91,6 @@ import dev.sasikanth.rss.reader.resources.icons.Website
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.KeyboardState
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.keyboardVisibilityAsState
 import dev.sasikanth.rss.reader.utils.toClipEntry
 import kotlin.time.Duration.Companion.milliseconds
@@ -108,6 +107,7 @@ import twine.shared.generated.resources.feedTitleHint
 import twine.shared.generated.resources.markAsRead
 import twine.shared.generated.resources.noUnreadPostsInFeed
 import twine.shared.generated.resources.numberOfUnreadPostsInFeed
+import twine.shared.generated.resources.showFeedFavIconTitle
 
 private val HORIZONTAL_PADDING = 24.dp
 
@@ -164,7 +164,7 @@ fun FeedInfoBottomSheet(
             onMarkPostsAsRead = { feedViewModel.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
           )
 
-          Divider(horizontalInsets = HORIZONTAL_PADDING)
+          Divider()
 
           AlwaysFetchSourceArticleSwitch(
             feed = feed,
@@ -174,6 +174,15 @@ fun FeedInfoBottomSheet(
           )
 
           Divider(horizontalInsets = HORIZONTAL_PADDING)
+
+          ShowFeedFavIconSwitch(
+            feed = feed,
+            onValueChanged = { newValue, feedId ->
+              feedViewModel.dispatch(FeedEvent.OnShowFeedFavIconChanged(newValue, feedId))
+            }
+          )
+
+          Divider()
 
           FeedOptions(
             modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
@@ -265,11 +274,10 @@ private fun FeedLabelInput(
       .padding(8.dp)
       .fillMaxWidth()
   ) {
-    val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-    val feedIcon = if (showFeedFavIcon) feed.homepageLink else feed.icon
-
     FeedIcon(
-      url = feedIcon,
+      icon = feed.icon,
+      homepageLink = feed.homepageLink,
+      showFeedFavIcon = feed.showFeedFavIcon,
       contentDescription = feed.name,
       shape = MaterialTheme.shapes.large,
       modifier = Modifier.requiredSize(56.dp),
@@ -388,21 +396,49 @@ private fun AlwaysFetchSourceArticleSwitch(
   modifier: Modifier = Modifier,
   onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
 ) {
-  var checked by
-    remember(feed.alwaysFetchSourceArticle) { mutableStateOf(feed.alwaysFetchSourceArticle) }
+  FeedOptionSwitch(
+    title = stringResource(Res.string.alwaysFetchSourceArticle),
+    checked = feed.alwaysFetchSourceArticle,
+    modifier = modifier,
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+  )
+}
+
+@Composable
+private fun ShowFeedFavIconSwitch(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
+) {
+  FeedOptionSwitch(
+    title = stringResource(Res.string.showFeedFavIconTitle),
+    checked = feed.showFeedFavIcon,
+    modifier = modifier,
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+  )
+}
+
+@Composable
+private fun FeedOptionSwitch(
+  title: String,
+  checked: Boolean,
+  onValueChanged: (Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var checkedState by remember(checked) { mutableStateOf(checked) }
 
   Row(
     modifier =
       Modifier.clickable {
-          checked = !checked
-          onValueChanged(checked, feed.id)
+          checkedState = !checkedState
+          onValueChanged(checkedState)
         }
-        .padding(vertical = 16.dp, horizontal = HORIZONTAL_PADDING),
+        .padding(vertical = 4.dp, horizontal = HORIZONTAL_PADDING),
     verticalAlignment = Alignment.CenterVertically
   ) {
     Text(
       modifier = Modifier.weight(1f),
-      text = stringResource(Res.string.alwaysFetchSourceArticle),
+      text = title,
       color = AppTheme.colorScheme.textEmphasisHigh,
       style = MaterialTheme.typography.titleMedium
     )
@@ -411,8 +447,8 @@ private fun AlwaysFetchSourceArticleSwitch(
 
     Switch(
       modifier = modifier,
-      checked = checked,
-      onCheckedChange = { newValue -> onValueChanged(newValue, feed.id) }
+      checked = checkedState,
+      onCheckedChange = { newValue -> onValueChanged(newValue) }
     )
   }
 }

@@ -36,13 +36,13 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.Constants.BADGE_COUNT_TRIM_LIMIT
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
 internal fun FeedBottomBarItem(
   badgeCount: Long,
   homePageUrl: String,
   feedIconUrl: String,
+  showFeedFavIcon: Boolean,
   canShowUnreadPostsCount: Boolean,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
@@ -53,12 +53,12 @@ internal fun FeedBottomBarItem(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
   ) {
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val feedIcon = if (showFeedFavIcon) homePageUrl else feedIconUrl
       val shape = MaterialTheme.shapes.large
 
       FeedIcon(
-        url = feedIcon,
+        icon = feedIconUrl,
+        homepageLink = homePageUrl,
+        showFeedFavIcon = showFeedFavIcon,
         contentDescription = null,
         shape = shape,
         modifier = Modifier.requiredSize(48.dp).clickable(onClick = onClick)

@@ -82,6 +82,9 @@ UPDATE feed SET lastCleanUpAt = :lastCleanUpAt WHERE id = :id;
 updateAlwaysFetchSourceArticle:
 UPDATE feed SET alwaysFetchSourceArticle = :alwaysFetchSourceArticle WHERE id = :id;
 
+updateShowFeedFavIcon:
+UPDATE feed SET showFeedFavIcon = :showFeedFavIcon WHERE id = :id;
+
 feedsInGroupPaginatedCount:
 SELECT COUNT(*) FROM feed
 WHERE id IN :feedIds AND isDeleted = 0;

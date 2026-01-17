@@ -31,7 +31,14 @@ WITH feed_group_metadata AS (
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
-    ), '') AS feedIcons
+    ), '') AS feedIcons,
+    COALESCE((
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
+      LIMIT 4
+    ), '') AS feedShowFavIconSettings
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
 
@@ -50,8 +57,10 @@ SELECT
   feedIds,
   feedHomepageLinks,
   feedIcons,
+  feedShowFavIconSettings,
   updatedAt,
-  pinnedPosition
+  pinnedPosition,
+  showFeedFavIcon
 FROM (
   SELECT
     'feed' AS type,
@@ -66,10 +75,12 @@ FROM (
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
+    NULL AS feedShowFavIconSettings,
     f.createdAt,
     f.pinnedAt,
     NULL AS updatedAt,
-    f.pinnedPosition
+    f.pinnedPosition,
+    f.showFeedFavIcon
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   WHERE f.isDeleted = 0
@@ -90,10 +101,12 @@ FROM (
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
+    fgm.feedShowFavIconSettings,
     fg.createdAt,
     fg.pinnedAt,
     fg.updatedAt,
-    fg.pinnedPosition
+    fg.pinnedPosition,
+    NULL AS showFeedFavIcon
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
@@ -128,7 +141,14 @@ WITH feed_group_metadata AS (
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
-    ), '') AS feedIcons
+    ), '') AS feedIcons,
+    COALESCE((
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
+      LIMIT 4
+    ), '') AS feedShowFavIconSettings
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
 
@@ -147,7 +167,10 @@ SELECT
   feedIds,
   feedHomepageLinks,
   feedIcons,
-  updatedAt
+  feedShowFavIconSettings,
+  updatedAt,
+  pinnedPosition,
+  showFeedFavIcon
 FROM (
   SELECT
     'feed' AS type,
@@ -162,9 +185,12 @@ FROM (
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
+    NULL AS feedShowFavIconSettings,
     f.createdAt,
     f.pinnedAt,
-    NULL AS updatedAt
+    NULL AS updatedAt,
+    f.pinnedPosition,
+    f.showFeedFavIcon
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   WHERE f.isDeleted = 0
@@ -185,9 +211,12 @@ FROM (
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
+    fgm.feedShowFavIconSettings,
     fg.createdAt,
     fg.pinnedAt,
-    fg.updatedAt
+    fg.updatedAt,
+    fg.pinnedPosition,
+    NULL AS showFeedFavIcon
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
@@ -227,7 +256,14 @@ WITH feed_group_metadata AS (
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
-    ), '') AS feedIcons
+    ), '') AS feedIcons,
+    COALESCE((
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      FROM feedGroupFeed gf
+      JOIN feed f ON gf.feedId = f.id
+      WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
+      LIMIT 4
+    ), '') AS feedShowFavIconSettings
   FROM (SELECT DISTINCT feedGroupId FROM feedGroupFeed) AS distinct_groups
 )
 
@@ -246,7 +282,10 @@ SELECT
   feedIds,
   feedHomepageLinks,
   feedIcons,
-  updatedAt
+  feedShowFavIconSettings,
+  updatedAt,
+  pinnedPosition,
+  showFeedFavIcon
 FROM (
   SELECT
     'feed' AS type,
@@ -261,9 +300,12 @@ FROM (
     NULL AS feedIds,
     NULL AS feedHomepageLinks,
     NULL AS feedIcons,
+    NULL AS feedShowFavIconSettings,
     f.createdAt,
     f.pinnedAt,
-    NULL AS updatedAt
+    NULL AS updatedAt,
+    f.pinnedPosition,
+    f.showFeedFavIcon
   FROM feed f
   LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
   WHERE f.id = :id AND f.isDeleted = 0
@@ -284,9 +326,12 @@ FROM (
     fgm.feedIds,
     fgm.feedHomepageLinks,
     fgm.feedIcons,
+    fgm.feedShowFavIconSettings,
     fg.createdAt,
     fg.pinnedAt,
-    fg.updatedAt
+    fg.updatedAt,
+    fg.pinnedPosition,
+    NULL AS showFeedFavIcon
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0

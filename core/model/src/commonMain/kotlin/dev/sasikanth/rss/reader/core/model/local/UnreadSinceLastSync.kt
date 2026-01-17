@@ -24,4 +24,5 @@ data class UnreadSinceLastSync(
   val hasNewArticles: Boolean,
   val feedHomepageLinks: List<String>,
   val feedIcons: List<String>,
+  val feedShowFavIconSettings: List<Boolean>,
 )

@@ -106,7 +106,6 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
@@ -381,14 +380,13 @@ private fun PostHeader(
       Spacer(Modifier.requiredHeight(12.dp))
 
       Row(verticalAlignment = Alignment.CenterVertically) {
-        val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-        val feedIconUrl = if (showFeedFavIcon) readerPost.feedHomepageLink else readerPost.feedIcon
-
         DisableSelection {
           PostSourcePill(
             modifier = Modifier.weight(1f).clearAndSetSemantics {},
             feedName = readerPost.feedName,
-            feedIcon = feedIconUrl,
+            feedIcon = readerPost.feedIcon,
+            feedHomepageLink = readerPost.feedHomepageLink,
+            showFeedFavIcon = readerPost.showFeedFavIcon,
             config =
               PostMetadataConfig(
                 showUnreadIndicator = false,
@@ -417,6 +415,8 @@ private fun PostHeader(
 @Composable
 private fun PostSourcePill(
   feedIcon: String,
+  feedHomepageLink: String,
+  showFeedFavIcon: Boolean,
   feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
@@ -449,7 +449,9 @@ private fun PostSourcePill(
     ) {
       FeedIcon(
         modifier = Modifier.requiredSize(16.dp),
-        url = feedIcon,
+        icon = feedIcon,
+        homepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
         shape = MaterialTheme.shapes.extraSmall,
         contentDescription = null,
       )

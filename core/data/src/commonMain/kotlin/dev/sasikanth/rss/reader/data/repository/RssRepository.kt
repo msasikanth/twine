@@ -24,6 +24,7 @@ import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.Post
+import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
@@ -226,21 +227,22 @@ class RssRepository(
           limit = limit,
           offset = offset,
           mapper = {
-            id,
-            sourceId,
-            title,
-            description,
-            imageUrl,
-            date,
-            createdAt,
-            link,
-            commentsLink,
-            flags,
-            feedName,
-            feedIcon,
-            feedHomepageLink,
-            alwaysFetchSourceArticle,
-            _ ->
+            id: String,
+            sourceId: String,
+            title: String,
+            description: String,
+            imageUrl: String?,
+            date: Instant,
+            createdAt: Instant,
+            link: String,
+            commentsLink: String?,
+            flags: Set<PostFlag>,
+            feedName: String,
+            feedIcon: String,
+            feedHomepageLink: String,
+            alwaysFetchFullArticle: Boolean,
+            showFeedFavIcon: Boolean,
+            _: Long ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
@@ -255,7 +257,8 @@ class RssRepository(
               feedName = feedName,
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,
-              alwaysFetchFullArticle = alwaysFetchSourceArticle,
+              alwaysFetchFullArticle = alwaysFetchFullArticle,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -354,6 +357,9 @@ class RssRepository(
             id: String,
             name: String,
             feedIds: String?,
+            feedHomepageLinks: String,
+            feedIconLinks: String,
+            feedShowFavIconSettings: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -363,8 +369,9 @@ class RssRepository(
               id = id,
               name = name,
               feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-              feedHomepageLinks = emptyList(),
-              feedIconLinks = emptyList(),
+              feedHomepageLinks = feedHomepageLinks.split(",").filter { it.isNotBlank() },
+              feedIconLinks = feedIconLinks.split(",").filter { it.isNotBlank() },
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -408,7 +415,8 @@ class RssRepository(
             createdAt,
             pinnedAt,
             lastCleanUpAt,
-            numberOfUnreadPosts ->
+            numberOfUnreadPosts,
+            showFeedFavIcon ->
             Feed(
               id = id,
               name = name,
@@ -420,6 +428,7 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -462,7 +471,7 @@ class RssRepository(
             lastCleanUpAt = lastCleanUpAt,
             alwaysFetchSourceArticle = alwaysFetchSourceArticle,
             numberOfUnreadPosts = numberOfUnreadPosts,
-            showFeedFavIcon = showFeedFavIcon,
+            showFeedFavIcon = showFeedFavIcon
           )
         }
       )
@@ -523,6 +532,20 @@ class RssRepository(
     }
   }
 
+  private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
+    return feedShowFavIconSettings
+      ?.split(",")
+      ?.filterNot { it.isBlank() }
+      ?.map {
+        when (it) {
+          "true" -> true
+          "false" -> false
+          else -> true
+        }
+      }
+      .orEmpty()
+  }
+
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateFeedName(
@@ -565,20 +588,21 @@ class RssRepository(
           limit = limit,
           offset = offset,
           mapper = {
-            id,
-            sourceId,
-            title,
-            description,
-            imageUrl,
-            date,
-            createdAt,
-            link,
-            commentsLink,
-            flags,
-            feedName,
-            feedIcon,
-            feedHomepageLink,
-            alwaysFetchSourceArticle ->
+            id: String,
+            sourceId: String,
+            title: String,
+            description: String,
+            imageUrl: String?,
+            date: Instant,
+            createdAt: Instant,
+            link: String,
+            commentsLink: String?,
+            flags: Set<PostFlag>,
+            feedName: String,
+            feedIcon: String,
+            feedHomepageLink: String,
+            alwaysFetchSourceArticle: Boolean,
+            showFeedFavIcon: Boolean ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
@@ -594,6 +618,7 @@ class RssRepository(
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -611,19 +636,20 @@ class RssRepository(
           limit,
           offset,
           mapper = {
-            id,
-            sourceId,
-            title,
-            description,
-            imageUrl,
-            date,
-            createdAt,
-            link,
-            commentsLink,
-            flags,
-            feedName,
-            feedIcon,
-            feedHomepageLink ->
+            id: String,
+            sourceId: String,
+            title: String,
+            description: String,
+            imageUrl: String?,
+            date: Instant,
+            createdAt: Instant,
+            link: String,
+            commentsLink: String?,
+            flags: Set<PostFlag>,
+            feedName: String,
+            feedIcon: String,
+            feedHomepageLink: String,
+            showFeedFavIcon: Boolean ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
@@ -639,6 +665,7 @@ class RssRepository(
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = true,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )
@@ -820,6 +847,9 @@ class RssRepository(
             id: String,
             name: String,
             feedIds: String?,
+            feedHomepageLinks: String,
+            feedIconLinks: String,
+            feedShowFavIconSettings: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -829,8 +859,9 @@ class RssRepository(
               id = id,
               name = name,
               feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-              feedHomepageLinks = emptyList(),
-              feedIconLinks = emptyList(),
+              feedHomepageLinks = feedHomepageLinks.split(",").filter { it.isNotBlank() },
+              feedIconLinks = feedIconLinks.split(",").filter { it.isNotBlank() },
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -863,6 +894,12 @@ class RssRepository(
   suspend fun updateFeedAlwaysFetchSource(feedId: String, newValue: Boolean) {
     return withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateAlwaysFetchSourceArticle(newValue, feedId)
+    }
+  }
+
+  suspend fun updateFeedShowFavIcon(feedId: String, newValue: Boolean) {
+    return withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateShowFeedFavIcon(newValue, feedId)
     }
   }
 
@@ -965,15 +1002,17 @@ class RssRepository(
           description: String?,
           link: String?,
           homepageLink: String?,
-          createdAt: Instant?,
+          createdAt: Instant,
           pinnedAt: Instant?,
           lastCleanUpAt: Instant?,
           numberOfUnreadPosts: Long,
           feedIds: String?,
           feedHomepageLinks: String?,
           feedIcons: String?,
+          feedShowFavIconSettings: String?,
           updatedAt: Instant?,
-          pinnedPosition: Double ->
+          pinnedPosition: Double,
+          showFeedFavIcon: Boolean? ->
           if (type == "group") {
             FeedGroup(
               id = id,
@@ -982,7 +1021,8 @@ class RssRepository(
               feedHomepageLinks =
                 feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
-              createdAt = createdAt!!,
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              createdAt = createdAt,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
@@ -996,11 +1036,12 @@ class RssRepository(
               description = description!!,
               link = link!!,
               homepageLink = homepageLink!!,
-              createdAt = createdAt!!,
+              createdAt = createdAt,
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
-              pinnedPosition = pinnedPosition
+              pinnedPosition = pinnedPosition,
+              showFeedFavIcon = showFeedFavIcon ?: true
             )
           }
         }
@@ -1040,7 +1081,10 @@ class RssRepository(
             feedIds: String?,
             feedHomepageLinks: String?,
             feedIcons: String?,
-            updatedAt: Instant? ->
+            feedShowFavIconSettings: String?,
+            updatedAt: Instant?,
+            pinnedPosition: Double,
+            showFeedFavIcon: Boolean? ->
             if (type == "group") {
               FeedGroup(
                 id = id,
@@ -1049,10 +1093,12 @@ class RssRepository(
                 feedHomepageLinks =
                   feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
                 feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
                 numberOfUnreadPosts = numberOfUnreadPosts,
+                pinnedPosition = pinnedPosition,
               )
             } else {
               Feed(
@@ -1066,6 +1112,8 @@ class RssRepository(
                 pinnedAt = pinnedAt,
                 lastCleanUpAt = lastCleanUpAt,
                 numberOfUnreadPosts = numberOfUnreadPosts,
+                pinnedPosition = pinnedPosition,
+                showFeedFavIcon = showFeedFavIcon ?: true
               )
             }
           }
@@ -1099,7 +1147,10 @@ class RssRepository(
           feedIds: String?,
           feedHomepageLinks: String?,
           feedIcons: String?,
-          updatedAt: Instant? ->
+          feedShowFavIconSettings: String?,
+          updatedAt: Instant?,
+          pinnedPosition: Double,
+          showFeedFavIcon: Boolean? ->
           if (type == "group") {
             FeedGroup(
               id = id,
@@ -1108,10 +1159,12 @@ class RssRepository(
               feedHomepageLinks =
                 feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
               feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
+              pinnedPosition = pinnedPosition,
             )
           } else {
             Feed(
@@ -1125,6 +1178,8 @@ class RssRepository(
               pinnedAt = pinnedAt,
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
+              pinnedPosition = pinnedPosition,
+              showFeedFavIcon = showFeedFavIcon ?: true
             )
           }
         }
@@ -1148,6 +1203,7 @@ class RssRepository(
             feedIds: String?,
             feedHomepageLinks: String,
             feedIcons: String,
+            feedShowFavIconSettings: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant?,
@@ -1158,6 +1214,7 @@ class RssRepository(
               feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
               feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1184,6 +1241,7 @@ class RssRepository(
             feedIds: String?,
             feedHomepageLinks: String,
             feedIcons: String,
+            feedShowFavIconSettings: String,
             createdAt: Instant,
             updatedAt: Instant,
             pinnedAt: Instant? ->
@@ -1193,6 +1251,7 @@ class RssRepository(
               feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
               feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
               feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1213,6 +1272,7 @@ class RssRepository(
           feedIds: String?,
           feedHomepageLinks: String,
           feedIcons: String,
+          feedShowFavIconSettings: String,
           createdAt: Instant,
           updatedAt: Instant,
           pinnedAt: Instant? ->
@@ -1222,6 +1282,7 @@ class RssRepository(
             feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
             feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
             feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+            feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
             createdAt = createdAt,
             updatedAt = updatedAt,
             pinnedAt = pinnedAt,
@@ -1323,12 +1384,13 @@ class RssRepository(
         sourceIds = sources,
         postsAfter = postsAfter,
         lastSyncedAt = lastSyncedAt,
-        mapper = { count, feedHomepageLinks, feedIcons ->
+        mapper = { count, feedHomepageLinks, feedIcons, feedShowFavIconSettings ->
           UnreadSinceLastSync(
             newArticleCount = count,
             hasNewArticles = count > 0,
             feedHomepageLinks = feedHomepageLinks.orEmpty().split(",").filterNot { it.isBlank() },
-            feedIcons = feedIcons.orEmpty().split(",").filterNot { it.isBlank() }
+            feedIcons = feedIcons.orEmpty().split(",").filterNot { it.isBlank() },
+            feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings)
           )
         }
       )

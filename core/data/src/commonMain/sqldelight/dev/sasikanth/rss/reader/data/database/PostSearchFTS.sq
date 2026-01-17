@@ -45,7 +45,8 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
-  feed.alwaysFetchSourceArticle
+  feed.alwaysFetchSourceArticle,
+  feed.showFeedFavIcon
 FROM post_search
 INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id
