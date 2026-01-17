@@ -69,6 +69,8 @@
     <string name="settingsThemeDark">Dunkel</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Feeds</string>
@@ -128,7 +130,7 @@
     <string name="groupAddNew">Neue hinzufügen</string>
     <string name="appBarAllFeeds">Alle Feeds</string>
     <string name="edit">Bearbeiten</string>
-    <string name="buttonAddToGroup">Zu Gruppe hinzufügen…</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Quellen löschen</string>
     <string name="removeSourcesDesc">Möchten Sie die ausgewählten Quellen löschen?</string>
     <string name="noPinnedSources">Keine angepinnten Feeds/Gruppen</string>
