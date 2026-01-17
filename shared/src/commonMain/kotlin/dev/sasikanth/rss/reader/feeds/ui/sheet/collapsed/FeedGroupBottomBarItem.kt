@@ -33,8 +33,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 internal fun FeedGroupBottomBarItem(
   feedGroup: FeedGroup,
   canShowUnreadPostsCount: Boolean,
-  onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  onClick: (() -> Unit)? = null,
   hasActiveSource: Boolean = false,
   selected: Boolean = false,
 ) {
@@ -43,12 +43,14 @@ internal fun FeedGroupBottomBarItem(
   ) {
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
       val shape = RoundedCornerShape(16.dp)
+      val clickableModifier =
+        if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
 
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
             .clip(shape)
-            .clickable { onClick() }
+            .then(clickableModifier)
             .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
         contentAlignment = Alignment.Center
       ) {

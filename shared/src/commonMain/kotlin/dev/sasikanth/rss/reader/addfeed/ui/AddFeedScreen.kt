@@ -17,10 +17,12 @@
 package dev.sasikanth.rss.reader.addfeed.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,28 +32,23 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowRight
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.twotone.FolderOpen
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDefaults
@@ -66,6 +63,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
@@ -76,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,14 +84,19 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Close
+import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
+import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.addToGroup
 import twine.shared.generated.resources.buttonAddFeed
-import twine.shared.generated.resources.buttonAddToGroup
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.errorFeedNotFound
 import twine.shared.generated.resources.errorMalformedXml
@@ -137,95 +141,95 @@ fun AddFeedScreen(
   var feedLink by remember { mutableStateOf(TextFieldValue()) }
   var feedTitle by remember { mutableStateOf(TextFieldValue()) }
 
-  AppTheme(useDarkTheme = true) {
-    Scaffold(
-      modifier = modifier,
-      topBar = {
-        Box {
-          CenterAlignedTopAppBar(
-            title = {},
-            navigationIcon = {
-              CircularIconButton(
-                modifier = Modifier.padding(start = 12.dp),
-                icon = TwineIcons.ArrowBack,
-                label = stringResource(Res.string.buttonGoBack),
-                onClick = { goBack() }
-              )
-            },
-            colors =
-              TopAppBarDefaults.topAppBarColors(
-                containerColor = AppTheme.colorScheme.surface,
-                navigationIconContentColor = AppTheme.colorScheme.onSurface,
-                titleContentColor = AppTheme.colorScheme.onSurface,
-                actionIconContentColor = AppTheme.colorScheme.onSurface
-              ),
+  Scaffold(
+    modifier = modifier,
+    topBar = {
+      CenterAlignedTopAppBar(
+        title = {},
+        navigationIcon = {
+          CircularIconButton(
+            modifier = Modifier.padding(start = 12.dp),
+            icon = TwineIcons.ArrowBack,
+            label = stringResource(Res.string.buttonGoBack),
+            onClick = { goBack() }
           )
+        },
+        colors =
+          TopAppBarDefaults.topAppBarColors(
+            containerColor = AppTheme.colorScheme.backdrop,
+            navigationIconContentColor = AppTheme.colorScheme.onSurface,
+            titleContentColor = AppTheme.colorScheme.onSurface,
+            actionIconContentColor = AppTheme.colorScheme.onSurface
+          ),
+      )
+    },
+    snackbarHost = {
+      SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+        Snackbar(
+          modifier = Modifier.padding(12.dp),
+          content = {
+            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+          },
+          action = null,
+          actionOnNewLine = false,
+          shape = SnackbarDefaults.shape,
+          backgroundColor = SnackbarDefaults.color,
+          contentColor = SnackbarDefaults.contentColor,
+          elevation = 0.dp
+        )
+      }
+    },
+    bottomBar = {
+      Button(
+        modifier =
+          Modifier.background(AppTheme.colorScheme.backdrop)
+            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .navigationBarsPadding()
+            .imePadding()
+            .fillMaxWidth()
+            .requiredHeight(56.dp),
+        colors =
+          ButtonDefaults.buttonColors(
+            containerColor = AppTheme.colorScheme.inverseSurface,
+            contentColor = AppTheme.colorScheme.inverseOnSurface,
+          ),
+        enabled =
+          feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
+        shape = MaterialTheme.shapes.extraLarge,
+        onClick = {
+          viewModel.dispatch(
+            AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text)
+          )
+        }
+      ) {
+        if (state.feedFetchingState == FeedFetchingState.Loading) {
+          CircularProgressIndicator(
+            color = AppTheme.colorScheme.tintedForeground,
+            modifier = Modifier.requiredSize(24.dp),
+            strokeWidth = 2.dp
+          )
+        } else {
+          Text(
+            text = stringResource(Res.string.buttonAddFeed).uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium,
+          )
+        }
+      }
+    },
+    content = { paddingValues ->
+      LazyVerticalGrid(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+        columns = GridCells.Adaptive(minSize = 64.dp),
+        contentPadding = paddingValues,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.requiredHeight(16.dp)) }
 
-          HorizontalDivider(
-            modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-            color = AppTheme.colorScheme.surfaceContainer
-          )
-        }
-      },
-      snackbarHost = {
-        SnackbarHost(hostState = snackbarHostState) { snackbarData ->
-          Snackbar(
-            modifier = Modifier.padding(12.dp),
-            content = {
-              Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
-            },
-            action = null,
-            actionOnNewLine = false,
-            shape = SnackbarDefaults.shape,
-            backgroundColor = SnackbarDefaults.color,
-            contentColor = SnackbarDefaults.contentColor,
-            elevation = 0.dp
-          )
-        }
-      },
-      bottomBar = {
-        Button(
-          modifier =
-            Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-              .navigationBarsPadding()
-              .imePadding()
-              .fillMaxWidth()
-              .requiredHeight(56.dp),
-          enabled =
-            feedLink.text.isNotBlank() && state.feedFetchingState != FeedFetchingState.Loading,
-          shape = MaterialTheme.shapes.extraLarge,
-          onClick = {
-            viewModel.dispatch(
-              AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text)
-            )
-          }
+        item(
+          span = { GridItemSpan(maxLineSpan) },
         ) {
-          if (state.feedFetchingState == FeedFetchingState.Loading) {
-            CircularProgressIndicator(
-              color = AppTheme.colorScheme.tintedForeground,
-              modifier = Modifier.requiredSize(24.dp),
-              strokeWidth = 2.dp
-            )
-          } else {
-            Text(
-              text = stringResource(Res.string.buttonAddFeed).uppercase(),
-              style = MaterialTheme.typography.labelLarge,
-              fontWeight = FontWeight.Medium,
-            )
-          }
-        }
-      },
-      content = { paddingValues ->
-        Column(
-          modifier =
-            Modifier.fillMaxSize()
-              .verticalScroll(rememberScrollState())
-              .padding(horizontal = 24.dp)
-              .padding(paddingValues),
-          verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-          Spacer(Modifier.requiredHeight(16.dp))
-
           TextField(
             modifier =
               Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
@@ -241,7 +245,11 @@ fun AddFeedScreen(
                 imeAction = ImeAction.Next
               )
           )
+        }
 
+        item(
+          span = { GridItemSpan(maxLineSpan) },
+        ) {
           TextField(
             modifier =
               Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
@@ -257,78 +265,85 @@ fun AddFeedScreen(
                 imeAction = ImeAction.Done
               ),
           )
+        }
 
-          Column(
-            Modifier.requiredSizeIn(minHeight = 56.dp)
-              .fillMaxWidth()
-              .background(AppTheme.colorScheme.surfaceContainer, RoundedCornerShape(16.dp))
+        item(
+          span = { GridItemSpan(maxLineSpan) },
+        ) {
+          Spacer(modifier = Modifier.requiredHeight(16.dp))
+        }
+
+        item(span = { GridItemSpan(maxLineSpan) }) {
+          val shape = RoundedCornerShape(50)
+          Row(
+            modifier =
+              Modifier.fillMaxWidth()
+                .clip(shape)
+                .border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
+                .clickable { openGroupSelection() }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
           ) {
-            FlowRow(
-              modifier = Modifier.padding(horizontal = 8.dp),
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-              verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              state.selectedFeedGroups.forEach { selectedGroup ->
-                InputChip(
-                  selected = false,
-                  onClick = {
-                    viewModel.dispatch(AddFeedEvent.OnRemoveGroupClicked(selectedGroup))
-                  },
-                  colors =
-                    InputChipDefaults.inputChipColors(
-                      containerColor = AppTheme.colorScheme.tintedForeground,
-                      labelColor = AppTheme.colorScheme.tintedBackground,
-                      leadingIconColor = AppTheme.colorScheme.tintedBackground,
-                      trailingIconColor = AppTheme.colorScheme.tintedBackground,
-                    ),
-                  border = null,
-                  shape = RoundedCornerShape(50),
-                  leadingIcon = {
-                    Icon(
-                      modifier = Modifier.requiredSize(16.dp),
-                      imageVector = Icons.TwoTone.FolderOpen,
-                      contentDescription = null
-                    )
-                  },
-                  trailingIcon = {
-                    Icon(
-                      modifier = Modifier.requiredSize(16.dp),
-                      imageVector = Icons.Rounded.Close,
-                      contentDescription = null
-                    )
-                  },
-                  label = { Text(text = selectedGroup.name) }
-                )
-              }
-            }
+            Icon(imageVector = TwineIcons.NewGroup, contentDescription = null)
 
-            Spacer(Modifier.requiredHeight(8.dp))
-
-            Button(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-              colors =
-                ButtonDefaults.buttonColors(
-                  containerColor = AppTheme.colorScheme.tintedForeground,
-                  contentColor = AppTheme.colorScheme.tintedBackground
-                ),
-              onClick = { openGroupSelection() },
-              content = {
-                Text(
-                  modifier = Modifier.weight(1f),
-                  text = stringResource(Res.string.buttonAddToGroup)
-                )
-
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowRight, contentDescription = null)
-              }
+            Text(
+              text = stringResource(Res.string.addToGroup),
+              style = MaterialTheme.typography.titleSmall,
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
-
-            Spacer(Modifier.requiredHeight(8.dp))
           }
         }
-      },
-      containerColor = AppTheme.colorScheme.surfaceContainerLowest,
-      contentColor = Color.Unspecified,
-      contentWindowInsets = WindowInsets.systemBars
+
+        items(state.selectedFeedGroups.toList()) { group ->
+          GroupItem(group) { viewModel.dispatch(AddFeedEvent.OnRemoveGroupClicked(group)) }
+        }
+      }
+    },
+    containerColor = AppTheme.colorScheme.backdrop,
+    contentColor = Color.Unspecified,
+    contentWindowInsets = WindowInsets.systemBars
+  )
+}
+
+@Composable
+private fun GroupItem(
+  group: FeedGroup,
+  onClick: () -> Unit,
+) {
+  Column(
+    modifier =
+      Modifier.clip(MaterialTheme.shapes.small).clickable { onClick() }.padding(bottom = 4.dp),
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Box {
+      FeedGroupBottomBarItem(feedGroup = group, canShowUnreadPostsCount = false)
+
+      Box(
+        modifier =
+          Modifier.align(Alignment.TopEnd)
+            .clip(CircleShape)
+            .requiredSize(24.dp)
+            .background(AppTheme.colorScheme.primary, CircleShape)
+            .border(2.dp, AppTheme.colorScheme.backdrop, CircleShape),
+        contentAlignment = Alignment.Center,
+      ) {
+        Icon(
+          modifier = Modifier.requiredSize(12.dp),
+          imageVector = TwineIcons.Close,
+          contentDescription = null,
+          tint = AppTheme.colorScheme.backdrop,
+        )
+      }
+    }
+
+    Text(
+      text = group.name,
+      style = MaterialTheme.typography.labelSmall,
+      color = AppTheme.colorScheme.onSurface,
+      textAlign = TextAlign.Center,
+      overflow = TextOverflow.Ellipsis,
+      maxLines = 1,
     )
   }
 }
@@ -344,26 +359,33 @@ private fun TextField(
   enabled: Boolean = true,
   trailingIcon: @Composable (() -> Unit)? = null,
 ) {
+  val translucentStyles = LocalTranslucentStyles.current
+  val containerShape = RoundedCornerShape(50)
+
   androidx.compose.material3.TextField(
-    modifier = modifier.requiredHeight(56.dp).fillMaxWidth(),
+    modifier =
+      modifier
+        .requiredHeight(56.dp)
+        .fillMaxWidth()
+        .border(1.dp, translucentStyles.default.outline, containerShape),
     value = input,
     onValueChange = onValueChange,
     keyboardOptions = keyboardOptions,
     keyboardActions = keyboardActions,
     singleLine = true,
     textStyle = MaterialTheme.typography.labelLarge,
-    shape = RoundedCornerShape(16.dp),
+    shape = containerShape,
     enabled = enabled,
     colors =
       TextFieldDefaults.colors(
-        unfocusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-        focusedContainerColor = AppTheme.colorScheme.surfaceContainer,
-        disabledContainerColor = AppTheme.colorScheme.surfaceContainer,
+        unfocusedContainerColor = translucentStyles.default.background,
+        focusedContainerColor = translucentStyles.default.background,
+        disabledContainerColor = translucentStyles.default.background,
         focusedIndicatorColor = Color.Transparent,
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         errorIndicatorColor = Color.Transparent,
-        cursorColor = AppTheme.colorScheme.tintedForeground,
+        cursorColor = AppTheme.colorScheme.primary,
         selectionColors =
           TextSelectionColors(
             handleColor = AppTheme.colorScheme.tintedForeground,

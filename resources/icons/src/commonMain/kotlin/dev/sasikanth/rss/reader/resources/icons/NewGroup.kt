@@ -1,23 +1,18 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
+import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
@@ -26,99 +21,73 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val TwineIcons.NewGroup: ImageVector
+public val TwineIcons.NewGroup: ImageVector
   get() {
-    if (newGroup != null) {
-      return newGroup!!
+    if (_newGroup != null) {
+      return _newGroup!!
     }
-    newGroup =
+    _newGroup =
       Builder(
           name = "NewGroup",
-          defaultWidth = 24.0.dp,
-          defaultHeight = 24.0.dp,
-          viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          defaultWidth = 20.0.dp,
+          defaultHeight = 20.0.dp,
+          viewportWidth = 20.0f,
+          viewportHeight = 20.0f
         )
         .apply {
           path(
-            fill = SolidColor(Color(0xFF171D19)),
+            fill = SolidColor(Color(0xFF817379)),
             stroke = null,
             strokeLineWidth = 0.0f,
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = EvenOdd
+            pathFillType = NonZero
           ) {
-            moveTo(5.0f, 5.0f)
-            horizontalLineTo(9.0f)
-            verticalLineTo(9.0f)
-            horizontalLineTo(5.0f)
-            verticalLineTo(5.0f)
-            close()
-            moveTo(3.0f, 5.0f)
-            curveTo(3.0f, 3.8954f, 3.8954f, 3.0f, 5.0f, 3.0f)
-            horizontalLineTo(9.0f)
-            curveTo(10.1046f, 3.0f, 11.0f, 3.8954f, 11.0f, 5.0f)
-            verticalLineTo(9.0f)
-            curveTo(11.0f, 10.1046f, 10.1046f, 11.0f, 9.0f, 11.0f)
-            horizontalLineTo(5.0f)
-            curveTo(3.8954f, 11.0f, 3.0f, 10.1046f, 3.0f, 9.0f)
-            verticalLineTo(5.0f)
-            close()
-            moveTo(15.0f, 5.0f)
-            horizontalLineTo(19.0f)
-            verticalLineTo(9.0f)
-            horizontalLineTo(15.0f)
-            verticalLineTo(5.0f)
-            close()
-            moveTo(13.0f, 5.0f)
-            curveTo(13.0f, 3.8954f, 13.8954f, 3.0f, 15.0f, 3.0f)
-            horizontalLineTo(19.0f)
-            curveTo(20.1046f, 3.0f, 21.0f, 3.8954f, 21.0f, 5.0f)
-            verticalLineTo(9.0f)
-            curveTo(21.0f, 10.1046f, 20.1046f, 11.0f, 19.0f, 11.0f)
-            horizontalLineTo(15.0f)
-            curveTo(13.8954f, 11.0f, 13.0f, 10.1046f, 13.0f, 9.0f)
-            verticalLineTo(5.0f)
-            close()
-            moveTo(9.0f, 15.0f)
-            horizontalLineTo(5.0f)
-            verticalLineTo(19.0f)
-            horizontalLineTo(9.0f)
+            moveTo(15.75f, 12.0f)
+            curveTo(16.164f, 12.0f, 16.5f, 12.336f, 16.5f, 12.75f)
             verticalLineTo(15.0f)
+            horizontalLineTo(18.75f)
+            curveTo(19.164f, 15.0f, 19.5f, 15.336f, 19.5f, 15.75f)
+            curveTo(19.5f, 16.164f, 19.164f, 16.5f, 18.75f, 16.5f)
+            horizontalLineTo(16.5f)
+            verticalLineTo(18.75f)
+            curveTo(16.5f, 19.164f, 16.164f, 19.5f, 15.75f, 19.5f)
+            curveTo(15.336f, 19.5f, 15.0f, 19.164f, 15.0f, 18.75f)
+            verticalLineTo(16.5f)
+            horizontalLineTo(12.75f)
+            curveTo(12.336f, 16.5f, 12.0f, 16.164f, 12.0f, 15.75f)
+            curveTo(12.0f, 15.336f, 12.336f, 15.0f, 12.75f, 15.0f)
+            horizontalLineTo(15.0f)
+            verticalLineTo(12.75f)
+            curveTo(15.0f, 12.336f, 15.336f, 12.0f, 15.75f, 12.0f)
             close()
-            moveTo(5.0f, 13.0f)
-            curveTo(3.8954f, 13.0f, 3.0f, 13.8954f, 3.0f, 15.0f)
-            verticalLineTo(19.0f)
-            curveTo(3.0f, 20.1046f, 3.8954f, 21.0f, 5.0f, 21.0f)
-            horizontalLineTo(9.0f)
-            curveTo(10.1046f, 21.0f, 11.0f, 20.1046f, 11.0f, 19.0f)
-            verticalLineTo(15.0f)
-            curveTo(11.0f, 13.8954f, 10.1046f, 13.0f, 9.0f, 13.0f)
-            horizontalLineTo(5.0f)
-            close()
-            moveTo(16.0f, 14.0f)
-            curveTo(16.0f, 13.4477f, 16.4477f, 13.0f, 17.0f, 13.0f)
-            curveTo(17.5523f, 13.0f, 18.0f, 13.4477f, 18.0f, 14.0f)
-            verticalLineTo(16.0f)
-            horizontalLineTo(20.0f)
-            curveTo(20.5523f, 16.0f, 21.0f, 16.4477f, 21.0f, 17.0f)
-            curveTo(21.0f, 17.5523f, 20.5523f, 18.0f, 20.0f, 18.0f)
-            horizontalLineTo(18.0f)
-            verticalLineTo(20.0f)
-            curveTo(18.0f, 20.5523f, 17.5523f, 21.0f, 17.0f, 21.0f)
-            curveTo(16.4477f, 21.0f, 16.0f, 20.5523f, 16.0f, 20.0f)
-            verticalLineTo(18.0f)
-            horizontalLineTo(14.0f)
-            curveTo(13.4477f, 18.0f, 13.0f, 17.5523f, 13.0f, 17.0f)
-            curveTo(13.0f, 16.4477f, 13.4477f, 16.0f, 14.0f, 16.0f)
-            horizontalLineTo(16.0f)
-            verticalLineTo(14.0f)
+            moveTo(13.5f, 2.5f)
+            curveTo(15.157f, 2.5f, 16.5f, 3.843f, 16.5f, 5.5f)
+            verticalLineTo(9.25f)
+            curveTo(16.5f, 9.664f, 16.164f, 10.0f, 15.75f, 10.0f)
+            curveTo(15.336f, 10.0f, 15.0f, 9.664f, 15.0f, 9.25f)
+            verticalLineTo(5.5f)
+            curveTo(15.0f, 4.672f, 14.328f, 4.0f, 13.5f, 4.0f)
+            horizontalLineTo(5.5f)
+            curveTo(4.672f, 4.0f, 4.0f, 4.672f, 4.0f, 5.5f)
+            verticalLineTo(13.5f)
+            lineTo(4.008f, 13.653f)
+            curveTo(4.079f, 14.359f, 4.641f, 14.92f, 5.347f, 14.992f)
+            lineTo(5.5f, 15.0f)
+            horizontalLineTo(9.25f)
+            curveTo(9.664f, 15.0f, 10.0f, 15.336f, 10.0f, 15.75f)
+            curveTo(10.0f, 16.164f, 9.664f, 16.5f, 9.25f, 16.5f)
+            horizontalLineTo(5.5f)
+            curveTo(3.843f, 16.5f, 2.5f, 15.157f, 2.5f, 13.5f)
+            verticalLineTo(5.5f)
+            curveTo(2.5f, 3.843f, 3.843f, 2.5f, 5.5f, 2.5f)
+            horizontalLineTo(13.5f)
             close()
           }
         }
         .build()
-    return newGroup!!
+    return _newGroup!!
   }
 
-private var newGroup: ImageVector? = null
+private var _newGroup: ImageVector? = null

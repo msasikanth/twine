@@ -135,7 +135,7 @@
     <string name="groupAddNew">Add new</string>
     <string name="appBarAllFeeds">All feeds</string>
     <string name="edit">Edit</string>
-    <string name="buttonAddToGroup">Add to group...</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Delete sources</string>
     <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
     <string name="noPinnedSources">No pinned feeds/groups</string>
