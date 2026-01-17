@@ -16,9 +16,15 @@
 
 package dev.sasikanth.rss.reader.components
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.resources.icons.Check
+import dev.sasikanth.rss.reader.resources.icons.Close
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
@@ -26,15 +32,19 @@ fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Bo
   MaterialTheme(
     colorScheme =
       MaterialTheme.colorScheme.copy(
-        primary = AppTheme.colorScheme.tintedForeground,
-        onPrimary = AppTheme.colorScheme.tintedSurface,
+        primary = AppTheme.colorScheme.primary,
+        onPrimary = AppTheme.colorScheme.onPrimary,
         outline = AppTheme.colorScheme.outline,
-        surfaceVariant = AppTheme.colorScheme.surfaceContainerHighest
+        surfaceContainerHighest = AppTheme.colorScheme.surfaceContainerHighest
       )
   ) {
     androidx.compose.material3.Switch(
       modifier = modifier,
       checked = checked,
+      thumbContent = {
+        val icon = if (checked) TwineIcons.Check else TwineIcons.Close
+        Icon(modifier = Modifier.size(16.dp), imageVector = icon, contentDescription = null)
+      },
       onCheckedChange = onCheckedChange
     )
   }
