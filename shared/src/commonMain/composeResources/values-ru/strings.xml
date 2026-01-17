@@ -69,6 +69,8 @@
     <string name="settingsThemeDark">Тёмная</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Новостные ленты</string>
@@ -128,7 +130,7 @@
     <string name="groupAddNew">Добавить новую</string>
     <string name="appBarAllFeeds">Все каналы</string>
     <string name="edit">Редактировать</string>
-    <string name="buttonAddToGroup">Добавить в группу...</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Удалить источники</string>
     <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
     <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
