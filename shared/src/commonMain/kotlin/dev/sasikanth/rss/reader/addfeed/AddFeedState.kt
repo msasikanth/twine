@@ -21,6 +21,8 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 data class AddFeedState(
   val feedFetchingState: FeedFetchingState,
   val selectedFeedGroups: Set<FeedGroup>,
+  val alwaysFetchSourceArticle: Boolean,
+  val showFeedFavIcon: Boolean,
   val error: AddFeedErrorType?,
   val goBack: Boolean,
 ) {
@@ -31,6 +33,8 @@ data class AddFeedState(
       AddFeedState(
         feedFetchingState = FeedFetchingState.Idle,
         selectedFeedGroups = emptySet(),
+        alwaysFetchSourceArticle = false,
+        showFeedFavIcon = true,
         error = null,
         goBack = false,
       )
