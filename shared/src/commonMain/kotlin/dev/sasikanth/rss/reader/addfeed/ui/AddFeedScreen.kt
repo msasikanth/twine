@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -85,6 +86,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
@@ -310,17 +312,18 @@ fun AddFeedScreen(
 
         item(span = { GridItemSpan(maxLineSpan) }) {
           val shape = RoundedCornerShape(50)
-          Row(
-            modifier =
-              Modifier.fillMaxWidth()
-                .clip(shape)
-                .border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
-                .clickable { openGroupSelection() }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+          OutlinedButton(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            shape = shape,
+            onClick = { openGroupSelection() },
           ) {
-            Icon(imageVector = TwineIcons.NewGroup, contentDescription = null)
+            Icon(
+              imageVector = TwineIcons.NewGroup,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.requiredWidth(12.dp))
 
             Text(
               text = stringResource(Res.string.addToGroup),
