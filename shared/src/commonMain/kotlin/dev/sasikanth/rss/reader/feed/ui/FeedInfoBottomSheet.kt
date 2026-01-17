@@ -457,6 +457,6 @@ private fun FeedOptionSwitch(
 private fun Divider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = AppTheme.colorScheme.tintedSurface
+    color = AppTheme.colorScheme.outlineVariant
   )
 }
