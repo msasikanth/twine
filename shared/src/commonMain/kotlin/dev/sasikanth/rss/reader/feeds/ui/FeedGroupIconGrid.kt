@@ -49,29 +49,7 @@ internal fun FeedGroupIconGrid(
 ) {
   val iconsCount = maxOf(feedHomepageLinks.size, feedIconLinks.size)
 
-  if (iconsCount == 2) {
-    Box(modifier = modifier) {
-      FeedIcon(
-        index = 0,
-        feedHomepageLinks = feedHomepageLinks,
-        feedIconLinks = feedIconLinks,
-        feedShowFavIconSettings = feedShowFavIconSettings,
-        iconSize = iconSize,
-        iconShape = iconShape,
-        modifier = Modifier.align(Alignment.TopStart)
-      )
-
-      FeedIcon(
-        index = 1,
-        feedHomepageLinks = feedHomepageLinks,
-        feedIconLinks = feedIconLinks,
-        feedShowFavIconSettings = feedShowFavIconSettings,
-        iconSize = iconSize,
-        iconShape = iconShape,
-        modifier = Modifier.align(Alignment.BottomEnd)
-      )
-    }
-  } else if (iconsCount > 0) {
+  if (iconsCount > 0) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
       Row(horizontalArrangement = horizontalArrangement) {
         FeedIcon(
