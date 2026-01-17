@@ -69,6 +69,8 @@
     <string name="settingsThemeDark">深色</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">来源</string>
@@ -128,7 +130,7 @@
     <string name="groupAddNew">新增</string>
     <string name="appBarAllFeeds">所有来源</string>
     <string name="edit">编辑</string>
-    <string name="buttonAddToGroup">添加至分组……</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">删除来源</string>
     <string name="removeSourcesDesc">你想删除选定来源吗？</string>
     <string name="noPinnedSources">没有钉选的来源/分组</string>
