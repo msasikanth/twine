@@ -12,8 +12,76 @@
 function processIFrames(doc) {
   const iframes = doc.querySelectorAll("iframe");
   iframes.forEach((iframe) => {
-    if (iframe.hasAttribute("data-runner-src")) {
-      iframe.src = iframe.getAttribute("data-runner-src");
+    const src = iframe.getAttribute("src");
+    const lazySrc =
+      iframe.getAttribute("data-src") ||
+      iframe.getAttribute("data-runner-src") ||
+      iframe.getAttribute("data-lazy-src");
+
+    if (!src && lazySrc) {
+      iframe.src = lazySrc;
+    }
+  });
+}
+
+/**
+ * Extracts images from <noscript> tags. Many sites use this for lazy loading
+ * where the actual <img> tag is hidden inside <noscript>.
+ */
+function processNoScriptImages(doc) {
+  const noscripts = doc.querySelectorAll("noscript");
+  noscripts.forEach((noscript) => {
+    const content = noscript.textContent || noscript.innerHTML;
+    if (content.includes("<img")) {
+      const tempDiv = doc.createElement("div");
+      tempDiv.innerHTML = content;
+      const imgs = tempDiv.querySelectorAll("img");
+      imgs.forEach((img) => {
+        noscript.parentNode.insertBefore(img, noscript);
+      });
+      noscript.remove();
+    }
+  });
+}
+
+/**
+ * Removes common non-content elements that might escape Readability's filtering.
+ */
+function cleanContent(doc) {
+  const junkSelectors = [
+    ".share",
+    ".social",
+    ".ad",
+    ".promo",
+    ".related",
+    ".entry-utility",
+    ".post-tags",
+    ".post-categories",
+    ".subscription-widget-container",
+    ".sub-button-container",
+    ".newsletter-widget",
+    "[id*='share']",
+    "[class*='share']",
+    "[id*='social']",
+    "[class*='social']",
+    ".sharedaddy",
+    ".jp-relatedposts",
+  ];
+
+  junkSelectors.forEach((selector) => {
+    doc.querySelectorAll(selector).forEach((el) => el.remove());
+  });
+
+  // Remove "Read More" links that are likely internal and redundant
+  doc.querySelectorAll("a").forEach((a) => {
+    const text = a.textContent.toLowerCase().trim();
+    if (text === "read more" || text === "continue reading" || text === "read more...") {
+      const p = a.closest("p");
+      if (p && p.textContent.trim() === a.textContent.trim()) {
+        p.remove();
+      } else {
+        a.remove();
+      }
     }
   });
 }
@@ -135,12 +203,29 @@ function removeFirstH1(doc) {
   doc.querySelector("h1")?.remove();
 }
 
+function normalizeUrl(url, baseURI) {
+  try {
+    const u = new URL(url, baseURI);
+    u.search = "";
+    u.hash = "";
+    return u.href;
+  } catch (e) {
+    return url;
+  }
+}
+
 function removeFirstImageTagByUrl(doc, imageUrl) {
   if (!imageUrl) return;
 
-  const img = doc.querySelector(`img[src="${imageUrl}"]`);
-  if (img) {
-    img.closest("figure")?.remove() || img.remove();
+  const normalizedBannerUrl = normalizeUrl(imageUrl, doc.baseURI);
+  const imgs = Array.from(doc.querySelectorAll("img"));
+
+  for (const img of imgs) {
+    const src = img.getAttribute("src") || img.getAttribute("data-src");
+    if (src && normalizeUrl(src, doc.baseURI) === normalizedBannerUrl) {
+      img.closest("figure")?.remove() || img.remove();
+      break;
+    }
   }
 }
 
@@ -164,6 +249,20 @@ async function parseReaderContent(link, bannerImage, html) {
     doc = parser.parseFromString(htmlWithBase, "text/html");
 
     const turndownService = new TurndownService();
+    turndownService.addRule("iframe", {
+      filter: "iframe",
+      replacement: function (content, node) {
+        const src = node.getAttribute("src") || node.getAttribute("data-src");
+        if (src) {
+          let label = "Video";
+          if (src.includes("youtube.com") || src.includes("youtu.be")) label = "YouTube Video";
+          if (src.includes("vimeo.com")) label = "Vimeo Video";
+
+          return `\n\n[${label}](${src})\n\n`;
+        }
+        return "";
+      },
+    });
 
     if (isXkcdUrl(link)) {
       const markdown = turndownService.turndown(doc.documentElement.outerHTML);
@@ -177,8 +276,10 @@ async function parseReaderContent(link, bannerImage, html) {
 
       removeFirstH1(doc);
       processIFrames(doc);
+      processNoScriptImages(doc);
       transformShredditElements(doc);
       removeFirstImageTagByUrl(doc, bannerImage);
+      cleanContent(doc);
 
       const article = new Readability(doc).parse();
       const markdown = turndownService.turndown(article.content);

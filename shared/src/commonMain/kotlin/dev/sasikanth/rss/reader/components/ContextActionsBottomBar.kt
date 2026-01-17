@@ -76,7 +76,7 @@ internal fun ContextActionsBottomBar(
         colors =
           ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Unspecified,
-            contentColor = AppTheme.colorScheme.tintedForeground
+            contentColor = AppTheme.colorScheme.onSurface
           ),
         border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
         onClick = onCancel
@@ -107,7 +107,7 @@ internal fun ContextActionItem(
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
       val color =
         if (enabled) {
-          AppTheme.colorScheme.tintedForeground
+          AppTheme.colorScheme.secondary
         } else {
           AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         }
@@ -123,7 +123,7 @@ internal fun ContextActionItem(
 
       Text(
         text = label,
-        style = MaterialTheme.typography.labelLarge,
+        style = MaterialTheme.typography.labelMedium,
         color = color,
         maxLines = 1,
       )

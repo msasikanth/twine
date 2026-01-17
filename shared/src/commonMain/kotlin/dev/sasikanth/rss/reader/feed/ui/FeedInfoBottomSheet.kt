@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
@@ -68,7 +67,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -78,6 +76,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.components.ConfirmFeedDeleteDialog
+import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
@@ -341,6 +340,7 @@ private fun FeedLabelInput(
       )
 
       Text(
+        modifier = Modifier.padding(end = 8.dp),
         text = feed.link,
         maxLines = 2,
         overflow = TextOverflow.MiddleEllipsis,
@@ -359,25 +359,25 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
   var showConfirmDialog by remember { mutableStateOf(false) }
 
   Row(modifier = modifier) {
-    FeedOptionItem(
+    ContextActionItem(
       icon = TwineIcons.CopyLink,
-      text = stringResource(Res.string.feedOptionCopyLink),
+      label = stringResource(Res.string.feedOptionCopyLink),
       modifier = Modifier.weight(1f),
-      onOptionClick = { coroutineScope.launch { clipboard.setClipEntry(feed.link.toClipEntry()) } }
+      onClick = { coroutineScope.launch { clipboard.setClipEntry(feed.link.toClipEntry()) } }
     )
 
-    FeedOptionItem(
+    ContextActionItem(
       icon = TwineIcons.Website,
-      text = stringResource(Res.string.feedOptionWebsite),
+      label = stringResource(Res.string.feedOptionWebsite),
       modifier = Modifier.weight(1f),
-      onOptionClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
+      onClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
     )
 
-    FeedOptionItem(
+    ContextActionItem(
       icon = TwineIcons.DeleteOutline,
-      text = stringResource(Res.string.actionDelete),
+      label = stringResource(Res.string.actionDelete),
       modifier = Modifier.weight(1f),
-      onOptionClick = { showConfirmDialog = true }
+      onClick = { showConfirmDialog = true }
     )
   }
 
@@ -449,37 +449,6 @@ private fun FeedOptionSwitch(
       modifier = modifier,
       checked = checkedState,
       onCheckedChange = { newValue -> onValueChanged(newValue) }
-    )
-  }
-}
-
-@Composable
-private fun FeedOptionItem(
-  icon: ImageVector,
-  text: String,
-  modifier: Modifier = Modifier,
-  onOptionClick: () -> Unit,
-) {
-  Column(
-    modifier =
-      Modifier.clip(RoundedCornerShape(8.dp))
-        .clickable { onOptionClick() }
-        .padding(vertical = 12.dp)
-        .then(modifier),
-    horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.spacedBy(4.dp)
-  ) {
-    Icon(
-      imageVector = icon,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.tintedForeground,
-      modifier = Modifier.size(24.dp)
-    )
-
-    Text(
-      text = text,
-      style = MaterialTheme.typography.labelMedium,
-      color = AppTheme.colorScheme.tintedForeground
     )
   }
 }
