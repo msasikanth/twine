@@ -109,7 +109,8 @@ WITH baseQuery AS (
     feed.name AS feedName,
     feed.icon AS feedIcon,
     feed.homepageLink AS feedHomepageLink,
-    feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle
+    feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+    feed.showFeedFavIcon AS showFeedFavIcon
   FROM post
   INNER JOIN feed ON post.sourceId == feed.id
   WHERE
@@ -196,43 +197,6 @@ WHERE
   post.postDate > :after AND
   (:isSourceIdsEmpty OR post.sourceId IN :sourceIds);
 
-unreadSinceLastSync:
-WITH unreadPosts AS (
-  SELECT
-    feed.homepageLink,
-    feed.icon,
-    post.syncedAt
-  FROM post
-  INNER JOIN feed ON post.sourceId == feed.id
-  WHERE
-    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
-    (post.flags & 4) == 0 AND
-    feed.isDeleted = 0 AND
-    (post.flags & 2) == 0 AND
-    post.postDate > :postsAfter AND
-    post.syncedAt > :lastSyncedAt
-)
-SELECT COUNT(*),
-(
-  SELECT GROUP_CONCAT(homepageLink, ',')
-  FROM (
-    SELECT DISTINCT homepageLink
-    FROM unreadPosts
-    ORDER BY syncedAt
-    LIMIT 3
-  )
-) AS feedHomepageLinks,
-(
-  SELECT GROUP_CONCAT(icon, ',')
-  FROM (
-    SELECT DISTINCT icon
-    FROM unreadPosts
-    ORDER BY syncedAt
-    LIMIT 3
-  )
-) AS feedIcons
-FROM unreadPosts;
-
 countPostsForFeed:
 SELECT COUNT(*) FROM post
 WHERE sourceId = :feedId;
@@ -261,7 +225,8 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
-  feed.alwaysFetchSourceArticle
+  feed.alwaysFetchSourceArticle,
+  feed.showFeedFavIcon
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
@@ -291,3 +256,54 @@ UPDATE SET
     syncedAt = excluded.syncedAt,
     flags = excluded.flags
 WHERE excluded.updatedAt > post.updatedAt;
+
+unreadSinceLastSync:
+WITH unreadPosts AS (
+  SELECT
+    f.id AS feedId,
+    f.homepageLink,
+    f.icon,
+    f.showFeedFavIcon,
+    p.syncedAt
+  FROM post p
+  INNER JOIN feed f ON p.sourceId = f.id
+  WHERE ((:isSourceIdsEmpty) OR p.sourceId IN :sourceIds)
+    AND (p.flags & 4) = 0
+    AND f.isDeleted = 0
+    AND (p.flags & 2) = 0
+    AND p.postDate > :postsAfter
+    AND p.syncedAt > :lastSyncedAt
+)
+SELECT
+  COUNT(*) AS count,
+  (
+    SELECT GROUP_CONCAT(homepageLink)
+    FROM (
+      SELECT homepageLink, MAX(syncedAt) AS maxSyncedAt
+      FROM unreadPosts
+      GROUP BY feedId
+      ORDER BY maxSyncedAt DESC
+      LIMIT 3
+    )
+  ) AS feedHomepageLinks,
+  (
+    SELECT GROUP_CONCAT(icon)
+    FROM (
+      SELECT icon, MAX(syncedAt) AS maxSyncedAt
+      FROM unreadPosts
+      GROUP BY feedId
+      ORDER BY maxSyncedAt DESC
+      LIMIT 3
+    )
+  ) AS feedIcons,
+  (
+    SELECT GROUP_CONCAT(CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+    FROM (
+      SELECT showFeedFavIcon, MAX(syncedAt) AS maxSyncedAt
+      FROM unreadPosts
+      GROUP BY feedId
+      ORDER BY maxSyncedAt DESC
+      LIMIT 3
+    )
+  ) AS feedShowFavIconSettings
+FROM unreadPosts;
