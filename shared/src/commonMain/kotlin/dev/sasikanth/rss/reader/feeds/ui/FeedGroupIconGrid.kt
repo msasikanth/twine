@@ -38,37 +38,55 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
 internal fun FeedGroupIconGrid(
-  icons: List<String>,
+  feedHomepageLinks: List<String>,
+  feedIconLinks: List<String>,
+  feedShowFavIconSettings: List<Boolean>,
   iconSize: Dp = 16.dp,
   iconShape: Shape = CircleShape,
   horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(2.dp),
   verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(2.dp),
   modifier: Modifier = Modifier,
 ) {
-  if (icons.isNotEmpty()) {
+  val iconsCount = maxOf(feedHomepageLinks.size, feedIconLinks.size)
+
+  if (iconsCount == 2) {
+    Box(modifier = modifier) {
+      FeedIcon(
+        index = 0,
+        feedHomepageLinks = feedHomepageLinks,
+        feedIconLinks = feedIconLinks,
+        feedShowFavIconSettings = feedShowFavIconSettings,
+        iconSize = iconSize,
+        iconShape = iconShape,
+        modifier = Modifier.align(Alignment.TopStart)
+      )
+
+      FeedIcon(
+        index = 1,
+        feedHomepageLinks = feedHomepageLinks,
+        feedIconLinks = feedIconLinks,
+        feedShowFavIconSettings = feedShowFavIconSettings,
+        iconSize = iconSize,
+        iconShape = iconShape,
+        modifier = Modifier.align(Alignment.BottomEnd)
+      )
+    }
+  } else if (iconsCount > 0) {
     Column(modifier = modifier, verticalArrangement = verticalArrangement) {
-      val icon2 =
-        if (icons.size > 2) {
-          icons.elementAtOrNull(1)
-        } else {
-          null
-        }
-
-      val icon4 =
-        if (icons.size > 2) {
-          icons.elementAtOrNull(3)
-        } else {
-          icons.elementAtOrNull(1)
-        }
-
       Row(horizontalArrangement = horizontalArrangement) {
         FeedIcon(
-          icon = icons.elementAtOrNull(0),
+          index = 0,
+          feedHomepageLinks = feedHomepageLinks,
+          feedIconLinks = feedIconLinks,
+          feedShowFavIconSettings = feedShowFavIconSettings,
           iconSize = iconSize,
           iconShape = iconShape,
         )
         FeedIcon(
-          icon = icon2,
+          index = 2,
+          feedHomepageLinks = feedHomepageLinks,
+          feedIconLinks = feedIconLinks,
+          feedShowFavIconSettings = feedShowFavIconSettings,
           iconSize = iconSize,
           iconShape = iconShape,
         )
@@ -76,12 +94,18 @@ internal fun FeedGroupIconGrid(
 
       Row(horizontalArrangement = horizontalArrangement) {
         FeedIcon(
-          icon = icons.elementAtOrNull(2),
+          index = 3,
+          feedHomepageLinks = feedHomepageLinks,
+          feedIconLinks = feedIconLinks,
+          feedShowFavIconSettings = feedShowFavIconSettings,
           iconSize = iconSize,
           iconShape = iconShape,
         )
         FeedIcon(
-          icon = icon4,
+          index = 1,
+          feedHomepageLinks = feedHomepageLinks,
+          feedIconLinks = feedIconLinks,
+          feedShowFavIconSettings = feedShowFavIconSettings,
           iconSize = iconSize,
           iconShape = iconShape,
         )
@@ -100,10 +124,24 @@ internal fun FeedGroupIconGrid(
 }
 
 @Composable
-private fun FeedIcon(icon: String?, iconSize: Dp, iconShape: Shape, modifier: Modifier = Modifier) {
-  if (!icon.isNullOrBlank()) {
+private fun FeedIcon(
+  index: Int,
+  feedHomepageLinks: List<String>,
+  feedIconLinks: List<String>,
+  feedShowFavIconSettings: List<Boolean>,
+  iconSize: Dp,
+  iconShape: Shape,
+  modifier: Modifier = Modifier
+) {
+  val homepageLink = feedHomepageLinks.getOrNull(index)
+  val iconLink = feedIconLinks.getOrNull(index)
+  val showFavIconSetting = feedShowFavIconSettings.getOrNull(index) ?: true
+
+  if (!homepageLink.isNullOrBlank() || !iconLink.isNullOrBlank()) {
     FeedIcon(
-      url = icon,
+      icon = iconLink.orEmpty(),
+      homepageLink = homepageLink.orEmpty(),
+      showFeedFavIcon = showFavIconSetting,
       contentDescription = null,
       shape = iconShape,
       modifier = Modifier.requiredSize(iconSize).background(Color.White).then(modifier)
