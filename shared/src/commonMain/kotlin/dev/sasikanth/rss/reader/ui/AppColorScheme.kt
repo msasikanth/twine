@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.lerp
 @Immutable
 class AppColorScheme(
   val primary: Color,
+  val onPrimary: Color,
   val secondary: Color,
   val outline: Color,
   val outlineVariant: Color,
@@ -54,6 +55,7 @@ class AppColorScheme(
 
   fun copy(
     primary: Color = this.primary,
+    onPrimary: Color = this.onPrimary,
     secondary: Color = this.secondary,
     outline: Color = this.outline,
     outlineVariant: Color = this.outlineVariant,
@@ -84,6 +86,7 @@ class AppColorScheme(
   ): AppColorScheme =
     AppColorScheme(
       primary = primary,
+      onPrimary = onPrimary,
       secondary = secondary,
       outline = outline,
       outlineVariant = outlineVariant,
@@ -116,6 +119,7 @@ class AppColorScheme(
   fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
     return copy(
       primary = lerp(primary, to.primary, fraction),
+      onPrimary = lerp(onPrimary, to.onPrimary, fraction),
       secondary = lerp(secondary, to.secondary, fraction),
       outline = lerp(outline, to.outline, fraction),
       outlineVariant = lerp(outlineVariant, to.outlineVariant, fraction),
@@ -150,6 +154,7 @@ class AppColorScheme(
 fun lightAppColorScheme(): AppColorScheme {
   return AppColorScheme(
     primary = Color(0xFF37693C),
+    onPrimary = Color.White,
     secondary = Color(0xFF516350),
     outline = Color(0xFF6A7771),
     outlineVariant = Color(0xFFBCCAC2),
@@ -183,6 +188,7 @@ fun lightAppColorScheme(): AppColorScheme {
 fun darkAppColorScheme(): AppColorScheme {
   return AppColorScheme(
     primary = Color(0xFF9DD49D),
+    onPrimary = Color.Black,
     secondary = Color(0xFFB8CCB5),
     outline = Color(0xFF89938E),
     outlineVariant = Color(0xFF3F4944),

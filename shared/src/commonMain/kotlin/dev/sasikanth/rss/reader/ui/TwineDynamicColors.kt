@@ -77,6 +77,7 @@ internal object TwineDynamicColors {
 
     return AppColorScheme(
       primary = dynamicColors.primary().getColor(scheme),
+      onPrimary = dynamicColors.onPrimary().getColor(scheme),
       secondary = dynamicColors.secondary().getColor(scheme),
       outline = dynamicColors.outline().getColor(scheme),
       outlineVariant = dynamicColors.outlineVariant().getColor(scheme),
