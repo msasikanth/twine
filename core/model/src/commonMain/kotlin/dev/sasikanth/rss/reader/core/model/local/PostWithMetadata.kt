@@ -36,6 +36,7 @@ data class PostWithMetadata(
   val feedIcon: String,
   val feedHomepageLink: String,
   val alwaysFetchFullArticle: Boolean,
+  val showFeedFavIcon: Boolean,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

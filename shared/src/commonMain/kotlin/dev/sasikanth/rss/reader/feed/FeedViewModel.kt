@@ -66,6 +66,8 @@ class FeedViewModel(
       is FeedEvent.OnFeedNameChanged -> onFeedNameUpdated(event.newFeedName, event.feedId)
       is FeedEvent.OnAlwaysFetchSourceArticleChanged ->
         onAlwaysFetchSourceArticleChanged(event.newValue, event.feedId)
+      is FeedEvent.OnShowFeedFavIconChanged ->
+        onShowFeedFavIconChanged(event.newValue, event.feedId)
       is FeedEvent.OnMarkPostsAsRead -> onMarkPostsAsRead(event.feedId)
     }
   }
@@ -88,6 +90,10 @@ class FeedViewModel(
 
   private fun onAlwaysFetchSourceArticleChanged(newValue: Boolean, feedId: String) {
     viewModelScope.launch { rssRepository.updateFeedAlwaysFetchSource(feedId, newValue) }
+  }
+
+  private fun onShowFeedFavIconChanged(newValue: Boolean, feedId: String) {
+    viewModelScope.launch { rssRepository.updateFeedShowFavIcon(feedId, newValue) }
   }
 
   private fun onFeedNameUpdated(newFeedName: String, feedId: String) {

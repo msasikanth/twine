@@ -16,12 +16,14 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
+import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.collections.Set
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -70,21 +72,22 @@ class WidgetDataRepository(
         offset = 0,
         orderBy = PostsSortOrder.Latest.name,
         mapper = {
-          id,
-          sourceId,
-          title,
-          description,
-          imageUrl,
-          date,
-          createdAt,
-          link,
-          commentsLink,
-          flags,
-          feedName,
-          feedIcon,
-          feedHomepageLink,
-          alwaysFetchSourceArticle,
-          _ ->
+          id: String,
+          sourceId: String,
+          title: String,
+          description: String,
+          imageUrl: String?,
+          date: Instant,
+          createdAt: Instant,
+          link: String,
+          commentsLink: String?,
+          flags: Set<PostFlag>,
+          feedName: String,
+          feedIcon: String,
+          feedHomepageLink: String,
+          alwaysFetchSourceArticle: Boolean,
+          showFeedFavIcon: Boolean,
+          _: Long ->
           WidgetPost(
             id = id,
             title = title,
@@ -107,20 +110,21 @@ class WidgetDataRepository(
           numberOfPosts = numberOfPosts.toLong(),
           offset = 0,
           mapper = {
-            id,
-            sourceId,
-            title,
-            description,
-            imageUrl,
-            date,
-            createdAt,
-            link,
-            commentsLink,
-            flags,
-            feedName,
-            feedIcon,
-            feedHomepageLink,
-            alwaysFetchSourceArticle ->
+            id: String,
+            sourceId: String,
+            title: String,
+            description: String,
+            imageUrl: String?,
+            date: Instant,
+            createdAt: Instant,
+            link: String,
+            commentsLink: String?,
+            flags: Set<PostFlag>,
+            feedName: String,
+            feedIcon: String,
+            feedHomepageLink: String,
+            alwaysFetchSourceArticle: Boolean,
+            showFeedFavIcon: Boolean ->
             WidgetPost(
               id = id,
               title = title,
@@ -159,7 +163,8 @@ class WidgetDataRepository(
             feedName,
             feedIcon,
             feedHomepageLink,
-            alwaysFetchSourceArticle ->
+            alwaysFetchSourceArticle,
+            showFeedFavIcon: Boolean ->
             PostWithMetadata(
               id = id,
               sourceId = sourceId,
@@ -175,6 +180,7 @@ class WidgetDataRepository(
               feedIcon = feedIcon,
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
+              showFeedFavIcon = showFeedFavIcon,
             )
           }
         )

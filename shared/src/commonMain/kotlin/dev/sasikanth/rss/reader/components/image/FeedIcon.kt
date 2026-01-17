@@ -38,19 +38,24 @@ import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
 internal fun FeedIcon(
-  url: String,
+  icon: String,
+  homepageLink: String,
+  showFeedFavIcon: Boolean,
   contentDescription: String?,
   shape: Shape,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
   size: Size = Size(Dimension.Undefined, 500)
 ) {
-  val showFeedFavIcon = LocalShowFeedFavIconSetting.current
+  val globalShowFeedFavIcon = LocalShowFeedFavIconSetting.current
+  val useFavIcon = showFeedFavIcon && globalShowFeedFavIcon
+
   Box(Modifier.clip(shape).then(modifier).background(Color.White, shape)) {
     val context = LocalPlatformContext.current
+    val url = if (useFavIcon) homepageLink else icon
     val imageRequest = ImageRequest.Builder(context).data(url).diskCacheKey(url).size(size).build()
     val imageLoader =
-      if (showFeedFavIcon) {
+      if (useFavIcon) {
         FavIconImageLoader.get(context)
       } else {
         SingletonImageLoader.get(context)

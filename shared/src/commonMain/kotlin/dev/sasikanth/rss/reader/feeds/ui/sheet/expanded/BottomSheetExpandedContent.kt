@@ -265,6 +265,8 @@ internal fun BottomSheetExpandedContent(
                 icon = editIcon,
                 label = editLabel,
                 onClick = {
+                  viewModel.dispatch(FeedsEvent.CancelSourcesSelection)
+
                   val selectedSource = state.selectedSources.first()
                   when (selectedSource.sourceType) {
                     SourceType.Feed -> {

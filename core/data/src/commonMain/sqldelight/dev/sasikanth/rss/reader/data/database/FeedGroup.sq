@@ -36,6 +36,11 @@ SELECT
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
      LIMIT 4), '') AS feedIconLinks,
+  COALESCE((SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedShowFavIconSettings,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -63,6 +68,11 @@ SELECT
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
      LIMIT 4), '') AS feedIconLinks,
+  COALESCE((SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedShowFavIconSettings,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -95,6 +105,21 @@ SELECT
        FROM feedGroupFeed gf
        JOIN feed f ON gf.feedId = f.id
        WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedIconLinks,
+  COALESCE((SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedShowFavIconSettings,
   createdAt,
   updatedAt,
   pinnedAt,
@@ -121,6 +146,11 @@ SELECT
      JOIN feed f ON gf.feedId = f.id
      WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
      LIMIT 4), '') AS feedIconLinks,
+  COALESCE((SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedShowFavIconSettings,
   createdAt,
   updatedAt,
   pinnedAt
@@ -139,6 +169,21 @@ SELECT
        FROM feedGroupFeed gf
        JOIN feed f ON gf.feedId = f.id
        WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0) AS feedIds,
+  COALESCE((SELECT GROUP_CONCAT(f.homepageLink)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedHomepageLinks,
+  COALESCE((SELECT GROUP_CONCAT(f.icon)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedIconLinks,
+  COALESCE((SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+     FROM feedGroupFeed gf
+     JOIN feed f ON gf.feedId = f.id
+     WHERE gf.feedGroupId = fg.id AND f.isDeleted = 0
+     LIMIT 4), '') AS feedShowFavIconSettings,
   createdAt,
   updatedAt,
   pinnedAt,

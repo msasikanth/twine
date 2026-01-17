@@ -25,5 +25,7 @@ sealed interface FeedEvent {
   data class OnAlwaysFetchSourceArticleChanged(val newValue: Boolean, val feedId: String) :
     FeedEvent
 
+  data class OnShowFeedFavIconChanged(val newValue: Boolean, val feedId: String) : FeedEvent
+
   data class OnMarkPostsAsRead(val feedId: String) : FeedEvent
 }
