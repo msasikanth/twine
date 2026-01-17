@@ -103,6 +103,7 @@ import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.snipme.highlights.Highlights
 import dev.snipme.highlights.model.SyntaxThemes
@@ -128,6 +129,7 @@ internal fun ReaderScreen(
   val linkHandler = LocalLinkHandler.current
   val seedColorExtractor = LocalSeedColorExtractor.current
   val appDynamicColorState = LocalDynamicColorState.current
+  val dynamicColorEnabled = LocalDynamicColorEnabled.current
   val shouldBlockImage = LocalBlockImage.current
 
   // Using theme colors as default from the home screen
@@ -156,11 +158,13 @@ internal fun ReaderScreen(
     val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem?.imageUrl)
     val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem?.imageUrl)
 
-    dynamicColorState.animate(
-      fromSeedColor = fromSeedColor,
-      toSeedColor = toSeedColor,
-      progress = offset
-    )
+    if (dynamicColorEnabled) {
+      dynamicColorState.animate(
+        fromSeedColor = fromSeedColor,
+        toSeedColor = toSeedColor,
+        progress = offset
+      )
+    }
   }
 
   LaunchedEffect(state.openPaywall) {

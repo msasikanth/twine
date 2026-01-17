@@ -85,6 +85,7 @@ class CloudSyncService(
             pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
             lastCleanUpAt = it.lastCleanUpAt?.toEpochMilliseconds(),
             alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
+            showFeedFavIcon = it.showFeedFavIcon,
             lastUpdatedAt = it.lastUpdatedAt?.toEpochMilliseconds(),
             isDeleted = it.isDeleted
           )

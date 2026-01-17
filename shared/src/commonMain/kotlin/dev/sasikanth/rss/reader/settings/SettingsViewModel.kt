@@ -72,6 +72,7 @@ class SettingsViewModel(
         settingsRepository.showReaderView,
         settingsRepository.appThemeMode,
         settingsRepository.useAmoled,
+        settingsRepository.dynamicColorEnabled,
         settingsRepository.enableAutoSync,
         settingsRepository.showFeedFavIcon,
         settingsRepository.markAsReadOn,
@@ -89,6 +90,7 @@ class SettingsViewModel(
         showReaderView,
         appThemeMode,
         useAmoled,
+        dynamicColorEnabled,
         enableAutoSync,
         showFeedFavIcon,
         markAsReadOn,
@@ -106,6 +108,7 @@ class SettingsViewModel(
           showReaderView = showReaderView,
           appThemeMode = appThemeMode,
           useAmoled = useAmoled,
+          dynamicColorEnabled = dynamicColorEnabled,
           enableAutoSync = enableAutoSync,
           showFeedFavIcon = showFeedFavIcon,
           markAsReadOn = markAsReadOn,
@@ -133,6 +136,7 @@ class SettingsViewModel(
             showReaderView = settings.showReaderView,
             appThemeMode = settings.appThemeMode,
             useAmoled = settings.useAmoled,
+            dynamicColorEnabled = settings.dynamicColorEnabled,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
             markAsReadOn = settings.markAsReadOn,
@@ -176,6 +180,7 @@ class SettingsViewModel(
       is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
       is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
+      is SettingsEvent.ToggleDynamicColor -> toggleDynamicColor(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
       is SettingsEvent.MarkOpenPaywallAsDone -> {
@@ -276,6 +281,10 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.toggleAmoled(value) }
   }
 
+  private fun toggleDynamicColor(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleDynamicColor(value) }
+  }
+
   private fun toggleShowReaderView(value: Boolean) {
     viewModelScope.launch { settingsRepository.toggleShowReaderView(value) }
   }
@@ -335,6 +344,7 @@ private data class Settings(
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
+  val dynamicColorEnabled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,

@@ -11,6 +11,7 @@
 package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,8 +33,8 @@ import dev.sasikanth.rss.reader.ui.AppTheme
 internal fun FeedGroupBottomBarItem(
   feedGroup: FeedGroup,
   canShowUnreadPostsCount: Boolean,
-  onClick: () -> Unit,
   modifier: Modifier = Modifier,
+  onClick: (() -> Unit)? = null,
   hasActiveSource: Boolean = false,
   selected: Boolean = false,
 ) {
@@ -42,38 +42,34 @@ internal fun FeedGroupBottomBarItem(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
   ) {
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+      val shape = RoundedCornerShape(16.dp)
+      val clickableModifier =
+        if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
-            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f))
-            .padding(8.dp),
+            .clip(shape)
+            .then(clickableModifier)
+            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
         contentAlignment = Alignment.Center
       ) {
-        val iconsCount = maxOf(feedGroup.feedHomepageLinks.size, feedGroup.feedIconLinks.size)
-        val iconSize =
-          if (iconsCount > 2) {
-            16.dp
-          } else {
-            18.dp
-          }
-
-        val iconSpacing =
-          if (iconsCount > 2) {
-            2.dp
-          } else {
-            0.dp
-          }
+        val iconSize = 16.dp
+        val iconSpacing = 2.dp
 
         FeedGroupIconGrid(
+          modifier = Modifier.padding(8.dp),
           feedHomepageLinks = feedGroup.feedHomepageLinks,
           feedIconLinks = feedGroup.feedIconLinks,
           feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
           iconSize = iconSize,
-          iconShape = MaterialTheme.shapes.small,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
+        )
+
+        Box(
+          modifier =
+            Modifier.matchParentSize().border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
         )
       }
     }

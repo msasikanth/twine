@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.FolderOpen
 import androidx.compose.material3.Icon
@@ -42,7 +42,7 @@ internal fun FeedGroupIconGrid(
   feedIconLinks: List<String>,
   feedShowFavIconSettings: List<Boolean>,
   iconSize: Dp = 16.dp,
-  iconShape: Shape = CircleShape,
+  iconShape: Shape = RoundedCornerShape(6.dp),
   horizontalArrangement: Arrangement.Horizontal = Arrangement.spacedBy(2.dp),
   verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(2.dp),
   modifier: Modifier = Modifier,

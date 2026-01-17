@@ -22,4 +22,5 @@ object Constants {
   const val NUMBER_OF_FEATURED_POSTS = 6L
   const val BACKUP_FILE_NAME = "twine_backup"
   const val BACKUP_FILE_EXTENSION = "opml"
+  const val GROUP_CONCAT_SEPARATOR = "::"
 }

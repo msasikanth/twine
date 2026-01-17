@@ -277,7 +277,7 @@ WITH unreadPosts AS (
 SELECT
   COUNT(*) AS count,
   (
-    SELECT GROUP_CONCAT(homepageLink)
+    SELECT GROUP_CONCAT(homepageLink, '::')
     FROM (
       SELECT homepageLink, MAX(syncedAt) AS maxSyncedAt
       FROM unreadPosts
@@ -287,7 +287,7 @@ SELECT
     )
   ) AS feedHomepageLinks,
   (
-    SELECT GROUP_CONCAT(icon)
+    SELECT GROUP_CONCAT(icon, '::')
     FROM (
       SELECT icon, MAX(syncedAt) AS maxSyncedAt
       FROM unreadPosts
@@ -297,7 +297,7 @@ SELECT
     )
   ) AS feedIcons,
   (
-    SELECT GROUP_CONCAT(CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+    SELECT GROUP_CONCAT(CASE WHEN showFeedFavIcon IS NULL THEN 'null' WHEN showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
     FROM (
       SELECT showFeedFavIcon, MAX(syncedAt) AS maxSyncedAt
       FROM unreadPosts

@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Badge
@@ -106,21 +105,8 @@ internal fun FeedGroupItem(
         .padding(8.dp)
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-      val iconsCount = maxOf(feedGroup.feedHomepageLinks.size, feedGroup.feedIconLinks.size)
-
-      val iconSize =
-        if (iconsCount > 2) {
-          17.dp
-        } else {
-          19.dp
-        }
-
-      val iconSpacing =
-        if (iconsCount > 2) {
-          2.dp
-        } else {
-          0.dp
-        }
+      val iconSize = 16.dp
+      val iconSpacing = 2.dp
 
       FeedGroupIconGrid(
         modifier = Modifier.requiredSize(36.dp),
@@ -128,7 +114,6 @@ internal fun FeedGroupItem(
         feedIconLinks = feedGroup.feedIconLinks,
         feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
         iconSize = iconSize,
-        iconShape = CircleShape,
         verticalArrangement = Arrangement.spacedBy(iconSpacing),
         horizontalArrangement = Arrangement.spacedBy(iconSpacing),
       )

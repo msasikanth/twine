@@ -50,18 +50,30 @@ internal fun FeedBottomBarItem(
   selected: Boolean = false,
 ) {
   Box(
-    modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
+    modifier =
+      modifier.size(64.dp).graphicsLayer {
+        alpha = if (selected || !hasActiveSource) 1f else 0.25f
+      },
+    contentAlignment = Alignment.Center
   ) {
-    Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-      val shape = MaterialTheme.shapes.large
+    val shape = MaterialTheme.shapes.large
 
+    Box(
+      modifier = Modifier.requiredSize(48.dp).clickable(onClick = onClick),
+      contentAlignment = Alignment.Center
+    ) {
       FeedIcon(
         icon = feedIconUrl,
         homepageLink = homePageUrl,
         showFeedFavIcon = showFeedFavIcon,
         contentDescription = null,
-        shape = shape,
-        modifier = Modifier.requiredSize(48.dp).clickable(onClick = onClick)
+        shape = RoundedCornerShape(17.dp),
+        modifier = Modifier.matchParentSize()
+      )
+
+      Box(
+        modifier =
+          Modifier.matchParentSize().border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
       )
     }
 

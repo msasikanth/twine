@@ -47,6 +47,8 @@ sealed interface SettingsEvent {
 
   data class ToggleAmoled(val value: Boolean) : SettingsEvent
 
+  data class ToggleDynamicColor(val value: Boolean) : SettingsEvent
+
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 
   data object LoadSubscriptionStatus : SettingsEvent
