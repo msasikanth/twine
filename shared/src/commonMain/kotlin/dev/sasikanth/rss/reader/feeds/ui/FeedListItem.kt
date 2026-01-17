@@ -51,7 +51,6 @@ import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -100,11 +99,10 @@ internal fun FeedListItem(
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val icon = if (showFeedFavIcon) feed.homepageLink else feed.icon
-
       FeedIcon(
-        url = icon,
+        icon = feed.icon,
+        homepageLink = feed.homepageLink,
+        showFeedFavIcon = feed.showFeedFavIcon,
         contentDescription = null,
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.requiredSize(36.dp),

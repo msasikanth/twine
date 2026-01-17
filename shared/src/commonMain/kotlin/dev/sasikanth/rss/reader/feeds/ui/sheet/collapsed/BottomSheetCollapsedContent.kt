@@ -180,6 +180,7 @@ private fun SourceItem(
         badgeCount = source.numberOfUnreadPosts,
         homePageUrl = source.homepageLink,
         feedIconUrl = source.icon,
+        showFeedFavIcon = source.showFeedFavIcon,
         canShowUnreadPostsCount = canShowUnreadPostsCount,
         hasActiveSource = activeSource != null,
         selected = activeSource?.id == source.id,

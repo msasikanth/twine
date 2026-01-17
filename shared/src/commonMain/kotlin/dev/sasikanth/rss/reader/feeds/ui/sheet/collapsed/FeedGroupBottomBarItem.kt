@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 
 @Composable
 internal fun FeedGroupBottomBarItem(
@@ -52,24 +51,25 @@ internal fun FeedGroupBottomBarItem(
             .padding(8.dp),
         contentAlignment = Alignment.Center
       ) {
-        val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-        val icons = if (showFeedFavIcon) feedGroup.feedHomepageLinks else feedGroup.feedIconLinks
+        val iconsCount = maxOf(feedGroup.feedHomepageLinks.size, feedGroup.feedIconLinks.size)
         val iconSize =
-          if (icons.size > 2) {
+          if (iconsCount > 2) {
             16.dp
           } else {
             18.dp
           }
 
         val iconSpacing =
-          if (icons.size > 2) {
+          if (iconsCount > 2) {
             2.dp
           } else {
             0.dp
           }
 
         FeedGroupIconGrid(
-          icons = icons,
+          feedHomepageLinks = feedGroup.feedHomepageLinks,
+          feedIconLinks = feedGroup.feedIconLinks,
+          feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
           iconSize = iconSize,
           iconShape = MaterialTheme.shapes.small,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),

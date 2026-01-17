@@ -87,6 +87,8 @@ import twine.shared.generated.resources.unBookmark
 internal fun PostActionBar(
   feedName: String,
   feedIcon: String,
+  feedHomepageLink: String,
+  showFeedFavIcon: Boolean,
   postRead: Boolean,
   postRelativeTimestamp: String,
   postLink: String,
@@ -114,6 +116,8 @@ internal fun PostActionBar(
       modifier = Modifier.weight(1f).clearAndSetSemantics {},
       feedName = feedName,
       feedIcon = feedIcon,
+      feedHomepageLink = feedHomepageLink,
+      showFeedFavIcon = showFeedFavIcon,
       config = config,
       onSourceClick = onSourceClick,
     )
@@ -146,6 +150,8 @@ internal fun PostActionBar(
 @Composable
 private fun PostSourcePill(
   feedIcon: String,
+  feedHomepageLink: String,
+  showFeedFavIcon: Boolean,
   feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
@@ -178,7 +184,9 @@ private fun PostSourcePill(
     ) {
       FeedIcon(
         modifier = Modifier.requiredSize(16.dp),
-        url = feedIcon,
+        icon = feedIcon,
+        homepageLink = feedHomepageLink,
+        showFeedFavIcon = showFeedFavIcon,
         shape = MaterialTheme.shapes.extraSmall,
         contentDescription = null,
       )

@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -107,18 +106,17 @@ internal fun FeedGroupItem(
         .padding(8.dp)
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-      val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-      val icons = if (showFeedFavIcon) feedGroup.feedHomepageLinks else feedGroup.feedIconLinks
+      val iconsCount = maxOf(feedGroup.feedHomepageLinks.size, feedGroup.feedIconLinks.size)
 
       val iconSize =
-        if (icons.size > 2) {
+        if (iconsCount > 2) {
           17.dp
         } else {
           19.dp
         }
 
       val iconSpacing =
-        if (icons.size > 2) {
+        if (iconsCount > 2) {
           2.dp
         } else {
           0.dp
@@ -126,7 +124,9 @@ internal fun FeedGroupItem(
 
       FeedGroupIconGrid(
         modifier = Modifier.requiredSize(36.dp),
-        icons = icons,
+        feedHomepageLinks = feedGroup.feedHomepageLinks,
+        feedIconLinks = feedGroup.feedIconLinks,
+        feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
         iconSize = iconSize,
         iconShape = CircleShape,
         verticalArrangement = Arrangement.spacedBy(iconSpacing),

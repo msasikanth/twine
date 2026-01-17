@@ -48,7 +48,6 @@ import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
 private val featuredItemPadding
@@ -136,12 +135,11 @@ internal fun FeaturedPostItem(
 
     Spacer(Modifier.requiredHeight(descriptionBottomPadding + 4.dp))
 
-    val showFeedFavIcon = LocalShowFeedFavIconSetting.current
-    val feedIconUrl = if (showFeedFavIcon) item.feedHomepageLink else item.feedIcon
-
     PostActionBar(
       feedName = item.feedName,
-      feedIcon = feedIconUrl,
+      feedIcon = item.feedIcon,
+      feedHomepageLink = item.feedHomepageLink,
+      showFeedFavIcon = item.showFeedFavIcon,
       postRead = readStatus,
       postRelativeTimestamp = item.date.relativeDurationString(),
       postLink = item.link,
