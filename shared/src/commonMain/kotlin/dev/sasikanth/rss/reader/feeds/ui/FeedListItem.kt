@@ -154,7 +154,7 @@ internal fun FeedListItem(
             modifier = Modifier.requiredSize(20.dp),
             imageVector = Icons.Filled.MoreVert,
             contentDescription = null,
-            tint = AppTheme.colorScheme.onSurfaceVariant,
+            tint = AppTheme.colorScheme.secondary,
           )
         }
       }
