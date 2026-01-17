@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Enable blur in homepage</string>
     <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
     <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
@@ -139,8 +139,8 @@
     <string name="cdLoadFullArticle">Load full article</string>
     <string name="enableAutoSyncTitle">Enable auto sync</string>
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
-    <string name="showFeedFavIconTitle">Show feed fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
@@ -171,8 +171,8 @@
     <string name="settingsEnableNotificationsTitle">सूचनाएं सक्षम करें</string>
     <string name="settingsEnableNotificationsSubtitle">चालू होने पर, बैकग्राउंड सिंक के दौरान नए लेख मिलने पर आपको सूचनाएं मिलेंगी</string>
     <string name="settingsDownloadFullContentTitle">पूरे लेख डाउनलोड करें</string>
-    <string name="settingsDownloadFullContentSubtitle">सक्षम होने पर, ऐप सिंक के दौरान पूरे लेख डाउनलोड करने की कोशिश करेगा।</string>
-    <string name="settingsDownloadFullContentWarning">चेतावनी!: इससे फीड लोड होने का समय, डेटा उपयोग, मेमोरी और स्टोरेज की खपत बढ़ सकती है। यह आपके उपयोगकर्ता अनुभव को संभावित रूप से प्रभावित कर सकता है।</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">क्रम</string>
     <string name="settingsHeaderSync">क्लाउड सिंक (अल्फा ⚠)</string>
     <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
