@@ -341,6 +341,7 @@ private fun FeedLabelInput(
       )
 
       Text(
+        modifier = Modifier.padding(end = 8.dp),
         text = feed.link,
         maxLines = 2,
         overflow = TextOverflow.MiddleEllipsis,
