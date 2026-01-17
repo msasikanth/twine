@@ -13,27 +13,27 @@ WITH feed_group_metadata AS (
   SELECT
     distinct_groups.feedGroupId,
     (
-      SELECT GROUP_CONCAT(gf.feedId)
+      SELECT GROUP_CONCAT(gf.feedId, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink)
+      SELECT GROUP_CONCAT(f.homepageLink, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
-      SELECT GROUP_CONCAT(f.icon)
+      SELECT GROUP_CONCAT(f.icon, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons,
     COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
@@ -123,27 +123,27 @@ WITH feed_group_metadata AS (
   SELECT
     distinct_groups.feedGroupId,
     (
-      SELECT GROUP_CONCAT(gf.feedId)
+      SELECT GROUP_CONCAT(gf.feedId, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink)
+      SELECT GROUP_CONCAT(f.homepageLink, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
-      SELECT GROUP_CONCAT(f.icon)
+      SELECT GROUP_CONCAT(f.icon, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons,
     COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
@@ -238,27 +238,27 @@ WITH feed_group_metadata AS (
   SELECT
     distinct_groups.feedGroupId,
     (
-      SELECT GROUP_CONCAT(gf.feedId)
+      SELECT GROUP_CONCAT(gf.feedId, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
     ) AS feedIds,
     COALESCE((
-      SELECT GROUP_CONCAT(f.homepageLink)
+      SELECT GROUP_CONCAT(f.homepageLink, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedHomepageLinks,
     COALESCE((
-      SELECT GROUP_CONCAT(f.icon)
+      SELECT GROUP_CONCAT(f.icon, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0
       LIMIT 4
     ), '') AS feedIcons,
     COALESCE((
-      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END)
+      SELECT GROUP_CONCAT(CASE WHEN f.showFeedFavIcon IS NULL THEN 'null' WHEN f.showFeedFavIcon = 1 THEN 'true' ELSE 'false' END, '::')
       FROM feedGroupFeed gf
       JOIN feed f ON gf.feedId = f.id
       WHERE gf.feedGroupId = distinct_groups.feedGroupId AND f.isDeleted = 0

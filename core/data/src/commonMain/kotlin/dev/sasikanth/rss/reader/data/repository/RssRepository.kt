@@ -534,7 +534,7 @@ class RssRepository(
 
   private fun mapToFeedShowFavIconSettings(feedShowFavIconSettings: String?): List<Boolean> {
     return feedShowFavIconSettings
-      ?.split(",")
+      ?.split(Constants.GROUP_CONCAT_SEPARATOR)
       ?.filterNot { it.isBlank() }
       ?.map {
         when (it) {
@@ -1017,10 +1017,20 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
+              feedIds =
+                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
               feedHomepageLinks =
-                feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
-              feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedHomepageLinks
+                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                  ?.filterNot { it.isBlank() }
+                  .orEmpty(),
+              feedIconLinks =
+                feedIcons
+                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                  ?.filterNot { it.isBlank() }
+                  .orEmpty(),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt!!,
@@ -1089,10 +1099,20 @@ class RssRepository(
               FeedGroup(
                 id = id,
                 name = name,
-                feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
+                feedIds =
+                  feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                    it.isBlank()
+                  },
                 feedHomepageLinks =
-                  feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
-                feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                  feedHomepageLinks
+                    ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                    ?.filterNot { it.isBlank() }
+                    .orEmpty(),
+                feedIconLinks =
+                  feedIcons
+                    ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                    ?.filterNot { it.isBlank() }
+                    .orEmpty(),
                 feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
@@ -1155,10 +1175,20 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
+              feedIds =
+                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
               feedHomepageLinks =
-                feedHomepageLinks?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
-              feedIconLinks = feedIcons?.split(",")?.filterNot { it.isBlank() }.orEmpty(),
+                feedHomepageLinks
+                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                  ?.filterNot { it.isBlank() }
+                  .orEmpty(),
+              feedIconLinks =
+                feedIcons
+                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+                  ?.filterNot { it.isBlank() }
+                  .orEmpty(),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt!!,
@@ -1211,9 +1241,16 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
-              feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
-              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+              feedIds =
+                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
+              feedHomepageLinks =
+                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
+              feedIconLinks =
+                feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
@@ -1248,9 +1285,16 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
-              feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
-              feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+              feedIds =
+                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
+              feedHomepageLinks =
+                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                  it.isBlank()
+                },
+              feedIconLinks =
+                feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
@@ -1279,9 +1323,12 @@ class RssRepository(
           FeedGroup(
             id = id,
             name = name,
-            feedIds = feedIds.orEmpty().split(",").filterNot { it.isBlank() },
-            feedHomepageLinks = feedHomepageLinks.split(",").filterNot { it.isBlank() },
-            feedIconLinks = feedIcons.split(",").filterNot { it.isBlank() },
+            feedIds =
+              feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
+            feedHomepageLinks =
+              feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
+            feedIconLinks =
+              feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
             feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
             createdAt = createdAt,
             updatedAt = updatedAt,
@@ -1388,8 +1435,14 @@ class RssRepository(
           UnreadSinceLastSync(
             newArticleCount = count,
             hasNewArticles = count > 0,
-            feedHomepageLinks = feedHomepageLinks.orEmpty().split(",").filterNot { it.isBlank() },
-            feedIcons = feedIcons.orEmpty().split(",").filterNot { it.isBlank() },
+            feedHomepageLinks =
+              feedHomepageLinks.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                it.isBlank()
+              },
+            feedIcons =
+              feedIcons.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
+                it.isBlank()
+              },
             feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings)
           )
         }
