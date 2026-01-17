@@ -289,7 +289,10 @@ fun App(
                   .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
                   .filterNotNull()
                   .onEach { selectedGroupIds ->
-                    feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                    if (selectedGroupIds.isNotEmpty()) {
+                      feedsViewModel.dispatch(FeedsEvent.OnGroupsSelected(selectedGroupIds))
+                      it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+                    }
                   }
                   .launchIn(this)
               }
@@ -399,7 +402,10 @@ fun App(
               .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
               .filterNotNull()
               .onEach { selectedGroupIds ->
-                viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
+                if (selectedGroupIds.isNotEmpty()) {
+                  viewModel.dispatch(AddFeedEvent.OnGroupsSelected(selectedGroupIds))
+                  it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+                }
               }
               .launchIn(this)
           }
@@ -427,7 +433,10 @@ fun App(
               .getStateFlow<Set<String>>(SELECTED_GROUPS_KEY, emptySet())
               .filterNotNull()
               .onEach { selectedGroupIds ->
-                viewModel.dispatch(GroupEvent.OnGroupsSelected(selectedGroupIds))
+                if (selectedGroupIds.isNotEmpty()) {
+                  viewModel.dispatch(GroupEvent.OnGroupsSelected(selectedGroupIds))
+                  it.savedStateHandle[SELECTED_GROUPS_KEY] = emptySet<String>()
+                }
               }
               .launchIn(this)
           }
