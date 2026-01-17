@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Enable blur in homepage</string>
     <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
     <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
@@ -139,8 +139,8 @@
     <string name="cdLoadFullArticle">Load full article</string>
     <string name="enableAutoSyncTitle">Enable auto sync</string>
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
-    <string name="showFeedFavIconTitle">Show feed fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
@@ -171,8 +171,8 @@
     <string name="settingsEnableNotificationsTitle">Activer les notifications</string>
     <string name="settingsEnableNotificationsSubtitle">Une fois activé, vous recevrez des notifications lorsque de nouveaux articles seront trouvés lors de la synchronisation en arrière-plan</string>
     <string name="settingsDownloadFullContentTitle">Télécharger les articles complets</string>
-    <string name="settingsDownloadFullContentSubtitle">Une fois activé, l'application tentera de télécharger les articles complets pendant la synchronisation.</string>
-    <string name="settingsDownloadFullContentWarning">Attention ! : cela peut augmenter le temps de chargement des flux, l'utilisation des données, la consommation de mémoire et de stockage. Cela peut potentiellement affecter votre expérience utilisateur.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Trier</string>
     <string name="settingsHeaderSync">Synchronisation cloud (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">Synchronisation multiplateforme cohérente</string>
