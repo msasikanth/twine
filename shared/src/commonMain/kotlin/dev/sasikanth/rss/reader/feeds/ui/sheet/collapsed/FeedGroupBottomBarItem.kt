@@ -11,6 +11,7 @@
 package dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,25 +42,32 @@ internal fun FeedGroupBottomBarItem(
     modifier = modifier.graphicsLayer { alpha = if (selected || !hasActiveSource) 1f else 0.25f }
   ) {
     Box(modifier = Modifier.size(64.dp), contentAlignment = Alignment.Center) {
+      val shape = RoundedCornerShape(16.dp)
+
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(shape)
             .clickable { onClick() }
-            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f))
-            .padding(8.dp),
+            .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
         contentAlignment = Alignment.Center
       ) {
         val iconSize = 16.dp
         val iconSpacing = 2.dp
 
         FeedGroupIconGrid(
+          modifier = Modifier.padding(8.dp),
           feedHomepageLinks = feedGroup.feedHomepageLinks,
           feedIconLinks = feedGroup.feedIconLinks,
           feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
           iconSize = iconSize,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
+        )
+
+        Box(
+          modifier =
+            Modifier.matchParentSize().border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
         )
       }
     }
