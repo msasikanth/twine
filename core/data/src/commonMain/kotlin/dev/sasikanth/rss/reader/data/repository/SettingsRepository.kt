@@ -67,6 +67,7 @@ class SettingsRepository(
   private val userSessionCountKey = intPreferencesKey("user_session_count")
   private val appIconKey = stringPreferencesKey("app_icon")
   private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
+  private val dynamicColorEnabledKey = booleanPreferencesKey("dynamic_color_enabled")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -107,6 +108,9 @@ class SettingsRepository(
 
   val isOnboardingDone: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[isOnboardingDoneKey] ?: false }
+
+  val dynamicColorEnabled: Flow<Boolean> =
+    dataStore.data.map { preferences -> preferences[dynamicColorEnabledKey] ?: true }
 
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
@@ -216,6 +220,10 @@ class SettingsRepository(
 
   suspend fun toggleAmoled(value: Boolean) {
     dataStore.edit { preferences -> preferences[useAmoledKey] = value }
+  }
+
+  suspend fun toggleDynamicColor(value: Boolean) {
+    dataStore.edit { preferences -> preferences[dynamicColorEnabledKey] = value }
   }
 
   suspend fun completeOnboarding() {

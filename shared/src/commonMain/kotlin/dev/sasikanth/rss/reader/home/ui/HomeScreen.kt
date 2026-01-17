@@ -101,6 +101,7 @@ import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
+import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -138,6 +139,7 @@ internal fun HomeScreen(
   val linkHandler = LocalLinkHandler.current
   val density = LocalDensity.current
   val dynamicColorState = LocalDynamicColorState.current
+  val dynamicColorEnabled = LocalDynamicColorEnabled.current
 
   val posts = state.posts?.collectAsLazyPagingItems()
   val featuredPosts by
@@ -194,11 +196,13 @@ internal fun HomeScreen(
     val fromSeedColor = fromItem?.seedColor?.let { Color(it) }
     val toSeedColor = toItem?.seedColor?.let { Color(it) }
 
-    dynamicColorState.animate(
-      fromSeedColor = fromSeedColor,
-      toSeedColor = toSeedColor,
-      progress = offset
-    )
+    if (dynamicColorEnabled) {
+      dynamicColorState.animate(
+        fromSeedColor = fromSeedColor,
+        toSeedColor = toSeedColor,
+        progress = offset
+      )
+    }
   }
 
   BackHandler(

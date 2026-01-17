@@ -169,6 +169,8 @@ import twine.shared.generated.resources.settingsCustomisations
 import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
 import twine.shared.generated.resources.settingsDownloadFullContentTitle
 import twine.shared.generated.resources.settingsDownloadFullContentWarning
+import twine.shared.generated.resources.settingsDynamicColorSubtitle
+import twine.shared.generated.resources.settingsDynamicColorTitle
 import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
@@ -395,6 +397,15 @@ internal fun SettingsScreen(
               }
             )
           }
+        }
+
+        item {
+          DynamicColorSettingItem(
+            dynamicColorEnabled = state.dynamicColorEnabled,
+            onValueChanged = { newValue ->
+              viewModel.dispatch(SettingsEvent.ToggleDynamicColor(newValue))
+            }
+          )
         }
 
         if (state.canSubscribe) {
@@ -1069,6 +1080,46 @@ private fun AmoledSettingItem(useAmoled: Boolean, onValueChanged: (Boolean) -> U
         )
         Text(
           stringResource(Res.string.settingsAmoledSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+
+      Spacer(Modifier.width(16.dp))
+
+      Switch(
+        checked = checked,
+        onCheckedChange = { checked -> onValueChanged(checked) },
+      )
+    }
+  }
+}
+
+@Composable
+private fun DynamicColorSettingItem(
+  dynamicColorEnabled: Boolean,
+  onValueChanged: (Boolean) -> Unit
+) {
+  var checked by remember(dynamicColorEnabled) { mutableStateOf(dynamicColorEnabled) }
+  Box(
+    modifier =
+      Modifier.clickable {
+        checked = !checked
+        onValueChanged(!dynamicColorEnabled)
+      }
+  ) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsDynamicColorTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsDynamicColorSubtitle),
           style = MaterialTheme.typography.labelLarge,
           color = AppTheme.colorScheme.textEmphasisMed
         )

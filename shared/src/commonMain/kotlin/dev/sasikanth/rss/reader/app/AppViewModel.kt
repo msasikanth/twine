@@ -26,7 +26,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
-import dev.sasikanth.rss.reader.utils.NTuple6
+import dev.sasikanth.rss.reader.utils.NTuple7
 import dev.sasikanth.rss.reader.utils.combine
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,19 +62,43 @@ class AppViewModel(
     combine(
         settingsRepository.appThemeMode,
         settingsRepository.useAmoled,
+        settingsRepository.dynamicColorEnabled,
         settingsRepository.showFeedFavIcon,
         settingsRepository.homeViewMode,
         settingsRepository.showReaderView,
         settingsRepository.blockImages,
-      ) { appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages ->
-        NTuple6(appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages)
+      ) {
+        appThemeMode,
+        useAmoled,
+        dynamicColorEnabled,
+        showFeedFavIcon,
+        homeViewMode,
+        showReaderView,
+        blockImages ->
+        NTuple7(
+          appThemeMode,
+          useAmoled,
+          dynamicColorEnabled,
+          showFeedFavIcon,
+          homeViewMode,
+          showReaderView,
+          blockImages
+        )
       }
       .onEach {
-        (appThemeMode, useAmoled, showFeedFavIcon, homeViewMode, showReaderView, blockImages) ->
+        (
+          appThemeMode,
+          useAmoled,
+          dynamicColorEnabled,
+          showFeedFavIcon,
+          homeViewMode,
+          showReaderView,
+          blockImages) ->
         _state.update {
           it.copy(
             appThemeMode = appThemeMode,
             useAmoled = useAmoled,
+            dynamicColorEnabled = dynamicColorEnabled,
             showFeedFavIcon = showFeedFavIcon,
             homeViewMode = homeViewMode,
             showReaderView = showReaderView,
