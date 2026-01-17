@@ -26,8 +26,8 @@ CREATE INDEX feed_pinned_position ON feed(pinnedPosition);
 CREATE INDEX feed_pinned_name ON feed(pinnedAt DESC, name);
 
 upsert:
-INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO
 UPDATE SET icon = excluded.icon, description = excluded.description,
 homepageLink = excluded.homepageLink, isDeleted = 0, lastUpdatedAt = :lastUpdatedAt;
