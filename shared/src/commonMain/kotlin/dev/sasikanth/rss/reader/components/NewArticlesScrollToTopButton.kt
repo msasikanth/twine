@@ -47,7 +47,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -56,15 +55,10 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
-import dev.sasikanth.rss.reader.ui.darkAppColorScheme
-import dev.sasikanth.rss.reader.ui.lightAppColorScheme
-import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -242,83 +236,6 @@ private fun OverlappedFeedIcons(
         placeable.placeRelative(x = x, y = 0, zIndex = index.toFloat())
         x += placeable.width - 12.dp.roundToPx()
       }
-    }
-  }
-}
-
-@Preview
-@Composable
-internal fun NewArticlesScrollToTopButtonPreview_OnlyNewArticles() {
-  CompositionLocalProvider(
-    LocalDynamicColorState provides
-      rememberDynamicColorState(lightAppColorScheme(), darkAppColorScheme())
-  ) {
-    AppTheme {
-      Box(modifier = Modifier.padding(16.dp)) {
-        NewArticlesScrollToTopButton(
-          unreadSinceLastSync =
-            UnreadSinceLastSync(
-              newArticleCount = 0,
-              hasNewArticles = true,
-              feedHomepageLinks = listOf("https://theverge.com", "https://wired.com"),
-              feedIcons = listOf("https://icon.horse/theverge.com", "https://icon.horse/wired.com"),
-              feedShowFavIconSettings = listOf(true, false)
-            ),
-          canShowScrollToTop = false,
-          onLoadNewArticlesClick = {},
-          onScrollToTopClick = {}
-        )
-      }
-    }
-  }
-}
-
-@Preview
-@Composable
-internal fun NewArticlesScrollToTopButtonPreview_OnlyScrollToTop() {
-  CompositionLocalProvider(
-    LocalDynamicColorState provides
-      rememberDynamicColorState(lightAppColorScheme(), darkAppColorScheme())
-  ) {
-    Box(modifier = Modifier.padding(16.dp)) {
-      NewArticlesScrollToTopButton(
-        unreadSinceLastSync =
-          UnreadSinceLastSync(
-            newArticleCount = 0,
-            hasNewArticles = false,
-            feedHomepageLinks = emptyList(),
-            feedIcons = emptyList(),
-            feedShowFavIconSettings = emptyList()
-          ),
-        canShowScrollToTop = true,
-        onLoadNewArticlesClick = {},
-        onScrollToTopClick = {}
-      )
-    }
-  }
-}
-
-@Preview
-@Composable
-internal fun NewArticlesScrollToTopButtonPreview_Both() {
-  CompositionLocalProvider(
-    LocalDynamicColorState provides
-      rememberDynamicColorState(lightAppColorScheme(), darkAppColorScheme())
-  ) {
-    Box(modifier = Modifier.padding(16.dp)) {
-      NewArticlesScrollToTopButton(
-        unreadSinceLastSync =
-          UnreadSinceLastSync(
-            newArticleCount = 0,
-            hasNewArticles = true,
-            feedHomepageLinks = listOf("https://theverge.com", "https://wired.com"),
-            feedIcons = listOf("https://icon.horse/theverge.com", "https://icon.horse/wired.com"),
-            feedShowFavIconSettings = listOf(true, false)
-          ),
-        canShowScrollToTop = true,
-        onLoadNewArticlesClick = {},
-        onScrollToTopClick = {}
-      )
     }
   }
 }
