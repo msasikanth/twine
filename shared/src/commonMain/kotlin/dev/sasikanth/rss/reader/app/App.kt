@@ -410,6 +410,11 @@ fun App(
               .launchIn(this)
           }
 
+          LaunchedEffect(Unit) {
+            toggleLightStatusBar(!useDarkTheme)
+            toggleLightNavBar(!useDarkTheme)
+          }
+
           AddFeedScreen(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
