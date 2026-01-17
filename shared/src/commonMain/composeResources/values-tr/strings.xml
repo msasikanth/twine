@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
     <string name="settingsHeaderTheme">Tema</string>
     <string name="settingsBrowserTypeTitle">Uygulama içi tarayıcıyı kullan</string>
-    <string name="settingsBrowserTypeSubtitle">Kapalı olduğunda, bağlantılar varsayılan tarayıcınızda açılır.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Ana sayfada bulanıklığı etkinleştir</string>
     <string name="settingsEnableBlurSubtitle">Devre dışı bırakıldığında, bulanık görüntüler yerine degrade gösterir. Performansı artırabilir.</string>
     <string name="settingsShowUnreadCountTitle">Okunmamış gönderi sayısını göster</string>
@@ -139,8 +139,8 @@
     <string name="cdLoadFullArticle">Tam makaleyi yükle</string>
     <string name="enableAutoSyncTitle">Otomatik senkronizasyonu etkinleştir</string>
     <string name="enableAutoSyncDesc">Açık olduğunda, akışlar arka planda güncellenecek</string>
-    <string name="showFeedFavIconTitle">Akış fav simgesini göster</string>
-    <string name="showFeedFavIconDesc">Kapalı olduğunda, web sitesinin favikonu yerine akış simgesi gösterilir</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
     <string name="blockedWords">Engellenen kelimeler</string>
     <string name="blockedWordsHint">Bir kelime girin</string>
     <string name="blockedWordsDesc">Gönderiler, metinlerine göre ana ekrandan gizlenebilir. Birçok gönderide görünen yaygın kelimelerden kaçınmanızı öneririz, çünkü bu, hiçbir gönderinin gösterilmemesine veya uygulamanın performansını olumsuz etkilemesine neden olabilir. \n\nGizli gönderiler arama ve yer imlerinde hala gösterilecektir.</string>
@@ -171,8 +171,8 @@
     <string name="settingsEnableNotificationsTitle">Bildirimleri etkinleştir</string>
     <string name="settingsEnableNotificationsSubtitle">Açıldığında, arka plan senkronizasyonu sırasında yeni makaleler bulunduğunda bildirim alacaksınız</string>
     <string name="settingsDownloadFullContentTitle">Tam makaleleri indir</string>
-    <string name="settingsDownloadFullContentSubtitle">Etkinleştirildiğinde, uygulama senkronizasyon sırasında tam makaleleri indirmeye çalışacaktır.</string>
-    <string name="settingsDownloadFullContentWarning">Uyarı!: Bu, akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi potansiyel olarak etkileyebilir.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Sırala</string>
     <string name="settingsHeaderSync">Bulut senkronizasyonu (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
