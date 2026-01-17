@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,27 +50,14 @@ internal fun FeedGroupBottomBarItem(
             .padding(8.dp),
         contentAlignment = Alignment.Center
       ) {
-        val iconsCount = maxOf(feedGroup.feedHomepageLinks.size, feedGroup.feedIconLinks.size)
-        val iconSize =
-          if (iconsCount > 2) {
-            16.dp
-          } else {
-            18.dp
-          }
-
-        val iconSpacing =
-          if (iconsCount > 2) {
-            2.dp
-          } else {
-            0.dp
-          }
+        val iconSize = 16.dp
+        val iconSpacing = 2.dp
 
         FeedGroupIconGrid(
           feedHomepageLinks = feedGroup.feedHomepageLinks,
           feedIconLinks = feedGroup.feedIconLinks,
           feedShowFavIconSettings = feedGroup.feedShowFavIconSettings,
           iconSize = iconSize,
-          iconShape = MaterialTheme.shapes.small,
           verticalArrangement = Arrangement.spacedBy(iconSpacing),
           horizontalArrangement = Arrangement.spacedBy(iconSpacing),
         )
