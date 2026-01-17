@@ -62,6 +62,12 @@ class AddFeedViewModel(
       AddFeedEvent.MarkGoBackAsDone -> {
         _state.update { it.copy(goBack = false) }
       }
+      is AddFeedEvent.OnAlwaysFetchSourceArticleChanged -> {
+        _state.update { it.copy(alwaysFetchSourceArticle = event.newValue) }
+      }
+      is AddFeedEvent.OnShowFeedFavIconChanged -> {
+        _state.update { it.copy(showFeedFavIcon = event.newValue) }
+      }
     }
   }
 
@@ -105,6 +111,8 @@ class AddFeedViewModel(
                 rssRepository.upsertFeedWithPosts(
                   feedPayload = feedPayload,
                   title = title,
+                  alwaysFetchSourceArticle = _state.value.alwaysFetchSourceArticle,
+                  showWebsiteFavIcon = _state.value.showFeedFavIcon,
                 )
               rssRepository.addFeedIdsToGroups(
                 groupIds = groups.map { it.id }.toSet(),

@@ -75,6 +75,8 @@ class RssRepository(
     feedPayload: FeedPayload,
     title: String? = null,
     feedLastCleanUpAt: Instant? = null,
+    alwaysFetchSourceArticle: Boolean = false,
+    showWebsiteFavIcon: Boolean = true,
   ): String {
     val feedId = nameBasedUuidOf(feedPayload.link).toString()
     val name = if (title.isNullOrBlank()) feedPayload.name else title
@@ -87,6 +89,8 @@ class RssRepository(
         description = feedPayload.description,
         homepageLink = feedPayload.homepageLink,
         link = feedPayload.link,
+        showFeedFavIcon = showWebsiteFavIcon,
+        alwaysFetchSourceArticle = alwaysFetchSourceArticle,
         createdAt = Clock.System.now(),
         lastUpdatedAt = Clock.System.now(),
       )

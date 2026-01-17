@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -49,6 +50,7 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDefaults
@@ -84,6 +86,8 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.FeedFetchingState
 import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
+import dev.sasikanth.rss.reader.components.OutlinedButton
+import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -92,10 +96,12 @@ import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
+import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.addToGroup
+import twine.shared.generated.resources.alwaysFetchSourceArticle
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.errorFeedNotFound
@@ -108,6 +114,7 @@ import twine.shared.generated.resources.errorUnknownHttpStatus
 import twine.shared.generated.resources.errorUnsupportedFeed
 import twine.shared.generated.resources.feedEntryLinkHint
 import twine.shared.generated.resources.feedEntryTitleHint
+import twine.shared.generated.resources.showFeedFavIconTitle
 
 @Composable
 fun AddFeedScreen(
@@ -267,25 +274,56 @@ fun AddFeedScreen(
           )
         }
 
-        item(
-          span = { GridItemSpan(maxLineSpan) },
-        ) {
-          Spacer(modifier = Modifier.requiredHeight(16.dp))
+        item(span = { GridItemSpan(maxLineSpan) }) {
+          Column {
+            HorizontalDivider(
+              modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
+              color = AppTheme.colorScheme.outlineVariant,
+            )
+
+            FeedOptionSwitch(
+              modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
+              title = stringResource(Res.string.alwaysFetchSourceArticle),
+              checked = state.alwaysFetchSourceArticle,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
+              }
+            )
+
+            HorizontalDivider(
+              color = AppTheme.colorScheme.outlineVariant,
+            )
+
+            FeedOptionSwitch(
+              modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
+              title = stringResource(Res.string.showFeedFavIconTitle),
+              checked = state.showFeedFavIcon,
+              onValueChanged = { newValue ->
+                viewModel.dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
+              }
+            )
+
+            HorizontalDivider(
+              modifier = Modifier.padding(vertical = 12.dp).ignoreHorizontalParentPadding(24.dp),
+              color = AppTheme.colorScheme.outlineVariant,
+            )
+          }
         }
 
         item(span = { GridItemSpan(maxLineSpan) }) {
           val shape = RoundedCornerShape(50)
-          Row(
-            modifier =
-              Modifier.fillMaxWidth()
-                .clip(shape)
-                .border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
-                .clickable { openGroupSelection() }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+          OutlinedButton(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            shape = shape,
+            onClick = { openGroupSelection() },
           ) {
-            Icon(imageVector = TwineIcons.NewGroup, contentDescription = null)
+            Icon(
+              imageVector = TwineIcons.NewGroup,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.requiredWidth(12.dp))
 
             Text(
               text = stringResource(Res.string.addToGroup),
@@ -304,6 +342,31 @@ fun AddFeedScreen(
     contentColor = Color.Unspecified,
     contentWindowInsets = WindowInsets.systemBars
   )
+}
+
+@Composable
+private fun FeedOptionSwitch(
+  title: String,
+  checked: Boolean,
+  onValueChanged: (Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier =
+      modifier.clickable { onValueChanged(!checked) }.padding(vertical = 16.dp, horizontal = 24.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Text(
+      modifier = Modifier.weight(1f),
+      text = title,
+      color = AppTheme.colorScheme.textEmphasisHigh,
+      style = MaterialTheme.typography.titleMedium
+    )
+
+    Spacer(Modifier.requiredSize(16.dp))
+
+    Switch(checked = checked, onCheckedChange = onValueChanged)
+  }
 }
 
 @Composable

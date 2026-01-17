@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.FolderOpen
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,6 +32,8 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
+import dev.sasikanth.rss.reader.resources.icons.Cards
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
@@ -92,7 +92,7 @@ internal fun FeedGroupIconGrid(
   } else {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
       Icon(
-        imageVector = Icons.TwoTone.FolderOpen,
+        imageVector = TwineIcons.Cards,
         contentDescription = null,
         tint = AppTheme.colorScheme.onSurface,
         modifier = Modifier.requiredSize(36.dp)

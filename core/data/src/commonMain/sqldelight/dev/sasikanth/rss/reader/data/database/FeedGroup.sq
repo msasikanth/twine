@@ -82,8 +82,12 @@ WHERE isDeleted = 0
 GROUP BY fg.id;
 
 createGroup:
-INSERT OR IGNORE INTO feedGroup(id, name, createdAt, updatedAt)
-VALUES (:id,  :name, :createdAt, :updatedAt);
+INSERT INTO feedGroup(id, name, createdAt, updatedAt)
+VALUES (:id, :name, :createdAt, :updatedAt)
+ON CONFLICT(id) DO UPDATE SET
+  name = excluded.name,
+  updatedAt = excluded.updatedAt,
+  isDeleted = 0;
 
 updateGroupName:
 UPDATE feedGroup SET name = :name, updatedAt = :updatedAt WHERE id = :id;
