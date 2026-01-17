@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
     <string name="settingsHeaderTheme">Thema</string>
     <string name="settingsBrowserTypeTitle">In-App-Browser verwenden</string>
-    <string name="settingsBrowserTypeSubtitle">Wenn ausgeschaltet, werden Links in Ihrem Standardbrowser geöffnet.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Unschärfe auf der Startseite aktivieren</string>
     <string name="settingsEnableBlurSubtitle">Wenn deaktiviert, werden Farbverläufe statt unscharfer Bilder angezeigt. Kann die Leistung verbessern.</string>
     <string name="settingsShowUnreadCountTitle">Anzahl ungelesener Beiträge anzeigen</string>
@@ -139,8 +139,8 @@
     <string name="cdLoadFullArticle">Vollständigen Beitrag laden</string>
     <string name="enableAutoSyncTitle">Automatische Synchronisierung aktivieren</string>
     <string name="enableAutoSyncDesc">Wenn eingeschaltet, werden die Feeds im Hintergrund aktualisiert</string>
-    <string name="showFeedFavIconTitle">Feed-Favoriten-Symbol anzeigen</string>
-    <string name="showFeedFavIconDesc">Wenn ausgeschaltet, wird das Feed-Symbol anstelle des Favoriten-Symbols der Website angezeigt</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
     <string name="blockedWords">Blockierte Wörter</string>
     <string name="blockedWordsHint">Geben Sie ein Wort ein</string>
     <string name="blockedWordsDesc">Beiträge können aufgrund ihres Textes auf dem Startbildschirm ausgeblendet werden. Wir empfehlen, häufige Wörter, die in vielen Beiträgen vorkommen, zu vermeiden, da dies dazu führen kann, dass keine Beiträge angezeigt werden oder die Leistung der App negativ beeinflusst wird. \n\nAusgeblendete Beiträge werden weiterhin in der Suche und in den Lesezeichen angezeigt.</string>
@@ -171,8 +171,8 @@
     <string name="settingsEnableNotificationsTitle">Benachrichtigungen aktivieren</string>
     <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
     <string name="settingsDownloadFullContentTitle">Vollständige Artikel herunterladen</string>
-    <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
-    <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Sortieren</string>
     <string name="settingsHeaderSync">Cloud-Synchronisierung (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
