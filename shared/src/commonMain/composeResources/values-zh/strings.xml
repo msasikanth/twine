@@ -41,7 +41,7 @@
     <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
     <string name="settingsHeaderTheme">主题</string>
     <string name="settingsBrowserTypeTitle">使用应用内浏览器</string>
-    <string name="settingsBrowserTypeSubtitle">关闭时，链接将在你的默认浏览器中打开。</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">在主页启用模糊效果</string>
     <string name="settingsEnableBlurSubtitle">关闭时，图片将使用渐变而不是模糊效果。可能会改善性能表现。</string>
     <string name="settingsShowUnreadCountTitle">显示未读文章计数</string>
@@ -139,8 +139,8 @@
     <string name="cdLoadFullArticle">加载完整文章</string>
     <string name="enableAutoSyncTitle">启用自动同步</string>
     <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
-    <string name="showFeedFavIconTitle">显示来源图标</string>
-    <string name="showFeedFavIconDesc">关闭时，将显示来源图标而不是网站图标</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
     <string name="blockedWords">关键字屏蔽</string>
     <string name="blockedWordsHint">输入关键字</string>
     <string name="blockedWordsDesc">可基于文本内容从主屏中隐藏文章。我们建议避免大多数文章内容中的常用词，否则会导致文章内容不可见甚至影响应用性能。\n\n被隐藏的文章仍会在搜索&amp;书签中显示。</string>
@@ -171,8 +171,8 @@
     <string name="settingsEnableNotificationsTitle">启用通知</string>
     <string name="settingsEnableNotificationsSubtitle">开启后，后台同步发现新文章时您将收到通知</string>
     <string name="settingsDownloadFullContentTitle">下载完整文章</string>
-    <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
-    <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">排序</string>
     <string name="settingsHeaderSync">云同步 (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
