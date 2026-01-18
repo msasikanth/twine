@@ -41,7 +41,7 @@ isDeleted = 0,
 lastUpdatedAt = :lastUpdatedAt;
 
 remove:
-UPDATE feed SET isDeleted = 1, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+UPDATE feed SET isDeleted = 1, pinnedAt = NULL, pinnedPosition = 0.0, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 
 feeds:
 SELECT * FROM feed
