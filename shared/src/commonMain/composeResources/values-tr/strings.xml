@@ -141,6 +141,7 @@
     <string name="enableAutoSyncDesc">Açık olduğunda, akışlar arka planda güncellenecek</string>
     <string name="showFeedFavIconTitle">Show website fav icon</string>
     <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Engellenen kelimeler</string>
     <string name="blockedWordsHint">Bir kelime girin</string>
     <string name="blockedWordsDesc">Gönderiler, metinlerine göre ana ekrandan gizlenebilir. Birçok gönderide görünen yaygın kelimelerden kaçınmanızı öneririz, çünkü bu, hiçbir gönderinin gösterilmemesine veya uygulamanın performansını olumsuz etkilemesine neden olabilir. \n\nGizli gönderiler arama ve yer imlerinde hala gösterilecektir.</string>
