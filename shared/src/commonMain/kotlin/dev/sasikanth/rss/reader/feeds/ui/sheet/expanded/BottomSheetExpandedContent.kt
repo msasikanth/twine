@@ -111,7 +111,6 @@ import twine.shared.generated.resources.feedsLetsStart
 import twine.shared.generated.resources.feedsSearchHint
 import twine.shared.generated.resources.removeSources
 import twine.shared.generated.resources.removeSourcesDesc
-import twine.shared.generated.resources.settings
 
 @Composable
 internal fun BottomSheetExpandedContent(
@@ -253,12 +252,7 @@ internal fun BottomSheetExpandedContent(
                 } else {
                   Icons.Filled.Tune
                 }
-              val editLabel =
-                if (state.selectedSources.first().sourceType == SourceType.FeedGroup) {
-                  stringResource(Res.string.edit)
-                } else {
-                  stringResource(Res.string.settings)
-                }
+              val editLabel = stringResource(Res.string.edit)
 
               ContextActionItem(
                 modifier = Modifier.weight(1f),
