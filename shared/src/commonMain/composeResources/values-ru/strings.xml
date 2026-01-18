@@ -141,6 +141,7 @@
     <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
     <string name="showFeedFavIconTitle">Show website fav icon</string>
     <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Заблокированные слова</string>
     <string name="blockedWordsHint">Введите слово</string>
     <string name="blockedWordsDesc">Посты могут быть скрыты с главного экрана из-за их текста. Мы рекомендуем избегать общих слов, которые встречаются во многих постах, поскольку это может привести к тому, что сообщения не будут отображаться или негативно скажутся на производительности приложения. \n\nСкрытые посты по-прежнему будут отображаться в поиске и закладках.</string>
