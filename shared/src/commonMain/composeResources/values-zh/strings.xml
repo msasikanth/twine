@@ -141,6 +141,7 @@
     <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
     <string name="showFeedFavIconTitle">Show website fav icon</string>
     <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">关键字屏蔽</string>
     <string name="blockedWordsHint">输入关键字</string>
     <string name="blockedWordsDesc">可基于文本内容从主屏中隐藏文章。我们建议避免大多数文章内容中的常用词，否则会导致文章内容不可见甚至影响应用性能。\n\n被隐藏的文章仍会在搜索&amp;书签中显示。</string>
