@@ -307,7 +307,7 @@ internal fun BottomSheetExpandedContent(
           end = padding.calculateEndPadding(layoutDirection),
           // adding extra spacing to bottom so that there is space between list end and the bottom
           // bar
-          bottom = padding.calculateBottomPadding() + 64.dp,
+          bottom = padding.calculateBottomPadding() + 200.dp,
           top = 8.dp
         )
       }
@@ -319,7 +319,7 @@ internal fun BottomSheetExpandedContent(
         modifier =
           Modifier.fillMaxSize()
             .padding(
-              bottom = if (imeBottomPadding > 0.dp) imeBottomPadding + 16.dp else 0.dp,
+              bottom = if (imeBottomPadding > 0.dp) imeBottomPadding else 0.dp,
               // doing this so that the dividers in sticky headers can go below the search bar and
               // not overlap with each other
               top = padding.calculateTopPadding()
