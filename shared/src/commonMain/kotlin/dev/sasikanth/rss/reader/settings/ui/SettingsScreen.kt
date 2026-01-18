@@ -89,6 +89,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -1607,7 +1608,11 @@ private fun OPMLSettingItem(
                 }
               }
 
-            Text(string)
+            Text(
+              text = string,
+              maxLines = 1,
+              overflow = TextOverflow.MiddleEllipsis,
+            )
           }
 
           OutlinedButton(
