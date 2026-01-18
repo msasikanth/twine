@@ -379,9 +379,14 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-              feedHomepageLinks = feedHomepageLinks.split(",").filter { it.isNotBlank() },
-              feedIconLinks = feedIconLinks.split(",").filter { it.isNotBlank() },
+              feedIds = feedIds?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
+                  ?: emptyList(),
+              feedHomepageLinks =
+                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter {
+                  it.isNotBlank()
+                },
+              feedIconLinks =
+                feedIconLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter { it.isNotBlank() },
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
@@ -876,9 +881,14 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds = feedIds?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-              feedHomepageLinks = feedHomepageLinks.split(",").filter { it.isNotBlank() },
-              feedIconLinks = feedIconLinks.split(",").filter { it.isNotBlank() },
+              feedIds = feedIds?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
+                  ?: emptyList(),
+              feedHomepageLinks =
+                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter {
+                  it.isNotBlank()
+                },
+              feedIconLinks =
+                feedIconLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter { it.isNotBlank() },
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
