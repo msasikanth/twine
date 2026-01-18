@@ -141,6 +141,7 @@
     <string name="enableAutoSyncDesc">Wenn eingeschaltet, werden die Feeds im Hintergrund aktualisiert</string>
     <string name="showFeedFavIconTitle">Show website fav icon</string>
     <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Blockierte Wörter</string>
     <string name="blockedWordsHint">Geben Sie ein Wort ein</string>
     <string name="blockedWordsDesc">Beiträge können aufgrund ihres Textes auf dem Startbildschirm ausgeblendet werden. Wir empfehlen, häufige Wörter, die in vielen Beiträgen vorkommen, zu vermeiden, da dies dazu führen kann, dass keine Beiträge angezeigt werden oder die Leistung der App negativ beeinflusst wird. \n\nAusgeblendete Beiträge werden weiterhin in der Suche und in den Lesezeichen angezeigt.</string>
