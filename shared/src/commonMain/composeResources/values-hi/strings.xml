@@ -141,6 +141,7 @@
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
     <string name="showFeedFavIconTitle">Show website fav icon</string>
     <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
