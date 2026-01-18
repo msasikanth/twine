@@ -30,8 +30,15 @@ upsert:
 INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(id) DO
-UPDATE SET icon = excluded.icon, description = excluded.description,
-homepageLink = excluded.homepageLink, isDeleted = 0, lastUpdatedAt = :lastUpdatedAt;
+UPDATE SET
+icon = excluded.icon,
+name = excluded.name,
+description = excluded.description,
+homepageLink = excluded.homepageLink,
+alwaysFetchSourceArticle = excluded.alwaysFetchSourceArticle,
+showFeedFavIcon = excluded.showFeedFavIcon,
+isDeleted = 0,
+lastUpdatedAt = :lastUpdatedAt;
 
 remove:
 UPDATE feed SET isDeleted = 1, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;

@@ -149,6 +149,7 @@ class LocalSyncCoordinator(
     rssRepository.upsertFeedWithPosts(
       feedPayload = feedFetchResult.feedPayload,
       feedLastCleanUpAt = feed.lastCleanUpAt,
+      updateFeed = false,
     )
 
     val finalPostCount = rssRepository.postsCountForFeed(feed.id)

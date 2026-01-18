@@ -77,23 +77,26 @@ class RssRepository(
     feedLastCleanUpAt: Instant? = null,
     alwaysFetchSourceArticle: Boolean = false,
     showWebsiteFavIcon: Boolean = true,
+    updateFeed: Boolean = true,
   ): String {
     val feedId = nameBasedUuidOf(feedPayload.link).toString()
-    val name = if (title.isNullOrBlank()) feedPayload.name else title
 
-    withContext(dispatchersProvider.databaseWrite) {
-      feedQueries.upsert(
-        id = feedId,
-        name = name,
-        icon = feedPayload.icon,
-        description = feedPayload.description,
-        homepageLink = feedPayload.homepageLink,
-        link = feedPayload.link,
-        showFeedFavIcon = showWebsiteFavIcon,
-        alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-        createdAt = Clock.System.now(),
-        lastUpdatedAt = Clock.System.now(),
-      )
+    if (updateFeed) {
+      val name = if (title.isNullOrBlank()) feedPayload.name else title
+      withContext(dispatchersProvider.databaseWrite) {
+        feedQueries.upsert(
+          id = feedId,
+          name = name,
+          icon = feedPayload.icon,
+          description = feedPayload.description,
+          homepageLink = feedPayload.homepageLink,
+          link = feedPayload.link,
+          showFeedFavIcon = showWebsiteFavIcon,
+          alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+          createdAt = Clock.System.now(),
+          lastUpdatedAt = Clock.System.now(),
+        )
+      }
     }
 
     val feedLastCleanUpAtEpochMilli =
