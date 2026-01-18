@@ -87,7 +87,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -197,6 +199,7 @@ import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsSyncDropbox
+import twine.shared.generated.resources.settingsSyncSignIn
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.settingsSyncStatusIdle
@@ -1605,7 +1608,11 @@ private fun OPMLSettingItem(
                 }
               }
 
-            Text(string)
+            Text(
+              text = string,
+              maxLines = 1,
+              overflow = TextOverflow.MiddleEllipsis,
+            )
           }
 
           OutlinedButton(
@@ -1803,16 +1810,25 @@ private fun CloudSyncSettingItem(
         }
 
         if (provider.isSupported) {
-          if (isSignedIn) {
-            TextButton(
-              onClick = { onSignOutClicked(provider) },
-            ) {
-              Text(
-                text = stringResource(Res.string.settingsSyncSignOut),
-                style = MaterialTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.primary
-              )
-            }
+          val label =
+            if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
+            else stringResource(Res.string.settingsSyncSignIn)
+
+          TextButton(
+            onClick = {
+              if (isSignedIn) {
+                onSignOutClicked(provider)
+              } else {
+                onSyncClicked(provider)
+              }
+            },
+          ) {
+            Text(
+              text = label,
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = AppTheme.colorScheme.primary
+            )
           }
         }
       }

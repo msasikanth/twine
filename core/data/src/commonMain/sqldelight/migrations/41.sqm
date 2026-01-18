@@ -1,0 +1,4 @@
+import kotlin.Boolean;
+
+-- Migration 41
+ALTER TABLE feed ADD COLUMN hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0;

@@ -218,18 +218,19 @@ fun App(
       ExternalUriHandler.listener = { uri ->
         if (uri.startsWith("twine://oauth")) {
           appViewModel.onOAuthRedirect(uri)
-        }
-
-        val deepLinkRequest = NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-        if (navController.graph.hasDeepLink(deepLinkRequest)) {
-          if (!navController.popBackStack(Screen.Main, inclusive = false)) {
-            navController.navigate(Screen.Main) {
-              popUpTo(Screen.Placeholder) { inclusive = true }
-              launchSingleTop = true
+        } else {
+          val deepLinkRequest =
+            NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+          if (navController.graph.hasDeepLink(deepLinkRequest)) {
+            if (!navController.popBackStack(Screen.Main, inclusive = false)) {
+              navController.navigate(Screen.Main) {
+                popUpTo(Screen.Placeholder) { inclusive = true }
+                launchSingleTop = true
+              }
             }
-          }
 
-          navController.navigate(NavUri(uri))
+            navController.navigate(NavUri(uri))
+          }
         }
       }
 
