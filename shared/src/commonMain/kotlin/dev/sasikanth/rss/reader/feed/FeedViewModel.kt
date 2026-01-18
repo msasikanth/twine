@@ -68,8 +68,14 @@ class FeedViewModel(
         onAlwaysFetchSourceArticleChanged(event.newValue, event.feedId)
       is FeedEvent.OnShowFeedFavIconChanged ->
         onShowFeedFavIconChanged(event.newValue, event.feedId)
+      is FeedEvent.OnHideFromAllFeedsChanged ->
+        onHideFromAllFeedsChanged(event.newValue, event.feedId)
       is FeedEvent.OnMarkPostsAsRead -> onMarkPostsAsRead(event.feedId)
     }
+  }
+
+  private fun onHideFromAllFeedsChanged(newValue: Boolean, feedId: String) {
+    viewModelScope.launch { rssRepository.updateFeedHideFromAllFeeds(feedId, newValue) }
   }
 
   private fun onMarkPostsAsRead(feedId: String) {

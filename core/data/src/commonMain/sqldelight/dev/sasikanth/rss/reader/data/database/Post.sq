@@ -86,7 +86,7 @@ allPostsCount:
 SELECT COUNT(post.id) FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 WHERE
-  ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   (post.flags & 4) == 0 AND
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
@@ -114,7 +114,7 @@ WITH baseQuery AS (
   FROM post
   INNER JOIN feed ON post.sourceId == feed.id
   WHERE
-    ((:isSourceIdsEmpty) OR post.sourceId IN :sourceIds) AND
+    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
     (post.flags & 4) == 0 AND
     feed.isDeleted = 0 AND
     (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
@@ -195,7 +195,7 @@ WHERE
   (post.flags & 2) == 0 AND
   feed.isDeleted = 0 AND
   post.postDate > :after AND
-  (:isSourceIdsEmpty OR post.sourceId IN :sourceIds);
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds);
 
 countPostsForFeed:
 SELECT COUNT(*) FROM post
@@ -267,7 +267,7 @@ WITH unreadPosts AS (
     p.syncedAt
   FROM post p
   INNER JOIN feed f ON p.sourceId = f.id
-  WHERE ((:isSourceIdsEmpty) OR p.sourceId IN :sourceIds)
+  WHERE ((:isSourceIdsEmpty AND f.hideFromAllFeeds = 0) OR p.sourceId IN :sourceIds)
     AND (p.flags & 4) = 0
     AND f.isDeleted = 0
     AND (p.flags & 2) = 0

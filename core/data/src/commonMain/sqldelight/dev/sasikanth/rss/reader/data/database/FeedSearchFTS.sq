@@ -44,7 +44,8 @@ SELECT
   f.pinnedAt,
   f.lastCleanUpAt,
   COUNT(CASE WHEN (p.flags & 2) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
-  f.showFeedFavIcon
+  f.showFeedFavIcon,
+  f.hideFromAllFeeds
 FROM feed_search fs
 INNER JOIN feed f ON f.id = fs.id
 LEFT JOIN post p ON p.sourceId = f.id AND p.postDate > :postsAfter

@@ -153,7 +153,8 @@ class RssRepository(
           showFeedFavIcon: Boolean,
           lastUpdatedAt: Instant?,
           refreshInterval: String,
-          isDeleted: Boolean ->
+          isDeleted: Boolean,
+          hideFromAllFeeds: Boolean ->
           Feed(
             id = id,
             name = name,
@@ -169,6 +170,7 @@ class RssRepository(
             alwaysFetchSourceArticle = alwaysFetchSourceArticle,
             pinnedPosition = pinnedPosition,
             showFeedFavIcon = showFeedFavIcon,
+            hideFromAllFeeds = hideFromAllFeeds,
             isDeleted = isDeleted,
           )
         }
@@ -329,7 +331,8 @@ class RssRepository(
             showFeedFavIcon: Boolean,
             lastUpdatedAt: Instant?,
             refreshInterval: String,
-            isDeleted: Boolean ->
+            isDeleted: Boolean,
+            hideFromAllFeeds: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -345,6 +348,7 @@ class RssRepository(
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               pinnedPosition = pinnedPosition,
               showFeedFavIcon = showFeedFavIcon,
+              hideFromAllFeeds = hideFromAllFeeds,
               isDeleted = isDeleted,
             )
           }
@@ -420,7 +424,8 @@ class RssRepository(
             pinnedAt,
             lastCleanUpAt,
             numberOfUnreadPosts,
-            showFeedFavIcon ->
+            showFeedFavIcon,
+            hideFromAllFeeds ->
             Feed(
               id = id,
               name = name,
@@ -433,6 +438,7 @@ class RssRepository(
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
               showFeedFavIcon = showFeedFavIcon,
+              hideFromAllFeeds = hideFromAllFeeds,
             )
           }
         )
@@ -462,7 +468,8 @@ class RssRepository(
           lastCleanUpAt: Instant?,
           alwaysFetchSourceArticle: Boolean,
           numberOfUnreadPosts: Long,
-          showFeedFavIcon: Boolean ->
+          showFeedFavIcon: Boolean,
+          hideFromAllFeeds: Boolean ->
           Feed(
             id = id,
             name = name,
@@ -475,7 +482,8 @@ class RssRepository(
             lastCleanUpAt = lastCleanUpAt,
             alwaysFetchSourceArticle = alwaysFetchSourceArticle,
             numberOfUnreadPosts = numberOfUnreadPosts,
-            showFeedFavIcon = showFeedFavIcon
+            showFeedFavIcon = showFeedFavIcon,
+            hideFromAllFeeds = hideFromAllFeeds,
           )
         }
       )
@@ -506,7 +514,8 @@ class RssRepository(
             lastCleanUpAt: Instant?,
             alwaysFetchSourceArticle: Boolean,
             numberOfUnreadPosts: Long,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            hideFromAllFeeds: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -520,6 +529,7 @@ class RssRepository(
               alwaysFetchSourceArticle = alwaysFetchSourceArticle,
               numberOfUnreadPosts = numberOfUnreadPosts,
               showFeedFavIcon = showFeedFavIcon,
+              hideFromAllFeeds = hideFromAllFeeds,
             )
           }
         )
@@ -816,7 +826,8 @@ class RssRepository(
             lastCleanUpAt = feed.lastCleanUpAt,
             alwaysFetchSourceArticle = feed.alwaysFetchSourceArticle,
             lastUpdatedAt = feed.lastUpdatedAt,
-            isDeleted = feed.isDeleted
+            isDeleted = feed.isDeleted,
+            hideFromAllFeeds = feed.hideFromAllFeeds
           )
         }
       }
@@ -904,6 +915,16 @@ class RssRepository(
   suspend fun updateFeedShowFavIcon(feedId: String, newValue: Boolean) {
     return withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateShowFeedFavIcon(newValue, feedId)
+    }
+  }
+
+  suspend fun updateFeedHideFromAllFeeds(feedId: String, newValue: Boolean) {
+    return withContext(dispatchersProvider.databaseWrite) {
+      feedQueries.updateHideFromAllFeeds(
+        hideFromAllFeeds = newValue,
+        lastUpdatedAt = Clock.System.now(),
+        id = feedId
+      )
     }
   }
 
@@ -1369,7 +1390,8 @@ class RssRepository(
             pinnedAt: Instant?,
             lastCleanUpAt: Instant?,
             numberOfUnreadPosts: Long,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            hideFromAllFeeds: Boolean ->
             Feed(
               id = id,
               name = name,
@@ -1382,6 +1404,7 @@ class RssRepository(
               lastCleanUpAt = lastCleanUpAt,
               numberOfUnreadPosts = numberOfUnreadPosts,
               showFeedFavIcon = showFeedFavIcon,
+              hideFromAllFeeds = hideFromAllFeeds,
             )
           }
         )

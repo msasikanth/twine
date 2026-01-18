@@ -103,6 +103,7 @@ import twine.shared.generated.resources.alwaysFetchSourceArticle
 import twine.shared.generated.resources.feedOptionCopyLink
 import twine.shared.generated.resources.feedOptionWebsite
 import twine.shared.generated.resources.feedTitleHint
+import twine.shared.generated.resources.hidePostsFromHome
 import twine.shared.generated.resources.markAsRead
 import twine.shared.generated.resources.noUnreadPostsInFeed
 import twine.shared.generated.resources.numberOfUnreadPostsInFeed
@@ -178,6 +179,15 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnShowFeedFavIconChanged(newValue, feedId))
+            }
+          )
+
+          Divider(horizontalInsets = HORIZONTAL_PADDING)
+
+          HidePostsFromAllFeedsSwitch(
+            feed = feed,
+            onValueChanged = { newValue, feedId ->
+              feedViewModel.dispatch(FeedEvent.OnHideFromAllFeedsChanged(newValue, feedId))
             }
           )
 
@@ -413,6 +423,20 @@ private fun ShowFeedFavIconSwitch(
   FeedOptionSwitch(
     title = stringResource(Res.string.showFeedFavIconTitle),
     checked = feed.showFeedFavIcon,
+    modifier = modifier,
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+  )
+}
+
+@Composable
+private fun HidePostsFromAllFeedsSwitch(
+  feed: Feed,
+  modifier: Modifier = Modifier,
+  onValueChanged: (newValue: Boolean, feedId: String) -> Unit,
+) {
+  FeedOptionSwitch(
+    title = stringResource(Res.string.hidePostsFromHome),
+    checked = feed.hideFromAllFeeds,
     modifier = modifier,
     onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
   )
