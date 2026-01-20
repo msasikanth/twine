@@ -46,6 +46,7 @@ class CloudSyncService(
   suspend fun sync(provider: CloudSyncProvider): Boolean {
     try {
       appConfigQueries.updateLastSyncStatus("SYNCING")
+      settingsRepository.updateLastSyncProgress("SYNCING")
       val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
       val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
 
@@ -170,6 +171,7 @@ class CloudSyncService(
         appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
         appConfigQueries.updateLastSyncStatus("SUCCESS")
         settingsRepository.updateLastSyncedAt(Clock.System.now())
+        settingsRepository.updateLastSyncProgress("SUCCESS")
 
         val allFiles = provider.listFiles("/twine_")
         val activeFiles = postChunks + metadataFileName
@@ -183,6 +185,7 @@ class CloudSyncService(
     } catch (e: Exception) {
       Logger.e(e) { "Failed to sync with ${provider.name}" }
       appConfigQueries.updateLastSyncStatus("FAILURE")
+      settingsRepository.updateLastSyncProgress("FAILURE")
       return false
     }
   }

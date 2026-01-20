@@ -68,6 +68,7 @@ class SettingsRepository(
   private val appIconKey = stringPreferencesKey("app_icon")
   private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
   private val dynamicColorEnabledKey = booleanPreferencesKey("dynamic_color_enabled")
+  private val lastSyncProgressKey = stringPreferencesKey("last_sync_progress")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -111,6 +112,9 @@ class SettingsRepository(
 
   val dynamicColorEnabled: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[dynamicColorEnabledKey] ?: true }
+
+  val lastSyncProgress: Flow<String?> =
+    dataStore.data.map { preferences -> preferences[lastSyncProgressKey] }
 
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
@@ -298,6 +302,16 @@ class SettingsRepository(
 
   suspend fun updateLastSyncedAt(value: Instant) {
     dataStore.edit { preferences -> preferences[lastSyncedAtKey] = value.toEpochMilliseconds() }
+  }
+
+  suspend fun updateLastSyncProgress(value: String?) {
+    dataStore.edit { preferences ->
+      if (value != null) {
+        preferences[lastSyncProgressKey] = value
+      } else {
+        preferences.remove(lastSyncProgressKey)
+      }
+    }
   }
 
   suspend fun updateInstallDate(value: Instant) {

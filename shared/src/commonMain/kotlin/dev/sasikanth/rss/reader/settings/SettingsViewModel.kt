@@ -81,7 +81,7 @@ class SettingsViewModel(
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
         settingsRepository.lastSyncedAt,
-        settingsRepository.lastSyncStatus,
+        settingsRepository.lastSyncProgress,
         settingsRepository.appIcon,
       ) {
         browserType,
@@ -99,7 +99,7 @@ class SettingsViewModel(
         enableNotifications,
         downloadFullContent,
         lastSyncedAt,
-        lastSyncStatus,
+        lastSyncProgress,
         appIcon ->
         Settings(
           browserType = browserType,
@@ -118,7 +118,7 @@ class SettingsViewModel(
           downloadFullContent = downloadFullContent,
           lastSyncedAt = lastSyncedAt,
           lastSyncStatus =
-            when (lastSyncStatus) {
+            when (lastSyncProgress) {
               "SUCCESS" -> SettingsState.SyncProgress.Success
               "FAILURE" -> SettingsState.SyncProgress.Failure
               "SYNCING" -> SettingsState.SyncProgress.Syncing
@@ -146,12 +146,7 @@ class SettingsViewModel(
             downloadFullContent = settings.downloadFullContent,
             lastSyncedAt = settings.lastSyncedAt,
             appIcon = settings.appIcon,
-            syncProgress =
-              if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
-                SettingsState.SyncProgress.Syncing
-              } else {
-                settings.lastSyncStatus
-              }
+            syncProgress = settings.lastSyncStatus
           )
         }
       }
@@ -205,14 +200,7 @@ class SettingsViewModel(
     viewModelScope.launch {
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
-        _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
         val result = cloudSyncService.sync(provider)
-        _state.update {
-          it.copy(
-            syncProgress =
-              if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
-          )
-        }
       } else {
         oAuthManager.setPendingProvider(provider.id)
         val authUrl = oAuthManager.getAuthUrl(provider.id)
@@ -224,7 +212,7 @@ class SettingsViewModel(
   private fun signOutClicked(provider: CloudSyncProvider) {
     viewModelScope.launch {
       provider.signOut()
-      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
+      settingsRepository.updateLastSyncProgress(null)
     }
   }
 
