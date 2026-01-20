@@ -54,7 +54,7 @@ revenuecat = "2.2.17+17.26.1"
 viewmodel = "2.9.6"
 navigation = "2.9.1"
 glance = "1.2.0-rc01"
-material-kolor = "4.0.5"
+material-kolor = "4.1.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
