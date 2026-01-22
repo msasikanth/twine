@@ -15,13 +15,6 @@ to browse through your feeds, with Material 3 [dynamic theming](https://m3.mater
 ## Images
 <img src="readme_images/banner.png" alt="banner" />
 
-<p style="text-align: center;">
-  <img src="readme_images/home.png" width="250" alt="Home screen"/>
-  <img src="readme_images/reader.png" width="250" alt="Reader screen"/>
-  <img src="readme_images/search.png" width="250" alt="Search screen"/>
-  <img src="readme_images/feed_management.png" width="250" alt="Feed management screen"/>
-</p>
-
 ## Features ✨
 
 - Supports **RDF**, **RSS**, **Atom** and **JSON** feeds
