@@ -213,12 +213,13 @@ class CloudSyncService(
             createdAt = localFeed?.createdAt ?: Clock.System.now(),
             pinnedAt = it.pinnedAt?.let(Instant::fromEpochMilliseconds),
             lastCleanUpAt = it.lastCleanUpAt?.let(Instant::fromEpochMilliseconds),
-            alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
             pinnedPosition = localFeed?.pinnedPosition ?: 0.0,
             showFeedFavIcon = localFeed?.showFeedFavIcon ?: true,
             lastUpdatedAt = it.lastUpdatedAt?.let(Instant::fromEpochMilliseconds),
             refreshInterval = localFeed?.refreshInterval ?: 1.hours,
-            isDeleted = it.isDeleted
+            isDeleted = it.isDeleted,
+            alwaysFetchSourceArticle = it.alwaysFetchSourceArticle,
+            hideFromAllFeeds = localFeed?.hideFromAllFeeds ?: false,
           )
         } else {
           null
