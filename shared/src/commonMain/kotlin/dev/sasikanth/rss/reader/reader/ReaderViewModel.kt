@@ -173,11 +173,6 @@ class ReaderViewModel(
                 UnreadWidget -> {
                   widgetDataRepository.unreadPostsPager()
                 }
-                else -> {
-                  throw IllegalArgumentException(
-                    "Unknown from screen: ${readerScreenArgs.fromScreen}"
-                  )
-                }
               }
             }
             .flow

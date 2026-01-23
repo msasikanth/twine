@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 @Suppress("DSL_SCOPE_VIOLATION")
@@ -60,7 +59,7 @@ kotlin {
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
-  androidLibrary {
+  android {
     namespace = "dev.sasikanth.rss.reader.common"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()

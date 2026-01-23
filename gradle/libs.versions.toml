@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.0"
-android_gradle_plugin = "8.13.2"
+android_gradle_plugin = "9.0.0"
 compose = "1.11.0-alpha01"
 compose_material_icons_extended = "1.7.3"
 
@@ -13,7 +13,7 @@ ktor = "3.3.3"
 kotlinx_coroutines = "1.10.2"
 kotlinx_date_time = "0.7.1"
 kotlinx_immutable_collections = "0.4.0"
-kotlinx_serialization_json = "1.9.0"
+kotlinx_serialization_json = "1.10.0"
 kotlinx_io = "0.8.2"
 androidx_activity = "1.12.2"
 androidx_appcompat = "1.7.1"
@@ -34,14 +34,14 @@ ksoup = "0.2.5"
 sqliteAndroid = "3.49.0"
 windowSizeClass = "0.5.0"
 desugarJdk = "2.1.5"
-atomicfu = "0.29.0"
+atomicfu = "0.30.0"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.91.3"
 ktxml = "1.0.0"
 uuid = "0.8.4"
 bugsnag-plugin = "8.2.0"
-bugsnag = "6.21.0"
+bugsnag = "6.22.0"
 google-play-review = "2.0.2"
 crashkios-bugsnag = "0.9.0"
 kermit = "2.0.8"
@@ -54,7 +54,7 @@ revenuecat = "2.2.17+17.26.1"
 viewmodel = "2.9.6"
 navigation = "2.9.1"
 glance = "1.2.0-rc01"
-material-kolor = "4.0.5"
+material-kolor = "4.1.0"
 
 [libraries]
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
@@ -143,7 +143,6 @@ material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "m
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }
 android_library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android_gradle_plugin" }
 kotlin_multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlin_android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin_parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin_compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin_serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

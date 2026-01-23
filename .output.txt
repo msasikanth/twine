@@ -1,0 +1,298 @@
+androidFoss androidFull androidMain commonMain  iosMain
+shared/src/androidFoss:
+kotlin
+shared/src/androidFoss/kotlin:
+dev
+shared/src/androidFoss/kotlin/dev:
+sasikanth
+shared/src/androidFoss/kotlin/dev/sasikanth:
+rss
+shared/src/androidFoss/kotlin/dev/sasikanth/rss:
+reader
+shared/src/androidFoss/kotlin/dev/sasikanth/rss/reader:
+app     billing premium utils
+shared/src/androidFoss/kotlin/dev/sasikanth/rss/reader/app:
+Flavor.kt
+shared/src/androidFoss/kotlin/dev/sasikanth/rss/reader/billing:
+BillingHandler.kt     BillingInitializer.kt
+shared/src/androidFoss/kotlin/dev/sasikanth/rss/reader/premium:
+shared/src/androidFoss/kotlin/dev/sasikanth/rss/reader/utils:
+AndroidInAppRating.kt
+shared/src/androidFull:
+kotlin
+shared/src/androidFull/kotlin:
+dev
+shared/src/androidFull/kotlin/dev:
+sasikanth
+shared/src/androidFull/kotlin/dev/sasikanth:
+rss
+shared/src/androidFull/kotlin/dev/sasikanth/rss:
+reader
+shared/src/androidFull/kotlin/dev/sasikanth/rss/reader:
+app     billing premium utils
+shared/src/androidFull/kotlin/dev/sasikanth/rss/reader/app:
+Flavor.kt
+shared/src/androidFull/kotlin/dev/sasikanth/rss/reader/billing:
+BillingHandler.kt     BillingInitializer.kt
+shared/src/androidFull/kotlin/dev/sasikanth/rss/reader/premium:
+shared/src/androidFull/kotlin/dev/sasikanth/rss/reader/utils:
+AndroidInAppRating.kt
+shared/src/androidMain:
+kotlin
+shared/src/androidMain/kotlin:
+dev
+shared/src/androidMain/kotlin/dev:
+sasikanth
+shared/src/androidMain/kotlin/dev/sasikanth:
+rss
+shared/src/androidMain/kotlin/dev/sasikanth/rss:
+reader
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader:
+app           notifications reader        ui
+di            platform      share         utils
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/app:
+AndroidAppIconManager.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/di:
+ApplicationComponent.kt         ImageLoaderComponent.android.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/notifications:
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/platform:
+AndroidLinkHandler.kt PlatformComponent.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/reader:
+webview
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/reader/webview:
+ReaderWebView.android.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/share:
+AndroidShareHandler.kt ShareComponent.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/ui:
+AndroidTypography.kt
+shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/utils:
+CoilExt.android.kt    ComposeExt.android.kt
+shared/src/commonMain:
+composeResources kotlin
+shared/src/commonMain/composeResources:
+drawable  font      values-de values-hi values-tr
+files     values    values-fr values-ru values-zh
+shared/src/commonMain/composeResources/drawable:
+ic_launcher_foreground.xml
+shared/src/commonMain/composeResources/files:
+reader
+shared/src/commonMain/composeResources/files/reader:
+main.js        readability.js turndown.js
+shared/src/commonMain/composeResources/font:
+anton.ttf                lora_bold.ttf            rethink-sans-medium.ttf
+comic-neue-bold.ttf      lora_medium.ttf          rethink-sans-regular.ttf
+comic-neue-regular.ttf   lora_regular.ttf         robot-serif-bold.ttf
+golos_bold.ttf           merriweather_bold.ttf    roboto-serif-medium.ttf
+golos_medium.ttf         merriweather_medium.ttf  roboto-serif-regular.ttf
+golos_regular.ttf        merriweather_regular.ttf
+google-sans.ttf          rethink-sans-bold.ttf
+shared/src/commonMain/composeResources/values:
+strings.xml
+shared/src/commonMain/composeResources/values-de:
+strings.xml
+shared/src/commonMain/composeResources/values-fr:
+strings.xml
+shared/src/commonMain/composeResources/values-hi:
+strings.xml
+shared/src/commonMain/composeResources/values-ru:
+strings.xml
+shared/src/commonMain/composeResources/values-tr:
+strings.xml
+shared/src/commonMain/composeResources/values-zh:
+strings.xml
+shared/src/commonMain/kotlin:
+dev
+shared/src/commonMain/kotlin/dev:
+sasikanth
+shared/src/commonMain/kotlin/dev/sasikanth:
+rss
+shared/src/commonMain/kotlin/dev/sasikanth/rss:
+reader
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader:
+about          components     groupselection onboarding     search
+addfeed        data           home           placeholder    settings
+app            di             icons          platform       share
+auth           favicons       initializers   posts          ui
+billing        feed           logging        premium        utils
+blockedwords   feeds          main           reader
+bookmarks      group          markdown       readlater
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/about:
+Person.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/about/ui:
+AboutScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed:
+AddFeedErrorType.kt AddFeedState.kt     ui
+AddFeedEvent.kt     AddFeedViewModel.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/ui:
+AddFeedScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app:
+App.kt          AppViewModel.kt Modals.kt
+AppState.kt     Flavor.kt       Screens.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/auth:
+ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/auth/ui:
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/billing:
+BillingComponent.kt   BillingInitializer.kt
+BillingHandler.kt     SubscriptionResult.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/blockedwords:
+BlockedWordsEvent.kt     BlockedWordsState.kt
+BlockedWordsScreen.kt    BlockedWordsViewModel.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/bookmarks:
+BookmarksEffect.kt    BookmarksState.kt     ui
+BookmarksEvent.kt     BookmarksViewModel.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/bookmarks/ui:
+BookmarksScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/components:
+BottomBarWithGradientShadow.kt  NewArticlesScrollToTopButton.kt
+Button.kt                       OutlinedButton.kt
+ConfirmFeedDeleteDialog.kt      SubHeader.kt
+ContextActionsBottomBar.kt      Switch.kt
+DropdownMenu.kt                 ToggleableButtonGroup.kt
+HorizontalPageIndicators.kt     image
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/components/image:
+AsyncImage.kt FeedIcon.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/data:
+sync
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/sync:
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/di:
+ImageLoaderComponent.kt       SharedApplicationComponent.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/favicons:
+FavIconFetcher.kt     FavIconImageLoader.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feed:
+FeedEvent.kt     FeedState.kt     FeedViewModel.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feed/ui:
+FeedInfoBottomSheet.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds:
+FeedsEvent.kt     FeedsState.kt     SourceListItem.kt
+FeedsPresenter.kt FeedsViewModel.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/ui:
+CreateGroupDialog.kt      FeedListItem.kt           sheet
+FeedGroupIconGrid.kt      SelectedCheckIndicator.kt
+FeedGroupItem.kt          common
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/ui/common:
+SourcesAll.kt           SourcesPinned.kt        SourcesSearchResults.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/ui/sheet:
+BottomSheetHandle.kt collapsed
+FeedsBottomSheet.kt  expanded
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/ui/sheet/collapsed:
+BottomSheetCollapsedContent.kt FeedGroupBottomBarItem.kt
+FeedBottomBarItem.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/ui/sheet/expanded:
+BottomSheetExpandedContent.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/group:
+GroupEvent.kt     GroupState.kt     GroupViewModel.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/group/ui:
+GroupScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection:
+GroupSelectionEffect.kt    GroupSelectionViewModel.kt
+GroupSelectionEvent.kt     ui
+GroupSelectionState.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection/ui:
+GroupSelectionSheet.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/home:
+HomeErrorType.kt HomePresenter.kt HomeViewModel.kt
+HomeEvent.kt     HomeState.kt     ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/home/ui:
+FeaturedImage.kt             PostActionBar.kt
+FeaturedPostItem.kt          PostList.kt
+FeaturedSection.kt           PostListItem.kt
+HomeScreen.kt                PostListKey.kt
+HomeScreenContentScaffold.kt PostsPreferencesSheet.kt
+HomeTopAppBar.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/icons:
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/initializers:
+Initializer.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/logging:
+LoggingComponent.kt   LoggingInitializer.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/main:
+ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/main/ui:
+MainScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/markdown:
+CoilMarkdownTransformer.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/onboarding:
+OnboardingEffect.kt    OnboardingState.kt     ui
+OnboardingEvent.kt     OnboardingViewModel.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/onboarding/ui:
+OnboardingScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/placeholder:
+PlaceholderScreen.kt    PlaceholderViewModel.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/platform:
+LinkHandler.kt       PlatformComponent.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/posts:
+AllPostsPager.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/premium:
+PremiumPaywallEvent.kt     PremiumPaywallViewModel.kt
+PremiumPaywallScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/reader:
+ReaderEvent.kt      ReaderState.kt      page                webview
+ReaderScreenArgs.kt ReaderViewModel.kt  ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/reader/page:
+ReaderPageViewModel.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/reader/page/ui:
+ReaderPage.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/reader/ui:
+ReaderCustomizationsContent.kt ReaderViewBottomBar.kt
+ReaderScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/reader/webview:
+ReaderHTML.kt    ReaderWebView.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/readlater:
+ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/readlater/ui:
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/search:
+SearchEvent.kt     SearchState.kt     SearchViewModel.kt ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/search/ui:
+SearchScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/settings:
+SettingsEvent.kt     SettingsViewModel.kt
+SettingsState.kt     ui
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/settings/ui:
+SettingsScreen.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/share:
+ShareComponent.kt ShareHandler.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/ui:
+AppColorScheme.kt     ElevationTokens.kt    TwineDynamicColors.kt
+AppTheme.kt           SeedColorExtractor.kt Typography.kt
+DynamicColorState.kt  TranslucentStyle.kt
+shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/utils:
+CoilExt.kt                     LocalBlockImage.kt
+ComposeExt.kt                  LocalDynamicColorEnabled.kt
+Constants.kt                   LocalShowFeedFavIconSetting.kt
+CoroutinesExt.kt               LocalWindowSizeClass.kt
+DateExt.kt                     ParallaxAlignment.kt
+ExternalUriHandler.kt          StringExt.kt
+InAppRating.kt                 Tuples.kt
+LocalAmoledSetting.kt
+shared/src/iosMain:
+kotlin
+shared/src/iosMain/kotlin:
+dev
+shared/src/iosMain/kotlin/dev:
+sasikanth
+shared/src/iosMain/kotlin/dev/sasikanth:
+rss
+shared/src/iosMain/kotlin/dev/sasikanth/rss:
+reader
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader:
+HomeViewController.kt di                    share
+app                   platform              ui
+billing               reader                utils
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/app:
+Flavor.kt            IosAppIconManager.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/billing:
+BillingHandler.kt     BillingInitializer.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/di:
+ApplicationComponent.kt        ImageLoaderComponent.ios.kt
+HomeViewControllerComponent.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/platform:
+IOSLinkHandler.kt    PlatformComponent.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/reader:
+webview
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/reader/webview:
+ReaderWebView.ios.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/share:
+IOSShareHandler.kt ShareComponent.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/ui:
+IOSTypography.kt
+shared/src/iosMain/kotlin/dev/sasikanth/rss/reader/utils:
+CoilExt.ios.kt    ComposeExt.ios.kt IosInAppRating.kt

@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
-
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -24,7 +22,7 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  androidLibrary {
+  android {
     namespace = "dev.sasikanth.rss.reader.core.base"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()
@@ -54,5 +52,8 @@ kotlin {
     }
   }
 
-  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
+  compilerOptions {
+    freeCompilerArgs.add("-Xexpect-actual-classes")
+    optIn.add("kotlin.time.ExperimentalTime")
+  }
 }
