@@ -3,39 +3,36 @@
 ![CI-MAIN](https://github.com/msasikanth/twine/actions/workflows/ci_checks.yml/badge.svg?branch=main)
 [![Crowdin](https://badges.crowdin.net/twine-rss-reader/localized.svg)](https://crowdin.com/project/twine-rss-reader)
 
+<img src="readme_images/banner.png" alt="banner" />
+
 Twine is a modern cross-platform RSS reader app built using Kotlin and Compose Multiplatform. It features a nice user experience
-to browse through your feeds, with Material 3 [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color) changing app ambient color based on content. .
+to browse through your feeds, with [dynamic theming](https://m3.material.io/styles/color/dynamic-color/user-generated-color), changing app ambient color based on content.
 
 ## Download
 
 <a href='https://play.google.com/store/apps/details?id=dev.sasikanth.rss.reader&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="200px"/></a>
-<a href='https://apt.izzysoft.de/packages/dev.sasikanth.rss.reader'><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="200" alt="Get it at IzzyOnDroid"></a>
 <a href="https://apps.apple.com/us/app/twine-rss-reader/id6465694958?itsct=apps_box_badge&amp;itscg=30200" style="display: inline-block; overflow: hidden; border-radius: 13px;"><img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/white/en-us;releaseDate=1694390400" alt="Download on the App Store" width="200px"></a>
-
-## Images
-<img src="readme_images/banner.png" alt="banner" />
+<a href='https://apt.izzysoft.de/packages/dev.sasikanth.rss.reader'><img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" width="200" alt="Get it at IzzyOnDroid"></a>
 
 ## Features ✨
 
 - Supports **RDF**, **RSS**, **Atom** and **JSON** feeds
-- Feed management: Add, Edit, Remove & Pin feeds
-- Feed grouping
-- Access to pinned feeds/groups from bottom bar in the home screen
+- Feed management: Add, edit, delete, pin and group feeds
+- Bottom bar in home screen to access pinned feeds and groups
 - Smart fetching: Twine looks for feeds when given any website homepage
-- Article shortcut to fetch full article in reader view
+- Article shortcut to fetch full article in the reader view
 - Bookmark posts to read later
 - Search posts
 - Background sync
 - Cloud sync support with Dropbox (Alpha ⚠)
 - Import and exports your feeds with OPML
-- Dynamic content theming
-- Light/Dark mode support
+- Light, dark and amoled theme support
 
 ## Tech Stack 📚
 
 - [Kotlin Multiplatform](https://kotlinlang.org/lp/multiplatform/)
-- [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 - [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/)
+- [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines)
 - [Ktor](https://ktor.io/)
 - [SQLDelight](https://cashapp.github.io/sqldelight/2.0.0-alpha05/)
 - [Kotlin-inject](https://github.com/evant/kotlin-inject)
