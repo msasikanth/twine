@@ -57,9 +57,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -568,16 +570,19 @@ fun featuredPosts(
 
   if (shouldBlockImage) return emptyFlow()
 
-  return remember(posts?.itemSnapshotList?.hashCode(), homeViewMode) {
+  val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
+  val featuredPostsSnapshot = posts?.itemSnapshotList?.take(featuredPostsCount)
+
+  return remember(featuredPostsSnapshot, homeViewMode) {
     flow {
       if (homeViewMode != HomeViewMode.Default || posts == null || posts.itemCount == 0) {
         emit(persistentListOf())
         return@flow
       }
 
-      val featuredPostsCount = minOf(posts.itemCount, Constants.NUMBER_OF_FEATURED_POSTS.toInt())
+      val actualFeaturedPostsCount = minOf(posts.itemCount, featuredPostsCount)
       val mutablePostsList =
-        MutableList(featuredPostsCount) { index ->
+        MutableList(actualFeaturedPostsCount) { index ->
           val post = posts[index]
           if (post != null && post.imageUrl.isNullOrBlank().not()) {
             val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
@@ -619,20 +624,25 @@ fun featuredPosts(
 
 @Composable
 private fun LazyListState.isScrollingTowardsUp(): Boolean {
+  var isScrollingTowardsUp by remember(this) { mutableStateOf(true) }
   var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
   var previousScrollOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
-  return remember(this) {
-      derivedStateOf {
-        if (previousIndex != firstVisibleItemIndex) {
-            previousIndex > firstVisibleItemIndex
+
+  LaunchedEffect(this) {
+    snapshotFlow { firstVisibleItemIndex to firstVisibleItemScrollOffset }
+      .collect { (currentIndex, currentScrollOffset) ->
+        val isScrollingUp =
+          if (previousIndex != currentIndex) {
+            previousIndex > currentIndex
           } else {
-            previousScrollOffset >= firstVisibleItemScrollOffset
+            previousScrollOffset >= currentScrollOffset
           }
-          .also {
-            previousIndex = firstVisibleItemIndex
-            previousScrollOffset = firstVisibleItemScrollOffset
-          }
+
+        isScrollingTowardsUp = isScrollingUp
+        previousIndex = currentIndex
+        previousScrollOffset = currentScrollOffset
       }
-    }
-    .value
+  }
+
+  return isScrollingTowardsUp
 }
