@@ -73,19 +73,20 @@ class RssRepository(
 
   suspend fun upsertFeedWithPosts(
     feedPayload: FeedPayload,
+    feedId: String? = null,
     title: String? = null,
     feedLastCleanUpAt: Instant? = null,
     alwaysFetchSourceArticle: Boolean = false,
     showWebsiteFavIcon: Boolean = true,
     updateFeed: Boolean = true,
   ): String {
-    val feedId = nameBasedUuidOf(feedPayload.link).toString()
+    val finalFeedId = feedId ?: nameBasedUuidOf(feedPayload.link).toString()
 
     if (updateFeed) {
       val name = if (title.isNullOrBlank()) feedPayload.name else title
       withContext(dispatchersProvider.databaseWrite) {
         feedQueries.upsert(
-          id = feedId,
+          id = finalFeedId,
           name = name,
           icon = feedPayload.icon,
           description = feedPayload.description,
@@ -110,7 +111,7 @@ class RssRepository(
         transactionRunner.invoke {
           postQueries.upsert(
             id = postId,
-            sourceId = feedId,
+            sourceId = finalFeedId,
             title = postPayload.title,
             description = postPayload.description,
             imageUrl = postPayload.imageUrl,
@@ -134,7 +135,7 @@ class RssRepository(
       }
     }
 
-    return feedId
+    return finalFeedId
   }
 
   fun feed(feedId: String): Feed? {

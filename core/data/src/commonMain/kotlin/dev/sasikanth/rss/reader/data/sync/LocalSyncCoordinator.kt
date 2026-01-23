@@ -148,6 +148,7 @@ class LocalSyncCoordinator(
 
     rssRepository.upsertFeedWithPosts(
       feedPayload = feedFetchResult.feedPayload,
+      feedId = feed.id,
       feedLastCleanUpAt = feed.lastCleanUpAt,
       updateFeed = false,
     )
