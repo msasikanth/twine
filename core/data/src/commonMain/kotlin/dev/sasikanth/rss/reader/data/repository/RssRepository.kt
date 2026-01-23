@@ -738,9 +738,10 @@ class RssRepository(
     feedIds: List<String>,
     lastCleanUpAt: Instant = Clock.System.now()
   ) {
+    val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        feedIds.forEach { feedId ->
+        feedIdsSnapshot.forEach { feedId ->
           feedQueries.updateLastCleanUpAt(lastCleanUpAt = lastCleanUpAt, id = feedId)
         }
       }
@@ -758,9 +759,10 @@ class RssRepository(
   }
 
   suspend fun markPostsAsRead(postIds: Set<String>) {
+    val postIdsSnapshot = postIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        postIds.forEach { postId ->
+        postIdsSnapshot.forEach { postId ->
           postQueries.updateReadStatus(read = 1L, id = postId, updatedAt = Clock.System.now())
         }
       }
@@ -771,9 +773,10 @@ class RssRepository(
     feedIds: List<String>,
     postsAfter: Instant = Instant.DISTANT_PAST
   ) {
+    val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        feedIds.forEach { feedId ->
+        feedIdsSnapshot.forEach { feedId ->
           postQueries.markPostsAsRead(
             sourceId = feedId,
             after = postsAfter,
@@ -797,9 +800,10 @@ class RssRepository(
   }
 
   suspend fun upsertPosts(posts: List<Post>) {
+    val postsSnapshot = posts.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        posts.forEach { post ->
+        postsSnapshot.forEach { post ->
           postQueries.upsertSyncPost(
             id = post.id,
             sourceId = post.sourceId,
@@ -820,9 +824,10 @@ class RssRepository(
   }
 
   suspend fun upsertFeeds(feeds: List<Feed>) {
+    val feedsSnapshot = feeds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        feeds.forEach { feed ->
+        feedsSnapshot.forEach { feed ->
           feedQueries.upsertSyncFeed(
             id = feed.id,
             name = feed.name,
@@ -963,10 +968,12 @@ class RssRepository(
   }
 
   suspend fun addFeedIdsToGroups(groupIds: Set<String>, feedIds: List<String>) {
+    val groupIdsSnapshot = groupIds.toList()
+    val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        groupIds.forEach { groupId ->
-          feedIds.forEach { feedId ->
+        groupIdsSnapshot.forEach { groupId ->
+          feedIdsSnapshot.forEach { feedId ->
             feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
           }
           feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
@@ -976,10 +983,12 @@ class RssRepository(
   }
 
   suspend fun removeFeedIdsFromGroups(groupIds: Set<String>, feedIds: List<String>) {
+    val groupIdsSnapshot = groupIds.toList()
+    val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
-        groupIds.forEach { groupId ->
-          feedIds.forEach { feedId ->
+        groupIdsSnapshot.forEach { groupId ->
+          feedIdsSnapshot.forEach { feedId ->
             feedGroupFeedQueries.removeFeedFromGroup(feedId = feedId, feedGroupId = groupId)
           }
           feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
@@ -989,10 +998,11 @@ class RssRepository(
   }
 
   suspend fun pinSources(sources: Set<Source>) {
+    val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        sources.forEach { source ->
+        sourcesSnapshot.forEach { source ->
           feedQueries.updatePinnedAt(id = source.id, pinnedAt = now, lastUpdatedAt = now)
           feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = now, updatedAt = now)
         }
@@ -1001,10 +1011,11 @@ class RssRepository(
   }
 
   suspend fun unpinSources(sources: Set<Source>) {
+    val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        sources.forEach { source ->
+        sourcesSnapshot.forEach { source ->
           feedQueries.updatePinnedAt(id = source.id, pinnedAt = null, lastUpdatedAt = now)
           feedGroupQueries.updatePinnedAt(id = source.id, pinnedAt = null, updatedAt = now)
         }
@@ -1013,10 +1024,11 @@ class RssRepository(
   }
 
   suspend fun deleteSources(sources: Set<Source>) {
+    val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
-        sources.forEach { source ->
+        sourcesSnapshot.forEach { source ->
           feedQueries.remove(id = source.id, lastUpdatedAt = now)
           postQueries.deletePostsForFeed(source.id)
           feedGroupQueries.deleteGroup(id = source.id, updatedAt = now)
