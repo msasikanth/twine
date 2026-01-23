@@ -23,10 +23,25 @@ to browse through your feeds, with [dynamic theming](https://m3.material.io/styl
 - Article shortcut to fetch full article in the reader view
 - Bookmark posts to read later
 - Search posts
+- Blocked words: Filter out content based on keywords
 - Background sync
 - Cloud sync support with Dropbox (Alpha ⚠)
 - Import and exports your feeds with OPML
 - Light, dark and amoled theme support
+
+## Project Structure 🏗️
+
+The project follows a modular Kotlin Multiplatform structure:
+
+- `androidApp`: Android-specific application code and entry point.
+- `iosApp`: iOS-specific application code (Swift/Xcode project).
+- `shared`: Contains the core UI logic using Compose Multiplatform, ViewModels (using `kotlin-inject`), and shared presentation logic.
+- `core/`: Modularized business logic.
+    - `base`: Base utilities, common interfaces, and platform abstractions.
+    - `data`: Data layer containing repositories, local database (SQLDelight), and sync logic.
+    - `model`: Domain models used across the project.
+    - `network`: Network layer using Ktor for fetching feeds and parsing.
+- `resources/icons`: Shared icon resources.
 
 ## Tech Stack 📚
 
@@ -36,6 +51,8 @@ to browse through your feeds, with [dynamic theming](https://m3.material.io/styl
 - [Ktor](https://ktor.io/)
 - [SQLDelight](https://cashapp.github.io/sqldelight/2.0.0-alpha05/)
 - [Kotlin-inject](https://github.com/evant/kotlin-inject)
+- [Coil](https://coil-kt.github.io/coil/)
+- [Multiplatform Markdown Renderer](https://github.com/mikepenz/multiplatform-markdown-renderer)
 - [Jetpack Libraries](https://developer.android.com/kotlin/multiplatform)
 
 For full list of dependencies used, please take a look at the [catalog](/gradle/libs.versions.toml) file.
@@ -44,7 +61,7 @@ For full list of dependencies used, please take a look at the [catalog](/gradle/
 
 You can just clone the repo and build it locally without requiring any changes. 
 
-Project requires JDK 20+, and based on the AGP version defined in [`libs.versions.toml`](/gradle/libs.versions.toml) file, 
+Project requires JDK 21+, and based on the AGP version defined in [`libs.versions.toml`](/gradle/libs.versions.toml) file, 
 you can use appropriate Android Studio to import the project.
 
 ## Contributing 🛠️
