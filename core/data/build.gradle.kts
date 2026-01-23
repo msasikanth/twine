@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
-
 /*
  * Copyright 2024 Sasikanth Miriyampalli
  *
@@ -44,7 +42,7 @@ kotlin {
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
-  androidLibrary {
+  android {
     namespace = "dev.sasikanth.rss.reader.data"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()

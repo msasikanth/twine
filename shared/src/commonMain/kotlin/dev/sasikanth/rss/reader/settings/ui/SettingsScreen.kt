@@ -1603,9 +1603,6 @@ private fun OPMLSettingItem(
                 is OpmlResult.InProgress.Exporting -> {
                   stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
                 }
-                else -> {
-                  ""
-                }
               }
 
             Text(

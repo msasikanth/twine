@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.android
+
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -16,16 +18,10 @@
 @Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   alias(libs.plugins.android.application)
-  alias(libs.plugins.kotlin.android)
   alias(libs.plugins.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.bugsnag)
   alias(libs.plugins.kotlin.compose)
-}
-
-kotlin {
-  jvmToolchain(21)
-  compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
 }
 
 android {

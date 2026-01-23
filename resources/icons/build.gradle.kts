@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
-
 /*
  * Copyright 2023 Sasikanth Miriyampalli
  *
@@ -27,7 +25,7 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
-  androidLibrary {
+  android {
     namespace = "dev.sasikanth.rss.reader.resources.icons"
 
     minSdk = libs.versions.android.sdk.min.get().toInt()
