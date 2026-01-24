@@ -68,8 +68,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                   DropboxSyncWorker(
                     context = appContext,
                     workerParameters = workerParameters,
-                    cloudSyncService = appComponent.cloudSyncService,
-                    dropboxSyncProvider = appComponent.dropboxSyncProvider,
+                    syncCoordinator = appComponent.syncCoordinator,
                   )
                 }
                 PostsCleanUpWorker::class.qualifiedName -> {

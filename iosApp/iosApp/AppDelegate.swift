@@ -156,10 +156,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         
         Task(priority: .background) {
             do {
-                let isDropboxSignedIn = try await applicationComponent.dropboxSyncProvider.isSignedInImmediate().boolValue
-                if isDropboxSignedIn {
-                    try await applicationComponent.cloudSyncService.sync(provider: applicationComponent.dropboxSyncProvider)
-                }
+                try await applicationComponent.syncCoordinator.push()
                 task.setTaskCompleted(success: true)
             } catch {
                 Bugsnag.notifyError(error)

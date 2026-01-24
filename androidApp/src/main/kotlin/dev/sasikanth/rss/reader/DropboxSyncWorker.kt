@@ -18,17 +18,14 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
-import dev.sasikanth.rss.reader.data.sync.CloudSyncService
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.flow.first
 
 class DropboxSyncWorker(
   context: Context,
   workerParameters: WorkerParameters,
-  private val cloudSyncService: CloudSyncService,
-  private val dropboxSyncProvider: DropboxSyncProvider,
+  private val syncCoordinator: SyncCoordinator,
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {
@@ -50,9 +47,7 @@ class DropboxSyncWorker(
 
   override suspend fun doWork(): Result {
     return try {
-      if (dropboxSyncProvider.isSignedIn().first()) {
-        cloudSyncService.sync(dropboxSyncProvider)
-      }
+      syncCoordinator.push()
       Result.success()
     } catch (e: CancellationException) {
       Result.failure()
