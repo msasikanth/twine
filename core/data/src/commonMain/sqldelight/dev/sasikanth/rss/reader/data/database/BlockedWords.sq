@@ -18,14 +18,7 @@ BEGIN
   SET flags = flags | 4
   WHERE
     (title LIKE '%' || new.content || '%' OR
-    description LIKE '%' || new.content || '%' OR
-    EXISTS (
-      SELECT 1
-      FROM postContent
-      WHERE postContent.id = post.id AND
-        (postContent.rawContent LIKE '%' || new.content || '%' OR
-        postContent.htmlContent LIKE '%' || new.content || '%')
-    )) AND
+    description LIKE '%' || new.content || '%') AND
     (flags & 4) == 0;
 END;
 
@@ -37,14 +30,7 @@ BEGIN
   SET flags = flags | 4
   WHERE
     (title LIKE '%' || new.content || '%' OR
-    description LIKE '%' || new.content || '%' OR
-    EXISTS (
-      SELECT 1
-      FROM postContent
-      WHERE postContent.id = post.id AND
-        (postContent.rawContent LIKE '%' || new.content || '%' OR
-        postContent.htmlContent LIKE '%' || new.content || '%')
-    )) AND
+    description LIKE '%' || new.content || '%') AND
     (flags & 4) == 0;
 END;
 
@@ -58,14 +44,7 @@ BEGIN
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
-           post.description LIKE '%' || blockedWord.content || '%' OR
-           EXISTS (
-             SELECT 1
-             FROM postContent
-             WHERE postContent.id = post.id AND
-               (postContent.rawContent LIKE '%' || blockedWord.content || '%' OR
-               postContent.htmlContent LIKE '%' || blockedWord.content || '%')
-           ))
+           post.description LIKE '%' || blockedWord.content || '%')
     AND isDeleted = 0
   )
   AND (flags & 4) != 0;
@@ -80,14 +59,7 @@ BEGIN
     SELECT 1
     FROM blockedWord
     WHERE (post.title LIKE '%' || blockedWord.content || '%' OR
-           post.description LIKE '%' || blockedWord.content || '%' OR
-           EXISTS (
-             SELECT 1
-             FROM postContent
-             WHERE postContent.id = post.id AND
-               (postContent.rawContent LIKE '%' || blockedWord.content || '%' OR
-               postContent.htmlContent LIKE '%' || blockedWord.content || '%')
-           ))
+           post.description LIKE '%' || blockedWord.content || '%')
     AND isDeleted = 0
   )
   AND (flags & 4) != 0;
