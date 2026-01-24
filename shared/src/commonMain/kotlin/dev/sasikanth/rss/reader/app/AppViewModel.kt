@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.sync.CloudSyncService
 import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -46,7 +45,6 @@ class AppViewModel(
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
-  private val cloudSyncService: CloudSyncService,
   private val dropboxSyncProvider: DropboxSyncProvider,
   private val linkHandler: LinkHandler,
 ) : ViewModel() {
@@ -124,11 +122,9 @@ class AppViewModel(
 
   fun onOAuthRedirect(uri: String) {
     viewModelScope.launch {
-      val providerId = oAuthManager.handleRedirect(uri)
-      if (providerId != null) {
-        when (providerId) {
-          dropboxSyncProvider.id -> cloudSyncService.sync(dropboxSyncProvider)
-        }
+      val signInSucceeded = oAuthManager.handleRedirect(uri)
+      if (signInSucceeded) {
+        syncCoordinator.pull()
       }
       linkHandler.close()
     }

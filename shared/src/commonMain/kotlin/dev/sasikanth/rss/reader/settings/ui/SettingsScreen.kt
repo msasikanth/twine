@@ -120,7 +120,8 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.CloudStorageService
+import dev.sasikanth.rss.reader.data.sync.FileCloudSyncProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
@@ -434,10 +435,8 @@ internal fun SettingsScreen(
             syncProgress = state.syncProgress,
             lastSyncedAt = state.lastSyncedAt,
             availableProviders = viewModel.availableProviders,
-            onSyncClicked = { provider -> viewModel.dispatch(SettingsEvent.SyncClicked(provider)) },
-            onSignOutClicked = { provider ->
-              viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
-            }
+            onSyncClicked = { viewModel.dispatch(SettingsEvent.SyncClicked(it)) },
+            onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) }
           )
         }
 
@@ -1751,15 +1750,14 @@ private fun AboutProfileImages() {
 private fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
-  availableProviders: List<CloudSyncProvider>,
-  onSyncClicked: (CloudSyncProvider) -> Unit,
-  onSignOutClicked: (CloudSyncProvider) -> Unit
+  availableProviders: List<FileCloudSyncProvider>,
+  onSyncClicked: (FileCloudSyncProvider) -> Unit,
+  onSignOutClicked: () -> Unit
 ) {
   availableProviders.forEach { provider ->
     val label =
-      when (provider.name) {
-        "Dropbox" -> stringResource(Res.string.settingsSyncDropbox)
-        else -> provider.name
+      when (provider.cloudService) {
+        CloudStorageService.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
 
@@ -1814,7 +1812,7 @@ private fun CloudSyncSettingItem(
           TextButton(
             onClick = {
               if (isSignedIn) {
-                onSignOutClicked(provider)
+                onSignOutClicked()
               } else {
                 onSyncClicked(provider)
               }

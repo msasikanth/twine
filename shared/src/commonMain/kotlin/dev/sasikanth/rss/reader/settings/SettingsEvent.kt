@@ -65,7 +65,7 @@ sealed interface SettingsEvent {
 
   data class SyncClicked(val provider: CloudSyncProvider) : SettingsEvent
 
-  data class SignOutClicked(val provider: CloudSyncProvider) : SettingsEvent
+  data object SignOutClicked : SettingsEvent
 
   data object ClearAuthUrl : SettingsEvent
 
