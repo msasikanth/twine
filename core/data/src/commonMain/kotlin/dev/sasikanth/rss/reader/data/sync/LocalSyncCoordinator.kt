@@ -135,8 +135,8 @@ class LocalSyncCoordinator(
     }
   }
 
-  override suspend fun push() {
-    // no-op
+  override suspend fun push(): Boolean {
+    return false
   }
 
   private suspend fun pullFeed(feed: Feed, now: Instant) {

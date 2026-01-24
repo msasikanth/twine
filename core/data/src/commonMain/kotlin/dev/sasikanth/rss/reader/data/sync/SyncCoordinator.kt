@@ -41,7 +41,7 @@ interface SyncCoordinator {
   suspend fun pull(feedId: String)
 
   /** Pushes the local changes to the remote source. */
-  suspend fun push()
+  suspend fun push(): Boolean
 }
 
 sealed interface SyncState {

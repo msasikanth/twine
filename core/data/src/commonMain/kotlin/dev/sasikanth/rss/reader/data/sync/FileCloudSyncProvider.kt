@@ -23,12 +23,22 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 
+interface ServiceType
+
+enum class CloudStorageService : ServiceType {
+  DROPBOX
+}
+
 interface CloudSyncProvider {
-  val id: String
-  val name: String
+  val cloudService: ServiceType
+}
+
+interface FileCloudSyncProvider : CloudSyncProvider {
+
+  override val cloudService: CloudStorageService
+
   val isSupported: Boolean
     get() = true
 
