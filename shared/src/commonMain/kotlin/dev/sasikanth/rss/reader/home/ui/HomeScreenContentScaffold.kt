@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.SubcomposeLayout
@@ -37,6 +39,13 @@ internal fun HomeScreenContentScaffold(
   body: @Composable (PaddingValues) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val latestHomeTopAppBar by rememberUpdatedState(homeTopAppBar)
+  val latestBody by rememberUpdatedState(body)
+  val paddingValues = remember { MutablePaddingValues() }
+
+  val homeTopAppBarContent = remember { @Composable { latestHomeTopAppBar() } }
+  val bodyContent = remember { @Composable { latestBody(paddingValues) } }
+
   SubcomposeLayout(
     modifier = Modifier.fillMaxSize().then(modifier),
   ) { constraints ->
@@ -45,13 +54,13 @@ internal fun HomeScreenContentScaffold(
     val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
 
     val topBarPlaceables =
-      subcompose("topBar") { homeTopAppBar() }.map { it.measure(looseConstraints) }
+      subcompose("topBar", homeTopAppBarContent).map { it.measure(looseConstraints) }
     val topBarHeight = topBarPlaceables.fastMaxBy { it.height }?.height ?: 0
 
+    paddingValues.top = topBarHeight.toDp()
+
     val bodyConstraints = looseConstraints.copy(maxHeight = layoutHeight)
-    val bodyPlaceables =
-      subcompose("body") { body(PaddingValues(top = topBarHeight.toDp())) }
-        .map { it.measure(bodyConstraints) }
+    val bodyPlaceables = subcompose("body", bodyContent).map { it.measure(bodyConstraints) }
 
     layout(layoutWidth, layoutHeight) {
       bodyPlaceables.fastForEach { it.placeRelative(0, 0) }
