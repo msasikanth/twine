@@ -1,0 +1,28 @@
+CREATE TABLE user_new(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    avatarUrl TEXT,
+    token TEXT NOT NULL,
+    refreshToken TEXT NOT NULL,
+    serverUrl TEXT,
+    lastSyncStatus TEXT NOT NULL DEFAULT 'IDLE'
+);
+
+INSERT INTO user_new (id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus)
+SELECT id, name, email, NULL, token, '', serverUrl, (SELECT lastSyncStatus FROM appConfig WHERE id = 0) FROM user;
+
+DROP TABLE user;
+ALTER TABLE user_new RENAME TO user;
+
+CREATE TABLE appConfig_new(
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
+    syncFormatVersion INTEGER NOT NULL DEFAULT 1,
+    lastSyncedFormatVersion INTEGER NOT NULL DEFAULT 0
+);
+
+INSERT INTO appConfig_new (id, syncFormatVersion, lastSyncedFormatVersion)
+SELECT id, syncFormatVersion, lastSyncedFormatVersion FROM appConfig;
+
+DROP TABLE appConfig;
+ALTER TABLE appConfig_new RENAME TO appConfig;

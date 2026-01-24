@@ -1,19 +1,15 @@
 CREATE TABLE appConfig(
     id INTEGER NOT NULL PRIMARY KEY CHECK (id = 0),
     syncFormatVersion INTEGER NOT NULL DEFAULT 1,
-    lastSyncedFormatVersion INTEGER NOT NULL DEFAULT 0,
-    lastSyncStatus TEXT NOT NULL DEFAULT 'IDLE'
+    lastSyncedFormatVersion INTEGER NOT NULL DEFAULT 0
 );
 
 getSyncConfig:
 SELECT * FROM appConfig WHERE id = 0;
 
 updateSyncFormatVersion:
-INSERT OR REPLACE INTO appConfig(id, syncFormatVersion, lastSyncedFormatVersion, lastSyncStatus)
-VALUES (0, :syncFormatVersion, (SELECT lastSyncedFormatVersion FROM appConfig WHERE id = 0), (SELECT lastSyncStatus FROM appConfig WHERE id = 0));
+INSERT OR REPLACE INTO appConfig(id, syncFormatVersion, lastSyncedFormatVersion)
+VALUES (0, :syncFormatVersion, (SELECT lastSyncedFormatVersion FROM appConfig WHERE id = 0));
 
 updateLastSyncedFormatVersion:
 UPDATE appConfig SET lastSyncedFormatVersion = :lastSyncedFormatVersion WHERE id = 0;
-
-updateLastSyncStatus:
-UPDATE appConfig SET lastSyncStatus = :lastSyncStatus WHERE id = 0;
