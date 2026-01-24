@@ -14,15 +14,15 @@ package dev.sasikanth.rss.reader.data.sync
 import kotlinx.coroutines.flow.Flow
 
 interface OAuthTokenProvider {
-  fun isSignedIn(providerId: String): Flow<Boolean>
+  fun isSignedIn(serviceType: ServiceType): Flow<Boolean>
 
-  suspend fun isSignedInImmediate(providerId: String): Boolean
+  suspend fun isSignedInImmediate(serviceType: ServiceType): Boolean
 
-  suspend fun getAccessToken(providerId: String): String?
+  suspend fun getAccessToken(serviceType: ServiceType): String?
 
-  suspend fun saveAccessToken(providerId: String, token: String?)
+  suspend fun saveAccessToken(serviceType: ServiceType, token: String?)
 
-  suspend fun getRefreshToken(providerId: String): String?
+  suspend fun getRefreshToken(serviceType: ServiceType): String?
 
-  suspend fun saveRefreshToken(providerId: String, token: String?)
+  suspend fun saveRefreshToken(serviceType: ServiceType, token: String?)
 }
