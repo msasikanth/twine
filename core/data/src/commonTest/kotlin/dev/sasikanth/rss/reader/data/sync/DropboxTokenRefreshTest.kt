@@ -87,7 +87,8 @@ class DropboxTokenRefreshTest {
 
     val httpClient = HttpClient(mockEngine) { install(ContentNegotiation) { json(json) } }
 
-    val provider = DropboxSyncProvider(httpClient, tokenProvider)
+    val provider =
+      DropboxSyncProvider(httpClient = httpClient, tokenProvider = tokenProvider, onSignOut = {})
     val result = provider.download("test.json")
 
     assertEquals("success_content", result)
