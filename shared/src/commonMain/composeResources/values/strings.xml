@@ -182,7 +182,7 @@
     <string name="sort">Sort</string>
     <string name="settingsHeaderSync">Cloud sync (Alpha ⚠)</string>
     <string name="settingsSyncDropbox" translatable="false">Dropbox</string>
-    <string name="settingsSyncFreshRSS" translatable="false">FreshRSS (Google Reader)</string>
+    <string name="settingsSyncFreshRSS" translatable="false">FreshRSS (GReader)</string>
     <string name="settingsSyncDropboxDesc">Consistent cross-platform sync</string>
     <string name="settingsSyncStatusIdle">Not synced</string>
     <string name="settingsSyncStatusSyncing">Syncing...</string>
