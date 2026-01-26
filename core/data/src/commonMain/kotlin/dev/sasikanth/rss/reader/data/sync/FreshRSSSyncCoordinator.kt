@@ -223,7 +223,7 @@ class FreshRSSSyncCoordinator(
       }
   }
 
-  private suspend fun syncSubscriptions() {
+  suspend fun syncSubscriptions() {
     val subscriptions = freshRssSource.subscriptions().subscriptions
     val localFeeds = rssRepository.allFeedsBlocking()
 
