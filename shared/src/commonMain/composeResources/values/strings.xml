@@ -205,6 +205,17 @@
     <string name="freshRssClearDataPositive">Clear and Login</string>
     <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
     <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="settingsSyncMiniflux" translatable="false">Miniflux</string>
+    <string name="minifluxLoginTitle">Miniflux Login</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxUrlPlaceholder" translatable="false">https://miniflux.example.com</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
