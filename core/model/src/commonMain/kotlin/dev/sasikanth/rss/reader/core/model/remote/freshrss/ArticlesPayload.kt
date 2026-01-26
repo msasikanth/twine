@@ -15,39 +15,39 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ArticlesPayload(
-  val id: String,
-  val updated: Long,
-  val items: List<ArticlePayload>,
-  val continuation: String?,
+  val id: String = "",
+  val updated: Long = 0,
+  val items: List<ArticlePayload> = emptyList(),
+  val continuation: String? = null,
 )
 
 @Serializable
 data class ArticlePayload(
   val id: String,
-  val crawlTimeMsec: String,
-  val timestampUsec: String,
-  val published: Long,
-  val title: String,
-  val canonical: List<LinksPayload>,
-  val alternate: List<LinksPayload>,
-  val origin: OriginPayload,
-  val summary: SummaryPayload,
+  val crawlTimeMsec: String = "",
+  val timestampUsec: String = "",
+  val published: Long = 0,
+  val title: String = "",
+  val canonical: List<LinksPayload> = emptyList(),
+  val alternate: List<LinksPayload> = emptyList(),
+  val origin: OriginPayload = OriginPayload(),
+  val summary: SummaryPayload = SummaryPayload(),
   val author: String? = null,
 )
 
 @Serializable
 data class OriginPayload(
-  val streamId: String,
-  val htmlUrl: String,
-  val title: String,
+  val streamId: String = "",
+  val htmlUrl: String = "",
+  val title: String = "",
 )
 
 @Serializable
 data class SummaryPayload(
-  val content: String,
+  val content: String = "",
 )
 
 @Serializable
 data class LinksPayload(
-  val href: String,
+  val href: String = "",
 )

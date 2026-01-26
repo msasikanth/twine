@@ -16,9 +16,8 @@ import dev.sasikanth.rss.reader.data.repository.UserRepository
 import me.tatarka.inject.annotations.Provides
 
 interface UserDataComponent {
-
   @Provides
-  fun providesUserProvider(userRepository: UserRepository): User? {
-    return userRepository.userBlocking()
+  fun providesUserProvider(userRepository: UserRepository): suspend () -> User? = {
+    userRepository.currentUser()
   }
 }

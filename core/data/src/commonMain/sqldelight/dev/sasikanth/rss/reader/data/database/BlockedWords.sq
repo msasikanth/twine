@@ -80,6 +80,9 @@ SELECT * FROM blockedWord WHERE isDeleted = 0 ORDER BY rowid DESC;
 allBlockedWords:
 SELECT * FROM blockedWord;
 
+deleteAll:
+DELETE FROM blockedWord;
+
 upsertSyncBlockedWord:
 INSERT INTO blockedWord(id, content, isDeleted, updatedAt)
 VALUES (:id, :content, :isDeleted, :updatedAt)

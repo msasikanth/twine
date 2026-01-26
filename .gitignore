@@ -28,5 +28,6 @@ core/network/http_requests/http-client.private.env.json
 .idea/appInsightsSettings.xml
 .idea/shelf
 .idea/httpRequests
+.idea/deviceManager.xml
 gradle.xml
 *.iml

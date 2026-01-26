@@ -49,7 +49,7 @@ fun <T : HttpClientEngineConfig> httpClient(
     install(HttpCache)
 
     install(Logging) {
-      level = LogLevel.INFO
+      level = LogLevel.ALL
       logger =
         object : Logger {
           override fun log(message: String) {

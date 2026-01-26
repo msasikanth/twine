@@ -18,3 +18,6 @@ DELETE FROM feedGroupFeed WHERE feedId = :feedId AND feedGroupId = :feedGroupId;
 
 removeAllFeedsFromGroup:
 DELETE FROM feedGroupFeed WHERE feedGroupId = :feedGroupId;
+
+deleteAll:
+DELETE FROM feedGroupFeed;

@@ -40,9 +40,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Icon
 import androidx.compose.material.Snackbar
 import androidx.compose.material.SnackbarHost
@@ -55,7 +53,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -88,6 +85,7 @@ import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.OutlinedButton
 import dev.sasikanth.rss.reader.components.Switch
+import dev.sasikanth.rss.reader.components.TextField
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
@@ -95,7 +93,6 @@ import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
-import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -242,7 +239,7 @@ fun AddFeedScreen(
               Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
                 next = feedTitleFocus
               },
-            input = feedLink,
+            value = feedLink,
             onValueChange = { feedLink = it },
             hint = stringResource(Res.string.feedEntryLinkHint),
             keyboardOptions =
@@ -262,7 +259,7 @@ fun AddFeedScreen(
               Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
                 previous = feedLinkFocus
               },
-            input = feedTitle,
+            value = feedTitle,
             onValueChange = { feedTitle = it },
             hint = stringResource(Res.string.feedEntryTitleHint),
             keyboardOptions =
@@ -409,61 +406,6 @@ private fun GroupItem(
       maxLines = 1,
     )
   }
-}
-
-@Composable
-private fun TextField(
-  input: TextFieldValue,
-  hint: String,
-  onValueChange: (TextFieldValue) -> Unit,
-  modifier: Modifier = Modifier,
-  keyboardActions: KeyboardActions = KeyboardActions(),
-  keyboardOptions: KeyboardOptions = KeyboardOptions(),
-  enabled: Boolean = true,
-  trailingIcon: @Composable (() -> Unit)? = null,
-) {
-  val translucentStyles = LocalTranslucentStyles.current
-  val containerShape = RoundedCornerShape(50)
-
-  androidx.compose.material3.TextField(
-    modifier =
-      modifier
-        .requiredHeight(56.dp)
-        .fillMaxWidth()
-        .border(1.dp, translucentStyles.default.outline, containerShape),
-    value = input,
-    onValueChange = onValueChange,
-    keyboardOptions = keyboardOptions,
-    keyboardActions = keyboardActions,
-    singleLine = true,
-    textStyle = MaterialTheme.typography.labelLarge,
-    shape = containerShape,
-    enabled = enabled,
-    colors =
-      TextFieldDefaults.colors(
-        unfocusedContainerColor = translucentStyles.default.background,
-        focusedContainerColor = translucentStyles.default.background,
-        disabledContainerColor = translucentStyles.default.background,
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        errorIndicatorColor = Color.Transparent,
-        cursorColor = AppTheme.colorScheme.primary,
-        selectionColors =
-          TextSelectionColors(
-            handleColor = AppTheme.colorScheme.tintedForeground,
-            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
-          )
-      ),
-    placeholder = {
-      Text(
-        text = hint,
-        style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
-      )
-    },
-    trailingIcon = trailingIcon,
-  )
 }
 
 private suspend fun errorMessageForErrorType(errorType: AddFeedErrorType): String? {

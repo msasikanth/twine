@@ -40,12 +40,15 @@ class Reader {
   )
 
   @Serializable
-  @Resource("stream/contents/reading-list")
+  @Resource("stream/contents")
   class Articles(
     val parent: Reader = Reader(),
+    @SerialName("s") val streamId: String = "user/-/state/com.google/reading-list",
+    @SerialName("xt") val excludeState: String? = null,
     @SerialName("n") val limit: Int = 1000,
     @SerialName("ot") val newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
-    @SerialName("c") val continuation: String = ""
+    @SerialName("c") val continuation: String = "",
+    val output: String = "json",
   )
 
   @Resource("edit-tag") class EditTag(val parent: Reader = Reader())
@@ -67,6 +70,7 @@ class Reader {
   class ItemIds(
     val parent: Reader = Reader(),
     @SerialName("s") val state: String,
-    @SerialName("n") val limit: Int = 10000
+    @SerialName("xt") val excludeState: String? = null,
+    @SerialName("n") val limit: Int = 50000
   )
 }

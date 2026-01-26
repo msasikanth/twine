@@ -13,14 +13,15 @@ package dev.sasikanth.rss.reader.core.model.remote.freshrss
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class SubscriptionsPayload(val subscriptions: List<SubscriptionPayload>)
+@Serializable
+data class SubscriptionsPayload(val subscriptions: List<SubscriptionPayload> = emptyList())
 
 @Serializable
 data class SubscriptionPayload(
   val id: String,
-  val title: String,
-  val categories: List<TagPayload>,
-  val url: String,
-  val htmlUrl: String,
-  val iconUrl: String,
+  val title: String = "",
+  val categories: List<TagPayload> = emptyList(),
+  val url: String = "",
+  val htmlUrl: String = "",
+  val iconUrl: String = "",
 )

@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.DefaultSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.DropboxCloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.FreshRssSyncProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
@@ -194,8 +195,9 @@ interface DataComponent :
   @AppScope
   fun providesSyncProviders(
     cloudServiceProvider: DropboxCloudServiceProvider,
+    freshRssSyncProvider: FreshRssSyncProvider,
   ): Set<CloudServiceProvider> {
-    return setOf(cloudServiceProvider)
+    return setOf(freshRssSyncProvider, cloudServiceProvider)
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries

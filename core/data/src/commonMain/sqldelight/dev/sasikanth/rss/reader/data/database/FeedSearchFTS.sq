@@ -43,6 +43,12 @@ SELECT
   f.createdAt,
   f.pinnedAt,
   f.lastCleanUpAt,
+  f.alwaysFetchSourceArticle,
+  f.pinnedPosition,
+  f.lastUpdatedAt,
+  f.refreshInterval,
+  f.isDeleted,
+  f.remoteId,
   COUNT(CASE WHEN (p.flags & 2) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
   f.showFeedFavIcon,
   f.hideFromAllFeeds

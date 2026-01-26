@@ -13,3 +13,6 @@ VALUES (0, :syncFormatVersion, (SELECT lastSyncedFormatVersion FROM appConfig WH
 
 updateLastSyncedFormatVersion:
 UPDATE appConfig SET lastSyncedFormatVersion = :lastSyncedFormatVersion WHERE id = 0;
+
+deleteAll:
+DELETE FROM appConfig;
