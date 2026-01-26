@@ -83,8 +83,8 @@ class UserRepository(
       .mapToOneOrNull(dispatchersProvider.databaseRead)
   }
 
-  fun userBlocking(): User? {
-    return with(dispatchersProvider.databaseRead) {
+  suspend fun currentUser(): User? {
+    return withContext(dispatchersProvider.databaseRead) {
       userQueries
         .user(
           mapper = { id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus ->

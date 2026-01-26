@@ -82,6 +82,7 @@ class WidgetDataRepository(
           link: String,
           commentsLink: String?,
           flags: Set<PostFlag>,
+          remoteId: String?,
           feedName: String,
           feedIcon: String,
           feedHomepageLink: String,
@@ -120,6 +121,7 @@ class WidgetDataRepository(
             link: String,
             commentsLink: String?,
             flags: Set<PostFlag>,
+            remoteId: String?,
             feedName: String,
             feedIcon: String,
             feedHomepageLink: String,
@@ -160,6 +162,7 @@ class WidgetDataRepository(
             link,
             commentsLink,
             flags,
+            remoteId,
             feedName,
             feedIcon,
             feedHomepageLink,
@@ -181,6 +184,7 @@ class WidgetDataRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
               showFeedFavIcon = showFeedFavIcon,
+              remoteId = remoteId,
             )
           }
         )
