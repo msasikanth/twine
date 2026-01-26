@@ -187,6 +187,16 @@
     <string name="settingsAppIconTitle">Uygulama simgesi</string>
     <string name="settingsAppIconSubtitle">Twine'ın ana ekranınızda nasıl görüneceğini seçin</string>
     <string name="filter">Filtrele</string>
+    <string name="freshRssLoginTitle">FreshRSS Login</string>
+    <string name="freshRssServerUrl">Server URL</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">Bildirim sorunları mı yaşıyorsunuz? Cihazınız uygulamayı arka planda kapatıyor olabilir. Nasıl düzelteceğinizi öğrenmek için buraya dokunun.</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
