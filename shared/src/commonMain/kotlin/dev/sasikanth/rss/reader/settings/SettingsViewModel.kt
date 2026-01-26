@@ -29,16 +29,17 @@ import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
-import dev.sasikanth.rss.reader.data.sync.CloudSyncService
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,16 +50,15 @@ class SettingsViewModel(
   rssRepository: RssRepository,
   val appInfo: AppInfo,
   private val settingsRepository: SettingsRepository,
+  private val userRepository: UserRepository,
   private val opmlManager: OpmlManager,
   private val billingHandler: BillingHandler,
   private val notifier: Notifier,
-  private val cloudSyncService: CloudSyncService,
+  private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val appIconManager: AppIconManager,
-  dropboxSyncProvider: DropboxSyncProvider,
+  val availableProviders: Set<CloudServiceProvider>
 ) : ViewModel() {
-
-  val availableProviders = listOf(dropboxSyncProvider)
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
   val state: StateFlow<SettingsState>
@@ -81,7 +81,7 @@ class SettingsViewModel(
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
         settingsRepository.lastSyncedAt,
-        settingsRepository.lastSyncStatus,
+        userRepository.user().mapNotNull { it?.lastSyncStatus ?: "IDLE" },
         settingsRepository.appIcon,
       ) {
         browserType,
@@ -191,7 +191,7 @@ class SettingsViewModel(
       is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
       is SettingsEvent.ToggleDownloadFullContent -> toggleDownloadFullContent(event.value)
       is SettingsEvent.SyncClicked -> syncClicked(event.provider)
-      is SettingsEvent.SignOutClicked -> signOutClicked(event.provider)
+      is SettingsEvent.SignOutClicked -> signOutClicked()
       SettingsEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
       is SettingsEvent.OnAppIconChanged -> onAppIconChanged(event.appIcon)
       SettingsEvent.AppIconClicked -> appIconClicked()
@@ -201,12 +201,12 @@ class SettingsViewModel(
     }
   }
 
-  private fun syncClicked(provider: CloudSyncProvider) {
+  private fun syncClicked(provider: CloudServiceProvider) {
     viewModelScope.launch {
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
         _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
-        val result = cloudSyncService.sync(provider)
+        val result = syncCoordinator.push()
         _state.update {
           it.copy(
             syncProgress =
@@ -214,16 +214,16 @@ class SettingsViewModel(
           )
         }
       } else {
-        oAuthManager.setPendingProvider(provider.id)
-        val authUrl = oAuthManager.getAuthUrl(provider.id)
+        oAuthManager.setPendingProvider(provider.cloudService)
+        val authUrl = oAuthManager.getAuthUrl(provider.cloudService)
         _state.update { it.copy(authUrlToOpen = authUrl) }
       }
     }
   }
 
-  private fun signOutClicked(provider: CloudSyncProvider) {
+  private fun signOutClicked() {
     viewModelScope.launch {
-      provider.signOut()
+      userRepository.deleteUser()
       _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
     }
   }

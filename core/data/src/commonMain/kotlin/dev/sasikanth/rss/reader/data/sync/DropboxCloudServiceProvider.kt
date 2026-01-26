@@ -12,37 +12,51 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.kermit.Logger
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.Parameters
+import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
 
 /**
  * Dropbox is a better alternative for cross-platform sync as it provides a consistent API across
  * all platforms and is easy to integrate with Ktor in commonMain.
  */
-class DropboxSyncProvider(
+class DropboxCloudServiceProvider(
   private val httpClient: HttpClient,
-  private val tokenProvider: OAuthTokenProvider
-) : CloudSyncProvider {
-  override val id: String = "dropbox"
-  override val name: String = "Dropbox"
+  private val tokenProvider: OAuthTokenProvider,
+  private val onSignOut: suspend () -> Unit,
+) : FileCloudServiceProvider {
 
-  override fun isSignedIn(): Flow<Boolean> = tokenProvider.isSignedIn(id)
+  override val cloudService = CloudStorageProvider.DROPBOX
 
-  override suspend fun isSignedInImmediate(): Boolean = tokenProvider.isSignedInImmediate(id)
+  override fun isSignedIn(): Flow<Boolean> = tokenProvider.isSignedIn(cloudService)
+
+  override suspend fun isSignedInImmediate(): Boolean =
+    tokenProvider.isSignedInImmediate(cloudService)
 
   override suspend fun signOut() {
-    tokenProvider.saveAccessToken(id, null)
-    tokenProvider.saveRefreshToken(id, null)
+    onSignOut()
   }
 
   private suspend fun refreshAccessToken(): String? {
-    val refreshToken = tokenProvider.getRefreshToken(id) ?: return null
+    val refreshToken = tokenProvider.getRefreshToken(cloudService) ?: return null
     return try {
       val response: DropboxTokenResponse =
         httpClient
@@ -57,9 +71,9 @@ class DropboxSyncProvider(
           )
           .body()
 
-      tokenProvider.saveAccessToken(id, response.accessToken)
+      tokenProvider.saveAccessToken(cloudService, response.accessToken)
       if (response.refreshToken != null) {
-        tokenProvider.saveRefreshToken(id, response.refreshToken)
+        tokenProvider.saveRefreshToken(cloudService, response.refreshToken)
       }
       response.accessToken
     } catch (e: Exception) {
@@ -69,7 +83,7 @@ class DropboxSyncProvider(
   }
 
   private suspend fun executeWithToken(block: suspend (String) -> HttpResponse): HttpResponse {
-    val token = tokenProvider.getAccessToken(id) ?: throw Exception("Not signed in")
+    val token = tokenProvider.getAccessToken(cloudService) ?: throw Exception("Not signed in")
     var response = block(token)
 
     if (response.status == HttpStatusCode.Unauthorized) {

@@ -23,18 +23,29 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 
-interface CloudSyncProvider {
-  val id: String
-  val name: String
-  val isSupported: Boolean
-    get() = true
+interface ServiceType
+
+enum class CloudStorageProvider : ServiceType {
+  DROPBOX
+}
+
+interface CloudServiceProvider {
+  val cloudService: ServiceType
 
   fun isSignedIn(): Flow<Boolean>
 
   suspend fun isSignedInImmediate(): Boolean
+}
+
+interface FileCloudServiceProvider : CloudServiceProvider {
+
+  override val cloudService: CloudStorageProvider
+
+  override fun isSignedIn(): Flow<Boolean>
+
+  override suspend fun isSignedInImmediate(): Boolean
 
   suspend fun signOut()
 

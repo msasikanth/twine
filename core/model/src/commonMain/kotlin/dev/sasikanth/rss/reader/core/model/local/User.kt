@@ -14,8 +14,10 @@ package dev.sasikanth.rss.reader.core.model.local
 data class User(
   val id: String,
   val name: String,
-  val profileId: String,
   val email: String,
+  val avatarUrl: String?,
   val token: String,
-  val serverUrl: String,
+  val refreshToken: String,
+  val serverUrl: String?,
+  val lastSyncStatus: String,
 )
