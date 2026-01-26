@@ -11,6 +11,8 @@
 
 package dev.sasikanth.rss.reader.data.sync
 
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
+
 interface OAuthManager {
   fun getAuthUrl(serviceType: ServiceType): String
 

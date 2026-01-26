@@ -14,6 +14,7 @@ package dev.sasikanth.rss.reader.freshrss
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -109,7 +110,8 @@ class FreshRssLoginViewModel(
           avatarUrl = null,
           token = userInfo.token,
           refreshToken = "",
-          serverUrl = userInfo.serverUrl
+          serverUrl = userInfo.serverUrl,
+          serviceType = ServiceType.FRESH_RSS
         )
 
         Logger.d { "FreshRSS login: user saved, finishing login" }

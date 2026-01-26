@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.data.sync
 
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import kotlinx.coroutines.flow.Flow
 
 interface OAuthTokenProvider {

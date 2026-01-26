@@ -12,6 +12,7 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
@@ -24,16 +25,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
-
-interface ServiceType
-
-enum class CloudStorageProvider : ServiceType {
-  DROPBOX
-}
-
-enum class APIServiceType : ServiceType {
-  FRESH_RSS
-}
 
 interface CloudServiceProvider {
   val cloudService: ServiceType
@@ -49,8 +40,6 @@ interface CloudServiceProvider {
 }
 
 interface FileCloudServiceProvider : CloudServiceProvider {
-
-  override val cloudService: CloudStorageProvider
 
   override fun isSignedIn(): Flow<Boolean>
 
@@ -68,8 +57,6 @@ interface FileCloudServiceProvider : CloudServiceProvider {
 }
 
 interface APIServiceProvider : CloudServiceProvider {
-
-  override val cloudService: APIServiceType
 
   override fun isSignedIn(): Flow<Boolean>
 

@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.data.sync
 
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
@@ -28,17 +29,19 @@ class FreshRssSyncProvider(
   private val settingsRepository: SettingsRepository,
 ) : APIServiceProvider {
 
-  override val cloudService: APIServiceType = APIServiceType.FRESH_RSS
+  override val cloudService: ServiceType = ServiceType.FRESH_RSS
 
   override val isPremium: Boolean = true
 
   override fun isSignedIn(): Flow<Boolean> {
-    return userRepository.user().map { it != null && it.serverUrl != null }
+    return userRepository.user().map {
+      it != null && it.serverUrl != null && it.serviceType == ServiceType.FRESH_RSS
+    }
   }
 
   override suspend fun isSignedInImmediate(): Boolean {
     val user = userRepository.currentUser()
-    return user != null && user.serverUrl != null
+    return user != null && user.serverUrl != null && user.serviceType == ServiceType.FRESH_RSS
   }
 
   override suspend fun signOut() {
