@@ -110,18 +110,45 @@ fun FreshRssLoginScreen(
   if (state.showConfirmationDialog) {
     AlertDialog(
       onDismissRequest = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
-      title = { Text(text = stringResource(Res.string.freshRssClearDataTitle)) },
-      text = { Text(text = stringResource(Res.string.freshRssClearDataDesc)) },
+      title = {
+        Text(
+          text = stringResource(Res.string.freshRssClearDataTitle),
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+      },
+      text = {
+        Text(
+          text = stringResource(Res.string.freshRssClearDataDesc),
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      },
       confirmButton = {
-        TextButton(onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) }) {
-          Text(text = stringResource(Res.string.freshRssClearDataPositive))
+        TextButton(
+          onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
+          shape = MaterialTheme.shapes.large
+        ) {
+          Text(
+            text = stringResource(Res.string.freshRssClearDataPositive),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.tintedForeground
+          )
         }
       },
       dismissButton = {
-        TextButton(onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) }) {
-          Text(text = stringResource(Res.string.buttonCancel))
+        TextButton(
+          onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
+          shape = MaterialTheme.shapes.large
+        ) {
+          Text(
+            text = stringResource(Res.string.buttonCancel),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.textEmphasisMed
+          )
         }
-      }
+      },
+      containerColor = AppTheme.colorScheme.tintedSurface,
+      titleContentColor = AppTheme.colorScheme.onSurface,
+      textContentColor = AppTheme.colorScheme.onSurface,
     )
   }
 
@@ -157,8 +184,8 @@ fun FreshRssLoginScreen(
           action = null,
           actionOnNewLine = false,
           shape = SnackbarDefaults.shape,
-          backgroundColor = SnackbarDefaults.color,
-          contentColor = SnackbarDefaults.contentColor,
+          backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
+          contentColor = AppTheme.colorScheme.onSurface,
           elevation = 0.dp
         )
       }
