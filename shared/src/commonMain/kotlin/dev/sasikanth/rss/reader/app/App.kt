@@ -58,6 +58,8 @@ import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
+import dev.sasikanth.rss.reader.freshrss.ui.FRESH_RSS_LOGIN_SUCCESS_KEY
+import dev.sasikanth.rss.reader.freshrss.ui.FreshRssLoginScreen
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.group.ui.GroupScreen
@@ -85,6 +87,7 @@ import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.search.SearchViewModel
 import dev.sasikanth.rss.reader.search.ui.SearchScreen
+import dev.sasikanth.rss.reader.settings.SettingsEvent
 import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
@@ -103,6 +106,7 @@ import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.reflect.typeOf
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -353,6 +357,20 @@ fun App(
             settingsContent = { goBack ->
               val viewModel = viewModel { settingsViewModel() }
 
+              LaunchedEffect(Unit) {
+                navController.currentBackStackEntry
+                  ?.savedStateHandle
+                  ?.getStateFlow(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
+                  ?.filter { it }
+                  ?.onEach {
+                    viewModel.dispatch(SettingsEvent.TriggerSync)
+                    navController.currentBackStackEntry
+                      ?.savedStateHandle
+                      ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
+                  }
+                  ?.launchIn(this)
+              }
+
               SettingsScreen(
                 viewModel = viewModel,
                 goBack = goBack,
@@ -368,8 +386,14 @@ fun App(
 
         composable<Screen.FreshRssLogin> {
           val viewModel = viewModel { freshRssLoginViewModel() }
-          dev.sasikanth.rss.reader.freshrss.ui.FreshRssLoginScreen(
+          FreshRssLoginScreen(
             viewModel = viewModel,
+            onLoginSuccess = {
+              navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, true)
+              navController.popBackStack()
+            },
             goBack = { navController.popBackStack() }
           )
         }

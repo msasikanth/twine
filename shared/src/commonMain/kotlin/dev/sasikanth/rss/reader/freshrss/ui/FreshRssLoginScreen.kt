@@ -78,9 +78,12 @@ import twine.shared.generated.resources.freshRssPassword
 import twine.shared.generated.resources.freshRssServerUrl
 import twine.shared.generated.resources.freshRssUsername
 
+const val FRESH_RSS_LOGIN_SUCCESS_KEY = "dev.sasikanth.twine.FRESH_RSS_LOGIN_SUCCESS"
+
 @Composable
 fun FreshRssLoginScreen(
   viewModel: FreshRssLoginViewModel,
+  onLoginSuccess: () -> Unit,
   goBack: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -90,7 +93,7 @@ fun FreshRssLoginScreen(
 
   LaunchedEffect(state.loginSuccess, state.error) {
     if (state.loginSuccess) {
-      goBack()
+      onLoginSuccess()
     }
 
     if (state.error != null) {

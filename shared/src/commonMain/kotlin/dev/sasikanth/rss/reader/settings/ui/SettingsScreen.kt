@@ -127,10 +127,13 @@ import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudStorageProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Dropbox
+import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -1780,15 +1783,33 @@ private fun CloudSyncSettingItem(
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
     val canInteract = !hasCloudServiceSignedIn || isSignedIn
+    val verticalPadding by animateDpAsState(if (canInteract) 12.dp else 4.dp)
 
     Box(
       modifier =
         Modifier.clickable(enabled = canInteract) { onSyncClicked(provider) }
           .fillMaxWidth()
-          .padding(horizontal = 24.dp, vertical = 12.dp)
+          .padding(horizontal = 24.dp, vertical = verticalPadding)
           .alpha(if (canInteract) 1f else 0.38f)
     ) {
-      Row(verticalAlignment = Alignment.CenterVertically) {
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        val icon =
+          when (provider.cloudService) {
+            APIServiceType.FRESH_RSS -> TwineIcons.Freshrss
+            CloudStorageProvider.DROPBOX -> TwineIcons.Dropbox
+            else -> {
+              TwineIcons.RSS
+            }
+          }
+
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+        )
+
         Column(modifier = Modifier.weight(1f)) {
           Text(
             text = label,

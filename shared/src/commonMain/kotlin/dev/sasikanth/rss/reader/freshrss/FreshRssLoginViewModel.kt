@@ -21,13 +21,11 @@ import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Instant
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -114,9 +112,7 @@ class FreshRssLoginViewModel(
           serverUrl = userInfo.serverUrl
         )
 
-        Logger.d { "FreshRSS login: user saved, triggering initial pull" }
-        withContext(NonCancellable) { syncCoordinator.syncSubscriptions() }
-
+        Logger.d { "FreshRSS login: user saved, finishing login" }
         _state.update { it.copy(isLoading = false, loginSuccess = true) }
       } catch (e: Exception) {
         Logger.e(e) { "FreshRSS login: failed to clear data and save user" }

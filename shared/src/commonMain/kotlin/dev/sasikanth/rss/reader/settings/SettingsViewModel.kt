@@ -192,6 +192,7 @@ class SettingsViewModel(
       is SettingsEvent.ToggleNotifications -> toggleNotifications(event.value)
       is SettingsEvent.ToggleDownloadFullContent -> toggleDownloadFullContent(event.value)
       is SettingsEvent.SyncClicked -> syncClicked(event.provider)
+      SettingsEvent.TriggerSync -> triggerSync()
       is SettingsEvent.SignOutClicked -> signOutClicked()
       SettingsEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
       is SettingsEvent.OnAppIconChanged -> onAppIconChanged(event.appIcon)
@@ -206,18 +207,24 @@ class SettingsViewModel(
     viewModelScope.launch {
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
-        _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
-        val result = syncCoordinator.pull()
-        _state.update {
-          it.copy(
-            syncProgress =
-              if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
-          )
-        }
+        triggerSync()
       } else {
         oAuthManager.setPendingProvider(provider.cloudService)
         val authUrl = oAuthManager.getAuthUrl(provider.cloudService)
         _state.update { it.copy(authUrlToOpen = authUrl) }
+      }
+    }
+  }
+
+  private fun triggerSync() {
+    viewModelScope.launch {
+      _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
+      val result = syncCoordinator.pull()
+      _state.update {
+        it.copy(
+          syncProgress =
+            if (result) SettingsState.SyncProgress.Success else SettingsState.SyncProgress.Failure
+        )
       }
     }
   }
