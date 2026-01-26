@@ -1795,7 +1795,7 @@ private fun CloudSyncSettingItem(
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
     val canInteract = !hasCloudServiceSignedIn || isSignedIn
-    val verticalPadding by animateDpAsState(if (canInteract) 12.dp else 4.dp)
+    val verticalPadding by animateDpAsState(if (isSignedIn) 12.dp else 4.dp)
 
     Box(
       modifier =
