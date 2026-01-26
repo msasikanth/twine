@@ -18,7 +18,8 @@ CREATE TABLE feed(
   lastUpdatedAt INTEGER AS Instant,
   refreshInterval TEXT NOT NULL DEFAULT '1h',
   isDeleted INTEGER AS Boolean NOT NULL DEFAULT 0,
-  hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0
+  hideFromAllFeeds INTEGER AS Boolean NOT NULL DEFAULT 0,
+  remoteId TEXT
 );
 
 CREATE INDEX feed_link_index ON feed(link);
@@ -27,8 +28,8 @@ CREATE INDEX feed_pinned_position ON feed(pinnedPosition);
 CREATE INDEX feed_pinned_name ON feed(pinnedAt DESC, name);
 
 upsert:
-INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO feed(id, name, icon, description, homepageLink, createdAt, link, alwaysFetchSourceArticle, showFeedFavIcon, lastUpdatedAt)
+VALUES (:id, :name, :icon, :description, :homepageLink, :createdAt, :link, :alwaysFetchSourceArticle, :showFeedFavIcon, :lastUpdatedAt)
 ON CONFLICT(id) DO
 UPDATE SET
 icon = excluded.icon,
@@ -65,11 +66,14 @@ SELECT
   f.pinnedAt,
   f.lastCleanUpAt,
   f.alwaysFetchSourceArticle,
+  f.pinnedPosition,
   COUNT(CASE WHEN (p.flags & 2) == 0 AND (p.flags & 4) == 0 THEN 1 ELSE NULL END) AS numberOfUnreadPosts,
   f.showFeedFavIcon,
-  f.hideFromAllFeeds
+  f.hideFromAllFeeds,
+  f.isDeleted,
+  f.remoteId
 FROM feed f
-LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
 WHERE f.id = :id AND f.isDeleted = 0
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
 
@@ -112,9 +116,13 @@ SELECT
   f.createdAt,
   f.pinnedAt,
   f.lastCleanUpAt,
+  f.alwaysFetchSourceArticle,
+  f.pinnedPosition,
   0 AS numberOfUnreadPosts,
   f.showFeedFavIcon,
-  f.hideFromAllFeeds
+  f.hideFromAllFeeds,
+  f.isDeleted,
+  f.remoteId
 FROM feed f
 WHERE f.id IN :feedIds AND f.isDeleted = 0
 ORDER BY
@@ -133,12 +141,21 @@ UPDATE feed SET lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
 updateRefreshInterval:
 UPDATE feed SET refreshInterval = :refreshInterval WHERE id = :id;
 
+updateFeedRemoteId:
+UPDATE feed SET remoteId = :remoteId, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+feedByRemoteId:
+SELECT * FROM feed WHERE remoteId = :remoteId AND isDeleted = 0;
+
 allFeedsBlocking:
 SELECT * FROM feed;
 
+deleteAll:
+DELETE FROM feed;
+
 upsertSyncFeed:
-INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds)
-VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds)
+INSERT INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt, lastCleanUpAt, alwaysFetchSourceArticle, lastUpdatedAt, isDeleted, hideFromAllFeeds, remoteId)
+VALUES (:id, :name, :icon, :description, :link, :homepageLink, :createdAt, :pinnedAt, :lastCleanUpAt, :alwaysFetchSourceArticle, :lastUpdatedAt, :isDeleted, :hideFromAllFeeds, :remoteId)
 ON CONFLICT(id) DO
 UPDATE SET
     name = excluded.name,
@@ -150,5 +167,6 @@ UPDATE SET
     alwaysFetchSourceArticle = excluded.alwaysFetchSourceArticle,
     lastUpdatedAt = excluded.lastUpdatedAt,
     isDeleted = excluded.isDeleted,
-    hideFromAllFeeds = excluded.hideFromAllFeeds
+    hideFromAllFeeds = excluded.hideFromAllFeeds,
+    remoteId = excluded.remoteId
 WHERE excluded.lastUpdatedAt > feed.lastUpdatedAt OR feed.lastUpdatedAt IS NULL;
