@@ -27,8 +27,9 @@ import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.DefaultSyncCoordinator
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
+import dev.sasikanth.rss.reader.data.sync.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
@@ -182,12 +183,20 @@ interface DataComponent :
     httpClient: HttpClient,
     tokenProvider: OAuthTokenProvider,
     userRepository: UserRepository,
-  ): DropboxSyncProvider =
-    DropboxSyncProvider(
+  ): DropboxCloudServiceProvider =
+    DropboxCloudServiceProvider(
       httpClient = httpClient,
       tokenProvider = tokenProvider,
       onSignOut = { userRepository.deleteUser() }
     )
+
+  @Provides
+  @AppScope
+  fun providesSyncProviders(
+    cloudServiceProvider: DropboxCloudServiceProvider,
+  ): Set<CloudServiceProvider> {
+    return setOf(cloudServiceProvider)
+  }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
 
