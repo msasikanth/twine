@@ -206,6 +206,7 @@ import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsSyncDropbox
+import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncSignIn
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
@@ -1788,7 +1789,7 @@ private fun CloudSyncSettingItem(
     val label =
       when (val service = provider.cloudService) {
         CloudStorageProvider.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
-        APIServiceType.FRESH_RSS -> "FreshRSS"
+        APIServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
         else -> {
           ""
         }
