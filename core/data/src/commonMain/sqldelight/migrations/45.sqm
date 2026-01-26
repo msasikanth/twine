@@ -1,0 +1,2 @@
+ALTER TABLE feed ADD COLUMN remoteId TEXT;
+ALTER TABLE post ADD COLUMN remoteId TEXT;

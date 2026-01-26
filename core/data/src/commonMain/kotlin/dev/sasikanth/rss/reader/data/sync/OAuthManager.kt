@@ -12,9 +12,9 @@
 package dev.sasikanth.rss.reader.data.sync
 
 interface OAuthManager {
-  fun getAuthUrl(providerId: String): String
+  fun getAuthUrl(serviceType: ServiceType): String
 
-  fun setPendingProvider(providerId: String)
+  fun setPendingProvider(serviceType: ServiceType)
 
-  suspend fun handleRedirect(uri: String): String?
+  suspend fun handleRedirect(uri: String): Boolean
 }

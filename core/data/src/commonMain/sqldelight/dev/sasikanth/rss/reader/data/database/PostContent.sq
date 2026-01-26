@@ -22,3 +22,6 @@ WHERE id = :id;
 updateHtmlContent:
 UPDATE postContent SET htmlContent = :htmlContent
 WHERE id = :id;
+
+deleteAll:
+DELETE FROM postContent;

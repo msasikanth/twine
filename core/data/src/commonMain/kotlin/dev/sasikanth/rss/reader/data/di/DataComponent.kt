@@ -26,9 +26,11 @@ import dev.sasikanth.rss.reader.data.database.ReaderDatabase
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
-import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
-import dev.sasikanth.rss.reader.data.sync.LocalSyncCoordinator
+import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.DefaultSyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.DropboxCloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.FreshRssSyncProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
@@ -47,7 +49,7 @@ interface DataComponent :
 
   @Provides
   @AppScope
-  fun providesSyncCoordinator(coordinator: LocalSyncCoordinator): SyncCoordinator = coordinator
+  fun providesSyncCoordinator(coordinator: DefaultSyncCoordinator): SyncCoordinator = coordinator
 
   @Provides
   @AppScope
@@ -165,22 +167,38 @@ interface DataComponent :
 
   @Provides
   @AppScope
-  fun providesOAuthTokenProvider(settingsRepository: SettingsRepository): OAuthTokenProvider =
-    RealOAuthTokenProvider(settingsRepository)
+  fun providesOAuthTokenProvider(userRepository: UserRepository): OAuthTokenProvider =
+    RealOAuthTokenProvider(userRepository)
 
   @Provides
   @AppScope
   fun providesOAuthManager(
     httpClient: HttpClient,
-    tokenProvider: OAuthTokenProvider
-  ): OAuthManager = RealOAuthManager(httpClient, tokenProvider)
+    tokenProvider: OAuthTokenProvider,
+    userRepository: UserRepository,
+  ): OAuthManager = RealOAuthManager(httpClient, tokenProvider, userRepository)
 
   @Provides
   @AppScope
   fun providesDropboxSyncProvider(
     httpClient: HttpClient,
-    tokenProvider: OAuthTokenProvider
-  ): DropboxSyncProvider = DropboxSyncProvider(httpClient, tokenProvider)
+    tokenProvider: OAuthTokenProvider,
+    userRepository: UserRepository,
+  ): DropboxCloudServiceProvider =
+    DropboxCloudServiceProvider(
+      httpClient = httpClient,
+      tokenProvider = tokenProvider,
+      onSignOut = { userRepository.deleteUser() }
+    )
+
+  @Provides
+  @AppScope
+  fun providesSyncProviders(
+    cloudServiceProvider: DropboxCloudServiceProvider,
+    freshRssSyncProvider: FreshRssSyncProvider,
+  ): Set<CloudServiceProvider> {
+    return setOf(freshRssSyncProvider, cloudServiceProvider)
+  }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
 

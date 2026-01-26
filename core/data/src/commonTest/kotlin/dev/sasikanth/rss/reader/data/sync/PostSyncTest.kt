@@ -15,7 +15,6 @@ import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Instant
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class PostSyncTest {
@@ -92,7 +91,7 @@ class PostSyncTest {
         )
       )
 
-    val filtered = CloudSyncService.filterPosts(posts, cleanUpAtByFeed)
+    val filtered = FileCloudSyncService.filterPosts(posts, cleanUpAtByFeed)
 
     assertEquals(3, filtered.size)
     assertEquals(setOf("post-2", "post-3", "post-4"), filtered.map { it.id }.toSet())
@@ -310,7 +309,7 @@ class PostSyncTest {
         )
       )
 
-    val filtered = CloudSyncService.filterPosts(posts, cleanUpAtByFeed)
+    val filtered = FileCloudSyncService.filterPosts(posts, cleanUpAtByFeed)
 
     assertEquals(1, filtered.size)
     assertEquals("post-1", filtered[0].id)

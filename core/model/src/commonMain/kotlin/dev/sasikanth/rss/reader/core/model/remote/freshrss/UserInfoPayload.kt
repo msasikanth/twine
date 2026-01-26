@@ -15,8 +15,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserInfoPayload(
-  val userId: String,
-  val userName: String,
-  val userProfileId: String,
-  val userEmail: String,
+  val userId: String = "",
+  val userName: String = "",
+  val userProfileId: String = "",
+  val userEmail: String = "",
 )

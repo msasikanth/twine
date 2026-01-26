@@ -26,13 +26,12 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class CloudSyncService(
+class FileCloudSyncService(
   private val rssRepository: RssRepository,
   private val postContentRepository: PostContentRepository,
   private val blockedWordsRepository: BlockedWordsRepository,
@@ -43,9 +42,9 @@ class CloudSyncService(
 
   private val json: Json = Json { ignoreUnknownKeys = true }
 
-  suspend fun sync(provider: CloudSyncProvider): Boolean {
+  suspend fun sync(provider: FileCloudServiceProvider): Boolean {
     try {
-      appConfigQueries.updateLastSyncStatus("SYNCING")
+      userRepository.updateLastSyncStatus("SYNCING")
       val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
       val currentSyncVersion = config?.syncFormatVersion?.toInt() ?: 1
 
@@ -168,7 +167,7 @@ class CloudSyncService(
 
       if (result) {
         appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
-        appConfigQueries.updateLastSyncStatus("SUCCESS")
+        userRepository.updateLastSyncStatus("SUCCESS")
         settingsRepository.updateLastSyncedAt(Clock.System.now())
 
         val allFiles = provider.listFiles("/twine_")
@@ -181,8 +180,8 @@ class CloudSyncService(
       }
       return result
     } catch (e: Exception) {
-      Logger.e(e) { "Failed to sync with ${provider.name}" }
-      appConfigQueries.updateLastSyncStatus("FAILURE")
+      Logger.e(e) { "Failed to sync with ${provider.cloudService}" }
+      userRepository.updateLastSyncStatus("FAILURE")
       return false
     }
   }

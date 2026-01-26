@@ -18,14 +18,10 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOneOrNull
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
-import dev.sasikanth.rss.reader.data.database.AppConfigQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -36,8 +32,6 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class SettingsRepository(
   private val dataStore: DataStore<Preferences>,
-  private val appConfigQueries: AppConfigQueries,
-  private val dispatchersProvider: DispatchersProvider,
 ) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
@@ -60,8 +54,6 @@ class SettingsRepository(
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
   private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
-  private val dropboxAccessTokenKey = stringPreferencesKey("dropbox_access_token")
-  private val dropboxRefreshTokenKey = stringPreferencesKey("dropbox_refresh_token")
   private val lastSyncedAtKey = longPreferencesKey("last_synced_at")
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
@@ -152,21 +144,10 @@ class SettingsRepository(
       preferences[lastSyncedAtKey]?.let(Instant::fromEpochMilliseconds)
     }
 
-  val lastSyncStatus: Flow<String> =
-    appConfigQueries.getSyncConfig().asFlow().mapToOneOrNull(dispatchersProvider.databaseRead).map {
-      it?.lastSyncStatus ?: "IDLE"
-    }
-
   val installDate: Flow<Instant?> =
     dataStore.data.map { preferences ->
       preferences[installDateKey]?.let(Instant::fromEpochMilliseconds)
     }
-
-  val dropboxAccessToken: Flow<String?> =
-    dataStore.data.map { preferences -> preferences[dropboxAccessTokenKey] }
-
-  val dropboxRefreshToken: Flow<String?> =
-    dataStore.data.map { preferences -> preferences[dropboxRefreshTokenKey] }
 
   val userSessionCount: Flow<Int> =
     dataStore.data.map { preferences -> preferences[userSessionCountKey] ?: 0 }
@@ -268,26 +249,6 @@ class SettingsRepository(
 
   suspend fun toggleDownloadFullContent(value: Boolean) {
     dataStore.edit { preferences -> preferences[downloadFullContentKey] = value }
-  }
-
-  suspend fun updateDropboxAccessToken(token: String?) {
-    dataStore.edit { preferences ->
-      if (token == null) {
-        preferences.remove(dropboxAccessTokenKey)
-      } else {
-        preferences[dropboxAccessTokenKey] = token
-      }
-    }
-  }
-
-  suspend fun updateDropboxRefreshToken(token: String?) {
-    dataStore.edit { preferences ->
-      if (token == null) {
-        preferences.remove(dropboxRefreshTokenKey)
-      } else {
-        preferences[dropboxRefreshTokenKey] = token
-      }
-    }
   }
 
   suspend fun updateLastReviewPromptDate(value: Instant) {

@@ -21,8 +21,6 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
-import dev.sasikanth.rss.reader.data.sync.CloudSyncService
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -47,10 +45,6 @@ abstract class ApplicationComponent(
   abstract val settingsRepository: SettingsRepository
 
   abstract val syncCoordinator: SyncCoordinator
-
-  abstract val cloudSyncService: CloudSyncService
-
-  abstract val dropboxSyncProvider: DropboxSyncProvider
 
   abstract val newArticleNotifier: NewArticleNotifier
 

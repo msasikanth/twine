@@ -11,51 +11,61 @@
 
 package dev.sasikanth.rss.reader.data.sync
 
-import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class RealOAuthTokenProvider(private val settingsRepository: SettingsRepository) :
-  OAuthTokenProvider {
+class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuthTokenProvider {
 
-  override fun isSignedIn(providerId: String): Flow<Boolean> {
-    return when (providerId) {
-      "dropbox" -> settingsRepository.dropboxAccessToken.map { it != null }
+  override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> {
+    return when (serviceType) {
+      CloudStorageProvider.DROPBOX ->
+        userRepository.user().map { it != null && it.serverUrl == null }
       else -> kotlinx.coroutines.flow.flowOf(false)
     }
   }
 
-  override suspend fun isSignedInImmediate(providerId: String): Boolean {
-    return when (providerId) {
-      "dropbox" -> settingsRepository.dropboxAccessToken.first() != null
+  override suspend fun isSignedInImmediate(serviceType: ServiceType): Boolean {
+    return when (serviceType) {
+      CloudStorageProvider.DROPBOX -> {
+        val user = userRepository.currentUser()
+        user != null && user.serverUrl == null
+      }
       else -> false
     }
   }
 
-  override suspend fun getAccessToken(providerId: String): String? {
-    return when (providerId) {
-      "dropbox" -> settingsRepository.dropboxAccessToken.first()
+  override suspend fun getAccessToken(serviceType: ServiceType): String? {
+    return when (serviceType) {
+      CloudStorageProvider.DROPBOX -> userRepository.currentUser()?.token
       else -> null
     }
   }
 
-  override suspend fun saveAccessToken(providerId: String, token: String?) {
-    when (providerId) {
-      "dropbox" -> settingsRepository.updateDropboxAccessToken(token)
+  override suspend fun saveAccessToken(serviceType: ServiceType, token: String?) {
+    when (serviceType) {
+      CloudStorageProvider.DROPBOX -> {
+        if (!(token.isNullOrBlank())) {
+          userRepository.updateToken(token)
+        }
+      }
     }
   }
 
-  override suspend fun getRefreshToken(providerId: String): String? {
-    return when (providerId) {
-      "dropbox" -> settingsRepository.dropboxRefreshToken.first()
+  override suspend fun getRefreshToken(serviceType: ServiceType): String? {
+    return when (serviceType) {
+      CloudStorageProvider.DROPBOX -> userRepository.currentUser()?.refreshToken
       else -> null
     }
   }
 
-  override suspend fun saveRefreshToken(providerId: String, token: String?) {
-    when (providerId) {
-      "dropbox" -> settingsRepository.updateDropboxRefreshToken(token)
+  override suspend fun saveRefreshToken(serviceType: ServiceType, token: String?) {
+    when (serviceType) {
+      CloudStorageProvider.DROPBOX -> {
+        if (!(token.isNullOrBlank())) {
+          userRepository.updateRefreshToken(token)
+        }
+      }
     }
   }
 }

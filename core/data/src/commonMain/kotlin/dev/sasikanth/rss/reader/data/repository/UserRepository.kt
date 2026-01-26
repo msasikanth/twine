@@ -26,31 +26,82 @@ class UserRepository(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
-  suspend fun createUser(
+  suspend fun saveUser(
     id: String,
     name: String,
-    profileId: String,
     email: String,
+    avatarUrl: String?,
     token: String,
-    serverUrl: String,
+    refreshToken: String,
+    serverUrl: String? = null,
   ) {
     withContext(dispatchersProvider.databaseWrite) {
-      val user = userBlocking()
-      if (user != null) return@withContext
-
-      userQueries.insert(id, name, profileId, email, token, serverUrl)
+      userQueries.insert(
+        id = id,
+        name = name,
+        email = email,
+        avatarUrl = avatarUrl,
+        token = token,
+        refreshToken = refreshToken,
+        serverUrl = serverUrl,
+        lastSyncStatus = "IDLE"
+      )
     }
+  }
+
+  suspend fun updateLastSyncStatus(lastSyncStatus: String) {
+    withContext(dispatchersProvider.databaseWrite) {
+      userQueries.updateLastSyncStatus(lastSyncStatus)
+    }
+  }
+
+  suspend fun updateToken(token: String) {
+    withContext(dispatchersProvider.databaseWrite) { userQueries.updateToken(token) }
+  }
+
+  suspend fun updateRefreshToken(refreshToken: String) {
+    withContext(dispatchersProvider.databaseWrite) { userQueries.updateRefreshToken(refreshToken) }
   }
 
   fun user(): Flow<User?> {
     return userQueries
-      .user(mapper = ::User)
+      .user(
+        mapper = { id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus ->
+          User(
+            id = id,
+            name = name,
+            email = email,
+            avatarUrl = avatarUrl,
+            token = token,
+            refreshToken = refreshToken,
+            serverUrl = serverUrl,
+            lastSyncStatus = lastSyncStatus
+          )
+        }
+      )
       .asFlow()
       .mapToOneOrNull(dispatchersProvider.databaseRead)
   }
 
-  fun userBlocking(): User? {
-    return userQueries.user(mapper = ::User).executeAsOneOrNull()
+  suspend fun currentUser(): User? {
+    return withContext(dispatchersProvider.databaseRead) {
+      userQueries
+        .user(
+          mapper = { id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus ->
+            User(
+              id = id,
+              name = name,
+              email = email,
+              avatarUrl = avatarUrl,
+              token = token,
+              refreshToken = refreshToken,
+              serverUrl = serverUrl,
+              lastSyncStatus = lastSyncStatus
+            )
+          }
+        )
+        .executeAsOneOrNull()
+    }
   }
 
   suspend fun deleteUser() {

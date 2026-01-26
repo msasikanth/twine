@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TagsPayload(
-  val tags: List<TagPayload>,
+  val tags: List<TagPayload> = emptyList(),
 )
 
 @Serializable

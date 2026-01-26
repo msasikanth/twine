@@ -31,6 +31,7 @@ data class Post(
   val link: String,
   val commentsLink: String?,
   val flags: Set<PostFlag>,
+  val remoteId: String? = null,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

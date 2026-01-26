@@ -74,6 +74,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
@@ -120,13 +121,19 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
+import dev.sasikanth.rss.reader.data.sync.APIServiceType
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.CloudStorageProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Dropbox
+import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
 import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -199,6 +206,7 @@ import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsSyncDropbox
+import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncSignIn
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
@@ -231,6 +239,7 @@ internal fun SettingsScreen(
   openAbout: () -> Unit,
   openBlockedWords: () -> Unit,
   openPaywall: () -> Unit,
+  openFreshRssLogin: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -433,11 +442,26 @@ internal fun SettingsScreen(
           CloudSyncSettingItem(
             syncProgress = state.syncProgress,
             lastSyncedAt = state.lastSyncedAt,
+            hasCloudServiceSignedIn = state.hasCloudServiceSignedIn,
             availableProviders = viewModel.availableProviders,
-            onSyncClicked = { provider -> viewModel.dispatch(SettingsEvent.SyncClicked(provider)) },
-            onSignOutClicked = { provider ->
-              viewModel.dispatch(SettingsEvent.SignOutClicked(provider))
-            }
+            isSubscribed = state.isSubscribed,
+            onSyncClicked = {
+              if (it.isPremium && !state.isSubscribed) {
+                openPaywall()
+              } else {
+                viewModel.dispatch(SettingsEvent.SyncClicked(it))
+              }
+            },
+            onAPIServiceClicked = {
+              if (it.isPremium && !state.isSubscribed) {
+                openPaywall()
+              } else {
+                when (it.cloudService) {
+                  APIServiceType.FRESH_RSS -> openFreshRssLogin()
+                }
+              }
+            },
+            onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) }
           )
         }
 
@@ -1603,6 +1627,9 @@ private fun OPMLSettingItem(
                 is OpmlResult.InProgress.Exporting -> {
                   stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
                 }
+                else -> {
+                  ""
+                }
               }
 
             Text(
@@ -1751,32 +1778,70 @@ private fun AboutProfileImages() {
 private fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
-  availableProviders: List<CloudSyncProvider>,
-  onSyncClicked: (CloudSyncProvider) -> Unit,
-  onSignOutClicked: (CloudSyncProvider) -> Unit
+  hasCloudServiceSignedIn: Boolean,
+  availableProviders: Set<CloudServiceProvider>,
+  isSubscribed: Boolean,
+  onSyncClicked: (CloudServiceProvider) -> Unit,
+  onAPIServiceClicked: (APIServiceProvider) -> Unit,
+  onSignOutClicked: () -> Unit
 ) {
   availableProviders.forEach { provider ->
     val label =
-      when (provider.name) {
-        "Dropbox" -> stringResource(Res.string.settingsSyncDropbox)
-        else -> provider.name
+      when (val service = provider.cloudService) {
+        CloudStorageProvider.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
+        APIServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
+        else -> {
+          ""
+        }
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
+    val canInteract = !hasCloudServiceSignedIn || isSignedIn
+    val verticalPadding by animateDpAsState(if (isSignedIn) 12.dp else 4.dp)
 
     Box(
       modifier =
-        Modifier.clickable(enabled = provider.isSupported) { onSyncClicked(provider) }
+        Modifier.clickable(enabled = canInteract) { onSyncClicked(provider) }
           .fillMaxWidth()
-          .padding(horizontal = 24.dp, vertical = 12.dp)
+          .padding(horizontal = 24.dp, vertical = verticalPadding)
+          .alpha(if (canInteract) 1f else 0.38f)
     ) {
-      Row(verticalAlignment = Alignment.CenterVertically) {
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        val icon =
+          when (provider.cloudService) {
+            APIServiceType.FRESH_RSS -> TwineIcons.Freshrss
+            CloudStorageProvider.DROPBOX -> TwineIcons.Dropbox
+            else -> {
+              TwineIcons.RSS
+            }
+          }
+
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+        )
+
         Column(modifier = Modifier.weight(1f)) {
-          val alpha = if (provider.isSupported) 1f else 0.38f
-          Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = alpha)
-          )
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = label,
+              style = MaterialTheme.typography.titleMedium,
+              color = AppTheme.colorScheme.textEmphasisHigh
+            )
+
+            if (provider.isPremium && !isSubscribed) {
+              Spacer(Modifier.width(8.dp))
+
+              Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Rounded.WorkspacePremium,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.primary
+              )
+            }
+          }
 
           var statusString =
             when (syncProgress) {
@@ -1792,12 +1857,15 @@ private fun CloudSyncSettingItem(
           if (
             syncProgress != SettingsState.SyncProgress.Idle &&
               syncProgress != SettingsState.SyncProgress.Syncing &&
-              lastSyncedAt != null
+              lastSyncedAt != null &&
+              isSignedIn
           ) {
             statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
           }
 
-          AnimatedVisibility(visible = syncProgress != SettingsState.SyncProgress.Idle) {
+          AnimatedVisibility(
+            visible = syncProgress != SettingsState.SyncProgress.Idle && isSignedIn
+          ) {
             Text(
               text = statusString,
               style = MaterialTheme.typography.bodyMedium,
@@ -1806,27 +1874,30 @@ private fun CloudSyncSettingItem(
           }
         }
 
-        if (provider.isSupported) {
-          val label =
-            if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
-            else stringResource(Res.string.settingsSyncSignIn)
+        val actionLabel =
+          if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
+          else stringResource(Res.string.settingsSyncSignIn)
 
-          TextButton(
-            onClick = {
-              if (isSignedIn) {
-                onSignOutClicked(provider)
+        TextButton(
+          enabled = canInteract,
+          onClick = {
+            if (isSignedIn) {
+              onSignOutClicked()
+            } else {
+              if (provider is APIServiceProvider) {
+                onAPIServiceClicked(provider)
               } else {
                 onSyncClicked(provider)
               }
-            },
-          ) {
-            Text(
-              text = label,
-              style = MaterialTheme.typography.bodyMedium,
-              fontWeight = FontWeight.SemiBold,
-              color = AppTheme.colorScheme.primary
-            )
-          }
+            }
+          },
+        ) {
+          Text(
+            text = actionLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.primary
+          )
         }
       }
     }

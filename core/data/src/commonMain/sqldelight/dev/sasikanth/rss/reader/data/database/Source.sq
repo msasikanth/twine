@@ -60,7 +60,8 @@ SELECT
   feedShowFavIconSettings,
   updatedAt,
   pinnedPosition,
-  showFeedFavIcon
+  showFeedFavIcon,
+  remoteId
 FROM (
   SELECT
     'feed' AS type,
@@ -80,9 +81,10 @@ FROM (
     f.pinnedAt,
     NULL AS updatedAt,
     f.pinnedPosition,
-    f.showFeedFavIcon
+    f.showFeedFavIcon,
+    f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   WHERE f.isDeleted = 0
   GROUP BY f.id
 
@@ -106,11 +108,12 @@ FROM (
     fg.pinnedAt,
     fg.updatedAt,
     fg.pinnedPosition,
-    NULL AS showFeedFavIcon
+    NULL AS showFeedFavIcon,
+    NULL AS remoteId
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.isDeleted = 0
   GROUP BY fg.id
@@ -170,7 +173,8 @@ SELECT
   feedShowFavIconSettings,
   updatedAt,
   pinnedPosition,
-  showFeedFavIcon
+  showFeedFavIcon,
+  remoteId
 FROM (
   SELECT
     'feed' AS type,
@@ -190,9 +194,10 @@ FROM (
     f.pinnedAt,
     NULL AS updatedAt,
     f.pinnedPosition,
-    f.showFeedFavIcon
+    f.showFeedFavIcon,
+    f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   WHERE f.isDeleted = 0
   GROUP BY f.id
 
@@ -216,11 +221,12 @@ FROM (
     fg.pinnedAt,
     fg.updatedAt,
     fg.pinnedPosition,
-    NULL AS showFeedFavIcon
+    NULL AS showFeedFavIcon,
+    NULL AS remoteId
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.isDeleted = 0
   GROUP BY fg.id
@@ -285,7 +291,8 @@ SELECT
   feedShowFavIconSettings,
   updatedAt,
   pinnedPosition,
-  showFeedFavIcon
+  showFeedFavIcon,
+  remoteId
 FROM (
   SELECT
     'feed' AS type,
@@ -305,9 +312,10 @@ FROM (
     f.pinnedAt,
     NULL AS updatedAt,
     f.pinnedPosition,
-    f.showFeedFavIcon
+    f.showFeedFavIcon,
+    f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   WHERE f.id = :id AND f.isDeleted = 0
   GROUP BY f.id
 
@@ -331,11 +339,12 @@ FROM (
     fg.pinnedAt,
     fg.updatedAt,
     fg.pinnedPosition,
-    NULL AS showFeedFavIcon
+    NULL AS showFeedFavIcon,
+    NULL AS remoteId
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.syncedAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.id = :id AND fg.isDeleted = 0
   GROUP BY fg.id

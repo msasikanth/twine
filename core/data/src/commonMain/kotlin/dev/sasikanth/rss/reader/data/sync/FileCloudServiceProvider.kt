@@ -23,20 +23,40 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 
-interface CloudSyncProvider {
-  val id: String
-  val name: String
-  val isSupported: Boolean
-    get() = true
+interface ServiceType
+
+enum class CloudStorageProvider : ServiceType {
+  DROPBOX
+}
+
+enum class APIServiceType : ServiceType {
+  FRESH_RSS
+}
+
+interface CloudServiceProvider {
+  val cloudService: ServiceType
+
+  val isPremium: Boolean
+    get() = false
 
   fun isSignedIn(): Flow<Boolean>
 
   suspend fun isSignedInImmediate(): Boolean
 
   suspend fun signOut()
+}
+
+interface FileCloudServiceProvider : CloudServiceProvider {
+
+  override val cloudService: CloudStorageProvider
+
+  override fun isSignedIn(): Flow<Boolean>
+
+  override suspend fun isSignedInImmediate(): Boolean
+
+  override suspend fun signOut()
 
   suspend fun upload(fileName: String, data: String): Boolean
 
@@ -45,6 +65,17 @@ interface CloudSyncProvider {
   suspend fun listFiles(prefix: String): List<String>
 
   suspend fun deleteFile(fileName: String): Boolean
+}
+
+interface APIServiceProvider : CloudServiceProvider {
+
+  override val cloudService: APIServiceType
+
+  override fun isSignedIn(): Flow<Boolean>
+
+  override suspend fun isSignedInImmediate(): Boolean
+
+  override suspend fun signOut()
 }
 
 @Serializable

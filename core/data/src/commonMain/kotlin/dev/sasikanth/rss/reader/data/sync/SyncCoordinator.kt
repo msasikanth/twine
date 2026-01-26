@@ -22,7 +22,7 @@ interface SyncCoordinator {
   val syncState: StateFlow<SyncState>
 
   /** Syncs feeds and posts from the remote source and updates the local database. */
-  suspend fun pull()
+  suspend fun pull(): Boolean
 
   /**
    * Fetches the latest posts for a list of specific feeds from the remote source and updates the
@@ -30,7 +30,7 @@ interface SyncCoordinator {
    *
    * @param feedIds A list of unique identifiers of the feeds to be updated.
    */
-  suspend fun pull(feedIds: List<String>)
+  suspend fun pull(feedIds: List<String>): Boolean
 
   /**
    * Fetches the latest posts for a specific feed from the remote source and updates the local
@@ -38,10 +38,10 @@ interface SyncCoordinator {
    *
    * @param feedId The unique identifier of the feed to be updated.
    */
-  suspend fun pull(feedId: String)
+  suspend fun pull(feedId: String): Boolean
 
   /** Pushes the local changes to the remote source. */
-  suspend fun push()
+  suspend fun push(): Boolean
 }
 
 sealed interface SyncState {
