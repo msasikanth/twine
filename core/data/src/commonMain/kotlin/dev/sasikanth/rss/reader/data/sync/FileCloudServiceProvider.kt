@@ -27,24 +27,25 @@ import kotlinx.serialization.json.jsonArray
 
 interface ServiceType
 
-enum class CloudStorageService : ServiceType {
+enum class CloudStorageProvider : ServiceType {
   DROPBOX
 }
 
-interface CloudSyncProvider {
+interface CloudServiceProvider {
   val cloudService: ServiceType
-}
-
-interface FileCloudSyncProvider : CloudSyncProvider {
-
-  override val cloudService: CloudStorageService
-
-  val isSupported: Boolean
-    get() = true
 
   fun isSignedIn(): Flow<Boolean>
 
   suspend fun isSignedInImmediate(): Boolean
+}
+
+interface FileCloudServiceProvider : CloudServiceProvider {
+
+  override val cloudService: CloudStorageProvider
+
+  override fun isSignedIn(): Flow<Boolean>
+
+  override suspend fun isSignedInImmediate(): Boolean
 
   suspend fun signOut()
 

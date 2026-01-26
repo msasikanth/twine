@@ -38,13 +38,13 @@ import kotlinx.serialization.json.put
  * Dropbox is a better alternative for cross-platform sync as it provides a consistent API across
  * all platforms and is easy to integrate with Ktor in commonMain.
  */
-class DropboxSyncProvider(
+class DropboxCloudServiceProvider(
   private val httpClient: HttpClient,
   private val tokenProvider: OAuthTokenProvider,
   private val onSignOut: suspend () -> Unit,
-) : FileCloudSyncProvider {
+) : FileCloudServiceProvider {
 
-  override val cloudService = CloudStorageService.DROPBOX
+  override val cloudService = CloudStorageProvider.DROPBOX
 
   override fun isSignedIn(): Flow<Boolean> = tokenProvider.isSignedIn(cloudService)
 

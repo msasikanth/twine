@@ -18,7 +18,7 @@ import me.tatarka.inject.annotations.Inject
 @AppScope
 class DropboxSyncCoordinator(
   private val fileCloudSyncService: FileCloudSyncService,
-  private val dropboxSyncProvider: DropboxSyncProvider,
+  private val dropboxSyncProvider: DropboxCloudServiceProvider,
   private val localSyncCoordinator: LocalSyncCoordinator,
 ) : SyncCoordinator {
 

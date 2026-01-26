@@ -41,7 +41,7 @@ class RealOAuthManager(
 
   override fun getAuthUrl(serviceType: ServiceType): String {
     return when (serviceType) {
-      CloudStorageService.DROPBOX -> {
+      CloudStorageProvider.DROPBOX -> {
         codeVerifier = generateCodeVerifier()
         val codeChallenge = generateCodeChallenge(codeVerifier!!)
         URLBuilder("https://www.dropbox.com/oauth2/authorize")

@@ -22,13 +22,13 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 
-class DropboxSyncWorker(
+class CloudSyncWorker(
   context: Context,
   workerParameters: WorkerParameters,
   private val syncCoordinator: SyncCoordinator,
 ) : CoroutineWorker(context, workerParameters) {
 
-  companion object {
+  companion object Companion {
 
     const val TAG = "DROPBOX_SYNC"
 
@@ -39,7 +39,7 @@ class DropboxSyncWorker(
           .setRequiresBatteryNotLow(true)
           .build()
 
-      return PeriodicWorkRequestBuilder<DropboxSyncWorker>(repeatInterval = Duration.ofMinutes(15))
+      return PeriodicWorkRequestBuilder<CloudSyncWorker>(repeatInterval = Duration.ofMinutes(15))
         .setConstraints(constraints)
         .build()
     }

@@ -19,28 +19,28 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> {
     return when (serviceType) {
-      CloudStorageService.DROPBOX -> userRepository.user().map { it != null }
+      CloudStorageProvider.DROPBOX -> userRepository.user().map { it != null }
       else -> kotlinx.coroutines.flow.flowOf(false)
     }
   }
 
   override suspend fun isSignedInImmediate(serviceType: ServiceType): Boolean {
     return when (serviceType) {
-      CloudStorageService.DROPBOX -> userRepository.userBlocking() != null
+      CloudStorageProvider.DROPBOX -> userRepository.userBlocking() != null
       else -> false
     }
   }
 
   override suspend fun getAccessToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      CloudStorageService.DROPBOX -> userRepository.userBlocking()?.token
+      CloudStorageProvider.DROPBOX -> userRepository.userBlocking()?.token
       else -> null
     }
   }
 
   override suspend fun saveAccessToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      CloudStorageService.DROPBOX -> {
+      CloudStorageProvider.DROPBOX -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateToken(token)
         }
@@ -50,14 +50,14 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override suspend fun getRefreshToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      CloudStorageService.DROPBOX -> userRepository.userBlocking()?.refreshToken
+      CloudStorageProvider.DROPBOX -> userRepository.userBlocking()?.refreshToken
       else -> null
     }
   }
 
   override suspend fun saveRefreshToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      CloudStorageService.DROPBOX -> {
+      CloudStorageProvider.DROPBOX -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateRefreshToken(token)
         }

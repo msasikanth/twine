@@ -42,7 +42,7 @@ class FileCloudSyncService(
 
   private val json: Json = Json { ignoreUnknownKeys = true }
 
-  suspend fun sync(provider: FileCloudSyncProvider): Boolean {
+  suspend fun sync(provider: FileCloudServiceProvider): Boolean {
     try {
       userRepository.updateLastSyncStatus("SYNCING")
       val config = appConfigQueries.getSyncConfig().executeAsOneOrNull()
