@@ -115,7 +115,7 @@ class FreshRssLoginViewModel(
         )
 
         Logger.d { "FreshRSS login: user saved, triggering initial pull" }
-        withContext(NonCancellable) { syncCoordinator.pull() }
+        withContext(NonCancellable) { syncCoordinator.syncSubscriptions() }
 
         _state.update { it.copy(isLoading = false, loginSuccess = true) }
       } catch (e: Exception) {
