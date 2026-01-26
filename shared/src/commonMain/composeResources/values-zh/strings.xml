@@ -187,6 +187,16 @@
     <string name="settingsAppIconTitle">应用图标</string>
     <string name="settingsAppIconSubtitle">选择 Twine 在主屏幕上的外观</string>
     <string name="filter">过滤</string>
+    <string name="freshRssLoginTitle">FreshRSS Login</string>
+    <string name="freshRssServerUrl">Server URL</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">通知有问题？您的设备可能会在后台关闭应用。点击此处了解如何修复。</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
