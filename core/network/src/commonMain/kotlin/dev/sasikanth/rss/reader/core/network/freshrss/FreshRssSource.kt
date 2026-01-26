@@ -35,6 +35,8 @@ import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.KotlinxSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import kotlin.time.Instant
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
@@ -42,16 +44,17 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class FreshRssSource(
   private val appHttpClient: HttpClient,
-  private val user: Lazy<User?>,
+  private val user: suspend () -> User?,
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
   companion object {
-    private const val USER_STATE_READ = "user/-/state/com.google/read"
-    private const val USER_STATE_UNREAD = "user/-/state/com.google/reading-list"
-    private const val USER_STATE_STARRED = "user/-/state/com.google/starred"
+    const val USER_STATE_READ = "user/-/state/com.google/read"
+    const val USER_STATE_UNREAD = "user/-/state/com.google/reading-list"
+    const val USER_STATE_STARRED = "user/-/state/com.google/starred"
   }
 
+  private val httpClientMutex = Mutex()
   private val defaultHttpClient by lazy {
     appHttpClient.config {
       followRedirects = true
@@ -66,6 +69,7 @@ class FreshRssSource(
   }
 
   private var _authenticatedHttpClient: HttpClient? = null
+  private var cachedUserId: String? = null
 
   /** @return: auth token for the account if successful or else return null */
   suspend fun login(endpoint: String, username: String, password: String): String? {
@@ -125,17 +129,21 @@ class FreshRssSource(
   }
 
   suspend fun articles(
+    streamId: String = "user/-/state/com.google/reading-list",
     limit: Int = 1000,
     newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
-    continuation: String? = null
+    continuation: String? = null,
+    excludeState: String? = null,
   ): ArticlesPayload {
     return withContext(dispatchersProvider.io) {
       authenticatedHttpClient()
         .get(
           Reader.Articles(
+            streamId = streamId,
             limit = limit,
             newerThan = newerThan,
-            continuation = continuation.orEmpty()
+            continuation = continuation ?: "",
+            excludeState = excludeState
           )
         )
         .body()
@@ -309,41 +317,55 @@ class FreshRssSource(
   }
 
   suspend fun unreadIds(): List<String> {
-    return fetchIds(state = USER_STATE_UNREAD)
+    return fetchIds(state = USER_STATE_UNREAD, excludeState = USER_STATE_READ)
   }
 
   suspend fun bookmarkIds(): List<String> {
     return fetchIds(state = USER_STATE_STARRED)
   }
 
-  private suspend fun fetchIds(state: String): List<String> =
+  private suspend fun fetchIds(state: String, excludeState: String? = null): List<String> =
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().get(Reader.ItemIds(state = state)).body<ItemIds>().itemRefs.map {
-        (id) ->
-        return@map toIdString(id)
-      }
+      authenticatedHttpClient()
+        .get(Reader.ItemIds(state = state, excludeState = excludeState))
+        .body<ItemIds>()
+        .itemRefs
+        .map { (id) ->
+          return@map toIdString(id)
+        }
     }
 
-  fun authenticatedHttpClient(): HttpClient {
-    return if (_authenticatedHttpClient != null) _authenticatedHttpClient!!
-    else {
-      val user by user
+  suspend fun authenticatedHttpClient(): HttpClient {
+    return httpClientMutex.withLock {
+      val user = user()
+      if (user == null) {
+        _authenticatedHttpClient = null
+        cachedUserId = null
+        return@withLock defaultHttpClient
+      }
+
+      if (_authenticatedHttpClient != null && cachedUserId == user.id) {
+        return@withLock _authenticatedHttpClient!!
+      }
 
       defaultHttpClient
         .config {
           defaultRequest {
-            val baseEndPoint = user?.serverUrl
+            val baseEndPoint = user.serverUrl
             if (!(baseEndPoint.isNullOrBlank())) {
               url(baseEndPoint)
             }
 
-            val authToken = user?.token
+            val authToken = user.token
             if (!(authToken.isNullOrBlank())) {
               header("Authorization", "GoogleLogin auth=${authToken.trim()}")
             }
           }
         }
-        .also { _authenticatedHttpClient = it }
+        .also {
+          _authenticatedHttpClient = it
+          cachedUserId = user.id
+        }
     }
   }
 

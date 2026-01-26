@@ -13,6 +13,6 @@ package dev.sasikanth.rss.reader.core.model.remote.freshrss
 
 import kotlinx.serialization.Serializable
 
-@Serializable data class ItemIds(val itemRefs: List<ItemRef>)
+@Serializable data class ItemIds(val itemRefs: List<ItemRef> = emptyList())
 
-@Serializable data class ItemRef(val id: String)
+@Serializable data class ItemRef(val id: String = "")
