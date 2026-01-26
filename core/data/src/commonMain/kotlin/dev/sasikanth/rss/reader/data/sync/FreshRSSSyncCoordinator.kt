@@ -69,7 +69,7 @@ class FreshRSSSyncCoordinator(
 
       // 2. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
-      syncArticles(newerThan = lastSyncedAt.toEpochMilliseconds())
+      val hasNewArticles = syncArticles(newerThan = lastSyncedAt.toEpochMilliseconds())
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED)
       updateSyncState(SyncState.InProgress(0.7f))
 
@@ -77,7 +77,9 @@ class FreshRSSSyncCoordinator(
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      settingsRepository.updateLastSyncedAt(syncStartTime)
+      if (hasNewArticles) {
+        settingsRepository.updateLastSyncedAt(syncStartTime)
+      }
       updateSyncState(SyncState.Complete)
 
       true
@@ -310,7 +312,8 @@ class FreshRSSSyncCoordinator(
   private suspend fun syncArticles(
     streamId: String = "user/-/state/com.google/reading-list",
     newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds()
-  ) {
+  ): Boolean {
+    var hasNewArticles = false
     var continuation: String? = null
     do {
       val articlesPayload =
@@ -321,13 +324,20 @@ class FreshRSSSyncCoordinator(
           continuation = continuation
         )
       val items = articlesPayload.items
-      items.asReversed().forEach { item -> upsertArticle(item) }
+      items.asReversed().forEach { item ->
+        val isNewArticle = upsertArticle(item)
+        if (isNewArticle) {
+          hasNewArticles = true
+        }
+      }
 
       continuation = articlesPayload.continuation
     } while (continuation != null && articlesPayload.items.isNotEmpty())
+
+    return hasNewArticles
   }
 
-  private suspend fun upsertArticle(item: ArticlePayload) {
+  private suspend fun upsertArticle(item: ArticlePayload): Boolean {
     val remoteId = item.id
     val localPost =
       rssRepository.postByRemoteId(remoteId)
@@ -339,6 +349,7 @@ class FreshRSSSyncCoordinator(
       if (localPost.remoteId != remoteId) {
         rssRepository.updatePostRemoteId(remoteId, localPost.id)
       }
+      return false
     } else {
       // Insert new post
       val feedRemoteId = item.origin.streamId
@@ -378,7 +389,9 @@ class FreshRSSSyncCoordinator(
         rssRepository.postByLink(postPayload.link)?.let {
           rssRepository.updatePostRemoteId(remoteId, it.id)
         }
+        return true
       }
+      return false
     }
   }
 
