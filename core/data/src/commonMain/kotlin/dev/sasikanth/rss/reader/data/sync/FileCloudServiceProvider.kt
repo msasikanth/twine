@@ -38,6 +38,9 @@ enum class APIServiceType : ServiceType {
 interface CloudServiceProvider {
   val cloudService: ServiceType
 
+  val isPremium: Boolean
+    get() = false
+
   fun isSignedIn(): Flow<Boolean>
 
   suspend fun isSignedInImmediate(): Boolean

@@ -443,10 +443,21 @@ internal fun SettingsScreen(
             lastSyncedAt = state.lastSyncedAt,
             hasCloudServiceSignedIn = state.hasCloudServiceSignedIn,
             availableProviders = viewModel.availableProviders,
-            onSyncClicked = { viewModel.dispatch(SettingsEvent.SyncClicked(it)) },
+            isSubscribed = state.isSubscribed,
+            onSyncClicked = {
+              if (it.isPremium && !state.isSubscribed) {
+                openPaywall()
+              } else {
+                viewModel.dispatch(SettingsEvent.SyncClicked(it))
+              }
+            },
             onAPIServiceClicked = {
-              when (it.cloudService) {
-                APIServiceType.FRESH_RSS -> openFreshRssLogin()
+              if (it.isPremium && !state.isSubscribed) {
+                openPaywall()
+              } else {
+                when (it.cloudService) {
+                  APIServiceType.FRESH_RSS -> openFreshRssLogin()
+                }
               }
             },
             onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) }
@@ -1768,6 +1779,7 @@ private fun CloudSyncSettingItem(
   lastSyncedAt: Instant?,
   hasCloudServiceSignedIn: Boolean,
   availableProviders: Set<CloudServiceProvider>,
+  isSubscribed: Boolean,
   onSyncClicked: (CloudServiceProvider) -> Unit,
   onAPIServiceClicked: (APIServiceProvider) -> Unit,
   onSignOutClicked: () -> Unit
@@ -1811,11 +1823,24 @@ private fun CloudSyncSettingItem(
         )
 
         Column(modifier = Modifier.weight(1f)) {
-          Text(
-            text = label,
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh
-          )
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = label,
+              style = MaterialTheme.typography.titleMedium,
+              color = AppTheme.colorScheme.textEmphasisHigh
+            )
+
+            if (provider.isPremium && !isSubscribed) {
+              Spacer(Modifier.width(8.dp))
+
+              Icon(
+                modifier = Modifier.size(16.dp),
+                imageVector = Icons.Rounded.WorkspacePremium,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.primary
+              )
+            }
+          }
 
           var statusString =
             when (syncProgress) {

@@ -30,6 +30,8 @@ class FreshRssSyncProvider(
 
   override val cloudService: APIServiceType = APIServiceType.FRESH_RSS
 
+  override val isPremium: Boolean = true
+
   override fun isSignedIn(): Flow<Boolean> {
     return userRepository.user().map { it != null && it.serverUrl != null }
   }
