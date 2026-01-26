@@ -139,6 +139,7 @@ fun App(
   searchViewModel: () -> SearchViewModel,
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
+  freshRssLoginViewModel: () -> dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
@@ -358,9 +359,18 @@ fun App(
                 openAbout = { navController.navigate(Screen.About) },
                 openBlockedWords = { navController.navigate(Screen.BlockedWords) },
                 openPaywall = { navController.navigate(Screen.Paywall) },
+                openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
                 modifier = screenModifier
               )
             }
+          )
+        }
+
+        composable<Screen.FreshRssLogin> {
+          val viewModel = viewModel { freshRssLoginViewModel() }
+          dev.sasikanth.rss.reader.freshrss.ui.FreshRssLoginScreen(
+            viewModel = viewModel,
+            goBack = { navController.popBackStack() }
           )
         }
 

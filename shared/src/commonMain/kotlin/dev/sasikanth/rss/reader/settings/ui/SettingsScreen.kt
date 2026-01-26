@@ -74,6 +74,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
@@ -120,6 +121,8 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
+import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
+import dev.sasikanth.rss.reader.data.sync.APIServiceType
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudStorageProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -232,6 +235,7 @@ internal fun SettingsScreen(
   openAbout: () -> Unit,
   openBlockedWords: () -> Unit,
   openPaywall: () -> Unit,
+  openFreshRssLogin: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -434,8 +438,14 @@ internal fun SettingsScreen(
           CloudSyncSettingItem(
             syncProgress = state.syncProgress,
             lastSyncedAt = state.lastSyncedAt,
+            hasCloudServiceSignedIn = state.hasCloudServiceSignedIn,
             availableProviders = viewModel.availableProviders,
             onSyncClicked = { viewModel.dispatch(SettingsEvent.SyncClicked(it)) },
+            onAPIServiceClicked = {
+              when (it.cloudService) {
+                APIServiceType.FRESH_RSS -> openFreshRssLogin()
+              }
+            },
             onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) }
           )
         }
@@ -1753,25 +1763,30 @@ private fun AboutProfileImages() {
 private fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
+  hasCloudServiceSignedIn: Boolean,
   availableProviders: Set<CloudServiceProvider>,
   onSyncClicked: (CloudServiceProvider) -> Unit,
+  onAPIServiceClicked: (APIServiceProvider) -> Unit,
   onSignOutClicked: () -> Unit
 ) {
   availableProviders.forEach { provider ->
     val label =
-      when (provider.cloudService) {
+      when (val service = provider.cloudService) {
         CloudStorageProvider.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
+        APIServiceType.FRESH_RSS -> "FreshRSS"
         else -> {
           ""
         }
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
+    val canInteract = !hasCloudServiceSignedIn || isSignedIn
 
     Box(
       modifier =
-        Modifier.clickable { onSyncClicked(provider) }
+        Modifier.clickable(enabled = canInteract) { onSyncClicked(provider) }
           .fillMaxWidth()
           .padding(horizontal = 24.dp, vertical = 12.dp)
+          .alpha(if (canInteract) 1f else 0.38f)
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
@@ -1795,12 +1810,15 @@ private fun CloudSyncSettingItem(
           if (
             syncProgress != SettingsState.SyncProgress.Idle &&
               syncProgress != SettingsState.SyncProgress.Syncing &&
-              lastSyncedAt != null
+              lastSyncedAt != null &&
+              isSignedIn
           ) {
             statusString += " \u2022 ${lastSyncedAt.relativeDurationString()}"
           }
 
-          AnimatedVisibility(visible = syncProgress != SettingsState.SyncProgress.Idle) {
+          AnimatedVisibility(
+            visible = syncProgress != SettingsState.SyncProgress.Idle && isSignedIn
+          ) {
             Text(
               text = statusString,
               style = MaterialTheme.typography.bodyMedium,
@@ -1809,21 +1827,26 @@ private fun CloudSyncSettingItem(
           }
         }
 
-        val label =
+        val actionLabel =
           if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
           else stringResource(Res.string.settingsSyncSignIn)
 
         TextButton(
+          enabled = canInteract,
           onClick = {
             if (isSignedIn) {
               onSignOutClicked()
             } else {
-              onSyncClicked(provider)
+              if (provider is APIServiceProvider) {
+                onAPIServiceClicked(provider)
+              } else {
+                onSyncClicked(provider)
+              }
             }
           },
         ) {
           Text(
-            text = label,
+            text = actionLabel,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = AppTheme.colorScheme.primary

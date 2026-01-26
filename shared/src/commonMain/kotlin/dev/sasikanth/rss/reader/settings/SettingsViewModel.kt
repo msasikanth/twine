@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -81,7 +80,7 @@ class SettingsViewModel(
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
         settingsRepository.lastSyncedAt,
-        userRepository.user().mapNotNull { it?.lastSyncStatus ?: "IDLE" },
+        userRepository.user(),
         settingsRepository.appIcon,
       ) {
         browserType,
@@ -99,7 +98,7 @@ class SettingsViewModel(
         enableNotifications,
         downloadFullContent,
         lastSyncedAt,
-        lastSyncStatus,
+        user,
         appIcon ->
         Settings(
           browserType = browserType,
@@ -118,12 +117,13 @@ class SettingsViewModel(
           downloadFullContent = downloadFullContent,
           lastSyncedAt = lastSyncedAt,
           lastSyncStatus =
-            when (lastSyncStatus) {
+            when (user?.lastSyncStatus) {
               "SUCCESS" -> SettingsState.SyncProgress.Success
               "FAILURE" -> SettingsState.SyncProgress.Failure
               "SYNCING" -> SettingsState.SyncProgress.Syncing
               else -> SettingsState.SyncProgress.Idle
             },
+          hasCloudServiceSignedIn = user != null,
           appIcon = appIcon,
         )
       }
@@ -145,6 +145,7 @@ class SettingsViewModel(
             enableNotifications = settings.enableNotifications,
             downloadFullContent = settings.downloadFullContent,
             lastSyncedAt = settings.lastSyncedAt,
+            hasCloudServiceSignedIn = settings.hasCloudServiceSignedIn,
             appIcon = settings.appIcon,
             syncProgress =
               if (it.syncProgress == SettingsState.SyncProgress.Syncing) {
@@ -206,7 +207,7 @@ class SettingsViewModel(
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
         _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
-        val result = syncCoordinator.push()
+        val result = syncCoordinator.pull()
         _state.update {
           it.copy(
             syncProgress =
@@ -223,7 +224,11 @@ class SettingsViewModel(
 
   private fun signOutClicked() {
     viewModelScope.launch {
-      userRepository.deleteUser()
+      availableProviders.forEach {
+        if (it.isSignedInImmediate()) {
+          it.signOut()
+        }
+      }
       _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Idle) }
     }
   }
@@ -354,5 +359,6 @@ private data class Settings(
   val downloadFullContent: Boolean,
   val lastSyncedAt: kotlin.time.Instant?,
   val lastSyncStatus: SettingsState.SyncProgress,
+  val hasCloudServiceSignedIn: Boolean,
   val appIcon: AppIcon,
 )
