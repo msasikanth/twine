@@ -122,7 +122,7 @@ class AppViewModel(
     viewModelScope.launch {
       val signInSucceeded = oAuthManager.handleRedirect(uri)
       if (signInSucceeded) {
-        syncCoordinator.pull()
+        syncCoordinator.push()
       }
       linkHandler.close()
     }

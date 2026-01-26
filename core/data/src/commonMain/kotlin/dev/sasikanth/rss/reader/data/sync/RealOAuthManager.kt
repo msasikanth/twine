@@ -39,6 +39,8 @@ class RealOAuthManager(
   private val redirectUri = "twine://oauth"
   private var codeVerifier: String? = null
 
+  private var pendingServiceType: ServiceType? = null
+
   override fun getAuthUrl(serviceType: ServiceType): String {
     return when (serviceType) {
       CloudStorageProvider.DROPBOX -> {
@@ -59,8 +61,6 @@ class RealOAuthManager(
       else -> ""
     }
   }
-
-  private var pendingServiceType: ServiceType? = null
 
   override fun setPendingProvider(serviceType: ServiceType) {
     pendingServiceType = serviceType
