@@ -13,7 +13,9 @@ package dev.sasikanth.rss.reader.core.network.miniflux
 
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
+import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCreateFeedResponse
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntriesPayload
+import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxError
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxFeed
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxUser
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -30,6 +32,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -98,6 +101,12 @@ class MinifluxSource(
     }
   }
 
+  suspend fun feed(feedId: Long): MinifluxFeed {
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(MinifluxApi.Feed(feedId = feedId)).body<MinifluxFeed>()
+    }
+  }
+
   suspend fun entries(
     status: String? = null,
     limit: Int? = null,
@@ -128,8 +137,8 @@ class MinifluxSource(
 
   suspend fun addFeed(url: String, categoryId: Long): MinifluxFeed {
     return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient()
-        .post(MinifluxApi.Feeds()) {
+      val response =
+        authenticatedHttpClient().post(MinifluxApi.Feeds()) {
           contentType(ContentType.Application.Json)
           setBody(
             buildJsonObject {
@@ -138,27 +147,49 @@ class MinifluxSource(
             }
           )
         }
-        .body<MinifluxFeed>()
+
+      if (response.status == HttpStatusCode.Created) {
+        val createFeedResponse = response.body<MinifluxCreateFeedResponse>()
+        feed(createFeedResponse.feedId)
+      } else if (response.status == HttpStatusCode.BadRequest) {
+        val error = response.body<MinifluxError>()
+        if (error.errorMessage == "This feed already exists.") {
+          feeds().find { it.feedUrl == url }
+            ?: throw Exception("Feed already exists but could not be found")
+        } else {
+          throw Exception(error.errorMessage)
+        }
+      } else {
+        response.body<MinifluxFeed>()
+      }
     }
   }
 
   suspend fun updateFeed(feedId: Long, title: String, categoryId: Long) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().put(MinifluxApi.Feed(feedId = feedId)) {
-        contentType(ContentType.Application.Json)
-        setBody(
-          buildJsonObject {
-            put("title", title)
-            put("category_id", categoryId)
-          }
-        )
+      val response =
+        authenticatedHttpClient().put(MinifluxApi.Feed(feedId = feedId)) {
+          contentType(ContentType.Application.Json)
+          setBody(
+            buildJsonObject {
+              put("title", title)
+              put("category_id", categoryId)
+            }
+          )
+        }
+
+      if (!response.status.isSuccess()) {
+        throw Exception("Failed to update feed: ${response.status}")
       }
     }
   }
 
   suspend fun deleteFeed(feedId: Long) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().delete(MinifluxApi.Feed(feedId = feedId))
+      val response = authenticatedHttpClient().delete(MinifluxApi.Feed(feedId = feedId))
+      if (!response.status.isSuccess()) {
+        throw Exception("Failed to delete feed: ${response.status}")
+      }
     }
   }
 
@@ -172,49 +203,82 @@ class MinifluxSource(
 
   private suspend fun updateEntriesStatus(ids: List<Long>, status: String) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().put(MinifluxApi.UpdateEntries()) {
-        contentType(ContentType.Application.Json)
-        setBody(
-          buildJsonObject {
-            putJsonArray("entry_ids") { ids.forEach { add(JsonPrimitive(it)) } }
-            put("status", status)
-          }
-        )
+      val response =
+        authenticatedHttpClient().put(MinifluxApi.UpdateEntries()) {
+          contentType(ContentType.Application.Json)
+          setBody(
+            buildJsonObject {
+              putJsonArray("entry_ids") { ids.forEach { add(JsonPrimitive(it)) } }
+              put("status", status)
+            }
+          )
+        }
+
+      if (!response.status.isSuccess()) {
+        throw Exception("Failed to update entries status: ${response.status}")
       }
     }
   }
 
   suspend fun toggleBookmark(entryId: Long) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().put(MinifluxApi.ToggleEntryBookmark(entryId = entryId)) {
-        contentType(ContentType.Application.Json)
+      val response =
+        authenticatedHttpClient().put(MinifluxApi.ToggleEntryBookmark(entryId = entryId)) {
+          contentType(ContentType.Application.Json)
+        }
+
+      if (!response.status.isSuccess()) {
+        throw Exception("Failed to toggle bookmark: ${response.status}")
       }
     }
   }
 
   suspend fun addCategory(title: String): MinifluxCategory {
     return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient()
-        .post(MinifluxApi.Categories()) {
+      val response =
+        authenticatedHttpClient().post(MinifluxApi.Categories()) {
           contentType(ContentType.Application.Json)
           setBody(buildJsonObject { put("title", title) })
         }
-        .body<MinifluxCategory>()
+
+      if (response.status == HttpStatusCode.Created) {
+        response.body<MinifluxCategory>()
+      } else if (response.status == HttpStatusCode.BadRequest) {
+        val error = response.body<MinifluxError>()
+        if (error.errorMessage == "This category already exists.") {
+          categories().find { it.title == title }
+            ?: throw Exception("Category already exists but could not be found")
+        } else {
+          throw Exception(error.errorMessage)
+        }
+      } else {
+        response.body<MinifluxCategory>()
+      }
     }
   }
 
   suspend fun updateCategory(categoryId: Long, title: String) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().put(MinifluxApi.Category(categoryId = categoryId)) {
-        contentType(ContentType.Application.Json)
-        setBody(buildJsonObject { put("title", title) })
+      val response =
+        authenticatedHttpClient().put(MinifluxApi.Category(categoryId = categoryId)) {
+          contentType(ContentType.Application.Json)
+          setBody(buildJsonObject { put("title", title) })
+        }
+
+      if (!response.status.isSuccess()) {
+        throw Exception("Failed to update category: ${response.status}")
       }
     }
   }
 
   suspend fun deleteCategory(categoryId: Long) {
     withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().delete(MinifluxApi.Category(categoryId = categoryId))
+      val response = authenticatedHttpClient().delete(MinifluxApi.Category(categoryId = categoryId))
+      if (response.status == HttpStatusCode.NotFound) {
+        // no-op
+      } else if (!response.status.isSuccess()) {
+        throw Exception("Failed to delete category: ${response.status}")
+      }
     }
   }
 
