@@ -40,4 +40,5 @@ data class Feed(
   val showFeedFavIcon: Boolean = true,
   val hideFromAllFeeds: Boolean = false,
   val isDeleted: Boolean = false,
+  val remoteId: String? = null,
 ) : Source
