@@ -31,12 +31,18 @@ enum class CloudStorageProvider : ServiceType {
   DROPBOX
 }
 
+enum class APIServiceType : ServiceType {
+  FRESH_RSS
+}
+
 interface CloudServiceProvider {
   val cloudService: ServiceType
 
   fun isSignedIn(): Flow<Boolean>
 
   suspend fun isSignedInImmediate(): Boolean
+
+  suspend fun signOut()
 }
 
 interface FileCloudServiceProvider : CloudServiceProvider {
@@ -47,7 +53,7 @@ interface FileCloudServiceProvider : CloudServiceProvider {
 
   override suspend fun isSignedInImmediate(): Boolean
 
-  suspend fun signOut()
+  override suspend fun signOut()
 
   suspend fun upload(fileName: String, data: String): Boolean
 
@@ -56,6 +62,17 @@ interface FileCloudServiceProvider : CloudServiceProvider {
   suspend fun listFiles(prefix: String): List<String>
 
   suspend fun deleteFile(fileName: String): Boolean
+}
+
+interface APIServiceProvider : CloudServiceProvider {
+
+  override val cloudService: APIServiceType
+
+  override fun isSignedIn(): Flow<Boolean>
+
+  override suspend fun isSignedInImmediate(): Boolean
+
+  override suspend fun signOut()
 }
 
 @Serializable

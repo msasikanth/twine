@@ -24,17 +24,18 @@ class DropboxSyncCoordinator(
 
   override val syncState: StateFlow<SyncState> = localSyncCoordinator.syncState
 
-  override suspend fun pull() {
-    fileCloudSyncService.sync(dropboxSyncProvider)
+  override suspend fun pull(): Boolean {
+    val syncResult = fileCloudSyncService.sync(dropboxSyncProvider)
     localSyncCoordinator.pull()
+    return syncResult
   }
 
-  override suspend fun pull(feedIds: List<String>) {
-    localSyncCoordinator.pull(feedIds)
+  override suspend fun pull(feedIds: List<String>): Boolean {
+    return localSyncCoordinator.pull(feedIds)
   }
 
-  override suspend fun pull(feedId: String) {
-    localSyncCoordinator.pull(feedId)
+  override suspend fun pull(feedId: String): Boolean {
+    return localSyncCoordinator.pull(feedId)
   }
 
   override suspend fun push(): Boolean {

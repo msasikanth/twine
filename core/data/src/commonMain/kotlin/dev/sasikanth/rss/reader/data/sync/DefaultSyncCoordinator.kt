@@ -17,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
@@ -27,6 +28,8 @@ class DefaultSyncCoordinator(
   private val localSyncCoordinator: LocalSyncCoordinator,
   private val dropboxSyncCoordinator: DropboxSyncCoordinator,
   private val dropboxSyncProvider: DropboxCloudServiceProvider,
+  private val freshRSSSyncCoordinator: FreshRSSSyncCoordinator,
+  private val freshRssSyncProvider: FreshRssSyncProvider,
   dispatchersProvider: DispatchersProvider,
 ) : SyncCoordinator {
 
@@ -34,35 +37,42 @@ class DefaultSyncCoordinator(
 
   @OptIn(ExperimentalCoroutinesApi::class)
   override val syncState: StateFlow<SyncState> =
-    dropboxSyncProvider
-      .isSignedIn()
-      .flatMapLatest { isSignedIn ->
-        if (isSignedIn) {
-          dropboxSyncCoordinator.syncState
-        } else {
-          localSyncCoordinator.syncState
+    combine(dropboxSyncProvider.isSignedIn(), freshRssSyncProvider.isSignedIn()) {
+        dropboxSignedIn,
+        freshRssSignedIn ->
+        when {
+          freshRssSignedIn -> freshRSSSyncCoordinator
+          dropboxSignedIn -> dropboxSyncCoordinator
+          else -> localSyncCoordinator
         }
       }
+      .flatMapLatest { it.syncState }
       .stateIn(scope, SharingStarted.WhileSubscribed(), SyncState.Idle)
 
-  override suspend fun pull() {
-    if (dropboxSyncProvider.isSignedInImmediate()) {
+  override suspend fun pull(): Boolean {
+    return if (freshRssSyncProvider.isSignedInImmediate()) {
+      freshRSSSyncCoordinator.pull()
+    } else if (dropboxSyncProvider.isSignedInImmediate()) {
       dropboxSyncCoordinator.pull()
     } else {
       localSyncCoordinator.pull()
     }
   }
 
-  override suspend fun pull(feedIds: List<String>) {
-    if (dropboxSyncProvider.isSignedInImmediate()) {
+  override suspend fun pull(feedIds: List<String>): Boolean {
+    return if (freshRssSyncProvider.isSignedInImmediate()) {
+      freshRSSSyncCoordinator.pull(feedIds)
+    } else if (dropboxSyncProvider.isSignedInImmediate()) {
       dropboxSyncCoordinator.pull(feedIds)
     } else {
       localSyncCoordinator.pull(feedIds)
     }
   }
 
-  override suspend fun pull(feedId: String) {
-    if (dropboxSyncProvider.isSignedInImmediate()) {
+  override suspend fun pull(feedId: String): Boolean {
+    return if (freshRssSyncProvider.isSignedInImmediate()) {
+      freshRSSSyncCoordinator.pull(feedId)
+    } else if (dropboxSyncProvider.isSignedInImmediate()) {
       dropboxSyncCoordinator.pull(feedId)
     } else {
       localSyncCoordinator.pull(feedId)
@@ -70,10 +80,10 @@ class DefaultSyncCoordinator(
   }
 
   override suspend fun push(): Boolean {
-    return if (dropboxSyncProvider.isSignedInImmediate()) {
-      dropboxSyncCoordinator.push()
-    } else {
-      localSyncCoordinator.push()
+    return when {
+      freshRssSyncProvider.isSignedInImmediate() -> freshRSSSyncCoordinator.push()
+      dropboxSyncProvider.isSignedInImmediate() -> dropboxSyncCoordinator.push()
+      else -> localSyncCoordinator.push()
     }
   }
 }

@@ -59,7 +59,7 @@ class LocalSyncCoordinator(
   private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
   override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
 
-  override suspend fun pull() {
+  override suspend fun pull(): Boolean {
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
@@ -86,9 +86,11 @@ class LocalSyncCoordinator(
         updateSyncState(SyncState.Error(e))
       }
     }
+
+    return true
   }
 
-  override suspend fun pull(feedIds: List<String>) {
+  override suspend fun pull(feedIds: List<String>): Boolean {
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
@@ -110,9 +112,11 @@ class LocalSyncCoordinator(
         updateSyncState(SyncState.Error(e))
       }
     }
+
+    return true
   }
 
-  override suspend fun pull(feedId: String) {
+  override suspend fun pull(feedId: String): Boolean {
     withContext(dispatchersProvider.default) {
       try {
         updateSyncState(SyncState.InProgress(0f))
@@ -133,6 +137,8 @@ class LocalSyncCoordinator(
         updateSyncState(SyncState.Error(e))
       }
     }
+
+    return true
   }
 
   override suspend fun push(): Boolean {
