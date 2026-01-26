@@ -1,3 +1,5 @@
+import dev.sasikanth.rss.reader.core.model.local.ServiceType;
+
 CREATE TABLE user(
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -6,12 +8,13 @@ CREATE TABLE user(
     token TEXT NOT NULL,
     refreshToken TEXT NOT NULL,
     serverUrl TEXT,
-    lastSyncStatus TEXT NOT NULL DEFAULT 'IDLE'
+    lastSyncStatus TEXT NOT NULL DEFAULT 'IDLE',
+    serviceType TEXT AS ServiceType DEFAULT NULL
 );
 
 insert:
-INSERT OR REPLACE INTO user(id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus)
-VALUES (:id, :name, :email, :avatarUrl, :token, :refreshToken, :serverUrl, :lastSyncStatus);
+INSERT OR REPLACE INTO user(id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus, serviceType)
+VALUES (:id, :name, :email, :avatarUrl, :token, :refreshToken, :serverUrl, :lastSyncStatus, :serviceType);
 
 delete:
 DELETE FROM user;
