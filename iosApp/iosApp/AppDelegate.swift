@@ -24,7 +24,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     
     private let feedsRefreshTaskIdentifier = "dev.sasikanth.reader.feeds_refresh"
     private let postsCleanupTaskIdentifier = "dev.sasikanth.reader.posts_cleanup"
-    private let dropboxSyncTaskIdentifier = "dev.sasikanth.reader.dropbox_sync"
+    private let cloudSyncTaskIdentifier = "dev.sasikanth.reader.cloud_sync"
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: feedsRefreshTaskIdentifier, using: nil) { (task) in
@@ -35,8 +35,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
             self.handlePostsCleanup(task: task as! BGProcessingTask)
         }
         
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: dropboxSyncTaskIdentifier, using: nil) { (task) in
-            self.handleDropboxSync(task: task as! BGProcessingTask)
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: cloudSyncTaskIdentifier, using: nil) { (task) in
+            self.handleCloudSync(task: task as! BGProcessingTask)
         }
 
         #if !DEBUG
@@ -79,8 +79,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
     
-    func scheduleDropboxSync() {
-        let request = BGProcessingTaskRequest(identifier: dropboxSyncTaskIdentifier)
+    func scheduleCloudSync() {
+        let request = BGProcessingTaskRequest(identifier: cloudSyncTaskIdentifier)
         request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
         request.requiresNetworkConnectivity = true
         
@@ -149,7 +149,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
     
-    func handleDropboxSync(task: BGProcessingTask) {
+    func handleCloudSync(task: BGProcessingTask) {
         Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
 
         scheduleDropboxSync()

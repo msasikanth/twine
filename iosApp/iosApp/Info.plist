@@ -6,7 +6,7 @@
 	<array>
 		<string>dev.sasikanth.reader.posts_cleanup</string>
 		<string>dev.sasikanth.reader.feeds_refresh</string>
-		<string>dev.sasikanth.reader.dropbox_sync</string>
+		<string>dev.sasikanth.reader.cloud_sync</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>

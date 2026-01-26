@@ -21,7 +21,7 @@ import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.Period
-import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 
 sealed interface SettingsEvent {
 
@@ -63,7 +63,7 @@ sealed interface SettingsEvent {
 
   data class ToggleDownloadFullContent(val value: Boolean) : SettingsEvent
 
-  data class SyncClicked(val provider: CloudSyncProvider) : SettingsEvent
+  data class SyncClicked(val provider: CloudServiceProvider) : SettingsEvent
 
   data object SignOutClicked : SettingsEvent
 

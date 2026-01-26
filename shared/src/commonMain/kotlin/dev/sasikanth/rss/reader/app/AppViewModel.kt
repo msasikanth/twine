@@ -19,7 +19,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
@@ -45,7 +44,6 @@ class AppViewModel(
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
-  private val dropboxSyncProvider: DropboxSyncProvider,
   private val linkHandler: LinkHandler,
 ) : ViewModel() {
 

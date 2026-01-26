@@ -120,8 +120,8 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_WEEK
 import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
-import dev.sasikanth.rss.reader.data.sync.CloudStorageService
-import dev.sasikanth.rss.reader.data.sync.FileCloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.CloudStorageProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
@@ -1602,6 +1602,9 @@ private fun OPMLSettingItem(
                 is OpmlResult.InProgress.Exporting -> {
                   stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
                 }
+                else -> {
+                  ""
+                }
               }
 
             Text(
@@ -1750,30 +1753,32 @@ private fun AboutProfileImages() {
 private fun CloudSyncSettingItem(
   syncProgress: SettingsState.SyncProgress,
   lastSyncedAt: Instant?,
-  availableProviders: List<FileCloudSyncProvider>,
-  onSyncClicked: (FileCloudSyncProvider) -> Unit,
+  availableProviders: Set<CloudServiceProvider>,
+  onSyncClicked: (CloudServiceProvider) -> Unit,
   onSignOutClicked: () -> Unit
 ) {
   availableProviders.forEach { provider ->
     val label =
       when (provider.cloudService) {
-        CloudStorageService.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
+        CloudStorageProvider.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
+        else -> {
+          ""
+        }
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
 
     Box(
       modifier =
-        Modifier.clickable(enabled = provider.isSupported) { onSyncClicked(provider) }
+        Modifier.clickable { onSyncClicked(provider) }
           .fillMaxWidth()
           .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
-          val alpha = if (provider.isSupported) 1f else 0.38f
           Text(
             text = label,
             style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.textEmphasisHigh.copy(alpha = alpha)
+            color = AppTheme.colorScheme.textEmphasisHigh
           )
 
           var statusString =
@@ -1804,27 +1809,25 @@ private fun CloudSyncSettingItem(
           }
         }
 
-        if (provider.isSupported) {
-          val label =
-            if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
-            else stringResource(Res.string.settingsSyncSignIn)
+        val label =
+          if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
+          else stringResource(Res.string.settingsSyncSignIn)
 
-          TextButton(
-            onClick = {
-              if (isSignedIn) {
-                onSignOutClicked()
-              } else {
-                onSyncClicked(provider)
-              }
-            },
-          ) {
-            Text(
-              text = label,
-              style = MaterialTheme.typography.bodyMedium,
-              fontWeight = FontWeight.SemiBold,
-              color = AppTheme.colorScheme.primary
-            )
-          }
+        TextButton(
+          onClick = {
+            if (isSignedIn) {
+              onSignOutClicked()
+            } else {
+              onSyncClicked(provider)
+            }
+          },
+        ) {
+          Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.primary
+          )
         }
       }
     }

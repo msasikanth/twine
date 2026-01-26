@@ -30,7 +30,7 @@ class CloudSyncWorker(
 
   companion object Companion {
 
-    const val TAG = "DROPBOX_SYNC"
+    const val TAG = "CLOUD_SYNC_WORKER"
 
     fun periodicRequest(): PeriodicWorkRequest {
       val constraints =

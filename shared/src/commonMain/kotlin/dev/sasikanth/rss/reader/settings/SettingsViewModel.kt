@@ -30,9 +30,7 @@ import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
-import dev.sasikanth.rss.reader.data.sync.CloudSyncProvider
-import dev.sasikanth.rss.reader.data.sync.DropboxSyncProvider
-import dev.sasikanth.rss.reader.data.sync.FileCloudSyncProvider
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.notifications.Notifier
@@ -59,10 +57,8 @@ class SettingsViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val appIconManager: AppIconManager,
-  dropboxSyncProvider: DropboxSyncProvider,
+  val availableProviders: Set<CloudServiceProvider>
 ) : ViewModel() {
-
-  val availableProviders = listOf(dropboxSyncProvider)
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
   val state: StateFlow<SettingsState>
@@ -205,12 +201,8 @@ class SettingsViewModel(
     }
   }
 
-  private fun syncClicked(provider: CloudSyncProvider) {
+  private fun syncClicked(provider: CloudServiceProvider) {
     viewModelScope.launch {
-      if (provider !is FileCloudSyncProvider) {
-        return@launch
-      }
-
       val isSignedIn = provider.isSignedIn().first()
       if (isSignedIn) {
         _state.update { it.copy(syncProgress = SettingsState.SyncProgress.Syncing) }
