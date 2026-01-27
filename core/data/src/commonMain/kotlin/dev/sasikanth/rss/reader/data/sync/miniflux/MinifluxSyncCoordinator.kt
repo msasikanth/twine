@@ -80,7 +80,7 @@ class MinifluxSyncCoordinator(
         if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).toEpochMilliseconds() / 1000
         else lastSyncedAt.toEpochMilliseconds() / 1000
 
-      syncArticles(after = after)
+      val hasNewArticles = syncArticles(after = after)
       syncArticles(starred = true, after = after)
       updateSyncState(SyncState.InProgress(0.7f))
 
@@ -88,8 +88,11 @@ class MinifluxSyncCoordinator(
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      // Always update lastSyncedAt after successful sync
-      settingsRepository.updateLastSyncedAt(syncStartTime)
+      // Only update lastSyncedAt if we found new articles to avoid missing articles
+      // that were added to the server between syncs with older timestamps
+      if (hasNewArticles) {
+        settingsRepository.updateLastSyncedAt(syncStartTime)
+      }
       updateSyncState(SyncState.Complete)
 
       true
