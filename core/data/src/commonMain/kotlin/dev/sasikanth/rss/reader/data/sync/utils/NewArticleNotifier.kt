@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.utils
 
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -40,7 +40,7 @@ class NewArticleNotifier(
     if (settingsRepository.enableNotifications.first()) {
       val lastRefreshedAtDateTime = lastRefreshedAt.dateTimeFlow.first()
       val now = Clock.System.now()
-      val tz = TimeZone.currentSystemDefault()
+      val tz = TimeZone.Companion.currentSystemDefault()
 
       val today = now.toLocalDateTime(tz).date
       val startOfDay = today.atStartOfDayIn(tz)
@@ -50,7 +50,8 @@ class NewArticleNotifier(
           .unreadSinceLastSync(
             sources = emptyList(),
             postsAfter = startOfDay,
-            lastSyncedAt = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault())
+            lastSyncedAt =
+              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault())
           )
           .first()
 

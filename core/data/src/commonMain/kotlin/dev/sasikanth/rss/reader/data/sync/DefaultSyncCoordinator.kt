@@ -14,6 +14,7 @@ import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRssSyncProvider
+import dev.sasikanth.rss.reader.data.sync.local.LocalSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncProvider
 import dev.sasikanth.rss.reader.di.scopes.AppScope
