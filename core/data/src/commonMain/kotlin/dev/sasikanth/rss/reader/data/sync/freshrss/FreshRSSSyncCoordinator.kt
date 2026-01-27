@@ -265,11 +265,6 @@ class FreshRSSSyncCoordinator(
           (targetTags - currentTags).forEach { tagId ->
             freshRssSource.addTagToFeed(remoteFeedId, tagId)
           }
-
-          // Remove extra tags
-          (currentTags - targetTags).forEach { tagId ->
-            freshRssSource.removeTagFromFeed(remoteFeedId, tagId)
-          }
         }
       }
   }
