@@ -1,0 +1,3 @@
+import dev.sasikanth.rss.reader.core.model.local.ServiceType;
+
+ALTER TABLE user ADD COLUMN serviceType TEXT AS ServiceType DEFAULT NULL;

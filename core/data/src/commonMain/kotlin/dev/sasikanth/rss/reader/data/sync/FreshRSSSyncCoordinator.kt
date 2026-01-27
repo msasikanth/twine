@@ -58,8 +58,6 @@ class FreshRSSSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      pushChanges(syncStartTime)
-
       // 1. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
@@ -80,6 +78,9 @@ class FreshRSSSyncCoordinator(
       // 3. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
+
+      // 4. Push local changes
+      pushChanges(syncStartTime)
 
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
@@ -207,16 +208,18 @@ class FreshRSSSyncCoordinator(
 
     // 2. Handle new/updated groups
     val localFeedToGroupsMap = mutableMapOf<String, MutableSet<String>>()
+    val updatedTagIds = mutableSetOf<String>()
     localGroups
       .filter { !it.isDeleted }
       .forEach { group ->
+        val isGroupUpdated = group.updatedAt > lastSyncedAt
         var remoteTagId = group.remoteId ?: "user/-/label/${group.name}"
 
         // If it's a new group, we might need to create it (though adding a feed is enough)
-        if (group.remoteId == null && group.updatedAt > lastSyncedAt) {
+        if (group.remoteId == null && isGroupUpdated) {
           freshRssSource.addTag(group.name)
           rssRepository.updateFeedGroupRemoteId(remoteTagId, group.id, syncStartTime)
-        } else if (group.remoteId != null && group.updatedAt > lastSyncedAt) {
+        } else if (group.remoteId != null && isGroupUpdated) {
           // Check for rename
           val remoteTagName = group.remoteId!!.replace("user/-/label/", "")
           if (remoteTagName != group.name) {
@@ -226,12 +229,16 @@ class FreshRSSSyncCoordinator(
           }
         }
 
-        group.feedIds.forEach { feedId ->
-          localFeedToGroupsMap.getOrPut(feedId) { mutableSetOf() }.add(remoteTagId)
+        if (isGroupUpdated) {
+          updatedTagIds.add(remoteTagId)
+          group.feedIds.forEach { feedId ->
+            localFeedToGroupsMap.getOrPut(feedId) { mutableSetOf() }.add(remoteTagId)
+          }
         }
       }
 
     // 3. Sync feeds tags
+    if (updatedTagIds.isEmpty()) return
     val remoteFeedsMap = subscriptions.associateBy { it.id }
     localFeeds
       .filter { !it.isDeleted && it.remoteId != null }
@@ -241,7 +248,10 @@ class FreshRSSSyncCoordinator(
         if (remoteSub != null) {
           val targetTags = localFeedToGroupsMap[localFeed.id].orEmpty()
           val currentTags =
-            remoteSub.categories.map { it.id }.filter { it.startsWith("user/-/label/") }.toSet()
+            remoteSub.categories
+              .map { it.id }
+              .filter { it.startsWith("user/-/label/") && it in updatedTagIds }
+              .toSet()
 
           // Add missing tags
           (targetTags - currentTags).forEach { tagId ->
@@ -365,6 +375,18 @@ class FreshRSSSyncCoordinator(
               rssRepository.feedGroupByRemoteId(category.id)!!.id
             }
 
+          // Remove feed from all groups except the target group
+          val allGroups = rssRepository.allFeedGroupsBlocking()
+          val groupsContainingFeed =
+            allGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
+          if (groupsContainingFeed.isNotEmpty()) {
+            rssRepository.removeFeedIdsFromGroups(
+              groupIds = groupsContainingFeed.map { it.id }.toSet(),
+              feedIds = listOf(feedId)
+            )
+          }
+
+          // Add feed to the correct group
           val isFeedInGroup =
             rssRepository.feedGroupBlocking(groupId)?.feedIds?.contains(feedId) ?: false
           if (!isFeedInGroup) {

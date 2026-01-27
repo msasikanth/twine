@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
+import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -64,8 +65,6 @@ class MinifluxSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      pushChanges(syncStartTime)
-
       // 1. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
@@ -83,6 +82,9 @@ class MinifluxSyncCoordinator(
       // 3. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
+
+      // 4. Push local changes
+      pushChanges(syncStartTime)
 
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
@@ -180,7 +182,7 @@ class MinifluxSyncCoordinator(
       }
     if (newFeeds.isNotEmpty()) {
       val categories = minifluxSource.categories()
-      val defaultCategory = findOrCreateDefaultCategory(categories)
+      val defaultCategory = findOrCreateDefaultCategory(categories, syncStartTime)
       newFeeds.forEach { feed ->
         val remoteFeed = minifluxSource.addFeed(feed.link, defaultCategory.id)
         rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), feed.id, syncStartTime)
@@ -208,6 +210,10 @@ class MinifluxSyncCoordinator(
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
     val subscriptions = minifluxSource.feeds()
+    val categories = minifluxSource.categories()
+    val defaultCategory = findOrCreateDefaultCategory(categories, syncStartTime)
+    val defaultCategoryLocalId =
+      rssRepository.feedGroupByRemoteId(defaultCategory.id.toString())!!.id
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
@@ -217,7 +223,15 @@ class MinifluxSyncCoordinator(
       .filter { it.isDeleted && it.updatedAt > lastSyncedAt }
       .forEach { group ->
         if (group.remoteId != null) {
-          minifluxSource.deleteCategory(group.remoteId!!.toLong())
+          val remoteCategoryId = group.remoteId!!.toLong()
+          val feedsInCategory = subscriptions.filter { it.category.id == remoteCategoryId }
+          if (feedsInCategory.isNotEmpty() && defaultCategory.id != remoteCategoryId) {
+            feedsInCategory.forEach { feed ->
+              minifluxSource.updateFeed(feed.id, feed.title, defaultCategory.id)
+              rssRepository.addFeedIdsToGroups(setOf(defaultCategoryLocalId), group.feedIds)
+            }
+          }
+          minifluxSource.deleteCategory(remoteCategoryId)
         }
       }
 
@@ -238,16 +252,13 @@ class MinifluxSyncCoordinator(
           rssRepository.updateFeedGroupUpdatedAt(group.id, syncStartTime)
         }
 
-        if (remoteCategoryId != null) {
+        if (remoteCategoryId != null && group.updatedAt > lastSyncedAt) {
           val remoteCategoryIdLong = remoteCategoryId.toLong()
           group.feedIds.forEach { feedId -> localFeedToCategoryMap[feedId] = remoteCategoryIdLong }
         }
       }
 
     // 3. Sync feeds categories
-    val categories = minifluxSource.categories()
-    val defaultCategory = findOrCreateDefaultCategory(categories)
-
     val remoteFeedsMap = subscriptions.associateBy { it.id }
     localFeeds
       .filter { !it.isDeleted && it.remoteId != null }
@@ -255,8 +266,8 @@ class MinifluxSyncCoordinator(
         val remoteFeedId = localFeed.remoteId!!.toLong()
         val remoteFeed = remoteFeedsMap[remoteFeedId]
         if (remoteFeed != null) {
-          val targetCategoryId = localFeedToCategoryMap[localFeed.id] ?: defaultCategory.id
-          if (remoteFeed.category.id != targetCategoryId) {
+          val targetCategoryId = localFeedToCategoryMap[localFeed.id]
+          if (targetCategoryId != null && remoteFeed.category.id != targetCategoryId) {
             minifluxSource.updateFeed(remoteFeedId, localFeed.name, targetCategoryId)
             rssRepository.updateFeedLastUpdatedAt(localFeed.id, syncStartTime)
           }
@@ -365,7 +376,7 @@ class MinifluxSyncCoordinator(
           localGroup.id
         } else {
           rssRepository.upsertGroup(
-            id = category.title.lowercase().replace(" ", "-"),
+            id = nameBasedUuidOf(category.title).toString(),
             name = category.title,
             pinnedAt = null,
             updatedAt = syncStartTime,
@@ -375,6 +386,18 @@ class MinifluxSyncCoordinator(
           rssRepository.feedGroupByRemoteId(category.id.toString())!!.id
         }
 
+      // Remove feed from all groups except the target group
+      val allGroups = rssRepository.allFeedGroupsBlocking()
+      val groupsContainingFeed =
+        allGroups.filter { it.feedIds.contains(feedId) && it.id != groupId }
+      if (groupsContainingFeed.isNotEmpty()) {
+        rssRepository.removeFeedIdsFromGroups(
+          groupIds = groupsContainingFeed.map { it.id }.toSet(),
+          feedIds = listOf(feedId)
+        )
+      }
+
+      // Add feed to the correct group
       val isFeedInGroup =
         rssRepository.feedGroupBlocking(groupId)?.feedIds?.contains(feedId) ?: false
       if (!isFeedInGroup) {
@@ -531,9 +554,22 @@ class MinifluxSyncCoordinator(
   }
 
   private suspend fun findOrCreateDefaultCategory(
-    categories: List<MinifluxCategory>
+    categories: List<MinifluxCategory>,
+    syncStartTime: Instant
   ): MinifluxCategory {
-    return categories.find { it.title.equals(DEFAULT_CATEGORY_TITLE, ignoreCase = true) }
-      ?: minifluxSource.addCategory(DEFAULT_CATEGORY_TITLE)
+    val category =
+      categories.find { it.title.equals(DEFAULT_CATEGORY_TITLE, ignoreCase = true) }
+        ?: minifluxSource.addCategory(DEFAULT_CATEGORY_TITLE)
+
+    rssRepository.upsertGroup(
+      id = nameBasedUuidOf(category.title).toString(),
+      name = category.title,
+      pinnedAt = null,
+      updatedAt = syncStartTime,
+      isDeleted = false,
+      remoteId = category.id.toString(),
+    )
+
+    return category
   }
 }

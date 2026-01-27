@@ -14,6 +14,7 @@ package dev.sasikanth.rss.reader.data.sync
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuthTokenProvider {
@@ -21,7 +22,7 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
   override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> {
     return when (serviceType) {
       ServiceType.DROPBOX -> userRepository.user().map { it != null && it.serverUrl == null }
-      else -> kotlinx.coroutines.flow.flowOf(false)
+      else -> flowOf(false)
     }
   }
 
