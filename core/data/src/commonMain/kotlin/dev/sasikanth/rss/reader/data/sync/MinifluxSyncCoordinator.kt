@@ -147,6 +147,15 @@ class MinifluxSyncCoordinator(
     pushStatusChanges()
     pushCategoryChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
+    purgeDeletedSource()
+  }
+
+  private suspend fun purgeDeletedSource() {
+    val feedGroups = rssRepository.allFeedGroupsBlocking()
+    val feeds = rssRepository.allFeedsBlocking()
+    val localSources = feeds + feedGroups
+
+    localSources.filter { it.isDeleted }.forEach { rssRepository.deleteSources(setOf(it)) }
   }
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
@@ -286,7 +295,7 @@ class MinifluxSyncCoordinator(
           localGroup.remoteId != null &&
           localGroup.remoteId !in remoteCategoryIds
       ) {
-        rssRepository.deleteSources(setOf(localGroup))
+        rssRepository.markSourcesAsDeleted(setOf(localGroup))
       }
     }
 

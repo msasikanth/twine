@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.minus
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -145,6 +144,15 @@ class FreshRSSSyncCoordinator(
     pushStatusChanges()
     pushGroupChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
+    purgeDeletedSource()
+  }
+
+  private suspend fun purgeDeletedSource() {
+    val feedGroups = rssRepository.allFeedGroupsBlocking()
+    val feeds = rssRepository.allFeedsBlocking()
+    val localSources = feeds + feedGroups
+
+    localSources.filter { it.isDeleted }.forEach { rssRepository.deleteSources(setOf(it)) }
   }
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
@@ -276,7 +284,7 @@ class FreshRSSSyncCoordinator(
       if (
         !localGroup.isDeleted && localGroup.remoteId != null && localGroup.remoteId !in remoteTagIds
       ) {
-        rssRepository.deleteSources(setOf(localGroup))
+        rssRepository.markSourcesAsDeleted(setOf(localGroup))
       }
     }
 
