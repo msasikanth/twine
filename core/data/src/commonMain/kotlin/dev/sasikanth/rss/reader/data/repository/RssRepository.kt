@@ -1184,11 +1184,9 @@ class RssRepository(
         val now = Clock.System.now()
         feedIdsSnapshot.forEach { feedId ->
           val currentGroupIds =
-            feedGroupFeedQueries
-              .groupIdsForFeed(feedId)
-              .executeAsList()
-              .map { it.feedGroupId }
-              .filterNotNull()
+            feedGroupFeedQueries.groupIdsForFeed(feedId).executeAsList().mapNotNull {
+              it.feedGroupId
+            }
 
           currentGroupIds.forEach { groupId -> feedGroupQueries.updateUpdatedAt(now, groupId) }
 
