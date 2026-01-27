@@ -58,8 +58,6 @@ class FreshRSSSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      pushChanges(syncStartTime)
-
       // 1. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
@@ -80,6 +78,9 @@ class FreshRSSSyncCoordinator(
       // 3. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
+
+      // 4. Push local changes
+      pushChanges(syncStartTime)
 
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
