@@ -1191,6 +1191,7 @@ class RssRepository(
           currentGroupIds.forEach { groupId -> feedGroupQueries.updateUpdatedAt(now, groupId) }
 
           feedGroupFeedQueries.removeFeedFromAllGroups(feedId)
+          feedQueries.updateLastUpdatedAt(lastUpdatedAt = now, id = feedId)
         }
 
         groupIdsSnapshot.forEach { groupId ->
