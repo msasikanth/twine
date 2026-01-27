@@ -19,8 +19,8 @@ struct iOSApp: App {
 		WindowGroup {
             ContentView(homeViewControllerComponent: homeViewControllerComponent)
         }
-        .onChange(of: scenePhase) { newValue in
-            if newValue == .background {
+        .onChange(of: scenePhase) {
+            if scenePhase == .background {
                 Task.detached(priority: .background) {
                     print("Twine: App entered background")
                     
@@ -29,7 +29,7 @@ struct iOSApp: App {
                     
                     await appDelegate.scheduleCleanUpPosts()
                     await appDelegate.scheduledRefreshFeeds()
-                    await appDelegate.scheduleDropboxSync()
+                    await appDelegate.scheduleCloudSync()
                     
                 }
             }
