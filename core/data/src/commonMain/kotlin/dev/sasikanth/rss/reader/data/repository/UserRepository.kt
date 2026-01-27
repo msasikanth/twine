@@ -13,6 +13,7 @@ package dev.sasikanth.rss.reader.data.repository
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToOneOrNull
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.data.database.UserQueries
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -34,6 +35,7 @@ class UserRepository(
     token: String,
     refreshToken: String,
     serverUrl: String? = null,
+    serviceType: ServiceType,
   ) {
     withContext(dispatchersProvider.databaseWrite) {
       userQueries.insert(
@@ -44,7 +46,8 @@ class UserRepository(
         token = token,
         refreshToken = refreshToken,
         serverUrl = serverUrl,
-        lastSyncStatus = "IDLE"
+        lastSyncStatus = "IDLE",
+        serviceType = serviceType
       )
     }
   }
@@ -66,7 +69,16 @@ class UserRepository(
   fun user(): Flow<User?> {
     return userQueries
       .user(
-        mapper = { id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus ->
+        mapper = {
+          id,
+          name,
+          email,
+          avatarUrl,
+          token,
+          refreshToken,
+          serverUrl,
+          lastSyncStatus,
+          serviceType ->
           User(
             id = id,
             name = name,
@@ -75,7 +87,8 @@ class UserRepository(
             token = token,
             refreshToken = refreshToken,
             serverUrl = serverUrl,
-            lastSyncStatus = lastSyncStatus
+            lastSyncStatus = lastSyncStatus,
+            serviceType = serviceType
           )
         }
       )
@@ -87,7 +100,16 @@ class UserRepository(
     return withContext(dispatchersProvider.databaseRead) {
       userQueries
         .user(
-          mapper = { id, name, email, avatarUrl, token, refreshToken, serverUrl, lastSyncStatus ->
+          mapper = {
+            id,
+            name,
+            email,
+            avatarUrl,
+            token,
+            refreshToken,
+            serverUrl,
+            lastSyncStatus,
+            serviceType ->
             User(
               id = id,
               name = name,
@@ -96,7 +118,8 @@ class UserRepository(
               token = token,
               refreshToken = refreshToken,
               serverUrl = serverUrl,
-              lastSyncStatus = lastSyncStatus
+              lastSyncStatus = lastSyncStatus,
+              serviceType = serviceType
             )
           }
         )

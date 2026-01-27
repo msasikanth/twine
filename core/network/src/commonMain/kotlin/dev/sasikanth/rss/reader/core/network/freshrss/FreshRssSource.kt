@@ -238,6 +238,23 @@ class FreshRssSource(
     }
   }
 
+  suspend fun removeTagFromFeed(feedId: String, tagId: String) {
+    withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().post(Reader.EditFeed()) {
+        contentType(ContentType.Application.FormUrlEncoded)
+        setBody(
+          FormDataContent(
+            parameters {
+              append("ac", "edit")
+              append("s", feedId)
+              append("r", tagId)
+            }
+          )
+        )
+      }
+    }
+  }
+
   suspend fun addTag(tagName: String) {
     withContext(dispatchersProvider.io) {
       authenticatedHttpClient().post(Reader.EditFeed()) {

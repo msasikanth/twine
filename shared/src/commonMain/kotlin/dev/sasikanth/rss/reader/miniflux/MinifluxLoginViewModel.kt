@@ -9,17 +9,17 @@
  *
  */
 
-package dev.sasikanth.rss.reader.freshrss
+package dev.sasikanth.rss.reader.miniflux
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
-import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
+import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
-import dev.sasikanth.rss.reader.data.sync.FreshRSSSyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.MinifluxSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,30 +30,27 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class FreshRssLoginViewModel(
-  private val freshRssSource: FreshRssSource,
+class MinifluxLoginViewModel(
+  private val minifluxSource: MinifluxSource,
   private val userRepository: UserRepository,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
-  private val syncCoordinator: FreshRSSSyncCoordinator,
+  private val syncCoordinator: MinifluxSyncCoordinator,
   private val dispatchersProvider: DispatchersProvider,
 ) : ViewModel() {
 
-  private val _state = MutableStateFlow(FreshRssLoginState.DEFAULT)
-  val state: StateFlow<FreshRssLoginState> = _state.asStateFlow()
+  private val _state = MutableStateFlow(MinifluxLoginState.DEFAULT)
+  val state: StateFlow<MinifluxLoginState> = _state.asStateFlow()
 
   private var verifiedUserInfo: VerifiedUserInfo? = null
 
-  fun onEvent(event: FreshRssLoginEvent) {
+  fun onEvent(event: MinifluxLoginEvent) {
     when (event) {
-      is FreshRssLoginEvent.OnUrlChanged -> _state.update { it.copy(url = event.url) }
-      is FreshRssLoginEvent.OnUsernameChanged ->
-        _state.update { it.copy(username = event.username) }
-      is FreshRssLoginEvent.OnPasswordChanged ->
-        _state.update { it.copy(password = event.password) }
-      FreshRssLoginEvent.OnLoginClicked -> login()
-      FreshRssLoginEvent.OnConfirmClearDataClicked -> confirmClearData()
-      FreshRssLoginEvent.OnConfirmationDismissed ->
+      is MinifluxLoginEvent.OnUrlChanged -> _state.update { it.copy(url = event.url) }
+      is MinifluxLoginEvent.OnApiKeyChanged -> _state.update { it.copy(apiKey = event.apiKey) }
+      MinifluxLoginEvent.OnLoginClicked -> login()
+      MinifluxLoginEvent.OnConfirmClearDataClicked -> confirmClearData()
+      MinifluxLoginEvent.OnConfirmationDismissed ->
         _state.update { it.copy(showConfirmationDialog = false) }
     }
   }
@@ -63,31 +60,25 @@ class FreshRssLoginViewModel(
       _state.update { it.copy(isLoading = true, error = null) }
       try {
         val endpoint = state.value.url.trim()
-        val username = state.value.username.trim()
-        val password = state.value.password.trim()
+        val apiKey = state.value.apiKey.trim()
 
-        val token =
-          freshRssSource
-            .login(endpoint = endpoint, username = username, password = password)
-            ?.trim()
+        val userInfo = minifluxSource.verify(endpoint = endpoint, token = apiKey)
 
-        if (token != null) {
-          val userInfo = freshRssSource.userInfo(endpoint, token)
+        if (userInfo != null) {
           verifiedUserInfo =
             VerifiedUserInfo(
-              id = userInfo.userId,
-              name = userInfo.userName,
-              email = userInfo.userEmail,
-              token = token,
+              id = userInfo.id.toString(),
+              name = userInfo.username,
+              token = apiKey,
               serverUrl = endpoint
             )
           _state.update { it.copy(isLoading = false, showConfirmationDialog = true) }
         } else {
-          _state.update { it.copy(isLoading = false, error = FreshRssLoginError.LoginFailed) }
+          _state.update { it.copy(isLoading = false, error = MinifluxLoginError.LoginFailed) }
         }
       } catch (e: Exception) {
         _state.update {
-          it.copy(isLoading = false, error = FreshRssLoginError.Unknown(e.message ?: ""))
+          it.copy(isLoading = false, error = MinifluxLoginError.Unknown(e.message ?: ""))
         }
       }
     }
@@ -98,7 +89,7 @@ class FreshRssLoginViewModel(
     viewModelScope.launch(dispatchersProvider.io) {
       _state.update { it.copy(isLoading = true, showConfirmationDialog = false) }
       try {
-        Logger.d { "FreshRSS login: starting data clear and user save" }
+        Logger.d { "Miniflux login: starting data clear and user save" }
         userRepository.deleteUser()
         rssRepository.deleteAllLocalData()
         settingsRepository.updateLastSyncedAt(Instant.DISTANT_PAST)
@@ -106,20 +97,20 @@ class FreshRssLoginViewModel(
         userRepository.saveUser(
           id = userInfo.id,
           name = userInfo.name,
-          email = userInfo.email,
+          email = "", // Miniflux doesn't provide email in user info
           avatarUrl = null,
           token = userInfo.token,
           refreshToken = "",
           serverUrl = userInfo.serverUrl,
-          serviceType = ServiceType.FRESH_RSS
+          serviceType = ServiceType.MINIFLUX
         )
 
-        Logger.d { "FreshRSS login: user saved, finishing login" }
+        Logger.d { "Miniflux login: user saved, finishing login" }
         _state.update { it.copy(isLoading = false, loginSuccess = true) }
       } catch (e: Exception) {
-        Logger.e(e) { "FreshRSS login: failed to clear data and save user" }
+        Logger.e(e) { "Miniflux login: failed to clear data and save user" }
         _state.update {
-          it.copy(isLoading = false, error = FreshRssLoginError.Unknown(e.message ?: ""))
+          it.copy(isLoading = false, error = MinifluxLoginError.Unknown(e.message ?: ""))
         }
       }
     }
@@ -128,27 +119,24 @@ class FreshRssLoginViewModel(
   private data class VerifiedUserInfo(
     val id: String,
     val name: String,
-    val email: String,
     val token: String,
     val serverUrl: String
   )
 }
 
-data class FreshRssLoginState(
+data class MinifluxLoginState(
   val url: String,
-  val username: String,
-  val password: String,
+  val apiKey: String,
   val isLoading: Boolean,
   val loginSuccess: Boolean,
   val showConfirmationDialog: Boolean,
-  val error: FreshRssLoginError?
+  val error: MinifluxLoginError?
 ) {
   companion object {
     val DEFAULT =
-      FreshRssLoginState(
+      MinifluxLoginState(
         url = "",
-        username = "",
-        password = "",
+        apiKey = "",
         isLoading = false,
         loginSuccess = false,
         showConfirmationDialog = false,
@@ -157,22 +145,20 @@ data class FreshRssLoginState(
   }
 }
 
-sealed interface FreshRssLoginError {
-  data object LoginFailed : FreshRssLoginError
+sealed interface MinifluxLoginError {
+  data object LoginFailed : MinifluxLoginError
 
-  data class Unknown(val message: String) : FreshRssLoginError
+  data class Unknown(val message: String) : MinifluxLoginError
 }
 
-sealed interface FreshRssLoginEvent {
-  data class OnUrlChanged(val url: String) : FreshRssLoginEvent
+sealed interface MinifluxLoginEvent {
+  data class OnUrlChanged(val url: String) : MinifluxLoginEvent
 
-  data class OnUsernameChanged(val username: String) : FreshRssLoginEvent
+  data class OnApiKeyChanged(val apiKey: String) : MinifluxLoginEvent
 
-  data class OnPasswordChanged(val password: String) : FreshRssLoginEvent
+  data object OnLoginClicked : MinifluxLoginEvent
 
-  data object OnLoginClicked : FreshRssLoginEvent
+  data object OnConfirmClearDataClicked : MinifluxLoginEvent
 
-  data object OnConfirmClearDataClicked : FreshRssLoginEvent
-
-  data object OnConfirmationDismissed : FreshRssLoginEvent
+  data object OnConfirmationDismissed : MinifluxLoginEvent
 }

@@ -52,6 +52,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.WorkspacePremium
+import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -109,6 +110,7 @@ import dev.sasikanth.rss.reader.components.SubHeader
 import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -122,9 +124,7 @@ import dev.sasikanth.rss.reader.data.repository.Period.ONE_YEAR
 import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
 import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
-import dev.sasikanth.rss.reader.data.sync.APIServiceType
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
-import dev.sasikanth.rss.reader.data.sync.CloudStorageProvider
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
@@ -132,8 +132,8 @@ import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.LayoutCompact
 import dev.sasikanth.rss.reader.resources.icons.LayoutDefault
 import dev.sasikanth.rss.reader.resources.icons.LayoutSimple
+import dev.sasikanth.rss.reader.resources.icons.Miniflux
 import dev.sasikanth.rss.reader.resources.icons.Platform
-import dev.sasikanth.rss.reader.resources.icons.RSS
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.settings.SettingsEvent
@@ -207,7 +207,7 @@ import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
-import twine.shared.generated.resources.settingsSyncSignIn
+import twine.shared.generated.resources.settingsSyncMiniflux
 import twine.shared.generated.resources.settingsSyncSignOut
 import twine.shared.generated.resources.settingsSyncStatusFailure
 import twine.shared.generated.resources.settingsSyncStatusIdle
@@ -240,6 +240,7 @@ internal fun SettingsScreen(
   openBlockedWords: () -> Unit,
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
+  openMinifluxLogin: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -250,7 +251,7 @@ internal fun SettingsScreen(
 
   LaunchedEffect(state.authUrlToOpen) {
     state.authUrlToOpen?.let { url ->
-      linkHandler.openLink(url)
+      linkHandler.openLink(url, useInAppBrowser = true)
       viewModel.dispatch(SettingsEvent.ClearAuthUrl)
     }
   }
@@ -457,7 +458,11 @@ internal fun SettingsScreen(
                 openPaywall()
               } else {
                 when (it.cloudService) {
-                  APIServiceType.FRESH_RSS -> openFreshRssLogin()
+                  ServiceType.FRESH_RSS -> openFreshRssLogin()
+                  ServiceType.MINIFLUX -> openMinifluxLogin()
+                  else -> {
+                    throw IllegalStateException("Unknown cloud service type: ${it.cloudService}")
+                  }
                 }
               }
             },
@@ -1788,11 +1793,9 @@ private fun CloudSyncSettingItem(
   availableProviders.forEach { provider ->
     val label =
       when (val service = provider.cloudService) {
-        CloudStorageProvider.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
-        APIServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
-        else -> {
-          ""
-        }
+        ServiceType.DROPBOX -> stringResource(Res.string.settingsSyncDropbox)
+        ServiceType.FRESH_RSS -> stringResource(Res.string.settingsSyncFreshRSS)
+        ServiceType.MINIFLUX -> stringResource(Res.string.settingsSyncMiniflux)
       }
     val isSignedIn by provider.isSignedIn().collectAsStateWithLifecycle(false)
     val canInteract = !hasCloudServiceSignedIn || isSignedIn
@@ -1800,7 +1803,13 @@ private fun CloudSyncSettingItem(
 
     Box(
       modifier =
-        Modifier.clickable(enabled = canInteract) { onSyncClicked(provider) }
+        Modifier.clickable(enabled = canInteract) {
+            if (provider is APIServiceProvider && !isSignedIn) {
+              onAPIServiceClicked(provider)
+            } else {
+              onSyncClicked(provider)
+            }
+          }
           .fillMaxWidth()
           .padding(horizontal = 24.dp, vertical = verticalPadding)
           .alpha(if (canInteract) 1f else 0.38f)
@@ -1811,11 +1820,9 @@ private fun CloudSyncSettingItem(
       ) {
         val icon =
           when (provider.cloudService) {
-            APIServiceType.FRESH_RSS -> TwineIcons.Freshrss
-            CloudStorageProvider.DROPBOX -> TwineIcons.Dropbox
-            else -> {
-              TwineIcons.RSS
-            }
+            ServiceType.FRESH_RSS -> TwineIcons.Freshrss
+            ServiceType.MINIFLUX -> TwineIcons.Miniflux
+            ServiceType.DROPBOX -> TwineIcons.Dropbox
           }
 
         Icon(
@@ -1874,30 +1881,22 @@ private fun CloudSyncSettingItem(
           }
         }
 
-        val actionLabel =
-          if (isSignedIn) stringResource(Res.string.settingsSyncSignOut)
-          else stringResource(Res.string.settingsSyncSignIn)
+        if (isSignedIn) {
+          val actionLabel = stringResource(Res.string.settingsSyncSignOut)
 
-        TextButton(
-          enabled = canInteract,
-          onClick = {
-            if (isSignedIn) {
-              onSignOutClicked()
-            } else {
-              if (provider is APIServiceProvider) {
-                onAPIServiceClicked(provider)
-              } else {
-                onSyncClicked(provider)
-              }
-            }
-          },
-        ) {
-          Text(
-            text = actionLabel,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = AppTheme.colorScheme.primary
-          )
+          TextButton(
+            enabled = canInteract,
+            onClick = { onSignOutClicked() },
+          ) {
+            Text(
+              text = actionLabel,
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = AppTheme.colorScheme.primary
+            )
+          }
+        } else {
+          Box(Modifier.minimumInteractiveComponentSize())
         }
       }
     }

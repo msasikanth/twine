@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
  * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,14 +11,8 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
-data class User(
-  val id: String,
-  val name: String,
-  val email: String,
-  val avatarUrl: String?,
-  val token: String,
-  val refreshToken: String,
-  val serverUrl: String?,
-  val lastSyncStatus: String,
-  val serviceType: ServiceType?,
-)
+enum class ServiceType {
+  DROPBOX,
+  FRESH_RSS,
+  MINIFLUX
+}

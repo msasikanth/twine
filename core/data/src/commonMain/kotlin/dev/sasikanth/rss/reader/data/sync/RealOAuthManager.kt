@@ -12,13 +12,11 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
-import io.ktor.client.request.header
-import io.ktor.client.request.post
-import io.ktor.http.HttpHeaders
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -43,7 +41,7 @@ class RealOAuthManager(
 
   override fun getAuthUrl(serviceType: ServiceType): String {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX -> {
+      ServiceType.DROPBOX -> {
         codeVerifier = generateCodeVerifier()
         val codeChallenge = generateCodeChallenge(codeVerifier!!)
         URLBuilder("https://www.dropbox.com/oauth2/authorize")
@@ -88,20 +86,15 @@ class RealOAuthManager(
             )
             .body()
 
-        val userInfo: DropboxUserInfo =
-          httpClient
-            .post("https://api.dropboxapi.com/2/users/get_current_account") {
-              header(HttpHeaders.Authorization, "Bearer ${response.accessToken}")
-            }
-            .body()
-
+        // Placeholder user data, replace if Dropbox approves getting user info via API
         userRepository.saveUser(
-          id = userInfo.accountId,
-          name = userInfo.name.displayName,
-          email = userInfo.email,
-          avatarUrl = userInfo.profilePhotoUrl,
+          id = "1",
+          name = "Dropbox User",
+          email = "user@dropbox",
+          avatarUrl = "",
           token = response.accessToken,
-          refreshToken = response.refreshToken ?: ""
+          refreshToken = response.refreshToken ?: "",
+          serviceType = serviceType,
         )
 
         tokenProvider.saveAccessToken(serviceType, response.accessToken)
@@ -135,14 +128,6 @@ class RealOAuthManager(
 internal data class DropboxTokenResponse(
   @SerialName("access_token") val accessToken: String,
   @SerialName("refresh_token") val refreshToken: String? = null,
-)
-
-@Serializable
-internal data class DropboxUserInfo(
-  @SerialName("account_id") val accountId: String,
-  val name: DropboxName,
-  val email: String,
-  @SerialName("profile_photo_url") val profilePhotoUrl: String? = null,
 )
 
 @Serializable

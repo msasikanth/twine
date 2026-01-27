@@ -23,6 +23,7 @@ interface Source {
   val sourceType: SourceType
   val pinnedAt: Instant?
   val pinnedPosition: Double
+  val isDeleted: Boolean
 }
 
 enum class SourceType {

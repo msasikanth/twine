@@ -15,6 +15,7 @@
  */
 package dev.sasikanth.rss.reader.data.di
 
+import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.SqlDriver
 import dev.sasikanth.rss.reader.data.database.BlockedWord
@@ -23,6 +24,7 @@ import dev.sasikanth.rss.reader.data.database.FeedGroup
 import dev.sasikanth.rss.reader.data.database.Post
 import dev.sasikanth.rss.reader.data.database.PostContent
 import dev.sasikanth.rss.reader.data.database.ReaderDatabase
+import dev.sasikanth.rss.reader.data.database.User
 import dev.sasikanth.rss.reader.data.database.adapter.DateAdapter
 import dev.sasikanth.rss.reader.data.database.adapter.PostFlagsAdapter
 import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
@@ -31,6 +33,7 @@ import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.DefaultSyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.DropboxCloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.FreshRssSyncProvider
+import dev.sasikanth.rss.reader.data.sync.MinifluxSyncProvider
 import dev.sasikanth.rss.reader.data.sync.OAuthManager
 import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
@@ -84,7 +87,8 @@ interface DataComponent :
       blockedWordAdapter =
         BlockedWord.Adapter(
           updatedAtAdapter = DateAdapter,
-        )
+        ),
+      userAdapter = User.Adapter(serviceTypeAdapter = EnumColumnAdapter()),
     )
   }
 
@@ -196,8 +200,9 @@ interface DataComponent :
   fun providesSyncProviders(
     cloudServiceProvider: DropboxCloudServiceProvider,
     freshRssSyncProvider: FreshRssSyncProvider,
+    minifluxSyncProvider: MinifluxSyncProvider,
   ): Set<CloudServiceProvider> {
-    return setOf(freshRssSyncProvider, cloudServiceProvider)
+    return setOf(freshRssSyncProvider, minifluxSyncProvider, cloudServiceProvider)
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries

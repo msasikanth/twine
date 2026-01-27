@@ -152,7 +152,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func handleCloudSync(task: BGProcessingTask) {
         Bugsnag.leaveBreadcrumb(withMessage: "Background Processing")
 
-        scheduleDropboxSync()
+        scheduleCloudSync()
         
         Task(priority: .background) {
             do {

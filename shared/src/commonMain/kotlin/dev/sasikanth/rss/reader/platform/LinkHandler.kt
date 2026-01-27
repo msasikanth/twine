@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.platform
 import androidx.compose.runtime.staticCompositionLocalOf
 
 interface LinkHandler {
-  suspend fun openLink(link: String?)
+  suspend fun openLink(link: String?, useInAppBrowser: Boolean = false)
 
   suspend fun close()
 }
