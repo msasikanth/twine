@@ -61,11 +61,14 @@ class FreshRSSSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      // 1. Sync Subscriptions
+      // 1. Push local changes
+      pushChanges(syncStartTime)
+
+      // 2. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
-      // 2. Sync Articles
+      // 3. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
       val newerThan =
         if (hasNewSubscriptions) {
@@ -78,12 +81,9 @@ class FreshRSSSyncCoordinator(
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
       updateSyncState(SyncState.InProgress(0.7f))
 
-      // 3. Sync Statuses (Read/Bookmark)
+      // 4. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
-
-      // 4. Push local changes
-      pushChanges(syncStartTime)
 
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
