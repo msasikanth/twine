@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -372,7 +373,7 @@ class FreshRSSSyncCoordinator(
               localGroup.id
             } else {
               rssRepository.upsertGroup(
-                id = tagName.lowercase().replace(" ", "-"),
+                id = nameBasedUuidOf(tagName).toString(),
                 name = tagName,
                 pinnedAt = null,
                 updatedAt = syncStartTime,
