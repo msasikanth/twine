@@ -39,6 +39,6 @@ data class Feed(
   override val pinnedPosition: Double = 0.0,
   val showFeedFavIcon: Boolean = true,
   val hideFromAllFeeds: Boolean = false,
-  val isDeleted: Boolean = false,
+  override val isDeleted: Boolean = false,
   val remoteId: String? = null,
 ) : Source

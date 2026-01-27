@@ -98,8 +98,11 @@ UPDATE feedGroup SET name = :name, updatedAt = :updatedAt WHERE id = :id;
 updateUpdatedAt:
 UPDATE feedGroup SET updatedAt = :updatedAt WHERE id = :id;
 
-deleteGroup:
+markAsDeleted:
 UPDATE feedGroup SET isDeleted = 1, updatedAt = :updatedAt WHERE id = :id;
+
+remove:
+DELETE FROM feedGroup WHERE id = :id;
 
 updatePinnedAt:
 UPDATE feedGroup SET pinnedAt = :pinnedAt, pinnedPosition = 0.0, updatedAt = :updatedAt WHERE id = :id;

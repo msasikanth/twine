@@ -70,6 +70,9 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.main.ui.MainScreen
+import dev.sasikanth.rss.reader.miniflux.MinifluxLoginViewModel
+import dev.sasikanth.rss.reader.miniflux.ui.MINIFLUX_LOGIN_SUCCESS_KEY
+import dev.sasikanth.rss.reader.miniflux.ui.MinifluxLoginScreen
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
 import dev.sasikanth.rss.reader.onboarding.ui.OnboardingScreen
 import dev.sasikanth.rss.reader.placeholder.PlaceholderScreen
@@ -106,9 +109,11 @@ import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlin.reflect.typeOf
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Assisted
@@ -144,6 +149,7 @@ fun App(
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
   freshRssLoginViewModel: () -> dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel,
+  minifluxLoginViewModel: () -> MinifluxLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
@@ -358,17 +364,30 @@ fun App(
               val viewModel = viewModel { settingsViewModel() }
 
               LaunchedEffect(Unit) {
-                navController.currentBackStackEntry
-                  ?.savedStateHandle
-                  ?.getStateFlow(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
-                  ?.filter { it }
-                  ?.onEach {
-                    viewModel.dispatch(SettingsEvent.TriggerSync)
+                merge(
                     navController.currentBackStackEntry
                       ?.savedStateHandle
-                      ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
-                  }
-                  ?.launchIn(this)
+                      ?.getStateFlow(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
+                      ?.filter { it }
+                      ?.onEach {
+                        navController.currentBackStackEntry
+                          ?.savedStateHandle
+                          ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
+                      }
+                      ?: emptyFlow(),
+                    navController.currentBackStackEntry
+                      ?.savedStateHandle
+                      ?.getStateFlow(MINIFLUX_LOGIN_SUCCESS_KEY, false)
+                      ?.filter { it }
+                      ?.onEach {
+                        navController.currentBackStackEntry
+                          ?.savedStateHandle
+                          ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, false)
+                      }
+                      ?: emptyFlow()
+                  )
+                  .onEach { viewModel.dispatch(SettingsEvent.TriggerSync) }
+                  .launchIn(this)
               }
 
               SettingsScreen(
@@ -378,6 +397,7 @@ fun App(
                 openBlockedWords = { navController.navigate(Screen.BlockedWords) },
                 openPaywall = { navController.navigate(Screen.Paywall) },
                 openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
+                openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
                 modifier = screenModifier
               )
             }
@@ -392,6 +412,20 @@ fun App(
               navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, true)
+              navController.popBackStack()
+            },
+            goBack = { navController.popBackStack() }
+          )
+        }
+
+        composable<Screen.MinifluxLogin> {
+          val viewModel = viewModel { minifluxLoginViewModel() }
+          MinifluxLoginScreen(
+            viewModel = viewModel,
+            onLoginSuccess = {
+              navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, true)
               navController.popBackStack()
             },
             goBack = { navController.popBackStack() }

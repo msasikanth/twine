@@ -61,6 +61,8 @@ sealed interface Screen {
 
   @Serializable data object FreshRssLogin : Screen
 
+  @Serializable data object MinifluxLogin : Screen
+
   @Serializable data object Paywall : Screen
 
   data object None : Screen

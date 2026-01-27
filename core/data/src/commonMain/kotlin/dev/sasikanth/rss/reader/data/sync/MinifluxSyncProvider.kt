@@ -23,25 +23,25 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class FreshRssSyncProvider(
+class MinifluxSyncProvider(
   private val userRepository: UserRepository,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
 ) : APIServiceProvider {
 
-  override val cloudService: ServiceType = ServiceType.FRESH_RSS
+  override val cloudService: ServiceType = ServiceType.MINIFLUX
 
   override val isPremium: Boolean = true
 
   override fun isSignedIn(): Flow<Boolean> {
     return userRepository.user().map {
-      it != null && it.serverUrl != null && it.serviceType == ServiceType.FRESH_RSS
+      it != null && it.serverUrl != null && it.serviceType == ServiceType.MINIFLUX
     }
   }
 
   override suspend fun isSignedInImmediate(): Boolean {
     val user = userRepository.currentUser()
-    return user != null && user.serverUrl != null && user.serviceType == ServiceType.FRESH_RSS
+    return user != null && user.serverUrl != null && user.serviceType == ServiceType.MINIFLUX
   }
 
   override suspend fun signOut() {

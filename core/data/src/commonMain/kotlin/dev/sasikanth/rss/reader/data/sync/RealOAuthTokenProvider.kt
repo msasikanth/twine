@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.data.sync
 
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,15 +20,14 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX ->
-        userRepository.user().map { it != null && it.serverUrl == null }
+      ServiceType.DROPBOX -> userRepository.user().map { it != null && it.serverUrl == null }
       else -> kotlinx.coroutines.flow.flowOf(false)
     }
   }
 
   override suspend fun isSignedInImmediate(serviceType: ServiceType): Boolean {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX -> {
+      ServiceType.DROPBOX -> {
         val user = userRepository.currentUser()
         user != null && user.serverUrl == null
       }
@@ -37,34 +37,40 @@ class RealOAuthTokenProvider(private val userRepository: UserRepository) : OAuth
 
   override suspend fun getAccessToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX -> userRepository.currentUser()?.token
+      ServiceType.DROPBOX -> userRepository.currentUser()?.token
       else -> null
     }
   }
 
   override suspend fun saveAccessToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      CloudStorageProvider.DROPBOX -> {
+      ServiceType.DROPBOX -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateToken(token)
         }
+      }
+      else -> {
+        throw IllegalStateException("Access token is not supported for $serviceType")
       }
     }
   }
 
   override suspend fun getRefreshToken(serviceType: ServiceType): String? {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX -> userRepository.currentUser()?.refreshToken
+      ServiceType.DROPBOX -> userRepository.currentUser()?.refreshToken
       else -> null
     }
   }
 
   override suspend fun saveRefreshToken(serviceType: ServiceType, token: String?) {
     when (serviceType) {
-      CloudStorageProvider.DROPBOX -> {
+      ServiceType.DROPBOX -> {
         if (!(token.isNullOrBlank())) {
           userRepository.updateRefreshToken(token)
         }
+      }
+      else -> {
+        throw IllegalStateException("Refresh token is not supported for $serviceType")
       }
     }
   }

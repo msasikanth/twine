@@ -12,6 +12,7 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
@@ -44,7 +45,7 @@ class DropboxCloudServiceProvider(
   private val onSignOut: suspend () -> Unit,
 ) : FileCloudServiceProvider {
 
-  override val cloudService = CloudStorageProvider.DROPBOX
+  override val cloudService = ServiceType.DROPBOX
 
   override fun isSignedIn(): Flow<Boolean> = tokenProvider.isSignedIn(cloudService)
 

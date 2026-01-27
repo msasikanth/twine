@@ -12,6 +12,7 @@
 package dev.sasikanth.rss.reader.data.sync
 
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -43,7 +44,7 @@ class RealOAuthManager(
 
   override fun getAuthUrl(serviceType: ServiceType): String {
     return when (serviceType) {
-      CloudStorageProvider.DROPBOX -> {
+      ServiceType.DROPBOX -> {
         codeVerifier = generateCodeVerifier()
         val codeChallenge = generateCodeChallenge(codeVerifier!!)
         URLBuilder("https://www.dropbox.com/oauth2/authorize")
@@ -101,7 +102,8 @@ class RealOAuthManager(
           email = userInfo.email,
           avatarUrl = userInfo.profilePhotoUrl,
           token = response.accessToken,
-          refreshToken = response.refreshToken ?: ""
+          refreshToken = response.refreshToken ?: "",
+          serviceType = serviceType,
         )
 
         tokenProvider.saveAccessToken(serviceType, response.accessToken)
