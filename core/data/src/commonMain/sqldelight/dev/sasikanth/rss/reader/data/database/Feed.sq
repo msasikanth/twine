@@ -41,8 +41,11 @@ showFeedFavIcon = excluded.showFeedFavIcon,
 isDeleted = 0,
 lastUpdatedAt = :lastUpdatedAt;
 
-remove:
+markAsDeleted:
 UPDATE feed SET isDeleted = 1, pinnedAt = NULL, pinnedPosition = 0.0, lastUpdatedAt = :lastUpdatedAt WHERE id = :id;
+
+remove:
+DELETE FROM feed WHERE id = :id;
 
 feeds:
 SELECT * FROM feed
