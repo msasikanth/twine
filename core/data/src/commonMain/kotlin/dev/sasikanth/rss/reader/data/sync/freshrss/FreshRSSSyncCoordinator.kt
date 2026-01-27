@@ -77,7 +77,7 @@ class FreshRSSSyncCoordinator(
           lastSyncedAt.toEpochMilliseconds()
         }
 
-      val hasNewArticles = syncArticles(newerThan = newerThan)
+      syncArticles(newerThan = newerThan)
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
       updateSyncState(SyncState.InProgress(0.7f))
 
@@ -85,9 +85,8 @@ class FreshRSSSyncCoordinator(
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      if (hasNewArticles) {
-        settingsRepository.updateLastSyncedAt(syncStartTime)
-      }
+      // Always update lastSyncedAt after successful sync
+      settingsRepository.updateLastSyncedAt(syncStartTime)
       updateSyncState(SyncState.Complete)
 
       true
@@ -163,6 +162,11 @@ class FreshRSSSyncCoordinator(
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
+    // Early return if no feeds have been updated since last sync
+    val hasUpdatedFeeds =
+      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
+    if (!hasUpdatedFeeds) return
+
     // 1. Handle deleted feeds
     localFeeds
       .filter {
@@ -200,10 +204,15 @@ class FreshRSSSyncCoordinator(
   }
 
   private suspend fun pushGroupChanges(syncStartTime: Instant) {
-    val subscriptions = freshRssSource.subscriptions().subscriptions
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+
+    // Early return if no groups have been updated since last sync
+    val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
+    if (!hasUpdatedGroups) return
+
+    val subscriptions = freshRssSource.subscriptions().subscriptions
 
     // 1. Handle deleted groups
     localGroups
