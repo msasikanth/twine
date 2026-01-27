@@ -9,12 +9,13 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.freshrss
 
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow

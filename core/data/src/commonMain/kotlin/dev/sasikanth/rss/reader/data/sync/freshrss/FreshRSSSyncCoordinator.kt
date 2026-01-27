@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.freshrss
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -19,6 +19,8 @@ import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Clock
