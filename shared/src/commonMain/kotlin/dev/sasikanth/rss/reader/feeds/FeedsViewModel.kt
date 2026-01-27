@@ -147,7 +147,7 @@ class FeedsViewModel(
 
   private fun deleteSelectedSources() {
     viewModelScope
-      .launch { rssRepository.deleteSources(_state.value.selectedSources) }
+      .launch { rssRepository.markSourcesAsDeleted(_state.value.selectedSources) }
       .invokeOnCompletion {
         if (_state.value.selectedSources.any { it.id == _state.value.activeSource?.id }) {
           observableActiveSource.clearSelection()
