@@ -251,7 +251,7 @@ internal fun SettingsScreen(
 
   LaunchedEffect(state.authUrlToOpen) {
     state.authUrlToOpen?.let { url ->
-      linkHandler.openLink(url)
+      linkHandler.openLink(url, useInAppBrowser = true)
       viewModel.dispatch(SettingsEvent.ClearAuthUrl)
     }
   }
