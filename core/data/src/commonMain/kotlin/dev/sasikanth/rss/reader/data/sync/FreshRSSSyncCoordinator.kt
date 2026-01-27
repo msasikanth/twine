@@ -144,10 +144,10 @@ class FreshRSSSyncCoordinator(
     pushStatusChanges()
     pushGroupChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
-    purgeDeletedSource()
+    purgeDeletedSources()
   }
 
-  private suspend fun purgeDeletedSource() {
+  private suspend fun purgeDeletedSources() {
     val feedGroups = rssRepository.allFeedGroupsBlocking()
     val feeds = rssRepository.allFeedsBlocking()
     val localSources = feeds + feedGroups
