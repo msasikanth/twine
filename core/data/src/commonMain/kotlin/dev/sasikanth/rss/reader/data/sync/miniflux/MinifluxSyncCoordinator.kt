@@ -80,7 +80,7 @@ class MinifluxSyncCoordinator(
         if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).toEpochMilliseconds() / 1000
         else lastSyncedAt.toEpochMilliseconds() / 1000
 
-      val hasNewArticles = syncArticles(after = after)
+      syncArticles(after = after)
       syncArticles(starred = true, after = after)
       updateSyncState(SyncState.InProgress(0.7f))
 
@@ -88,9 +88,8 @@ class MinifluxSyncCoordinator(
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      if (hasNewArticles) {
-        settingsRepository.updateLastSyncedAt(syncStartTime)
-      }
+      // Always update lastSyncedAt after successful sync
+      settingsRepository.updateLastSyncedAt(syncStartTime)
       updateSyncState(SyncState.Complete)
 
       true
@@ -166,6 +165,11 @@ class MinifluxSyncCoordinator(
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
+    // Early return if no feeds have been updated since last sync
+    val hasUpdatedFeeds =
+      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
+    if (!hasUpdatedFeeds) return
+
     // 1. Handle deleted feeds
     localFeeds
       .filter {
@@ -211,14 +215,19 @@ class MinifluxSyncCoordinator(
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
+    val localGroups = rssRepository.allFeedGroupsBlocking()
+    val localFeeds = rssRepository.allFeedsBlocking()
+    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+
+    // Early return if no groups have been updated since last sync
+    val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
+    if (!hasUpdatedGroups) return
+
     val subscriptions = minifluxSource.feeds()
     val categories = minifluxSource.categories()
     val defaultCategory = findOrCreateDefaultCategory(categories, syncStartTime)
     val defaultCategoryLocalId =
       rssRepository.feedGroupByRemoteId(defaultCategory.id.toString())!!.id
-    val localGroups = rssRepository.allFeedGroupsBlocking()
-    val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
     // 1. Handle deleted groups
     localGroups
