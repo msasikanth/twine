@@ -202,7 +202,7 @@ interface DataComponent :
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
   ): Set<CloudServiceProvider> {
-    return setOf(freshRssSyncProvider, minifluxSyncProvider, cloudServiceProvider)
+    return setOf(minifluxSyncProvider, freshRssSyncProvider, cloudServiceProvider)
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries
