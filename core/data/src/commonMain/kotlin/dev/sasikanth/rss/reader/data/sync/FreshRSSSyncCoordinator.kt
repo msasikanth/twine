@@ -257,7 +257,19 @@ class FreshRSSSyncCoordinator(
       }
     }
 
-    // 2. Handle new/updated subscriptions from remote
+    // 2. Handle remote group deletions
+    val remoteTagIds = freshRssSource.tags().tags.map { it.id }.toSet()
+    val localGroups = rssRepository.allFeedGroupsBlocking()
+
+    localGroups.forEach { localGroup ->
+      if (
+        !localGroup.isDeleted && localGroup.remoteId != null && localGroup.remoteId !in remoteTagIds
+      ) {
+        rssRepository.deleteSources(setOf(localGroup))
+      }
+    }
+
+    // 3. Handle new/updated subscriptions from remote
     subscriptions.forEach { subscription ->
       val localFeed =
         localFeeds.find { it.link == subscription.url || it.remoteId == subscription.id }

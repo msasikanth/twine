@@ -230,7 +230,22 @@ class MinifluxSyncCoordinator(
       }
     }
 
-    // 2. Handle new/updated subscriptions from remote
+    // 2. Handle remote group deletions
+    val remoteCategories = minifluxSource.categories()
+    val remoteCategoryIds = remoteCategories.map { it.id.toString() }.toSet()
+    val localGroups = rssRepository.allFeedGroupsBlocking()
+
+    localGroups.forEach { localGroup ->
+      if (
+        !localGroup.isDeleted &&
+          localGroup.remoteId != null &&
+          localGroup.remoteId !in remoteCategoryIds
+      ) {
+        rssRepository.deleteSources(setOf(localGroup))
+      }
+    }
+
+    // 3. Handle new/updated subscriptions from remote
     remoteFeeds.forEach { remoteFeed ->
       val localFeed =
         localFeeds.find { it.link == remoteFeed.feedUrl || it.remoteId == remoteFeed.id.toString() }
