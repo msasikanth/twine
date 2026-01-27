@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,6 +46,10 @@ class MinifluxSyncCoordinator(
   private val articleHtmlParser: ArticleHtmlParser,
 ) : SyncCoordinator {
 
+  companion object {
+    private const val DEFAULT_CATEGORY_TITLE = "All"
+  }
+
   private val syncMutex = Mutex()
   private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
   override val syncState: StateFlow<SyncState> = _syncState.asStateFlow()
@@ -58,16 +63,20 @@ class MinifluxSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      pushChanges()
+      pushChanges(syncStartTime)
 
       // 1. Sync Subscriptions
-      syncSubscriptions()
+      val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 2. Sync Articles
-      val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
-      val hasNewArticles = syncArticles(after = lastSyncedAt.toEpochMilliseconds() / 1000)
-      syncArticles(starred = true)
+      val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
+      val after =
+        if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).toEpochMilliseconds() / 1000
+        else lastSyncedAt.toEpochMilliseconds() / 1000
+
+      val hasNewArticles = syncArticles(after = after)
+      syncArticles(starred = true, after = after)
       updateSyncState(SyncState.InProgress(0.7f))
 
       // 3. Sync Statuses (Read/Bookmark)
@@ -133,13 +142,13 @@ class MinifluxSyncCoordinator(
     }
   }
 
-  private suspend fun pushChanges() {
+  private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
-    pushCategoryChanges()
-    pushFeedChanges()
+    pushCategoryChanges(syncStartTime)
+    pushFeedChanges(syncStartTime)
   }
 
-  private suspend fun pushFeedChanges() {
+  private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
@@ -185,7 +194,7 @@ class MinifluxSyncCoordinator(
       }
   }
 
-  private suspend fun pushCategoryChanges() {
+  private suspend fun pushCategoryChanges(syncStartTime: Instant) {
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
@@ -211,9 +220,10 @@ class MinifluxSyncCoordinator(
       }
   }
 
-  private suspend fun syncSubscriptions() {
+  private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
     val remoteFeeds = minifluxSource.feeds()
     val localFeeds = rssRepository.allFeedsBlocking()
+    var hasNewSubscriptions = false
 
     // 1. Handle remote deletions
     val remoteIds = remoteFeeds.map { it.id.toString() }.toSet()
@@ -302,6 +312,8 @@ class MinifluxSyncCoordinator(
         rssRepository.addFeedIdsToGroups(setOf(groupId), listOf(feedId))
       }
     }
+
+    return hasNewSubscriptions
   }
 
   private suspend fun syncArticles(

@@ -59,16 +59,23 @@ class FreshRSSSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      pushChanges()
+      pushChanges(syncStartTime)
 
       // 1. Sync Subscriptions
-      syncSubscriptions()
+      val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 2. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
-      val hasNewArticles = syncArticles(newerThan = lastSyncedAt.toEpochMilliseconds())
-      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED)
+      val newerThan =
+        if (hasNewSubscriptions) {
+          lastSyncedAt.minus(2.hours).toEpochMilliseconds()
+        } else {
+          lastSyncedAt.toEpochMilliseconds()
+        }
+
+      val hasNewArticles = syncArticles(newerThan = newerThan)
+      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
       updateSyncState(SyncState.InProgress(0.7f))
 
       // 3. Sync Statuses (Read/Bookmark)
@@ -134,13 +141,13 @@ class FreshRSSSyncCoordinator(
     }
   }
 
-  private suspend fun pushChanges() {
+  private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
-    pushGroupChanges()
-    pushFeedChanges()
+    pushGroupChanges(syncStartTime)
+    pushFeedChanges(syncStartTime)
   }
 
-  private suspend fun pushFeedChanges() {
+  private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
@@ -172,7 +179,7 @@ class FreshRSSSyncCoordinator(
       .forEach { feed -> freshRssSource.editFeedName(feed.remoteId!!, feed.name) }
   }
 
-  private suspend fun pushGroupChanges() {
+  private suspend fun pushGroupChanges(syncStartTime: Instant) {
     val subscriptions = freshRssSource.subscriptions().subscriptions
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
@@ -238,9 +245,10 @@ class FreshRSSSyncCoordinator(
       }
   }
 
-  suspend fun syncSubscriptions() {
+  private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
     val subscriptions = freshRssSource.subscriptions().subscriptions
     val localFeeds = rssRepository.allFeedsBlocking()
+    var hasNewSubscriptions = false
 
     // 1. Handle remote deletions
     val remoteIds = subscriptions.map { it.id }.toSet()
@@ -330,6 +338,8 @@ class FreshRSSSyncCoordinator(
         }
       }
     }
+
+    return hasNewSubscriptions
   }
 
   private suspend fun syncArticles(
