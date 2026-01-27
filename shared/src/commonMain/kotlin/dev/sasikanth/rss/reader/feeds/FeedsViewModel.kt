@@ -115,6 +115,7 @@ class FeedsViewModel(
         }
       }
       FeedsEvent.DeleteSelectedSources -> deleteSelectedSources()
+      FeedsEvent.OnAddToGroupClicked -> onAddToGroupClicked()
       FeedsEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
       is FeedsEvent.OnPinnedSourcePositionChanged ->
         onPinnedSourcePositionChanged(event.newSourcesList)
@@ -124,6 +125,23 @@ class FeedsViewModel(
       is FeedsEvent.MarkOpenAddFeedDone -> {
         _state.update { it.copy(openAddFeedScreen = false) }
       }
+      is FeedsEvent.MarkOpenGroupSelectionDone -> {
+        _state.update { it.copy(openGroupSelection = null) }
+      }
+    }
+  }
+
+  private fun onAddToGroupClicked() {
+    viewModelScope.launch {
+      val selectedSources = _state.value.selectedSources
+      val groupIds =
+        if (selectedSources.size == 1) {
+          rssRepository.groupIdsForFeed(selectedSources.first().id).toSet()
+        } else {
+          emptySet()
+        }
+
+      _state.update { it.copy(openGroupSelection = groupIds) }
     }
   }
 

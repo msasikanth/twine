@@ -113,6 +113,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -144,7 +145,7 @@ fun App(
   readerPageViewModel: (PostWithMetadata) -> ReaderPageViewModel,
   addFeedViewModel: () -> AddFeedViewModel,
   feedViewModel: (SavedStateHandle) -> FeedViewModel,
-  groupSelectionViewModel: () -> GroupSelectionViewModel,
+  groupSelectionViewModel: (SavedStateHandle) -> GroupSelectionViewModel,
   searchViewModel: () -> SearchViewModel,
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
@@ -310,6 +311,17 @@ fun App(
               }
 
               LaunchedEffect(Unit) {
+                feedsViewModel.state
+                  .map { it.openGroupSelection }
+                  .filterNotNull()
+                  .onEach { selectedGroupIds ->
+                    navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+                    feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
+                  }
+                  .launchIn(this)
+              }
+
+              LaunchedEffect(Unit) {
                 viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
               }
 
@@ -318,7 +330,9 @@ fun App(
                 feedsViewModel = feedsViewModel,
                 onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
                 openPost = { index, post -> openPost(index, post, FromScreen.Home) },
-                openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
+                openGroupSelectionSheet = {
+                  feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked)
+                },
                 openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
                 openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
                 openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
@@ -485,10 +499,11 @@ fun App(
           }
 
           AddFeedScreen(
-            modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
-            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
+            openGroupSelection = { selectedGroupIds ->
+              navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
+            }
           )
         }
 
@@ -519,7 +534,7 @@ fun App(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
-            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
+            openGroupSelection = { navController.navigate(Modals.GroupSelection()) }
           )
         }
 
@@ -549,7 +564,7 @@ fun App(
         }
 
         dialog<Modals.GroupSelection> {
-          val viewModel = viewModel { groupSelectionViewModel() }
+          val viewModel = viewModel { groupSelectionViewModel(it.savedStateHandle) }
           GroupSelectionSheet(
             viewModel = viewModel,
             dismiss = { navController.popBackStack() },

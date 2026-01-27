@@ -1181,13 +1181,37 @@ class RssRepository(
     val feedIdsSnapshot = feedIds.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
+        val now = Clock.System.now()
+        feedIdsSnapshot.forEach { feedId ->
+          val currentGroupIds =
+            feedGroupFeedQueries
+              .groupIdsForFeed(feedId)
+              .executeAsList()
+              .map { it.feedGroupId }
+              .filterNotNull()
+
+          currentGroupIds.forEach { groupId -> feedGroupQueries.updateUpdatedAt(now, groupId) }
+
+          feedGroupFeedQueries.removeFeedFromAllGroups(feedId)
+        }
+
         groupIdsSnapshot.forEach { groupId ->
           feedIdsSnapshot.forEach { feedId ->
             feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
           }
-          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
+          feedGroupQueries.updateUpdatedAt(now, groupId)
         }
       }
+    }
+  }
+
+  suspend fun groupIdsForFeed(feedId: String): List<String> {
+    return withContext(dispatchersProvider.io) {
+      feedGroupFeedQueries
+        .groupIdsForFeed(feedId)
+        .executeAsList()
+        .map { it.feedGroupId }
+        .filterNotNull()
     }
   }
 
