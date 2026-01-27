@@ -215,6 +215,10 @@ class MinifluxSyncCoordinator(
         }
       }
     }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
@@ -297,6 +301,10 @@ class MinifluxSyncCoordinator(
           }
         }
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {

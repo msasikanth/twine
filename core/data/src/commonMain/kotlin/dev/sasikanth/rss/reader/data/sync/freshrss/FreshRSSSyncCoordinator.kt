@@ -204,6 +204,10 @@ class FreshRSSSyncCoordinator(
         freshRssSource.editFeedName(feed.remoteId!!, feed.name)
         rssRepository.updateFeedLastUpdatedAt(feed.id, syncStartTime)
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun pushGroupChanges(syncStartTime: Instant) {
@@ -279,6 +283,10 @@ class FreshRSSSyncCoordinator(
           }
         }
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
