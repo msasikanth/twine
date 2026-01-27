@@ -24,8 +24,8 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
-import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
