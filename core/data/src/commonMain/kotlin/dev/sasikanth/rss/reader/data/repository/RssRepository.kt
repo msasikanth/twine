@@ -604,7 +604,7 @@ class RssRepository(
   suspend fun removeFeed(feedId: String) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.transaction {
-        feedQueries.remove(id = feedId, lastUpdatedAt = Clock.System.now())
+        feedQueries.markAsDeleted(id = feedId, lastUpdatedAt = Clock.System.now())
         postQueries.deletePostsForFeed(feedId)
       }
     }
@@ -1232,15 +1232,29 @@ class RssRepository(
     }
   }
 
+  suspend fun markSourcesAsDeleted(sources: Set<Source>) {
+    val sourcesSnapshot = sources.toList()
+    withContext(dispatchersProvider.databaseWrite) {
+      transactionRunner.invoke {
+        val now = Clock.System.now()
+        sourcesSnapshot.forEach { source ->
+          feedQueries.markAsDeleted(id = source.id, lastUpdatedAt = now)
+          postQueries.deletePostsForFeed(source.id)
+          feedGroupQueries.markAsDeleted(id = source.id, updatedAt = now)
+        }
+      }
+    }
+  }
+
   suspend fun deleteSources(sources: Set<Source>) {
     val sourcesSnapshot = sources.toList()
     withContext(dispatchersProvider.databaseWrite) {
       transactionRunner.invoke {
         val now = Clock.System.now()
         sourcesSnapshot.forEach { source ->
-          feedQueries.remove(id = source.id, lastUpdatedAt = now)
+          feedQueries.remove(id = source.id)
           postQueries.deletePostsForFeed(source.id)
-          feedGroupQueries.deleteGroup(id = source.id, updatedAt = now)
+          feedGroupQueries.remove(id = source.id)
         }
       }
     }
