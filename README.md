@@ -25,7 +25,7 @@ to browse through your feeds, with [dynamic theming](https://m3.material.io/styl
 - Search posts
 - Blocked words: Filter out content based on keywords
 - Background sync
-- Cloud sync support with Dropbox (Alpha ⚠)
+- Cloud sync support with FreshRSS(GReader), Miniflux, Dropbox (Alpha ⚠)
 - Import and exports your feeds with OPML
 - Light, dark and amoled theme support
 
