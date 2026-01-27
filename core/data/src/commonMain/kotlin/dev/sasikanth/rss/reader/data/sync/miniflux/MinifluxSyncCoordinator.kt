@@ -254,24 +254,34 @@ class MinifluxSyncCoordinator(
           rssRepository.updateFeedGroupUpdatedAt(group.id, syncStartTime)
         }
 
-        if (remoteCategoryId != null && group.updatedAt > lastSyncedAt) {
+        // Build complete feed-to-category map for all non-deleted groups
+        if (remoteCategoryId != null) {
           val remoteCategoryIdLong = remoteCategoryId.toLong()
           group.feedIds.forEach { feedId -> localFeedToCategoryMap[feedId] = remoteCategoryIdLong }
         }
       }
 
-    // 3. Sync feeds categories
+    // 3. Sync feeds categories for feeds that have been updated
     val remoteFeedsMap = subscriptions.associateBy { it.id }
     localFeeds
-      .filter { !it.isDeleted && it.remoteId != null }
+      .filter {
+        !it.isDeleted &&
+          it.remoteId != null &&
+          (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
+      }
       .forEach { localFeed ->
         val remoteFeedId = localFeed.remoteId!!.toLong()
         val remoteFeed = remoteFeedsMap[remoteFeedId]
         if (remoteFeed != null) {
-          val targetCategoryId = localFeedToCategoryMap[localFeed.id]
-          if (targetCategoryId != null && remoteFeed.category.id != targetCategoryId) {
+          val targetCategoryId = localFeedToCategoryMap[localFeed.id] ?: defaultCategory.id
+          if (remoteFeed.category.id != targetCategoryId) {
             minifluxSource.updateFeed(remoteFeedId, localFeed.name, targetCategoryId)
             rssRepository.updateFeedLastUpdatedAt(localFeed.id, syncStartTime)
+
+            // If feed was removed from all groups, add it to the default category locally
+            if (localFeedToCategoryMap[localFeed.id] == null) {
+              rssRepository.addFeedIdsToGroups(setOf(defaultCategoryLocalId), listOf(localFeed.id))
+            }
           }
         }
       }
