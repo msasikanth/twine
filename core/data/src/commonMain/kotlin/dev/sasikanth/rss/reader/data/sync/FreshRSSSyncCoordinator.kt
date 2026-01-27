@@ -176,7 +176,10 @@ class FreshRSSSyncCoordinator(
           it.remoteId != null &&
           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
       }
-      .forEach { feed -> freshRssSource.editFeedName(feed.remoteId!!, feed.name) }
+      .forEach { feed ->
+        freshRssSource.editFeedName(feed.remoteId!!, feed.name)
+        rssRepository.updateFeedLastUpdatedAt(feed.id, syncStartTime)
+      }
   }
 
   private suspend fun pushGroupChanges(syncStartTime: Instant) {
@@ -204,14 +207,14 @@ class FreshRSSSyncCoordinator(
         // If it's a new group, we might need to create it (though adding a feed is enough)
         if (group.remoteId == null && group.updatedAt > lastSyncedAt) {
           freshRssSource.addTag(group.name)
-          rssRepository.updateFeedGroupRemoteId(remoteTagId, group.id)
+          rssRepository.updateFeedGroupRemoteId(remoteTagId, group.id, syncStartTime)
         } else if (group.remoteId != null && group.updatedAt > lastSyncedAt) {
           // Check for rename
           val remoteTagName = group.remoteId!!.replace("user/-/label/", "")
           if (remoteTagName != group.name) {
             freshRssSource.editTag(group.remoteId!!, group.name)
             remoteTagId = "user/-/label/${group.name}"
-            rssRepository.updateFeedGroupRemoteId(remoteTagId, group.id)
+            rssRepository.updateFeedGroupRemoteId(remoteTagId, group.id, syncStartTime)
           }
         }
 
@@ -283,8 +286,22 @@ class FreshRSSSyncCoordinator(
         localFeeds.find { it.link == subscription.url || it.remoteId == subscription.id }
       val feedId =
         if (localFeed != null) {
-          if (localFeed.remoteId != subscription.id) {
-            rssRepository.updateFeedRemoteId(subscription.id, localFeed.id)
+          if (
+            localFeed.remoteId != subscription.id ||
+              localFeed.name != subscription.title ||
+              localFeed.homepageLink != subscription.htmlUrl
+          ) {
+            rssRepository.upsertFeeds(
+              listOf(
+                localFeed.copy(
+                  name = subscription.title,
+                  homepageLink = subscription.htmlUrl,
+                  remoteId = subscription.id,
+                  lastUpdatedAt = syncStartTime,
+                  isDeleted = false,
+                )
+              )
+            )
           }
           localFeed.id
         } else {
@@ -297,11 +314,14 @@ class FreshRSSSyncCoordinator(
                   description = "",
                   homepageLink = subscription.htmlUrl,
                   link = subscription.url,
-                  posts = emptyFlow() // No posts for now, will be fetched in syncArticles
+                  posts = emptyFlow()
                 ),
               updateFeed = true
             )
-            .also { rssRepository.updateFeedRemoteId(subscription.id, it) }
+            .also {
+              hasNewSubscriptions = true
+              rssRepository.updateFeedRemoteId(subscription.id, it, syncStartTime)
+            }
         }
 
       // Sync categories (groups)
@@ -314,8 +334,15 @@ class FreshRSSSyncCoordinator(
 
           val groupId =
             if (localGroup != null) {
-              if (localGroup.remoteId != category.id) {
-                rssRepository.updateFeedGroupRemoteId(category.id, localGroup.id)
+              if (localGroup.remoteId != category.id || localGroup.name != tagName) {
+                rssRepository.upsertGroup(
+                  id = localGroup.id,
+                  name = tagName,
+                  pinnedAt = localGroup.pinnedAt,
+                  updatedAt = syncStartTime,
+                  isDeleted = false,
+                  remoteId = category.id
+                )
               }
               localGroup.id
             } else {
@@ -323,7 +350,7 @@ class FreshRSSSyncCoordinator(
                 id = tagName.lowercase().replace(" ", "-"),
                 name = tagName,
                 pinnedAt = null,
-                updatedAt = Clock.System.now(),
+                updatedAt = syncStartTime,
                 isDeleted = false,
                 remoteId = category.id
               )

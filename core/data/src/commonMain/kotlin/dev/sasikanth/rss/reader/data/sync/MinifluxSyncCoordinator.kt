@@ -14,6 +14,7 @@ package dev.sasikanth.rss.reader.data.sync
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
+import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntry
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
@@ -162,40 +163,44 @@ class MinifluxSyncCoordinator(
       .forEach { feed -> minifluxSource.deleteFeed(feed.remoteId!!.toLong()) }
 
     // 2. Handle new feeds
-    localFeeds
-      .filter {
+    val newFeeds =
+      localFeeds.filter {
         !it.isDeleted &&
           it.remoteId == null &&
           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
       }
-      .forEach { feed ->
-        // We need a category ID to add a feed in Miniflux.
-        // For now, we'll use the default category or find/create one.
-        val categories = minifluxSource.categories()
-        val defaultCategory = categories.firstOrNull()
-        if (defaultCategory != null) {
-          val remoteFeed = minifluxSource.addFeed(feed.link, defaultCategory.id)
-          rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), feed.id)
-        }
+    if (newFeeds.isNotEmpty()) {
+      val categories = minifluxSource.categories()
+      val defaultCategory = findOrCreateDefaultCategory(categories)
+      newFeeds.forEach { feed ->
+        val remoteFeed = minifluxSource.addFeed(feed.link, defaultCategory.id)
+        rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), feed.id, syncStartTime)
       }
+    }
 
     // 3. Handle renamed feeds
-    localFeeds
-      .filter {
+    val renamedFeeds =
+      localFeeds.filter {
         !it.isDeleted &&
           it.remoteId != null &&
           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
       }
-      .forEach { feed ->
-        val remoteFeed = minifluxSource.feeds().find { it.id == feed.remoteId!!.toLong() }
-        if (remoteFeed != null) {
+    if (renamedFeeds.isNotEmpty()) {
+      val remoteFeeds = minifluxSource.feeds()
+      renamedFeeds.forEach { feed ->
+        val remoteFeed = remoteFeeds.find { it.id == feed.remoteId!!.toLong() }
+        if (remoteFeed != null && remoteFeed.title != feed.name) {
           minifluxSource.updateFeed(remoteFeed.id, feed.name, remoteFeed.category.id)
+          rssRepository.updateFeedLastUpdatedAt(feed.id, syncStartTime)
         }
       }
+    }
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
+    val subscriptions = minifluxSource.feeds()
     val localGroups = rssRepository.allFeedGroupsBlocking()
+    val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
     // 1. Handle deleted groups
@@ -208,14 +213,44 @@ class MinifluxSyncCoordinator(
       }
 
     // 2. Handle new/updated groups
+    val localFeedToCategoryMap = mutableMapOf<String, Long>()
     localGroups
-      .filter { !it.isDeleted && it.updatedAt > lastSyncedAt }
+      .filter { !it.isDeleted }
       .forEach { group ->
-        if (group.remoteId == null) {
+        var remoteCategoryId = group.remoteId
+
+        // If it's a new group, we might need to create it (though adding a feed is enough)
+        if (group.remoteId == null && group.updatedAt > lastSyncedAt) {
           val remoteCategory = minifluxSource.addCategory(group.name)
-          rssRepository.updateFeedGroupRemoteId(remoteCategory.id.toString(), group.id)
-        } else {
+          remoteCategoryId = remoteCategory.id.toString()
+          rssRepository.updateFeedGroupRemoteId(remoteCategoryId, group.id, syncStartTime)
+        } else if (group.remoteId != null && group.updatedAt > lastSyncedAt) {
           minifluxSource.updateCategory(group.remoteId!!.toLong(), group.name)
+          rssRepository.updateFeedGroupUpdatedAt(group.id, syncStartTime)
+        }
+
+        if (remoteCategoryId != null) {
+          val remoteCategoryIdLong = remoteCategoryId.toLong()
+          group.feedIds.forEach { feedId -> localFeedToCategoryMap[feedId] = remoteCategoryIdLong }
+        }
+      }
+
+    // 3. Sync feeds categories
+    val categories = minifluxSource.categories()
+    val defaultCategory = findOrCreateDefaultCategory(categories)
+
+    val remoteFeedsMap = subscriptions.associateBy { it.id }
+    localFeeds
+      .filter { !it.isDeleted && it.remoteId != null }
+      .forEach { localFeed ->
+        val remoteFeedId = localFeed.remoteId!!.toLong()
+        val remoteFeed = remoteFeedsMap[remoteFeedId]
+        if (remoteFeed != null) {
+          val targetCategoryId = localFeedToCategoryMap[localFeed.id] ?: defaultCategory.id
+          if (remoteFeed.category.id != targetCategoryId) {
+            minifluxSource.updateFeed(remoteFeedId, localFeed.name, targetCategoryId)
+            rssRepository.updateFeedLastUpdatedAt(localFeed.id, syncStartTime)
+          }
         }
       }
   }
@@ -261,8 +296,22 @@ class MinifluxSyncCoordinator(
         localFeeds.find { it.link == remoteFeed.feedUrl || it.remoteId == remoteFeed.id.toString() }
       val feedId =
         if (localFeed != null) {
-          if (localFeed.remoteId != remoteFeed.id.toString()) {
-            rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), localFeed.id)
+          if (
+            localFeed.remoteId != remoteFeed.id.toString() ||
+              localFeed.name != remoteFeed.title ||
+              localFeed.homepageLink != remoteFeed.siteUrl
+          ) {
+            rssRepository.upsertFeeds(
+              listOf(
+                localFeed.copy(
+                  name = remoteFeed.title,
+                  homepageLink = remoteFeed.siteUrl,
+                  remoteId = remoteFeed.id.toString(),
+                  lastUpdatedAt = syncStartTime,
+                  isDeleted = false,
+                )
+              )
+            )
           }
           localFeed.id
         } else {
@@ -279,19 +328,30 @@ class MinifluxSyncCoordinator(
                 ),
               updateFeed = true
             )
-            .also { rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), it) }
+            .also {
+              hasNewSubscriptions = true
+              rssRepository.updateFeedRemoteId(remoteFeed.id.toString(), it, syncStartTime)
+            }
         }
 
       // Sync category
       val category = remoteFeed.category
+
       val localGroup =
         rssRepository.feedGroupByRemoteId(category.id.toString())
           ?: rssRepository.allFeedGroupsBlocking().find { it.name == category.title }
 
       val groupId =
         if (localGroup != null) {
-          if (localGroup.remoteId != category.id.toString()) {
-            rssRepository.updateFeedGroupRemoteId(category.id.toString(), localGroup.id)
+          if (localGroup.remoteId != category.id.toString() || localGroup.name != category.title) {
+            rssRepository.upsertGroup(
+              id = localGroup.id,
+              name = category.title,
+              pinnedAt = localGroup.pinnedAt,
+              updatedAt = syncStartTime,
+              isDeleted = false,
+              remoteId = category.id.toString()
+            )
           }
           localGroup.id
         } else {
@@ -299,7 +359,7 @@ class MinifluxSyncCoordinator(
             id = category.title.lowercase().replace(" ", "-"),
             name = category.title,
             pinnedAt = null,
-            updatedAt = Clock.System.now(),
+            updatedAt = syncStartTime,
             isDeleted = false,
             remoteId = category.id.toString()
           )
@@ -457,5 +517,12 @@ class MinifluxSyncCoordinator(
 
   private suspend fun updateSyncState(newState: SyncState) {
     _syncState.value = newState
+  }
+
+  private suspend fun findOrCreateDefaultCategory(
+    categories: List<MinifluxCategory>
+  ): MinifluxCategory {
+    return categories.find { it.title.equals(DEFAULT_CATEGORY_TITLE, ignoreCase = true) }
+      ?: minifluxSource.addCategory(DEFAULT_CATEGORY_TITLE)
   }
 }
