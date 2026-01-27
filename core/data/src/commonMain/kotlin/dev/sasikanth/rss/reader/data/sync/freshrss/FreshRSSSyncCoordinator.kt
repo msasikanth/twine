@@ -146,8 +146,8 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
-    pushGroupChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
+    pushGroupChanges(syncStartTime)
     purgeDeletedSources()
   }
 
