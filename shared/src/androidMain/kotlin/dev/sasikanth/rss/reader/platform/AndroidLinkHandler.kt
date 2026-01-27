@@ -33,14 +33,14 @@ class AndroidLinkHandler(
   private val settingsRepository: SettingsRepository
 ) : LinkHandler {
 
-  override suspend fun openLink(link: String?) {
+  override suspend fun openLink(link: String?, useInAppBrowser: Boolean) {
     if (link.isNullOrBlank()) return
 
     try {
       val browserType = settingsRepository.browserType.first()
       when (browserType) {
         BrowserType.Default -> {
-          openDefaultBrowserIfExists(link)
+          openDefaultBrowserIfExists(link, useInAppBrowser)
         }
         BrowserType.InApp -> {
           openCustomTab(link)
@@ -55,10 +55,10 @@ class AndroidLinkHandler(
     // no-op
   }
 
-  private fun openDefaultBrowserIfExists(link: String) {
+  private fun openDefaultBrowserIfExists(link: String, useInAppBrowser: Boolean) {
     val packageManager = activity.packageManager
     val intent = Intent(Intent.ACTION_VIEW, link.toUri())
-    if (intent.resolveActivity(packageManager) != null) {
+    if (intent.resolveActivity(packageManager) != null && !useInAppBrowser) {
       activity.startActivity(intent)
     } else {
       openCustomTab(link)

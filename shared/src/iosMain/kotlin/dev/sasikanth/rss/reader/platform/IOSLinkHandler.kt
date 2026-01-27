@@ -36,7 +36,7 @@ class IOSLinkHandler(
   private val settingsRepository: SettingsRepository,
 ) : LinkHandler {
 
-  override suspend fun openLink(link: String?) {
+  override suspend fun openLink(link: String?, useInAppBrowser: Boolean) {
     if (link.isNullOrBlank()) return
 
     val browserType = settingsRepository.browserType.first()
@@ -45,7 +45,7 @@ class IOSLinkHandler(
     when (browserType) {
       BrowserType.Default -> {
         val canOpenUrl = UIApplication.sharedApplication().canOpenURL(url)
-        if (canOpenUrl) {
+        if (canOpenUrl && !useInAppBrowser) {
           openBrowser(url)
         } else {
           inAppBrowser(url)
