@@ -382,6 +382,8 @@ class MinifluxSyncCoordinator(
       }
     }
 
+    purgeDeletedSources()
+
     return hasNewSubscriptions
   }
 

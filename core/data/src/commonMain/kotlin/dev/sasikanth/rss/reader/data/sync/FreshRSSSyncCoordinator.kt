@@ -374,6 +374,8 @@ class FreshRSSSyncCoordinator(
       }
     }
 
+    purgeDeletedSources()
+
     return hasNewSubscriptions
   }
 
