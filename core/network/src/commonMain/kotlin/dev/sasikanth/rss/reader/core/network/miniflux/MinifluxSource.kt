@@ -187,7 +187,10 @@ class MinifluxSource(
   suspend fun deleteFeed(feedId: Long) {
     withContext(dispatchersProvider.io) {
       val response = authenticatedHttpClient().delete(MinifluxApi.Feed(feedId = feedId))
-      if (!response.status.isSuccess()) {
+
+      if (response.status == HttpStatusCode.NotFound) {
+        // no-op: feed does not exist, or must have been deleted remotely
+      } else if (!response.status.isSuccess()) {
         throw Exception("Failed to delete feed: ${response.status}")
       }
     }
@@ -265,7 +268,9 @@ class MinifluxSource(
           setBody(buildJsonObject { put("title", title) })
         }
 
-      if (!response.status.isSuccess()) {
+      if (response.status == HttpStatusCode.NotFound) {
+        // no-op: category does not exist, or must have been deleted remotely
+      } else if (!response.status.isSuccess()) {
         throw Exception("Failed to update category: ${response.status}")
       }
     }
