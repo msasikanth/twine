@@ -31,14 +31,14 @@ import dev.sasikanth.rss.reader.data.database.migrations.SQLCodeMigrations
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.data.sync.DefaultSyncCoordinator
-import dev.sasikanth.rss.reader.data.sync.DropboxCloudServiceProvider
-import dev.sasikanth.rss.reader.data.sync.FreshRssSyncProvider
-import dev.sasikanth.rss.reader.data.sync.MinifluxSyncProvider
-import dev.sasikanth.rss.reader.data.sync.OAuthManager
-import dev.sasikanth.rss.reader.data.sync.OAuthTokenProvider
-import dev.sasikanth.rss.reader.data.sync.RealOAuthManager
-import dev.sasikanth.rss.reader.data.sync.RealOAuthTokenProvider
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
+import dev.sasikanth.rss.reader.data.sync.auth.OAuthTokenProvider
+import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthManager
+import dev.sasikanth.rss.reader.data.sync.auth.RealOAuthTokenProvider
+import dev.sasikanth.rss.reader.data.sync.dropbox.DropboxCloudServiceProvider
+import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRssSyncProvider
+import dev.sasikanth.rss.reader.data.sync.miniflux.MinifluxSyncProvider
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import io.ktor.client.HttpClient
 import me.tatarka.inject.annotations.Provides
@@ -202,7 +202,7 @@ interface DataComponent :
     freshRssSyncProvider: FreshRssSyncProvider,
     minifluxSyncProvider: MinifluxSyncProvider,
   ): Set<CloudServiceProvider> {
-    return setOf(freshRssSyncProvider, minifluxSyncProvider, cloudServiceProvider)
+    return setOf(minifluxSyncProvider, freshRssSyncProvider, cloudServiceProvider)
   }
 
   @Provides fun providesPostContentQueries(database: ReaderDatabase) = database.postContentQueries

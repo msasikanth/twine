@@ -72,18 +72,13 @@ class AddFeedViewModel(
   }
 
   private fun onRemoveSelectedGroup(group: FeedGroup) {
-    viewModelScope.launch {
-      val selectedGroups = _state.value.selectedFeedGroups
-      _state.update { it.copy(selectedFeedGroups = selectedGroups - group) }
-    }
+    viewModelScope.launch { _state.update { it.copy(selectedFeedGroups = emptySet()) } }
   }
 
   private fun onGroupsSelected(selectedGroupIds: Set<String>) {
     viewModelScope.launch {
       val feedGroups = rssRepository.groupByIds(selectedGroupIds)
-      _state.update {
-        it.copy(selectedFeedGroups = _state.value.selectedFeedGroups + feedGroups.toSet())
-      }
+      _state.update { it.copy(selectedFeedGroups = feedGroups.toSet()) }
     }
   }
 

@@ -117,7 +117,7 @@ import twine.shared.generated.resources.showFeedFavIconTitle
 fun AddFeedScreen(
   viewModel: AddFeedViewModel,
   goBack: () -> Unit,
-  openGroupSelection: () -> Unit,
+  openGroupSelection: (Set<String>) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -312,7 +312,7 @@ fun AddFeedScreen(
           OutlinedButton(
             modifier = Modifier.padding(horizontal = 12.dp),
             shape = shape,
-            onClick = { openGroupSelection() },
+            onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
           ) {
             Icon(
               imageVector = TwineIcons.NewGroup,

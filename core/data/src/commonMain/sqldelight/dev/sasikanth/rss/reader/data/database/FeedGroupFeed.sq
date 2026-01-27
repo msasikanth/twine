@@ -16,8 +16,14 @@ VALUES (?, ?);
 removeFeedFromGroup:
 DELETE FROM feedGroupFeed WHERE feedId = :feedId AND feedGroupId = :feedGroupId;
 
+removeFeedFromAllGroups:
+DELETE FROM feedGroupFeed WHERE feedId = :feedId;
+
 removeAllFeedsFromGroup:
 DELETE FROM feedGroupFeed WHERE feedGroupId = :feedGroupId;
 
 deleteAll:
 DELETE FROM feedGroupFeed;
+
+groupIdsForFeed:
+SELECT feedGroupId FROM feedGroupFeed WHERE feedId = :feedId;

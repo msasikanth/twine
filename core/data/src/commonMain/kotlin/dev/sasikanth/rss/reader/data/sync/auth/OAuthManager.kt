@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.auth
 
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 

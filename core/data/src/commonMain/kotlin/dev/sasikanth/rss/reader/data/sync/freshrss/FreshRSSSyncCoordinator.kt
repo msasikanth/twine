@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.freshrss
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -19,8 +19,11 @@ import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -58,11 +61,14 @@ class FreshRSSSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      // 1. Sync Subscriptions
+      // 1. Push local changes
+      pushChanges(syncStartTime)
+
+      // 2. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
-      // 2. Sync Articles
+      // 3. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
       val newerThan =
         if (hasNewSubscriptions) {
@@ -75,13 +81,12 @@ class FreshRSSSyncCoordinator(
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
       updateSyncState(SyncState.InProgress(0.7f))
 
-      // 3. Sync Statuses (Read/Bookmark)
+      // 4. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      // 4. Push local changes
-      pushChanges(syncStartTime)
-
+      // Only update lastSyncedAt if we found new articles to avoid missing articles
+      // that were added to the server between syncs with older timestamps
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
       }
@@ -143,8 +148,8 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
-    pushGroupChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
+    pushGroupChanges(syncStartTime)
     purgeDeletedSources()
   }
 
@@ -159,6 +164,11 @@ class FreshRSSSyncCoordinator(
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+
+    // Early return if no feeds have been updated since last sync
+    val hasUpdatedFeeds =
+      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
+    if (!hasUpdatedFeeds) return
 
     // 1. Handle deleted feeds
     localFeeds
@@ -176,7 +186,12 @@ class FreshRSSSyncCoordinator(
           it.remoteId == null &&
           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
       }
-      .forEach { feed -> freshRssSource.addFeed(feed.link) }
+      .forEach { feed ->
+        val response = freshRssSource.addFeed(feed.link)
+        if (response != null) {
+          rssRepository.updateFeedRemoteId(response.streamId, feed.id, syncStartTime)
+        }
+      }
 
     // 3. Handle renamed feeds
     localFeeds
@@ -189,13 +204,22 @@ class FreshRSSSyncCoordinator(
         freshRssSource.editFeedName(feed.remoteId!!, feed.name)
         rssRepository.updateFeedLastUpdatedAt(feed.id, syncStartTime)
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun pushGroupChanges(syncStartTime: Instant) {
-    val subscriptions = freshRssSource.subscriptions().subscriptions
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+
+    // Early return if no groups have been updated since last sync
+    val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
+    if (!hasUpdatedGroups) return
+
+    val subscriptions = freshRssSource.subscriptions().subscriptions
 
     // 1. Handle deleted groups
     localGroups
@@ -257,13 +281,12 @@ class FreshRSSSyncCoordinator(
           (targetTags - currentTags).forEach { tagId ->
             freshRssSource.addTagToFeed(remoteFeedId, tagId)
           }
-
-          // Remove extra tags
-          (currentTags - targetTags).forEach { tagId ->
-            freshRssSource.removeTagFromFeed(remoteFeedId, tagId)
-          }
         }
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
@@ -365,7 +388,7 @@ class FreshRSSSyncCoordinator(
               localGroup.id
             } else {
               rssRepository.upsertGroup(
-                id = tagName.lowercase().replace(" ", "-"),
+                id = nameBasedUuidOf(tagName).toString(),
                 name = tagName,
                 pinnedAt = null,
                 updatedAt = syncStartTime,

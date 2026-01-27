@@ -1,0 +1,420 @@
+diff --git a/androidApp/src/main/kotlin/dev/sasikanth/rss/reader/FeedsRefreshWorker.kt b/androidApp/src/main/kotlin/dev/sasikanth/rss/reader/FeedsRefreshWorker.kt
+index 7da3ff8d..60ae7e3c 100644
+--- a/androidApp/src/main/kotlin/dev/sasikanth/rss/reader/FeedsRefreshWorker.kt
++++ b/androidApp/src/main/kotlin/dev/sasikanth/rss/reader/FeedsRefreshWorker.kt
+@@ -25,8 +25,8 @@ import androidx.work.WorkerParameters
+ import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+ import com.bugsnag.android.Bugsnag
+ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+-import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
+ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
++import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
+ import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
+ import java.time.Duration
+ import kotlinx.coroutines.CancellationException
+diff --git a/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/repository/RssRepository.kt b/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/repository/RssRepository.kt
+index 640e941f..91ed6297 100644
+--- a/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/repository/RssRepository.kt
++++ b/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/repository/RssRepository.kt
+@@ -1181,16 +1181,40 @@ class RssRepository(
+     val feedIdsSnapshot = feedIds.toList()
+     withContext(dispatchersProvider.databaseWrite) {
+       transactionRunner.invoke {
++        val now = Clock.System.now()
++        feedIdsSnapshot.forEach { feedId ->
++          val currentGroupIds =
++            feedGroupFeedQueries
++              .groupIdsForFeed(feedId)
++              .executeAsList()
++              .map { it.feedGroupId }
++              .filterNotNull()
++
++          currentGroupIds.forEach { groupId -> feedGroupQueries.updateUpdatedAt(now, groupId) }
++
++          feedGroupFeedQueries.removeFeedFromAllGroups(feedId)
++        }
++
+         groupIdsSnapshot.forEach { groupId ->
+           feedIdsSnapshot.forEach { feedId ->
+             feedGroupFeedQueries.addFeedToGroup(feedGroupId = groupId, feedId = feedId)
+           }
+-          feedGroupQueries.updateUpdatedAt(Clock.System.now(), groupId)
++          feedGroupQueries.updateUpdatedAt(now, groupId)
+         }
+       }
+     }
+   }
+
++  suspend fun groupIdsForFeed(feedId: String): List<String> {
++    return withContext(dispatchersProvider.io) {
++      feedGroupFeedQueries
++        .groupIdsForFeed(feedId)
++        .executeAsList()
++        .map { it.feedGroupId }
++        .filterNotNull()
++    }
++  }
++
+   suspend fun removeFeedIdsFromGroups(groupIds: Set<String>, feedIds: List<String>) {
+     val groupIdsSnapshot = groupIds.toList()
+     val feedIdsSnapshot = feedIds.toList()
+diff --git a/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/sync/freshrss/FreshRSSSyncCoordinator.kt b/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/sync/freshrss/FreshRSSSyncCoordinator.kt
+index efb82cb1..783aa087 100644
+--- a/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/sync/freshrss/FreshRSSSyncCoordinator.kt
++++ b/core/data/src/commonMain/kotlin/dev/sasikanth/rss/reader/data/sync/freshrss/FreshRSSSyncCoordinator.kt
+@@ -178,7 +178,12 @@ class FreshRSSSyncCoordinator(
+           it.remoteId == null &&
+           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
+       }
+-      .forEach { feed -> freshRssSource.addFeed(feed.link) }
++      .forEach { feed ->
++        val response = freshRssSource.addFeed(feed.link)
++        if (response != null) {
++          rssRepository.updateFeedRemoteId(response.streamId, feed.id, syncStartTime)
++        }
++      }
+
+     // 3. Handle renamed feeds
+     localFeeds
+diff --git a/core/data/src/commonMain/sqldelight/dev/sasikanth/rss/reader/data/database/FeedGroupFeed.sq b/core/data/src/commonMain/sqldelight/dev/sasikanth/rss/reader/data/database/FeedGroupFeed.sq
+index ec1d58cc..e0e7e6c5 100644
+--- a/core/data/src/commonMain/sqldelight/dev/sasikanth/rss/reader/data/database/FeedGroupFeed.sq
++++ b/core/data/src/commonMain/sqldelight/dev/sasikanth/rss/reader/data/database/FeedGroupFeed.sq
+@@ -16,8 +16,14 @@ VALUES (?, ?);
+ removeFeedFromGroup:
+ DELETE FROM feedGroupFeed WHERE feedId = :feedId AND feedGroupId = :feedGroupId;
+
++removeFeedFromAllGroups:
++DELETE FROM feedGroupFeed WHERE feedId = :feedId;
++
+ removeAllFeedsFromGroup:
+ DELETE FROM feedGroupFeed WHERE feedGroupId = :feedGroupId;
+
+ deleteAll:
+ DELETE FROM feedGroupFeed;
++
++groupIdsForFeed:
++SELECT feedGroupId FROM feedGroupFeed WHERE feedId = :feedId;
+diff --git a/core/network/src/commonMain/kotlin/dev/sasikanth/rss/reader/core/network/freshrss/FreshRssSource.kt b/core/network/src/commonMain/kotlin/dev/sasikanth/rss/reader/core/network/freshrss/FreshRssSource.kt
+index df17d24e..ae8452c8 100644
+--- a/core/network/src/commonMain/kotlin/dev/sasikanth/rss/reader/core/network/freshrss/FreshRssSource.kt
++++ b/core/network/src/commonMain/kotlin/dev/sasikanth/rss/reader/core/network/freshrss/FreshRssSource.kt
+@@ -12,6 +12,7 @@
+ package dev.sasikanth.rss.reader.core.network.freshrss
+
+ import dev.sasikanth.rss.reader.core.model.local.User
++import dev.sasikanth.rss.reader.core.model.remote.freshrss.AddFeedResponsePayload
+ import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlesPayload
+ import dev.sasikanth.rss.reader.core.model.remote.freshrss.ItemIds
+ import dev.sasikanth.rss.reader.core.model.remote.freshrss.SubscriptionsPayload
+@@ -182,9 +183,9 @@ class FreshRssSource(
+     }
+   }
+
+-  suspend fun addFeed(url: String) {
+-    withContext(dispatchersProvider.io) {
+-      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url))
++  suspend fun addFeed(url: String): AddFeedResponsePayload? {
++    return withContext(dispatchersProvider.io) {
++      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url)).body()
+     }
+   }
+
+diff --git a/shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/di/ApplicationComponent.kt b/shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/di/ApplicationComponent.kt
+index 9fef3bba..36b533c5 100644
+--- a/shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/di/ApplicationComponent.kt
++++ b/shared/src/androidMain/kotlin/dev/sasikanth/rss/reader/di/ApplicationComponent.kt
+@@ -24,8 +24,8 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
+ import dev.sasikanth.rss.reader.data.repository.RssRepository
+ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+ import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
+-import dev.sasikanth.rss.reader.data.sync.NewArticleNotifier
+ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
++import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
+ import dev.sasikanth.rss.reader.di.scopes.AppScope
+ import me.tatarka.inject.annotations.Component
+ import me.tatarka.inject.annotations.Provides
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/AddFeedViewModel.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/AddFeedViewModel.kt
+index 9982c2f8..1f64567d 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/AddFeedViewModel.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/AddFeedViewModel.kt
+@@ -72,18 +72,13 @@ class AddFeedViewModel(
+   }
+
+   private fun onRemoveSelectedGroup(group: FeedGroup) {
+-    viewModelScope.launch {
+-      val selectedGroups = _state.value.selectedFeedGroups
+-      _state.update { it.copy(selectedFeedGroups = selectedGroups - group) }
+-    }
++    viewModelScope.launch { _state.update { it.copy(selectedFeedGroups = emptySet()) } }
+   }
+
+   private fun onGroupsSelected(selectedGroupIds: Set<String>) {
+     viewModelScope.launch {
+       val feedGroups = rssRepository.groupByIds(selectedGroupIds)
+-      _state.update {
+-        it.copy(selectedFeedGroups = _state.value.selectedFeedGroups + feedGroups.toSet())
+-      }
++      _state.update { it.copy(selectedFeedGroups = feedGroups.toSet()) }
+     }
+   }
+
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/ui/AddFeedScreen.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/ui/AddFeedScreen.kt
+index c4e2f883..6705195f 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/ui/AddFeedScreen.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/addfeed/ui/AddFeedScreen.kt
+@@ -117,7 +117,7 @@ import twine.shared.generated.resources.showFeedFavIconTitle
+ fun AddFeedScreen(
+   viewModel: AddFeedViewModel,
+   goBack: () -> Unit,
+-  openGroupSelection: () -> Unit,
++  openGroupSelection: (Set<String>) -> Unit,
+   modifier: Modifier = Modifier,
+ ) {
+   val state by viewModel.state.collectAsStateWithLifecycle()
+@@ -312,7 +312,7 @@ fun AddFeedScreen(
+           OutlinedButton(
+             modifier = Modifier.padding(horizontal = 12.dp),
+             shape = shape,
+-            onClick = { openGroupSelection() },
++            onClick = { openGroupSelection(state.selectedFeedGroups.map { it.id }.toSet()) },
+           ) {
+             Icon(
+               imageVector = TwineIcons.NewGroup,
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/App.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/App.kt
+index c3bea468..731cdbec 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/App.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/App.kt
+@@ -113,6 +113,7 @@ import kotlinx.coroutines.flow.emptyFlow
+ import kotlinx.coroutines.flow.filter
+ import kotlinx.coroutines.flow.filterNotNull
+ import kotlinx.coroutines.flow.launchIn
++import kotlinx.coroutines.flow.map
+ import kotlinx.coroutines.flow.merge
+ import kotlinx.coroutines.flow.onEach
+ import kotlinx.coroutines.launch
+@@ -144,7 +145,7 @@ fun App(
+   readerPageViewModel: (PostWithMetadata) -> ReaderPageViewModel,
+   addFeedViewModel: () -> AddFeedViewModel,
+   feedViewModel: (SavedStateHandle) -> FeedViewModel,
+-  groupSelectionViewModel: () -> GroupSelectionViewModel,
++  groupSelectionViewModel: (SavedStateHandle) -> GroupSelectionViewModel,
+   searchViewModel: () -> SearchViewModel,
+   bookmarksViewModel: () -> BookmarksViewModel,
+   settingsViewModel: () -> SettingsViewModel,
+@@ -309,6 +310,17 @@ fun App(
+                   .launchIn(this)
+               }
+
++              LaunchedEffect(Unit) {
++                feedsViewModel.state
++                  .map { it.openGroupSelection }
++                  .filterNotNull()
++                  .onEach { selectedGroupIds ->
++                    navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
++                    feedsViewModel.dispatch(FeedsEvent.MarkOpenGroupSelectionDone)
++                  }
++                  .launchIn(this)
++              }
++
+               LaunchedEffect(Unit) {
+                 viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
+               }
+@@ -318,7 +330,9 @@ fun App(
+                 feedsViewModel = feedsViewModel,
+                 onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
+                 openPost = { index, post -> openPost(index, post, FromScreen.Home) },
+-                openGroupSelectionSheet = { navController.navigate(Modals.GroupSelection) },
++                openGroupSelectionSheet = {
++                  feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked)
++                },
+                 openFeedInfoSheet = { feedId -> navController.navigate(Modals.FeedInfo(feedId)) },
+                 openAddFeedScreen = { navController.navigate(Screen.AddFeed) },
+                 openGroupScreen = { groupId -> navController.navigate(Screen.FeedGroup(groupId)) },
+@@ -485,10 +499,11 @@ fun App(
+           }
+
+           AddFeedScreen(
+-            modifier = roundedCornerScreenModifier,
+             viewModel = viewModel,
+             goBack = { navController.popBackStack() },
+-            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
++            openGroupSelection = { selectedGroupIds ->
++              navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
++            }
+           )
+         }
+
+@@ -519,7 +534,7 @@ fun App(
+             modifier = roundedCornerScreenModifier,
+             viewModel = viewModel,
+             goBack = { navController.popBackStack() },
+-            openGroupSelection = { navController.navigate(Modals.GroupSelection) }
++            openGroupSelection = { navController.navigate(Modals.GroupSelection()) }
+           )
+         }
+
+@@ -549,7 +564,7 @@ fun App(
+         }
+
+         dialog<Modals.GroupSelection> {
+-          val viewModel = viewModel { groupSelectionViewModel() }
++          val viewModel = viewModel { groupSelectionViewModel(it.savedStateHandle) }
+           GroupSelectionSheet(
+             viewModel = viewModel,
+             dismiss = { navController.popBackStack() },
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/Modals.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/Modals.kt
+index 7290519e..2294d6e7 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/Modals.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/app/Modals.kt
+@@ -24,5 +24,6 @@ internal sealed interface Modals {
+
+   @Serializable data class FeedInfo(val feedId: String) : Modals
+
+-  @Serializable data object GroupSelection : Modals
++  @Serializable
++  data class GroupSelection(val selectedGroupIds: List<String> = emptyList()) : Modals
+ }
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsEvent.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsEvent.kt
+index d676e2a1..bac5429d 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsEvent.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsEvent.kt
+@@ -56,6 +56,8 @@ sealed interface FeedsEvent {
+
+   data object OnNewFeedClicked : FeedsEvent
+
++  data object OnAddToGroupClicked : FeedsEvent
++
+   data object DismissDeleteConfirmation : FeedsEvent
+
+   data object DeleteSelectedSources : FeedsEvent
+@@ -65,4 +67,6 @@ sealed interface FeedsEvent {
+   data object MarkOpenPaywallDone : FeedsEvent
+
+   data object MarkOpenAddFeedDone : FeedsEvent
++
++  data object MarkOpenGroupSelectionDone : FeedsEvent
+ }
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsState.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsState.kt
+index c335d255..5450726e 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsState.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsState.kt
+@@ -38,6 +38,7 @@ data class FeedsState(
+   val showDeleteConfirmation: Boolean,
+   val openPaywall: Boolean,
+   val openAddFeedScreen: Boolean,
++  val openGroupSelection: Set<String>? = null,
+ ) {
+
+   val isInMultiSelectMode: Boolean
+@@ -60,6 +61,7 @@ data class FeedsState(
+         showDeleteConfirmation = false,
+         openPaywall = false,
+         openAddFeedScreen = false,
++        openGroupSelection = null,
+       )
+   }
+ }
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsViewModel.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsViewModel.kt
+index 6d89540e..b5b0ac6d 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsViewModel.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/feeds/FeedsViewModel.kt
+@@ -115,6 +115,7 @@ class FeedsViewModel(
+         }
+       }
+       FeedsEvent.DeleteSelectedSources -> deleteSelectedSources()
++      FeedsEvent.OnAddToGroupClicked -> onAddToGroupClicked()
+       FeedsEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
+       is FeedsEvent.OnPinnedSourcePositionChanged ->
+         onPinnedSourcePositionChanged(event.newSourcesList)
+@@ -124,6 +125,23 @@ class FeedsViewModel(
+       is FeedsEvent.MarkOpenAddFeedDone -> {
+         _state.update { it.copy(openAddFeedScreen = false) }
+       }
++      is FeedsEvent.MarkOpenGroupSelectionDone -> {
++        _state.update { it.copy(openGroupSelection = null) }
++      }
++    }
++  }
++
++  private fun onAddToGroupClicked() {
++    viewModelScope.launch {
++      val selectedSources = _state.value.selectedSources
++      val groupIds =
++        if (selectedSources.size == 1) {
++          rssRepository.groupIdsForFeed(selectedSources.first().id).toSet()
++        } else {
++          emptySet()
++        }
++
++      _state.update { it.copy(openGroupSelection = groupIds) }
+     }
+   }
+
+diff --git a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection/GroupSelectionViewModel.kt b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection/GroupSelectionViewModel.kt
+index 999052d2..c967382f 100644
+--- a/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection/GroupSelectionViewModel.kt
++++ b/shared/src/commonMain/kotlin/dev/sasikanth/rss/reader/groupselection/GroupSelectionViewModel.kt
+@@ -16,11 +16,13 @@
+
+ package dev.sasikanth.rss.reader.groupselection
+
++import androidx.lifecycle.SavedStateHandle
+ import androidx.lifecycle.ViewModel
+ import androidx.lifecycle.viewModelScope
+ import app.cash.paging.cachedIn
+ import app.cash.paging.createPager
+ import app.cash.paging.createPagingConfig
++import dev.sasikanth.rss.reader.app.Modals
+ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+ import dev.sasikanth.rss.reader.data.repository.RssRepository
+ import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent.OnCreateGroup
+@@ -29,14 +31,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
+ import kotlinx.coroutines.flow.StateFlow
+ import kotlinx.coroutines.flow.update
+ import kotlinx.coroutines.launch
++import me.tatarka.inject.annotations.Assisted
+ import me.tatarka.inject.annotations.Inject
+
+ @Inject
+ class GroupSelectionViewModel(
++  @Assisted savedStateHandle: SavedStateHandle,
+   private val rssRepository: RssRepository,
+ ) : ViewModel() {
+
+-  private val _state = MutableStateFlow(GroupSelectionState.DEFAULT)
++  private val selectedGroupIds =
++    savedStateHandle
++      .get<Modals.GroupSelection>(Modals.GroupSelection::class.simpleName!!)
++      ?.selectedGroupIds
++      ?.toSet()
++      ?: emptySet()
++
++  private val _state =
++    MutableStateFlow(GroupSelectionState.DEFAULT.copy(selectedGroups = selectedGroupIds))
+   val state: StateFlow<GroupSelectionState>
+     get() = _state
+
+@@ -61,16 +73,19 @@ class GroupSelectionViewModel(
+   }
+
+   private fun onCreateGroup(name: String) {
+-    viewModelScope.launch { rssRepository.createGroup(name) }
++    viewModelScope.launch {
++      val groupId = rssRepository.createGroup(name)
++      _state.update { it.copy(selectedGroups = setOf(groupId)) }
++    }
+   }
+
+   private fun onToggleGroupSelection(feedGroup: FeedGroup) {
+     _state.update {
+       val selectedGroups = it.selectedGroups
+       if (selectedGroups.contains(feedGroup.id)) {
+-        it.copy(selectedGroups = selectedGroups - setOf(feedGroup.id))
++        it.copy(selectedGroups = emptySet())
+       } else {
+-        it.copy(selectedGroups = selectedGroups + setOf(feedGroup.id))
++        it.copy(selectedGroups = setOf(feedGroup.id))
+       }
+     }
+   }

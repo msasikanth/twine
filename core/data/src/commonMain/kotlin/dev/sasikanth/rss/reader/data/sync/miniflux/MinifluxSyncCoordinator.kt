@@ -9,7 +9,7 @@
  *
  */
 
-package dev.sasikanth.rss.reader.data.sync
+package dev.sasikanth.rss.reader.data.sync.miniflux
 
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
@@ -20,6 +20,8 @@ import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
@@ -65,11 +67,14 @@ class MinifluxSyncCoordinator(
       val syncStartTime = Clock.System.now()
       updateSyncState(SyncState.InProgress(0f))
 
-      // 1. Sync Subscriptions
+      // 1. Push local changes
+      pushChanges(syncStartTime)
+
+      // 2. Sync Subscriptions
       val hasNewSubscriptions = syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
-      // 2. Sync Articles
+      // 3. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
       val after =
         if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).toEpochMilliseconds() / 1000
@@ -79,13 +84,12 @@ class MinifluxSyncCoordinator(
       syncArticles(starred = true, after = after)
       updateSyncState(SyncState.InProgress(0.7f))
 
-      // 3. Sync Statuses (Read/Bookmark)
+      // 4. Sync Statuses (Read/Bookmark)
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      // 4. Push local changes
-      pushChanges(syncStartTime)
-
+      // Only update lastSyncedAt if we found new articles to avoid missing articles
+      // that were added to the server between syncs with older timestamps
       if (hasNewArticles) {
         settingsRepository.updateLastSyncedAt(syncStartTime)
       }
@@ -164,6 +168,11 @@ class MinifluxSyncCoordinator(
     val localFeeds = rssRepository.allFeedsBlocking()
     val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
+    // Early return if no feeds have been updated since last sync
+    val hasUpdatedFeeds =
+      localFeeds.any { (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt }
+    if (!hasUpdatedFeeds) return
+
     // 1. Handle deleted feeds
     localFeeds
       .filter {
@@ -206,17 +215,26 @@ class MinifluxSyncCoordinator(
         }
       }
     }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
+    val localGroups = rssRepository.allFeedGroupsBlocking()
+    val localFeeds = rssRepository.allFeedsBlocking()
+    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+
+    // Early return if no groups have been updated since last sync
+    val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
+    if (!hasUpdatedGroups) return
+
     val subscriptions = minifluxSource.feeds()
     val categories = minifluxSource.categories()
     val defaultCategory = findOrCreateDefaultCategory(categories, syncStartTime)
     val defaultCategoryLocalId =
       rssRepository.feedGroupByRemoteId(defaultCategory.id.toString())!!.id
-    val localGroups = rssRepository.allFeedGroupsBlocking()
-    val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
 
     // 1. Handle deleted groups
     localGroups
@@ -252,27 +270,41 @@ class MinifluxSyncCoordinator(
           rssRepository.updateFeedGroupUpdatedAt(group.id, syncStartTime)
         }
 
-        if (remoteCategoryId != null && group.updatedAt > lastSyncedAt) {
+        // Build complete feed-to-category map for all non-deleted groups
+        if (remoteCategoryId != null) {
           val remoteCategoryIdLong = remoteCategoryId.toLong()
           group.feedIds.forEach { feedId -> localFeedToCategoryMap[feedId] = remoteCategoryIdLong }
         }
       }
 
-    // 3. Sync feeds categories
+    // 3. Sync feeds categories for feeds that have been updated
     val remoteFeedsMap = subscriptions.associateBy { it.id }
     localFeeds
-      .filter { !it.isDeleted && it.remoteId != null }
+      .filter {
+        !it.isDeleted &&
+          it.remoteId != null &&
+          (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
+      }
       .forEach { localFeed ->
         val remoteFeedId = localFeed.remoteId!!.toLong()
         val remoteFeed = remoteFeedsMap[remoteFeedId]
         if (remoteFeed != null) {
-          val targetCategoryId = localFeedToCategoryMap[localFeed.id]
-          if (targetCategoryId != null && remoteFeed.category.id != targetCategoryId) {
+          val targetCategoryId = localFeedToCategoryMap[localFeed.id] ?: defaultCategory.id
+          if (remoteFeed.category.id != targetCategoryId) {
             minifluxSource.updateFeed(remoteFeedId, localFeed.name, targetCategoryId)
             rssRepository.updateFeedLastUpdatedAt(localFeed.id, syncStartTime)
+
+            // If feed was removed from all groups, add it to the default category locally
+            if (localFeedToCategoryMap[localFeed.id] == null) {
+              rssRepository.addFeedIdsToGroups(setOf(defaultCategoryLocalId), listOf(localFeed.id))
+            }
           }
         }
       }
+
+    // Update lastSyncedAt after successful push to prevent redundant push attempts
+    // This ensures early returns work correctly on subsequent syncs when no new articles
+    settingsRepository.updateLastSyncedAt(syncStartTime)
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {

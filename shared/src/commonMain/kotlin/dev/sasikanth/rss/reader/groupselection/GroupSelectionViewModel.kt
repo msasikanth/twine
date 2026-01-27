@@ -16,11 +16,13 @@
 
 package dev.sasikanth.rss.reader.groupselection
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import dev.sasikanth.rss.reader.app.Modals
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionEvent.OnCreateGroup
@@ -29,14 +31,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.tatarka.inject.annotations.Assisted
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class GroupSelectionViewModel(
+  @Assisted savedStateHandle: SavedStateHandle,
   private val rssRepository: RssRepository,
 ) : ViewModel() {
 
-  private val _state = MutableStateFlow(GroupSelectionState.DEFAULT)
+  private val selectedGroupIds =
+    savedStateHandle
+      .get<Modals.GroupSelection>(Modals.GroupSelection::class.simpleName!!)
+      ?.selectedGroupIds
+      ?.toSet()
+      ?: emptySet()
+
+  private val _state =
+    MutableStateFlow(GroupSelectionState.DEFAULT.copy(selectedGroups = selectedGroupIds))
   val state: StateFlow<GroupSelectionState>
     get() = _state
 
@@ -61,16 +73,19 @@ class GroupSelectionViewModel(
   }
 
   private fun onCreateGroup(name: String) {
-    viewModelScope.launch { rssRepository.createGroup(name) }
+    viewModelScope.launch {
+      val groupId = rssRepository.createGroup(name)
+      _state.update { it.copy(selectedGroups = setOf(groupId)) }
+    }
   }
 
   private fun onToggleGroupSelection(feedGroup: FeedGroup) {
     _state.update {
       val selectedGroups = it.selectedGroups
       if (selectedGroups.contains(feedGroup.id)) {
-        it.copy(selectedGroups = selectedGroups - setOf(feedGroup.id))
+        it.copy(selectedGroups = emptySet())
       } else {
-        it.copy(selectedGroups = selectedGroups + setOf(feedGroup.id))
+        it.copy(selectedGroups = setOf(feedGroup.id))
       }
     }
   }

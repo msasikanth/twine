@@ -38,6 +38,7 @@ data class FeedsState(
   val showDeleteConfirmation: Boolean,
   val openPaywall: Boolean,
   val openAddFeedScreen: Boolean,
+  val openGroupSelection: Set<String>? = null,
 ) {
 
   val isInMultiSelectMode: Boolean
@@ -60,6 +61,7 @@ data class FeedsState(
         showDeleteConfirmation = false,
         openPaywall = false,
         openAddFeedScreen = false,
+        openGroupSelection = null,
       )
   }
 }

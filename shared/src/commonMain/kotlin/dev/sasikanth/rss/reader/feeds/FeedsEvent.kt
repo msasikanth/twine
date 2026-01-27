@@ -56,6 +56,8 @@ sealed interface FeedsEvent {
 
   data object OnNewFeedClicked : FeedsEvent
 
+  data object OnAddToGroupClicked : FeedsEvent
+
   data object DismissDeleteConfirmation : FeedsEvent
 
   data object DeleteSelectedSources : FeedsEvent
@@ -65,4 +67,6 @@ sealed interface FeedsEvent {
   data object MarkOpenPaywallDone : FeedsEvent
 
   data object MarkOpenAddFeedDone : FeedsEvent
+
+  data object MarkOpenGroupSelectionDone : FeedsEvent
 }

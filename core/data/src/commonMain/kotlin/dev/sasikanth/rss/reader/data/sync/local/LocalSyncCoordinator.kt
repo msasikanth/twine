@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
  * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -8,7 +8,8 @@
  *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
  */
-package dev.sasikanth.rss.reader.data.sync
+
+package dev.sasikanth.rss.reader.data.sync.local
 
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
@@ -18,6 +19,8 @@ import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -185,7 +188,8 @@ class LocalSyncCoordinator(
             activeSourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             after = postsAfter,
-            lastSyncedAt = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault())
+            lastSyncedAt =
+              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault())
           )
         }
 

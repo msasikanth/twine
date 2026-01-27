@@ -19,7 +19,7 @@ import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
-import dev.sasikanth.rss.reader.data.sync.FreshRSSSyncCoordinator
+import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
