@@ -178,7 +178,12 @@ class FreshRSSSyncCoordinator(
           it.remoteId == null &&
           (it.lastUpdatedAt ?: Instant.DISTANT_PAST) > lastSyncedAt
       }
-      .forEach { feed -> freshRssSource.addFeed(feed.link) }
+      .forEach { feed ->
+        val response = freshRssSource.addFeed(feed.link)
+        if (response != null) {
+          rssRepository.updateFeedRemoteId(response.streamId, feed.id, syncStartTime)
+        }
+      }
 
     // 3. Handle renamed feeds
     localFeeds

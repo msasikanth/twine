@@ -12,6 +12,7 @@
 package dev.sasikanth.rss.reader.core.network.freshrss
 
 import dev.sasikanth.rss.reader.core.model.local.User
+import dev.sasikanth.rss.reader.core.model.remote.freshrss.AddFeedResponsePayload
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlesPayload
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ItemIds
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.SubscriptionsPayload
@@ -182,9 +183,9 @@ class FreshRssSource(
     }
   }
 
-  suspend fun addFeed(url: String) {
-    withContext(dispatchersProvider.io) {
-      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url))
+  suspend fun addFeed(url: String): AddFeedResponsePayload? {
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().post(Reader.AddFeed(quickadd = url)).body()
     }
   }
 
