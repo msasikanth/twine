@@ -130,6 +130,10 @@ class FreshRSSSyncCoordinator(
   private suspend fun pullFeedInternal(feedId: String): Boolean {
     return try {
       updateSyncState(SyncState.InProgress(0f))
+
+      // Push local changes for this feed before pulling
+      pushChangesForFeed(feedId)
+
       val feed = rssRepository.feed(feedId)
       if (feed?.remoteId != null) {
         syncArticles(streamId = feed.remoteId!!)
@@ -151,6 +155,10 @@ class FreshRSSSyncCoordinator(
     pushFeedChanges(syncStartTime)
     pushGroupChanges(syncStartTime)
     purgeDeletedSources()
+  }
+
+  private suspend fun pushChangesForFeed(feedId: String) {
+    pushStatusChangesForFeed(feedId)
   }
 
   private suspend fun purgeDeletedSources() {
@@ -535,6 +543,23 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun pushStatusChanges() {
     val dirtyPosts = rssRepository.postsWithLocalChanges()
+    if (dirtyPosts.isEmpty()) return
+
+    val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
+    val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
+    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
+    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
+
+    if (toMarkRead.isNotEmpty()) freshRssSource.markArticlesAsRead(toMarkRead)
+    if (toMarkUnread.isNotEmpty()) freshRssSource.markArticlesAsUnRead(toMarkUnread)
+    if (toBookmark.isNotEmpty()) freshRssSource.addBookmarks(toBookmark)
+    if (toUnbookmark.isNotEmpty()) freshRssSource.removeBookmarks(toUnbookmark)
+
+    dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+  }
+
+  private suspend fun pushStatusChangesForFeed(feedId: String) {
+    val dirtyPosts = rssRepository.postsWithLocalChangesForFeed(feedId)
     if (dirtyPosts.isEmpty()) return
 
     val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
