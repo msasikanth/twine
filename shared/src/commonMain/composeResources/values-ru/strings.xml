@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
 <resources>
     <string name="postSourceUnknown">Неизвестный</string>
     <string name="buttonAll">ВСЕ</string>
@@ -41,7 +57,7 @@
     <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
     <string name="settingsHeaderTheme">Тема</string>
     <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
+    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию</string>
     <string name="settingsEnableBlurTitle">Включить размытие на главной странице</string>
     <string name="settingsEnableBlurSubtitle">Если функция отключена, вместо размытых изображений будут отображаться градиенты. Это может повысить производительность.</string>
     <string name="settingsShowUnreadCountTitle">Показывать количество непрочитанных сообщений</string>
@@ -145,8 +161,8 @@
     <string name="cdLoadFullArticle">Загрузить полную статью</string>
     <string name="enableAutoSyncTitle">Включить автоматическую синхронизацию</string>
     <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
-    <string name="showFeedFavIconTitle">Show website fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="showFeedFavIconTitle">Показывать значок ленты новостей</string>
+    <string name="showFeedFavIconDesc">Если функция отключена вместо значка веб-сайта будет отображаться значок ленты</string>
     <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Заблокированные слова</string>
     <string name="blockedWordsHint">Введите слово</string>
@@ -178,8 +194,8 @@
     <string name="settingsEnableNotificationsTitle">Включить уведомления</string>
     <string name="settingsEnableNotificationsSubtitle">Если функция включена, вы будете получать уведомления при обнаружении новых статей во время фоновой синхронизации</string>
     <string name="settingsDownloadFullContentTitle">Скачивать полные статьи</string>
-    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
-    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
+    <string name="settingsDownloadFullContentSubtitle">Если функция включена, приложение будет пытаться скачивать полные статьи во время синхронизации.</string>
+    <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
     <string name="sort">Сортировка</string>
     <string name="settingsHeaderSync">Облачная синхронизация (Альфа ⚠)</string>
     <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
@@ -234,4 +250,12 @@
         <item quantity="many">Много</item>
         <item quantity="other">Другое</item>
     </plurals>
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="statisticsNoData">No reading data available yet</string>
+    <string name="statisticsTotalRead">Total Articles Read</string>
+    <string name="statisticsTopFeeds">Top 10 Feeds</string>
+    <string name="statisticsReadingTrends">Reading Trends (Last 30 Days)</string>
+    <string name="settingsStatisticsTitle">Statistics</string>
+    <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 </resources>
