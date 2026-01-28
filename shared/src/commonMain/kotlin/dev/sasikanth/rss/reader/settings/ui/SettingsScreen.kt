@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -152,6 +153,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.blockedWords
+import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.enableAutoSyncDesc
 import twine.shared.generated.resources.enableAutoSyncTitle
@@ -175,6 +177,11 @@ import twine.shared.generated.resources.settingsBlockImagesTitle
 import twine.shared.generated.resources.settingsBrowserTypeSubtitle
 import twine.shared.generated.resources.settingsBrowserTypeTitle
 import twine.shared.generated.resources.settingsCustomisations
+import twine.shared.generated.resources.settingsDeleteAppDataButton
+import twine.shared.generated.resources.settingsDeleteAppDataDialogDesc
+import twine.shared.generated.resources.settingsDeleteAppDataDialogTitle
+import twine.shared.generated.resources.settingsDeleteAppDataSubtitle
+import twine.shared.generated.resources.settingsDeleteAppDataTitle
 import twine.shared.generated.resources.settingsDownloadFullContentSubtitle
 import twine.shared.generated.resources.settingsDownloadFullContentTitle
 import twine.shared.generated.resources.settingsDownloadFullContentWarning
@@ -183,6 +190,7 @@ import twine.shared.generated.resources.settingsDynamicColorTitle
 import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
 import twine.shared.generated.resources.settingsHeaderBehaviour
+import twine.shared.generated.resources.settingsHeaderData
 import twine.shared.generated.resources.settingsHeaderFeedback
 import twine.shared.generated.resources.settingsHeaderOpml
 import twine.shared.generated.resources.settingsHeaderSync
@@ -249,6 +257,8 @@ internal fun SettingsScreen(
   val layoutDirection = LocalLayoutDirection.current
   val linkHandler = LocalLinkHandler.current
 
+  var showDeleteAppDataConfirmation by remember { mutableStateOf(false) }
+
   LaunchedEffect(state.authUrlToOpen) {
     state.authUrlToOpen?.let { url ->
       linkHandler.openLink(url, useInAppBrowser = true)
@@ -265,6 +275,16 @@ internal fun SettingsScreen(
 
   LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
     viewModel.dispatch(SettingsEvent.LoadSubscriptionStatus)
+  }
+
+  if (showDeleteAppDataConfirmation) {
+    DeleteAppDataConfirmationDialog(
+      onConfirm = {
+        showDeleteAppDataConfirmation = false
+        viewModel.dispatch(SettingsEvent.DeleteAppData)
+      },
+      onDismiss = { showDeleteAppDataConfirmation = false }
+    )
   }
 
   Scaffold(
@@ -619,6 +639,10 @@ internal fun SettingsScreen(
             }
           )
         }
+
+        item { Divider() }
+
+        item { DeleteAppDataSettingItem { showDeleteAppDataConfirmation = true } }
 
         item { Divider() }
 
@@ -1710,6 +1734,71 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
       }
     }
   }
+}
+
+@Composable
+private fun DeleteAppDataSettingItem(onClick: () -> Unit) {
+  Column {
+    SubHeader(text = stringResource(Res.string.settingsHeaderData))
+
+    Row(
+      modifier =
+        Modifier.clickable(onClick = onClick)
+          .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsDeleteAppDataTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.error
+        )
+        Text(
+          stringResource(Res.string.settingsDeleteAppDataSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+  AlertDialog(
+    onDismissRequest = onDismiss,
+    confirmButton = {
+      TextButton(onClick = onConfirm) {
+        Text(
+          text = stringResource(Res.string.settingsDeleteAppDataButton),
+          color = AppTheme.colorScheme.error
+        )
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text(
+          text = stringResource(Res.string.buttonCancel),
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+    },
+    title = {
+      Text(
+        text = stringResource(Res.string.settingsDeleteAppDataDialogTitle),
+        color = AppTheme.colorScheme.textEmphasisHigh
+      )
+    },
+    text = {
+      Text(
+        text = stringResource(Res.string.settingsDeleteAppDataDialogDesc),
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
+    },
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    titleContentColor = AppTheme.colorScheme.textEmphasisHigh,
+    textContentColor = AppTheme.colorScheme.textEmphasisMed,
+  )
 }
 
 @Composable

@@ -266,6 +266,10 @@ class SettingsRepository(
     }
   }
 
+  suspend fun clear() {
+    dataStore.edit { it.clear() }
+  }
+
   private fun mapToAppThemeMode(pref: String?): AppThemeMode? {
     if (pref.isNullOrBlank()) return null
     return AppThemeMode.valueOf(pref)

@@ -76,4 +76,6 @@ sealed interface SettingsEvent {
   data object CloseAppIconSelectionSheet : SettingsEvent
 
   data class OnAppIconChanged(val appIcon: AppIcon) : SettingsEvent
+
+  data object DeleteAppData : SettingsEvent
 }
