@@ -194,19 +194,18 @@
     <string name="settingsAppIconTitle">App icon</string>
     <string name="settingsAppIconSubtitle">Choose how Twine looks on your home screen</string>
     <string name="filter">Filter</string>
-    <string name="freshRssLoginTitle">FreshRSS Login</string>
-    <string name="freshRssServerUrl">Server URL</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssServerUrl" translatable="false">https://freshrss.example.com/api/greader.php/</string>
     <string name="freshRssUsername">Username</string>
     <string name="freshRssPassword">Password</string>
     <string name="freshRssLoginButton">Login</string>
-    <string name="freshRssUrlPlaceholder" translatable="false">https://freshrss.example.com/api/greader.php/</string>
     <string name="freshRssClearDataTitle">Clear local data?</string>
     <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
     <string name="freshRssClearDataPositive">Clear and Login</string>
     <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
     <string name="freshRssErrorUnknown">An unknown error occurred</string>
     <string name="settingsSyncMiniflux" translatable="false">Miniflux</string>
-    <string name="minifluxLoginTitle">Miniflux Login</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
     <string name="minifluxServerUrl">Server URL</string>
     <string name="minifluxApiKey">API Key</string>
     <string name="minifluxLoginButton">Login</string>
