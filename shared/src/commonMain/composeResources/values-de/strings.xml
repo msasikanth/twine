@@ -105,6 +105,12 @@
     <string name="tagSaveButton">Speichern</string>
     <string name="deleteTagTitle">Tag löschen?</string>
     <string name="deleteTagDesc">Das Tag wird gelöscht und aus allen zugewiesenen Feeds entfernt. Ihre Feeds werden nicht gelöscht</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Teilen</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Website</string>
