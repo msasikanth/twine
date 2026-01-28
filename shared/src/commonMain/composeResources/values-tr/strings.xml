@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
 <resources>
     <string name="postSourceUnknown">Bilinmeyen</string>
     <string name="buttonAll">TÜMÜ</string>
@@ -41,7 +57,7 @@
     <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
     <string name="settingsHeaderTheme">Tema</string>
     <string name="settingsBrowserTypeTitle">Uygulama içi tarayıcıyı kullan</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
+    <string name="settingsBrowserTypeSubtitle">Kapalı olduğunda, bağlantılar varsayılan tarayıcınızda açılır.</string>
     <string name="settingsEnableBlurTitle">Ana sayfada bulanıklığı etkinleştir</string>
     <string name="settingsEnableBlurSubtitle">Devre dışı bırakıldığında, bulanık görüntüler yerine degrade gösterir. Performansı artırabilir.</string>
     <string name="settingsShowUnreadCountTitle">Okunmamış gönderi sayısını göster</string>
@@ -145,8 +161,8 @@
     <string name="cdLoadFullArticle">Tam makaleyi yükle</string>
     <string name="enableAutoSyncTitle">Otomatik senkronizasyonu etkinleştir</string>
     <string name="enableAutoSyncDesc">Açık olduğunda, akışlar arka planda güncellenecek</string>
-    <string name="showFeedFavIconTitle">Show website fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="showFeedFavIconTitle">Akış fav simgesini göster</string>
+    <string name="showFeedFavIconDesc">Kapalı olduğunda, web sitesinin favikonu yerine akış simgesi gösterilir</string>
     <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Engellenen kelimeler</string>
     <string name="blockedWordsHint">Bir kelime girin</string>
@@ -178,8 +194,8 @@
     <string name="settingsEnableNotificationsTitle">Bildirimleri etkinleştir</string>
     <string name="settingsEnableNotificationsSubtitle">Açıldığında, arka plan senkronizasyonu sırasında yeni makaleler bulunduğunda bildirim alacaksınız</string>
     <string name="settingsDownloadFullContentTitle">Tam makaleleri indir</string>
-    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
-    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
+    <string name="settingsDownloadFullContentSubtitle">Etkinleştirildiğinde, uygulama senkronizasyon sırasında tam makaleleri indirmeye çalışacaktır.</string>
+    <string name="settingsDownloadFullContentWarning">Uyarı!: Bu, akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi potansiyel olarak etkileyebilir.</string>
     <string name="sort">Sırala</string>
     <string name="settingsHeaderSync">Bulut senkronizasyonu (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
@@ -228,4 +244,12 @@
         <item quantity="one">%1$d akış</item>
         <item quantity="other">%1$d akış</item>
     </plurals>
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="statisticsNoData">No reading data available yet</string>
+    <string name="statisticsTotalRead">Total Articles Read</string>
+    <string name="statisticsTopFeeds">Top 10 Feeds</string>
+    <string name="statisticsReadingTrends">Reading Trends (Last 30 Days)</string>
+    <string name="settingsStatisticsTitle">Statistics</string>
+    <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 </resources>
