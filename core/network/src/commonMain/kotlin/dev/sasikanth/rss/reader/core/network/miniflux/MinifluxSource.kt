@@ -11,6 +11,7 @@
 
 package dev.sasikanth.rss.reader.core.network.miniflux
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCreateFeedResponse
@@ -221,25 +222,28 @@ class MinifluxSource(
   }
 
   suspend fun addBookmarks(ids: List<Long>) {
-    updateEntriesStarredStatus(ids, true)
+    withContext(dispatchersProvider.io) {
+      ids.forEach { entryId ->
+        try {
+          authenticatedHttpClient().put(MinifluxApi.ToggleEntryBookmark(entryId = entryId))
+        } catch (e: Exception) {
+          Logger.e(e) { "Failed to add bookmark for entry: $entryId" }
+          throw e
+        }
+      }
+    }
   }
 
   suspend fun removeBookmarks(ids: List<Long>) {
-    updateEntriesStarredStatus(ids, false)
-  }
-
-  private suspend fun updateEntriesStarredStatus(ids: List<Long>, starred: Boolean) {
     withContext(dispatchersProvider.io) {
-      val response =
-        authenticatedHttpClient().put(MinifluxApi.UpdateEntries()) {
-          contentType(ContentType.Application.Json)
-          setBody(
-            buildJsonObject {
-              putJsonArray("entry_ids") { ids.forEach { add(JsonPrimitive(it)) } }
-              put("starred", starred)
-            }
-          )
+      ids.forEach { entryId ->
+        try {
+          authenticatedHttpClient().put(MinifluxApi.ToggleEntryBookmark(entryId = entryId))
+        } catch (e: Exception) {
+          Logger.e(e) { "Failed to remove bookmark for entry: $entryId" }
+          throw e
         }
+      }
     }
   }
 

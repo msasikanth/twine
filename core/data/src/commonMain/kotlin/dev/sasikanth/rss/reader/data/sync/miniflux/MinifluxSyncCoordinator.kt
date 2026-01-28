@@ -575,10 +575,22 @@ class MinifluxSyncCoordinator(
     val dirtyPosts = rssRepository.postsWithLocalChanges()
     if (dirtyPosts.isEmpty()) return
 
+    // Fetch remote bookmark state to avoid accidentally toggling bookmarks
+    // for posts that are dirty due to read status changes only
+    val remoteBookmarkIds = fetchStarredEntryIds()
+
     val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
     val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
-    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
-    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
+
+    // Only push bookmark changes for posts where local state differs from remote state
+    val toBookmark =
+      dirtyPosts
+        .filter { it.bookmarked && it.remoteId !in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
+    val toUnbookmark =
+      dirtyPosts
+        .filter { !it.bookmarked && it.remoteId in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
 
     if (toMarkRead.isNotEmpty()) minifluxSource.markEntriesAsRead(toMarkRead)
     if (toMarkUnread.isNotEmpty()) minifluxSource.markEntriesAsUnread(toMarkUnread)
