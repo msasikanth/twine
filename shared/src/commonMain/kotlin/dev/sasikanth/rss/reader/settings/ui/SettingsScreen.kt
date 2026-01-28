@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material.minimumInteractiveComponentSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
@@ -1737,39 +1738,34 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
 
 @Composable
 private fun DeleteAppDataSettingItem(onClick: () -> Unit) {
-  Box(modifier = Modifier.clickable(onClick = onClick)) {
-    Column {
-      SubHeader(text = stringResource(Res.string.settingsHeaderData))
+  Column {
+    SubHeader(text = stringResource(Res.string.settingsHeaderData))
 
-      Row(
-        modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-        verticalAlignment = Alignment.CenterVertically
-      ) {
-        Column(modifier = Modifier.weight(1f)) {
-          Text(
-            stringResource(Res.string.settingsDeleteAppDataTitle),
-            style = MaterialTheme.typography.titleMedium,
-            color = AppTheme.colorScheme.error
-          )
-          Text(
-            stringResource(Res.string.settingsDeleteAppDataSubtitle),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
-          )
-        }
+    Row(
+      modifier =
+        Modifier.clickable(onClick = onClick)
+          .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsDeleteAppDataTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.error
+        )
+        Text(
+          stringResource(Res.string.settingsDeleteAppDataSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
       }
-
-      HorizontalDivider(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-        color = AppTheme.colorScheme.surfaceContainer
-      )
     }
   }
 }
 
 @Composable
 private fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-  androidx.compose.material3.AlertDialog(
+  AlertDialog(
     onDismissRequest = onDismiss,
     confirmButton = {
       TextButton(onClick = onConfirm) {
