@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.utils
 
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSLocale
+import platform.Foundation.currentLocale
 
 actual fun String.formatReadingTrendDate(): String {
   val formatter = NSDateFormatter()
