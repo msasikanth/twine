@@ -77,8 +77,8 @@ class MinifluxSyncCoordinator(
       // 3. Sync Articles
       val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
       val after =
-        if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).toEpochMilliseconds() / 1000
-        else lastSyncedAt.toEpochMilliseconds() / 1000
+        if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).epochSeconds
+        else lastSyncedAt.epochSeconds
 
       val hasNewArticles = syncArticles(after = after)
       syncArticles(starred = true, after = after)
@@ -97,7 +97,7 @@ class MinifluxSyncCoordinator(
 
       true
     } catch (e: Exception) {
-      Logger.e(e) { "Miniflux pull failed" }
+      Logger.e(e) { "Miniflux pull failed: $e" }
       updateSyncState(SyncState.Error(e))
       false
     }
@@ -453,10 +453,12 @@ class MinifluxSyncCoordinator(
     do {
       val entriesPayload =
         minifluxSource.entries(
+          status = listOf("read", "unread"),
           limit = limit,
           offset = offset,
           after = after,
           starred = starred,
+          feedId = feedId,
         )
       val entries = entriesPayload.entries
       entries.forEach { entry ->
@@ -531,7 +533,7 @@ class MinifluxSyncCoordinator(
     val limit = 1000
     do {
       val entries =
-        minifluxSource.entries(status = "unread", limit = limit, offset = offset).entries
+        minifluxSource.entries(status = listOf("unread"), limit = limit, offset = offset).entries
       unreadIds.addAll(entries.map { it.id.toString() })
       offset += limit
     } while (entries.size >= limit)
@@ -569,16 +571,15 @@ class MinifluxSyncCoordinator(
 
     val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
     val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
+    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
+    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
 
     if (toMarkRead.isNotEmpty()) minifluxSource.markEntriesAsRead(toMarkRead)
     if (toMarkUnread.isNotEmpty()) minifluxSource.markEntriesAsUnread(toMarkUnread)
+    if (toBookmark.isNotEmpty()) minifluxSource.addBookmarks(toBookmark)
+    if (toUnbookmark.isNotEmpty()) minifluxSource.removeBookmarks(toUnbookmark)
 
-    dirtyPosts.forEach { post ->
-      if (post.remoteId != null) {
-        minifluxSource.toggleBookmark(post.remoteId!!.toLong())
-      }
-      rssRepository.updatePostSyncedAt(post.id, post.updatedAt)
-    }
+    dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
   }
 
   private suspend fun updateSyncState(newState: SyncState) {
