@@ -105,6 +105,12 @@
     <string name="tagSaveButton">保存</string>
     <string name="deleteTagTitle">删除标签？</string>
     <string name="deleteTagDesc">从所有已分配的订阅源中移除并删除标签。你的订阅源不会被删除</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">分享</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">网站</string>
