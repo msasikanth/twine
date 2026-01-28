@@ -337,3 +337,41 @@ SELECT
     )
   ) AS feedShowFavIconSettings
 FROM unreadPosts;
+
+totalReadPostsCount:
+SELECT COUNT(*) FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE
+  (post.flags & 2) != 0 AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0;
+
+readPostsByFeed:
+SELECT
+  feed.id AS feedId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  COUNT(post.id) AS readCount
+FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE
+  (post.flags & 2) != 0 AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0
+GROUP BY feed.id, feed.name, feed.icon
+ORDER BY readCount DESC;
+
+readPostsOverTime:
+SELECT
+  DATE(postDate / 1000, 'unixepoch') AS date,
+  COUNT(*) AS count
+FROM post
+INNER JOIN feed ON post.sourceId == feed.id
+WHERE
+  (post.flags & 2) != 0 AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0 AND
+  postDate >= :startDate
+GROUP BY date
+ORDER BY date DESC;
