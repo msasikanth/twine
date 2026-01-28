@@ -108,24 +108,40 @@ class MinifluxSource(
   }
 
   suspend fun entries(
-    status: String? = null,
+    status: List<String>? = null,
     limit: Int? = null,
     offset: Int? = null,
     after: Long? = null,
     starred: Boolean? = null,
+    feedId: Long? = null
   ): MinifluxEntriesPayload {
     return withContext(dispatchersProvider.io) {
-      authenticatedHttpClient()
-        .get(
-          MinifluxApi.Entries(
-            status = status,
-            limit = limit,
-            offset = offset,
-            after = after,
-            starred = starred?.toString()
+      if (feedId == null) {
+        authenticatedHttpClient()
+          .get(
+            MinifluxApi.Entries(
+              status = status,
+              limit = limit,
+              offset = offset,
+              after = after,
+              starred = starred?.toString()
+            )
           )
-        )
-        .body<MinifluxEntriesPayload>()
+          .body<MinifluxEntriesPayload>()
+      } else {
+        authenticatedHttpClient()
+          .get(
+            MinifluxApi.Feed.Entries(
+              parent = MinifluxApi.Feed(feedId = feedId),
+              status = status,
+              limit = limit,
+              offset = offset,
+              after = after,
+              starred = starred?.toString()
+            )
+          )
+          .body<MinifluxEntriesPayload>()
+      }
     }
   }
 
@@ -204,6 +220,29 @@ class MinifluxSource(
     updateEntriesStatus(ids, "unread")
   }
 
+  suspend fun addBookmarks(ids: List<Long>) {
+    updateEntriesStarredStatus(ids, true)
+  }
+
+  suspend fun removeBookmarks(ids: List<Long>) {
+    updateEntriesStarredStatus(ids, false)
+  }
+
+  private suspend fun updateEntriesStarredStatus(ids: List<Long>, starred: Boolean) {
+    withContext(dispatchersProvider.io) {
+      val response =
+        authenticatedHttpClient().put(MinifluxApi.UpdateEntries()) {
+          contentType(ContentType.Application.Json)
+          setBody(
+            buildJsonObject {
+              putJsonArray("entry_ids") { ids.forEach { add(JsonPrimitive(it)) } }
+              put("starred", starred)
+            }
+          )
+        }
+    }
+  }
+
   private suspend fun updateEntriesStatus(ids: List<Long>, status: String) {
     withContext(dispatchersProvider.io) {
       val response =
@@ -219,19 +258,6 @@ class MinifluxSource(
 
       if (!response.status.isSuccess()) {
         throw Exception("Failed to update entries status: ${response.status}")
-      }
-    }
-  }
-
-  suspend fun toggleBookmark(entryId: Long) {
-    withContext(dispatchersProvider.io) {
-      val response =
-        authenticatedHttpClient().put(MinifluxApi.ToggleEntryBookmark(entryId = entryId)) {
-          contentType(ContentType.Application.Json)
-        }
-
-      if (!response.status.isSuccess()) {
-        throw Exception("Failed to toggle bookmark: ${response.status}")
       }
     }
   }

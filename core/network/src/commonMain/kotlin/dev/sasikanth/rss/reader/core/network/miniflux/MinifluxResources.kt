@@ -24,13 +24,27 @@ class MinifluxApi {
 
   @Serializable
   @Resource("feeds/{feedId}")
-  class Feed(val parent: MinifluxApi = MinifluxApi(), val feedId: Long)
+  class Feed(val parent: MinifluxApi = MinifluxApi(), val feedId: Long) {
+
+    @Serializable
+    @Resource("entries")
+    class Entries(
+      val parent: Feed,
+      val status: List<String>? = null,
+      val limit: Int? = null,
+      val offset: Int? = null,
+      val after: Long? = null,
+      val starred: String? = null,
+      val order: String? = "published_at",
+      val direction: String? = "desc",
+    )
+  }
 
   @Serializable
   @Resource("entries")
   class Entries(
     val parent: MinifluxApi = MinifluxApi(),
-    val status: String? = null,
+    val status: List<String>? = null,
     val limit: Int? = null,
     val offset: Int? = null,
     val after: Long? = null,
