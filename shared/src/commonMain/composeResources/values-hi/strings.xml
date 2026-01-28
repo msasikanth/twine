@@ -187,8 +187,7 @@
     <string name="settingsAppIconTitle">ऐप आइकन</string>
     <string name="settingsAppIconSubtitle">चुनें कि ट्विन आपकी होम स्क्रीन पर कैसा दिखता है</string>
     <string name="filter">फ़िल्टर</string>
-    <string name="freshRssLoginTitle">FreshRSS Login</string>
-    <string name="freshRssServerUrl">Server URL</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
     <string name="freshRssUsername">Username</string>
     <string name="freshRssPassword">Password</string>
     <string name="freshRssLoginButton">Login</string>
@@ -197,7 +196,7 @@
     <string name="freshRssClearDataPositive">Clear and Login</string>
     <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
     <string name="freshRssErrorUnknown">An unknown error occurred</string>
-    <string name="minifluxLoginTitle">Miniflux Login</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
     <string name="minifluxServerUrl">Server URL</string>
     <string name="minifluxApiKey">API Key</string>
     <string name="minifluxLoginButton">Login</string>
