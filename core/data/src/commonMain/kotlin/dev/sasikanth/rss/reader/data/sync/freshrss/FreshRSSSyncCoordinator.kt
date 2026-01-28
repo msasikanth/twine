@@ -56,6 +56,33 @@ class FreshRSSSyncCoordinator(
     return syncMutex.withLock { pullInternal() }
   }
 
+  override suspend fun pull(feedIds: List<String>): Boolean {
+    return withContext(dispatchersProvider.io) {
+      syncMutex.withLock {
+        feedIds.forEach { feedId -> pullFeedInternal(feedId) }
+        true
+      }
+    }
+  }
+
+  override suspend fun pull(feedId: String): Boolean {
+    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullFeedInternal(feedId) } }
+  }
+
+  override suspend fun push(): Boolean {
+    return withContext(dispatchersProvider.io) {
+      syncMutex.withLock {
+        try {
+          pushChanges()
+          true
+        } catch (e: Exception) {
+          Logger.e(e) { "FreshRSS push failed" }
+          false
+        }
+      }
+    }
+  }
+
   private suspend fun pullInternal(): Boolean {
     return try {
       val syncStartTime = Clock.System.now()
@@ -100,19 +127,6 @@ class FreshRSSSyncCoordinator(
     }
   }
 
-  override suspend fun pull(feedIds: List<String>): Boolean {
-    return withContext(dispatchersProvider.io) {
-      syncMutex.withLock {
-        feedIds.forEach { feedId -> pullFeedInternal(feedId) }
-        true
-      }
-    }
-  }
-
-  override suspend fun pull(feedId: String): Boolean {
-    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullFeedInternal(feedId) } }
-  }
-
   private suspend fun pullFeedInternal(feedId: String): Boolean {
     return try {
       updateSyncState(SyncState.InProgress(0f))
@@ -129,20 +143,6 @@ class FreshRSSSyncCoordinator(
       Logger.e(e) { "FreshRSS pull failed for feed: $feedId" }
       updateSyncState(SyncState.Error(e))
       false
-    }
-  }
-
-  override suspend fun push(): Boolean {
-    return withContext(dispatchersProvider.io) {
-      syncMutex.withLock {
-        try {
-          pushChanges()
-          true
-        } catch (e: Exception) {
-          Logger.e(e) { "FreshRSS push failed" }
-          false
-        }
-      }
     }
   }
 
