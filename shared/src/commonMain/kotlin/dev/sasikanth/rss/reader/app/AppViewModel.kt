@@ -17,11 +17,11 @@ package dev.sasikanth.rss.reader.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.utils.NTuple7
@@ -39,7 +39,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 @ActivityScope
 class AppViewModel(
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
@@ -130,7 +130,7 @@ class AppViewModel(
 
   private fun refreshFeedsIfExpired() {
     viewModelScope.launch {
-      if (lastRefreshedAt.hasExpired()) {
+      if (refreshPolicy.hasExpired()) {
         syncCoordinator.pull()
       }
     }

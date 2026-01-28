@@ -17,7 +17,6 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.di.scopes.AppScope
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import me.tatarka.inject.annotations.Inject
@@ -48,6 +47,5 @@ class FreshRssSyncProvider(
   override suspend fun signOut() {
     userRepository.deleteUser()
     rssRepository.deleteAllLocalData()
-    settingsRepository.updateLastSyncedAt(Instant.DISTANT_PAST)
   }
 }

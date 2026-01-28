@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -56,6 +57,7 @@ class SettingsViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val appIconManager: AppIconManager,
+  private val refreshPolicy: RefreshPolicy,
   val availableProviders: Set<CloudServiceProvider>
 ) : ViewModel() {
 
@@ -79,7 +81,7 @@ class SettingsViewModel(
         settingsRepository.blockImages,
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
-        settingsRepository.lastSyncedAt,
+        refreshPolicy.instantFlow,
         userRepository.user(),
         settingsRepository.appIcon,
       ) {

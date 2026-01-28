@@ -21,10 +21,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dev.sasikanth.rss.reader.app.Modals
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +47,7 @@ class FeedViewModel(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -83,7 +83,7 @@ class FeedViewModel(
       val (postsType, dateTime) =
         withContext(dispatchersProvider.io) {
           val postsType = settingsRepository.postsType.first()
-          val dateTime = lastRefreshedAt.dateTimeFlow.first()
+          val dateTime = refreshPolicy.dateTimeFlow.first()
 
           Pair(postsType, dateTime)
         }
@@ -119,7 +119,7 @@ class FeedViewModel(
       val (postsType, dateTime) =
         withContext(dispatchersProvider.io) {
           val postsType = settingsRepository.postsType.first()
-          val dateTime = lastRefreshedAt.dateTimeFlow.first()
+          val dateTime = refreshPolicy.dateTimeFlow.first()
 
           Pair(postsType, dateTime)
         }

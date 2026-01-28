@@ -25,13 +25,13 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.NTuple6
@@ -57,7 +57,7 @@ import me.tatarka.inject.annotations.Inject
 class HomeViewModel(
   private val rssRepository: RssRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   private val settingsRepository: SettingsRepository,
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
@@ -182,7 +182,7 @@ class HomeViewModel(
   private fun loadNewArticles() {
     viewModelScope.launch {
       _state.update { it.copy(unreadSinceLastSync = null) }
-      lastRefreshedAt.refresh()
+      refreshPolicy.refresh()
       inAppRating.request()
     }
   }

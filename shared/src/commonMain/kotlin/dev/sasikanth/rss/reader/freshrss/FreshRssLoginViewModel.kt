@@ -16,12 +16,12 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +36,7 @@ class FreshRssLoginViewModel(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: FreshRSSSyncCoordinator,
+  private val refreshPolicy: RefreshPolicy,
   private val dispatchersProvider: DispatchersProvider,
 ) : ViewModel() {
 
@@ -101,7 +102,7 @@ class FreshRssLoginViewModel(
         Logger.d { "FreshRSS login: starting data clear and user save" }
         userRepository.deleteUser()
         rssRepository.deleteAllLocalData()
-        settingsRepository.updateLastSyncedAt(Instant.DISTANT_PAST)
+        refreshPolicy.clear()
 
         userRepository.saveUser(
           id = userInfo.id,

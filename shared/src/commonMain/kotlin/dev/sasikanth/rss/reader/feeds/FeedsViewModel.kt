@@ -32,11 +32,11 @@ import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.SourceType
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
@@ -69,7 +69,7 @@ class FeedsViewModel(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val observableActiveSource: ObservableActiveSource,
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   private val billingHandler: BillingHandler,
 ) : ViewModel() {
 
@@ -274,7 +274,7 @@ class FeedsViewModel(
     combine(
         searchQueryFlow,
         settingsRepository.postsType,
-        lastRefreshedAt.dateTimeFlow,
+        refreshPolicy.dateTimeFlow,
       ) { searchQuery, postsType, dateTime ->
         Triple(searchQuery, postsType, dateTime)
       }
@@ -307,7 +307,7 @@ class FeedsViewModel(
 
     combine(
         activeSourceFlow,
-        lastRefreshedAt.dateTimeFlow,
+        refreshPolicy.dateTimeFlow,
         postsTypeFlow,
       ) { activeSource, lastRefreshedAt, postsType ->
         Triple(activeSource, lastRefreshedAt, postsType)
@@ -349,7 +349,7 @@ class FeedsViewModel(
     val pinnedSourcesFlow =
       combine(
           settingsRepository.postsType,
-          lastRefreshedAt.dateTimeFlow,
+          refreshPolicy.dateTimeFlow,
         ) { postsType, dateTime ->
           Pair(postsType, dateTime)
         }
@@ -365,7 +365,7 @@ class FeedsViewModel(
       combine(
           settingsRepository.postsType,
           settingsRepository.feedsSortOrder,
-          lastRefreshedAt.dateTimeFlow
+          refreshPolicy.dateTimeFlow
         ) { postsType, feedsSortOrder, dateTime ->
           Triple(postsType, feedsSortOrder, dateTime)
         }

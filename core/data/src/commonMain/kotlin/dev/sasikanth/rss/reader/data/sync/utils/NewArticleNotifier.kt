@@ -11,9 +11,9 @@
 
 package dev.sasikanth.rss.reader.data.sync.utils
 
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.notifications.Notifier
 import kotlin.time.Clock
@@ -29,7 +29,7 @@ import me.tatarka.inject.annotations.Inject
 class NewArticleNotifier(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   private val notifier: Notifier,
 ) {
 
@@ -38,7 +38,7 @@ class NewArticleNotifier(
     content: () -> String,
   ) {
     if (settingsRepository.enableNotifications.first()) {
-      val lastRefreshedAtDateTime = lastRefreshedAt.dateTimeFlow.first()
+      val lastRefreshedAtDateTime = refreshPolicy.dateTimeFlow.first()
       val now = Clock.System.now()
       val tz = TimeZone.Companion.currentSystemDefault()
 
