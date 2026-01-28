@@ -349,6 +349,7 @@ fun App(
                   toggleLightStatusBar(!showDarkSystemBars)
                   toggleLightNavBar(!showDarkSystemBars)
                 },
+                onScrolledToTop = { appViewModel.updateActivePostIndex(0) },
                 modifier = screenModifier,
               )
             },

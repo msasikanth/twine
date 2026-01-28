@@ -133,6 +133,7 @@ internal fun HomeScreen(
   openPaywall: () -> Unit,
   onMenuClicked: (() -> Unit)? = null,
   onBottomSheetStateChanged: (SheetValue) -> Unit,
+  onScrolledToTop: () -> Unit = {},
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -170,6 +171,28 @@ internal fun HomeScreen(
 
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
+  val isAtTop by
+    remember(postsListState) {
+      derivedStateOf {
+        postsListState.firstVisibleItemIndex == 0 &&
+          postsListState.firstVisibleItemScrollOffset == 0
+      }
+    }
+
+  LaunchedEffect(isAtTop) {
+    if (isAtTop) {
+      onScrolledToTop()
+    }
+  }
+
+  LaunchedEffect(state.activeSource) {
+    if (state.activeSource != state.prevActiveSource) {
+      bottomSheetState.partialExpand()
+
+      viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
+      viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
+    }
+  }
 
   if (state.showPostsSortFilter) {
     PostsPreferencesSheet(
@@ -180,15 +203,6 @@ internal fun HomeScreen(
       },
       onDismiss = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(show = false)) }
     )
-  }
-
-  LaunchedEffect(state.activeSource) {
-    if (state.activeSource != state.prevActiveSource) {
-      bottomSheetState.partialExpand()
-
-      viewModel.dispatch(HomeEvent.UpdatePrevActiveSource(state.activeSource))
-      viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(0))
-    }
   }
 
   featuredPostsPagerState.CollectItemTransition(
