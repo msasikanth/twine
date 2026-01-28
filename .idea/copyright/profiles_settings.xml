@@ -1,7 +1,3 @@
 <component name="CopyrightManager">
-  <settings default="Sasikanth Miriyampalli (GPL 3.0)">
-    <module2copyright>
-      <element module="Project Files" copyright="Sasikanth Miriyampalli (GPL 3.0)" />
-    </module2copyright>
-  </settings>
+  <settings default="Sasikanth Miriyampalli (GPL 3.0)" />
 </component>
