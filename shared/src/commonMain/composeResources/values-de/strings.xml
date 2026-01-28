@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Unbekannt</string>
+    <string name="postSourceUnknown">Unbekannt</string>
     <string name="buttonAll">ALLE</string>
     <string name="buttonAddFeed">Feed hinzufügen</string>
     <string name="buttonGoBack">Zurück</string>
@@ -38,10 +38,10 @@
     <string name="settings">Einstellungen</string>
     <string name="moreMenuOptions">Weitere Menüoptionen</string>
     <string name="settingsHeaderBehaviour">Verhalten</string>
-  <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
+    <string name="settingsHeaderFeedback">Feedback &amp; Fehlerberichte</string>
     <string name="settingsHeaderTheme">Thema</string>
     <string name="settingsBrowserTypeTitle">In-App-Browser verwenden</string>
-    <string name="settingsBrowserTypeSubtitle">Wenn ausgeschaltet, werden Links in Ihrem Standardbrowser geöffnet.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Unschärfe auf der Startseite aktivieren</string>
     <string name="settingsEnableBlurSubtitle">Wenn deaktiviert, werden Farbverläufe statt unscharfer Bilder angezeigt. Kann die Leistung verbessern.</string>
     <string name="settingsShowUnreadCountTitle">Anzahl ungelesener Beiträge anzeigen</string>
@@ -69,6 +69,8 @@
     <string name="settingsThemeDark">Dunkel</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Feeds</string>
@@ -77,7 +79,7 @@
     <string name="about">Über</string>
     <string name="aboutRoleDeveloper">Entwickler</string>
     <string name="aboutRoleDesigner">Designer</string>
-  <string name="aboutSocialWebsite">Website</string>
+    <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Angepinnt</string>
@@ -103,6 +105,12 @@
     <string name="tagSaveButton">Speichern</string>
     <string name="deleteTagTitle">Tag löschen?</string>
     <string name="deleteTagDesc">Das Tag wird gelöscht und aus allen zugewiesenen Feeds entfernt. Ihre Feeds werden nicht gelöscht</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Teilen</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Website</string>
@@ -128,7 +136,7 @@
     <string name="groupAddNew">Neue hinzufügen</string>
     <string name="appBarAllFeeds">Alle Feeds</string>
     <string name="edit">Bearbeiten</string>
-    <string name="buttonAddToGroup">Zu Gruppe hinzufügen…</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Quellen löschen</string>
     <string name="removeSourcesDesc">Möchten Sie die ausgewählten Quellen löschen?</string>
     <string name="noPinnedSources">Keine angepinnten Feeds/Gruppen</string>
@@ -137,8 +145,9 @@
     <string name="cdLoadFullArticle">Vollständigen Beitrag laden</string>
     <string name="enableAutoSyncTitle">Automatische Synchronisierung aktivieren</string>
     <string name="enableAutoSyncDesc">Wenn eingeschaltet, werden die Feeds im Hintergrund aktualisiert</string>
-    <string name="showFeedFavIconTitle">Feed-Favoriten-Symbol anzeigen</string>
-    <string name="showFeedFavIconDesc">Wenn ausgeschaltet, wird das Feed-Symbol anstelle des Favoriten-Symbols der Website angezeigt</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Blockierte Wörter</string>
     <string name="blockedWordsHint">Geben Sie ein Wort ein</string>
     <string name="blockedWordsDesc">Beiträge können aufgrund ihres Textes auf dem Startbildschirm ausgeblendet werden. Wir empfehlen, häufige Wörter, die in vielen Beiträgen vorkommen, zu vermeiden, da dies dazu führen kann, dass keine Beiträge angezeigt werden oder die Leistung der App negativ beeinflusst wird. \n\nAusgeblendete Beiträge werden weiterhin in der Suche und in den Lesezeichen angezeigt.</string>
@@ -169,11 +178,11 @@
     <string name="settingsEnableNotificationsTitle">Benachrichtigungen aktivieren</string>
     <string name="settingsEnableNotificationsSubtitle">Wenn aktiviert, erhalten Sie Benachrichtigungen, wenn bei der Hintergrundsynchronisierung neue Artikel gefunden werden</string>
     <string name="settingsDownloadFullContentTitle">Vollständige Artikel herunterladen</string>
-    <string name="settingsDownloadFullContentSubtitle">Wenn aktiviert, versucht die App, während der Synchronisierung vollständige Artikel herunterzuladen.</string>
-    <string name="settingsDownloadFullContentWarning">Achtung!: Dies kann die Ladezeiten der Feeds, den Datenverbrauch, den Arbeitsspeicher und den Speicherplatzbedarf erhöhen. Es kann potenziell Ihr Nutzererlebnis beeinträchtigen.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Sortieren</string>
     <string name="settingsHeaderSync">Cloud-Synchronisierung (Alpha ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
+    <string name="settingsSyncDropboxDesc">Konsistente plattformübergreifende Synchronisierung</string>
     <string name="settingsSyncStatusIdle">Nicht synchronisiert</string>
     <string name="settingsSyncStatusSyncing">Synchronisierung...</string>
     <string name="settingsSyncStatusSuccess">Letzte Synchronisierung: Erfolgreich</string>
@@ -184,8 +193,28 @@
     <string name="settingsAppIconTitle">App-Symbol</string>
     <string name="settingsAppIconSubtitle">Wählen Sie aus, wie Twine auf Ihrem Startbildschirm aussieht</string>
     <string name="filter">Filter</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">Probleme mit Benachrichtigungen? Ihr Gerät schließt die App möglicherweise im Hintergrund. Tippen Sie hier, um zu erfahren, wie Sie das beheben können.</string>
-
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>

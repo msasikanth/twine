@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Unknown</string>
+    <string name="postSourceUnknown">Unknown</string>
     <string name="buttonAll">ALL</string>
     <string name="buttonAddFeed">Add feed</string>
     <string name="buttonGoBack">Go back</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">New articles</string>
     <string name="noFeeds">No feeds present!</string>
     <string name="swipeUpGetStarted">Swipe up to get started</string>
+    <string name="feedsLetsStart">आप यहाँ अपने सभी फीड्स देखेंगे, चलिए एक फीड जोड़कर शुरुआत करते हैं।\n\nबटन पर क्लिक करें।</string>
     <string name="feedNameHint">Feed name</string>
     <string name="editFeedName">Edit</string>
     <string name="errorUnsupportedFeed">Link doesn't contain any RSS/Atom feed.</string>
@@ -37,10 +38,10 @@
     <string name="settings">Settings</string>
     <string name="moreMenuOptions">More menu options</string>
     <string name="settingsHeaderBehaviour">Behavior</string>
-  <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
+    <string name="settingsHeaderFeedback">Feedback &amp; bug reports</string>
     <string name="settingsHeaderTheme">Theme</string>
     <string name="settingsBrowserTypeTitle">Use in-app browser</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Enable blur in homepage</string>
     <string name="settingsEnableBlurSubtitle">When disabled, displays gradients instead of blurred images. May improve performance.</string>
     <string name="settingsShowUnreadCountTitle">Show unread posts count</string>
@@ -68,6 +69,8 @@
     <string name="settingsThemeDark">Dark</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Feeds</string>
@@ -76,7 +79,7 @@
     <string name="about">About</string>
     <string name="aboutRoleDeveloper">Developer</string>
     <string name="aboutRoleDesigner">Designer</string>
-  <string name="aboutSocialWebsite">Website</string>
+    <string name="aboutSocialWebsite">Website</string>
     <string name="feedsSearchHint">Filter</string>
     <string name="allFeeds">Feeds</string>
     <string name="pinnedFeeds">Pinned</string>
@@ -102,6 +105,12 @@
     <string name="tagSaveButton">Save</string>
     <string name="deleteTagTitle">Delete tag?</string>
     <string name="deleteTagDesc">Tag will be deleted and removed from all the assigned feeds. Your feeds won't be deleted</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Share</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Website</string>
@@ -127,7 +136,7 @@
     <string name="groupAddNew">Add new</string>
     <string name="appBarAllFeeds">All feeds</string>
     <string name="edit">Edit</string>
-    <string name="buttonAddToGroup">Add to group...</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Delete sources</string>
     <string name="removeSourcesDesc">Do you want to delete selected sources?</string>
     <string name="noPinnedSources">No pinned feeds/groups</string>
@@ -136,8 +145,9 @@
     <string name="cdLoadFullArticle">Load full article</string>
     <string name="enableAutoSyncTitle">Enable auto sync</string>
     <string name="enableAutoSyncDesc">When turned-on, feeds will be updated in the background</string>
-    <string name="showFeedFavIconTitle">Show feed fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-off, the feed icon will be displayed instead of the website's favicon</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Blocked words</string>
     <string name="blockedWordsHint">Enter a word</string>
     <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
@@ -164,14 +174,15 @@
     <string name="postsSortLatest">नवीनतम</string>
     <string name="postsSortOldest">सबसे पुराना</string>
     <string name="buttonApply">लागू करें</string>
+    <string name="screenHome">होम</string>
     <string name="settingsEnableNotificationsTitle">सूचनाएं सक्षम करें</string>
     <string name="settingsEnableNotificationsSubtitle">चालू होने पर, बैकग्राउंड सिंक के दौरान नए लेख मिलने पर आपको सूचनाएं मिलेंगी</string>
     <string name="settingsDownloadFullContentTitle">पूरे लेख डाउनलोड करें</string>
-    <string name="settingsDownloadFullContentSubtitle">सक्षम होने पर, ऐप सिंक के दौरान पूरे लेख डाउनलोड करने की कोशिश करेगा।</string>
-    <string name="settingsDownloadFullContentWarning">चेतावनी!: इससे फीड लोड होने का समय, डेटा उपयोग, मेमोरी और स्टोरेज की खपत बढ़ सकती है। यह आपके उपयोगकर्ता अनुभव को संभावित रूप से प्रभावित कर सकता है।</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">क्रम</string>
     <string name="settingsHeaderSync">क्लाउड सिंक (अल्फा ⚠)</string>
-  <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
+    <string name="settingsSyncDropboxDesc">लगातार क्रॉस-प्लेटफ़ॉर्म सिंक</string>
     <string name="settingsSyncStatusIdle">सिंक नहीं किया गया</string>
     <string name="settingsSyncStatusSyncing">सिंक हो रहा है...</string>
     <string name="settingsSyncStatusSuccess">पिछला सिंक: सफल</string>
@@ -182,9 +193,28 @@
     <string name="settingsAppIconTitle">ऐप आइकन</string>
     <string name="settingsAppIconSubtitle">चुनें कि ट्विन आपकी होम स्क्रीन पर कैसा दिखता है</string>
     <string name="filter">फ़िल्टर</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">सूचना संबंधी समस्याएं? आपका डिवाइस बैकग्राउंड में ऐप को बंद कर सकता है। इसे ठीक करने का तरीका जानने के लिए यहाँ टैप करें।</string>
-    <string name="screenHome">होम</string>
-    <string name="feedsLetsStart">आप यहाँ अपने सभी फीड्स देखेंगे, चलिए एक फीड जोड़कर शुरुआत करते हैं।\n\nबटन पर क्लिक करें।</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>

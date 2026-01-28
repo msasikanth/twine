@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Неизвестный</string>
+    <string name="postSourceUnknown">Неизвестный</string>
     <string name="buttonAll">ВСЕ</string>
     <string name="buttonAddFeed">Добавить канал</string>
     <string name="buttonGoBack">Назад</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">Новые статьи</string>
     <string name="noFeeds">Никаких каналов нет!</string>
     <string name="swipeUpGetStarted">Проведите пальцем вверх, чтобы начать</string>
+    <string name="feedsLetsStart">Вы увидите все свои фиды здесь, давайте начнем с добавления фида.\n\nНажмите кнопку.</string>
     <string name="feedNameHint">Название канала</string>
     <string name="editFeedName">Редактировать</string>
     <string name="errorUnsupportedFeed">Ссылка не содержит никакой RSS-ленты/Atom-канала.</string>
@@ -37,10 +38,10 @@
     <string name="settings">Настройки</string>
     <string name="moreMenuOptions">Дополнительные опции меню</string>
     <string name="settingsHeaderBehaviour">Настройки приложения</string>
-  <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
+    <string name="settingsHeaderFeedback">Обратная связь и сообщения об ошибках</string>
     <string name="settingsHeaderTheme">Тема</string>
     <string name="settingsBrowserTypeTitle">Использовать встроенный браузер приложения</string>
-    <string name="settingsBrowserTypeSubtitle">Если функция отключена, ссылки будут открываться в вашем браузере по умолчанию</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Включить размытие на главной странице</string>
     <string name="settingsEnableBlurSubtitle">Если функция отключена, вместо размытых изображений будут отображаться градиенты. Это может повысить производительность.</string>
     <string name="settingsShowUnreadCountTitle">Показывать количество непрочитанных сообщений</string>
@@ -68,6 +69,8 @@
     <string name="settingsThemeDark">Тёмная</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Новостные ленты</string>
@@ -76,7 +79,7 @@
     <string name="about">О приложении</string>
     <string name="aboutRoleDeveloper">Разработчик</string>
     <string name="aboutRoleDesigner">Дизайнер</string>
-  <string name="aboutSocialWebsite">Вебсайт</string>
+    <string name="aboutSocialWebsite">Вебсайт</string>
     <string name="feedsSearchHint">Фильтр</string>
     <string name="allFeeds">Новостные ленты</string>
     <string name="pinnedFeeds">Закреплённые</string>
@@ -102,6 +105,12 @@
     <string name="tagSaveButton">Сохранить</string>
     <string name="deleteTagTitle">Удалить тег?</string>
     <string name="deleteTagDesc">Тег будет удален из всех назначенных лент. Ваши ленты удалены не будут</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Поделиться</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Вебсайт</string>
@@ -127,7 +136,7 @@
     <string name="groupAddNew">Добавить новую</string>
     <string name="appBarAllFeeds">Все каналы</string>
     <string name="edit">Редактировать</string>
-    <string name="buttonAddToGroup">Добавить в группу...</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Удалить источники</string>
     <string name="removeSourcesDesc">Вы хотите удалить выбранные источники?</string>
     <string name="noPinnedSources">Закреплённых каналов/групп нет</string>
@@ -136,8 +145,9 @@
     <string name="cdLoadFullArticle">Загрузить полную статью</string>
     <string name="enableAutoSyncTitle">Включить автоматическую синхронизацию</string>
     <string name="enableAutoSyncDesc">Если функция включена, каналы будут обновляться в фоновом режиме</string>
-    <string name="showFeedFavIconTitle">Показывать значок ленты новостей</string>
-    <string name="showFeedFavIconDesc">Если функция отключена вместо значка веб-сайта будет отображаться значок ленты</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Заблокированные слова</string>
     <string name="blockedWordsHint">Введите слово</string>
     <string name="blockedWordsDesc">Посты могут быть скрыты с главного экрана из-за их текста. Мы рекомендуем избегать общих слов, которые встречаются во многих постах, поскольку это может привести к тому, что сообщения не будут отображаться или негативно скажутся на производительности приложения. \n\nСкрытые посты по-прежнему будут отображаться в поиске и закладках.</string>
@@ -164,14 +174,15 @@
     <string name="postsSortLatest">Сначала новые</string>
     <string name="postsSortOldest">Сначала старые</string>
     <string name="buttonApply">Применить</string>
+    <string name="screenHome">Главная</string>
     <string name="settingsEnableNotificationsTitle">Включить уведомления</string>
     <string name="settingsEnableNotificationsSubtitle">Если функция включена, вы будете получать уведомления при обнаружении новых статей во время фоновой синхронизации</string>
     <string name="settingsDownloadFullContentTitle">Скачивать полные статьи</string>
-    <string name="settingsDownloadFullContentSubtitle">Если функция включена, приложение будет пытаться скачивать полные статьи во время синхронизации.</string>
-    <string name="settingsDownloadFullContentWarning">Внимание!: это может увеличить время загрузки фида, использование данных, потребление памяти и хранилища. Это может потенциально повлиять на ваш пользовательский опыт.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Сортировка</string>
     <string name="settingsHeaderSync">Облачная синхронизация (Альфа ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
+    <string name="settingsSyncDropboxDesc">Согласованная кроссплатформенная синхронизация</string>
     <string name="settingsSyncStatusIdle">Не синхронизировано</string>
     <string name="settingsSyncStatusSyncing">Синхронизация...</string>
     <string name="settingsSyncStatusSuccess">Последняя синхронизация: Успешно</string>
@@ -182,9 +193,28 @@
     <string name="settingsAppIconTitle">Иконка приложения</string>
     <string name="settingsAppIconSubtitle">Выберите, как Twine будет выглядеть на вашем домашнем экране</string>
     <string name="filter">Фильтр</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">Проблемы с уведомлениями? Ваше устройство может закрывать приложение в фоновом режиме. Нажмите здесь, чтобы узнать, как это исправить.</string>
-    <string name="screenHome">Главная</string>
-    <string name="feedsLetsStart">Вы увидите все свои фиды здесь, давайте начнем с добавления фида.\n\nНажмите кнопку.</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">Один</item>

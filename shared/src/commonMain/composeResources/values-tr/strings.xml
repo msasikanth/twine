@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">Bilinmeyen</string>
+    <string name="postSourceUnknown">Bilinmeyen</string>
     <string name="buttonAll">TÜMÜ</string>
     <string name="buttonAddFeed">Akış ekle</string>
     <string name="buttonGoBack">Geri dön</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">Yeni makaleler</string>
     <string name="noFeeds">Akışlar yok!</string>
     <string name="swipeUpGetStarted">Başlamak için yukarı kaydırın</string>
+    <string name="feedsLetsStart">Tüm akışlarınızı burada göreceksiniz, bir akış ekleyerek başlayalım.\n\nDüğmeye tıklayın.</string>
     <string name="feedNameHint">Akış adı</string>
     <string name="editFeedName">Düzenle</string>
     <string name="errorUnsupportedFeed">Bağlantı herhangi bir RSS/Atom akışı içermiyor.</string>
@@ -37,10 +38,10 @@
     <string name="settings">Ayarlar</string>
     <string name="moreMenuOptions">Daha fazla seçenek</string>
     <string name="settingsHeaderBehaviour">Davranış</string>
-  <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
+    <string name="settingsHeaderFeedback">Geri bildirim ve hata raporları</string>
     <string name="settingsHeaderTheme">Tema</string>
     <string name="settingsBrowserTypeTitle">Uygulama içi tarayıcıyı kullan</string>
-    <string name="settingsBrowserTypeSubtitle">Kapalı olduğunda, bağlantılar varsayılan tarayıcınızda açılır.</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">Ana sayfada bulanıklığı etkinleştir</string>
     <string name="settingsEnableBlurSubtitle">Devre dışı bırakıldığında, bulanık görüntüler yerine degrade gösterir. Performansı artırabilir.</string>
     <string name="settingsShowUnreadCountTitle">Okunmamış gönderi sayısını göster</string>
@@ -68,6 +69,8 @@
     <string name="settingsThemeDark">Koyu</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">Akışlar</string>
@@ -76,7 +79,7 @@
     <string name="about">Hakkında</string>
     <string name="aboutRoleDeveloper">Geliştirici</string>
     <string name="aboutRoleDesigner">Tasarımcı</string>
-  <string name="aboutSocialWebsite">Web sitesi</string>
+    <string name="aboutSocialWebsite">Web sitesi</string>
     <string name="feedsSearchHint">Filtrele</string>
     <string name="allFeeds">Akışlar</string>
     <string name="pinnedFeeds">Sabitlenenler</string>
@@ -102,6 +105,12 @@
     <string name="tagSaveButton">Kaydet</string>
     <string name="deleteTagTitle">Etiketi sil?</string>
     <string name="deleteTagDesc">Etiket silinecek ve atanan tüm akışlardan kaldırılacak. Akışlarınız silinmeyecek</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Paylaş</string>
     <string name="feedOptionCopyLink">Bağlantıyı Kopyala</string>
     <string name="feedOptionWebsite">Web sitesi</string>
@@ -127,7 +136,7 @@
     <string name="groupAddNew">Yeni ekle</string>
     <string name="appBarAllFeeds">Tüm akışlar</string>
     <string name="edit">Düzenle</string>
-    <string name="buttonAddToGroup">Gruba ekle...</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">Kaynakları sil</string>
     <string name="removeSourcesDesc">Seçilen kaynakları silmek istiyor musunuz?</string>
     <string name="noPinnedSources">Sabitlenmiş akış/grup yok</string>
@@ -136,8 +145,9 @@
     <string name="cdLoadFullArticle">Tam makaleyi yükle</string>
     <string name="enableAutoSyncTitle">Otomatik senkronizasyonu etkinleştir</string>
     <string name="enableAutoSyncDesc">Açık olduğunda, akışlar arka planda güncellenecek</string>
-    <string name="showFeedFavIconTitle">Akış fav simgesini göster</string>
-    <string name="showFeedFavIconDesc">Kapalı olduğunda, web sitesinin favikonu yerine akış simgesi gösterilir</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">Engellenen kelimeler</string>
     <string name="blockedWordsHint">Bir kelime girin</string>
     <string name="blockedWordsDesc">Gönderiler, metinlerine göre ana ekrandan gizlenebilir. Birçok gönderide görünen yaygın kelimelerden kaçınmanızı öneririz, çünkü bu, hiçbir gönderinin gösterilmemesine veya uygulamanın performansını olumsuz etkilemesine neden olabilir. \n\nGizli gönderiler arama ve yer imlerinde hala gösterilecektir.</string>
@@ -164,14 +174,15 @@
     <string name="postsSortLatest">En yeni</string>
     <string name="postsSortOldest">En eski</string>
     <string name="buttonApply">Uygula</string>
+    <string name="screenHome">Ana Sayfa</string>
     <string name="settingsEnableNotificationsTitle">Bildirimleri etkinleştir</string>
     <string name="settingsEnableNotificationsSubtitle">Açıldığında, arka plan senkronizasyonu sırasında yeni makaleler bulunduğunda bildirim alacaksınız</string>
     <string name="settingsDownloadFullContentTitle">Tam makaleleri indir</string>
-    <string name="settingsDownloadFullContentSubtitle">Etkinleştirildiğinde, uygulama senkronizasyon sırasında tam makaleleri indirmeye çalışacaktır.</string>
-    <string name="settingsDownloadFullContentWarning">Uyarı!: Bu, akış yükleme sürelerini, veri kullanımını, bellek ve depolama tüketimini artırabilir. Kullanıcı deneyiminizi potansiyel olarak etkileyebilir.</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">Sırala</string>
     <string name="settingsHeaderSync">Bulut senkronizasyonu (Alpha ⚠)</string>
-  <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
+    <string name="settingsSyncDropboxDesc">Tutarlı platformlar arası senkronizasyon</string>
     <string name="settingsSyncStatusIdle">Senkronize edilmedi</string>
     <string name="settingsSyncStatusSyncing">Senkronize ediliyor...</string>
     <string name="settingsSyncStatusSuccess">Son senkronizasyon: Başarılı</string>
@@ -180,11 +191,30 @@
     <string name="settingsSyncSignOut">Çıkış yap</string>
     <string name="settingsCustomisations">Özelleştirmeler</string>
     <string name="settingsAppIconTitle">Uygulama simgesi</string>
-    <string name="settingsAppIconSubtitle">Twine\'ın ana ekranınızda nasıl görüneceğini seçin</string>
+    <string name="settingsAppIconSubtitle">Twine'ın ana ekranınızda nasıl görüneceğini seçin</string>
     <string name="filter">Filtrele</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">Bildirim sorunları mı yaşıyorsunuz? Cihazınız uygulamayı arka planda kapatıyor olabilir. Nasıl düzelteceğinizi öğrenmek için buraya dokunun.</string>
-    <string name="screenHome">Ana Sayfa</string>
-    <string name="feedsLetsStart">Tüm akışlarınızı burada göreceksiniz, bir akış ekleyerek başlayalım.\n\nDüğmeye tıklayın.</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d sonuç</item>

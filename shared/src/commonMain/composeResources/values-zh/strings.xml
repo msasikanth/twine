@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="postSourceUnknown">未知</string>
+    <string name="postSourceUnknown">未知</string>
     <string name="buttonAll">全部</string>
     <string name="buttonAddFeed">添加来源</string>
     <string name="buttonGoBack">返回</string>
@@ -15,6 +15,7 @@
     <string name="newArticles">新文章</string>
     <string name="noFeeds">没有可呈现的来源！</string>
     <string name="swipeUpGetStarted">上滑以开始</string>
+    <string name="feedsLetsStart">您将在这里看到所有的订阅源，让我们从添加一个订阅源开始吧。\n\n点击按钮。</string>
     <string name="feedNameHint">来源名称</string>
     <string name="editFeedName">编辑</string>
     <string name="errorUnsupportedFeed">链接不包含任何 RSS/Atom 来源。</string>
@@ -37,10 +38,10 @@
     <string name="settings">设置</string>
     <string name="moreMenuOptions">更多菜单选项</string>
     <string name="settingsHeaderBehaviour">行为</string>
-  <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
+    <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
     <string name="settingsHeaderTheme">主题</string>
     <string name="settingsBrowserTypeTitle">使用应用内浏览器</string>
-    <string name="settingsBrowserTypeSubtitle">关闭时，链接将在你的默认浏览器中打开。</string>
+    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
     <string name="settingsEnableBlurTitle">在主页启用模糊效果</string>
     <string name="settingsEnableBlurSubtitle">关闭时，图片将使用渐变而不是模糊效果。可能会改善性能表现。</string>
     <string name="settingsShowUnreadCountTitle">显示未读文章计数</string>
@@ -68,6 +69,8 @@
     <string name="settingsThemeDark">深色</string>
     <string name="settingsAmoledTitle">Amoled mode</string>
     <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
+    <string name="settingsDynamicColorTitle">Dynamic color</string>
+    <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
     <string name="settingsBlockImagesTitle">Block images</string>
     <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
     <string name="feeds">来源</string>
@@ -76,7 +79,7 @@
     <string name="about">关于</string>
     <string name="aboutRoleDeveloper">开发者</string>
     <string name="aboutRoleDesigner">设计师</string>
-  <string name="aboutSocialWebsite">网站</string>
+    <string name="aboutSocialWebsite">网站</string>
     <string name="feedsSearchHint">过滤器</string>
     <string name="allFeeds">来源</string>
     <string name="pinnedFeeds">已钉选</string>
@@ -102,6 +105,12 @@
     <string name="tagSaveButton">保存</string>
     <string name="deleteTagTitle">删除标签？</string>
     <string name="deleteTagDesc">从所有已分配的订阅源中移除并删除标签。你的订阅源不会被删除</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">分享</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">网站</string>
@@ -127,7 +136,7 @@
     <string name="groupAddNew">新增</string>
     <string name="appBarAllFeeds">所有来源</string>
     <string name="edit">编辑</string>
-    <string name="buttonAddToGroup">添加至分组……</string>
+    <string name="addToGroup">Add to group</string>
     <string name="removeSources">删除来源</string>
     <string name="removeSourcesDesc">你想删除选定来源吗？</string>
     <string name="noPinnedSources">没有钉选的来源/分组</string>
@@ -136,8 +145,9 @@
     <string name="cdLoadFullArticle">加载完整文章</string>
     <string name="enableAutoSyncTitle">启用自动同步</string>
     <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
-    <string name="showFeedFavIconTitle">显示来源图标</string>
-    <string name="showFeedFavIconDesc">关闭时，将显示来源图标而不是网站图标</string>
+    <string name="showFeedFavIconTitle">Show website fav icon</string>
+    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">关键字屏蔽</string>
     <string name="blockedWordsHint">输入关键字</string>
     <string name="blockedWordsDesc">可基于文本内容从主屏中隐藏文章。我们建议避免大多数文章内容中的常用词，否则会导致文章内容不可见甚至影响应用性能。\n\n被隐藏的文章仍会在搜索&amp;书签中显示。</string>
@@ -164,14 +174,15 @@
     <string name="postsSortLatest">最新</string>
     <string name="postsSortOldest">最早</string>
     <string name="buttonApply">应用</string>
+    <string name="screenHome">首页</string>
     <string name="settingsEnableNotificationsTitle">启用通知</string>
     <string name="settingsEnableNotificationsSubtitle">开启后，后台同步发现新文章时您将收到通知</string>
     <string name="settingsDownloadFullContentTitle">下载完整文章</string>
-    <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
-    <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
+    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
+    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
     <string name="sort">排序</string>
     <string name="settingsHeaderSync">云同步 (Alpha ⚠)</string>
-  <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
+    <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
     <string name="settingsSyncStatusIdle">未同步</string>
     <string name="settingsSyncStatusSyncing">同步中...</string>
     <string name="settingsSyncStatusSuccess">最后一次同步：成功</string>
@@ -182,9 +193,28 @@
     <string name="settingsAppIconTitle">应用图标</string>
     <string name="settingsAppIconSubtitle">选择 Twine 在主屏幕上的外观</string>
     <string name="filter">过滤</string>
+    <string name="freshRssLoginTitle">FreshRSS</string>
+    <string name="freshRssUsername">Username</string>
+    <string name="freshRssPassword">Password</string>
+    <string name="freshRssLoginButton">Login</string>
+    <string name="freshRssClearDataTitle">Clear local data?</string>
+    <string name="freshRssClearDataDesc">Logging into FreshRSS will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="freshRssClearDataPositive">Clear and Login</string>
+    <string name="freshRssErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="freshRssErrorUnknown">An unknown error occurred</string>
+    <string name="minifluxLoginTitle">Miniflux</string>
+    <string name="minifluxServerUrl">Server URL</string>
+    <string name="minifluxApiKey">API Key</string>
+    <string name="minifluxLoginButton">Login</string>
+    <string name="minifluxClearDataTitle">Clear local data?</string>
+    <string name="minifluxClearDataDesc">Logging into Miniflux will clear all your current local feeds and posts to ensure a clean sync. Do you want to proceed?</string>
+    <string name="minifluxClearDataPositive">Clear and Login</string>
+    <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
+    <string name="minifluxErrorUnknown">An unknown error occurred</string>
     <string name="settingsNotificationWarningAndroid">通知有问题？您的设备可能会在后台关闭应用。点击此处了解如何修复。</string>
-    <string name="screenHome">首页</string>
-    <string name="feedsLetsStart">您将在这里看到所有的订阅源，让我们从添加一个订阅源开始吧。\n\n点击按钮。</string>
+    <string name="onboardingGetStarted">Get started</string>
+    <string name="onboardingSubtitle">Build your feed</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d 个结果</item>
