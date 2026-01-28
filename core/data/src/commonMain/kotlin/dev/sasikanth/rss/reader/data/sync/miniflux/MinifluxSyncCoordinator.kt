@@ -18,8 +18,8 @@ import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntry
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -46,8 +45,8 @@ class MinifluxSyncCoordinator(
   private val minifluxSource: MinifluxSource,
   private val rssRepository: RssRepository,
   private val dispatchersProvider: DispatchersProvider,
-  private val settingsRepository: SettingsRepository,
   private val articleHtmlParser: ArticleHtmlParser,
+  private val refreshPolicy: RefreshPolicy,
 ) : SyncCoordinator {
 
   companion object {
@@ -75,7 +74,7 @@ class MinifluxSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: syncStartTime.minus(4.hours)
+      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime.minus(4.hours)
       val after =
         if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).epochSeconds
         else lastSyncedAt.epochSeconds
@@ -91,7 +90,7 @@ class MinifluxSyncCoordinator(
       // Only update lastSyncedAt if we found new articles to avoid missing articles
       // that were added to the server between syncs with older timestamps
       if (hasNewArticles) {
-        settingsRepository.updateLastSyncedAt(syncStartTime)
+        refreshPolicy.refresh()
       }
       updateSyncState(SyncState.Complete)
 
@@ -166,7 +165,7 @@ class MinifluxSyncCoordinator(
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no feeds have been updated since last sync
     val hasUpdatedFeeds =
@@ -218,13 +217,13 @@ class MinifluxSyncCoordinator(
 
     // Update lastSyncedAt after successful push to prevent redundant push attempts
     // This ensures early returns work correctly on subsequent syncs when no new articles
-    settingsRepository.updateLastSyncedAt(syncStartTime)
+    refreshPolicy.refresh()
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = settingsRepository.lastSyncedAt.first() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no groups have been updated since last sync
     val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
@@ -304,7 +303,7 @@ class MinifluxSyncCoordinator(
 
     // Update lastSyncedAt after successful push to prevent redundant push attempts
     // This ensures early returns work correctly on subsequent syncs when no new articles
-    settingsRepository.updateLastSyncedAt(syncStartTime)
+    refreshPolicy.refresh()
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
