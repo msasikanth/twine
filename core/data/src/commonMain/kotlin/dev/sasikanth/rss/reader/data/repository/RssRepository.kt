@@ -944,6 +944,12 @@ class RssRepository(
     }
   }
 
+  suspend fun postsWithLocalChangesForFeed(feedId: String): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsWithLocalChangesForFeed(feedId, ::Post).executeAsList()
+    }
+  }
+
   suspend fun postByRemoteId(remoteId: String): Post? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postByRemoteId(remoteId, ::Post).executeAsOneOrNull()
