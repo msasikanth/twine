@@ -1828,6 +1828,7 @@ private fun CloudSyncSettingItem(
         Icon(
           imageVector = icon,
           contentDescription = null,
+          tint = AppTheme.colorScheme.onSurface,
         )
 
         Column(modifier = Modifier.weight(1f)) {
