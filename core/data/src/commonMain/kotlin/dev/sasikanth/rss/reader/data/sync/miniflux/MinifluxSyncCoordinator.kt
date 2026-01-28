@@ -526,6 +526,18 @@ class MinifluxSyncCoordinator(
     }
   }
 
+  private suspend fun fetchStarredEntryIds(): Set<String> {
+    val bookmarkIds = mutableSetOf<String>()
+    var offset = 0
+    val limit = 1000
+    do {
+      val entries = minifluxSource.entries(starred = true, limit = limit, offset = offset).entries
+      bookmarkIds.addAll(entries.map { it.id.toString() })
+      offset += limit
+    } while (entries.size >= limit)
+    return bookmarkIds
+  }
+
   private suspend fun syncStatuses() {
     // Paginate through unread entries to get IDs
     val unreadIds = mutableSetOf<String>()
@@ -538,14 +550,8 @@ class MinifluxSyncCoordinator(
       offset += limit
     } while (entries.size >= limit)
 
-    // Paginate through starred entries to get IDs
-    val bookmarkIds = mutableSetOf<String>()
-    offset = 0
-    do {
-      val entries = minifluxSource.entries(starred = true, limit = limit, offset = offset).entries
-      bookmarkIds.addAll(entries.map { it.id.toString() })
-      offset += limit
-    } while (entries.size >= limit)
+    // Fetch starred entries to get bookmark IDs
+    val bookmarkIds = fetchStarredEntryIds()
 
     val localPosts = rssRepository.postsWithRemoteId()
     localPosts.forEach { post ->
