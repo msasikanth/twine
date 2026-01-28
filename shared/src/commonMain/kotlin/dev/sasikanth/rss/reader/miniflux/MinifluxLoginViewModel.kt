@@ -16,6 +16,7 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
@@ -35,6 +36,7 @@ class MinifluxLoginViewModel(
   private val rssRepository: RssRepository,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: MinifluxSyncCoordinator,
+  private val refreshPolicy: RefreshPolicy,
   private val dispatchersProvider: DispatchersProvider,
 ) : ViewModel() {
 
@@ -91,7 +93,7 @@ class MinifluxLoginViewModel(
         Logger.d { "Miniflux login: starting data clear and user save" }
         userRepository.deleteUser()
         rssRepository.deleteAllLocalData()
-        settingsRepository.clearLastSyncedAt()
+        refreshPolicy.clear()
 
         userRepository.saveUser(
           id = userInfo.id,

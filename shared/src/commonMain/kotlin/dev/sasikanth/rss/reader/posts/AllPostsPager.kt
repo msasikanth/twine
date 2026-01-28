@@ -26,12 +26,12 @@ import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -58,7 +58,7 @@ import me.tatarka.inject.annotations.Inject
 class AllPostsPager(
   observableActiveSource: ObservableActiveSource,
   settingsRepository: SettingsRepository,
-  lastRefreshedAt: LastRefreshedAt,
+  refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
   dispatchersProvider: DispatchersProvider,
@@ -78,7 +78,7 @@ class AllPostsPager(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
         settingsRepository.postsSortOrder,
-        lastRefreshedAt.dateTimeFlow
+        refreshPolicy.dateTimeFlow
       ) { activeSource, postsType, postsSortOrder, dateTime ->
         computeParameters(activeSource, postsType, postsSortOrder, dateTime)
       }
