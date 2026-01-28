@@ -550,7 +550,7 @@ class FreshRSSSyncCoordinator(
     dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
   }
 
-  private suspend fun updateSyncState(newState: SyncState) {
+  private fun updateSyncState(newState: SyncState) {
     _syncState.value = newState
   }
 }
