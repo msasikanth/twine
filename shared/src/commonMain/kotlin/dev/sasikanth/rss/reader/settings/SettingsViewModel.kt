@@ -211,6 +211,7 @@ class SettingsViewModel(
   private fun deleteAppData() {
     viewModelScope.launch {
       rssRepository.deleteAllLocalData()
+      userRepository.deleteUser()
       settingsRepository.clear()
       imageLoader.diskCache?.clear()
       imageLoader.memoryCache?.clear()
