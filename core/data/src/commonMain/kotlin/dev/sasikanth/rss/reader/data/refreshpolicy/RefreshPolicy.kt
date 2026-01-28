@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dev.sasikanth.rss.reader.data.time
+package dev.sasikanth.rss.reader.data.refreshpolicy
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -34,9 +34,9 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class LastRefreshedAt(private val dataStore: DataStore<Preferences>) {
+class RefreshPolicy(private val dataStore: DataStore<Preferences>) {
 
-  companion object {
+  companion object Companion {
     private val UPDATE_DURATION = 60.minutes
   }
 
@@ -51,6 +51,9 @@ class LastRefreshedAt(private val dataStore: DataStore<Preferences>) {
       instant.toLocalDateTime(timeZone)
     }
 
+  val instantFlow: Flow<Instant?> =
+    dataStore.data.map { preferences -> preferences[lastUpdatedAtKey]?.let { Instant.parse(it) } }
+
   suspend fun refresh() {
     dataStore.edit { preferences -> preferences[lastUpdatedAtKey] = Clock.System.now().toString() }
   }
@@ -63,9 +66,13 @@ class LastRefreshedAt(private val dataStore: DataStore<Preferences>) {
     return lastUpdateDuration > UPDATE_DURATION
   }
 
-  private suspend fun fetchLastUpdatedAt() =
+  suspend fun fetchLastUpdatedAt(): Instant? =
     dataStore.data
       .map { preferences -> preferences[lastUpdatedAtKey] ?: return@map null }
       .first()
       ?.let { Instant.parse(it) }
+
+  suspend fun clear() {
+    dataStore.edit { preferences -> preferences.remove(lastUpdatedAtKey) }
+  }
 }
