@@ -105,6 +105,12 @@
     <string name="tagSaveButton">Сохранить</string>
     <string name="deleteTagTitle">Удалить тег?</string>
     <string name="deleteTagDesc">Тег будет удален из всех назначенных лент. Ваши ленты удалены не будут</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Поделиться</string>
     <string name="feedOptionCopyLink">Copy Link</string>
     <string name="feedOptionWebsite">Вебсайт</string>
