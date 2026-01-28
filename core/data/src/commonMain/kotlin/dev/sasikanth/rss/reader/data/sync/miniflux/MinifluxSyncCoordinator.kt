@@ -62,6 +62,33 @@ class MinifluxSyncCoordinator(
     return syncMutex.withLock { pullInternal() }
   }
 
+  override suspend fun pull(feedIds: List<String>): Boolean {
+    return withContext(dispatchersProvider.io) {
+      syncMutex.withLock {
+        feedIds.forEach { feedId -> pullFeedInternal(feedId) }
+        true
+      }
+    }
+  }
+
+  override suspend fun pull(feedId: String): Boolean {
+    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullFeedInternal(feedId) } }
+  }
+
+  override suspend fun push(): Boolean {
+    return withContext(dispatchersProvider.io) {
+      syncMutex.withLock {
+        try {
+          pushChanges()
+          true
+        } catch (e: Exception) {
+          Logger.e(e) { "Miniflux push failed" }
+          false
+        }
+      }
+    }
+  }
+
   private suspend fun pullInternal(): Boolean {
     return try {
       val syncStartTime = Clock.System.now()
@@ -103,22 +130,13 @@ class MinifluxSyncCoordinator(
     }
   }
 
-  override suspend fun pull(feedIds: List<String>): Boolean {
-    return withContext(dispatchersProvider.io) {
-      syncMutex.withLock {
-        feedIds.forEach { feedId -> pullFeedInternal(feedId) }
-        true
-      }
-    }
-  }
-
-  override suspend fun pull(feedId: String): Boolean {
-    return withContext(dispatchersProvider.io) { syncMutex.withLock { pullFeedInternal(feedId) } }
-  }
-
   private suspend fun pullFeedInternal(feedId: String): Boolean {
     return try {
       updateSyncState(SyncState.InProgress(0f))
+
+      // Push local changes for this feed before pulling
+      pushChangesForFeed(feedId)
+
       val feed = rssRepository.feed(feedId)
       if (feed?.remoteId != null) {
         syncArticles(feedId = feed.remoteId!!.toLong())
@@ -135,25 +153,15 @@ class MinifluxSyncCoordinator(
     }
   }
 
-  override suspend fun push(): Boolean {
-    return withContext(dispatchersProvider.io) {
-      syncMutex.withLock {
-        try {
-          pushChanges()
-          true
-        } catch (e: Exception) {
-          Logger.e(e) { "Miniflux push failed" }
-          false
-        }
-      }
-    }
-  }
-
   private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
     pushCategoryChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
     purgeDeletedSources()
+  }
+
+  private suspend fun pushChangesForFeed(feedId: String) {
+    pushStatusChangesForFeed(feedId)
   }
 
   private suspend fun purgeDeletedSources() {
@@ -526,6 +534,18 @@ class MinifluxSyncCoordinator(
     }
   }
 
+  private suspend fun fetchStarredEntryIds(): Set<String> {
+    val bookmarkIds = mutableSetOf<String>()
+    var offset = 0
+    val limit = 1000
+    do {
+      val entries = minifluxSource.entries(starred = true, limit = limit, offset = offset).entries
+      bookmarkIds.addAll(entries.map { it.id.toString() })
+      offset += limit
+    } while (entries.size >= limit)
+    return bookmarkIds
+  }
+
   private suspend fun syncStatuses() {
     // Paginate through unread entries to get IDs
     val unreadIds = mutableSetOf<String>()
@@ -538,14 +558,8 @@ class MinifluxSyncCoordinator(
       offset += limit
     } while (entries.size >= limit)
 
-    // Paginate through starred entries to get IDs
-    val bookmarkIds = mutableSetOf<String>()
-    offset = 0
-    do {
-      val entries = minifluxSource.entries(starred = true, limit = limit, offset = offset).entries
-      bookmarkIds.addAll(entries.map { it.id.toString() })
-      offset += limit
-    } while (entries.size >= limit)
+    // Fetch starred entries to get bookmark IDs
+    val bookmarkIds = fetchStarredEntryIds()
 
     val localPosts = rssRepository.postsWithRemoteId()
     localPosts.forEach { post ->
@@ -569,10 +583,22 @@ class MinifluxSyncCoordinator(
     val dirtyPosts = rssRepository.postsWithLocalChanges()
     if (dirtyPosts.isEmpty()) return
 
+    // Fetch remote bookmark state to avoid accidentally toggling bookmarks
+    // for posts that are dirty due to read status changes only
+    val remoteBookmarkIds = fetchStarredEntryIds()
+
     val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
     val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
-    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
-    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId?.toLong() }
+
+    // Only push bookmark changes for posts where local state differs from remote state
+    val toBookmark =
+      dirtyPosts
+        .filter { it.bookmarked && it.remoteId !in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
+    val toUnbookmark =
+      dirtyPosts
+        .filter { !it.bookmarked && it.remoteId in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
 
     if (toMarkRead.isNotEmpty()) minifluxSource.markEntriesAsRead(toMarkRead)
     if (toMarkUnread.isNotEmpty()) minifluxSource.markEntriesAsUnread(toMarkUnread)
@@ -582,7 +608,36 @@ class MinifluxSyncCoordinator(
     dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
   }
 
-  private suspend fun updateSyncState(newState: SyncState) {
+  private suspend fun pushStatusChangesForFeed(feedId: String) {
+    val dirtyPosts = rssRepository.postsWithLocalChangesForFeed(feedId)
+    if (dirtyPosts.isEmpty()) return
+
+    // Fetch remote bookmark state to avoid accidentally toggling bookmarks
+    // for posts that are dirty due to read status changes only
+    val remoteBookmarkIds = fetchStarredEntryIds()
+
+    val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
+    val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
+
+    // Only push bookmark changes for posts where local state differs from remote state
+    val toBookmark =
+      dirtyPosts
+        .filter { it.bookmarked && it.remoteId !in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
+    val toUnbookmark =
+      dirtyPosts
+        .filter { !it.bookmarked && it.remoteId in remoteBookmarkIds }
+        .mapNotNull { it.remoteId?.toLong() }
+
+    if (toMarkRead.isNotEmpty()) minifluxSource.markEntriesAsRead(toMarkRead)
+    if (toMarkUnread.isNotEmpty()) minifluxSource.markEntriesAsUnread(toMarkUnread)
+    if (toBookmark.isNotEmpty()) minifluxSource.addBookmarks(toBookmark)
+    if (toUnbookmark.isNotEmpty()) minifluxSource.removeBookmarks(toUnbookmark)
+
+    dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+  }
+
+  private fun updateSyncState(newState: SyncState) {
     _syncState.value = newState
   }
 
