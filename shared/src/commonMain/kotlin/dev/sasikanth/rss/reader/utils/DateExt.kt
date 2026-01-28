@@ -26,6 +26,8 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 
+expect fun String.formatReadingTrendDate(): String
+
 fun Period.calculateInstantBeforePeriod(): Instant {
   if (this == Period.NEVER) return Instant.DISTANT_PAST
 

@@ -95,6 +95,8 @@ import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
+import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
+import dev.sasikanth.rss.reader.statistics.ui.StatisticsScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
@@ -154,6 +156,7 @@ fun App(
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
+  statisticsViewModel: () -> StatisticsViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -409,6 +412,7 @@ fun App(
                 viewModel = viewModel,
                 goBack = goBack,
                 openAbout = { navController.navigate(Screen.About) },
+                openStatistics = { navController.navigate(Screen.Statistics) },
                 openBlockedWords = { navController.navigate(Screen.BlockedWords) },
                 openPaywall = { navController.navigate(Screen.Paywall) },
                 openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
@@ -511,6 +515,15 @@ fun App(
         composable<Screen.About> {
           AboutScreen(
             modifier = roundedCornerScreenModifier,
+            goBack = { navController.popBackStack() }
+          )
+        }
+
+        composable<Screen.Statistics> {
+          val viewModel = viewModel { statisticsViewModel() }
+          StatisticsScreen(
+            modifier = roundedCornerScreenModifier,
+            viewModel = viewModel,
             goBack = { navController.popBackStack() }
           )
         }
