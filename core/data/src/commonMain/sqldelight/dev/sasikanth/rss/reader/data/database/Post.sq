@@ -209,6 +209,9 @@ SELECT * FROM post WHERE remoteId IS NOT NULL;
 postsWithLocalChanges:
 SELECT * FROM post WHERE updatedAt > syncedAt AND remoteId IS NOT NULL;
 
+postsWithLocalChangesForFeed:
+SELECT * FROM post WHERE updatedAt > syncedAt AND remoteId IS NOT NULL AND sourceId = :feedId;
+
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post
 INNER JOIN feed ON post.sourceId == feed.id
