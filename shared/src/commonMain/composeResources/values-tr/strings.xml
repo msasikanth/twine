@@ -105,6 +105,12 @@
     <string name="tagSaveButton">Kaydet</string>
     <string name="deleteTagTitle">Etiketi sil?</string>
     <string name="deleteTagDesc">Etiket silinecek ve atanan tüm akışlardan kaldırılacak. Akışlarınız silinmeyecek</string>
+    <string name="settingsHeaderData">Data</string>
+    <string name="settingsDeleteAppDataTitle">Delete app data</string>
+    <string name="settingsDeleteAppDataSubtitle">Clear all your feeds, settings and image cache. You will be logged out as well.</string>
+    <string name="settingsDeleteAppDataDialogTitle">Delete app data?</string>
+    <string name="settingsDeleteAppDataDialogDesc">This action will clear all your feeds, settings, and image cache. This action cannot be undone.</string>
+    <string name="settingsDeleteAppDataButton">Delete</string>
     <string name="feedOptionShare">Paylaş</string>
     <string name="feedOptionCopyLink">Bağlantıyı Kopyala</string>
     <string name="feedOptionWebsite">Web sitesi</string>
