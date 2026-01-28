@@ -54,7 +54,6 @@ class SettingsRepository(
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
   private val lastReviewPromptDateKey = longPreferencesKey("last_review_prompt_date")
-  private val lastSyncedAtKey = longPreferencesKey("last_synced_at")
   private val installDateKey = longPreferencesKey("install_date")
   private val userSessionCountKey = intPreferencesKey("user_session_count")
   private val appIconKey = stringPreferencesKey("app_icon")
@@ -137,11 +136,6 @@ class SettingsRepository(
   val lastReviewPromptDate: Flow<Instant?> =
     dataStore.data.map { preferences ->
       preferences[lastReviewPromptDateKey]?.let(Instant::fromEpochMilliseconds)
-    }
-
-  val lastSyncedAt: Flow<Instant?> =
-    dataStore.data.map { preferences ->
-      preferences[lastSyncedAtKey]?.let(Instant::fromEpochMilliseconds)
     }
 
   val installDate: Flow<Instant?> =
@@ -255,14 +249,6 @@ class SettingsRepository(
     dataStore.edit { preferences ->
       preferences[lastReviewPromptDateKey] = value.toEpochMilliseconds()
     }
-  }
-
-  suspend fun updateLastSyncedAt(value: Instant) {
-    dataStore.edit { preferences -> preferences[lastSyncedAtKey] = value.toEpochMilliseconds() }
-  }
-
-  suspend fun clearLastSyncedAt() {
-    dataStore.edit { preferences -> preferences.remove(lastSyncedAtKey) }
   }
 
   suspend fun updateInstallDate(value: Instant) {
