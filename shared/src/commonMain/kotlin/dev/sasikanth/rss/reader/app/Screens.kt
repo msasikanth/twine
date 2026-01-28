@@ -49,6 +49,8 @@ sealed interface Screen {
 
   @Serializable data object About : Screen
 
+  @Serializable data object Statistics : Screen
+
   @Serializable
   data object AddFeed : Screen {
 
