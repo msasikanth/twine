@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
 <resources>
     <string name="postSourceUnknown">未知</string>
     <string name="buttonAll">全部</string>
@@ -41,7 +57,7 @@
     <string name="settingsHeaderFeedback">反馈 &amp; 问题报告</string>
     <string name="settingsHeaderTheme">主题</string>
     <string name="settingsBrowserTypeTitle">使用应用内浏览器</string>
-    <string name="settingsBrowserTypeSubtitle">When turned off, links will open in your default browser</string>
+    <string name="settingsBrowserTypeSubtitle">关闭时，链接将在你的默认浏览器中打开。</string>
     <string name="settingsEnableBlurTitle">在主页启用模糊效果</string>
     <string name="settingsEnableBlurSubtitle">关闭时，图片将使用渐变而不是模糊效果。可能会改善性能表现。</string>
     <string name="settingsShowUnreadCountTitle">显示未读文章计数</string>
@@ -145,8 +161,8 @@
     <string name="cdLoadFullArticle">加载完整文章</string>
     <string name="enableAutoSyncTitle">启用自动同步</string>
     <string name="enableAutoSyncDesc">开启后，来源将在后台自动更新</string>
-    <string name="showFeedFavIconTitle">Show website fav icon</string>
-    <string name="showFeedFavIconDesc">When turned-on, the website's favicon will be displayed instead of feed icon</string>
+    <string name="showFeedFavIconTitle">显示来源图标</string>
+    <string name="showFeedFavIconDesc">关闭时，将显示来源图标而不是网站图标</string>
     <string name="hidePostsFromHome">Hide from "Home"</string>
     <string name="blockedWords">关键字屏蔽</string>
     <string name="blockedWordsHint">输入关键字</string>
@@ -178,8 +194,8 @@
     <string name="settingsEnableNotificationsTitle">启用通知</string>
     <string name="settingsEnableNotificationsSubtitle">开启后，后台同步发现新文章时您将收到通知</string>
     <string name="settingsDownloadFullContentTitle">下载完整文章</string>
-    <string name="settingsDownloadFullContentSubtitle">When enabled, the app will try and download full articles during sync</string>
-    <string name="settingsDownloadFullContentWarning">Warning!: This can increase feed loading times, data usage, memory and storage consumption. It can potentially impact your user experience</string>
+    <string name="settingsDownloadFullContentSubtitle">启用后，应用将在同步期间尝试下载完整文章。</string>
+    <string name="settingsDownloadFullContentWarning">警告！：这可能会增加订阅源加载时间、数据使用量、内存和存储消耗。它可能会影响您的用户体验。</string>
     <string name="sort">排序</string>
     <string name="settingsHeaderSync">云同步 (Alpha ⚠)</string>
     <string name="settingsSyncDropboxDesc">一致的跨平台同步</string>
@@ -225,4 +241,12 @@
     <plurals name="feedGroupFeeds">
         <item quantity="other">%1$d 个来源</item>
     </plurals>
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="statisticsNoData">No reading data available yet</string>
+    <string name="statisticsTotalRead">Total Articles Read</string>
+    <string name="statisticsTopFeeds">Top 10 Feeds</string>
+    <string name="statisticsReadingTrends">Reading Trends (Last 30 Days)</string>
+    <string name="settingsStatisticsTitle">Statistics</string>
+    <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 </resources>
