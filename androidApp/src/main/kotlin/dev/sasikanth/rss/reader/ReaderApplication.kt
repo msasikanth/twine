@@ -59,7 +59,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     context = appContext,
                     workerParameters = workerParameters,
                     syncCoordinator = appComponent.syncCoordinator,
-                    lastRefreshedAt = appComponent.lastRefreshedAt,
+                    refreshPolicy = appComponent.refreshPolicy,
                     settingsRepository = appComponent.settingsRepository,
                     newArticleNotifier = appComponent.newArticleNotifier,
                   )

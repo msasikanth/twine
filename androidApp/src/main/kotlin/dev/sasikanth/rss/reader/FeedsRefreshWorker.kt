@@ -24,10 +24,10 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkerParameters
 import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.bugsnag.android.Bugsnag
+import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
-import dev.sasikanth.rss.reader.data.time.LastRefreshedAt
 import java.time.Duration
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.first
 class FeedsRefreshWorker(
   context: Context,
   workerParameters: WorkerParameters,
-  private val lastRefreshedAt: LastRefreshedAt,
+  private val refreshPolicy: RefreshPolicy,
   private val settingsRepository: SettingsRepository,
   private val syncCoordinator: SyncCoordinator,
   private val newArticleNotifier: NewArticleNotifier,
@@ -61,7 +61,7 @@ class FeedsRefreshWorker(
   override suspend fun doWork(): Result {
     if (settingsRepository.enableAutoSync.first().not()) return Result.failure()
 
-    return if (lastRefreshedAt.hasExpired()) {
+    return if (refreshPolicy.hasExpired()) {
       try {
         syncCoordinator.pull()
 
