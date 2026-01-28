@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.dateStringToEpochMillis
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,7 +75,7 @@ class MinifluxSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime.minus(4.hours)
+      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime.minus(2.days)
       val after =
         if (hasNewSubscriptions) lastSyncedAt.minus(2.hours).epochSeconds
         else lastSyncedAt.epochSeconds

@@ -104,7 +104,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                     return
                 }
                 
-                let hasLastUpdatedAtExpired = try await applicationComponent.lastRefreshedAt.hasExpired().boolValue
+                let hasLastUpdatedAtExpired = try await applicationComponent.refreshPolicy.hasExpired().boolValue
                 if hasLastUpdatedAtExpired {
                     try await applicationComponent.syncCoordinator.pull()
 

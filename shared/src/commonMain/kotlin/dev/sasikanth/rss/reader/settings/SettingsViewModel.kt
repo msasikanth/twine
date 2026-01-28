@@ -17,6 +17,7 @@ package dev.sasikanth.rss.reader.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.ImageLoader
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
@@ -47,7 +48,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 class SettingsViewModel(
-  rssRepository: RssRepository,
+  private val rssRepository: RssRepository,
   val appInfo: AppInfo,
   private val settingsRepository: SettingsRepository,
   private val userRepository: UserRepository,
@@ -58,6 +59,7 @@ class SettingsViewModel(
   private val oAuthManager: OAuthManager,
   private val appIconManager: AppIconManager,
   private val refreshPolicy: RefreshPolicy,
+  private val imageLoader: ImageLoader,
   val availableProviders: Set<CloudServiceProvider>
 ) : ViewModel() {
 
@@ -202,6 +204,17 @@ class SettingsViewModel(
       SettingsEvent.CloseAppIconSelectionSheet -> {
         _state.update { it.copy(showAppIconSelectionSheet = false) }
       }
+      SettingsEvent.DeleteAppData -> deleteAppData()
+    }
+  }
+
+  private fun deleteAppData() {
+    viewModelScope.launch {
+      rssRepository.deleteAllLocalData()
+      settingsRepository.clear()
+      imageLoader.diskCache?.clear()
+      imageLoader.memoryCache?.clear()
+      settingsRepository.completeOnboarding()
     }
   }
 

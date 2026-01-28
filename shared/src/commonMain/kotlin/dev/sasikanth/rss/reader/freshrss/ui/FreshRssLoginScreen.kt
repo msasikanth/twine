@@ -13,6 +13,7 @@ package dev.sasikanth.rss.reader.freshrss.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDefaults
@@ -155,24 +157,37 @@ fun FreshRssLoginScreen(
   Scaffold(
     modifier = modifier,
     topBar = {
-      CenterAlignedTopAppBar(
-        title = { Text(text = stringResource(Res.string.freshRssLoginTitle)) },
-        navigationIcon = {
-          CircularIconButton(
-            modifier = Modifier.padding(start = 12.dp),
-            icon = TwineIcons.ArrowBack,
-            label = stringResource(Res.string.buttonGoBack),
-            onClick = goBack
-          )
-        },
-        colors =
-          TopAppBarDefaults.topAppBarColors(
-            containerColor = AppTheme.colorScheme.backdrop,
-            navigationIconContentColor = AppTheme.colorScheme.onSurface,
-            titleContentColor = AppTheme.colorScheme.onSurface,
-            actionIconContentColor = AppTheme.colorScheme.onSurface
-          ),
-      )
+      Box {
+        CenterAlignedTopAppBar(
+          title = {
+            Text(
+              text = stringResource(Res.string.freshRssLoginTitle),
+              color = AppTheme.colorScheme.onSurface,
+              style = MaterialTheme.typography.titleMedium,
+            )
+          },
+          navigationIcon = {
+            CircularIconButton(
+              modifier = Modifier.padding(start = 12.dp),
+              icon = TwineIcons.ArrowBack,
+              label = stringResource(Res.string.buttonGoBack),
+              onClick = goBack
+            )
+          },
+          colors =
+            TopAppBarDefaults.topAppBarColors(
+              containerColor = AppTheme.colorScheme.surface,
+              navigationIconContentColor = AppTheme.colorScheme.onSurface,
+              titleContentColor = AppTheme.colorScheme.onSurface,
+              actionIconContentColor = AppTheme.colorScheme.onSurface
+            ),
+        )
+
+        HorizontalDivider(
+          modifier = Modifier.align(Alignment.BottomCenter),
+          color = AppTheme.colorScheme.surfaceContainer
+        )
+      }
     },
     snackbarHost = {
       SnackbarHost(hostState = snackbarHostState) { snackbarData ->
