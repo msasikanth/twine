@@ -261,6 +261,10 @@ class SettingsRepository(
     dataStore.edit { preferences -> preferences[lastSyncedAtKey] = value.toEpochMilliseconds() }
   }
 
+  suspend fun clearLastSyncedAt() {
+    dataStore.edit { preferences -> preferences.remove(lastSyncedAtKey) }
+  }
+
   suspend fun updateInstallDate(value: Instant) {
     dataStore.edit { preferences -> preferences[installDateKey] = value.toEpochMilliseconds() }
   }

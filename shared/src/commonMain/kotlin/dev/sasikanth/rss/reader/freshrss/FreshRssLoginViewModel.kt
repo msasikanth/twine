@@ -21,7 +21,6 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.freshrss.FreshRSSSyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
-import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -101,7 +100,7 @@ class FreshRssLoginViewModel(
         Logger.d { "FreshRSS login: starting data clear and user save" }
         userRepository.deleteUser()
         rssRepository.deleteAllLocalData()
-        settingsRepository.updateLastSyncedAt(Instant.DISTANT_PAST)
+        settingsRepository.clearLastSyncedAt()
 
         userRepository.saveUser(
           id = userInfo.id,
