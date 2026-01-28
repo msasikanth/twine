@@ -23,10 +23,13 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
+import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
+import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -1774,6 +1777,36 @@ class RssRepository(
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
+  }
+
+  suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
+    return withContext(dispatchersProvider.databaseRead) {
+      val totalReadCount = postQueries.totalReadPostsCount().executeAsOne()
+
+      val topFeeds =
+        postQueries.readPostsByFeed().executeAsList().map {
+          FeedReadCount(
+            feedId = it.feedId,
+            feedName = it.feedName,
+            feedIcon = it.feedIcon,
+            homepageLink = it.feedHomepageLink,
+            readCount = it.readCount
+          )
+        }
+
+      val readingTrends =
+        postQueries.readPostsOverTime(startDate).executeAsList().map {
+          ReadingTrend(date = it.date, count = it.count)
+        }
+
+      kotlinx.coroutines.flow.flowOf(
+        ReadingStatistics(
+          totalReadCount = totalReadCount,
+          topFeeds = topFeeds,
+          readingTrends = readingTrends
+        )
+      )
+    }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
