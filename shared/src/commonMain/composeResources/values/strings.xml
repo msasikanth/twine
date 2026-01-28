@@ -1,4 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright 2026 Sasikanth Miriyampalli
+  ~
+  ~ Licensed under the GPL, Version 3.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.gnu.org/licenses/gpl-3.0.en.html
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+
 <resources>
     <string name="appName" translatable="false">Twine</string>
     <string name="postSourceUnknown">Unknown</string>
@@ -241,4 +258,12 @@
         <item quantity="one">%1$d feed</item>
         <item quantity="other">%1$d feeds</item>
     </plurals>
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="statisticsNoData">No reading data available yet</string>
+    <string name="statisticsTotalRead">Total Articles Read</string>
+    <string name="statisticsTopFeeds">Top 10 Feeds</string>
+    <string name="statisticsReadingTrends">Reading Trends (Last 30 Days)</string>
+    <string name="settingsStatisticsTitle">Statistics</string>
+    <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 </resources>

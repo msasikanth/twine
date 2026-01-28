@@ -1,11 +1,17 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
  * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     https://www.gnu.org/licenses/gpl-3.0.en.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
 package dev.sasikanth.rss.reader.app
@@ -95,6 +101,8 @@ import dev.sasikanth.rss.reader.settings.SettingsViewModel
 import dev.sasikanth.rss.reader.settings.ui.SettingsScreen
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.share.ShareHandler
+import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
+import dev.sasikanth.rss.reader.statistics.ui.StatisticsScreen
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
@@ -154,6 +162,7 @@ fun App(
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
   premiumPaywallViewModel: () -> PremiumPaywallViewModel,
+  statisticsViewModel: () -> StatisticsViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -409,6 +418,7 @@ fun App(
                 viewModel = viewModel,
                 goBack = goBack,
                 openAbout = { navController.navigate(Screen.About) },
+                openStatistics = { navController.navigate(Screen.Statistics) },
                 openBlockedWords = { navController.navigate(Screen.BlockedWords) },
                 openPaywall = { navController.navigate(Screen.Paywall) },
                 openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
@@ -511,6 +521,15 @@ fun App(
         composable<Screen.About> {
           AboutScreen(
             modifier = roundedCornerScreenModifier,
+            goBack = { navController.popBackStack() }
+          )
+        }
+
+        composable<Screen.Statistics> {
+          val viewModel = viewModel { statisticsViewModel() }
+          StatisticsScreen(
+            modifier = roundedCornerScreenModifier,
+            viewModel = viewModel,
             goBack = { navController.popBackStack() }
           )
         }

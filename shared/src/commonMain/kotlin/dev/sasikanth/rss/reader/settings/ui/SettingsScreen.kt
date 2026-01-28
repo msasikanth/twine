@@ -1,17 +1,18 @@
 /*
- * Copyright 2023 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 package dev.sasikanth.rss.reader.settings.ui
 
@@ -213,6 +214,8 @@ import twine.shared.generated.resources.settingsShowReaderViewSubtitle
 import twine.shared.generated.resources.settingsShowReaderViewTitle
 import twine.shared.generated.resources.settingsShowUnreadCountSubtitle
 import twine.shared.generated.resources.settingsShowUnreadCountTitle
+import twine.shared.generated.resources.settingsStatisticsSubtitle
+import twine.shared.generated.resources.settingsStatisticsTitle
 import twine.shared.generated.resources.settingsSyncDropbox
 import twine.shared.generated.resources.settingsSyncFreshRSS
 import twine.shared.generated.resources.settingsSyncMiniflux
@@ -245,6 +248,7 @@ internal fun SettingsScreen(
   viewModel: SettingsViewModel,
   goBack: () -> Unit,
   openAbout: () -> Unit,
+  openStatistics: () -> Unit,
   openBlockedWords: () -> Unit,
   openPaywall: () -> Unit,
   openFreshRssLogin: () -> Unit,
@@ -643,6 +647,10 @@ internal fun SettingsScreen(
         item { Divider() }
 
         item { DeleteAppDataSettingItem { showDeleteAppDataConfirmation = true } }
+
+        item { Divider() }
+
+        item { StatisticsItem { openStatistics() } }
 
         item { Divider() }
 
@@ -1799,6 +1807,29 @@ private fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: ()
     titleContentColor = AppTheme.colorScheme.textEmphasisHigh,
     textContentColor = AppTheme.colorScheme.textEmphasisMed,
   )
+}
+
+@Composable
+private fun StatisticsItem(onClick: () -> Unit) {
+  Box(modifier = Modifier.clickable(onClick = onClick)) {
+    Row(
+      modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+      verticalAlignment = Alignment.CenterVertically
+    ) {
+      Column(modifier = Modifier.weight(1f)) {
+        Text(
+          stringResource(Res.string.settingsStatisticsTitle),
+          style = MaterialTheme.typography.titleMedium,
+          color = AppTheme.colorScheme.textEmphasisHigh
+        )
+        Text(
+          stringResource(Res.string.settingsStatisticsSubtitle),
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.textEmphasisMed
+        )
+      }
+    }
+  }
 }
 
 @Composable

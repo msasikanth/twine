@@ -1,17 +1,18 @@
 /*
- * Copyright 2024 Sasikanth Miriyampalli
+ * Copyright 2026 Sasikanth Miriyampalli
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the GPL, Version 3.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     https://www.gnu.org/licenses/gpl-3.0.en.html
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 package dev.sasikanth.rss.reader.data.repository
 
@@ -23,10 +24,13 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
+import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
+import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -1774,6 +1778,36 @@ class RssRepository(
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
+  }
+
+  suspend fun getReadingStatistics(startDate: Instant): Flow<ReadingStatistics> {
+    return withContext(dispatchersProvider.databaseRead) {
+      val totalReadCount = postQueries.totalReadPostsCount().executeAsOne()
+
+      val topFeeds =
+        postQueries.readPostsByFeed().executeAsList().map {
+          FeedReadCount(
+            feedId = it.feedId,
+            feedName = it.feedName,
+            feedIcon = it.feedIcon,
+            homepageLink = it.feedHomepageLink,
+            readCount = it.readCount
+          )
+        }
+
+      val readingTrends =
+        postQueries.readPostsOverTime(startDate).executeAsList().map {
+          ReadingTrend(date = it.date, count = it.count)
+        }
+
+      kotlinx.coroutines.flow.flowOf(
+        ReadingStatistics(
+          totalReadCount = totalReadCount,
+          topFeeds = topFeeds,
+          readingTrends = readingTrends
+        )
+      )
+    }
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
