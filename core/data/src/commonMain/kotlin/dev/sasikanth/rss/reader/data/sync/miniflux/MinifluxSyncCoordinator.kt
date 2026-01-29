@@ -22,10 +22,12 @@ import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntry
+import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.miniflux.MinifluxSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -40,6 +42,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -54,6 +57,8 @@ class MinifluxSyncCoordinator(
   private val dispatchersProvider: DispatchersProvider,
   private val articleHtmlParser: ArticleHtmlParser,
   private val refreshPolicy: RefreshPolicy,
+  private val settingsRepository: SettingsRepository,
+  private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
 
   companion object {
@@ -464,6 +469,7 @@ class MinifluxSyncCoordinator(
     var hasNewArticles = false
     var offset = 0
     val limit = 100
+    val downloadFullContent = settingsRepository.downloadFullContent.first()
     do {
       val entriesPayload =
         minifluxSource.entries(
@@ -477,7 +483,7 @@ class MinifluxSyncCoordinator(
       val entries = entriesPayload.entries
       entries.forEach { entry ->
         if (feedId == null || entry.feedId == feedId) {
-          val isNewArticle = upsertArticle(entry)
+          val isNewArticle = upsertArticle(entry, downloadFullContent)
           if (isNewArticle) {
             hasNewArticles = true
           }
@@ -490,7 +496,10 @@ class MinifluxSyncCoordinator(
     return hasNewArticles
   }
 
-  private suspend fun upsertArticle(entry: MinifluxEntry): Boolean {
+  private suspend fun upsertArticle(
+    entry: MinifluxEntry,
+    downloadFullContent: Boolean,
+  ): Boolean {
     val remoteId = entry.id.toString()
     val localPost = rssRepository.postByRemoteId(remoteId) ?: rssRepository.postByLink(entry.url)
 
@@ -503,6 +512,12 @@ class MinifluxSyncCoordinator(
       val feed = rssRepository.feedByRemoteId(entry.feedId.toString())
       if (feed != null) {
         val htmlContent = articleHtmlParser.parse(entry.content)
+        val fullContent =
+          if (downloadFullContent && entry.url.isNotBlank()) {
+            fullArticleFetcher.fetch(entry.url, remoteId).getOrNull()
+          } else {
+            null
+          }
         val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
         val postPayload =
           PostPayload(
@@ -513,7 +528,7 @@ class MinifluxSyncCoordinator(
             imageUrl = htmlContent?.heroImage,
             date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
             commentsLink = null,
-            fullContent = null,
+            fullContent = fullContent,
             isDateParsedCorrectly = postPubDateInMillis != null
           )
 

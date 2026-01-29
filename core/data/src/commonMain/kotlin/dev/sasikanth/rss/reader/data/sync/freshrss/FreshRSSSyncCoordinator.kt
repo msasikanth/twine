@@ -21,10 +21,12 @@ import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlePayload
+import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.core.network.freshrss.FreshRssSource
 import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
+import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,6 +55,8 @@ class FreshRSSSyncCoordinator(
   private val dispatchersProvider: DispatchersProvider,
   private val articleHtmlParser: ArticleHtmlParser,
   private val refreshPolicy: RefreshPolicy,
+  private val settingsRepository: SettingsRepository,
+  private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
 
   private val syncMutex = Mutex()
@@ -444,6 +449,7 @@ class FreshRSSSyncCoordinator(
   ): Boolean {
     var hasNewArticles = false
     var continuation: String? = null
+    val downloadFullContent = settingsRepository.downloadFullContent.first()
     do {
       val articlesPayload =
         freshRssSource.articles(
@@ -454,7 +460,7 @@ class FreshRSSSyncCoordinator(
         )
       val items = articlesPayload.items
       items.asReversed().forEach { item ->
-        val isNewArticle = upsertArticle(item)
+        val isNewArticle = upsertArticle(item, downloadFullContent)
         if (isNewArticle) {
           hasNewArticles = true
         }
@@ -466,13 +472,14 @@ class FreshRSSSyncCoordinator(
     return hasNewArticles
   }
 
-  private suspend fun upsertArticle(item: ArticlePayload): Boolean {
+  private suspend fun upsertArticle(
+    item: ArticlePayload,
+    downloadFullContent: Boolean,
+  ): Boolean {
     val remoteId = item.id
-    val localPost =
-      rssRepository.postByRemoteId(remoteId)
-        ?: rssRepository.postByLink(
-          item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: ""
-        )
+    val postLink =
+      item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: item.id
+    val localPost = rssRepository.postByRemoteId(remoteId) ?: rssRepository.postByLink(postLink)
 
     if (localPost != null) {
       if (localPost.remoteId != remoteId) {
@@ -486,17 +493,22 @@ class FreshRSSSyncCoordinator(
 
       if (feed != null) {
         val htmlContent = articleHtmlParser.parse(item.summary.content)
+        val fullContent =
+          if (downloadFullContent && postLink.isNotBlank()) {
+            fullArticleFetcher.fetch(postLink).getOrNull()
+          } else {
+            null
+          }
         val postPayload =
           PostPayload(
             title = item.title,
-            link = item.canonical.firstOrNull()?.href
-                ?: item.alternate.firstOrNull()?.href ?: item.id,
+            link = postLink,
             description = htmlContent?.textContent ?: "",
             rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
             imageUrl = htmlContent?.heroImage,
             date = item.published * 1000, // FreshRSS uses seconds, we use millis
             commentsLink = null,
-            fullContent = null,
+            fullContent = fullContent,
             isDateParsedCorrectly = true
           )
 
