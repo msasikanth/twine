@@ -96,7 +96,7 @@ class ReaderPageViewModel(
     viewModelScope.launch {
       _parsingProgress.value = ReaderProcessingProgress.Loading
 
-      val article = fullArticleFetcher.fetch(readerPost.link).getOrNull()
+      val article = fullArticleFetcher.fetch(readerPost.link, readerPost.remoteId).getOrNull()
       if (article == null) {
         _parsingProgress.value = ReaderProcessingProgress.Idle
         return@launch
