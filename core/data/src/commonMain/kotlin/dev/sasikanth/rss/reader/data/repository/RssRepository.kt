@@ -35,6 +35,7 @@ import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
+import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.data.database.AppConfigQueries
 import dev.sasikanth.rss.reader.data.database.BlockedWordsQueries
 import dev.sasikanth.rss.reader.data.database.BookmarkQueries
@@ -55,8 +56,9 @@ import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -97,6 +99,7 @@ class RssRepository(
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   suspend fun upsertFeedWithPosts(
     feedPayload: FeedPayload,
     feedId: String? = null,
@@ -130,19 +133,10 @@ class RssRepository(
       feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
     withContext(dispatchersProvider.databaseWrite) {
-      val buffer = ArrayList<PostPayload>(POST_UPSERT_BATCH_SIZE)
       feedPayload.posts
         .filter { it.date >= feedLastCleanUpAtEpochMilli }
-        .collect { postPayload ->
-          buffer.add(postPayload)
-          if (buffer.size >= POST_UPSERT_BATCH_SIZE) {
-            upsertPostsBatch(buffer, finalFeedId)
-            buffer.clear()
-          }
-        }
-      if (buffer.isNotEmpty()) {
-        upsertPostsBatch(buffer, finalFeedId)
-      }
+        .chunked(POST_UPSERT_BATCH_SIZE)
+        .collect { batch -> upsertPostsBatch(batch, finalFeedId) }
     }
 
     return finalFeedId
