@@ -531,7 +531,7 @@ class MinifluxSyncCoordinator(
             rawContent = htmlContent?.cleanedHtml ?: entry.content,
             imageUrl = htmlContent?.heroImage,
             date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
-            commentsLink = null,
+            commentsLink = entry.commentsUrl,
             fullContent = fullContent,
             isDateParsedCorrectly = postPubDateInMillis != null
           )
