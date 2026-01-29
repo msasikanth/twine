@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -111,15 +111,21 @@ class AllPostsPager(
   }
 
   private fun observeHasNewerArticles() {
-    combine(baseParameters, syncCoordinator.syncState) { params, syncState -> params to syncState }
-      .filter { (_, syncState) -> syncState !is SyncState.InProgress }
-      .flatMapLatest { (params, _) ->
-        rssRepository.unreadSinceLastSync(
-          sources = params.activeSourceIds,
-          postsAfter = params.postsAfter,
-          lastSyncedAt = params.lastSyncedAt
-        )
+    syncCoordinator.syncState
+      .flatMapLatest { syncState ->
+        if (syncState is SyncState.InProgress) {
+          emptyFlow()
+        } else {
+          baseParameters.flatMapLatest { params ->
+            rssRepository.unreadSinceLastSync(
+              sources = params.activeSourceIds,
+              postsAfter = params.postsAfter,
+              lastSyncedAt = params.lastSyncedAt
+            )
+          }
+        }
       }
+      .distinctUntilChanged()
       .onEach { _unreadSinceLastSync.value = it }
       .launchIn(coroutineScope)
   }

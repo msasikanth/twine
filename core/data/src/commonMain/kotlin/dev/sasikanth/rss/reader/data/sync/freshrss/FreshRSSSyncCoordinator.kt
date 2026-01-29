@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.data.sync.freshrss
 
 import co.touchlab.kermit.Logger
+import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.remote.FeedPayload
 import dev.sasikanth.rss.reader.core.model.remote.PostPayload
 import dev.sasikanth.rss.reader.core.model.remote.freshrss.ArticlePayload
@@ -58,6 +59,11 @@ class FreshRSSSyncCoordinator(
   private val settingsRepository: SettingsRepository,
   private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
+  private companion object {
+    private const val ARTICLE_PAGE_SIZE = 250
+    private const val LOCAL_POSTS_PAGE_SIZE = 1000
+    private const val STATUS_BATCH_SIZE = 500
+  }
 
   private val syncMutex = Mutex()
   private val _syncState = MutableStateFlow<SyncState>(SyncState.Idle)
@@ -454,7 +460,7 @@ class FreshRSSSyncCoordinator(
       val articlesPayload =
         freshRssSource.articles(
           streamId = streamId,
-          limit = 1000,
+          limit = ARTICLE_PAGE_SIZE,
           newerThan = newerThan,
           continuation = continuation
         )
@@ -539,58 +545,89 @@ class FreshRSSSyncCoordinator(
   private suspend fun syncStatuses() {
     val unreadIds = freshRssSource.unreadIds().toSet()
     val bookmarkIds = freshRssSource.bookmarkIds().toSet()
-    val localPosts = rssRepository.postsWithRemoteId()
+    var offset = 0L
+    var localPosts: List<Post> = emptyList()
+    do {
+      localPosts =
+        rssRepository.postsWithRemoteIdPaged(
+          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
+          offset = offset,
+        )
 
-    localPosts.forEach { post ->
-      val remoteRead = post.remoteId !in unreadIds
-      val remoteBookmarked = post.remoteId in bookmarkIds
+      localPosts.forEach { post ->
+        val remoteRead = post.remoteId !in unreadIds
+        val remoteBookmarked = post.remoteId in bookmarkIds
 
-      // If local is synced (no pending changes), remote is source of truth
-      if (post.syncedAt >= post.updatedAt) {
-        if (post.read != remoteRead) {
-          rssRepository.updatePostReadStatus(read = remoteRead, id = post.id)
-          rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
-        }
-        if (post.bookmarked != remoteBookmarked) {
-          rssRepository.updateBookmarkStatus(bookmarked = remoteBookmarked, id = post.id)
-          rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
+        // If local is synced (no pending changes), remote is source of truth
+        if (post.syncedAt >= post.updatedAt) {
+          if (post.read != remoteRead) {
+            rssRepository.updatePostReadStatus(read = remoteRead, id = post.id)
+            rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
+          }
+          if (post.bookmarked != remoteBookmarked) {
+            rssRepository.updateBookmarkStatus(bookmarked = remoteBookmarked, id = post.id)
+            rssRepository.updatePostSyncedAt(post.id, Clock.System.now())
+          }
         }
       }
-    }
+
+      offset += localPosts.size
+    } while (localPosts.size >= LOCAL_POSTS_PAGE_SIZE)
   }
 
   private suspend fun pushStatusChanges() {
-    val dirtyPosts = rssRepository.postsWithLocalChanges()
-    if (dirtyPosts.isEmpty()) return
+    while (true) {
+      val dirtyPosts =
+        rssRepository.postsWithLocalChangesPaged(
+          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
+          offset = 0,
+        )
+      if (dirtyPosts.isEmpty()) return
 
-    val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
-    val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
-    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
-    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
+      val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
+      val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
+      val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
+      val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
 
-    if (toMarkRead.isNotEmpty()) freshRssSource.markArticlesAsRead(toMarkRead)
-    if (toMarkUnread.isNotEmpty()) freshRssSource.markArticlesAsUnRead(toMarkUnread)
-    if (toBookmark.isNotEmpty()) freshRssSource.addBookmarks(toBookmark)
-    if (toUnbookmark.isNotEmpty()) freshRssSource.removeBookmarks(toUnbookmark)
+      toMarkRead.chunked(STATUS_BATCH_SIZE).forEach { ids ->
+        freshRssSource.markArticlesAsRead(ids)
+      }
+      toMarkUnread.chunked(STATUS_BATCH_SIZE).forEach { ids ->
+        freshRssSource.markArticlesAsUnRead(ids)
+      }
+      toBookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> freshRssSource.addBookmarks(ids) }
+      toUnbookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> freshRssSource.removeBookmarks(ids) }
 
-    dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+      dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+    }
   }
 
   private suspend fun pushStatusChangesForFeed(feedId: String) {
-    val dirtyPosts = rssRepository.postsWithLocalChangesForFeed(feedId)
-    if (dirtyPosts.isEmpty()) return
+    while (true) {
+      val dirtyPosts =
+        rssRepository.postsWithLocalChangesForFeedPaged(
+          feedId = feedId,
+          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
+          offset = 0,
+        )
+      if (dirtyPosts.isEmpty()) return
 
-    val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
-    val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
-    val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
-    val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
+      val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }
+      val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId }
+      val toBookmark = dirtyPosts.filter { it.bookmarked }.mapNotNull { it.remoteId }
+      val toUnbookmark = dirtyPosts.filter { !it.bookmarked }.mapNotNull { it.remoteId }
 
-    if (toMarkRead.isNotEmpty()) freshRssSource.markArticlesAsRead(toMarkRead)
-    if (toMarkUnread.isNotEmpty()) freshRssSource.markArticlesAsUnRead(toMarkUnread)
-    if (toBookmark.isNotEmpty()) freshRssSource.addBookmarks(toBookmark)
-    if (toUnbookmark.isNotEmpty()) freshRssSource.removeBookmarks(toUnbookmark)
+      toMarkRead.chunked(STATUS_BATCH_SIZE).forEach { ids ->
+        freshRssSource.markArticlesAsRead(ids)
+      }
+      toMarkUnread.chunked(STATUS_BATCH_SIZE).forEach { ids ->
+        freshRssSource.markArticlesAsUnRead(ids)
+      }
+      toBookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> freshRssSource.addBookmarks(ids) }
+      toUnbookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> freshRssSource.removeBookmarks(ids) }
 
-    dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+      dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
+    }
   }
 
   private fun updateSyncState(newState: SyncState) {
