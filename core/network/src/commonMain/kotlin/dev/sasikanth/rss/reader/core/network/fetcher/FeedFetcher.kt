@@ -42,6 +42,7 @@ import io.ktor.http.contentType
 import io.ktor.http.isRelativePath
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.asSource
+import io.ktor.utils.io.readBuffer
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -180,7 +181,7 @@ class FeedFetcher(
         return FeedFetchResult.Success(feedPayload)
       }
       ContentType.Application.Json -> {
-        val jsonSource = responseChannel.asSource()
+        val jsonSource = responseChannel.readBuffer()
         var feedPayload =
           jsonFeedParser.parse(
             content = jsonSource,
