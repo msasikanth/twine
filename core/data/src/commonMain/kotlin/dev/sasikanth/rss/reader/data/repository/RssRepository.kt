@@ -56,9 +56,9 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -79,6 +79,9 @@ class RssRepository(
   private val sourceQueries: SourceQueries,
   private val dispatchersProvider: DispatchersProvider
 ) {
+  private companion object {
+    private const val POST_UPSERT_BATCH_SIZE = 200
+  }
 
   suspend fun deleteAllLocalData() {
     withContext(dispatchersProvider.databaseWrite) {
@@ -126,43 +129,54 @@ class RssRepository(
     val feedLastCleanUpAtEpochMilli =
       feedLastCleanUpAt?.toEpochMilliseconds() ?: Instant.DISTANT_PAST.toEpochMilliseconds()
 
-    val posts =
+    withContext(dispatchersProvider.databaseWrite) {
+      val buffer = ArrayList<PostPayload>(POST_UPSERT_BATCH_SIZE)
       feedPayload.posts
         .filter { it.date >= feedLastCleanUpAtEpochMilli }
-        .toList()
-        .sortedBy { it.date }
-
-    withContext(dispatchersProvider.databaseWrite) {
-      posts.forEach { postPayload ->
-        val postId = nameBasedUuidOf(postPayload.link).toString()
-        transactionRunner.invoke {
-          postQueries.upsert(
-            id = postId,
-            sourceId = finalFeedId,
-            title = postPayload.title,
-            description = postPayload.description,
-            imageUrl = postPayload.imageUrl,
-            postDate = Instant.fromEpochMilliseconds(postPayload.date),
-            createdAt = Clock.System.now(),
-            updatedAt = Clock.System.now(),
-            syncedAt = Clock.System.now(),
-            link = postPayload.link,
-            commentsLink = postPayload.commentsLink,
-            isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
-          )
-
-          postContentQueries.upsert(
-            id = postId,
-            rawContent = postPayload.rawContent,
-            rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-            htmlContent = postPayload.fullContent,
-            createdAt = Clock.System.now(),
-          )
+        .collect { postPayload ->
+          buffer.add(postPayload)
+          if (buffer.size >= POST_UPSERT_BATCH_SIZE) {
+            upsertPostsBatch(buffer, finalFeedId)
+            buffer.clear()
+          }
         }
+      if (buffer.isNotEmpty()) {
+        upsertPostsBatch(buffer, finalFeedId)
       }
     }
 
     return finalFeedId
+  }
+
+  private fun upsertPostsBatch(posts: List<PostPayload>, feedId: String) {
+    val now = Clock.System.now()
+    transactionRunner.invoke {
+      posts.forEach { postPayload ->
+        val postId = nameBasedUuidOf(postPayload.link).toString()
+        postQueries.upsert(
+          id = postId,
+          sourceId = feedId,
+          title = postPayload.title,
+          description = postPayload.description,
+          imageUrl = postPayload.imageUrl,
+          postDate = Instant.fromEpochMilliseconds(postPayload.date),
+          createdAt = now,
+          updatedAt = now,
+          syncedAt = now,
+          link = postPayload.link,
+          commentsLink = postPayload.commentsLink,
+          isDateParsedCorrectly = if (postPayload.isDateParsedCorrectly) 1 else 0,
+        )
+
+        postContentQueries.upsert(
+          id = postId,
+          rawContent = postPayload.rawContent,
+          rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
+          htmlContent = postPayload.fullContent,
+          createdAt = now,
+        )
+      }
+    }
   }
 
   fun feed(feedId: String): Feed? {
@@ -942,15 +956,37 @@ class RssRepository(
     }
   }
 
+  suspend fun postsWithRemoteIdPaged(limit: Long, offset: Long): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsWithRemoteIdPaged(limit, offset, ::Post).executeAsList()
+    }
+  }
+
   suspend fun postsWithLocalChanges(): List<Post> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postsWithLocalChanges(::Post).executeAsList()
     }
   }
 
+  suspend fun postsWithLocalChangesPaged(limit: Long, offset: Long): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsWithLocalChangesPaged(limit, offset, ::Post).executeAsList()
+    }
+  }
+
   suspend fun postsWithLocalChangesForFeed(feedId: String): List<Post> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postsWithLocalChangesForFeed(feedId, ::Post).executeAsList()
+    }
+  }
+
+  suspend fun postsWithLocalChangesForFeedPaged(
+    feedId: String,
+    limit: Long,
+    offset: Long,
+  ): List<Post> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.postsWithLocalChangesForFeedPaged(feedId, limit, offset, ::Post).executeAsList()
     }
   }
 
