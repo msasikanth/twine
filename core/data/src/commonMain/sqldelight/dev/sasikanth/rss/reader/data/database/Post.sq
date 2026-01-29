@@ -206,11 +206,29 @@ UPDATE post SET syncedAt = :syncedAt WHERE id = :id;
 postsWithRemoteId:
 SELECT * FROM post WHERE remoteId IS NOT NULL;
 
+postsWithRemoteIdPaged:
+SELECT * FROM post
+WHERE remoteId IS NOT NULL
+ORDER BY id
+LIMIT :limit OFFSET :offset;
+
 postsWithLocalChanges:
 SELECT * FROM post WHERE updatedAt > syncedAt AND remoteId IS NOT NULL;
 
+postsWithLocalChangesPaged:
+SELECT * FROM post
+WHERE updatedAt > syncedAt AND remoteId IS NOT NULL
+ORDER BY id
+LIMIT :limit OFFSET :offset;
+
 postsWithLocalChangesForFeed:
 SELECT * FROM post WHERE updatedAt > syncedAt AND remoteId IS NOT NULL AND sourceId = :feedId;
+
+postsWithLocalChangesForFeedPaged:
+SELECT * FROM post
+WHERE updatedAt > syncedAt AND remoteId IS NOT NULL AND sourceId = :feedId
+ORDER BY id
+LIMIT :limit OFFSET :offset;
 
 unreadPostsCountInSource:
 SELECT COUNT(*) FROM post

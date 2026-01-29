@@ -61,10 +61,11 @@ class FeedFetcher(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
-  private val networkDispatcher = dispatchersProvider.io.limitedParallelism(10)
+  private val networkDispatcher = dispatchersProvider.io.limitedParallelism(4)
 
   companion object {
     private const val MAX_REDIRECTS_ALLOWED = 5
+    private const val FULL_CONTENT_CONCURRENCY = 3
   }
 
   suspend fun fetch(url: String, fetchFullContent: Boolean = false): FeedFetchResult {
@@ -180,10 +181,10 @@ class FeedFetcher(
         return FeedFetchResult.Success(feedPayload)
       }
       ContentType.Application.Json -> {
-        val jsonBuffer = responseChannel.readBuffer()
+        val jsonSource = responseChannel.readBuffer()
         var feedPayload =
           jsonFeedParser.parse(
-            content = jsonBuffer,
+            content = jsonSource,
             feedUrl = url,
           )
 
@@ -200,7 +201,7 @@ class FeedFetcher(
 
   private fun fetchFullContentForPosts(feedPayload: FeedPayload): FeedPayload {
     val postsWithFullContent =
-      feedPayload.posts.flatMapMerge(concurrency = 10) { post ->
+      feedPayload.posts.flatMapMerge(concurrency = FULL_CONTENT_CONCURRENCY) { post ->
         flow {
           val fullContent = fullArticleFetcher.fetch(post.link).getOrNull()
           emit(post.copy(fullContent = fullContent))
