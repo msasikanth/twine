@@ -32,3 +32,9 @@ data class MinifluxEntry(
   @SerialName("published_at") val publishedAt: String,
   val starred: Boolean,
 )
+
+@Serializable
+data class MinifluxEntryContent(
+  val content: String,
+  @SerialName("reading_time") val readingTime: Long
+)

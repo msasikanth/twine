@@ -66,6 +66,10 @@ class MinifluxApi {
   class ToggleEntryBookmark(val parent: MinifluxApi = MinifluxApi(), val entryId: Long)
 
   @Serializable
+  @Resource("entries/{entryId}/fetch-content")
+  class FetchContent(val parent: MinifluxApi = MinifluxApi(), val entryId: Long)
+
+  @Serializable
   @Resource("feeds/{feedId}/entries")
   class FeedEntries(
     val parent: MinifluxApi = MinifluxApi(),

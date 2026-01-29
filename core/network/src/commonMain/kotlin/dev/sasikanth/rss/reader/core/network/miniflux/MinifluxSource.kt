@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.core.model.local.User
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCategory
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxCreateFeedResponse
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntriesPayload
+import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxEntryContent
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxError
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxFeed
 import dev.sasikanth.rss.reader.core.model.remote.miniflux.MinifluxUser
@@ -149,6 +150,12 @@ class MinifluxSource(
           )
           .body<MinifluxEntriesPayload>()
       }
+    }
+  }
+
+  suspend fun fetchEntryContent(entryId: Long): MinifluxEntryContent {
+    return withContext(dispatchersProvider.io) {
+      authenticatedHttpClient().get(MinifluxApi.FetchContent(entryId = entryId)).body()
     }
   }
 

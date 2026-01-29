@@ -47,7 +47,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -189,7 +188,6 @@ private fun StatisticCard(title: String, value: String, modifier: Modifier = Mod
     modifier =
       modifier
         .fillMaxWidth()
-        .clip(MaterialTheme.shapes.large)
         .background(AppTheme.colorScheme.surface)
         .padding(horizontal = 16.dp, vertical = 20.dp),
     horizontalAlignment = Alignment.CenterHorizontally

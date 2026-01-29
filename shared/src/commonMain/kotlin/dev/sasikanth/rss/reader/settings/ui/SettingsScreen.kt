@@ -628,6 +628,20 @@ internal fun SettingsScreen(
         item { Divider() }
         // endregion
 
+        item { Divider() }
+
+        // region Data
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderData)) }
+
+        item { StatisticsItem { openStatistics() } }
+
+        item { Divider(24.dp) }
+
+        item { DeleteAppDataSettingItem { showDeleteAppDataConfirmation = true } }
+
+        item { Divider() }
+        // endregion
+
         // region Feedback and about
         item {
           SubHeader(
@@ -643,14 +657,6 @@ internal fun SettingsScreen(
             }
           )
         }
-
-        item { Divider() }
-
-        item { DeleteAppDataSettingItem { showDeleteAppDataConfirmation = true } }
-
-        item { Divider() }
-
-        item { StatisticsItem { openStatistics() } }
 
         item { Divider() }
 
@@ -1746,27 +1752,23 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
 
 @Composable
 private fun DeleteAppDataSettingItem(onClick: () -> Unit) {
-  Column {
-    SubHeader(text = stringResource(Res.string.settingsHeaderData))
-
-    Row(
-      modifier =
-        Modifier.clickable(onClick = onClick)
-          .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          stringResource(Res.string.settingsDeleteAppDataTitle),
-          style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.error
-        )
-        Text(
-          stringResource(Res.string.settingsDeleteAppDataSubtitle),
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
-        )
-      }
+  Row(
+    modifier =
+      Modifier.clickable(onClick = onClick)
+        .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+    verticalAlignment = Alignment.CenterVertically
+  ) {
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        stringResource(Res.string.settingsDeleteAppDataTitle),
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.error
+      )
+      Text(
+        stringResource(Res.string.settingsDeleteAppDataSubtitle),
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.textEmphasisMed
+      )
     }
   }
 }
