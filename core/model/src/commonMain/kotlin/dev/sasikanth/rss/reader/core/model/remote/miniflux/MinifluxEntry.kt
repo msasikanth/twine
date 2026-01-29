@@ -31,6 +31,7 @@ data class MinifluxEntry(
   val content: String,
   @SerialName("published_at") val publishedAt: String,
   val starred: Boolean,
+  @SerialName("comments_url") val commentsUrl: String?
 )
 
 @Serializable
