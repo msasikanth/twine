@@ -61,7 +61,7 @@ class LocalSyncCoordinator(
 ) : SyncCoordinator {
 
   companion object {
-    private const val SYNC_CHUNK_SIZE = 6
+    private const val SYNC_CHUNK_SIZE = 3
   }
 
   private val syncMutex = Mutex()
