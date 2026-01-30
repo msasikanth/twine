@@ -323,7 +323,7 @@ internal fun SettingsScreen(
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },
@@ -2028,6 +2028,6 @@ private fun CloudSyncSettingItem(
 private fun Divider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = AppTheme.colorScheme.surfaceContainer
+    color = AppTheme.colorScheme.outlineVariant
   )
 }

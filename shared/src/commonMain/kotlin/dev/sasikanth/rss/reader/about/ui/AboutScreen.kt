@@ -173,7 +173,7 @@ fun AboutScreen(
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },
@@ -242,7 +242,7 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
 
     HorizontalDivider(
       modifier = Modifier.align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.surfaceContainer
+      color = AppTheme.colorScheme.outlineVariant
     )
   }
 }

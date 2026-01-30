@@ -113,7 +113,7 @@ internal fun BookmarksScreen(
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },
@@ -158,7 +158,7 @@ internal fun BookmarksScreen(
                 if (index != bookmarks.itemCount - 1) {
                   HorizontalDivider(
                     modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                    color = AppTheme.colorScheme.surfaceContainer
+                    color = AppTheme.colorScheme.outlineVariant
                   )
                 }
               }
