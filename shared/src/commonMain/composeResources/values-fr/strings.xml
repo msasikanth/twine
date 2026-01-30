@@ -230,7 +230,7 @@
     <string name="settingsNotificationWarningAndroid">Des problèmes de notification ? Votre appareil ferme peut-être l'application en arrière-plan. Appuyez ici pour savoir comment y remédier.</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
-    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d result</item>
