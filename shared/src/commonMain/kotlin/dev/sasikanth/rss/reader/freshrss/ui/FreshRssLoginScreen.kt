@@ -191,7 +191,7 @@ fun FreshRssLoginScreen(
 
         HorizontalDivider(
           modifier = Modifier.align(Alignment.BottomCenter),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },

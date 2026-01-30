@@ -195,7 +195,7 @@ internal fun SearchScreen(
               if (index != searchResults.itemCount - 1) {
                 HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                  color = AppTheme.colorScheme.surfaceContainer
+                  color = AppTheme.colorScheme.outlineVariant
                 )
               }
             }
@@ -313,7 +313,7 @@ private fun SearchBar(
 
     HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.surfaceContainer
+      color = AppTheme.colorScheme.outlineVariant
     )
   }
 }

@@ -110,7 +110,7 @@ fun StatisticsScreen(
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },

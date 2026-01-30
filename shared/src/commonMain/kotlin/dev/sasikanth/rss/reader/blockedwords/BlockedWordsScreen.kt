@@ -120,7 +120,7 @@ fun BlockedWordsScreen(
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.surfaceContainer
+          color = AppTheme.colorScheme.outlineVariant
         )
       }
     },
@@ -214,7 +214,7 @@ fun BlockedWordsScreen(
 
             HorizontalDivider(
               modifier = Modifier.padding(vertical = 16.dp),
-              color = AppTheme.colorScheme.surfaceContainer
+              color = AppTheme.colorScheme.outlineVariant
             )
           }
         }
@@ -245,7 +245,7 @@ fun BlockedWordsScreen(
             if (index < state.blockedWords.lastIndex) {
               HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = AppTheme.colorScheme.surfaceContainer
+                color = AppTheme.colorScheme.outlineVariant
               )
             }
           }
