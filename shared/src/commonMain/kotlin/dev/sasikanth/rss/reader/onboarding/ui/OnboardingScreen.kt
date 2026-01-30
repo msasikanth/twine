@@ -17,14 +17,7 @@
 
 package dev.sasikanth.rss.reader.onboarding.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -46,7 +39,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -86,14 +78,18 @@ internal fun OnboardingScreen(
   }
 
   Scaffold(
-    modifier = modifier,
-    containerColor = AppTheme.colorScheme.backdrop,
+    modifier =
+      modifier.background(
+        Brush.verticalGradient(
+          0f to Color.Transparent,
+          0.60f to AppTheme.colorScheme.primary.copy(alpha = 0.15f),
+          1f to AppTheme.colorScheme.primary.copy(alpha = 0.65f)
+        )
+      ),
+    containerColor = Color.Transparent,
     bottomBar = {
       Column(
-        modifier =
-          Modifier.fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = Modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Text(
@@ -110,7 +106,12 @@ internal fun OnboardingScreen(
           modifier = Modifier.fillMaxWidth().height(56.dp),
           enabled = !state.isPrePopulating,
           shape = MaterialTheme.shapes.extraLarge,
-          elevation = ButtonDefaults.elevatedButtonElevation()
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = AppTheme.colorScheme.onPrimary,
+              contentColor = AppTheme.colorScheme.primary,
+            ),
+          elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 6.dp)
         ) {
           Box(
             modifier = Modifier.fillMaxSize(),
@@ -127,7 +128,6 @@ internal fun OnboardingScreen(
                 text = stringResource(Res.string.onboardingGetStarted).uppercase(),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = AppTheme.colorScheme.inverseOnSurface
               )
             }
           }
@@ -136,9 +136,12 @@ internal fun OnboardingScreen(
     }
   ) { paddingValues ->
     Column(
-      modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
+      modifier =
+        Modifier.fillMaxSize()
+          .padding(paddingValues)
+          .padding(horizontal = 24.dp)
+          .padding(top = 88.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.Center
     ) {
       val backgroundColor = AppTheme.colorScheme.primary
       val backgroundBrush =
@@ -148,49 +151,9 @@ internal fun OnboardingScreen(
           center = Offset(20f, 24f)
         )
 
-      val infiniteTransition = rememberInfiniteTransition()
-      val glowRadius by
-        infiniteTransition.animateFloat(
-          initialValue = 20f,
-          targetValue = 70f,
-          animationSpec =
-            infiniteRepeatable(
-              animation = tween(2000, easing = LinearEasing),
-              repeatMode = RepeatMode.Reverse
-            )
-        )
-
-      val glowOffsetX by
-        infiniteTransition.animateFloat(
-          initialValue = -10f,
-          targetValue = 10f,
-          animationSpec =
-            infiniteRepeatable(
-              animation = tween(3000, easing = LinearEasing),
-              repeatMode = RepeatMode.Reverse
-            )
-        )
-
-      val glowOffsetY by
-        infiniteTransition.animateFloat(
-          initialValue = -10f,
-          targetValue = 10f,
-          animationSpec =
-            infiniteRepeatable(
-              animation = tween(4000, easing = LinearEasing),
-              repeatMode = RepeatMode.Reverse
-            )
-        )
-
       Box(
         modifier =
-          Modifier.requiredSize(128.dp)
-            .dropShadow(shape = RoundedCornerShape(32.dp)) {
-              color = backgroundColor
-              radius = glowRadius.dp.toPx()
-              offset = Offset(glowOffsetX.dp.toPx(), glowOffsetY.dp.toPx())
-            }
-            .background(backgroundBrush, RoundedCornerShape(32.dp)),
+          Modifier.requiredSize(128.dp).background(backgroundBrush, RoundedCornerShape(32.dp)),
         contentAlignment = Alignment.Center
       ) {
         Icon(
@@ -205,7 +168,7 @@ internal fun OnboardingScreen(
 
       Text(
         text = stringResource(Res.string.appName),
-        style = MaterialTheme.typography.displayMedium,
+        style = MaterialTheme.typography.displayLarge,
         fontWeight = FontWeight.Bold,
         color = AppTheme.colorScheme.textEmphasisHigh
       )
