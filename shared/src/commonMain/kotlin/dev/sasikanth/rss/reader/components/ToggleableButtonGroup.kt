@@ -51,7 +51,7 @@ fun ToggleableButtonGroup(
         .requiredHeightIn(min = 56.dp)
         .border(
           width = 1.dp,
-          color = AppTheme.colorScheme.surfaceContainerHigh,
+          color = AppTheme.colorScheme.outlineVariant,
           shape = MaterialTheme.shapes.large,
         )
   ) {
