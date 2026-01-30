@@ -628,8 +628,6 @@ internal fun SettingsScreen(
         item { Divider() }
         // endregion
 
-        item { Divider() }
-
         // region Data
         item { SubHeader(text = stringResource(Res.string.settingsHeaderData)) }
 
