@@ -230,7 +230,7 @@
     <string name="settingsNotificationWarningAndroid">Probleme mit Benachrichtigungen? Ihr Gerät schließt die App möglicherweise im Hintergrund. Tippen Sie hier, um zu erfahren, wie Sie das beheben können.</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
-    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="one">%1$d Ergebnis</item>
