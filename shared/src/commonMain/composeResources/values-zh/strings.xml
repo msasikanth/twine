@@ -230,7 +230,7 @@
     <string name="settingsNotificationWarningAndroid">通知有问题？您的设备可能会在后台关闭应用。点击此处了解如何修复。</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
-    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
     <!-- Plurals -->
     <plurals name="searchResultsCount">
         <item quantity="other">%1$d 个结果</item>
