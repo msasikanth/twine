@@ -216,7 +216,7 @@ internal fun SearchScreen(
         }
       }
     },
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
 }

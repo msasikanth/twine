@@ -114,7 +114,7 @@ fun StatisticsScreen(
         )
       }
     },
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.backdrop,
   ) { padding ->
     if (state.isLoading) {
       Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {

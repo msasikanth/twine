@@ -124,7 +124,7 @@ fun BlockedWordsScreen(
         )
       }
     },
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   ) { innerPadding ->
     Column(modifier = Modifier.padding(innerPadding).imePadding()) {
