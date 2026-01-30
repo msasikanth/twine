@@ -241,7 +241,7 @@
     <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>
     <string name="onboardingGetStarted">Get started</string>
     <string name="onboardingSubtitle">Build your feed</string>
-    <string name="onboardingSubtitle2">No algorithm. No ads. Just the content you love.</string>
+    <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
 
     <!-- Plurals -->
     <plurals name="searchResultsCount">
