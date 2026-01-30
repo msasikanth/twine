@@ -628,8 +628,6 @@ internal fun SettingsScreen(
         item { Divider() }
         // endregion
 
-        item { Divider() }
-
         // region Data
         item { SubHeader(text = stringResource(Res.string.settingsHeaderData)) }
 
@@ -666,7 +664,7 @@ internal fun SettingsScreen(
         // endregion
       }
     },
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
   )
 }

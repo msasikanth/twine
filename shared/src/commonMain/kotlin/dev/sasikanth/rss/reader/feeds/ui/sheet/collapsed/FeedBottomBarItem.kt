@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
@@ -58,25 +59,21 @@ internal fun FeedBottomBarItem(
     contentAlignment = Alignment.Center
   ) {
     val shape = MaterialTheme.shapes.large
+    val feedIconShape = RoundedCornerShape(17.dp)
+
+    FeedIcon(
+      icon = feedIconUrl,
+      homepageLink = homePageUrl,
+      showFeedFavIcon = showFeedFavIcon,
+      contentDescription = null,
+      shape = feedIconShape,
+      modifier = Modifier.requiredSize(48.dp).clip(feedIconShape).clickable(onClick = onClick),
+    )
 
     Box(
-      modifier = Modifier.requiredSize(48.dp).clickable(onClick = onClick),
-      contentAlignment = Alignment.Center
-    ) {
-      FeedIcon(
-        icon = feedIconUrl,
-        homepageLink = homePageUrl,
-        showFeedFavIcon = showFeedFavIcon,
-        contentDescription = null,
-        shape = RoundedCornerShape(17.dp),
-        modifier = Modifier.matchParentSize()
-      )
-
-      Box(
-        modifier =
-          Modifier.matchParentSize().border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
-      )
-    }
+      modifier =
+        Modifier.requiredSize(48.dp).border(1.dp, AppTheme.colorScheme.outlineVariant, shape)
+    )
 
     if (badgeCount > 0 && canShowUnreadPostsCount) {
       UnreadCountBadge(badgeCount)

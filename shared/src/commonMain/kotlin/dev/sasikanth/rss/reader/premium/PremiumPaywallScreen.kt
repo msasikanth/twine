@@ -22,8 +22,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.revenuecat.purchases.kmp.models.CustomerInfo
 import com.revenuecat.purchases.kmp.ui.revenuecatui.CustomerCenter
 import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
+import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallListener
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 
 @Composable
@@ -36,7 +38,16 @@ fun PremiumPaywallScreen(
     if (!hasPremium) {
       val paywallOptions = remember {
         PaywallOptions.Builder(dismissRequest = { goBack() })
-          .apply { shouldDisplayDismissButton = true }
+          .apply {
+            shouldDisplayDismissButton = true
+            listener =
+              object : PaywallListener {
+                override fun onRestoreCompleted(customerInfo: CustomerInfo) {
+                  super.onRestoreCompleted(customerInfo)
+                  goBack()
+                }
+              }
+          }
           .build()
       }
 

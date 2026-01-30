@@ -87,7 +87,7 @@ internal fun OnboardingScreen(
 
   Scaffold(
     modifier = modifier,
-    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    containerColor = AppTheme.colorScheme.backdrop,
     bottomBar = {
       Column(
         modifier =
