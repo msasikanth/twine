@@ -9,6 +9,14 @@
  *
  */
 
+/** * Combined junk selectors for performance
+ */
+const JUNK_SELECTORS = [
+  ".share", ".social", ".ad", ".promo", ".related", ".newsletter-widget",
+  "[id*='share']", "[class*='share']", ".sharedaddy", ".jp-relatedposts"
+].join(",");
+
+
 function processIFrames(doc) {
   const iframes = doc.querySelectorAll("iframe");
   iframes.forEach((iframe) => {
@@ -195,10 +203,6 @@ function isXkcdUrl(url) {
   return xkcdDomainPattern.test(url);
 }
 
-function removeHeadTag(html) {
-  return html.replace(/<head[^>]*>[\s\S]*?<\/head>/i, "");
-}
-
 function removeFirstH1(doc) {
   doc.querySelector("h1")?.remove();
 }
@@ -239,54 +243,65 @@ function getImageCaption(markdown) {
 }
 
 async function parseReaderContent(link, bannerImage, html) {
-  const cleanedHtml = removeHeadTag(html);
-  const sanitizedHtml = `<body><div>${cleanedHtml}</div></body>`;
-
-  let doc;
   try {
     const parser = new DOMParser();
-    const htmlWithBase = `<head><base href="${link}"></head>${sanitizedHtml}`;
-    doc = parser.parseFromString(htmlWithBase, "text/html");
+    const doc = parser.parseFromString(
+      `<html><head><base href="${link}"></head><body>${html}</body></html>`,
+      "text/html"
+    );
+    const turndownService = new TurndownService({
+        headingStyle: 'atx',
+        codeBlockStyle: 'fenced'
+    });
 
-    const turndownService = new TurndownService();
     turndownService.addRule("iframe", {
       filter: "iframe",
-      replacement: function (content, node) {
+      replacement: (content, node) => {
         const src = node.getAttribute("src") || node.getAttribute("data-src");
-        if (src) {
-          let label = "Video";
-          if (src.includes("youtube.com") || src.includes("youtu.be")) label = "YouTube Video";
-          if (src.includes("vimeo.com")) label = "Vimeo Video";
-
-          return `\n\n[${label}](${src})\n\n`;
-        }
-        return "";
-      },
+        if (!src) return "";
+        let label = src.includes("youtube.com") ? "YouTube Video" : "Video";
+        return `\n\n[${label}](${src})\n\n`;
+      }
     });
 
     if (isXkcdUrl(link)) {
-      const markdown = turndownService.turndown(doc.documentElement.outerHTML);
-      const imageCaption = getImageCaption(markdown);
-
-      return JSON.stringify({ content: imageCaption, excerpt: null });
-    } else {
-      if (isRedditUrl(link)) {
-        processRedditPost(doc);
-      }
-
-      removeFirstH1(doc);
-      processIFrames(doc);
-      processNoScriptImages(doc);
-      transformShredditElements(doc);
-      removeFirstImageTagByUrl(doc, bannerImage);
-      cleanContent(doc);
-
-      const article = new Readability(doc).parse();
-      const markdown = turndownService.turndown(article.content);
-      return JSON.stringify({ content: markdown, excerpt: article.excerpt });
+      const markdown = turndownService.turndown(doc.body.innerHTML);
+      return { content: getImageCaption(markdown), excerpt: null };
     }
+
+    if (isRedditUrl(link)) {
+      processRedditPost(doc);
+    }
+
+    removeFirstH1(doc);
+    processIFrames(doc);
+    processNoScriptImages(doc);
+    transformShredditElements(doc);
+    removeFirstImageTagByUrl(doc, bannerImage);
+
+    doc.querySelectorAll(JUNK_SELECTORS).forEach(el => el.remove());
+
+    const reader = new Readability(doc, {
+        charThreshold: 0,
+        keepClasses: false
+    });
+    const article = reader.parse();
+
+    if (!article) {
+        return { content: turndownService.turndown(doc.body.innerHTML), excerpt: "" };
+    }
+
+    const markdown = turndownService.turndown(article.content);
+
+    return {
+      title: article.title,
+      content: markdown,
+      excerpt: article.excerpt,
+      byline: article.byline
+    };
+
   } catch (error) {
-    console.error("Error parsing HTML:", error);
-    return null;
+    console.error("Reader Error:", error);
+    return { content: "Error parsing content", excerpt: null };
   }
 }
