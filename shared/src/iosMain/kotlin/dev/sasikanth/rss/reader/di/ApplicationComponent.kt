@@ -25,6 +25,8 @@ import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.reader.readability.IosReadabilityRunner
+import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import kotlin.experimental.ExperimentalNativeApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import me.tatarka.inject.annotations.Component
@@ -66,6 +68,11 @@ abstract class ApplicationComponent(
       isFoss = isFoss,
       cachePath = { NSFileManager.defaultManager.cacheDir }
     )
+
+  @Provides
+  @AppScope
+  fun providesReadabilityRunner(readabilityRunner: IosReadabilityRunner): ReadabilityRunner =
+    readabilityRunner
 
   @OptIn(ExperimentalForeignApi::class)
   private val NSFileManager.cacheDir: String
