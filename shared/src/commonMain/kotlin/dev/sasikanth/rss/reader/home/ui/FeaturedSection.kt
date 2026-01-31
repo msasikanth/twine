@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -189,6 +190,8 @@ internal fun FeaturedSection(
                     drawLayer(imageGraphicsLayer)
                   },
                 imageUrl = postWithMetadata.imageUrl,
+                unlockAspectRatio =
+                  UrlUtils.isUnconstrainedMedia(postWithMetadata.imageUrl.orEmpty()),
                 alignment =
                   remember(pagerState) {
                     ParallaxAlignment(

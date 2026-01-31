@@ -15,17 +15,11 @@
  *
  */
 
-package dev.sasikanth.rss.reader.reader.webview
+package dev.sasikanth.rss.reader.reader.redability
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 
-/** Need this to parse the HTML content of the post using a custom reader parser in JS */
-@Composable
-internal expect fun ReaderWebView(
-  link: String?,
-  content: String?,
-  postImage: String?,
-  contentLoaded: (String) -> Unit,
-  modifier: Modifier = Modifier.Companion,
-)
+interface ReadabilityRunner {
+
+  suspend fun parseHtml(link: String?, content: String, image: String? = null): ReadabilityResult
+}

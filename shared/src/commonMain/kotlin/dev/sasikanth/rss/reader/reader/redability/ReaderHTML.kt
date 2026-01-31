@@ -15,24 +15,25 @@
  *
  */
 
-package dev.sasikanth.rss.reader.reader.webview
+package dev.sasikanth.rss.reader.reader.redability
 
 import twine.shared.generated.resources.Res
 
 object ReaderHTML {
 
-  private var readerHTML: String? = null
+  private var cachedHtml: String? = null
 
   internal suspend fun createOrGet(): String {
+    if (!(cachedHtml.isNullOrBlank())) return cachedHtml!!
+
     val readabilityJS = readFile("readability.js")
     val turndownJS = readFile("turndown.js")
     val readerJS = readFile("main.js")
 
-    if (readerHTML.isNullOrBlank()) {
-      // language=HTML
-      @Suppress("HtmlRequiredLangAttribute", "HtmlRequiredTitleElement")
-      readerHTML =
-        """
+    // language=HTML
+    @Suppress("HtmlRequiredLangAttribute", "HtmlRequiredTitleElement")
+    cachedHtml =
+      """
         <html dir='auto'>
         <head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -43,10 +44,9 @@ object ReaderHTML {
         <body />
         </html>
         """
-          .trimIndent()
-    }
+        .trimIndent()
 
-    return readerHTML!!
+    return cachedHtml!!
   }
 
   private suspend fun readFile(fileName: String): String {

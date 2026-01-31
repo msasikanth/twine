@@ -21,18 +21,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mikepenz.markdown.model.State
 import com.mikepenz.markdown.model.parseMarkdownFlow
-import dev.sasikanth.rss.reader.core.model.local.PostContent
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
-import dev.sasikanth.rss.reader.reader.page.ui.ReaderContent
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
@@ -48,11 +50,9 @@ class ReaderPageViewModel(
   dispatchersProvider: DispatchersProvider,
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
+  private val readabilityRunner: ReadabilityRunner,
   @Assisted private val readerPost: PostWithMetadata,
 ) : ViewModel() {
-
-  private val _postContent = MutableStateFlow<PostContent?>(null)
-  val postContent: StateFlow<PostContent?> = _postContent
 
   private val _contentState = MutableStateFlow("")
   val contentState =
@@ -83,18 +83,21 @@ class ReaderPageViewModel(
     loadFullArticle()
   }
 
-  fun onParsingComplete(readerContent: ReaderContent) {
-    viewModelScope.launch {
-      _contentState.update { it -> readerContent.content ?: it }
-      _excerptState.update { it -> readerContent.excerpt ?: it }
+  fun toggleFullArticle() {
+    _showFullArticle.value = !(_showFullArticle.value)
+    if (_showFullArticle.value) {
+      loadFullArticle()
     }
   }
 
-  fun loadFullArticle() {
-    if (_postContent.value?.fullArticleHtml != null) return
-
+  private fun loadFullArticle() {
     viewModelScope.launch {
       _parsingProgress.value = ReaderProcessingProgress.Loading
+
+      val fullArticle = postContentRepository.postContent(readerPost.id).firstOrNull()
+      if (fullArticle != null && !(fullArticle.fullArticleHtml.isNullOrBlank())) {
+        return@launch
+      }
 
       val article = fullArticleFetcher.fetch(readerPost.link, readerPost.remoteId).getOrNull()
       if (article == null) {
@@ -105,22 +108,37 @@ class ReaderPageViewModel(
     }
   }
 
-  fun toggleFullArticle() {
-    _showFullArticle.value = !(_showFullArticle.value)
-    if (_showFullArticle.value) {
-      loadFullArticle()
-    }
-  }
-
   private fun loadPostContent() {
-    postContentRepository
-      .postContent(readerPost.id)
-      .onEach { postContent ->
-        _postContent.value = postContent
-        if (postContent?.postContent.isNullOrBlank()) {
-          _parsingProgress.value = ReaderProcessingProgress.Idle
-        }
+    combine(postContentRepository.postContent(readerPost.id), showFullArticle) {
+        postContent,
+        alwaysFetchFullArticle ->
+        Pair(postContent, alwaysFetchFullArticle)
+      }
+      .distinctUntilChanged()
+      .onEach { (postContent, alwaysFetchFullArticle) ->
+        val content =
+          if (alwaysFetchFullArticle) {
+            postContent?.fullArticleHtml ?: postContent?.postContent
+          } else {
+            postContent?.postContent ?: readerPost.description
+          }
+        val readabilityResult =
+          readabilityRunner.parseHtml(
+            link = readerPost.link,
+            content = content ?: "",
+            image = readerPost.imageUrl,
+          )
+
+        onParsingComplete(readabilityResult)
       }
       .launchIn(viewModelScope)
+  }
+
+  private fun onParsingComplete(result: ReadabilityResult) {
+    viewModelScope.launch {
+      _contentState.update { it -> result.content ?: it }
+      _excerptState.update { it -> result.excerpt ?: it }
+      _parsingProgress.value = ReaderProcessingProgress.Idle
+    }
   }
 }

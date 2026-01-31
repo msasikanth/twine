@@ -28,6 +28,8 @@ import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.reader.readability.AndroidReadabilityRunner
+import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import me.tatarka.inject.annotations.Component
 import me.tatarka.inject.annotations.Provides
 
@@ -70,6 +72,11 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
       cachePath = { context.cacheDir.absolutePath }
     )
   }
+
+  @Provides
+  @AppScope
+  fun providesReadabilityRunner(readabilityRunner: AndroidReadabilityRunner): ReadabilityRunner =
+    readabilityRunner
 
   companion object
 }
