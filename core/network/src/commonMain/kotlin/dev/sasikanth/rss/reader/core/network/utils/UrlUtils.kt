@@ -23,7 +23,13 @@ import io.ktor.http.set
 
 object UrlUtils {
 
-  private val comicStripUrls = listOf("https://imgs.xkcd.com/comics/")
+  private val unconstrainedImagePrefixes =
+    listOf(
+      "https://imgs.xkcd.com/comics/",
+      "https://preview.redd.it/",
+      "https://i.redd.it/",
+      "https://external-preview.redd.it/"
+    )
 
   fun isYouTubeLink(url: String): Boolean {
     val youtubeRegex =
@@ -36,8 +42,8 @@ object UrlUtils {
     return youtubeRegex.matches(url)
   }
 
-  fun isComicStrip(url: String): Boolean {
-    return comicStripUrls.any { url.startsWith(it) }
+  fun isUnconstrainedMedia(url: String): Boolean {
+    return unconstrainedImagePrefixes.any { url.startsWith(it) }
   }
 
   fun fallbackFeedIcon(host: String): String {

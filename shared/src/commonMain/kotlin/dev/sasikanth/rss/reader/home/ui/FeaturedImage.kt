@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.Dp
@@ -42,7 +41,7 @@ fun FeaturedImage(
   imageUrl: String?,
   modifier: Modifier = Modifier,
   alignment: Alignment = Alignment.Center,
-  isComicStrip: Boolean = false,
+  unlockAspectRatio: Boolean = false,
 ) {
   val sizeClass = LocalWindowSizeClass.current.widthSizeClass
   val imageMaxHeight =
@@ -52,16 +51,16 @@ fun FeaturedImage(
       else -> Dp.Unspecified
     }
 
-  val comicStripImageModifier =
-    if (isComicStrip) {
-      Modifier.fillMaxWidth().clip(RectangleShape)
+  val adaptiveImageModifier =
+    if (unlockAspectRatio) {
+      Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small)
     } else {
       Modifier.aspectRatio(16f / 9f)
         .heightIn(max = imageMaxHeight)
         .clip(MaterialTheme.shapes.extraLarge)
     }
-  val contentScale =
-    if (isComicStrip) {
+  val adaptiveContentScale =
+    if (unlockAspectRatio) {
       ContentScale.FillWidth
     } else {
       widthBiasedScale
@@ -73,11 +72,11 @@ fun FeaturedImage(
     AsyncImage(
       url = imageUrl,
       modifier =
-        Modifier.then(comicStripImageModifier)
+        Modifier.then(adaptiveImageModifier)
           .background(translucentStyle.prominent.background)
           .then(modifier),
       contentDescription = null,
-      contentScale = contentScale,
+      contentScale = adaptiveContentScale,
       alignment = alignment
     )
   }

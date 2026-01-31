@@ -40,7 +40,6 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -304,7 +303,7 @@ private fun PostHeader(
       Box(modifier = Modifier.padding(horizontal = 24.dp).align(Alignment.CenterHorizontally)) {
         FeaturedImage(
           imageUrl = postImage,
-          isComicStrip = UrlUtils.isComicStrip(postImage),
+          unlockAspectRatio = UrlUtils.isUnconstrainedMedia(postImage),
           alignment =
             remember(pagerState) {
               ParallaxAlignment(
