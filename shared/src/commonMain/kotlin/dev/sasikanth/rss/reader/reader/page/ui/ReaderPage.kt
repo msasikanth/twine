@@ -100,7 +100,6 @@ import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
-import dev.sasikanth.rss.reader.reader.webview.ReaderWebView
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
@@ -139,7 +138,6 @@ internal fun ReaderPage(
   page: Int,
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
-  loadFullArticle: Boolean,
   isDarkTheme: Boolean,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
@@ -149,7 +147,6 @@ internal fun ReaderPage(
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
-  val readerPostContent by pageViewModel.postContent.collectAsStateWithLifecycle()
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -166,27 +163,6 @@ internal fun ReaderPage(
   CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors) {
     SelectionContainer {
       Box(modifier = modifier) {
-        // Dummy view to parse the reader content using JS
-        val postContent =
-          remember(loadFullArticle, readerPostContent) {
-            if (loadFullArticle) {
-              readerPostContent?.fullArticleHtml
-            } else {
-              readerPostContent?.postContent
-            }
-          }
-
-        ReaderWebView(
-          link = readerPost.link,
-          content = postContent,
-          postImage = readerPost.imageUrl,
-          contentLoaded = {
-            val readerContent = json.decodeFromString<ReaderContent>(it)
-            pageViewModel.onParsingComplete(readerContent)
-          },
-          modifier = Modifier.requiredSize(0.dp),
-        )
-
         CompositionLocalProvider(
           LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
           LocalMarkdownPadding provides
@@ -587,9 +563,3 @@ enum class ReaderProcessingProgress {
   Loading,
   Idle
 }
-
-@Serializable
-data class ReaderContent(
-  val excerpt: String?,
-  val content: String?,
-)

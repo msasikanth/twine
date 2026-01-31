@@ -333,7 +333,6 @@ internal fun ReaderScreen(
 
             if (readerPost != null) {
               val pageViewModel = pageViewModelFactory.invoke(readerPost)
-              val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
               val highlightsBuilder =
                 remember(isDarkTheme) {
                   Highlights.Builder().theme(SyntaxThemes.atom(darkMode = isDarkTheme))
@@ -372,7 +371,6 @@ internal fun ReaderScreen(
                 page = page,
                 pagerState = pagerState,
                 markdownComponents = markdownComponents,
-                loadFullArticle = showFullArticle,
                 isDarkTheme = isDarkTheme,
                 onBookmarkClick = {
                   viewModel.dispatch(
