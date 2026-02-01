@@ -60,6 +60,7 @@ kotlin {
       implementation(libs.ktor.json)
       api(libs.kotlinx.serialization.json)
       implementation(libs.filekit)
+      implementation(libs.ksoup)
       implementation(libs.bundles.xmlutil)
       implementation(libs.stately.isolate)
     }
