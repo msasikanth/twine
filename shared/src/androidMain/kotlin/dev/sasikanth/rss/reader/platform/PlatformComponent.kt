@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.platform
 
 import dev.sasikanth.rss.reader.app.AndroidAppIconManager
 import dev.sasikanth.rss.reader.app.AppIconManager
+import dev.sasikanth.rss.reader.media.AndroidAudioPlayer
+import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.utils.AndroidInAppRating
 import dev.sasikanth.rss.reader.utils.InAppRating
 import me.tatarka.inject.annotations.Provides
@@ -30,4 +32,6 @@ actual interface PlatformComponent {
   @Provides fun AndroidInAppRating.bind(): InAppRating = this
 
   @Provides fun AndroidAppIconManager.bind(): AppIconManager = this
+
+  @Provides fun AndroidAudioPlayer.bind(): AudioPlayer = this
 }

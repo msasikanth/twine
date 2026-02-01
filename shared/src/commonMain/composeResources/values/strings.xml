@@ -242,6 +242,8 @@
   <string name="onboardingSubtitle">Build your feed</string>
   <string name="onboardingSubtitle2">No algorithm. No ads.\nJust the content you love.</string>
   <string name="readingTimeEstimate">%1$dM read</string>
+  <string name="play">Play</string>
+  <string name="pause">Pause</string>
 
   <!-- Statistics -->
   <string name="statistics">Statistics</string>

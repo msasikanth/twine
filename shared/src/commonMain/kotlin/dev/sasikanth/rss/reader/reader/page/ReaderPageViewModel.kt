@@ -25,6 +25,7 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
+import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
@@ -51,6 +52,7 @@ class ReaderPageViewModel(
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
+  val audioPlayer: AudioPlayer,
   @Assisted private val readerPost: ResolvedPost,
 ) : ViewModel() {
 
@@ -88,6 +90,28 @@ class ReaderPageViewModel(
     if (_showFullArticle.value) {
       loadFullArticle()
     }
+  }
+
+  fun playAudio() {
+    val audioUrl = readerPost.audioUrl ?: return
+    audioPlayer.play(
+      url = audioUrl,
+      title = readerPost.title,
+      artist = readerPost.feedName,
+      coverUrl = readerPost.imageUrl
+    )
+  }
+
+  fun pauseAudio() {
+    audioPlayer.pause()
+  }
+
+  fun resumeAudio() {
+    audioPlayer.resume()
+  }
+
+  fun seekAudio(position: Long) {
+    audioPlayer.seekTo(position)
   }
 
   private fun loadFullArticle() {

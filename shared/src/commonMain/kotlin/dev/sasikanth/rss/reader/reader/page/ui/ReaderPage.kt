@@ -40,10 +40,13 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
@@ -97,11 +100,14 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
+import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Pause
+import dev.sasikanth.rss.reader.resources.icons.Play
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
@@ -121,6 +127,8 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.pause
+import twine.shared.generated.resources.play
 import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
@@ -148,6 +156,7 @@ internal fun ReaderPage(
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
+  val playbackState by pageViewModel.audioPlayer.playbackState.collectAsStateWithLifecycle()
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -231,6 +240,26 @@ internal fun ReaderPage(
                 onBookmarkClick = onBookmarkClick,
                 onMarkAsUnread = onMarkAsUnread,
               )
+            }
+
+            if (!readerPost.audioUrl.isNullOrBlank()) {
+              item(key = "podcast-player") {
+                val isPostAudioPlaying = playbackState.playingUrl == readerPost.audioUrl
+                val postPlaybackState =
+                  if (isPostAudioPlaying) {
+                    playbackState
+                  } else {
+                    PlaybackState.Idle
+                  }
+
+                MediaControls(
+                  playbackState = postPlaybackState,
+                  onPlayClick = pageViewModel::playAudio,
+                  onPauseClick = pageViewModel::pauseAudio,
+                  onSeek = pageViewModel::seekAudio,
+                  modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+              }
             }
 
             item(key = "divider") {
@@ -590,4 +619,97 @@ private fun PostActionButton(
 enum class ReaderProcessingProgress {
   Loading,
   Idle
+}
+
+@Composable
+private fun MediaControls(
+  playbackState: PlaybackState,
+  onPlayClick: () -> Unit,
+  onPauseClick: () -> Unit,
+  onSeek: (Long) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val isPlaying = playbackState.isPlaying
+  val progress =
+    if (playbackState.duration > 0) {
+      (playbackState.currentPosition.toFloat() / playbackState.duration.toFloat()).coerceIn(0f, 1f)
+    } else {
+      0f
+    }
+
+  Column(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+        .padding(16.dp)
+  ) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+      Box(
+        modifier =
+          Modifier.requiredSize(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(AppTheme.colorScheme.primaryContainer)
+            .clickable(onClick = if (isPlaying) onPauseClick else onPlayClick),
+        contentAlignment = Alignment.Center
+      ) {
+        if (playbackState.buffering) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = AppTheme.colorScheme.onPrimaryContainer,
+            strokeWidth = 2.dp
+          )
+        } else {
+          Icon(
+            imageVector = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
+            contentDescription =
+              if (isPlaying) stringResource(Res.string.pause) else stringResource(Res.string.play),
+            tint = AppTheme.colorScheme.onPrimaryContainer,
+          )
+        }
+      }
+
+      Spacer(Modifier.requiredWidth(16.dp))
+
+      Column(modifier = Modifier.weight(1f)) {
+        Slider(
+          modifier = Modifier.padding(top = 16.dp),
+          value = progress,
+          onValueChange = { onSeek((it * playbackState.duration).toLong()) },
+          colors =
+            SliderDefaults.colors(
+              thumbColor = AppTheme.colorScheme.primary,
+              activeTrackColor = AppTheme.colorScheme.primary,
+              inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f)
+            ),
+        )
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+          Text(
+            text = formatDuration(playbackState.currentPosition),
+            style = MaterialTheme.typography.labelSmall,
+            color = AppTheme.colorScheme.onSurfaceVariant
+          )
+          Spacer(Modifier.weight(1f))
+          Text(
+            text = formatDuration(playbackState.duration),
+            style = MaterialTheme.typography.labelSmall,
+            color = AppTheme.colorScheme.onSurfaceVariant
+          )
+        }
+      }
+    }
+  }
+}
+
+private fun formatDuration(duration: Long): String {
+  val seconds = (duration / 1000) % 60
+  val minutes = (duration / (1000 * 60)) % 60
+  val hours = (duration / (1000 * 60 * 60))
+
+  return if (hours > 0) {
+    "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+  } else {
+    "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+  }
 }
