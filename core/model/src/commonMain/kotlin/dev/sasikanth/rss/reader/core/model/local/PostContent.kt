@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader.core.model.local
 
 data class PostContent(
   val id: String,
-  val postContent: String?,
-  val fullArticleHtml: String?,
+  val feedContent: String?,
+  val articleContent: String?,
+  val feedContentReadingTime: Int?,
+  val articleContentReadingTime: Int?,
 )

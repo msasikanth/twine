@@ -19,13 +19,13 @@ package dev.sasikanth.rss.reader.addfeed
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.FeedAddResult
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.exceptions.XmlParsingError
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import dev.sasikanth.rss.reader.utils.InAppRating
 import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.network.sockets.SocketTimeoutException
@@ -123,8 +123,8 @@ class AddFeedViewModel(
           }
         }
       } catch (e: Exception) {
-        BugsnagKotlin.setCustomValue(section = "AddingFeed", key = "feed_url", value = feedLink)
-        BugsnagKotlin.sendHandledException(e)
+        CrashReporter.setCustomValue(section = "AddingFeed", key = "feed_url", value = feedLink)
+        CrashReporter.log(e)
         _state.update { it.copy(error = AddFeedErrorType.Unknown(e)) }
       } finally {
         _state.update { it.copy(feedFetchingState = FeedFetchingState.Idle) }
@@ -141,8 +141,8 @@ class AddFeedViewModel(
         _state.update { it.copy(error = AddFeedErrorType.UnknownFeedType) }
       }
       is XmlParsingError -> {
-        BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-        BugsnagKotlin.sendHandledException(error.exception)
+        CrashReporter.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+        CrashReporter.log(error.exception)
         _state.update { it.copy(error = AddFeedErrorType.FailedToParseXML) }
       }
       is ConnectTimeoutException,
@@ -150,8 +150,8 @@ class AddFeedViewModel(
         _state.update { it.copy(error = AddFeedErrorType.Timeout) }
       }
       else -> {
-        BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-        BugsnagKotlin.sendHandledException(error.exception)
+        CrashReporter.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+        CrashReporter.log(error.exception)
         _state.update { it.copy(error = AddFeedErrorType.Unknown(error.exception)) }
       }
     }
@@ -182,7 +182,7 @@ class AddFeedViewModel(
   }
 
   private fun handleDatabaseErrors(error: FeedAddResult.DatabaseError, feedLink: String) {
-    BugsnagKotlin.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
-    BugsnagKotlin.sendHandledException(error.exception)
+    CrashReporter.setCustomValue("AddingFeed", key = "feed_url", value = feedLink)
+    CrashReporter.log(error.exception)
   }
 }

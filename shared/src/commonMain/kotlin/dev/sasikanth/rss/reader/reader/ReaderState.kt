@@ -19,7 +19,7 @@ package dev.sasikanth.rss.reader.reader
 
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.emptyFlow
 data class ReaderState(
   val activePostIndex: Int,
   val activePostId: String,
-  val posts: Flow<PagingData<PostWithMetadata>>,
+  val posts: Flow<PagingData<ResolvedPost>>,
   val showReaderCustomisations: Boolean,
   val selectedReaderFont: ReaderFont,
   val readerFontScaleFactor: Float,

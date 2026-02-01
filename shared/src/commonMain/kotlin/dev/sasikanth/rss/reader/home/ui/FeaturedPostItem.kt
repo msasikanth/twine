@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -45,26 +44,30 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import androidx.window.core.layout.WindowSizeClass
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
-private val featuredItemPadding
+private val featuredItemPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
+  get() {
+    val sizeClass = LocalWindowSizeClass.current
+    return when {
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
+        PaddingValues(horizontal = 128.dp)
       else -> PaddingValues(0.dp)
     }
+  }
 
-@Immutable data class FeaturedPostItem(val postWithMetadata: PostWithMetadata, val seedColor: Int?)
+@Immutable data class FeaturedPostItem(val resolvedPost: ResolvedPost, val seedColor: Int?)
 
 @Composable
 internal fun FeaturedPostItem(
-  item: PostWithMetadata,
+  item: ResolvedPost,
   onClick: () -> Unit,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
@@ -146,6 +149,7 @@ internal fun FeaturedPostItem(
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       onTogglePostReadClick = {

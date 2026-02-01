@@ -26,7 +26,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
 import kotlin.time.Duration.Companion.seconds
@@ -43,12 +43,12 @@ internal fun PostsList(
   listState: LazyListState,
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
-  posts: () -> LazyPagingItems<PostWithMetadata>,
+  posts: () -> LazyPagingItems<ResolvedPost>,
   postsScrolled: (List<String>) -> Unit,
   markScrolledPostsAsRead: () -> Unit,
   markPostAsReadOnScroll: (String) -> Unit,
-  onPostClicked: (post: PostWithMetadata, postIndex: Int) -> Unit,
-  onPostBookmarkClick: (PostWithMetadata) -> Unit,
+  onPostClicked: (post: ResolvedPost, postIndex: Int) -> Unit,
+  onPostBookmarkClick: (ResolvedPost) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
   updateReadStatus: (String, Boolean) -> Unit,

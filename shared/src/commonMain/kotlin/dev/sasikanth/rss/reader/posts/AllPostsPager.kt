@@ -22,9 +22,9 @@ import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
@@ -85,7 +85,7 @@ class AllPostsPager(
       }
       .distinctUntilChanged()
 
-  val allPostsPagingData: Flow<PagingData<PostWithMetadata>> =
+  val allPostsPagingData: Flow<PagingData<ResolvedPost>> =
     baseParameters.flatMapLatest { params ->
       createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
           rssRepository.allPosts(

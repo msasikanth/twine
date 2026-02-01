@@ -23,6 +23,8 @@ plugins {
 kotlin {
   jvmToolchain(21)
 
+  jvm()
+
   android {
     namespace = "dev.sasikanth.rss.reader.core.base"
 
@@ -50,7 +52,10 @@ kotlin {
       implementation(libs.androidx.annotation)
       api(libs.androidx.activity.compose)
       api(libs.androidx.core)
+      implementation(libs.crashkios.bugsnag)
     }
+
+    iosMain.dependencies { implementation(libs.crashkios.bugsnag) }
   }
 
   compilerOptions {

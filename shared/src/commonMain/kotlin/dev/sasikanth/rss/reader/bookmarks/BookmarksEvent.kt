@@ -16,11 +16,11 @@
  */
 package dev.sasikanth.rss.reader.bookmarks
 
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 
 sealed interface BookmarksEvent {
 
-  data class OnPostBookmarkClick(val post: PostWithMetadata) : BookmarksEvent
+  data class OnPostBookmarkClick(val post: ResolvedPost) : BookmarksEvent
 
   data class UpdatePostReadStatus(val postId: String, val updatedReadStatus: Boolean) :
     BookmarksEvent

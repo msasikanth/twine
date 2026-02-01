@@ -92,7 +92,7 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
@@ -121,6 +121,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -133,7 +134,8 @@ private val json = Json {
 @Composable
 internal fun ReaderPage(
   pageViewModel: ReaderPageViewModel,
-  readerPost: PostWithMetadata,
+  readerPost: ResolvedPost,
+  showFullArticle: Boolean,
   page: Int,
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
@@ -217,6 +219,7 @@ internal fun ReaderPage(
             item(key = "reader-header") {
               PostHeader(
                 readerPost = readerPost,
+                showFullArticle = showFullArticle,
                 page = page,
                 pagerState = pagerState,
                 excerpt = excerptState,
@@ -281,7 +284,8 @@ private fun ProgressIndicator() {
 
 @Composable
 private fun PostHeader(
-  readerPost: PostWithMetadata,
+  readerPost: ResolvedPost,
+  showFullArticle: Boolean,
   page: Int,
   pagerState: PagerState,
   excerpt: String,
@@ -319,13 +323,38 @@ private fun PostHeader(
 
     Column(modifier = Modifier.padding(horizontal = 32.dp)) {
       DisableSelection {
-        Text(
+        Row(
           modifier = Modifier.padding(top = 20.dp),
-          text = readerPost.date.readerDateTimestamp(),
-          style = MaterialTheme.typography.bodyMedium,
-          color = AppTheme.colorScheme.outline,
-          maxLines = 1,
-        )
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = readerPost.date.readerDateTimestamp(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.outline,
+            maxLines = 1,
+          )
+
+          val readingTimeEstimate =
+            readerPost.articleContentReadingTime?.takeIf { showFullArticle }
+              ?: readerPost.feedContentReadingTime ?: 0
+
+          if (readingTimeEstimate > 0) {
+            Text(
+              modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
+              style = MaterialTheme.typography.bodyMedium,
+              maxLines = 1,
+              text = "\u2022",
+              color = AppTheme.colorScheme.outline,
+            )
+
+            Text(
+              text = stringResource(Res.string.readingTimeEstimate, readingTimeEstimate),
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.outline,
+              maxLines = 1,
+            )
+          }
+        }
       }
 
       Text(

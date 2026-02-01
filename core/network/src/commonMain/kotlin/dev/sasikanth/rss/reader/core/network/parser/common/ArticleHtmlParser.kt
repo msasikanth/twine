@@ -16,10 +16,10 @@
  */
 package dev.sasikanth.rss.reader.core.network.parser.common
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.safety.Cleaner
 import com.fleeksoft.ksoup.safety.Safelist
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import io.ktor.utils.io.charsets.MalformedInputException
 import me.tatarka.inject.annotations.Inject
 
@@ -66,7 +66,7 @@ class ArticleHtmlParser {
     } catch (e: Exception) {
       null
     } catch (e: MalformedInputException) {
-      BugsnagKotlin.sendHandledException(e)
+      CrashReporter.log(e)
       null
     }
   }

@@ -27,10 +27,10 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -50,6 +50,7 @@ import dev.sasikanth.rss.reader.data.database.SourceQueries
 import dev.sasikanth.rss.reader.data.database.TransactionRunner
 import dev.sasikanth.rss.reader.data.sync.ReadPostSyncEntity
 import dev.sasikanth.rss.reader.data.utils.Constants
+import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
@@ -57,6 +58,8 @@ import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.filter
@@ -79,6 +82,7 @@ class RssRepository(
   private val blockedWordsQueries: BlockedWordsQueries,
   private val appConfigQueries: AppConfigQueries,
   private val sourceQueries: SourceQueries,
+  private val readingTimeCalculator: ReadingTimeCalculator,
   private val dispatchersProvider: DispatchersProvider
 ) {
   private companion object {
@@ -142,10 +146,29 @@ class RssRepository(
     return finalFeedId
   }
 
-  private fun upsertPostsBatch(posts: List<PostPayload>, feedId: String) {
+  private suspend fun upsertPostsBatch(posts: List<PostPayload>, feedId: String) {
     val now = Clock.System.now()
+    val postsWithReadingTime =
+      withContext(dispatchersProvider.default) {
+        posts
+          .map { postPayload ->
+            async {
+              val rawContentReadingTime = readingTimeCalculator.calculate(postPayload.rawContent)
+              val htmlContentReadingTime =
+                if (postPayload.fullContent != null) {
+                  readingTimeCalculator.calculate(postPayload.fullContent)
+                } else {
+                  null
+                }
+
+              postPayload to (rawContentReadingTime to htmlContentReadingTime)
+            }
+          }
+          .awaitAll()
+      }
+
     transactionRunner.invoke {
-      posts.forEach { postPayload ->
+      postsWithReadingTime.forEach { (postPayload, readingTimes) ->
         val postId = nameBasedUuidOf(postPayload.link).toString()
         postQueries.upsert(
           id = postId,
@@ -164,10 +187,12 @@ class RssRepository(
 
         postContentQueries.upsert(
           id = postId,
-          rawContent = postPayload.rawContent,
-          rawContentLen = postPayload.rawContent.orEmpty().length.toLong(),
-          htmlContent = postPayload.fullContent,
+          feedContent = postPayload.rawContent,
+          feedContentLen = postPayload.rawContent.orEmpty().length.toLong(),
+          articleContent = postPayload.fullContent,
           createdAt = now,
+          feedContentReadingTime = readingTimes.first.toLong(),
+          articleContentReadingTime = readingTimes.second?.toLong(),
         )
       }
     }
@@ -250,7 +275,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
-  ): PagingSource<Int, PostWithMetadata> {
+  ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery =
         postQueries.allPostsCount(
@@ -290,8 +315,10 @@ class RssRepository(
             feedHomepageLink: String,
             alwaysFetchFullArticle: Boolean,
             showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long?,
             _: Long ->
-            PostWithMetadata(
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,
@@ -307,6 +334,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchFullArticle,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
               remoteId = remoteId,
             )
           }
@@ -664,7 +693,7 @@ class RssRepository(
     }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
+  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, ResolvedPost> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
@@ -692,8 +721,10 @@ class RssRepository(
             feedIcon: String,
             feedHomepageLink: String,
             alwaysFetchSourceArticle: Boolean,
-            showFeedFavIcon: Boolean ->
-            PostWithMetadata(
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,
@@ -709,6 +740,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
             )
           }
         )
@@ -716,7 +749,7 @@ class RssRepository(
     )
   }
 
-  fun bookmarks(): PagingSource<Int, PostWithMetadata> {
+  fun bookmarks(): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery = bookmarkQueries.countBookmarks(),
       transacter = bookmarkQueries,
@@ -739,8 +772,10 @@ class RssRepository(
             feedName: String,
             feedIcon: String,
             feedHomepageLink: String,
-            showFeedFavIcon: Boolean ->
-            PostWithMetadata(
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,
@@ -756,6 +791,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = true,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
             )
           }
         )

@@ -21,7 +21,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +56,7 @@ class BookmarksViewModel(
     }
   }
 
-  private fun onPostBookmarkClicked(post: PostWithMetadata) {
+  private fun onPostBookmarkClicked(post: ResolvedPost) {
     viewModelScope.launch {
       if (rssRepository.hasFeed(post.sourceId) && rssRepository.hasPost(post.id)) {
         rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)

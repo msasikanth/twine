@@ -66,7 +66,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
@@ -100,6 +99,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
@@ -234,14 +234,17 @@ import twine.shared.generated.resources.twinePremium
 import twine.shared.generated.resources.twinePremiumDesc
 import twine.shared.generated.resources.twinePremiumSubscribedDesc
 
-private val settingsItemPadding
+private val settingsItemPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
+  get() {
+    val sizeClass = LocalWindowSizeClass.current
+    return when {
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
+        PaddingValues(horizontal = 128.dp)
       else -> PaddingValues(0.dp)
     }
+  }
 
 @Composable
 internal fun SettingsScreen(

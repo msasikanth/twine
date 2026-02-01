@@ -1,0 +1,6 @@
+ALTER TABLE postContent RENAME COLUMN rawContent TO feedContent;
+ALTER TABLE postContent RENAME COLUMN htmlContent TO articleContent;
+ALTER TABLE postContent RENAME COLUMN rawContentLen TO feedContentLen;
+
+ALTER TABLE postContent ADD COLUMN feedContentReadingTime INTEGER DEFAULT NULL;
+ALTER TABLE postContent ADD COLUMN articleContentReadingTime INTEGER DEFAULT NULL;

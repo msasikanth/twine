@@ -26,6 +26,8 @@ kotlin {
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
+  jvm()
+
   android {
     namespace = "dev.sasikanth.rss.reader.core.network"
 
@@ -58,7 +60,6 @@ kotlin {
       implementation(libs.ksoup.kotlinx.io)
       implementation(libs.ktxml)
       implementation(libs.kermit)
-      implementation(libs.crashkios.bugsnag)
       api(libs.korlibs.string)
     }
     commonTest.dependencies {
@@ -70,9 +71,15 @@ kotlin {
     androidMain.dependencies {
       implementation(libs.androidx.annotation)
       implementation(libs.ktor.client.okhttp)
+      implementation(libs.crashkios.bugsnag)
     }
 
-    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    iosMain.dependencies {
+      implementation(libs.ktor.client.darwin)
+      implementation(libs.crashkios.bugsnag)
+    }
+
+    jvmMain.dependencies { implementation(libs.ktor.client.okhttp) }
 
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
   }

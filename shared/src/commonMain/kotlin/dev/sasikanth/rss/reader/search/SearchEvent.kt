@@ -17,7 +17,7 @@
 package dev.sasikanth.rss.reader.search
 
 import androidx.compose.ui.text.input.TextFieldValue
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 
 sealed interface SearchEvent {
@@ -32,7 +32,7 @@ sealed interface SearchEvent {
 
   data object ClearSearchQuery : SearchEvent
 
-  data class OnPostBookmarkClick(val post: PostWithMetadata) : SearchEvent
+  data class OnPostBookmarkClick(val post: ResolvedPost) : SearchEvent
 
   data class UpdatePostReadStatus(val postId: String, val updatedReadStatus: Boolean) : SearchEvent
 }

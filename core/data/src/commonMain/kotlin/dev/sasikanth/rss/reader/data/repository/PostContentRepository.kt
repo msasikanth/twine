@@ -22,6 +22,7 @@ import app.cash.sqldelight.coroutines.mapToOneOrNull
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.PostContent
 import dev.sasikanth.rss.reader.data.database.PostContentQueries
+import dev.sasikanth.rss.reader.data.utils.ReadingTimeCalculator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
@@ -33,12 +34,26 @@ import me.tatarka.inject.annotations.Inject
 class PostContentRepository(
   private val postContentQueries: PostContentQueries,
   private val dispatcherProvider: DispatchersProvider,
+  private val readingTimeCalculator: ReadingTimeCalculator,
 ) {
 
   fun postContent(postId: String): Flow<PostContent?> {
     return postContentQueries
-      .getByPostId(postId) { id, rawContent, htmlContent, _, createdAt ->
-        PostContent(id, rawContent, htmlContent)
+      .getByPostId(postId) {
+        id,
+        feedContent,
+        articleContent,
+        _,
+        _,
+        feedContentReadingTime,
+        articleContentReadingTime ->
+        PostContent(
+          id = id,
+          feedContent = feedContent,
+          articleContent = articleContent,
+          feedContentReadingTime = feedContentReadingTime?.toInt(),
+          articleContentReadingTime = articleContentReadingTime?.toInt()
+        )
       }
       .asFlow()
       .mapToOneOrNull(dispatcherProvider.databaseRead)
@@ -48,25 +63,40 @@ class PostContentRepository(
       }
   }
 
-  suspend fun updateFullArticleContent(postId: String, htmlContent: String?) {
+  suspend fun updateFullArticleContent(postId: String, articleContent: String?) {
+    val readingTime = readingTimeCalculator.calculate(articleContent)
     withContext(dispatcherProvider.databaseWrite) {
-      postContentQueries.updateHtmlContent(htmlContent, postId)
+      postContentQueries.updateArticleContent(
+        articleContent = articleContent,
+        articleContentReadingTime = readingTime.toLong(),
+        id = postId
+      )
     }
   }
 
   suspend fun upsert(
     postId: String,
-    rawContent: String?,
-    htmlContent: String?,
+    feedContent: String?,
+    articleContent: String?,
     createdAt: Instant,
   ) {
+    val feedReadingTime = readingTimeCalculator.calculate(feedContent)
+    val articleReadingTime =
+      if (articleContent != null) {
+        readingTimeCalculator.calculate(articleContent)
+      } else {
+        null
+      }
+
     withContext(dispatcherProvider.databaseWrite) {
       postContentQueries.upsert(
         id = postId,
-        rawContent = rawContent,
-        rawContentLen = rawContent?.length?.toLong() ?: 0L,
-        htmlContent = htmlContent,
+        feedContent = feedContent,
+        feedContentLen = feedContent?.length?.toLong() ?: 0L,
+        articleContent = articleContent,
         createdAt = createdAt,
+        feedContentReadingTime = feedReadingTime.toLong(),
+        articleContentReadingTime = articleReadingTime?.toLong(),
       )
     }
   }

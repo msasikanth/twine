@@ -72,6 +72,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -81,10 +87,11 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
@@ -105,6 +112,7 @@ import dev.sasikanth.rss.reader.utils.CollectItemTransition
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
+import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -112,6 +120,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -126,7 +135,7 @@ internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
   onVisiblePostChanged: (Int) -> Unit,
-  openPost: (Int, PostWithMetadata) -> Unit,
+  openPost: (Int, ResolvedPost) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
   openAddFeedScreen: () -> Unit,
@@ -227,7 +236,19 @@ internal fun HomeScreen(
     onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } }
   )
 
-  Scaffold(modifier) { scaffoldPadding ->
+  Scaffold(
+    modifier =
+      modifier.onPreviewKeyEvent { event ->
+        println(event.key)
+        when {
+          event.isMetaPressed && event.key == Key.R && event.type == KeyEventType.KeyUp -> {
+            viewModel.dispatch(HomeEvent.OnSwipeToRefresh)
+            true
+          }
+          else -> false
+        }
+      },
+  ) { scaffoldPadding ->
     val sheetPeekHeight by
       animateDpAsState(
         targetValue =
@@ -479,22 +500,26 @@ private fun PullToRefreshContent(
   onRefresh: () -> Unit,
   content: @Composable () -> Unit,
 ) {
-  PullToRefreshBox(
-    state = pullToRefreshState,
-    isRefreshing = state.isSyncing,
-    onRefresh = onRefresh,
-    indicator = {
-      Indicator(
-        modifier =
-          Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
-        isRefreshing = state.isSyncing,
-        containerColor = AppTheme.colorScheme.primaryContainer,
-        color = AppTheme.colorScheme.primary,
-        state = pullToRefreshState
-      )
+  if (platform == Platform.Desktop) {
+    Box(modifier = Modifier.fillMaxSize()) { content() }
+  } else {
+    PullToRefreshBox(
+      state = pullToRefreshState,
+      isRefreshing = state.isSyncing,
+      onRefresh = onRefresh,
+      indicator = {
+        Indicator(
+          modifier =
+            Modifier.align(Alignment.TopCenter).padding(top = paddingValues.calculateTopPadding()),
+          isRefreshing = state.isSyncing,
+          containerColor = AppTheme.colorScheme.primaryContainer,
+          color = AppTheme.colorScheme.primary,
+          state = pullToRefreshState
+        )
+      }
+    ) {
+      content()
     }
-  ) {
-    content()
   }
 }
 
@@ -576,11 +601,17 @@ private fun NoNewPosts() {
 
 @Composable
 fun featuredPosts(
-  posts: () -> LazyPagingItems<PostWithMetadata>?,
+  posts: () -> LazyPagingItems<ResolvedPost>?,
   homeViewMode: HomeViewMode,
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
   val shouldBlockImage = LocalBlockImage.current
+  val sizeClass = LocalWindowSizeClass.current
+
+  if (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)) {
+    return flowOf(persistentListOf())
+  }
+
   val posts = posts.invoke()
 
   if (shouldBlockImage) return emptyFlow()
@@ -603,7 +634,7 @@ fun featuredPosts(
             val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
 
             FeaturedPostItem(
-              postWithMetadata = post,
+              resolvedPost = post,
               seedColor = existingSeedColor?.toArgb(),
             )
           } else {
@@ -620,10 +651,10 @@ fun featuredPosts(
 
             if (item.seedColor != null) return@mapNotNull item
 
-            return@mapNotNull if (!item.postWithMetadata.imageUrl.isNullOrBlank()) {
+            return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
               val seedColor =
                 seedColorExtractor.calculateSeedColor(
-                  url = item.postWithMetadata.imageUrl,
+                  url = item.resolvedPost.imageUrl,
                 )
               item.copy(seedColor = seedColor?.toArgb())
             } else {

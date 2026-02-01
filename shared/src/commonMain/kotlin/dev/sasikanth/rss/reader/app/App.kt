@@ -22,8 +22,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -57,7 +57,7 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feed.FeedViewModel
@@ -150,7 +150,7 @@ fun App(
   homeViewModel: () -> HomeViewModel,
   feedsViewModel: () -> FeedsViewModel,
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
-  readerPageViewModel: (PostWithMetadata) -> ReaderPageViewModel,
+  readerPageViewModel: (ResolvedPost) -> ReaderPageViewModel,
   addFeedViewModel: () -> AddFeedViewModel,
   feedViewModel: (SavedStateHandle) -> FeedViewModel,
   groupSelectionViewModel: (SavedStateHandle) -> GroupSelectionViewModel,
@@ -177,9 +177,10 @@ fun App(
       defaultDarkAppColorScheme = darkAppColorScheme(),
     )
   val coroutineScope = rememberCoroutineScope()
+  val windowInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
 
   CompositionLocalProvider(
-    LocalWindowSizeClass provides calculateWindowSizeClass(),
+    LocalWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
@@ -199,7 +200,7 @@ fun App(
         }
       }
     val navController = rememberNavController()
-    val openPost: (Int, PostWithMetadata, FromScreen) -> Unit =
+    val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
       remember(navController, linkHandler, appViewModel, coroutineScope) {
         { index, post, fromScreen ->
           navController.navigateToReaderOrOpenLink(
@@ -605,7 +606,7 @@ fun App(
 private fun NavHostController.navigateToReaderOrOpenLink(
   showReader: Boolean,
   index: Int,
-  post: PostWithMetadata,
+  post: ResolvedPost,
   fromScreen: FromScreen,
   openLink: () -> Unit,
 ) {

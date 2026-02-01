@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class PostWithMetadata(
+data class ResolvedPost(
   val id: String,
   val sourceId: String,
   val title: String,
@@ -38,6 +38,8 @@ data class PostWithMetadata(
   val feedHomepageLink: String,
   val alwaysFetchFullArticle: Boolean,
   val showFeedFavIcon: Boolean,
+  val feedContentReadingTime: Int? = null,
+  val articleContentReadingTime: Int? = null,
   val remoteId: String? = null,
 ) {
   val bookmarked: Boolean

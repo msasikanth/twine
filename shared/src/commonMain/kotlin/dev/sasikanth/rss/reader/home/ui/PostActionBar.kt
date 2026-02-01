@@ -81,6 +81,7 @@ import twine.shared.generated.resources.markAsRead
 import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.moreMenuOptions
 import twine.shared.generated.resources.openWebsite
+import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -95,6 +96,7 @@ internal fun PostActionBar(
   postLink: String,
   postBookmarked: Boolean,
   commentsLink: String?,
+  postReadingTimeEstimate: Int,
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
   onTogglePostReadClick: () -> Unit,
@@ -114,7 +116,7 @@ internal fun PostActionBar(
     verticalAlignment = Alignment.CenterVertically
   ) {
     PostSourcePill(
-      modifier = Modifier.weight(1f).clearAndSetSemantics {},
+      modifier = Modifier.weight(1f).padding(end = 8.dp).clearAndSetSemantics {},
       feedName = feedName,
       feedIcon = feedIcon,
       feedHomepageLink = feedHomepageLink,
@@ -124,7 +126,7 @@ internal fun PostActionBar(
     )
 
     Text(
-      modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics {},
+      modifier = Modifier.clearAndSetSemantics {},
       style = MaterialTheme.typography.labelSmall,
       maxLines = 1,
       text = postRelativeTimestamp.uppercase(),
@@ -132,6 +134,26 @@ internal fun PostActionBar(
       textAlign = TextAlign.Start,
       overflow = TextOverflow.Ellipsis,
     )
+
+    if (postReadingTimeEstimate > 0) {
+      Text(
+        modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
+        style = MaterialTheme.typography.labelSmall,
+        maxLines = 1,
+        text = "\u2022",
+        color = AppTheme.colorScheme.outline,
+      )
+
+      Text(
+        modifier = Modifier.clearAndSetSemantics {},
+        style = MaterialTheme.typography.labelSmall,
+        maxLines = 1,
+        text = stringResource(Res.string.readingTimeEstimate, postReadingTimeEstimate).uppercase(),
+        color = AppTheme.colorScheme.outline,
+        textAlign = TextAlign.Start,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
 
     PostActions(
       postLink = postLink,
