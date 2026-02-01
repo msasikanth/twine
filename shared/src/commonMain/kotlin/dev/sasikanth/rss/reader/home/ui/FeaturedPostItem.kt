@@ -149,6 +149,7 @@ internal fun FeaturedPostItem(
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
       onTogglePostReadClick = {

@@ -121,6 +121,7 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -134,6 +135,7 @@ private val json = Json {
 internal fun ReaderPage(
   pageViewModel: ReaderPageViewModel,
   readerPost: ResolvedPost,
+  showFullArticle: Boolean,
   page: Int,
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
@@ -217,6 +219,7 @@ internal fun ReaderPage(
             item(key = "reader-header") {
               PostHeader(
                 readerPost = readerPost,
+                showFullArticle = showFullArticle,
                 page = page,
                 pagerState = pagerState,
                 excerpt = excerptState,
@@ -282,6 +285,7 @@ private fun ProgressIndicator() {
 @Composable
 private fun PostHeader(
   readerPost: ResolvedPost,
+  showFullArticle: Boolean,
   page: Int,
   pagerState: PagerState,
   excerpt: String,
@@ -319,13 +323,38 @@ private fun PostHeader(
 
     Column(modifier = Modifier.padding(horizontal = 32.dp)) {
       DisableSelection {
-        Text(
+        Row(
           modifier = Modifier.padding(top = 20.dp),
-          text = readerPost.date.readerDateTimestamp(),
-          style = MaterialTheme.typography.bodyMedium,
-          color = AppTheme.colorScheme.outline,
-          maxLines = 1,
-        )
+          verticalAlignment = Alignment.CenterVertically
+        ) {
+          Text(
+            text = readerPost.date.readerDateTimestamp(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.outline,
+            maxLines = 1,
+          )
+
+          val readingTimeEstimate =
+            readerPost.articleContentReadingTime?.takeIf { showFullArticle }
+              ?: readerPost.feedContentReadingTime ?: 0
+
+          if (readingTimeEstimate > 0) {
+            Text(
+              modifier = Modifier.padding(horizontal = 4.dp).clearAndSetSemantics {},
+              style = MaterialTheme.typography.bodyMedium,
+              maxLines = 1,
+              text = "\u2022",
+              color = AppTheme.colorScheme.outline,
+            )
+
+            Text(
+              text = stringResource(Res.string.readingTimeEstimate, readingTimeEstimate),
+              style = MaterialTheme.typography.bodyMedium,
+              color = AppTheme.colorScheme.outline,
+              maxLines = 1,
+            )
+          }
+        }
       }
 
       Text(

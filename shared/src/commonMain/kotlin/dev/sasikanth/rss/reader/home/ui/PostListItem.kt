@@ -174,6 +174,7 @@ internal fun PostListItem(
       postLink = item.link,
       postBookmarked = item.bookmarked,
       commentsLink = item.commentsLink,
+      postReadingTimeEstimate = item.feedContentReadingTime ?: 0,
       onBookmarkClick = onPostBookmarkClick,
       onCommentsClick = onPostCommentsClick,
       onTogglePostReadClick = {
