@@ -63,6 +63,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
@@ -213,7 +218,23 @@ internal fun ReaderScreen(
       val isDarkTheme = AppTheme.isDark
 
       Scaffold(
-        modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+        modifier =
+          modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection).onKeyEvent {
+            event ->
+            return@onKeyEvent when {
+              event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+
+                true
+              }
+              event.key == Key.DirectionLeft && event.type == KeyEventType.KeyUp -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+
+                true
+              }
+              else -> false
+            }
+          },
         topBar = {
           val topBarScrimColor = AppTheme.colorScheme.backdrop
           CenterAlignedTopAppBar(
@@ -306,7 +327,7 @@ internal fun ReaderScreen(
             if (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
               960.dp
             } else {
-              640.dp
+              700.dp
             }
 
           HorizontalPager(

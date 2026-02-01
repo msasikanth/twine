@@ -27,6 +27,8 @@ kotlin {
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
+  jvm()
+
   android {
     namespace = "dev.sasikanth.rss.reader.data"
 
@@ -48,7 +50,6 @@ kotlin {
       implementation(libs.kotlinx.coroutines)
       implementation(libs.kotlininject.runtime)
       implementation(libs.kermit)
-      implementation(libs.crashkios.bugsnag)
       api(libs.sqldelight.extensions.coroutines)
       api(libs.sqldelight.extensions.paging)
       api(libs.androidx.datastore.preferences)
@@ -72,9 +73,15 @@ kotlin {
       implementation(libs.androidx.annotation)
       implementation(libs.sqldelight.driver.android)
       api(libs.sqliteAndroid)
+      implementation(libs.crashkios.bugsnag)
     }
 
-    iosMain.dependencies { implementation(libs.sqldelight.driver.native) }
+    iosMain.dependencies {
+      implementation(libs.sqldelight.driver.native)
+      implementation(libs.crashkios.bugsnag)
+    }
+
+    jvmMain.dependencies { implementation(libs.sqldelight.driver.jdbc) }
   }
 
   compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
