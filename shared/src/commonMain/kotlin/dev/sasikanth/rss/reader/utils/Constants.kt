@@ -49,4 +49,6 @@ internal object Constants {
 
   const val NUMBER_OF_FEATURED_POSTS = Constants.NUMBER_OF_FEATURED_POSTS
   const val IOS_APP_GROUP = Constants.APP_GROUP
+
+  internal const val ENTITLEMENT_PREMIUM = "Premium"
 }

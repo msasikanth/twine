@@ -22,16 +22,13 @@ import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
 import com.revenuecat.purchases.kmp.models.CacheFetchPolicy
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.Constants.ENTITLEMENT_PREMIUM
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
 actual class BillingHandler(private val dispatchersProvider: DispatchersProvider) {
-
-  companion object {
-    private const val ENTITLEMENT_PREMIUM = "Premium"
-  }
 
   private val purchases by lazy { Purchases.sharedInstance }
 
