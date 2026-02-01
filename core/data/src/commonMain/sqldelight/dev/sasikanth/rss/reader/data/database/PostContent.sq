@@ -6,8 +6,8 @@ CREATE TABLE postContent (
   articleContent TEXT,
   feedContentLen INTEGER,
   createdAt INTEGER AS Instant NOT NULL,
-  feedContentReadingTime INTEGER,
-  articleContentReadingTime INTEGER
+  feedContentReadingTime INTEGER DEFAULT NULL,
+  articleContentReadingTime INTEGER DEFAULT NULL
 );
 
 upsert:
