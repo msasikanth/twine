@@ -41,7 +41,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
@@ -57,31 +56,40 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 
-private val postListPadding
+private val postListPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
+  get() {
+    val sizeClass = LocalWindowSizeClass.current
+    return when {
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
+        PaddingValues(horizontal = 128.dp)
       else -> PaddingValues(0.dp)
     }
+  }
 
-private val compactPostListPadding
+private val compactPostListPadding: PaddingValues
   @Composable
   @ReadOnlyComposable
-  get() =
-    when (LocalWindowSizeClass.current.widthSizeClass) {
-      WindowWidthSizeClass.Expanded -> PaddingValues(horizontal = 128.dp)
-      else -> PaddingValues(horizontal = 24.dp)
+  get() {
+    val sizeClass = LocalWindowSizeClass.current
+    return when {
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) ->
+        PaddingValues(horizontal = 128.dp)
+      else -> PaddingValues(24.dp)
     }
+  }
 
 @Composable
 internal fun PostListItem(
@@ -119,15 +127,29 @@ internal fun PostListItem(
       modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      Text(
-        modifier =
-          Modifier.weight(1f).align(Alignment.Top).padding(horizontal = 8.dp).padding(top = 4.dp),
-        style = MaterialTheme.typography.titleMedium,
-        text = item.title.ifBlank { item.description },
-        color = AppTheme.colorScheme.textEmphasisHigh,
-        maxLines = 3,
-        overflow = TextOverflow.Ellipsis
-      )
+      Column(
+        modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(top = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+      ) {
+        Text(
+          style = MaterialTheme.typography.titleMedium,
+          text = item.title.ifBlank { item.description },
+          color = AppTheme.colorScheme.textEmphasisHigh,
+          maxLines = 3,
+          overflow = TextOverflow.Ellipsis
+        )
+
+        if (platform is Platform.Desktop) {
+          Text(
+            text = item.description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.outline,
+            minLines = 3,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
 
       item.imageUrl?.let { url ->
         AsyncImage(

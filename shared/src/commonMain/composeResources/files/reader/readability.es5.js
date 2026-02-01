@@ -1,3 +1,4 @@
+if (!Array.from) { Array.from = (function () { var toStr = Object.prototype.toString; var isCallable = function (fn) { return typeof fn === 'function' || toStr.call(fn) === '[object Function]'; }; var toInteger = function (value) { var number = Number(value); if (isNaN(number)) { return 0; } if (number === 0 || !isFinite(number)) { return number; } return (number > 0 ? 1 : -1) * Math.floor(Math.abs(number)); }; var maxSafeInteger = Math.pow(2, 53) - 1; var toLength = function (value) { var len = toInteger(value); return Math.min(Math.max(len, 0), maxSafeInteger); }; return function from(arrayLike/*, mapFn, thisArg */) { var C = this; var items = Object(arrayLike); if (arrayLike == null) { throw new TypeError('Array.from requires an array-like object - not null or undefined'); } var mapFn = arguments.length > 1 ? arguments[1] : undefined; var T; if (typeof mapFn !== 'undefined') { if (!isCallable(mapFn)) { throw new TypeError('Array.from: when provided, the second argument must be a function'); } if (arguments.length > 2) { T = arguments[2]; } } var len = toLength(items.length); var A = isCallable(C) ? Object(new C(len)) : new Array(len); var k = 0; var kValue; while (k < len) { kValue = items[k]; if (mapFn) { A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k); } else { A[k] = kValue; } k += 1; } A.length = len; return A; }; }()); } 
 /*
  * Copyright (c) 2010 Arc90 Inc
  *
@@ -73,18 +74,18 @@ function Readability(doc, options) {
 
   // Control whether log messages are sent to the console
   if (this._debug) {
-    let logNode = function (node) {
+    var logNode = function (node) {
       if (node.nodeType == node.TEXT_NODE) {
-        return `${node.nodeName} ("${node.textContent}")`;
+        return node.nodeName + ' ("' + node.textContent + '")';
       }
-      let attrPairs = Array.from(node.attributes || [], function (attr) {
-        return `${attr.name}="${attr.value}"`;
+      var attrPairs = Array.from(node.attributes || [], function (attr) {
+        return attr.name + '="' + attr.value + '"';
       }).join(" ");
-      return `<${node.localName} ${attrPairs}>`;
+      return '<' + node.localName + ' ' + attrPairs + '>';
     };
     this.log = function () {
       if (typeof console !== "undefined") {
-        let args = Array.from(arguments, arg => {
+        var args = Array.from(arguments, function(arg) {
           if (arg && arg.nodeType == this.ELEMENT_NODE) {
             return logNode(arg);
           }
@@ -92,7 +93,7 @@ function Readability(doc, options) {
         });
         args.unshift("Reader: (Readability)");
         // eslint-disable-next-line no-console
-        console.log(...args);
+        console.log.apply(console, args);
       } else if (typeof dump !== "undefined") {
         /* global dump */
         var msg = Array.prototype.map
@@ -170,9 +171,9 @@ Readability.prototype = {
       /^Article|AdvertiserContentArticle|NewsArticle|AnalysisNewsArticle|AskPublicNewsArticle|BackgroundNewsArticle|OpinionNewsArticle|ReportageNewsArticle|ReviewNewsArticle|Report|SatiricalArticle|ScholarlyArticle|MedicalScholarlyArticle|SocialMediaPosting|BlogPosting|LiveBlogPosting|DiscussionForumPosting|TechArticle|APIReference$/,
     // used to see if a node's content matches words commonly used for ad blocks or loading indicators
     adWords:
-      /^(ad(vertising|vertisement)?|pub(licité)?|werb(ung)?|广告|Реклама|Anuncio)$/iu,
+      /^(ad(vertising|vertisement)?|pub(licité)?|werb(ung)?|广告|Реклама|Anuncio)$/i,
     loadingWords:
-      /^((loading|正在加载|Загрузка|chargement|cargando)(…|\.\.\.)?)$/iu,
+      /^((loading|正在加载|Загрузка|chargement|cargando)(…|\.\.\.)?)$/i,
   },
 
   UNLIKELY_ROLES: [
@@ -292,8 +293,8 @@ Readability.prototype = {
   },
 
   /**
-   * Iterates over a NodeList, calls `filterFn` for each node and removes node
-   * if function returned `true`.
+   * Iterates over a NodeList, calls 'filterFn' for each node and removes node
+   * if function returned 'true'.
    *
    * If function is not passed, removes all the nodes in node list.
    *
@@ -329,7 +330,7 @@ Readability.prototype = {
     if (this._docJSDOMParser && nodeList._isLiveNodeList) {
       throw new Error("Do not pass live node lists to _replaceNodeTags");
     }
-    for (const node of nodeList) {
+    for (var node of nodeList) {
       this._setNodeTag(node, newTagName);
     }
   },
@@ -419,7 +420,7 @@ Readability.prototype = {
     var classesToPreserve = this._classesToPreserve;
     var className = (node.getAttribute("class") || "")
       .split(/\s+/)
-      .filter(cls => classesToPreserve.includes(cls))
+      .filter(function(cls) { return classesToPreserve.includes(cls); })
       .join(" ");
 
     if (className) {
@@ -594,18 +595,21 @@ Readability.prototype = {
     }
 
     // If there's a separator in the title, first remove the final part
-    const titleSeparators = /\|\-–—\\\/>»/.source;
-    if (new RegExp(`\\s[${titleSeparators}]\\s`).test(curTitle)) {
+    var titleSeparators = /\|\-–—\\\/>»/.source;
+    if (new RegExp('\\s[' + titleSeparators + ']\\s').test(curTitle)) {
       titleHadHierarchicalSeparators = /\s[\\\/>»]\s/.test(curTitle);
-      let allSeparators = Array.from(
-        origTitle.matchAll(new RegExp(`\\s[${titleSeparators}]\\s`, "gi"))
-      );
+      var allSeparators = [];
+      var re = new RegExp('\s[' + titleSeparators + ']\s', 'gi');
+      var match;
+      while ((match = re.exec(origTitle)) !== null) {
+        allSeparators.push(match);
+      }
       curTitle = origTitle.substring(0, allSeparators.pop().index);
 
       // If the resulting title is too short, remove the first part instead:
       if (wordCount(curTitle) < 3) {
         curTitle = origTitle.replace(
-          new RegExp(`^[^${titleSeparators}]*[${titleSeparators}]`, "gi"),
+          new RegExp('^[^' + titleSeparators + ']*[' + titleSeparators + ']', "gi"),
           ""
         );
       }
@@ -650,7 +654,7 @@ Readability.prototype = {
       (!titleHadHierarchicalSeparators ||
         curTitleWordCount !=
           wordCount(
-            origTitle.replace(new RegExp(`\\s[${titleSeparators}]\\s`, "g"), "")
+            origTitle.replace(new RegExp('\\s[' + titleSeparators + ']\\s', "g"), "")
           ) -
             1)
     ) {
@@ -760,7 +764,7 @@ Readability.prototype = {
   },
 
   _setNodeTag(node, tag) {
-    this.log("_setNodeTag", node, tag);
+//    this.log("_setNodeTag", node, tag);
     if (this._docJSDOMParser) {
       node.localName = tag.toLowerCase();
       node.tagName = tag.toUpperCase();
@@ -990,7 +994,7 @@ Readability.prototype = {
     if (!tokensA.length || !tokensB.length) {
       return 0;
     }
-    var uniqTokensB = tokensB.filter(token => !tokensA.includes(token));
+    var uniqTokensB = tokensB.filter(function(token) { return !tokensA.includes(token); });
     var distanceB = uniqTokensB.join(" ").length / tokensB.join(" ").length;
     return 1 - distanceB;
   },
@@ -1039,21 +1043,21 @@ Readability.prototype = {
    **/
   /* eslint-disable-next-line complexity */
   _grabArticle(page) {
-    this.log("**** grabArticle ****");
+//    this.log("**** grabArticle ****");
     var doc = this._doc;
     var isPaging = page !== null;
     page = page ? page : this._doc.body;
 
     // We can't grab an article if we don't have a page!
     if (!page) {
-      this.log("No body found in document. Abort.");
+//      this.log("No body found in document. Abort.");
       return null;
     }
 
     var pageCacheHtml = page.innerHTML;
 
     while (true) {
-      this.log("Starting grabArticle loop");
+//      this.log("Starting grabArticle loop");
       var stripUnlikelyCandidates = this._flagIsActive(
         this.FLAG_STRIP_UNLIKELYS
       );
@@ -1064,7 +1068,7 @@ Readability.prototype = {
       var elementsToScore = [];
       var node = this._doc.documentElement;
 
-      let shouldRemoveTitleHeader = true;
+      var shouldRemoveTitleHeader = true;
 
       while (node) {
         if (node.tagName === "HTML") {
@@ -1074,7 +1078,7 @@ Readability.prototype = {
         var matchString = node.className + " " + node.id;
 
         if (!this._isProbablyVisible(node)) {
-          this.log("Removing hidden node - " + matchString);
+//          this.log("Removing hidden node - " + matchString);
           node = this._removeAndGetNext(node);
           continue;
         }
@@ -1107,17 +1111,17 @@ Readability.prototype = {
               next = this._getNextNode(next);
             }
           }
-          this._articleByline = (itemPropNameNode ?? node).textContent.trim();
+          this._articleByline = ((itemPropNameNode !== null && itemPropNameNode !== undefined ? itemPropNameNode : node)).textContent.trim();
           node = this._removeAndGetNext(node);
           continue;
         }
 
         if (shouldRemoveTitleHeader && this._headerDuplicatesTitle(node)) {
-          this.log(
-            "Removing header: ",
-            node.textContent.trim(),
-            this._articleTitle.trim()
-          );
+//          this.log(
+//            "Removing header: ",
+//            node.textContent.trim(),
+//            this._articleTitle.trim()
+//          );
           shouldRemoveTitleHeader = false;
           node = this._removeAndGetNext(node);
           continue;
@@ -1133,18 +1137,18 @@ Readability.prototype = {
             node.tagName !== "BODY" &&
             node.tagName !== "A"
           ) {
-            this.log("Removing unlikely candidate - " + matchString);
+//            this.log("Removing unlikely candidate - " + matchString);
             node = this._removeAndGetNext(node);
             continue;
           }
 
           if (this.UNLIKELY_ROLES.includes(node.getAttribute("role"))) {
-            this.log(
-              "Removing content with role " +
-                node.getAttribute("role") +
-                " - " +
-                matchString
-            );
+//            this.log(
+//              "Removing content with role " +
+//                node.getAttribute("role") +
+//                " - " +
+//                matchString
+//            );
             node = this._removeAndGetNext(node);
             continue;
           }
@@ -1297,7 +1301,7 @@ Readability.prototype = {
           (1 - this._getLinkDensity(candidate));
         candidate.readability.contentScore = candidateScore;
 
-        this.log("Candidate:", candidate, "with score " + candidateScore);
+//        this.log("Candidate:", candidate, "with score " + candidateScore);
 
         for (var t = 0; t < this._nbTopCandidates; t++) {
           var aTopCandidate = topCandidates[t];
@@ -1328,7 +1332,7 @@ Readability.prototype = {
         // Move everything (not just elements, also text nodes etc.) into the container
         // so we even include text directly in the body:
         while (page.firstChild) {
-          this.log("Moving child out:", page.firstChild);
+//          this.log("Moving child out:", page.firstChild);
           topCandidate.appendChild(page.firstChild);
         }
 
@@ -1336,8 +1340,8 @@ Readability.prototype = {
 
         this._initializeNode(topCandidate);
       } else if (topCandidate) {
-        // Find a better top candidate node if it contains (at least three) nodes which belong to `topCandidates` array
-        // and whose scores are quite closed with current `topCandidate` node.
+        // Find a better top candidate node if it contains (at least three) nodes which belong to 'topCandidates' array
+        // and whose scores are quite closed with current 'topCandidate' node.
         var alternativeCandidateAncestors = [];
         for (var i = 1; i < topCandidates.length; i++) {
           if (
@@ -1442,17 +1446,17 @@ Readability.prototype = {
         var sibling = siblings[s];
         var append = false;
 
-        this.log(
-          "Looking at sibling node:",
-          sibling,
-          sibling.readability
-            ? "with score " + sibling.readability.contentScore
-            : ""
-        );
-        this.log(
-          "Sibling has score",
-          sibling.readability ? sibling.readability.contentScore : "Unknown"
-        );
+//        this.log(
+//          "Looking at sibling node:",
+//          sibling,
+//          sibling.readability
+//            ? "with score " + sibling.readability.contentScore
+//            : ""
+//        );
+//        this.log(
+//          "Sibling has score",
+//          sibling.readability ? sibling.readability.contentScore : "Unknown"
+//        );
 
         if (sibling === topCandidate) {
           append = true;
@@ -1492,12 +1496,12 @@ Readability.prototype = {
         }
 
         if (append) {
-          this.log("Appending node:", sibling);
+//          this.log("Appending node:", sibling);
 
           if (!this.ALTER_TO_DIV_EXCEPTIONS.includes(sibling.nodeName)) {
             // We have a node that isn't a common block level element, like a form or td tag.
             // Turn it into a div so it doesn't get filtered out later by accident.
-            this.log("Altering sibling:", sibling, "to div.");
+//            this.log("Altering sibling:", sibling, "to div.");
 
             sibling = this._setNodeTag(sibling, "DIV");
           }
@@ -1516,12 +1520,12 @@ Readability.prototype = {
       }
 
       if (this._debug) {
-        this.log("Article content pre-prep: " + articleContent.innerHTML);
+//        this.log("Article content pre-prep: " + articleContent.innerHTML);
       }
       // So we have all of the content that we need. Now we clean it up for presentation.
       this._prepArticle(articleContent);
       if (this._debug) {
-        this.log("Article content post-prep: " + articleContent.innerHTML);
+//        this.log("Article content post-prep: " + articleContent.innerHTML);
       }
 
       if (neededToCreateTopCandidate) {
@@ -1542,7 +1546,7 @@ Readability.prototype = {
       }
 
       if (this._debug) {
-        this.log("Article content after paging: " + articleContent.innerHTML);
+//        this.log("Article content after paging: " + articleContent.innerHTML);
       }
 
       var parseSuccessful = true;
@@ -1658,7 +1662,7 @@ Readability.prototype = {
           var parsed = JSON.parse(content);
 
           if (Array.isArray(parsed)) {
-            parsed = parsed.find(it => {
+            parsed = parsed.find(function(it) {
               return (
                 it["@type"] &&
                 it["@type"].match(this.REGEXPS.jsonLdArticleTypes)
@@ -1682,7 +1686,7 @@ Readability.prototype = {
           }
 
           if (!parsed["@type"] && Array.isArray(parsed["@graph"])) {
-            parsed = parsed["@graph"].find(it => {
+            parsed = parsed["@graph"].find(function(it) {
               return (it["@type"] || "").match(this.REGEXPS.jsonLdArticleTypes);
             });
           }
@@ -1749,7 +1753,7 @@ Readability.prototype = {
             metadata.datePublished = parsed.datePublished.trim();
           }
         } catch (err) {
-          this.log(err.message);
+//          this.log(err.message);
         }
       }
     });
@@ -1825,7 +1829,7 @@ Readability.prototype = {
       metadata.title = this._getArticleTitle();
     }
 
-    const articleAuthor =
+    var articleAuthor =
       typeof values["article:author"] === "string" &&
       !this._isUrl(values["article:author"])
         ? values["article:author"]
@@ -2100,7 +2104,7 @@ Readability.prototype = {
       return;
     }
 
-    // Remove `style` and deprecated presentational attributes
+    // Remove 'style' and deprecated presentational attributes
     for (var i = 0; i < this.PRESENTATIONAL_ATTRIBUTES.length; i++) {
       e.removeAttribute(this.PRESENTATIONAL_ATTRIBUTES[i]);
     }
@@ -2310,7 +2314,7 @@ Readability.prototype = {
         return !!table.getElementsByTagName(tag)[0];
       };
       if (dataTableDescendants.some(descendantExists)) {
-        this.log("Data table because found data-y descendant");
+//        this.log("Data table because found data-y descendant");
         table._readabilityDataTable = true;
         continue;
       }
@@ -2430,7 +2434,7 @@ Readability.prototype = {
     var children = this._getAllNodesWithTag(e, tags);
     this._forEachNode(
       children,
-      child => (childrenLength += this._getInnerText(child, true).length)
+      function(child) { return childrenLength += this._getInnerText(child, true).length; }
     );
     return childrenLength / textLength;
   },
@@ -2463,7 +2467,7 @@ Readability.prototype = {
         var listNodes = this._getAllNodesWithTag(node, ["ul", "ol"]);
         this._forEachNode(
           listNodes,
-          list => (listLength += this._getInnerText(list).length)
+          function(list) { return listLength += this._getInnerText(list).length; }
         );
         isList = listLength / this._getInnerText(node).length > 0.9;
       }
@@ -2483,8 +2487,8 @@ Readability.prototype = {
 
       // keep element if it has a data tables
       if (
-        [...node.getElementsByTagName("table")].some(
-          tbl => tbl._readabilityDataTable
+        Array.from(node.getElementsByTagName("table")).some(
+          function(tbl) { return tbl._readabilityDataTable; }
         )
       ) {
         return false;
@@ -2492,7 +2496,7 @@ Readability.prototype = {
 
       var weight = this._getClassWeight(node);
 
-      this.log("Cleaning Conditionally", node);
+//      this.log("Cleaning Conditionally", node);
 
       var contentScore = 0;
 
@@ -2562,16 +2566,16 @@ Readability.prototype = {
         var isFigureChild = this._hasAncestorTag(node, "figure");
 
         // apply shadiness checks, then check for exceptions
-        const shouldRemoveNode = () => {
-          const errs = [];
+        var shouldRemoveNode = function() {
+          var errs = [];
           if (!isFigureChild && img > 1 && p / img < 0.5) {
-            errs.push(`Bad p to img ratio (img=${img}, p=${p})`);
+            errs.push('Bad p to img ratio (img=' + img + ', p=' + p + ')');
           }
           if (!isList && li > p) {
-            errs.push(`Too many li's outside of a list. (li=${li} > p=${p})`);
+            errs.push('Too many li\'s outside of a list. (li=' + li + ' > p=' + p + ')');
           }
           if (input > Math.floor(p / 3)) {
-            errs.push(`Too many inputs per p. (input=${input}, p=${p})`);
+            errs.push('Too many inputs per p. (input=' + input + ', p=' + p + ')');
           }
           if (
             !isList &&
@@ -2582,7 +2586,7 @@ Readability.prototype = {
             linkDensity > 0
           ) {
             errs.push(
-              `Suspiciously short. (headingDensity=${headingDensity}, img=${img}, linkDensity=${linkDensity})`
+              'Suspiciously short. (headingDensity=' + headingDensity + ', img=' + img + ', linkDensity=' + linkDensity + ')'
             );
           }
           if (
@@ -2591,27 +2595,27 @@ Readability.prototype = {
             linkDensity > 0.2 + this._linkDensityModifier
           ) {
             errs.push(
-              `Low weight and a little linky. (linkDensity=${linkDensity})`
+              'Low weight and a little linky. (linkDensity=' + linkDensity + ')'
             );
           }
           if (weight >= 25 && linkDensity > 0.5 + this._linkDensityModifier) {
             errs.push(
-              `High weight and mostly links. (linkDensity=${linkDensity})`
+              'High weight and mostly links. (linkDensity=' + linkDensity + ')'
             );
           }
           if ((embedCount === 1 && contentLength < 75) || embedCount > 1) {
             errs.push(
-              `Suspicious embed. (embedCount=${embedCount}, contentLength=${contentLength})`
+              'Suspicious embed. (embedCount=' + embedCount + ', contentLength=' + contentLength + ')'
             );
           }
           if (img === 0 && textDensity === 0) {
             errs.push(
-              `No useful content. (img=${img}, textDensity=${textDensity})`
+              'No useful content. (img=' + img + ', textDensity=' + textDensity + ')'
             );
           }
 
           if (errs.length) {
-            this.log("Checks failed", errs);
+//            this.log("Checks failed", errs);
             return true;
           }
 
@@ -2623,13 +2627,13 @@ Readability.prototype = {
         // Allow simple lists of images to remain in pages
         if (isList && haveToRemove) {
           for (var x = 0; x < node.children.length; x++) {
-            let child = node.children[x];
+            var child = node.children[x];
             // Don't filter in lists with li's that contain more than one child
             if (child.children.length > 1) {
               return haveToRemove;
             }
           }
-          let li_count = node.getElementsByTagName("li").length;
+          var li_count = node.getElementsByTagName("li").length;
           // Only allow the list to remain if every li contains an image
           if (img == li_count) {
             return false;
@@ -2667,11 +2671,11 @@ Readability.prototype = {
    * @return void
    **/
   _cleanHeaders(e) {
-    let headingNodes = this._getAllNodesWithTag(e, ["h1", "h2"]);
+    var headingNodes = this._getAllNodesWithTag(e, ["h1", "h2"]);
     this._removeNodes(headingNodes, function (node) {
-      let shouldRemove = this._getClassWeight(node) < 0;
+      var shouldRemove = this._getClassWeight(node) < 0;
       if (shouldRemove) {
-        this.log("Removing header with low class weight:", node);
+//        this.log("Removing header with low class weight:", node);
       }
       return shouldRemove;
     });
@@ -2689,7 +2693,7 @@ Readability.prototype = {
       return false;
     }
     var heading = this._getInnerText(node, false);
-    this.log("Evaluating similarity of header:", heading, this._articleTitle);
+//    this.log("Evaluating similarity of header:", heading, this._articleTitle);
     return this._textSimilarity(this._articleTitle, heading) > 0.75;
   },
 
@@ -2759,7 +2763,7 @@ Readability.prototype = {
       return null;
     }
 
-    this.log("Grabbed: " + articleContent.innerHTML);
+//    this.log("Grabbed: " + articleContent.innerHTML);
 
     this._postProcessContent(articleContent);
 

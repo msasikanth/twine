@@ -32,6 +32,8 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    maven("https://www.jetbrains.com/intellij-repository/releases")
+    maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     maven("https://jitpack.io")
     maven("https://oss.sonatype.org/content/repositories/snapshots")
@@ -39,6 +41,8 @@ dependencyResolutionManagement {
 }
 
 include(":androidApp")
+
+include(":desktopApp")
 
 include(":shared")
 

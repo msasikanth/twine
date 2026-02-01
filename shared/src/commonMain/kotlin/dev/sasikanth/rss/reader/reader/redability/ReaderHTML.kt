@@ -26,9 +26,9 @@ object ReaderHTML {
   internal suspend fun createOrGet(): String {
     if (!(cachedHtml.isNullOrBlank())) return cachedHtml!!
 
-    val readabilityJS = readFile("readability.js")
+    val readabilityJS = readFile("readability.es5.js")
     val turndownJS = readFile("turndown.js")
-    val readerJS = readFile("main.js")
+    val readerJS = readFile("main.es5.js")
 
     // language=HTML
     @Suppress("HtmlRequiredLangAttribute", "HtmlRequiredTitleElement")

@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.data.opml
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
 import co.touchlab.kermit.Logger
 import co.touchlab.stately.concurrency.AtomicInt
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
@@ -26,6 +25,7 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_EXTENSION
 import dev.sasikanth.rss.reader.data.utils.Constants.BACKUP_FILE_NAME
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.PickerMode
@@ -108,7 +108,7 @@ class OpmlManager(
           return
         }
 
-        BugsnagKotlin.sendHandledException(e)
+        CrashReporter.log(e)
         _result.emit(OpmlResult.Error.UnknownFailure(e))
       }
     }
@@ -168,7 +168,7 @@ class OpmlManager(
         return
       }
 
-      BugsnagKotlin.sendHandledException(e)
+      CrashReporter.log(e)
       _result.emit(OpmlResult.Error.UnknownFailure(e))
     }
   }

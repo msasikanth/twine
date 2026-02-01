@@ -46,7 +46,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +63,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LookaheadScope
@@ -74,6 +78,7 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.collectAsLazyPagingItems
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeBlock
@@ -213,7 +218,23 @@ internal fun ReaderScreen(
       val isDarkTheme = AppTheme.isDark
 
       Scaffold(
-        modifier = modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection),
+        modifier =
+          modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection).onKeyEvent {
+            event ->
+            return@onKeyEvent when {
+              event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
+
+                true
+              }
+              event.key == Key.DirectionLeft && event.type == KeyEventType.KeyUp -> {
+                coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
+
+                true
+              }
+              else -> false
+            }
+          },
         topBar = {
           val topBarScrimColor = AppTheme.colorScheme.backdrop
           CenterAlignedTopAppBar(
@@ -301,12 +322,12 @@ internal fun ReaderScreen(
           modifier = Modifier.fillMaxSize(),
         ) {
           val layoutDirection = LocalLayoutDirection.current
-          val sizeClass = LocalWindowSizeClass.current.widthSizeClass
+          val sizeClass = LocalWindowSizeClass.current
           val readerContentMaxWidth =
-            if (sizeClass >= WindowWidthSizeClass.Expanded) {
+            if (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND)) {
               960.dp
             } else {
-              640.dp
+              700.dp
             }
 
           HorizontalPager(
