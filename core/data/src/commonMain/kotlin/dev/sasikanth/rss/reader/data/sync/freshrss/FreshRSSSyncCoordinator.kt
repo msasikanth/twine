@@ -34,7 +34,6 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -113,13 +112,8 @@ class FreshRSSSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime.minus(2.days)
-      val newerThan =
-        if (hasNewSubscriptions) {
-          lastSyncedAt.minus(2.hours).toEpochMilliseconds()
-        } else {
-          lastSyncedAt.toEpochMilliseconds()
-        }
+      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime
+      val newerThan = lastSyncedAt.minus(24.hours).toEpochMilliseconds()
 
       val hasNewArticles = syncArticles(newerThan = newerThan)
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
@@ -129,11 +123,10 @@ class FreshRSSSyncCoordinator(
       syncStatuses()
       updateSyncState(SyncState.InProgress(0.9f))
 
-      // Only update lastSyncedAt if we found new articles to avoid missing articles
-      // that were added to the server between syncs with older timestamps
-      if (hasNewArticles) {
-        refreshPolicy.refresh()
-      }
+      // Always update lastSyncedAt after a successful sync. The 24-hour overlap
+      // when fetching articles handles cases where articles might be added to
+      // the server with older timestamps.
+      refreshPolicy.refresh()
       updateSyncState(SyncState.Complete)
 
       true
