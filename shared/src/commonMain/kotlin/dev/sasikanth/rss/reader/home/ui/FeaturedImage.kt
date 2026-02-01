@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ScaleFactor
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -43,11 +43,11 @@ fun FeaturedImage(
   alignment: Alignment = Alignment.Center,
   unlockAspectRatio: Boolean = false,
 ) {
-  val sizeClass = LocalWindowSizeClass.current.widthSizeClass
+  val sizeClass = LocalWindowSizeClass.current
   val imageMaxHeight =
     when {
-      sizeClass >= WindowWidthSizeClass.Expanded -> 360.dp
-      sizeClass >= WindowWidthSizeClass.Medium -> 250.dp
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 360.dp
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 250.dp
       else -> Dp.Unspecified
     }
 

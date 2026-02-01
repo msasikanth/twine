@@ -16,8 +16,8 @@
  */
 package dev.sasikanth.rss.reader.utils
 
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.window.core.layout.WindowSizeClass
 
 internal val LocalWindowSizeClass =
   staticCompositionLocalOf<WindowSizeClass> { error("No WindowSizeClass found") }

@@ -60,6 +60,8 @@ kotlin {
 
   compilerOptions { freeCompilerArgs.add("-Xexpect-actual-classes") }
 
+  jvm()
+
   android {
     namespace = "dev.sasikanth.rss.reader.common"
 
@@ -88,6 +90,7 @@ kotlin {
       implementation(projects.resources.icons)
 
       implementation(libs.bundles.compose)
+      implementation(libs.compose.material3.windowsizeclass)
       implementation(libs.bundles.kotlinx)
       implementation(libs.ktor.core)
       implementation(libs.ktor.client.logging)
@@ -95,7 +98,6 @@ kotlin {
       implementation(libs.androidx.collection)
       implementation(libs.ksoup)
       implementation(libs.ksoup.kotlinx.io)
-      implementation(libs.windowSizeClass)
       api(libs.androidx.datastore.okio)
       api(libs.androidx.datastore.preferences)
       implementation(libs.paging.common)
@@ -107,18 +109,15 @@ kotlin {
       api(libs.coil.compose)
       api(libs.coil.network)
       api(libs.coil.svg)
-      api(libs.crashkios.bugsnag)
       implementation(libs.kermit)
-      implementation(libs.kermit.bugsnag)
       implementation(libs.reorderable)
       api(libs.filekit)
       implementation(libs.markdown.renderer)
       implementation(libs.markdown.material3)
       implementation(libs.markdown.coil)
       implementation(libs.markdown.code)
-      implementation(libs.purchases.core)
-      implementation(libs.purchases.ui)
       implementation(libs.viewmodel)
+      implementation(libs.lifecycle.runtime.compose)
       implementation(libs.navigation)
       implementation(libs.material.kolor)
     }
@@ -141,6 +140,10 @@ kotlin {
         api(libs.androidx.core)
         api(libs.androidx.browser)
         implementation(libs.ktor.client.okhttp)
+        api(libs.crashkios.bugsnag)
+        implementation(libs.kermit.bugsnag)
+        implementation(libs.purchases.core)
+        implementation(libs.purchases.ui)
 
         if (!isFoss) {
           implementation(libs.googlePlayReview)
@@ -148,7 +151,18 @@ kotlin {
       }
     }
 
-    iosMain.dependencies { implementation(libs.ktor.client.darwin) }
+    iosMain.dependencies {
+      implementation(libs.ktor.client.darwin)
+      implementation(libs.crashkios.bugsnag)
+      implementation(libs.kermit.bugsnag)
+      implementation(libs.purchases.core)
+      implementation(libs.purchases.ui)
+    }
+
+    jvmMain.dependencies {
+      implementation(libs.ktor.client.okhttp)
+      implementation(libs.htmlunit)
+    }
 
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
   }
@@ -166,4 +180,5 @@ dependencies {
   add("kspAndroid", libs.kotlininject.compiler)
   add("kspIosArm64", libs.kotlininject.compiler)
   add("kspIosSimulatorArm64", libs.kotlininject.compiler)
+  add("kspJvm", libs.kotlininject.compiler)
 }

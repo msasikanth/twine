@@ -31,7 +31,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,6 +54,7 @@ import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onVisibilityChanged
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
 import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
@@ -230,12 +230,12 @@ private fun FeaturedSectionBackground(
   modifier: Modifier = Modifier,
   drawImage: DrawScope.() -> Unit,
 ) {
-  val sizeClass = LocalWindowSizeClass.current.widthSizeClass
+  val sizeClass = LocalWindowSizeClass.current
   val overlayColor = AppTheme.colorScheme.inversePrimary
   val imageAspectRatio =
     when {
-      sizeClass >= WindowWidthSizeClass.Expanded -> 2f
-      sizeClass >= WindowWidthSizeClass.Medium -> 1.5f
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 2f
+      sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 1.5f
       else -> 1f
     }
   val isDarkTheme = AppTheme.isDark

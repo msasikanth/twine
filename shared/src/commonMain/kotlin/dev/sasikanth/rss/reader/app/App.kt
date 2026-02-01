@@ -22,8 +22,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -177,9 +177,10 @@ fun App(
       defaultDarkAppColorScheme = darkAppColorScheme(),
     )
   val coroutineScope = rememberCoroutineScope()
+  val windowInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
 
   CompositionLocalProvider(
-    LocalWindowSizeClass provides calculateWindowSizeClass(),
+    LocalWindowSizeClass provides windowInfo.windowSizeClass,
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
