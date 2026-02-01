@@ -17,7 +17,7 @@
 
 package dev.sasikanth.rss.reader.data.opml
 
-import co.touchlab.crashkios.bugsnag.BugsnagKotlin
+import dev.sasikanth.rss.reader.logging.CrashReporter
 import kotlinx.serialization.serializer
 import me.tatarka.inject.annotations.Inject
 import nl.adaptivity.xmlutil.serialization.XML
@@ -50,7 +50,7 @@ class SourcesOpml {
         .appendLine()
         .toString()
     } catch (e: Exception) {
-      BugsnagKotlin.sendHandledException(e)
+      CrashReporter.log(e)
     }
 
     return ""
@@ -61,7 +61,7 @@ class SourcesOpml {
       val opml = xml.decodeFromString(serializer<Opml>(), content)
       return opml.body.outlines.mapNotNull(::mapOutlineToSource)
     } catch (e: Exception) {
-      BugsnagKotlin.sendHandledException(e)
+      CrashReporter.log(e)
     }
 
     return emptyList()
