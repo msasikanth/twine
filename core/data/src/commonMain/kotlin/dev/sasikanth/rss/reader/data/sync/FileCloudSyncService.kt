@@ -148,6 +148,7 @@ class FileCloudSyncService(
               syncedAt = it.syncedAt.toEpochMilliseconds(),
               link = it.link,
               commentsLink = it.commentsLink,
+              audioUrl = it.audioUrl,
               flags = it.flags,
               feedContent = content?.feedContent,
               articleContent = content?.articleContent
@@ -290,6 +291,7 @@ class FileCloudSyncService(
           syncedAt = Instant.fromEpochMilliseconds(it.syncedAt),
           link = it.link,
           commentsLink = it.commentsLink,
+          audioUrl = it.audioUrl,
           flags = it.flags
         )
       }

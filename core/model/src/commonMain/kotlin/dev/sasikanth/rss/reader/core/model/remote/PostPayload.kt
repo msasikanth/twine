@@ -23,6 +23,7 @@ data class PostPayload(
   val rawContent: String?,
   val fullContent: String?,
   val imageUrl: String?,
+  val audioUrl: String?,
   val date: Long,
   val commentsLink: String?,
   val isDateParsedCorrectly: Boolean

@@ -31,8 +31,12 @@ data class MinifluxEntry(
   val content: String,
   @SerialName("published_at") val publishedAt: String,
   val starred: Boolean,
-  @SerialName("comments_url") val commentsUrl: String?
+  @SerialName("comments_url") val commentsUrl: String?,
+  val enclosures: List<MinifluxEnclosure> = emptyList()
 )
+
+@Serializable
+data class MinifluxEnclosure(val url: String, @SerialName("mime_type") val mimeType: String)
 
 @Serializable
 data class MinifluxEntryContent(

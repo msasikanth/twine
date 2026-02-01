@@ -8,6 +8,7 @@ CREATE TABLE post(
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
+  audioUrl TEXT,
   postDate INTEGER AS Instant NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL,
@@ -74,13 +75,14 @@ BEGIN
 END;
 
 upsert:
-INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink)
-VALUES (:id,  :sourceId, :title, :description, :imageUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink)
+INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink)
+VALUES (:id,  :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate,  :createdAt, :updatedAt, :syncedAt, :link, :commentsLink)
 ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
     description = excluded.description,
     imageUrl = excluded.imageUrl,
+    audioUrl = excluded.audioUrl,
     postDate = CASE WHEN :isDateParsedCorrectly == 1 AND postDate < excluded.postDate THEN excluded.postDate ELSE postDate END;
 
 allPostsCount:
@@ -102,6 +104,7 @@ WITH baseQuery AS (
     post.title AS title,
     post.description AS description,
     post.imageUrl AS imageUrl,
+    post.audioUrl AS audioUrl,
     post.postDate AS postDate,
     post.createdAt AS createdAt,
     post.link AS link,
@@ -263,6 +266,7 @@ SELECT
   post.title,
   post.description,
   post.imageUrl,
+  post.audioUrl,
   post.postDate,
   post.createdAt,
   post.link,
@@ -297,13 +301,14 @@ deleteAll:
 DELETE FROM post;
 
 upsertSyncPost:
-INSERT INTO post(id, sourceId, title, description, imageUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags, remoteId)
-VALUES (:id, :sourceId, :title, :description, :imageUrl, :postDate, :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :flags, :remoteId)
+INSERT INTO post(id, sourceId, title, description, imageUrl, audioUrl, postDate, createdAt, updatedAt, syncedAt, link, commentsLink, flags, remoteId)
+VALUES (:id, :sourceId, :title, :description, :imageUrl, :audioUrl, :postDate, :createdAt, :updatedAt, :syncedAt, :link, :commentsLink, :flags, :remoteId)
 ON CONFLICT(id, sourceId) DO
 UPDATE SET
     title = excluded.title,
     description = excluded.description,
     imageUrl = excluded.imageUrl,
+    audioUrl = excluded.audioUrl,
     postDate = excluded.postDate,
     updatedAt = excluded.updatedAt,
     syncedAt = excluded.syncedAt,

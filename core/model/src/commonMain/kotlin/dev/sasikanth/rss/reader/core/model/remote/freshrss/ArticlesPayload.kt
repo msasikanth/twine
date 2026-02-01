@@ -38,6 +38,7 @@ data class ArticlePayload(
   val alternate: List<LinksPayload> = emptyList(),
   val origin: OriginPayload = OriginPayload(),
   val summary: SummaryPayload = SummaryPayload(),
+  val enclosure: List<LinksPayload> = emptyList(),
   val author: String? = null,
 )
 

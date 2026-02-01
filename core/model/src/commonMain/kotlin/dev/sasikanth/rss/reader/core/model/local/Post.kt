@@ -25,6 +25,7 @@ data class Post(
   val title: String,
   val description: String,
   val imageUrl: String?,
+  val audioUrl: String?,
   val postDate: Instant,
   val createdAt: Instant,
   val updatedAt: Instant,

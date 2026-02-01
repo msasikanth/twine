@@ -127,6 +127,7 @@ abstract class XmlContentParser {
     description: String?,
     rawContent: String?,
     imageUrl: String?,
+    audioUrl: String?,
     date: String?,
     commentsLink: String? = null,
     hostLink: String?
@@ -144,6 +145,7 @@ abstract class XmlContentParser {
       rawContent = rawContent,
       fullContent = null,
       imageUrl = UrlUtils.safeUrl(hostLink, imageUrl),
+      audioUrl = audioUrl,
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),
       isDateParsedCorrectly = postPubDateInMillis != null

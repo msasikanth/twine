@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ListenableWorker
@@ -29,6 +31,7 @@ import co.touchlab.crashkios.bugsnag.enableBugsnag
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
+import dev.sasikanth.rss.reader.media.AudioCacheProvider
 
 class ReaderApplication : Application(), Configuration.Provider {
 
@@ -87,6 +90,7 @@ class ReaderApplication : Application(), Configuration.Provider {
         )
         .build()
 
+  @OptIn(UnstableApi::class)
   override fun onCreate() {
     super.onCreate()
 
@@ -98,6 +102,8 @@ class ReaderApplication : Application(), Configuration.Provider {
     enqueuePeriodicFeedsRefresh()
     enqueuePeriodicPostsCleanUp()
     enqueueCloudSyncWorker()
+
+    AudioCacheProvider.cache = appComponent.audioCache.cache
 
     appComponent.initializers.forEach { it.initialize() }
   }
