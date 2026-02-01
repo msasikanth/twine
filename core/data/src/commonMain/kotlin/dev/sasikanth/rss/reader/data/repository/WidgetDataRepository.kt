@@ -94,6 +94,8 @@ class WidgetDataRepository(
           feedHomepageLink: String,
           alwaysFetchSourceArticle: Boolean,
           showFeedFavIcon: Boolean,
+          feedContentReadingTime: Long?,
+          articleContentReadingTime: Long?,
           _: Long ->
           WidgetPost(
             id = id,
@@ -132,7 +134,9 @@ class WidgetDataRepository(
             feedIcon: String,
             feedHomepageLink: String,
             alwaysFetchSourceArticle: Boolean,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
             WidgetPost(
               id = id,
               title = title,
@@ -173,7 +177,9 @@ class WidgetDataRepository(
             feedIcon,
             feedHomepageLink,
             alwaysFetchSourceArticle,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -190,6 +196,8 @@ class WidgetDataRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
               remoteId = remoteId,
             )
           }

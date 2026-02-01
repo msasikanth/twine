@@ -315,6 +315,8 @@ class RssRepository(
             feedHomepageLink: String,
             alwaysFetchFullArticle: Boolean,
             showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long?,
             _: Long ->
             ResolvedPost(
               id = id,
@@ -332,6 +334,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchFullArticle,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
               remoteId = remoteId,
             )
           }
@@ -717,7 +721,9 @@ class RssRepository(
             feedIcon: String,
             feedHomepageLink: String,
             alwaysFetchSourceArticle: Boolean,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -734,6 +740,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = alwaysFetchSourceArticle,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
             )
           }
         )
@@ -764,7 +772,9 @@ class RssRepository(
             feedName: String,
             feedIcon: String,
             feedHomepageLink: String,
-            showFeedFavIcon: Boolean ->
+            showFeedFavIcon: Boolean,
+            feedContentReadingTime: Long?,
+            articleContentReadingTime: Long? ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -781,6 +791,8 @@ class RssRepository(
               feedHomepageLink = feedHomepageLink,
               alwaysFetchFullArticle = true,
               showFeedFavIcon = showFeedFavIcon,
+              feedContentReadingTime = feedContentReadingTime?.toInt(),
+              articleContentReadingTime = articleContentReadingTime?.toInt(),
             )
           }
         )

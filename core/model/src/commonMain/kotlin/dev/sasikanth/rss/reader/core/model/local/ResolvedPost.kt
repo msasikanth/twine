@@ -38,6 +38,8 @@ data class ResolvedPost(
   val feedHomepageLink: String,
   val alwaysFetchFullArticle: Boolean,
   val showFeedFavIcon: Boolean,
+  val feedContentReadingTime: Int? = null,
+  val articleContentReadingTime: Int? = null,
   val remoteId: String? = null,
 ) {
   val bookmarked: Boolean

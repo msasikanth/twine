@@ -20,9 +20,12 @@ SELECT
   feed.name AS feedName,
   feed.icon AS feedIcon,
   feed.homepageLink AS feedHomepageLink,
-  feed.showFeedFavIcon AS showFeedFavIcon
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
+LEFT JOIN postContent pc ON post.id == pc.id
 WHERE (post.flags & 1) != 0
 ORDER BY date DESC
 LIMIT :limit OFFSET :offset;
