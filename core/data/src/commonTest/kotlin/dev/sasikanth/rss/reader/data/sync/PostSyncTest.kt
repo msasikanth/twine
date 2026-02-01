@@ -276,8 +276,8 @@ class PostSyncTest {
               commentsLink = null,
               flags = emptySet(),
               isDeleted = false,
-              rawContent = "Raw content",
-              htmlContent = "HTML content"
+              feedContent = "Raw content",
+              articleContent = "HTML content"
             )
           ),
       )
@@ -286,8 +286,8 @@ class PostSyncTest {
     val deserialized = json.decodeFromString<SyncData>(serialized)
 
     assertEquals(syncData, deserialized)
-    assertEquals("Raw content", deserialized.posts[0].rawContent)
-    assertEquals("HTML content", deserialized.posts[0].htmlContent)
+    assertEquals("Raw content", deserialized.posts[0].feedContent)
+    assertEquals("HTML content", deserialized.posts[0].articleContent)
     assertEquals(false, deserialized.posts[0].isDeleted)
   }
 

@@ -95,7 +95,7 @@ class ReaderPageViewModel(
       _parsingProgress.value = ReaderProcessingProgress.Loading
 
       val fullArticle = postContentRepository.postContent(readerPost.id).firstOrNull()
-      if (fullArticle != null && !(fullArticle.fullArticleHtml.isNullOrBlank())) {
+      if (fullArticle != null && !(fullArticle.articleContent.isNullOrBlank())) {
         return@launch
       }
 
@@ -118,9 +118,9 @@ class ReaderPageViewModel(
       .onEach { (postContent, alwaysFetchFullArticle) ->
         val content =
           if (alwaysFetchFullArticle) {
-            postContent?.fullArticleHtml ?: postContent?.postContent
+            postContent?.articleContent ?: postContent?.feedContent
           } else {
-            postContent?.postContent ?: readerPost.description
+            postContent?.feedContent ?: readerPost.description
           }
         val readabilityResult =
           readabilityRunner.parseHtml(

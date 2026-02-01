@@ -149,8 +149,8 @@ class FileCloudSyncService(
               link = it.link,
               commentsLink = it.commentsLink,
               flags = it.flags,
-              rawContent = content?.postContent,
-              htmlContent = content?.fullArticleHtml
+              feedContent = content?.feedContent,
+              articleContent = content?.articleContent
             )
           }
         val serializedChunk = json.encodeToString(postsSyncEntities)
@@ -308,11 +308,11 @@ class FileCloudSyncService(
     }
 
     filteredRemotePosts.forEach { remotePost ->
-      if (remotePost.rawContent != null || remotePost.htmlContent != null) {
+      if (remotePost.feedContent != null || remotePost.articleContent != null) {
         postContentRepository.upsert(
           postId = remotePost.id,
-          rawContent = remotePost.rawContent,
-          htmlContent = remotePost.htmlContent,
+          feedContent = remotePost.feedContent,
+          articleContent = remotePost.articleContent,
           createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt)
         )
       }

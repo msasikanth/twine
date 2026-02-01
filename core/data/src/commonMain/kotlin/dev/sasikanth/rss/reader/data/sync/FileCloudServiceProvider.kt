@@ -101,8 +101,8 @@ data class PostSyncEntity(
   val commentsLink: String?,
   val flags: Set<PostFlag>,
   val isDeleted: Boolean = false,
-  val rawContent: String? = null,
-  val htmlContent: String? = null
+  val feedContent: String? = null,
+  val articleContent: String? = null
 )
 
 @Serializable
