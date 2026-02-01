@@ -51,7 +51,7 @@ import dev.sasikanth.rss.reader.bookmarks.BookmarksEvent
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.home.ui.PostListItem
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -70,7 +70,7 @@ import twine.shared.generated.resources.buttonGoBack
 internal fun BookmarksScreen(
   bookmarksViewModel: BookmarksViewModel,
   goBack: () -> Unit,
-  openPost: (postIndex: Int, post: PostWithMetadata) -> Unit,
+  openPost: (postIndex: Int, post: ResolvedPost) -> Unit,
   modifier: Modifier = Modifier
 ) {
   val state by bookmarksViewModel.state.collectAsStateWithLifecycle()

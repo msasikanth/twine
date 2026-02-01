@@ -27,10 +27,10 @@ import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.FeedReadCount
 import dev.sasikanth.rss.reader.core.model.local.Post
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 import dev.sasikanth.rss.reader.core.model.local.ReadingTrend
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
@@ -275,7 +275,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
-  ): PagingSource<Int, PostWithMetadata> {
+  ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery =
         postQueries.allPostsCount(
@@ -316,7 +316,7 @@ class RssRepository(
             alwaysFetchFullArticle: Boolean,
             showFeedFavIcon: Boolean,
             _: Long ->
-            PostWithMetadata(
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,
@@ -689,7 +689,7 @@ class RssRepository(
     }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, PostWithMetadata> {
+  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, ResolvedPost> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
@@ -718,7 +718,7 @@ class RssRepository(
             feedHomepageLink: String,
             alwaysFetchSourceArticle: Boolean,
             showFeedFavIcon: Boolean ->
-            PostWithMetadata(
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,
@@ -741,7 +741,7 @@ class RssRepository(
     )
   }
 
-  fun bookmarks(): PagingSource<Int, PostWithMetadata> {
+  fun bookmarks(): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery = bookmarkQueries.countBookmarks(),
       transacter = bookmarkQueries,
@@ -765,7 +765,7 @@ class RssRepository(
             feedIcon: String,
             feedHomepageLink: String,
             showFeedFavIcon: Boolean ->
-            PostWithMetadata(
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,

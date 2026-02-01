@@ -23,8 +23,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -257,7 +257,7 @@ class HomeViewModel(
     }
   }
 
-  private fun onPostBookmarkClicked(post: PostWithMetadata) {
+  private fun onPostBookmarkClicked(post: ResolvedPost) {
     viewModelScope.launch {
       rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
     }

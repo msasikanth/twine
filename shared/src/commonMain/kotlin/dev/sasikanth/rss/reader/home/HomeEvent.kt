@@ -20,9 +20,9 @@ package dev.sasikanth.rss.reader.home
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
@@ -36,7 +36,7 @@ sealed interface HomeEvent {
 
   data object OnHomeSelected : HomeEvent
 
-  data class OnPostBookmarkClick(val post: PostWithMetadata) : HomeEvent
+  data class OnPostBookmarkClick(val post: ResolvedPost) : HomeEvent
 
   data class OnPostsTypeChanged(val postsType: PostsType) : HomeEvent
 

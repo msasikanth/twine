@@ -22,7 +22,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-data class PostWithMetadata(
+data class ResolvedPost(
   val id: String,
   val sourceId: String,
   val title: String,

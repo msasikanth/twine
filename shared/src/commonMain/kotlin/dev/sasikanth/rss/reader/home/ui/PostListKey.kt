@@ -17,7 +17,7 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -33,7 +33,7 @@ data class PostListKey(
 
   companion object {
 
-    fun from(post: PostWithMetadata): PostListKey {
+    fun from(post: ResolvedPost): PostListKey {
       return PostListKey(postId = post.id, feedId = post.sourceId)
     }
 

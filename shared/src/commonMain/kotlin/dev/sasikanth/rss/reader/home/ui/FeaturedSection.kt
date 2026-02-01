@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.util.canBlurImage
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
@@ -75,8 +75,8 @@ internal fun FeaturedSection(
   pagerState: PagerState,
   modifier: Modifier = Modifier,
   markPostAsReadOnScroll: (String) -> Unit,
-  onItemClick: (PostWithMetadata, postIndex: Int) -> Unit,
-  onPostBookmarkClick: (PostWithMetadata) -> Unit,
+  onItemClick: (ResolvedPost, postIndex: Int) -> Unit,
+  onPostBookmarkClick: (ResolvedPost) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
   updateReadStatus: (id: String, updatedReadStatus: Boolean) -> Unit,
@@ -112,12 +112,12 @@ internal fun FeaturedSection(
       pageSpacing = 16.dp,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
-        post?.let { post.postWithMetadata.id + post.postWithMetadata.sourceId } ?: page
+        post?.let { post.resolvedPost.id + post.resolvedPost.sourceId } ?: page
       },
     ) { page ->
       val featuredPost = featuredPosts.getOrNull(page)
       if (featuredPost != null) {
-        val postWithMetadata = featuredPost.postWithMetadata
+        val postWithMetadata = featuredPost.resolvedPost
         var isImageRecorded by remember { mutableStateOf(false) }
         val imageGraphicsLayer = rememberGraphicsLayer()
         val blurRadius = 100.dp
@@ -125,7 +125,7 @@ internal fun FeaturedSection(
         Box(
           modifier =
             Modifier.onVisibilityChanged(minDurationMs = 500) {
-              if (featuredPost.postWithMetadata.read) return@onVisibilityChanged
+              if (featuredPost.resolvedPost.read) return@onVisibilityChanged
 
               if (it) {
                 markPostAsReadOnScroll(postWithMetadata.id)

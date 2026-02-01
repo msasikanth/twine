@@ -91,7 +91,7 @@ import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
@@ -135,7 +135,7 @@ internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
   onVisiblePostChanged: (Int) -> Unit,
-  openPost: (Int, PostWithMetadata) -> Unit,
+  openPost: (Int, ResolvedPost) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
   openAddFeedScreen: () -> Unit,
@@ -601,7 +601,7 @@ private fun NoNewPosts() {
 
 @Composable
 fun featuredPosts(
-  posts: () -> LazyPagingItems<PostWithMetadata>?,
+  posts: () -> LazyPagingItems<ResolvedPost>?,
   homeViewMode: HomeViewMode,
 ): Flow<ImmutableList<FeaturedPostItem>> {
   val seedColorExtractor = LocalSeedColorExtractor.current
@@ -634,7 +634,7 @@ fun featuredPosts(
             val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
 
             FeaturedPostItem(
-              postWithMetadata = post,
+              resolvedPost = post,
               seedColor = existingSeedColor?.toArgb(),
             )
           } else {
@@ -651,10 +651,10 @@ fun featuredPosts(
 
             if (item.seedColor != null) return@mapNotNull item
 
-            return@mapNotNull if (!item.postWithMetadata.imageUrl.isNullOrBlank()) {
+            return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
               val seedColor =
                 seedColorExtractor.calculateSeedColor(
-                  url = item.postWithMetadata.imageUrl,
+                  url = item.resolvedPost.imageUrl,
                 )
               item.copy(seedColor = seedColor?.toArgb())
             } else {

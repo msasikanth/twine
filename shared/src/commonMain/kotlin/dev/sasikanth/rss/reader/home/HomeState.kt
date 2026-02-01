@@ -22,9 +22,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -34,7 +34,7 @@ import kotlinx.datetime.LocalDateTime
 
 @Immutable
 data class HomeState(
-  val posts: Flow<PagingData<PostWithMetadata>>?,
+  val posts: Flow<PagingData<ResolvedPost>>?,
   val syncState: SyncState,
   val feedsSheetState: SheetValue,
   val activeSource: Source?,

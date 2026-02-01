@@ -17,7 +17,7 @@
 
 package dev.sasikanth.rss.reader.reader
 
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 
 sealed interface ReaderEvent {
@@ -25,7 +25,7 @@ sealed interface ReaderEvent {
   data class TogglePostBookmark(val postId: String, val currentBookmarkStatus: Boolean) :
     ReaderEvent
 
-  data class PostPageChanged(val postIndex: Int, val post: PostWithMetadata) : ReaderEvent
+  data class PostPageChanged(val postIndex: Int, val post: ResolvedPost) : ReaderEvent
 
   data object ShowReaderCustomisations : ReaderEvent
 

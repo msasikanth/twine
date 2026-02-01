@@ -26,7 +26,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlin.time.Duration.Companion.milliseconds
@@ -100,7 +100,7 @@ class SearchViewModel(
     }
   }
 
-  private fun onPostBookmarkClick(post: PostWithMetadata) {
+  private fun onPostBookmarkClick(post: ResolvedPost) {
     viewModelScope.launch {
       rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
     }

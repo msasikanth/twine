@@ -57,7 +57,7 @@ import dev.sasikanth.rss.reader.blockedwords.BlockedWordsScreen
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feed.FeedViewModel
@@ -150,7 +150,7 @@ fun App(
   homeViewModel: () -> HomeViewModel,
   feedsViewModel: () -> FeedsViewModel,
   readerViewModel: (SavedStateHandle) -> ReaderViewModel,
-  readerPageViewModel: (PostWithMetadata) -> ReaderPageViewModel,
+  readerPageViewModel: (ResolvedPost) -> ReaderPageViewModel,
   addFeedViewModel: () -> AddFeedViewModel,
   feedViewModel: (SavedStateHandle) -> FeedViewModel,
   groupSelectionViewModel: (SavedStateHandle) -> GroupSelectionViewModel,
@@ -200,7 +200,7 @@ fun App(
         }
       }
     val navController = rememberNavController()
-    val openPost: (Int, PostWithMetadata, FromScreen) -> Unit =
+    val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
       remember(navController, linkHandler, appViewModel, coroutineScope) {
         { index, post, fromScreen ->
           navController.navigateToReaderOrOpenLink(
@@ -606,7 +606,7 @@ fun App(
 private fun NavHostController.navigateToReaderOrOpenLink(
   showReader: Boolean,
   index: Int,
-  post: PostWithMetadata,
+  post: ResolvedPost,
   fromScreen: FromScreen,
   openLink: () -> Unit,
 ) {

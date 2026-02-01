@@ -23,8 +23,8 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -148,7 +148,7 @@ class WidgetDataRepository(
     }
   }
 
-  fun unreadPostsPager(): PagingSource<Int, PostWithMetadata> {
+  fun unreadPostsPager(): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery = postQueries.widgetUnreadPostsCount(),
       transacter = postQueries,
@@ -174,7 +174,7 @@ class WidgetDataRepository(
             feedHomepageLink,
             alwaysFetchSourceArticle,
             showFeedFavIcon: Boolean ->
-            PostWithMetadata(
+            ResolvedPost(
               id = id,
               sourceId = sourceId,
               title = title,

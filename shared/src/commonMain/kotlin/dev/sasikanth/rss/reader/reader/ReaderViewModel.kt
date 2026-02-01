@@ -25,7 +25,7 @@ import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -138,7 +138,7 @@ class ReaderViewModel(
     }
   }
 
-  private fun postPageChange(postIndex: Int, post: PostWithMetadata) {
+  private fun postPageChange(postIndex: Int, post: ResolvedPost) {
     openedPostItems += post.id
     _state.update { it.copy(activePostIndex = postIndex, activePostId = post.id) }
   }

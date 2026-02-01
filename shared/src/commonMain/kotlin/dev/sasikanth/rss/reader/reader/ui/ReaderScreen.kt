@@ -86,7 +86,7 @@ import com.mikepenz.markdown.compose.elements.MarkdownHighlightedCodeFence
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.HorizontalPageIndicators
 import dev.sasikanth.rss.reader.components.PageIndicatorState
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderEvent
@@ -123,7 +123,7 @@ import twine.shared.generated.resources.buttonGoBack
 @Composable
 internal fun ReaderScreen(
   viewModel: ReaderViewModel,
-  pageViewModelFactory: @Composable (PostWithMetadata) -> ReaderPageViewModel,
+  pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
   onPostChanged: (Int) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,

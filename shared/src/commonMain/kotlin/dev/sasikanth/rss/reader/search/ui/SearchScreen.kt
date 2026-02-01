@@ -78,7 +78,7 @@ import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.components.SubHeader
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Newest
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Oldest
@@ -110,9 +110,7 @@ internal fun SearchScreen(
   searchViewModel: SearchViewModel,
   goBack: () -> Unit,
   openPost:
-    (
-      searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: PostWithMetadata
-    ) -> Unit,
+    (searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: ResolvedPost) -> Unit,
   modifier: Modifier = Modifier
 ) {
   val state by searchViewModel.state.collectAsStateWithLifecycle()

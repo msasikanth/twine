@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.components.image.AsyncImage
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -93,7 +93,7 @@ private val compactPostListPadding: PaddingValues
 
 @Composable
 internal fun PostListItem(
-  item: PostWithMetadata,
+  item: ResolvedPost,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,
   onPostCommentsClick: () -> Unit,
@@ -191,7 +191,7 @@ internal fun PostListItem(
 
 @Composable
 internal fun CompactPostListItem(
-  item: PostWithMetadata,
+  item: ResolvedPost,
   showDivider: Boolean,
   onClick: () -> Unit,
   onPostBookmarkClick: () -> Unit,

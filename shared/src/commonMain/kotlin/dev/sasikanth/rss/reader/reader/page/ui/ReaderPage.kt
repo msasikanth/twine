@@ -92,7 +92,7 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
-import dev.sasikanth.rss.reader.core.model.local.PostWithMetadata
+import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
@@ -133,7 +133,7 @@ private val json = Json {
 @Composable
 internal fun ReaderPage(
   pageViewModel: ReaderPageViewModel,
-  readerPost: PostWithMetadata,
+  readerPost: ResolvedPost,
   page: Int,
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
@@ -281,7 +281,7 @@ private fun ProgressIndicator() {
 
 @Composable
 private fun PostHeader(
-  readerPost: PostWithMetadata,
+  readerPost: ResolvedPost,
   page: Int,
   pagerState: PagerState,
   excerpt: String,
