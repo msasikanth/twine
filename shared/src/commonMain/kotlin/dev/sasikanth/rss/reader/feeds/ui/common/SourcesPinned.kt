@@ -72,7 +72,7 @@ internal fun LazyListScope.pinnedSources(
       PinnedFeedsHeader(
         modifier = Modifier.animateItem(),
         isPinnedSectionExpanded = isPinnedSectionExpanded,
-        onToggleSection = onTogglePinnedSection
+        onToggleSection = onTogglePinnedSection,
       )
     }
 
@@ -113,7 +113,7 @@ internal fun LazyListScope.pinnedSources(
                       start = startPadding,
                       top = topPadding,
                       end = endPadding,
-                      bottom = bottomPadding
+                      bottom = bottomPadding,
                     )
                     .animateItem(),
               )
@@ -134,7 +134,7 @@ internal fun LazyListScope.pinnedSources(
                       start = startPadding,
                       top = topPadding,
                       end = endPadding,
-                      bottom = bottomPadding
+                      bottom = bottomPadding,
                     )
                     .animateItem(),
               )
@@ -147,7 +147,7 @@ internal fun LazyListScope.pinnedSources(
     item {
       HorizontalDivider(
         modifier = Modifier.padding(top = 24.dp).animateItem(),
-        color = AppTheme.colorScheme.tintedSurface
+        color = AppTheme.colorScheme.tintedSurface,
       )
     }
   }
@@ -156,7 +156,7 @@ internal fun LazyListScope.pinnedSources(
 @Composable
 private fun DragHandle(
   scope: ReorderableCollectionItemScope,
-  interactionSource: MutableInteractionSource
+  interactionSource: MutableInteractionSource,
 ) {
   with(scope) {
     Box(modifier = Modifier.requiredSize(40.dp), contentAlignment = Alignment.Center) {
@@ -175,7 +175,7 @@ private fun DragHandle(
 private fun PinnedFeedsHeader(
   isPinnedSectionExpanded: Boolean,
   modifier: Modifier = Modifier,
-  onToggleSection: () -> Unit
+  onToggleSection: () -> Unit,
 ) {
   Row(
     modifier =
@@ -183,7 +183,7 @@ private fun PinnedFeedsHeader(
         .padding(start = 32.dp, end = 20.dp)
         .padding(vertical = 12.dp)
         .then(modifier),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(
       modifier = Modifier.weight(1f),

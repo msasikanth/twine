@@ -107,7 +107,7 @@ class WidgetDataRepository(
             feedName = feedName,
             feedIcon = feedIcon,
           )
-        }
+        },
       )
       .asFlow()
       .mapToList(dispatchersProvider.databaseRead)
@@ -148,7 +148,7 @@ class WidgetDataRepository(
               feedName = feedName,
               feedIcon = feedIcon,
             )
-          }
+          },
         )
         .executeAsList()
     }
@@ -204,9 +204,9 @@ class WidgetDataRepository(
               articleContentReadingTime = articleContentReadingTime?.toInt(),
               remoteId = remoteId,
             )
-          }
+          },
         )
-      }
+      },
     )
   }
 }

@@ -48,10 +48,8 @@ import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
-class AtomContentParser(
-  httpClient: HttpClient,
-  override val articleHtmlParser: ArticleHtmlParser,
-) : XmlContentParser() {
+class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: ArticleHtmlParser) :
+  XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
 
@@ -116,8 +114,8 @@ class AtomContentParser(
           parser = parser,
           firstPost = firstPost,
           itemTag = TAG_ATOM_ENTRY,
-          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) }
-        )
+          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) },
+        ),
     )
   }
 
@@ -196,7 +194,7 @@ class AtomContentParser(
       imageUrl = image,
       audioUrl = audioUrl,
       date = date,
-      hostLink = hostLink
+      hostLink = hostLink,
     )
   }
 

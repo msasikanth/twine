@@ -41,10 +41,10 @@ actual fun String.decodeHTMLString(): String {
             options =
               mapOf(
                 NSDocumentTypeDocumentAttribute to NSHTMLTextDocumentType,
-                NSCharacterEncodingDocumentAttribute to NSUTF8StringEncoding
+                NSCharacterEncodingDocumentAttribute to NSUTF8StringEncoding,
               ),
             documentAttributes = null,
-            error = null
+            error = null,
           )
           ?.string
 

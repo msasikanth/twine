@@ -23,10 +23,7 @@ import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 import dev.sasikanth.rss.reader.utils.Constants.ENTITLEMENT_PREMIUM
 
 @Composable
-actual fun PaywallComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier,
-) {
+actual fun PaywallComponent(onDismiss: () -> Unit, modifier: Modifier) {
   val paywallListener = remember {
     object : PaywallListener {
       override fun onRestoreCompleted(customerInfo: CustomerInfo) {
@@ -52,9 +49,6 @@ actual fun PaywallComponent(
 }
 
 @Composable
-actual fun CustomerCenterComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier,
-) {
+actual fun CustomerCenterComponent(onDismiss: () -> Unit, modifier: Modifier) {
   CustomerCenter(modifier = modifier.fillMaxSize(), onDismiss = onDismiss)
 }

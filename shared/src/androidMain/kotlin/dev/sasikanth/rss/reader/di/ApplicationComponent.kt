@@ -72,7 +72,7 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
       versionCode = versionCode,
       isDebugBuild = (applicationInfo.flags and FLAG_DEBUGGABLE) != 0,
       isFoss = isFoss,
-      cachePath = { context.cacheDir.absolutePath }
+      cachePath = { context.cacheDir.absolutePath },
     )
   }
 

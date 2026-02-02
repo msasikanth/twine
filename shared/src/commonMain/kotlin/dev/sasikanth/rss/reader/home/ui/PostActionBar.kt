@@ -107,13 +107,8 @@ internal fun PostActionBar(
   onSourceClick: () -> Unit,
 ) {
   Row(
-    modifier =
-      Modifier.padding(
-          top = 8.dp,
-          bottom = 8.dp,
-        )
-        .then(modifier),
-    verticalAlignment = Alignment.CenterVertically
+    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp).then(modifier),
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     PostSourcePill(
       modifier = Modifier.weight(1f).padding(end = 8.dp).clearAndSetSemantics {},
@@ -165,7 +160,7 @@ internal fun PostActionBar(
       onDropdownChange = onDropdownChange,
       onBookmarkClick = onBookmarkClick,
       onCommentsClick = onCommentsClick,
-      togglePostReadClick = onTogglePostReadClick
+      togglePostReadClick = onTogglePostReadClick,
     )
   }
 }
@@ -178,7 +173,7 @@ private fun PostSourcePill(
   feedName: String,
   config: PostMetadataConfig,
   onSourceClick: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Box(modifier = modifier) {
     val postSourceTextColor =
@@ -192,18 +187,18 @@ private fun PostSourcePill(
       modifier =
         Modifier.background(
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-            RoundedCornerShape(50)
+            RoundedCornerShape(50),
           )
           .border(
             1.dp,
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-            RoundedCornerShape(50)
+            RoundedCornerShape(50),
           )
           .clip(RoundedCornerShape(50))
           .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
           .padding(vertical = 6.dp)
           .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       FeedIcon(
         modifier = Modifier.requiredSize(16.dp),
@@ -221,7 +216,7 @@ private fun PostSourcePill(
         maxLines = 1,
         text = feedName,
         color = postSourceTextColor,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
       )
     }
   }
@@ -238,7 +233,7 @@ internal fun PostActions(
   onDropdownChange: (Boolean) -> Unit = {},
   onBookmarkClick: () -> Unit,
   onCommentsClick: () -> Unit,
-  togglePostReadClick: () -> Unit
+  togglePostReadClick: () -> Unit,
 ) {
   Row(modifier = Modifier.semantics { isTraversalGroup = true }) {
     if (!commentsLink.isNullOrBlank()) {
@@ -246,7 +241,7 @@ internal fun PostActions(
       IconButton(
         icon = TwineIcons.Comments,
         contentDescription = commentsLabel,
-        onClick = onCommentsClick
+        onClick = onCommentsClick,
       )
     }
 
@@ -264,7 +259,7 @@ internal fun PostActions(
           TwineIcons.Bookmark
         },
       contentDescription = bookmarkLabel,
-      onClick = onBookmarkClick
+      onClick = onBookmarkClick,
     )
 
     Box {
@@ -279,7 +274,7 @@ internal fun PostActions(
         modifier =
           Modifier.onGloballyPositioned { coordinates ->
             buttonHeight = with(density) { coordinates.size.height.toDp() }
-          }
+          },
       ) {
         onDropdownChange(true)
       }
@@ -305,7 +300,7 @@ internal fun PostActions(
               Text(
                 text = markAsReadLabel,
                 color = AppTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Start
+                textAlign = TextAlign.Start,
               )
             },
             leadingIcon = {
@@ -316,18 +311,14 @@ internal fun PostActions(
                   TwineIcons.Visibility
                 }
 
-              Icon(
-                icon,
-                contentDescription = null,
-                tint = AppTheme.colorScheme.onSurface,
-              )
+              Icon(icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
             },
             onClick = {
               coroutineScope.launch {
                 onDropdownChange(false)
                 togglePostReadClick()
               }
-            }
+            },
           )
         }
 
@@ -341,7 +332,7 @@ internal fun PostActions(
             Text(
               text = openWebsiteLabel,
               color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start
+              textAlign = TextAlign.Start,
             )
           },
           leadingIcon = {
@@ -358,7 +349,7 @@ internal fun PostActions(
               delay(150)
               linkHandler.openLink(postLink)
             }
-          }
+          },
         )
 
         val shareHandler = LocalShareHandler.current
@@ -371,15 +362,11 @@ internal fun PostActions(
             Text(
               text = shareLabel,
               color = AppTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Start
+              textAlign = TextAlign.Start,
             )
           },
           leadingIcon = {
-            Icon(
-              TwineIcons.Share,
-              contentDescription = null,
-              tint = AppTheme.colorScheme.onSurface,
-            )
+            Icon(TwineIcons.Share, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
           },
           onClick = {
             coroutineScope.launch {
@@ -387,7 +374,7 @@ internal fun PostActions(
               delay(150)
               shareHandler.share(postLink)
             }
-          }
+          },
         )
       }
     }
@@ -398,7 +385,7 @@ internal fun PostActions(
 data class PostMetadataConfig(
   val showUnreadIndicator: Boolean,
   val showToggleReadUnreadOption: Boolean,
-  val enablePostSource: Boolean
+  val enablePostSource: Boolean,
 ) {
 
   companion object {
@@ -407,7 +394,7 @@ data class PostMetadataConfig(
       PostMetadataConfig(
         showUnreadIndicator = true,
         showToggleReadUnreadOption = true,
-        enablePostSource = true
+        enablePostSource = true,
       )
   }
 }

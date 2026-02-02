@@ -83,7 +83,7 @@ internal fun PostsList(
     modifier = modifier,
     state = listState,
     contentPadding =
-      PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp)
+      PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp),
   ) {
     if (featuredPosts.isNotEmpty()) {
       item(contentType = "featured_items") {
@@ -114,7 +114,7 @@ internal fun PostsList(
           adjustedIndex
         }
       },
-      contentType = { "post_item" }
+      contentType = { "post_item" },
     ) { index ->
       val adjustedIndex = index + featuredPosts.size
       val post = posts[adjustedIndex] ?: return@items
@@ -131,7 +131,7 @@ internal fun PostsList(
             updatePostReadStatus = { updatedReadStatus ->
               updateReadStatus(post.id, updatedReadStatus)
             },
-            reduceReadItemAlpha = true
+            reduceReadItemAlpha = true,
           )
         }
         HomeViewMode.Compact -> {
@@ -144,7 +144,7 @@ internal fun PostsList(
             updatePostReadStatus = { updatedReadStatus ->
               updateReadStatus(post.id, updatedReadStatus)
             },
-            reduceReadItemAlpha = true
+            reduceReadItemAlpha = true,
           )
         }
       }

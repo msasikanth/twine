@@ -70,14 +70,14 @@ fun ToggleableButtonGroup(
             topLeft =
               Offset(
                 x = itemWidth * selectedItemIndex + spacingBetween * selectedItemIndex,
-                y = 0f
+                y = 0f,
               ),
             size = Size(width = itemWidth, height = size.height),
             cornerRadius = CornerRadius(12.dp.toPx()),
           )
         },
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(4.dp)
+      horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
       items.forEach { toggleableButtonItem ->
         TextButton(
@@ -93,15 +93,11 @@ fun ToggleableButtonGroup(
                   AppTheme.colorScheme.tintedForeground
                 }
             ),
-          onClick = { onItemSelected(toggleableButtonItem) }
+          onClick = { onItemSelected(toggleableButtonItem) },
         )
       }
     }
   }
 }
 
-data class ToggleableButtonItem(
-  val label: String,
-  val isSelected: Boolean,
-  val identifier: Any?,
-)
+data class ToggleableButtonItem(val label: String, val isSelected: Boolean, val identifier: Any?)

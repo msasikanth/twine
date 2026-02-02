@@ -67,14 +67,14 @@ internal fun BottomSheetCollapsedContent(
   onSourceClick: (Source) -> Unit,
   onHomeSelected: () -> Unit,
   openFeeds: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   Box(modifier.height(IntrinsicSize.Min)) {
     LazyRow(
       modifier = Modifier.fillMaxWidth().height(BOTTOM_SHEET_PEEK_HEIGHT).padding(end = 16.dp),
       verticalAlignment = Alignment.CenterVertically,
       contentPadding = PaddingValues(start = 8.dp, end = 64.dp),
-      overscrollEffect = null
+      overscrollEffect = null,
     ) {
       if (activeSource != null && activeSource.pinnedAt == null) {
         item {
@@ -83,7 +83,7 @@ internal fun BottomSheetCollapsedContent(
             activeSource = activeSource,
             canShowUnreadPostsCount = canShowUnreadPostsCount,
             onHomeSelected = onHomeSelected,
-            onSourceClick = onSourceClick
+            onSourceClick = onSourceClick,
           )
         }
 
@@ -101,7 +101,7 @@ internal fun BottomSheetCollapsedContent(
           activeSource = activeSource,
           canShowUnreadPostsCount = canShowUnreadPostsCount,
           onHomeSelected = onHomeSelected,
-          onSourceClick = onSourceClick
+          onSourceClick = onSourceClick,
         )
       }
     }
@@ -137,11 +137,11 @@ internal fun BottomSheetCollapsedContent(
               ),
               RoundedCornerShape(
                 topEnd = BOTTOM_SHEET_CORNER_SIZE,
-                bottomEnd = BOTTOM_SHEET_CORNER_SIZE
-              )
+                bottomEnd = BOTTOM_SHEET_CORNER_SIZE,
+              ),
             )
             .pointerInput(Unit) {},
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
       ) {
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -178,7 +178,7 @@ private fun SourceItem(
           } else {
             onSourceClick(source)
           }
-        }
+        },
       )
     }
     is Feed -> {

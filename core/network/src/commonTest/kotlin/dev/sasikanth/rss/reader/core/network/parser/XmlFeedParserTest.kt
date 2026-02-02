@@ -80,13 +80,13 @@ class XmlFeedParserTest {
               respond(
                 content = ByteReadChannel(youtubeChannelHtml.toByteArray()),
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "html")
+                headers = headersOf(HttpHeaders.ContentType, "html"),
               )
             } else {
               respond(
                 content = ByteReadChannel("".toByteArray()),
                 status = HttpStatusCode.InternalServerError,
-                headers = headersOf()
+                headers = headersOf(),
               )
             }
           }
@@ -98,7 +98,7 @@ class XmlFeedParserTest {
         rssContentParser = RSSContentParser(articleHtmlParser),
         atomContentParser = AtomContentParser(httpClient, articleHtmlParser),
         dispatchersProvider = TestDispatchersProvider(),
-        platformPageSize = 4096L
+        platformPageSize = 4096L,
       )
   }
 
@@ -123,7 +123,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>First post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/first-post-media-url",
@@ -141,7 +141,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Post with media thumbnail</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/media/post-with-media-thumbnail",
@@ -159,7 +159,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Second post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -177,7 +177,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Third post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -195,7 +195,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Fourth post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/enclosure-image",
@@ -216,7 +216,7 @@ class XmlFeedParserTest {
                     <img src="https://example.com/encoded-image" alt="encoded image">
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/encoded-image",
@@ -234,7 +234,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Relative image post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "http://example.com/relative-media-url",
@@ -252,7 +252,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Really long post with comments.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -270,7 +270,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Media group description</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/media/maxresdefault.jpg",
@@ -280,7 +280,7 @@ class XmlFeedParserTest {
                 audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -312,7 +312,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>First post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -333,7 +333,7 @@ class XmlFeedParserTest {
                     <img src="https://example.com/encoded-image" alt="encoded image">
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/encoded-image",
@@ -343,7 +343,7 @@ class XmlFeedParserTest {
                 audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -378,7 +378,7 @@ class XmlFeedParserTest {
                     <p>Post summary with an image.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/image.jpg",
@@ -398,7 +398,7 @@ class XmlFeedParserTest {
                     <p>Post summary of the second post.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -418,7 +418,7 @@ class XmlFeedParserTest {
                     <p>Post summary of the third post. <a href="https://example.com/hyperlink">click here</a>.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
@@ -439,7 +439,7 @@ class XmlFeedParserTest {
                     <p>Post summary with an image.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "http://example.com/resources/image.jpg",
@@ -449,7 +449,7 @@ class XmlFeedParserTest {
                 audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -484,9 +484,9 @@ class XmlFeedParserTest {
                 commentsLink = null,
                 isDateParsedCorrectly = true,
                 audioUrl = null,
-              ),
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -518,7 +518,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Episode 1 description</body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/episode-1-image.jpg",
@@ -526,9 +526,9 @@ class XmlFeedParserTest {
                 commentsLink = null,
                 isDateParsedCorrectly = true,
                 audioUrl = "https://example.com/episode-1.mp3",
-              ),
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -560,7 +560,7 @@ class XmlFeedParserTest {
                   <html>
                    <body>Episode 1 description</body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/episode-1-image.jpg",
@@ -568,9 +568,9 @@ class XmlFeedParserTest {
                 commentsLink = null,
                 isDateParsedCorrectly = true,
                 audioUrl = "https://example.com/episode-1.mp3",
-              ),
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when

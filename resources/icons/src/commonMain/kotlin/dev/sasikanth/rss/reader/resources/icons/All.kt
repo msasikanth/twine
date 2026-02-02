@@ -37,7 +37,7 @@ val TwineIcons.All: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -47,7 +47,7 @@ val TwineIcons.All: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(12.0f, 5.0f)
             moveToRelative(-3.0f, 0.0f)
@@ -61,7 +61,7 @@ val TwineIcons.All: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(5.0f, 12.0f)
             moveToRelative(-3.0f, 0.0f)
@@ -75,7 +75,7 @@ val TwineIcons.All: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(19.0f, 12.0f)
             moveToRelative(-3.0f, 0.0f)
@@ -89,7 +89,7 @@ val TwineIcons.All: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(12.0f, 19.0f)
             moveToRelative(-3.0f, 0.0f)

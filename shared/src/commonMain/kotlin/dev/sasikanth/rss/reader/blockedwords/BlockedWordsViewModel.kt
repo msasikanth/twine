@@ -30,9 +30,8 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class BlockedWordsViewModel(
-  private val blockedWordsRepository: BlockedWordsRepository,
-) : ViewModel() {
+class BlockedWordsViewModel(private val blockedWordsRepository: BlockedWordsRepository) :
+  ViewModel() {
 
   private val _state = MutableStateFlow(BlockedWordsState.default())
   val state: StateFlow<BlockedWordsState>

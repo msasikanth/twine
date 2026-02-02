@@ -114,10 +114,7 @@ internal fun PostListItem(
   Column(
     modifier =
       Modifier.then(modifier)
-        .combinedClickable(
-          onClick = onClick,
-          onLongClick = { showDropdown = true },
-        )
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
         .padding(postListPadding)
         .graphicsLayer { this.alpha = alpha }
@@ -129,14 +126,14 @@ internal fun PostListItem(
     ) {
       Column(
         modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(top = 4.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         Text(
           style = MaterialTheme.typography.titleMedium,
           text = item.title.ifBlank { item.description },
           color = AppTheme.colorScheme.textEmphasisHigh,
           maxLines = 3,
-          overflow = TextOverflow.Ellipsis
+          overflow = TextOverflow.Ellipsis,
         )
 
         if (platform is Platform.Desktop) {
@@ -159,7 +156,7 @@ internal fun PostListItem(
               .clip(RoundedCornerShape(16.dp))
               .align(Alignment.CenterVertically),
           contentDescription = null,
-          contentScale = ContentScale.Crop
+          contentScale = ContentScale.Crop,
         )
       }
     }
@@ -185,7 +182,7 @@ internal fun PostListItem(
       showDropdown = showDropdown,
       onDropdownChange = { showDropdown = it },
       config = postMetadataConfig,
-      onSourceClick = onPostSourceClick
+      onSourceClick = onPostSourceClick,
     )
   }
 }
@@ -215,13 +212,10 @@ internal fun CompactPostListItem(
       verticalAlignment = Alignment.CenterVertically,
       modifier =
         Modifier.then(modifier)
-          .combinedClickable(
-            onClick = onClick,
-            onLongClick = { showDropdown = true },
-          )
+          .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
           .padding(vertical = 12.dp)
           .padding(compactPostListPadding)
-          .graphicsLayer { this.alpha = alpha }
+          .graphicsLayer { this.alpha = alpha },
     ) {
       FeedIcon(
         icon = item.feedIcon,
@@ -240,7 +234,7 @@ internal fun CompactPostListItem(
         color = AppTheme.colorScheme.onSurface,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
       )
 
       Spacer(Modifier.requiredWidth(16.dp))
@@ -264,7 +258,7 @@ internal fun CompactPostListItem(
     if (showDivider) {
       HorizontalDivider(
         modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart).padding(postListPadding),
-        color = AppTheme.colorScheme.outlineVariant
+        color = AppTheme.colorScheme.outlineVariant,
       )
     }
   }

@@ -35,13 +35,13 @@ class SourcesOpmlTest {
             listOf(
               OpmlFeed(title = "The Verge", link = "https://www.theverge.com/rss/index.xml"),
               OpmlFeed(title = "Hacker News", link = "https://news.ycombinator.com/rss"),
-            )
+            ),
         ),
         OpmlFeed(
           title = "NYT",
           link =
-            "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml"
-        )
+            "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml",
+        ),
       )
 
     // when
@@ -64,7 +64,7 @@ class SourcesOpmlTest {
         </body>
       </opml>
 
-    """
+      """
         .trimIndent()
 
     assertEquals(expected, opmlXml)
@@ -89,7 +89,7 @@ class SourcesOpmlTest {
         </body>
       </opml>
 
-    """
+      """
         .trimIndent()
 
     // when
@@ -104,12 +104,12 @@ class SourcesOpmlTest {
             listOf(
               OpmlFeed(title = "The Verge", link = "https://www.theverge.com/rss/index.xml"),
               OpmlFeed(title = "Hacker News", link = "https://news.ycombinator.com/rss"),
-            )
+            ),
         ),
         OpmlFeed(
           title = "NYT",
           link =
-            "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml"
+            "https://www.nytimes.com/svc/collections/v1/publish/https://www.nytimes.com/section/world/rss.xml",
         ),
       )
 

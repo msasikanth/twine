@@ -19,8 +19,4 @@ package dev.sasikanth.rss.reader.core.model.remote.miniflux
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class MinifluxUser(
-  val id: Long,
-  val username: String,
-)
+@Serializable data class MinifluxUser(val id: Long, val username: String)

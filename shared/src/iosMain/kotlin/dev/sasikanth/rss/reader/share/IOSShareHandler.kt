@@ -44,7 +44,7 @@ class IOSShareHandler(private val viewControllerProvider: () -> UIViewController
         x = CGRectGetMidX(viewController.view.bounds),
         y = CGRectGetMaxY(viewController.view.bounds),
         width = 0.0,
-        height = 0.0
+        height = 0.0,
       )
     )
     viewController.presentViewController(activityController, true, null)

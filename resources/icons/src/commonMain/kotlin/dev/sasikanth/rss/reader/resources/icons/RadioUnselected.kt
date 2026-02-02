@@ -38,7 +38,7 @@ val TwineIcons.RadioUnselected: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ val TwineIcons.RadioUnselected: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = EvenOdd
+            pathFillType = EvenOdd,
           ) {
             moveTo(12.0f, 20.9998f)
             curveTo(16.9706f, 20.9998f, 21.0f, 16.9703f, 21.0f, 11.9998f)

@@ -37,7 +37,7 @@ public val TwineIcons.Miniflux: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           path(
@@ -47,7 +47,7 @@ public val TwineIcons.Miniflux: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(6.19f, 4.583f)
             curveTo(6.808f, 4.287f, 7.496f, 4.135f, 8.194f, 4.141f)

@@ -27,5 +27,5 @@ enum class AppIcon(val title: String) {
   RoyalPlum("Royal Plum"),
   SlateBlue("Slate Blue"),
   SoftSage("Soft Sage"),
-  StormySky("Stormy Sky")
+  StormySky("Stormy Sky"),
 }

@@ -38,7 +38,7 @@ public val TwineIcons.Sort: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 960.0f,
-          viewportHeight = 960.0f
+          viewportHeight = 960.0f,
         )
         .apply {
           group(translationX = -0.0f, translationY = 960.0f) {
@@ -49,7 +49,7 @@ public val TwineIcons.Sort: ImageVector
               strokeLineCap = Butt,
               strokeLineJoin = Miter,
               strokeLineMiter = 4.0f,
-              pathFillType = NonZero
+              pathFillType = NonZero,
             ) {
               /* pathData = "M160-240q-17 0-28.5-11.5T120-280q0-17 11.5-28.5T160-320h160q17 0 28.5 11.5T360-280q0 17-11.5 28.5T320-240H160Zm0-200q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h400q17 0 28.5 11.5T600-480q0 17-11.5 28.5T560-440H160Zm0-200q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h640q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H160Z" */
               moveTo(160.0f, -240.0f)

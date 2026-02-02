@@ -37,7 +37,7 @@ val TwineIcons.PinFilled: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -47,7 +47,7 @@ val TwineIcons.PinFilled: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = EvenOdd
+            pathFillType = EvenOdd,
           ) {
             moveTo(16.0f, 9.0f)
             verticalLineTo(4.0f)

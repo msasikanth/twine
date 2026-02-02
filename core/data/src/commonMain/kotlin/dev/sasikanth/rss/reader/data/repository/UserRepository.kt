@@ -53,7 +53,7 @@ class UserRepository(
         refreshToken = refreshToken,
         serverUrl = serverUrl,
         lastSyncStatus = "IDLE",
-        serviceType = serviceType
+        serviceType = serviceType,
       )
     }
   }
@@ -94,7 +94,7 @@ class UserRepository(
             refreshToken = refreshToken,
             serverUrl = serverUrl,
             lastSyncStatus = lastSyncStatus,
-            serviceType = serviceType
+            serviceType = serviceType,
           )
         }
       )
@@ -125,7 +125,7 @@ class UserRepository(
               refreshToken = refreshToken,
               serverUrl = serverUrl,
               lastSyncStatus = lastSyncStatus,
-              serviceType = serviceType
+              serviceType = serviceType,
             )
           }
         )

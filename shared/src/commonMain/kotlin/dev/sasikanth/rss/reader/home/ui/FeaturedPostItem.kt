@@ -86,10 +86,7 @@ internal fun FeaturedPostItem(
       Modifier.then(modifier)
         .padding(featuredItemPadding)
         .clip(MaterialTheme.shapes.extraLarge)
-        .combinedClickable(
-          onClick = onClick,
-          onLongClick = { showDropdown = true },
-        )
+        .combinedClickable(onClick = onClick, onLongClick = { showDropdown = true })
         .graphicsLayer { this.alpha = alpha }
   ) {
     val density = LocalDensity.current
@@ -124,7 +121,7 @@ internal fun FeaturedPostItem(
           val lineHeight = with(density) { titleTextStyle.lineHeight.toDp() }
           descriptionBottomPadding = lineHeight * (titleMaxLines - numberOfLines)
         }
-      }
+      },
     )
 
     Text(

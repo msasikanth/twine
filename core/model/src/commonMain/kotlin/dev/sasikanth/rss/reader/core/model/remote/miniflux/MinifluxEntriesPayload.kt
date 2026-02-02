@@ -19,8 +19,4 @@ package dev.sasikanth.rss.reader.core.model.remote.miniflux
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class MinifluxEntriesPayload(
-  val total: Int,
-  val entries: List<MinifluxEntry>,
-)
+@Serializable data class MinifluxEntriesPayload(val total: Int, val entries: List<MinifluxEntry>)

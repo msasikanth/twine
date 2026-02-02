@@ -80,7 +80,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
       visible = unreadSinceLastSync.hasNewArticles || canShowScrollToTop,
       enter = slideInVertically { it },
       exit = slideOutVertically { it },
-      modifier = modifier.align(Alignment.BottomCenter)
+      modifier = modifier.align(Alignment.BottomCenter),
     ) {
       val buttonShape = RoundedCornerShape(50)
       Box(
@@ -100,7 +100,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
               radius = 8.dp.toPx()
               spread = 0f
             }
-            .padding(4.dp),
+            .padding(4.dp)
       ) {
         AppTheme(useDarkTheme = true) {
           Row(modifier = Modifier.height(IntrinsicSize.Min)) {
@@ -114,16 +114,9 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
                   onClick = onLoadNewArticlesClick,
                   shape = RoundedCornerShape(50),
                   colors =
-                    ButtonDefaults.textButtonColors(
-                      contentColor = AppTheme.colorScheme.onSurface,
-                    ),
+                    ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.onSurface),
                   contentPadding =
-                    PaddingValues(
-                      start = 12.dp,
-                      top = 8.dp,
-                      end = endPadding,
-                      bottom = 8.dp,
-                    ),
+                    PaddingValues(start = 12.dp, top = 8.dp, end = endPadding, bottom = 8.dp),
                   content = {
                     unreadSinceLastSync.apply {
                       OverlappedFeedIcons(
@@ -139,15 +132,13 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
                       text = stringResource(Res.string.newArticles),
                       style = MaterialTheme.typography.labelLarge,
                     )
-                  }
+                  },
                 )
               }
             }
 
             AnimatedVisibility(visible = unreadSinceLastSync.hasNewArticles && canShowScrollToTop) {
-              VerticalDivider(
-                modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp),
-              )
+              VerticalDivider(modifier = Modifier.fillMaxHeight().padding(vertical = 16.dp))
             }
 
             AnimatedVisibility(
@@ -173,7 +164,7 @@ internal fun BoxScope.NewArticlesScrollToTopButton(
                     contentDescription = stringResource(Res.string.scrollToTop),
                     tint = AppTheme.colorScheme.onSurface,
                   )
-                }
+                },
               )
             }
           }
@@ -211,12 +202,12 @@ private fun OverlappedFeedIcons(
               showFeedFavIcon = showFeedFavIcon,
               contentDescription = null,
               shape = MaterialTheme.shapes.extraSmall,
-              modifier = Modifier.requiredSize(20.dp)
+              modifier = Modifier.requiredSize(20.dp),
             )
           }
         }
       }
-    }
+    },
   ) { measurables, constraints ->
     val placeables = measurables.map { it.measure(constraints) }
     val height = placeables.maxOfOrNull { it.height } ?: 0

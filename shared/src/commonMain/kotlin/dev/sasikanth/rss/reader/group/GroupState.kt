@@ -42,7 +42,7 @@ data class GroupState(
         group = null,
         feeds = emptyFlow(),
         selectedSources = emptySet(),
-        feedsOrderBy = FeedsOrderBy.Latest
+        feedsOrderBy = FeedsOrderBy.Latest,
       )
   }
 }

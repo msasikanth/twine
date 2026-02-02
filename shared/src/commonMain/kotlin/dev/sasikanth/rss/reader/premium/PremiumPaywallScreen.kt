@@ -22,11 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun PremiumPaywallScreen(
-  hasPremium: Boolean,
-  goBack: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun PremiumPaywallScreen(hasPremium: Boolean, goBack: () -> Unit, modifier: Modifier = Modifier) {
   Box(modifier = modifier) {
     if (!hasPremium) {
       PaywallComponent(onDismiss = goBack, modifier = modifier)

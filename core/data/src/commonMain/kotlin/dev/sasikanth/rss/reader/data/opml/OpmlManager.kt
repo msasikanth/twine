@@ -83,7 +83,7 @@ class OpmlManager(
             title = "Import OPML",
             type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
             mode = PickerMode.Single,
-            initialDirectory = "downloads"
+            initialDirectory = "downloads",
           )
 
         withContext(dispatchersProvider.io + job) {
@@ -131,12 +131,7 @@ class OpmlManager(
           feedGroups.forEach { feedGroup ->
             val feedsInGroup =
               feedGroup.feedIds.mapNotNull { feedId ->
-                feedsById[feedId]?.let { feed ->
-                  OpmlFeed(
-                    title = feed.name,
-                    link = feed.link,
-                  )
-                }
+                feedsById[feedId]?.let { feed -> OpmlFeed(title = feed.name, link = feed.link) }
               }
 
             val opmlFeedGroup = OpmlFeedGroup(title = feedGroup.name, feeds = feedsInGroup)
@@ -196,7 +191,7 @@ class OpmlManager(
             producerScope = this,
             feeds = group.feeds,
             processedFeedsCount,
-            totalFeedsCount = totalSourcesCount
+            totalFeedsCount = totalSourcesCount,
           )
         val groupId = rssRepository.createGroup(group.title)
 
@@ -239,7 +234,7 @@ class OpmlManager(
 
     return rssRepository.upsertFeedWithPosts(
       feedPayload = feedFetcherResult.feedPayload,
-      title = feed.title
+      title = feed.title,
     )
   }
 

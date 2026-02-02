@@ -42,7 +42,7 @@ actual interface NetworkComponent {
 
           protocols(listOf(Protocol.HTTP_1_1, Protocol.HTTP_2))
         }
-      }
+      },
     )
   }
 

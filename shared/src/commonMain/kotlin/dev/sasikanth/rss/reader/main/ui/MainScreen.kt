@@ -158,7 +158,7 @@ internal fun MainScreen(
                                 0.85f to Color.Transparent,
                                 1.0f to Color.Transparent,
                               ),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
                           )
                         } else {
                           Modifier
@@ -173,17 +173,17 @@ internal fun MainScreen(
                   icon = {
                     Icon(
                       imageVector = destination.icon,
-                      contentDescription = stringResource(destination.label)
+                      contentDescription = stringResource(destination.label),
                     )
                   },
-                  colors = drawerItemColors
+                  colors = drawerItemColors,
                 )
               }
 
               Spacer(Modifier.weight(1f))
             }
           }
-        }
+        },
       ) {
         when (selectedDestination) {
           MainDestination.Home -> homeContent(openDrawer)
@@ -223,7 +223,7 @@ internal fun MainScreen(
                   Icon(imageVector = icon, contentDescription = stringResource(destination.label))
                 },
                 label = null,
-                colors = navigationRailItemColors
+                colors = navigationRailItemColors,
               )
             }
             Spacer(Modifier.weight(1f))
@@ -289,7 +289,7 @@ internal fun MainScreen(
                               0.85f to Color.Transparent,
                               1.0f to Color.Transparent,
                             ),
-                          shape = RoundedCornerShape(12.dp)
+                          shape = RoundedCornerShape(12.dp),
                         )
                       } else {
                         Modifier
@@ -306,13 +306,13 @@ internal fun MainScreen(
 
                   Icon(imageVector = icon, contentDescription = stringResource(destination.label))
                 },
-                colors = drawerItemColors
+                colors = drawerItemColors,
               )
             }
 
             Spacer(Modifier.weight(1f))
           }
-        }
+        },
       ) {
         when (selectedDestination) {
           MainDestination.Home -> homeContent(openDrawer)
@@ -334,16 +334,16 @@ private enum class MainDestination(
   Search(
     icon = TwineIcons.Search,
     selectedIcon = TwineIcons.Search,
-    label = Res.string.postsSearchHint
+    label = Res.string.postsSearchHint,
   ),
   Bookmarks(
     icon = TwineIcons.Bookmark,
     selectedIcon = TwineIcons.BookmarkFilled,
-    label = Res.string.bookmarks
+    label = Res.string.bookmarks,
   ),
   Settings(
     icon = TwineIcons.Settings,
     selectedIcon = TwineIcons.SettingsFilled,
-    label = Res.string.settings
+    label = Res.string.settings,
   ),
 }

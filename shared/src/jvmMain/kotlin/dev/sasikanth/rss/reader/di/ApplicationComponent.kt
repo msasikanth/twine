@@ -57,7 +57,7 @@ abstract class ApplicationComponent : SharedApplicationComponent() {
           cachePath.mkdirs()
         }
         cachePath.absolutePath
-      }
+      },
     )
 
   companion object

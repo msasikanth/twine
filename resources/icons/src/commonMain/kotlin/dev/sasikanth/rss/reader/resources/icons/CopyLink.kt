@@ -38,7 +38,7 @@ public val TwineIcons.CopyLink: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ public val TwineIcons.CopyLink: ImageVector
             strokeLineCap = Round,
             strokeLineJoin = StrokeJoin.Companion.Round,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(14.556f, 13.218f)
             curveTo(13.514f, 14.261f, 11.824f, 14.261f, 10.782f, 13.218f)
@@ -68,7 +68,7 @@ public val TwineIcons.CopyLink: ImageVector
             strokeLineCap = Round,
             strokeLineJoin = StrokeJoin.Companion.Round,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.5f, 3.0f)
             curveTo(7.213f, 3.0f, 5.569f, 3.0f, 4.463f, 3.908f)

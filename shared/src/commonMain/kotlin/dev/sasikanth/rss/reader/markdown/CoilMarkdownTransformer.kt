@@ -74,7 +74,7 @@ object CoilMarkdownTransformer : ImageTransformer {
   override fun placeholderConfig(
     density: Density,
     containerSize: Size,
-    intrinsicImageSize: Size
+    intrinsicImageSize: Size,
   ): PlaceholderConfig {
     return super.placeholderConfig(density, containerSize, intrinsicImageSize)
   }

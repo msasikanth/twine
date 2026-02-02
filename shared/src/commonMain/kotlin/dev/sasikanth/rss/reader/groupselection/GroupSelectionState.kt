@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.emptyFlow
 
 data class GroupSelectionState(
   val groups: Flow<PagingData<FeedGroup>>,
-  val selectedGroups: Set<String>
+  val selectedGroups: Set<String>,
 ) {
 
   val areGroupsSelected: Boolean

@@ -37,7 +37,7 @@ class HomeViewController(private val app: App) {
         },
         {
           // no-op
-        }
+        },
       )
     }
   }

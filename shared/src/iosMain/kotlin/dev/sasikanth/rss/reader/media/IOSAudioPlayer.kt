@@ -46,9 +46,7 @@ import platform.darwin.dispatch_get_main_queue
 @OptIn(ExperimentalForeignApi::class)
 @Inject
 @AppScope
-class IOSAudioPlayer(
-  private val dispatchersProvider: DispatchersProvider,
-) : AudioPlayer {
+class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : AudioPlayer {
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
@@ -74,7 +72,7 @@ class IOSAudioPlayer(
     NSNotificationCenter.defaultCenter.addObserverForName(
       AVPlayerItemDidPlayToEndTimeNotification,
       null,
-      null
+      null,
     ) {
       pause()
       seekTo(0)
@@ -104,7 +102,7 @@ class IOSAudioPlayer(
     localUrl: NSURL,
     title: String,
     artist: String,
-    coverUrl: String?
+    coverUrl: String?,
   ) {
     val nsUrl = NSURL.URLWithString(remoteUrl) ?: return
     val task =
@@ -247,7 +245,7 @@ class IOSAudioPlayer(
         duration = duration,
         playingUrl = playingUrl,
         buffering = buffering,
-        playbackSpeed = currentSpeed
+        playbackSpeed = currentSpeed,
       )
     }
 

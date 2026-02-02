@@ -178,7 +178,7 @@ internal fun PostsPreferencesSheet(
 
       PostsFilterGrid(
         selectedPostsType = selectedPostsType,
-        onPostTypeSelected = { selectedPostsType = it }
+        onPostTypeSelected = { selectedPostsType = it },
       )
 
       Spacer(Modifier.requiredHeight(24.dp))
@@ -200,14 +200,14 @@ internal fun PostsPreferencesSheet(
         colors =
           ButtonDefaults.textButtonColors(
             contentColor = AppTheme.colorScheme.tintedForeground,
-            containerColor = AppTheme.colorScheme.tintedSurface
+            containerColor = AppTheme.colorScheme.tintedSurface,
           ),
         shape = MaterialTheme.shapes.medium,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
       ) {
         Text(
           text = stringResource(Res.string.buttonApply),
-          style = MaterialTheme.typography.labelLarge
+          style = MaterialTheme.typography.labelLarge,
         )
       }
     }
@@ -226,13 +226,13 @@ private fun PostsFilterGrid(
         label = getPostTypeLabel(PostsType.ALL),
         isSelected = selectedPostsType == PostsType.ALL,
         onClick = { onPostTypeSelected(PostsType.ALL) },
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
       )
       PostsFilterButton(
         label = getPostTypeLabel(PostsType.UNREAD),
         isSelected = selectedPostsType == PostsType.UNREAD,
         onClick = { onPostTypeSelected(PostsType.UNREAD) },
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
       )
     }
 
@@ -243,13 +243,13 @@ private fun PostsFilterGrid(
         label = getPostTypeLabel(PostsType.TODAY),
         isSelected = selectedPostsType == PostsType.TODAY,
         onClick = { onPostTypeSelected(PostsType.TODAY) },
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
       )
       PostsFilterButton(
         label = getPostTypeLabel(PostsType.LAST_24_HOURS),
         isSelected = selectedPostsType == PostsType.LAST_24_HOURS,
         onClick = { onPostTypeSelected(PostsType.LAST_24_HOURS) },
-        modifier = Modifier.weight(1f)
+        modifier = Modifier.weight(1f),
       )
     }
   }
@@ -296,34 +296,30 @@ private fun PostsFilterButton(
         .border(width = 1.dp, color = borderColor, shape = MaterialTheme.shapes.medium)
         .clickable(onClick = onClick)
         .padding(8.dp),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Text(
       text = label,
       style = MaterialTheme.typography.bodyMedium,
       fontWeight = FontWeight.Medium,
       color = textColor,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
     )
   }
 }
 
 @Composable
-private fun SectionHeader(
-  text: String,
-  icon: ImageVector,
-  modifier: Modifier = Modifier,
-) {
+private fun SectionHeader(text: String, icon: ImageVector, modifier: Modifier = Modifier) {
   Row(
     modifier = modifier.padding(horizontal = 0.dp, vertical = 0.dp),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(8.dp)
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     Icon(
       imageVector = icon,
       contentDescription = null,
       tint = AppTheme.colorScheme.onSurfaceVariant,
-      modifier = Modifier.requiredSize(20.dp)
+      modifier = Modifier.requiredSize(20.dp),
     )
     Text(
       text = text,
@@ -344,10 +340,10 @@ private fun getPostTypeLabel(type: PostsType) =
 
 private enum class SortBy {
   Date,
-  Added
+  Added,
 }
 
 private enum class SortDirection {
   Newest,
-  Oldest
+  Oldest,
 }

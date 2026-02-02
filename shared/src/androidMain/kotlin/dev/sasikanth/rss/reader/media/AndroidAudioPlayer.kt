@@ -75,7 +75,7 @@ class AndroidAudioPlayer(
           override fun onPositionDiscontinuity(
             oldPosition: Player.PositionInfo,
             newPosition: Player.PositionInfo,
-            reason: Int
+            reason: Int,
           ) {
             updatePlaybackState()
           }
@@ -131,7 +131,7 @@ class AndroidAudioPlayer(
         duration = player.duration.coerceAtLeast(0),
         playingUrl = player.currentMediaItem?.mediaId,
         buffering = player.playbackState == Player.STATE_BUFFERING,
-        playbackSpeed = player.playbackParameters.speed
+        playbackSpeed = player.playbackParameters.speed,
       )
     }
   }

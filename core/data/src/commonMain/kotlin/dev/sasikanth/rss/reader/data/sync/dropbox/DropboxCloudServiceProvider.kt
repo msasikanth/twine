@@ -78,7 +78,7 @@ class DropboxCloudServiceProvider(
                 append("refresh_token", refreshToken)
                 append("grant_type", "refresh_token")
                 append("client_id", DROPBOX_CLIENT_ID)
-              }
+              },
           )
           .body()
 
@@ -122,7 +122,7 @@ class DropboxCloudServiceProvider(
                 put("mode", "overwrite")
                 put("mute", true)
               }
-            )
+            ),
           )
           contentType(ContentType.Application.OctetStream)
           setBody(data.encodeToByteArray())

@@ -23,5 +23,5 @@ import kotlinx.serialization.Serializable
 enum class PostFlag {
   Bookmarked,
   Read,
-  Hidden
+  Hidden,
 }

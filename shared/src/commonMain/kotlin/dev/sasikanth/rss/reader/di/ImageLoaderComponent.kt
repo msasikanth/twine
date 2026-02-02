@@ -33,10 +33,7 @@ interface ImageLoaderComponent : ImageLoaderPlatformComponent {
   val imageLoader: ImageLoader
 
   @Provides
-  fun imageLoader(
-    platformContext: PlatformContext,
-    appInfo: AppInfo,
-  ): ImageLoader {
+  fun imageLoader(platformContext: PlatformContext, appInfo: AppInfo): ImageLoader {
     return ImageLoader.Builder(platformContext)
       .components { add(SvgDecoder.Factory()) }
       .memoryCache { MemoryCache.Builder().maxSizePercent(platformContext, percent = 0.25).build() }

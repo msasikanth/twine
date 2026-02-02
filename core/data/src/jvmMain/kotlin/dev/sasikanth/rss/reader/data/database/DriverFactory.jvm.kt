@@ -20,9 +20,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-actual class DriverFactory(
-  private val codeMigrations: Array<AfterVersion>,
-) {
+actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
 
   actual fun createDriver(): SqlDriver {
     val databasePath = File(System.getProperty("user.home"), ".twine/${DB_NAME}")

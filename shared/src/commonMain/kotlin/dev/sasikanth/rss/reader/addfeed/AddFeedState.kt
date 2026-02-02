@@ -44,5 +44,5 @@ data class AddFeedState(
 
 enum class FeedFetchingState {
   Idle,
-  Loading
+  Loading,
 }

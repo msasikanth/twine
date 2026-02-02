@@ -201,10 +201,7 @@ internal fun ReaderPage(
       Box(modifier = modifier) {
         CompositionLocalProvider(
           LocalReferenceLinkHandler provides ReferenceLinkHandlerImpl(),
-          LocalMarkdownPadding provides
-            markdownPadding(
-              block = 12.dp,
-            ),
+          LocalMarkdownPadding provides markdownPadding(block = 12.dp),
           LocalMarkdownDimens provides markdownDimens(),
           LocalImageTransformer provides CoilMarkdownTransformer,
           LocalMarkdownAnnotator provides
@@ -248,8 +245,8 @@ internal fun ReaderPage(
             contentPadding =
               PaddingValues(
                 top = contentPaddingValues.calculateTopPadding(),
-                bottom = contentPaddingValues.calculateBottomPadding() + 24.dp
-              )
+                bottom = contentPaddingValues.calculateBottomPadding() + 24.dp,
+              ),
           ) {
             item(key = "reader-header") {
               PostHeader(
@@ -296,7 +293,7 @@ internal fun ReaderPage(
                       }
                     pageViewModel.setPlaybackSpeed(newSpeed)
                   },
-                  modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp)
+                  modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp),
                 )
               }
             }
@@ -304,7 +301,7 @@ internal fun ReaderPage(
             item(key = "divider") {
               HorizontalDivider(
                 modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
-                color = AppTheme.colorScheme.outlineVariant
+                color = AppTheme.colorScheme.outlineVariant,
               )
             }
 
@@ -363,9 +360,7 @@ private fun PostHeader(
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  Column(
-    modifier = Modifier.fillMaxWidth().then(modifier),
-  ) {
+  Column(modifier = Modifier.fillMaxWidth().then(modifier)) {
     val title = readerPost.title
     val description = readerPost.description
     val postImage = readerPost.imageUrl
@@ -381,7 +376,7 @@ private fun PostHeader(
                 horizontalBias = { pagerState.getOffsetFractionForPage(page) },
                 multiplier = 2f,
               )
-            }
+            },
         )
       }
 
@@ -392,7 +387,7 @@ private fun PostHeader(
       DisableSelection {
         Row(
           modifier = Modifier.padding(top = 20.dp),
-          verticalAlignment = Alignment.CenterVertically
+          verticalAlignment = Alignment.CenterVertically,
         ) {
           Text(
             text = readerPost.date.readerDateTimestamp(),
@@ -403,7 +398,8 @@ private fun PostHeader(
 
           val readingTimeEstimate =
             readerPost.articleContentReadingTime?.takeIf { showFullArticle }
-              ?: readerPost.feedContentReadingTime ?: 0
+              ?: readerPost.feedContentReadingTime
+              ?: 0
 
           if (readingTimeEstimate > 0) {
             Text(
@@ -468,7 +464,7 @@ private fun PostHeader(
               PostMetadataConfig(
                 showUnreadIndicator = false,
                 showToggleReadUnreadOption = true,
-                enablePostSource = false
+                enablePostSource = false,
               ),
             onSourceClick = {
               // no-op
@@ -511,18 +507,18 @@ private fun PostSourcePill(
       modifier =
         Modifier.background(
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.08f),
-            RoundedCornerShape(50)
+            RoundedCornerShape(50),
           )
           .border(
             1.dp,
             MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
-            androidx.compose.foundation.shape.RoundedCornerShape(50)
+            androidx.compose.foundation.shape.RoundedCornerShape(50),
           )
           .clip(androidx.compose.foundation.shape.RoundedCornerShape(50))
           .clickable(onClick = onSourceClick, enabled = config.enablePostSource)
           .padding(vertical = 6.dp)
           .padding(start = 8.dp, end = 12.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       FeedIcon(
         modifier = Modifier.requiredSize(16.dp),
@@ -540,7 +536,7 @@ private fun PostSourcePill(
         maxLines = 1,
         text = feedName,
         color = postSourceTextColor,
-        overflow = TextOverflow.Ellipsis
+        overflow = TextOverflow.Ellipsis,
       )
     }
   }
@@ -564,7 +560,7 @@ private fun PostActions(
       label = markAsUnreadLabel,
       icon = markAsUnreadIcon,
       iconTint = AppTheme.colorScheme.onSurfaceVariant,
-      onClick = onMarkAsUnread
+      onClick = onMarkAsUnread,
     )
 
     if (!commentsLink.isNullOrBlank()) {
@@ -573,7 +569,7 @@ private fun PostActions(
         label = commentsLabel,
         icon = TwineIcons.Comments,
         iconTint = AppTheme.colorScheme.onSurfaceVariant,
-        onClick = onCommentsClick
+        onClick = onCommentsClick,
       )
     }
 
@@ -582,7 +578,7 @@ private fun PostActions(
       label = sharedLabel,
       icon = TwineIcons.Share,
       iconTint = AppTheme.colorScheme.onSurfaceVariant,
-      onClick = onShareClick
+      onClick = onShareClick,
     )
 
     val bookmarkLabel =
@@ -605,7 +601,7 @@ private fun PostActions(
         } else {
           AppTheme.colorScheme.onSurfaceVariant
         },
-      onClick = onBookmarkClick
+      onClick = onBookmarkClick,
     )
   }
 }
@@ -624,12 +620,12 @@ private fun PostActionButton(
     tooltip = {
       Box(
         modifier =
-          Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp)).padding(8.dp),
+          Modifier.background(AppTheme.colorScheme.surface, RoundedCornerShape(4.dp)).padding(8.dp)
       ) {
         Text(text = label)
       }
     },
-    state = rememberTooltipState()
+    state = rememberTooltipState(),
   ) {
     Box(
       modifier =
@@ -641,13 +637,13 @@ private fun PostActionButton(
             contentDescription = label
           }
           .then(modifier),
-      contentAlignment = Alignment.Center
+      contentAlignment = Alignment.Center,
     ) {
       Icon(
         imageVector = icon,
         contentDescription = null,
         tint = iconTint,
-        modifier = Modifier.size(20.dp)
+        modifier = Modifier.size(20.dp),
       )
     }
   }
@@ -679,7 +675,7 @@ private fun MediaControls(
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
         .padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(16.dp)
+    verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     Column {
       Slider(
@@ -690,7 +686,7 @@ private fun MediaControls(
           SliderDefaults.colors(
             thumbColor = AppTheme.colorScheme.primary,
             activeTrackColor = AppTheme.colorScheme.primary,
-            inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f)
+            inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f),
           ),
       )
 
@@ -698,13 +694,13 @@ private fun MediaControls(
         Text(
           text = formatDuration(playbackState.currentPosition),
           style = MaterialTheme.typography.labelSmall,
-          color = AppTheme.colorScheme.onSurfaceVariant
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.weight(1f))
         Text(
           text = formatDuration(playbackState.duration),
           style = MaterialTheme.typography.labelSmall,
-          color = AppTheme.colorScheme.onSurfaceVariant
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
     }
@@ -712,7 +708,7 @@ private fun MediaControls(
     Row(
       modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceEvenly
+      horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
       TextButton(onClick = { onPlaybackSpeedChange(playbackState.playbackSpeed) }) {
         AnimatedContent(
@@ -721,12 +717,12 @@ private fun MediaControls(
             (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
               (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
             )
-          }
+          },
         ) {
           Text(
             text = stringResource(Res.string.playback_speed, it),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.onSurfaceVariant
+            color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }
       }
@@ -735,7 +731,7 @@ private fun MediaControls(
         Icon(
           imageVector = TwineIcons.Replay30,
           contentDescription = stringResource(Res.string.seek_backward),
-          tint = AppTheme.colorScheme.onSurfaceVariant
+          tint = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 
@@ -750,8 +746,8 @@ private fun MediaControls(
           animationSpec =
             spring(
               stiffness = Spring.StiffnessMedium,
-              dampingRatio = Spring.DampingRatioMediumBouncy
-            )
+              dampingRatio = Spring.DampingRatioMediumBouncy,
+            ),
         )
       val fabMorph by remember {
         derivedStateOf { Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided) }
@@ -763,13 +759,13 @@ private fun MediaControls(
             .clip(fabMorph.toShape(progress))
             .background(AppTheme.colorScheme.primaryContainer)
             .clickable(onClick = if (isPlaying) onPauseClick else onPlayClick),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
       ) {
         if (playbackState.buffering) {
           CircularProgressIndicator(
             modifier = Modifier.size(24.dp),
             color = AppTheme.colorScheme.onPrimaryContainer,
-            strokeWidth = 2.dp
+            strokeWidth = 2.dp,
           )
         } else {
           Icon(
@@ -785,7 +781,7 @@ private fun MediaControls(
         Icon(
           imageVector = TwineIcons.Forward30,
           contentDescription = stringResource(Res.string.seek_forward),
-          tint = AppTheme.colorScheme.onSurfaceVariant
+          tint = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

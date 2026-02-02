@@ -23,11 +23,7 @@ import androidx.compose.ui.graphics.Color
 
 data class TranslucentStyle(val background: Color, val foreground: Color, val outline: Color)
 
-@Immutable
-class TranslucentStyles(
-  val default: TranslucentStyle,
-  val prominent: TranslucentStyle,
-)
+@Immutable class TranslucentStyles(val default: TranslucentStyle, val prominent: TranslucentStyle)
 
 internal val LocalTranslucentStyles =
   compositionLocalOf<TranslucentStyles> {

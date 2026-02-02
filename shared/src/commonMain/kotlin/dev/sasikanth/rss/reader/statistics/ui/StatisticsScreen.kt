@@ -96,7 +96,7 @@ fun StatisticsScreen(
               modifier = Modifier.padding(start = 12.dp),
               icon = TwineIcons.ArrowBack,
               label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack
+              onClick = goBack,
             )
           },
           colors =
@@ -104,13 +104,13 @@ fun StatisticsScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
-            )
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
+            ),
         )
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -125,12 +125,12 @@ fun StatisticsScreen(
       if (statistics == null || statistics.totalReadCount == 0L) {
         Box(
           modifier = Modifier.fillMaxSize().padding(padding),
-          contentAlignment = Alignment.Center
+          contentAlignment = Alignment.Center,
         ) {
           Text(
             text = stringResource(Res.string.statisticsNoData),
             style = MaterialTheme.typography.bodyLarge,
-            color = AppTheme.colorScheme.onSurfaceVariant
+            color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }
       } else {
@@ -141,8 +141,8 @@ fun StatisticsScreen(
               start = padding.calculateStartPadding(layoutDirection),
               end = padding.calculateEndPadding(layoutDirection),
               top = padding.calculateTopPadding(),
-              bottom = padding.calculateBottomPadding() + 80.dp
-            )
+              bottom = padding.calculateBottomPadding() + 80.dp,
+            ),
         ) {
           item {
             StatisticCard(
@@ -159,7 +159,7 @@ fun StatisticsScreen(
             items(statistics.topFeeds.take(10)) { feedReadCount ->
               FeedReadCountItem(
                 feedReadCount = feedReadCount,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp),
               )
             }
 
@@ -172,7 +172,7 @@ fun StatisticsScreen(
             items(statistics.readingTrends.take(30)) { trend ->
               ReadingTrendItem(
                 trend = trend,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
               )
             }
           }
@@ -190,19 +190,19 @@ private fun StatisticCard(title: String, value: String, modifier: Modifier = Mod
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface)
         .padding(horizontal = 16.dp, vertical = 20.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Text(
       text = title,
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.onSurfaceVariant
+      color = AppTheme.colorScheme.onSurfaceVariant,
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
       text = value,
       style = MaterialTheme.typography.displayMedium,
       fontWeight = FontWeight.Bold,
-      color = AppTheme.colorScheme.primary
+      color = AppTheme.colorScheme.primary,
     )
   }
 }
@@ -236,7 +236,7 @@ private fun FeedReadCountItem(feedReadCount: FeedReadCount, modifier: Modifier =
       text = feedReadCount.readCount.toString(),
       style = MaterialTheme.typography.titleMedium,
       fontWeight = FontWeight.Bold,
-      color = AppTheme.colorScheme.primary
+      color = AppTheme.colorScheme.primary,
     )
   }
 }
@@ -246,18 +246,18 @@ private fun ReadingTrendItem(trend: ReadingTrend, modifier: Modifier = Modifier)
   Row(
     modifier = modifier.fillMaxWidth(),
     horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(
       text = trend.date.formatReadingTrendDate(),
       style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
     )
     Text(
       text = trend.count.toString(),
       style = MaterialTheme.typography.bodyMedium,
       fontWeight = FontWeight.Medium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
     )
   }
 }

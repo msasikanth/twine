@@ -92,7 +92,7 @@ fun MinifluxLoginScreen(
   viewModel: MinifluxLoginViewModel,
   onLoginSuccess: () -> Unit,
   goBack: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
@@ -120,36 +120,36 @@ fun MinifluxLoginScreen(
       title = {
         Text(
           text = stringResource(Res.string.minifluxClearDataTitle),
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
       },
       text = {
         Text(
           text = stringResource(Res.string.minifluxClearDataDesc),
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       },
       confirmButton = {
         TextButton(
           onClick = { viewModel.onEvent(MinifluxLoginEvent.OnConfirmClearDataClicked) },
-          shape = MaterialTheme.shapes.large
+          shape = MaterialTheme.shapes.large,
         ) {
           Text(
             text = stringResource(Res.string.minifluxClearDataPositive),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground
+            color = AppTheme.colorScheme.tintedForeground,
           )
         }
       },
       dismissButton = {
         TextButton(
           onClick = { viewModel.onEvent(MinifluxLoginEvent.OnConfirmationDismissed) },
-          shape = MaterialTheme.shapes.large
+          shape = MaterialTheme.shapes.large,
         ) {
           Text(
             text = stringResource(Res.string.buttonCancel),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
+            color = AppTheme.colorScheme.textEmphasisMed,
           )
         }
       },
@@ -176,7 +176,7 @@ fun MinifluxLoginScreen(
               modifier = Modifier.padding(start = 12.dp),
               icon = TwineIcons.ArrowBack,
               label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack
+              onClick = goBack,
             )
           },
           colors =
@@ -184,13 +184,13 @@ fun MinifluxLoginScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.align(Alignment.BottomCenter),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -206,7 +206,7 @@ fun MinifluxLoginScreen(
           shape = SnackbarDefaults.shape,
           backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
           contentColor = AppTheme.colorScheme.onSurface,
-          elevation = 0.dp
+          elevation = 0.dp,
         )
       }
     },
@@ -226,13 +226,13 @@ fun MinifluxLoginScreen(
           ),
         enabled = !state.isLoading && state.url.isNotBlank() && state.apiKey.isNotBlank(),
         shape = MaterialTheme.shapes.extraLarge,
-        onClick = { viewModel.onEvent(MinifluxLoginEvent.OnLoginClicked) }
+        onClick = { viewModel.onEvent(MinifluxLoginEvent.OnLoginClicked) },
       ) {
         if (state.isLoading) {
           CircularProgressIndicator(
             color = AppTheme.colorScheme.tintedForeground,
             modifier = Modifier.requiredSize(24.dp),
-            strokeWidth = 2.dp
+            strokeWidth = 2.dp,
           )
         } else {
           Text(
@@ -248,7 +248,7 @@ fun MinifluxLoginScreen(
     LazyColumn(
       modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       item { Spacer(Modifier.requiredHeight(8.dp)) }
 

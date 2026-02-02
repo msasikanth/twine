@@ -55,7 +55,7 @@ class DefaultSyncCoordinator(
     combine(
         dropboxSyncProvider.isSignedIn(),
         freshRssSyncProvider.isSignedIn(),
-        minifluxSyncProvider.isSignedIn()
+        minifluxSyncProvider.isSignedIn(),
       ) { dropboxSignedIn, freshRssSignedIn, minifluxSignedIn ->
         when {
           freshRssSignedIn -> freshRSSSyncCoordinator

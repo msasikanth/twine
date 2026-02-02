@@ -74,7 +74,7 @@ class FeedsRefreshWorker(
               count,
             )
           },
-          content = { applicationContext.getString(R.string.notification_new_articles_content) }
+          content = { applicationContext.getString(R.string.notification_new_articles_content) },
         )
 
         Result.success()

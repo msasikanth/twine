@@ -131,7 +131,7 @@ class FeedViewModel(
         .feed(
           feedId = feedId,
           postsAfter = postsAfter,
-          lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+          lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault()),
         )
         .onEach { feed -> _state.update { it.copy(feed = feed) } }
         .catch {

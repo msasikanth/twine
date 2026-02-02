@@ -174,7 +174,7 @@ internal fun HomeScreen(
         onBottomSheetStateChanged(it)
 
         true
-      }
+      },
     )
   val bottomSheetScaffoldState =
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
@@ -211,13 +211,13 @@ internal fun HomeScreen(
       onApply = { postsType, postsSortOrder ->
         viewModel.dispatch(HomeEvent.OnPostsSortFilterApplied(postsType, postsSortOrder))
       },
-      onDismiss = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(show = false)) }
+      onDismiss = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(show = false)) },
     )
   }
 
   featuredPostsPagerState.CollectItemTransition(
     key = featuredPosts,
-    itemProvider = { index -> featuredPosts.getOrNull(index) }
+    itemProvider = { index -> featuredPosts.getOrNull(index) },
   ) { fromItem, toItem, offset ->
     val fromSeedColor = fromItem?.seedColor?.let { Color(it) }
     val toSeedColor = toItem?.seedColor?.let { Color(it) }
@@ -226,14 +226,14 @@ internal fun HomeScreen(
       dynamicColorState.animate(
         fromSeedColor = fromSeedColor,
         toSeedColor = toSeedColor,
-        progress = offset
+        progress = offset,
       )
     }
   }
 
   BackHandler(
     enabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
-    onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } }
+    onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } },
   )
 
   Scaffold(
@@ -247,7 +247,7 @@ internal fun HomeScreen(
           }
           else -> false
         }
-      },
+      }
   ) { scaffoldPadding ->
     val sheetPeekHeight by
       animateDpAsState(
@@ -297,7 +297,7 @@ internal fun HomeScreen(
                 scrollBehavior = scrollBehavior,
                 onMenuClicked = onMenuClicked,
                 onShowPostsSortFilter = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(true)) },
-                onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) }
+                onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) },
               )
             },
             body = { paddingValues ->
@@ -340,8 +340,7 @@ internal fun HomeScreen(
                     .firstOrNull { itemInfo ->
                       itemInfo.offset >= topOffset || itemInfo.offset == 0
                     }
-                    ?.index
-                    ?: 0
+                    ?.index ?: 0
 
                 val adjustedIndex =
                   if (firstVisibleItemIndexAfterOffset == 0) {
@@ -367,7 +366,7 @@ internal fun HomeScreen(
                     pullToRefreshState = pullToRefreshState,
                     state = state,
                     paddingValues = paddingValues,
-                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
+                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
                   ) {
                     NoNewPosts()
                   }
@@ -377,7 +376,7 @@ internal fun HomeScreen(
                     pullToRefreshState = pullToRefreshState,
                     state = state,
                     paddingValues = paddingValues,
-                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) }
+                    onRefresh = { viewModel.dispatch(HomeEvent.OnSwipeToRefresh) },
                   ) {
                     PostsList(
                       paddingValues = paddingValues,
@@ -408,7 +407,7 @@ internal fun HomeScreen(
                           HomeEvent.UpdatePostReadStatus(postId, updatedReadStatus)
                         )
                       },
-                      modifier = Modifier.fillMaxSize()
+                      modifier = Modifier.fillMaxSize(),
                     )
                   }
                 }
@@ -424,7 +423,7 @@ internal fun HomeScreen(
                 .align(Alignment.BottomCenter),
             visible = postsListState.isScrollingTowardsUp(),
             enter = slideInVertically { it },
-            exit = slideOutVertically { it }
+            exit = slideOutVertically { it },
           ) {
             Box(
               modifier =
@@ -465,7 +464,7 @@ internal fun HomeScreen(
                 val bottomSheetProgress =
                   bottomSheetState.anchoredDraggableState.progress(
                     SheetValue.PartiallyExpanded,
-                    SheetValue.Expanded
+                    SheetValue.Expanded,
                   )
 
                 drawRect(color = SYSTEM_SCRIM, alpha = bottomSheetProgress)
@@ -480,7 +479,7 @@ internal fun HomeScreen(
             @Suppress("INVISIBLE_REFERENCE") {
               bottomSheetState.anchoredDraggableState.progress(
                 SheetValue.PartiallyExpanded,
-                SheetValue.Expanded
+                SheetValue.Expanded,
               )
             },
           openFeedInfoSheet = openFeedInfoSheet,
@@ -489,7 +488,7 @@ internal fun HomeScreen(
           openAddFeedScreen = openAddFeedScreen,
           openPaywall = openPaywall,
           openFeeds = { coroutineScope.launch { bottomSheetState.expand() } },
-          closeFeeds = { coroutineScope.launch { bottomSheetState.partialExpand() } }
+          closeFeeds = { coroutineScope.launch { bottomSheetState.partialExpand() } },
         )
       },
       containerColor = Color.Transparent,
@@ -500,7 +499,7 @@ internal fun HomeScreen(
       sheetPeekHeight = sheetPeekHeight,
       sheetShape = RectangleShape,
       sheetSwipeEnabled = !feedsState.isInMultiSelectMode,
-      sheetDragHandle = null
+      sheetDragHandle = null,
     )
   }
 }
@@ -527,9 +526,9 @@ private fun PullToRefreshContent(
           isRefreshing = state.isSyncing,
           containerColor = AppTheme.colorScheme.primaryContainer,
           color = AppTheme.colorScheme.primary,
-          state = pullToRefreshState
+          state = pullToRefreshState,
         )
-      }
+      },
     ) {
       content()
     }
@@ -549,13 +548,13 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
         }
       },
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
+    verticalArrangement = Arrangement.Center,
   ) {
     Text(
       text = stringResource(Res.string.noFeeds),
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
     )
 
     Spacer(Modifier.requiredHeight(8.dp))
@@ -564,7 +563,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
       text = stringResource(Res.string.swipeUpGetStarted),
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
     )
 
     Spacer(Modifier.requiredHeight(12.dp))
@@ -572,7 +571,7 @@ private fun NoFeeds(onNoFeedsSwipeUp: () -> Unit) {
     Icon(
       imageVector = Icons.Rounded.KeyboardArrowUp,
       contentDescription = null,
-      tint = AppTheme.colorScheme.tintedForeground
+      tint = AppTheme.colorScheme.tintedForeground,
     )
   }
 }
@@ -583,13 +582,13 @@ private fun NoNewPosts() {
     modifier =
       Modifier.padding(horizontal = 16.dp).fillMaxSize().verticalScroll(rememberScrollState()),
     horizontalAlignment = Alignment.CenterHorizontally,
-    verticalArrangement = Arrangement.Center
+    verticalArrangement = Arrangement.Center,
   ) {
     Icon(
       imageVector = TwineIcons.Newsstand,
       contentDescription = null,
       tint = AppTheme.colorScheme.textEmphasisHigh,
-      modifier = Modifier.requiredSize(80.dp)
+      modifier = Modifier.requiredSize(80.dp),
     )
 
     Spacer(Modifier.requiredHeight(12.dp))
@@ -598,7 +597,7 @@ private fun NoNewPosts() {
       text = stringResource(Res.string.noNewPosts),
       style = MaterialTheme.typography.headlineMedium,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
     )
 
     Spacer(Modifier.requiredHeight(8.dp))
@@ -607,7 +606,7 @@ private fun NoNewPosts() {
       text = stringResource(Res.string.noNewPostsSubtitle),
       style = MaterialTheme.typography.labelLarge,
       color = AppTheme.colorScheme.textEmphasisMed,
-      textAlign = TextAlign.Center
+      textAlign = TextAlign.Center,
     )
   }
 }
@@ -646,10 +645,7 @@ fun featuredPosts(
           if (post != null && post.imageUrl.isNullOrBlank().not()) {
             val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
 
-            FeaturedPostItem(
-              resolvedPost = post,
-              seedColor = existingSeedColor?.toArgb(),
-            )
+            FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
           } else {
             null
           }
@@ -666,9 +662,7 @@ fun featuredPosts(
 
             return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
               val seedColor =
-                seedColorExtractor.calculateSeedColor(
-                  url = item.resolvedPost.imageUrl,
-                )
+                seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl)
               item.copy(seedColor = seedColor?.toArgb())
             } else {
               null

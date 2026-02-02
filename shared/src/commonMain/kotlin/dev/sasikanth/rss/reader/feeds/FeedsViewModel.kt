@@ -179,7 +179,7 @@ class FeedsViewModel(
     viewModelScope.launch {
       rssRepository.addFeedIdsToGroups(
         groupIds = groupIds,
-        feedIds = _state.value.selectedSources.map { it.id }
+        feedIds = _state.value.selectedSources.map { it.id },
       )
       dispatch(FeedsEvent.CancelSourcesSelection)
     }
@@ -272,11 +272,10 @@ class FeedsViewModel(
     val searchQueryFlow =
       snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
 
-    combine(
-        searchQueryFlow,
-        settingsRepository.postsType,
-        refreshPolicy.dateTimeFlow,
-      ) { searchQuery, postsType, dateTime ->
+    combine(searchQueryFlow, settingsRepository.postsType, refreshPolicy.dateTimeFlow) {
+        searchQuery,
+        postsType,
+        dateTime ->
         Triple(searchQuery, postsType, dateTime)
       }
       .onEach { (searchQuery, postsType, dateTime) ->
@@ -285,7 +284,7 @@ class FeedsViewModel(
           if (searchQuery.text.length >= MINIMUM_REQUIRED_SEARCH_CHARACTERS) {
             feedsSearchResultsPager(
               transformedSearchQuery = searchQuery.text,
-              postsAfter = postsAfter
+              postsAfter = postsAfter,
             )
           } else {
             flowOf(PagingData.empty())
@@ -306,11 +305,10 @@ class FeedsViewModel(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(
-        activeSourceFlow,
-        refreshPolicy.dateTimeFlow,
-        postsTypeFlow,
-      ) { activeSource, lastRefreshedAt, postsType ->
+    combine(activeSourceFlow, refreshPolicy.dateTimeFlow, postsTypeFlow) {
+        activeSource,
+        lastRefreshedAt,
+        postsType ->
         Triple(activeSource, lastRefreshedAt, postsType)
       }
       .flatMapLatest { (activeSource, lastRefreshedAt, postsType) ->
@@ -341,24 +339,21 @@ class FeedsViewModel(
         _state.update {
           it.copy(
             numberOfFeeds = numberOfFeeds.toInt(),
-            numberOfFeedGroups = numberOfFeedGroups.toInt()
+            numberOfFeedGroups = numberOfFeedGroups.toInt(),
           )
         }
       }
       .launchIn(viewModelScope)
 
     val pinnedSourcesFlow =
-      combine(
-          settingsRepository.postsType,
-          refreshPolicy.dateTimeFlow,
-        ) { postsType, dateTime ->
+      combine(settingsRepository.postsType, refreshPolicy.dateTimeFlow) { postsType, dateTime ->
           Pair(postsType, dateTime)
         }
         .flatMapLatest { (postsType, dateTime) ->
           val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
           rssRepository.pinnedSources(
             postsAfter = postsAfter,
-            lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault())
+            lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault()),
           )
         }
 
@@ -366,7 +361,7 @@ class FeedsViewModel(
       combine(
           settingsRepository.postsType,
           settingsRepository.feedsSortOrder,
-          refreshPolicy.dateTimeFlow
+          refreshPolicy.dateTimeFlow,
         ) { postsType, feedsSortOrder, dateTime ->
           Triple(postsType, feedsSortOrder, dateTime)
         }
@@ -386,12 +381,7 @@ class FeedsViewModel(
         Pair(pinnedSources, allSources)
       }
       .onEach { (pinnedSources, allSources) ->
-        _state.update {
-          it.copy(
-            pinnedSources = pinnedSources,
-            sources = allSources,
-          )
-        }
+        _state.update { it.copy(pinnedSources = pinnedSources, sources = allSources) }
       }
       .launchIn(viewModelScope)
   }
@@ -405,13 +395,13 @@ class FeedsViewModel(
   private fun sources(
     postsAfter: Instant,
     lastSyncedAt: LocalDateTime,
-    feedsSortOrder: FeedsOrderBy
+    feedsSortOrder: FeedsOrderBy,
   ) =
     createPager(config = createPagingConfig(pageSize = 20)) {
         rssRepository.sources(
           postsAfter = postsAfter,
           lastSyncedAt = lastSyncedAt.toInstant(TimeZone.currentSystemDefault()),
-          orderBy = feedsSortOrder
+          orderBy = feedsSortOrder,
         )
       }
       .flow

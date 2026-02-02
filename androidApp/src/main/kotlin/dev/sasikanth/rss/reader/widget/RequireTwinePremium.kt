@@ -45,16 +45,12 @@ fun RequireTwinePremium(modifier: GlanceModifier = GlanceModifier) {
         .background(GlanceTheme.colors.background)
         .cornerRadius(16.dp)
         .padding(16.dp),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Text(
       text = context.getString(R.string.widget_required_premium),
       style =
-        TextStyle(
-          fontWeight = FontWeight.Medium,
-          fontSize = 16.sp,
-          textAlign = TextAlign.Center,
-        )
+        TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center),
     )
   }
 }

@@ -14,14 +14,6 @@ package dev.sasikanth.rss.reader.premium
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-@Composable
-expect fun PaywallComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier = Modifier,
-)
+@Composable expect fun PaywallComponent(onDismiss: () -> Unit, modifier: Modifier = Modifier)
 
-@Composable
-expect fun CustomerCenterComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier = Modifier,
-)
+@Composable expect fun CustomerCenterComponent(onDismiss: () -> Unit, modifier: Modifier = Modifier)

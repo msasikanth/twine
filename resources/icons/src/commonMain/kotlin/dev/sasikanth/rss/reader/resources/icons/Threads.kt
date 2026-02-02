@@ -38,7 +38,7 @@ val TwineIcons.Threads: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ val TwineIcons.Threads: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(14.8568f, 9.3305f)
             curveTo(14.7778f, 9.2926f, 14.6976f, 9.2562f, 14.6163f, 9.2213f)

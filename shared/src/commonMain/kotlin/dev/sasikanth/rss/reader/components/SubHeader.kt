@@ -31,6 +31,6 @@ internal fun SubHeader(text: String, modifier: Modifier = Modifier) {
     text = text,
     style = MaterialTheme.typography.titleMedium,
     color = AppTheme.colorScheme.onSurfaceVariant,
-    modifier = modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+    modifier = modifier.padding(horizontal = 24.dp, vertical = 12.dp),
   )
 }

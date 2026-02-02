@@ -42,7 +42,7 @@ internal fun rememberDynamicColorState(
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
-      useTonalSpotScheme = useTonalSpotScheme
+      useTonalSpotScheme = useTonalSpotScheme,
     )
   }
 }
@@ -88,7 +88,7 @@ internal class DynamicColorState(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = false,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightAppColorScheme
+                defaultColorScheme = defaultLightAppColorScheme,
               )
               .also { cache.put("light_$fromSeedColor", it) }
 
@@ -98,7 +98,7 @@ internal class DynamicColorState(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = true,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkAppColorScheme
+                defaultColorScheme = defaultDarkAppColorScheme,
               )
               .also { cache.put("dark_$fromSeedColor", it) }
 
@@ -108,7 +108,7 @@ internal class DynamicColorState(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = false,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightAppColorScheme
+                defaultColorScheme = defaultLightAppColorScheme,
               )
               .also { cache.put("light_$toSeedColor", it) }
 
@@ -118,7 +118,7 @@ internal class DynamicColorState(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = true,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkAppColorScheme
+                defaultColorScheme = defaultDarkAppColorScheme,
               )
               .also { cache.put("dark_$toSeedColor", it) }
       }

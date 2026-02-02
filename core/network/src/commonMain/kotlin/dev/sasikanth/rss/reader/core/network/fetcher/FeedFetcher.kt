@@ -125,7 +125,7 @@ class FeedFetcher(
     response: HttpResponse,
     url: String,
     fetchFullContent: Boolean,
-    redirectCount: Int
+    redirectCount: Int,
   ): FeedFetchResult {
     val contentType =
       try {
@@ -145,7 +145,7 @@ class FeedFetcher(
           return fetch(
             url = feedUrl,
             fetchFullContent = fetchFullContent,
-            redirectCount = redirectCount + 1
+            redirectCount = redirectCount + 1,
           )
         }
       }
@@ -168,11 +168,7 @@ class FeedFetcher(
         val charset = Charset.forName(responseCharset ?: Charsets.UTF8.name)
 
         var feedPayload =
-          xmlFeedParser.parse(
-            feedUrl = url,
-            content = responseChannel,
-            charset = charset,
-          )
+          xmlFeedParser.parse(feedUrl = url, content = responseChannel, charset = charset)
 
         if (fetchFullContent) {
           feedPayload = fetchFullContentForPosts(feedPayload)
@@ -182,11 +178,7 @@ class FeedFetcher(
       }
       ContentType.Application.Json -> {
         val jsonSource = responseChannel.readBuffer()
-        var feedPayload =
-          jsonFeedParser.parse(
-            content = jsonSource,
-            feedUrl = url,
-          )
+        var feedPayload = jsonFeedParser.parse(content = jsonSource, feedUrl = url)
 
         if (fetchFullContent) {
           feedPayload = fetchFullContentForPosts(feedPayload)
@@ -215,7 +207,7 @@ class FeedFetcher(
     response: HttpResponse,
     url: Url,
     fetchFullContent: Boolean,
-    redirectCount: Int
+    redirectCount: Int,
   ): FeedFetchResult {
     val headerLocation = response.headers["Location"]
     val redirectToUrl = UrlUtils.safeUrl(host = url.host, url = headerLocation)
@@ -227,13 +219,13 @@ class FeedFetcher(
     return fetch(
       url = redirectToUrl,
       fetchFullContent = fetchFullContent,
-      redirectCount = redirectCount + 1
+      redirectCount = redirectCount + 1,
     )
   }
 
   private fun fetchFeedLinkFromHtmlIfExists(
     htmlContent: ByteReadChannel,
-    originalUrl: String
+    originalUrl: String,
   ): String? {
     val document =
       try {
@@ -246,8 +238,7 @@ class FeedFetcher(
       document.getElementsByTag(TAG_LINK).firstOrNull {
         val linkType = it.attr(ATTR_TYPE)
         linkType == RSS_MEDIA_TYPE || linkType == ATOM_MEDIA_TYPE
-      }
-        ?: return null
+      } ?: return null
     val link = linkElement.attr(ATTR_HREF)
     val host = UrlUtils.extractHost(originalUrl)
 

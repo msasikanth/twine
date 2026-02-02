@@ -40,7 +40,7 @@ class SourcesOpml {
         Opml(
           version = "2.0",
           head = Head("Twine RSS Feeds"),
-          body = Body(outlines = sources.map(::mapSourceToOutline))
+          body = Body(outlines = sources.map(::mapSourceToOutline)),
         )
 
       val xmlString = xml.encodeToString(serializer<Opml>(), opml)
@@ -75,7 +75,7 @@ class SourcesOpml {
           title = source.title,
           type = "rss",
           xmlUrl = source.link,
-          outlines = null
+          outlines = null,
         )
       }
       is OpmlFeedGroup -> {
@@ -84,7 +84,7 @@ class SourcesOpml {
           title = source.title,
           type = null,
           xmlUrl = null,
-          outlines = source.feeds.map(::mapSourceToOutline)
+          outlines = source.feeds.map(::mapSourceToOutline),
         )
       }
     }
@@ -96,7 +96,7 @@ class SourcesOpml {
     } else if (outline.outlines.isNullOrEmpty().not()) {
       return OpmlFeedGroup(
         title = outline.title ?: outline.text ?: "Group",
-        feeds = outline.outlines.mapNotNull(::mapOutlineToOpmlFeed)
+        feeds = outline.outlines.mapNotNull(::mapOutlineToOpmlFeed),
       )
     }
 

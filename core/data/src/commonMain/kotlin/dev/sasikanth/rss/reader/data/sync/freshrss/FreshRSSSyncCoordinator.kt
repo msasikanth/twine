@@ -373,9 +373,9 @@ class FreshRSSSyncCoordinator(
                   description = "",
                   homepageLink = subscription.htmlUrl,
                   link = subscription.url,
-                  posts = emptyFlow()
+                  posts = emptyFlow(),
                 ),
-              updateFeed = true
+              updateFeed = true,
             )
             .also {
               hasNewSubscriptions = true
@@ -400,7 +400,7 @@ class FreshRSSSyncCoordinator(
                   pinnedAt = localGroup.pinnedAt,
                   updatedAt = syncStartTime,
                   isDeleted = false,
-                  remoteId = category.id
+                  remoteId = category.id,
                 )
               }
               localGroup.id
@@ -411,7 +411,7 @@ class FreshRSSSyncCoordinator(
                 pinnedAt = null,
                 updatedAt = syncStartTime,
                 isDeleted = false,
-                remoteId = category.id
+                remoteId = category.id,
               )
               rssRepository.feedGroupByRemoteId(category.id)!!.id
             }
@@ -423,7 +423,7 @@ class FreshRSSSyncCoordinator(
           if (groupsContainingFeed.isNotEmpty()) {
             rssRepository.removeFeedIdsFromGroups(
               groupIds = groupsContainingFeed.map { it.id }.toSet(),
-              feedIds = listOf(feedId)
+              feedIds = listOf(feedId),
             )
           }
 
@@ -444,7 +444,7 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun syncArticles(
     streamId: String = "user/-/state/com.google/reading-list",
-    newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds()
+    newerThan: Long = Instant.DISTANT_PAST.toEpochMilliseconds(),
   ): Boolean {
     var hasNewArticles = false
     var continuation: String? = null
@@ -455,7 +455,7 @@ class FreshRSSSyncCoordinator(
           streamId = streamId,
           limit = ARTICLE_PAGE_SIZE,
           newerThan = newerThan,
-          continuation = continuation
+          continuation = continuation,
         )
       val items = articlesPayload.items
       items.asReversed().forEach { item ->
@@ -471,10 +471,7 @@ class FreshRSSSyncCoordinator(
     return hasNewArticles
   }
 
-  private suspend fun upsertArticle(
-    item: ArticlePayload,
-    downloadFullContent: Boolean,
-  ): Boolean {
+  private suspend fun upsertArticle(item: ArticlePayload, downloadFullContent: Boolean): Boolean {
     val remoteId = item.id
     val postLink =
       item.canonical.firstOrNull()?.href ?: item.alternate.firstOrNull()?.href ?: item.id
@@ -509,7 +506,7 @@ class FreshRSSSyncCoordinator(
             date = item.published * 1000, // FreshRSS uses seconds, we use millis
             commentsLink = null,
             fullContent = fullContent,
-            isDateParsedCorrectly = true
+            isDateParsedCorrectly = true,
           )
 
         rssRepository.upsertFeedWithPosts(
@@ -520,10 +517,10 @@ class FreshRSSSyncCoordinator(
               description = feed.description,
               homepageLink = feed.homepageLink,
               link = feed.link,
-              posts = flowOf(postPayload)
+              posts = flowOf(postPayload),
             ),
           feedId = feed.id,
-          updateFeed = false
+          updateFeed = false,
         )
 
         // Link the newly created post with remoteId
@@ -572,10 +569,7 @@ class FreshRSSSyncCoordinator(
   private suspend fun pushStatusChanges() {
     while (true) {
       val dirtyPosts =
-        rssRepository.postsWithLocalChangesPaged(
-          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
-          offset = 0,
-        )
+        rssRepository.postsWithLocalChangesPaged(limit = LOCAL_POSTS_PAGE_SIZE.toLong(), offset = 0)
       if (dirtyPosts.isEmpty()) return
 
       val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId }

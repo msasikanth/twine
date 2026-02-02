@@ -42,7 +42,7 @@ abstract class XmlContentParser {
     parser: XmlPullParser,
     firstPost: PostPayload? = null,
     itemTag: String,
-    readItem: (XmlPullParser) -> PostPayload?
+    readItem: (XmlPullParser) -> PostPayload?,
   ): Flow<PostPayload> = flow {
     if (firstPost != null) {
       emit(firstPost)
@@ -68,7 +68,7 @@ abstract class XmlContentParser {
     icon: String?,
     homepageLink: String?,
     link: String,
-    posts: Flow<PostPayload>
+    posts: Flow<PostPayload>,
   ): FeedPayload {
     val host = UrlUtils.extractHost(homepageLink ?: link)
     val finalIcon =
@@ -84,7 +84,7 @@ abstract class XmlContentParser {
       icon = finalIcon,
       homepageLink = homepageLink ?: link,
       link = link,
-      posts = posts
+      posts = posts,
     )
   }
 
@@ -95,7 +95,7 @@ abstract class XmlContentParser {
     return PostContent(
       rawContent = htmlContent?.cleanedHtml,
       heroImage = htmlContent?.heroImage,
-      textContent = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim()
+      textContent = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim(),
     )
   }
 
@@ -130,7 +130,7 @@ abstract class XmlContentParser {
     audioUrl: String?,
     date: String?,
     commentsLink: String? = null,
-    hostLink: String?
+    hostLink: String?,
   ): PostPayload? {
     val postPubDateInMillis = date?.dateStringToEpochMillis()
 
@@ -148,14 +148,14 @@ abstract class XmlContentParser {
       audioUrl = audioUrl,
       date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
       commentsLink = commentsLink?.trim(),
-      isDateParsedCorrectly = postPubDateInMillis != null
+      isDateParsedCorrectly = postPubDateInMillis != null,
     )
   }
 
   protected data class PostContent(
     val rawContent: String?,
     val heroImage: String?,
-    val textContent: String?
+    val textContent: String?,
   )
 
   protected data class MediaGroupResult(val image: String?, val description: String?)

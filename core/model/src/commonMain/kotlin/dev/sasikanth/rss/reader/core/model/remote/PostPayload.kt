@@ -26,7 +26,7 @@ data class PostPayload(
   val audioUrl: String? = null,
   val date: Long,
   val commentsLink: String?,
-  val isDateParsedCorrectly: Boolean
+  val isDateParsedCorrectly: Boolean,
 ) {
   companion object
 }

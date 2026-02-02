@@ -36,9 +36,7 @@ import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 
 @Inject
 @AppScope
-class JvmAudioPlayer(
-  private val dispatchersProvider: DispatchersProvider,
-) : AudioPlayer {
+class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : AudioPlayer {
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
@@ -126,7 +124,7 @@ class JvmAudioPlayer(
         duration = mediaPlayer?.status()?.length()?.coerceAtLeast(0) ?: 0L,
         playingUrl = playingUrl,
         buffering = it.buffering,
-        playbackSpeed = mediaPlayer?.status()?.rate() ?: 1f
+        playbackSpeed = mediaPlayer?.status()?.rate() ?: 1f,
       )
     }
   }

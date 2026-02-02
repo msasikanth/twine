@@ -107,7 +107,7 @@ internal fun HomeTopAppBar(
           modifier = Modifier.padding(start = 12.dp),
           icon = Icons.Rounded.Menu,
           label = stringResource(Res.string.moreMenuOptions),
-          onClick = onMenuClicked
+          onClick = onMenuClicked,
         )
       }
     },
@@ -115,7 +115,7 @@ internal fun HomeTopAppBar(
       AnimatedVisibility(
         visible = hasUnreadPosts,
         enter = fadeIn() + scaleIn(),
-        exit = fadeOut() + scaleOut()
+        exit = fadeOut() + scaleOut(),
       ) {
         CircularIconButton(
           icon = TwineIcons.MarkAllAsRead,
@@ -124,7 +124,7 @@ internal fun HomeTopAppBar(
           onClick = {
             hasUnreadPosts = false
             onMarkPostsAsRead(source)
-          }
+          },
         )
       }
 
@@ -133,23 +133,19 @@ internal fun HomeTopAppBar(
       CircularIconButton(
         icon = TwineIcons.Sort,
         label = stringResource(Res.string.postsFilter),
-        onClick = onShowPostsSortFilter
+        onClick = onShowPostsSortFilter,
       )
     },
     colors =
       TopAppBarDefaults.topAppBarColors(
         containerColor = Color.Transparent,
-        scrolledContainerColor = Color.Transparent
-      )
+        scrolledContainerColor = Color.Transparent,
+      ),
   )
 }
 
 @Composable
-private fun SourceInfo(
-  source: Source?,
-  postsType: PostsType,
-  modifier: Modifier = Modifier,
-) {
+private fun SourceInfo(source: Source?, postsType: PostsType, modifier: Modifier = Modifier) {
   Row(
     modifier = modifier.clip(MaterialTheme.shapes.small),
     verticalAlignment = Alignment.CenterVertically,
@@ -157,7 +153,7 @@ private fun SourceInfo(
   ) {
     Column(
       modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-      horizontalAlignment = Alignment.CenterHorizontally
+      horizontalAlignment = Alignment.CenterHorizontally,
     ) {
       val title =
         when (source) {

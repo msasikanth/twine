@@ -86,19 +86,19 @@ class JsonFeedParser(
               audioUrl = audioUrl,
               date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
               commentsLink = null,
-              isDateParsedCorrectly = postPublishedAt != null
+              isDateParsedCorrectly = postPublishedAt != null,
             )
           }
 
         val feedPayload =
           FeedPayload(
             name = jsonFeedPayload.title,
-            icon = jsonFeedPayload.icon
-                ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
+            icon =
+              jsonFeedPayload.icon ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts = posts.asFlow()
+            posts = posts.asFlow(),
           )
 
         return@withContext feedPayload
@@ -135,8 +135,5 @@ private data class JsonFeedPayload(
   )
 
   @Serializable
-  data class Attachment(
-    val url: String,
-    @SerialName("mime_type") val mimeType: String,
-  )
+  data class Attachment(val url: String, @SerialName("mime_type") val mimeType: String)
 }

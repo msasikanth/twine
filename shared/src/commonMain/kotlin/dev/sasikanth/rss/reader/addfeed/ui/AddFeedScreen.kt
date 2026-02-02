@@ -156,7 +156,7 @@ fun AddFeedScreen(
             modifier = Modifier.padding(start = 12.dp),
             icon = TwineIcons.ArrowBack,
             label = stringResource(Res.string.buttonGoBack),
-            onClick = { goBack() }
+            onClick = { goBack() },
           )
         },
         colors =
@@ -164,7 +164,7 @@ fun AddFeedScreen(
             containerColor = AppTheme.colorScheme.backdrop,
             navigationIconContentColor = AppTheme.colorScheme.onSurface,
             titleContentColor = AppTheme.colorScheme.onSurface,
-            actionIconContentColor = AppTheme.colorScheme.onSurface
+            actionIconContentColor = AppTheme.colorScheme.onSurface,
           ),
       )
     },
@@ -180,7 +180,7 @@ fun AddFeedScreen(
           shape = SnackbarDefaults.shape,
           backgroundColor = SnackbarDefaults.color,
           contentColor = SnackbarDefaults.contentColor,
-          elevation = 0.dp
+          elevation = 0.dp,
         )
       }
     },
@@ -205,13 +205,13 @@ fun AddFeedScreen(
           viewModel.dispatch(
             AddFeedEvent.AddFeedClicked(feedLink = feedLink.text, name = feedTitle.text)
           )
-        }
+        },
       ) {
         if (state.feedFetchingState == FeedFetchingState.Loading) {
           CircularProgressIndicator(
             color = AppTheme.colorScheme.tintedForeground,
             modifier = Modifier.requiredSize(24.dp),
-            strokeWidth = 2.dp
+            strokeWidth = 2.dp,
           )
         } else {
           Text(
@@ -232,9 +232,7 @@ fun AddFeedScreen(
       ) {
         item(span = { GridItemSpan(maxLineSpan) }) { Spacer(Modifier.requiredHeight(16.dp)) }
 
-        item(
-          span = { GridItemSpan(maxLineSpan) },
-        ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
           TextField(
             modifier =
               Modifier.fillMaxWidth().focusRequester(feedLinkFocus).focusProperties {
@@ -247,14 +245,12 @@ fun AddFeedScreen(
               KeyboardOptions(
                 autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Uri,
-                imeAction = ImeAction.Next
-              )
+                imeAction = ImeAction.Next,
+              ),
           )
         }
 
-        item(
-          span = { GridItemSpan(maxLineSpan) },
-        ) {
+        item(span = { GridItemSpan(maxLineSpan) }) {
           TextField(
             modifier =
               Modifier.fillMaxWidth().focusRequester(feedTitleFocus).focusProperties {
@@ -267,7 +263,7 @@ fun AddFeedScreen(
               KeyboardOptions(
                 autoCorrectEnabled = false,
                 keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
+                imeAction = ImeAction.Done,
               ),
           )
         }
@@ -285,12 +281,10 @@ fun AddFeedScreen(
               checked = state.alwaysFetchSourceArticle,
               onValueChanged = { newValue ->
                 viewModel.dispatch(AddFeedEvent.OnAlwaysFetchSourceArticleChanged(newValue))
-              }
+              },
             )
 
-            HorizontalDivider(
-              color = AppTheme.colorScheme.outlineVariant,
-            )
+            HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
 
             FeedOptionSwitch(
               modifier = Modifier.ignoreHorizontalParentPadding(24.dp),
@@ -298,7 +292,7 @@ fun AddFeedScreen(
               checked = state.showFeedFavIcon,
               onValueChanged = { newValue ->
                 viewModel.dispatch(AddFeedEvent.OnShowFeedFavIconChanged(newValue))
-              }
+              },
             )
 
             HorizontalDivider(
@@ -338,7 +332,7 @@ fun AddFeedScreen(
     },
     containerColor = AppTheme.colorScheme.backdrop,
     contentColor = Color.Unspecified,
-    contentWindowInsets = WindowInsets.systemBars
+    contentWindowInsets = WindowInsets.systemBars,
   )
 }
 
@@ -352,13 +346,13 @@ private fun FeedOptionSwitch(
   Row(
     modifier =
       modifier.clickable { onValueChanged(!checked) }.padding(vertical = 16.dp, horizontal = 24.dp),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(
       modifier = Modifier.weight(1f),
       text = title,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      style = MaterialTheme.typography.titleMedium
+      style = MaterialTheme.typography.titleMedium,
     )
 
     Spacer(Modifier.requiredSize(16.dp))
@@ -368,10 +362,7 @@ private fun FeedOptionSwitch(
 }
 
 @Composable
-private fun GroupItem(
-  group: FeedGroup,
-  onClick: () -> Unit,
-) {
+private fun GroupItem(group: FeedGroup, onClick: () -> Unit) {
   Column(
     modifier =
       Modifier.clip(MaterialTheme.shapes.small).clickable { onClick() }.padding(bottom = 4.dp),

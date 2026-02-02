@@ -121,7 +121,7 @@ class GroupViewModel(
     viewModelScope.launch {
       rssRepository.removeFeedIdsFromGroups(
         groupIds = setOf(groupId),
-        feedIds = _state.value.selectedSources.map { it.id }
+        feedIds = _state.value.selectedSources.map { it.id },
       )
 
       _state.update { it.copy(selectedSources = emptySet()) }
@@ -132,12 +132,12 @@ class GroupViewModel(
     viewModelScope.launch {
       rssRepository.removeFeedIdsFromGroups(
         groupIds = setOf(groupId),
-        feedIds = _state.value.selectedSources.map { it.id }
+        feedIds = _state.value.selectedSources.map { it.id },
       )
 
       rssRepository.addFeedIdsToGroups(
         groupIds = groupIds,
-        feedIds = _state.value.selectedSources.map { it.id }
+        feedIds = _state.value.selectedSources.map { it.id },
       )
 
       _state.update { it.copy(selectedSources = emptySet()) }

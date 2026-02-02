@@ -79,7 +79,7 @@ class AllPostsPager(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
         settingsRepository.postsSortOrder,
-        refreshPolicy.dateTimeFlow
+        refreshPolicy.dateTimeFlow,
       ) { activeSource, postsType, postsSortOrder, dateTime ->
         computeParameters(activeSource, postsType, postsSortOrder, dateTime)
       }
@@ -93,7 +93,7 @@ class AllPostsPager(
             postsSortOrder = params.postsSortOrder,
             unreadOnly = params.unreadOnly,
             after = params.postsAfter,
-            lastSyncedAt = params.lastSyncedAt
+            lastSyncedAt = params.lastSyncedAt,
           )
         }
         .flow
@@ -120,7 +120,7 @@ class AllPostsPager(
             rssRepository.unreadSinceLastSync(
               sources = params.activeSourceIds,
               postsAfter = params.postsAfter,
-              lastSyncedAt = params.lastSyncedAt
+              lastSyncedAt = params.lastSyncedAt,
             )
           }
         }
@@ -146,7 +146,7 @@ class AllPostsPager(
     activeSource: Source?,
     postsType: PostsType,
     postsSortOrder: PostsSortOrder,
-    dateTime: LocalDateTime
+    dateTime: LocalDateTime,
   ): PostsParameters {
     return PostsParameters(
       activeSourceIds = activeSourceIds(activeSource),

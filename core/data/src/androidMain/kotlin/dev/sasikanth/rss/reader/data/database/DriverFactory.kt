@@ -52,7 +52,7 @@ actual class DriverFactory(
             db.setForeignKeyConstraintsEnabled(true)
           }
         },
-      factory = RequerySQLiteOpenHelperFactory()
+      factory = RequerySQLiteOpenHelperFactory(),
     )
   }
 }

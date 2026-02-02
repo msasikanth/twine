@@ -79,14 +79,14 @@ fun TextField(
         selectionColors =
           TextSelectionColors(
             handleColor = AppTheme.colorScheme.tintedForeground,
-            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
-          )
+            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+          ),
       ),
     placeholder = {
       Text(
         text = hint,
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
+        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
       )
     },
     trailingIcon = trailingIcon,
@@ -136,14 +136,14 @@ fun TextField(
         selectionColors =
           TextSelectionColors(
             handleColor = AppTheme.colorScheme.tintedForeground,
-            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
-          )
+            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+          ),
       ),
     placeholder = {
       Text(
         text = hint,
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f)
+        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
       )
     },
     trailingIcon = trailingIcon,

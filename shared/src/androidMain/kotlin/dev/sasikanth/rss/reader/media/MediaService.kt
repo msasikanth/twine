@@ -48,7 +48,7 @@ class MediaService : MediaSessionService() {
             .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
             .setUsage(C.USAGE_MEDIA)
             .build(),
-          true
+          true,
         )
         .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
         .build()

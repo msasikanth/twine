@@ -36,7 +36,7 @@ expect interface NetworkComponent
 fun <T : HttpClientEngineConfig> httpClient(
   appInfo: AppInfo,
   engine: HttpClientEngineFactory<T>,
-  config: T.() -> Unit
+  config: T.() -> Unit,
 ): HttpClient {
   return HttpClient(engine) {
     followRedirects = false

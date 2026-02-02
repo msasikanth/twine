@@ -36,9 +36,7 @@ import platform.Foundation.NSUserDomainMask
 @Inject
 @AppScope
 @OptIn(ExperimentalForeignApi::class)
-actual class DriverFactory(
-  private val codeMigrations: Array<AfterVersion>,
-) {
+actual class DriverFactory(private val codeMigrations: Array<AfterVersion>) {
 
   actual fun createDriver(): SqlDriver {
     migrateAppDatabaseToAppGroup()
@@ -46,7 +44,7 @@ actual class DriverFactory(
     val extendedConfig =
       DatabaseConfiguration.Extended(
         foreignKeyConstraints = true,
-        basePath = appGroupDatabasePath()
+        basePath = appGroupDatabasePath(),
       )
 
     return NativeSqliteDriver(
@@ -61,7 +59,7 @@ actual class DriverFactory(
               driver = it,
               oldVersion = oldVersion.toLong(),
               newVersion = newVersion.toLong(),
-              callbacks = codeMigrations
+              callbacks = codeMigrations,
             )
           }
         },
@@ -107,11 +105,7 @@ actual class DriverFactory(
       toURL = groupDatabaseWalPath,
       error = null,
     )
-    fileManager.moveItemAtURL(
-      appDatabaseShmPath,
-      toURL = groupDatabaseSgnPath,
-      error = null,
-    )
+    fileManager.moveItemAtURL(appDatabaseShmPath, toURL = groupDatabaseSgnPath, error = null)
   }
 
   private fun appDatabasePath(): String {

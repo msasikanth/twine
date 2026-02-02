@@ -64,6 +64,6 @@ sealed interface HomeEvent {
 
   data class OnPostsSortFilterApplied(
     val postsType: PostsType,
-    val postsSortOrder: PostsSortOrder
+    val postsSortOrder: PostsSortOrder,
   ) : HomeEvent
 }

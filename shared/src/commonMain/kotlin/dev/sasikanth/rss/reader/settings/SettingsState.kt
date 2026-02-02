@@ -65,7 +65,7 @@ data class SettingsState(
     Idle,
     Syncing,
     Success,
-    Failure
+    Failure,
   }
 
   companion object {

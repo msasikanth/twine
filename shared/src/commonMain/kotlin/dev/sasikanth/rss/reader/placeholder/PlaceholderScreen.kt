@@ -55,7 +55,7 @@ fun PlaceholderScreen(
   viewModel: PlaceholderViewModel,
   navigateHome: () -> Unit,
   navigateOnboarding: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val navigateToHome by viewModel.navigateToHome.collectAsStateWithLifecycle()
   val navigateToOnboarding by viewModel.navigateToOnboarding.collectAsStateWithLifecycle()
@@ -83,21 +83,17 @@ fun PlaceholderScreen(
 
   Box(
     modifier = modifier.background(AppTheme.colorScheme.backdrop).padding(horizontal = 24.dp),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
-    AnimatedVisibility(
-      visible = isVisible,
-      enter = fadeIn(),
-      exit = fadeOut(),
-    ) {
+    AnimatedVisibility(visible = isVisible, enter = fadeIn(), exit = fadeOut()) {
       Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         CircularProgressIndicator(
           color = AppTheme.colorScheme.tintedForeground,
           modifier = Modifier.requiredSize(24.dp),
-          strokeWidth = 2.dp
+          strokeWidth = 2.dp,
         )
 
         Spacer(Modifier.requiredHeight(4.dp))

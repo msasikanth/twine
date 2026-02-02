@@ -39,7 +39,7 @@ val TwineIcons.CustomTypography: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           group {
@@ -50,7 +50,7 @@ val TwineIcons.CustomTypography: ImageVector
               strokeLineCap = Butt,
               strokeLineJoin = Miter,
               strokeLineMiter = 4.0f,
-              pathFillType = NonZero
+              pathFillType = NonZero,
             ) {
               moveTo(9.5f, 18.5f)
               verticalLineTo(13.0f)

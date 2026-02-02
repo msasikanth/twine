@@ -42,7 +42,7 @@ class AndroidAppIconManager(private val context: Context) : AppIconManager {
       packageManager.setComponentEnabledSetting(
         componentName,
         newState,
-        PackageManager.DONT_KILL_APP
+        PackageManager.DONT_KILL_APP,
       )
     }
   }

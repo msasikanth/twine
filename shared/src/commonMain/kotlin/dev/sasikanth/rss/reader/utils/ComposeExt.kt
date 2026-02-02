@@ -63,7 +63,7 @@ internal fun Float.inverse() = 1f - this
 
 internal enum class KeyboardState {
   Opened,
-  Closed
+  Closed,
 }
 
 @Composable
@@ -94,7 +94,7 @@ fun PagerState.getOffsetFractionForPage(page: Int): Float {
 fun <T> PagerState.CollectItemTransition(
   key: Any? = null,
   itemProvider: (Int) -> T?,
-  onTransition: suspend (from: T?, to: T?, progress: Float) -> Unit
+  onTransition: suspend (from: T?, to: T?, progress: Float) -> Unit,
 ) {
   val currentItemProvider by rememberUpdatedState(itemProvider)
   val currentOnTransition by rememberUpdatedState(onTransition)

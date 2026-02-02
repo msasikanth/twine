@@ -34,14 +34,11 @@ fun main() {
   }
 
   application {
-    Window(
-      onCloseRequest = ::exitApplication,
-      title = "",
-    ) {
+    Window(onCloseRequest = ::exitApplication, title = "") {
       desktopComponent.app(
-        { /* Handle theme change if needed */},
-        { /* No-op on desktop */},
-        { /* No-op on desktop */}
+        { /* Handle theme change if needed */ },
+        { /* No-op on desktop */ },
+        { /* No-op on desktop */ },
       )
     }
   }

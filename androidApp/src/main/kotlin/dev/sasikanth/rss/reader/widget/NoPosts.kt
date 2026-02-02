@@ -45,16 +45,12 @@ fun NoPosts(modifier: GlanceModifier = GlanceModifier) {
         .background(GlanceTheme.colors.widgetBackground)
         .cornerRadius(16.dp)
         .padding(16.dp),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Text(
       text = context.getString(R.string.widget_no_posts),
       style =
-        TextStyle(
-          fontWeight = FontWeight.Medium,
-          fontSize = 16.sp,
-          textAlign = TextAlign.Center,
-        )
+        TextStyle(fontWeight = FontWeight.Medium, fontSize = 16.sp, textAlign = TextAlign.Center),
     )
   }
 }

@@ -66,7 +66,7 @@ interface DataComponent :
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
           syncedAtAdapter = DateAdapter,
-          flagsAdapter = PostFlagsAdapter
+          flagsAdapter = PostFlagsAdapter,
         ),
       feedAdapter =
         Feed.Adapter(
@@ -79,16 +79,10 @@ interface DataComponent :
         FeedGroup.Adapter(
           createdAtAdapter = DateAdapter,
           updatedAtAdapter = DateAdapter,
-          pinnedAtAdapter = DateAdapter
+          pinnedAtAdapter = DateAdapter,
         ),
-      postContentAdapter =
-        PostContent.Adapter(
-          createdAtAdapter = DateAdapter,
-        ),
-      blockedWordAdapter =
-        BlockedWord.Adapter(
-          updatedAtAdapter = DateAdapter,
-        ),
+      postContentAdapter = PostContent.Adapter(createdAtAdapter = DateAdapter),
+      blockedWordAdapter = BlockedWord.Adapter(updatedAtAdapter = DateAdapter),
       userAdapter = User.Adapter(serviceTypeAdapter = EnumColumnAdapter()),
     )
   }
@@ -101,47 +95,47 @@ interface DataComponent :
     return arrayOf(
       // Kottke
       """
-        INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
-        VALUES (
-            'ba2ba021-2f69-55ad-9c21-cdf1a555e9bf',
-            'Kottke',
-            "Jason Kottke's weblog, home of fine hypertext products since 1998",
-            'https://icon.horse/icon/kottke.org',
-            'https://feeds.kottke.org/main',
-            'https://kottke.org/',
-            (strftime('%s', 'now') * 1000),
-            (strftime('%s', 'now') * 1000)
-        );
+      INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
+      VALUES (
+          'ba2ba021-2f69-55ad-9c21-cdf1a555e9bf',
+          'Kottke',
+          "Jason Kottke's weblog, home of fine hypertext products since 1998",
+          'https://icon.horse/icon/kottke.org',
+          'https://feeds.kottke.org/main',
+          'https://kottke.org/',
+          (strftime('%s', 'now') * 1000),
+          (strftime('%s', 'now') * 1000)
+      );
       """
         .trimIndent(),
       // HackerNews
       """
-        INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
-        VALUES (
-            'c90003bd-b1e6-5545-ba59-3d2128d658a7',
-            'HN',
-            'Links for the intellectually curious, ranked by readers.',
-            'https://icon.horse/icon/news.ycombinator.com',
-            'https://news.ycombinator.com/rss',
-            'https://news.ycombinator.com/',
-            (strftime('%s', 'now') * 1000),
-            (strftime('%s', 'now') * 1000)
-        );
+      INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
+      VALUES (
+          'c90003bd-b1e6-5545-ba59-3d2128d658a7',
+          'HN',
+          'Links for the intellectually curious, ranked by readers.',
+          'https://icon.horse/icon/news.ycombinator.com',
+          'https://news.ycombinator.com/rss',
+          'https://news.ycombinator.com/',
+          (strftime('%s', 'now') * 1000),
+          (strftime('%s', 'now') * 1000)
+      );
       """
         .trimIndent(),
       // TheVerge
       """
-        INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
-        VALUES (
-            'e8d31cec-2893-54d0-bcae-7f134713e532',
-            'The Verge',
-            'The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.',
-            'https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1',
-            'https://www.theverge.com/rss/index.xml',
-            'https://www.theverge.com',
-            (strftime('%s', 'now') * 1000),
-            (strftime('%s', 'now') * 1000)
-        );
+      INSERT OR IGNORE INTO feed(id, name, icon, description, link, homepageLink, createdAt, pinnedAt)
+      VALUES (
+          'e8d31cec-2893-54d0-bcae-7f134713e532',
+          'The Verge',
+          'The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.',
+          'https://platform.theverge.com/wp-content/uploads/sites/2/2025/01/verge-rss-large_80b47e.png?w=150&h=150&crop=1',
+          'https://www.theverge.com/rss/index.xml',
+          'https://www.theverge.com',
+          (strftime('%s', 'now') * 1000),
+          (strftime('%s', 'now') * 1000)
+      );
       """
         .trimIndent(),
     )
@@ -193,7 +187,7 @@ interface DataComponent :
     DropboxCloudServiceProvider(
       httpClient = httpClient,
       tokenProvider = tokenProvider,
-      onSignOut = { userRepository.deleteUser() }
+      onSignOut = { userRepository.deleteUser() },
     )
 
   @Provides

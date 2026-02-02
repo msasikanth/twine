@@ -150,14 +150,14 @@ internal fun BottomSheetExpandedContent(
   if (state.showDeleteConfirmation) {
     DeleteConfirmationDialog(
       onDelete = { viewModel.dispatch(FeedsEvent.DeleteSelectedSources) },
-      dismiss = { viewModel.dispatch(FeedsEvent.DismissDeleteConfirmation) }
+      dismiss = { viewModel.dispatch(FeedsEvent.DismissDeleteConfirmation) },
     )
   }
 
   if (showNewGroupDialog) {
     CreateGroupDialog(
       onCreateGroup = { viewModel.dispatch(FeedsEvent.OnCreateGroup(it)) },
-      onDismiss = { showNewGroupDialog = false }
+      onDismiss = { showNewGroupDialog = false },
     )
   }
 
@@ -183,19 +183,15 @@ internal fun BottomSheetExpandedContent(
             modifier = Modifier.padding(end = 20.dp),
             icon = TwineIcons.CollapseContent,
             label = stringResource(Res.string.feeds),
-            onClick = closeFeeds
+            onClick = closeFeeds,
           )
         },
-        contentPadding =
-          PaddingValues(
-            top = 8.dp,
-            bottom = 8.dp,
-          ),
+        contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp),
         colors =
           TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent,
             scrolledContainerColor = Color.Transparent,
-          )
+          ),
       )
     },
     bottomBar = {
@@ -203,7 +199,7 @@ internal fun BottomSheetExpandedContent(
         AnimatedVisibility(
           visible = state.isInMultiSelectMode,
           enter = slideInVertically { it },
-          exit = slideOutVertically { it }
+          exit = slideOutVertically { it },
         ) {
           val areGroupsSelected = state.selectedSources.any { it is FeedGroup }
           val tooltip: @Composable (() -> Unit)? =
@@ -215,7 +211,7 @@ internal fun BottomSheetExpandedContent(
 
           ContextActionsBottomBar(
             tooltip = tooltip,
-            onCancel = { viewModel.dispatch(FeedsEvent.CancelSourcesSelection) }
+            onCancel = { viewModel.dispatch(FeedsEvent.CancelSourcesSelection) },
           ) {
             val areSelectedFeedsPinned = state.selectedSources.all { it.pinnedAt != null }
 
@@ -233,7 +229,7 @@ internal fun BottomSheetExpandedContent(
                 } else {
                   viewModel.dispatch(FeedsEvent.PinSelectedSources)
                 }
-              }
+              },
             )
 
             ContextActionItem(
@@ -241,14 +237,14 @@ internal fun BottomSheetExpandedContent(
               icon = TwineIcons.NewGroup,
               label = stringResource(Res.string.actionAddTo),
               enabled = !areGroupsSelected,
-              onClick = { openGroupSelectionSheet() }
+              onClick = { openGroupSelectionSheet() },
             )
 
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.Delete,
               label = stringResource(Res.string.actionDelete),
-              onClick = { viewModel.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) }
+              onClick = { viewModel.dispatch(FeedsEvent.DeleteSelectedSourcesClicked) },
             )
 
             if (state.selectedSources.size == 1) {
@@ -276,7 +272,7 @@ internal fun BottomSheetExpandedContent(
                   }
 
                   viewModel.dispatch(FeedsEvent.CancelSourcesSelection)
-                }
+                },
               )
             }
           }
@@ -314,7 +310,7 @@ internal fun BottomSheetExpandedContent(
           // adding extra spacing to bottom so that there is space between list end and the bottom
           // bar
           bottom = padding.calculateBottomPadding() + 200.dp,
-          top = 8.dp
+          top = 8.dp,
         )
       }
 
@@ -328,11 +324,11 @@ internal fun BottomSheetExpandedContent(
               bottom = if (imeBottomPadding > 0.dp) imeBottomPadding else 0.dp,
               // doing this so that the dividers in sticky headers can go below the search bar and
               // not overlap with each other
-              top = padding.calculateTopPadding()
+              top = padding.calculateTopPadding(),
             ),
         state = lazyListState,
         contentPadding = listContentPadding,
-        overscrollEffect = null
+        overscrollEffect = null,
       ) {
         if (isInSearchMode) {
           sourcesSearchResults(
@@ -341,7 +337,7 @@ internal fun BottomSheetExpandedContent(
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             isInMultiSelectMode = state.isInMultiSelectMode,
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
           )
         } else {
           pinnedSources(
@@ -353,7 +349,7 @@ internal fun BottomSheetExpandedContent(
             isInMultiSelectMode = state.isInMultiSelectMode,
             onTogglePinnedSection = { viewModel.dispatch(FeedsEvent.TogglePinnedSection) },
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
-            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) }
+            onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
           )
 
           allSources(
@@ -367,7 +363,7 @@ internal fun BottomSheetExpandedContent(
             onFeedsSortChanged = { viewModel.dispatch(FeedsEvent.OnFeedSortOrderChanged(it)) },
             onSourceClick = { viewModel.dispatch(FeedsEvent.OnSourceClick(it)) },
             onToggleSourceSelection = { viewModel.dispatch(FeedsEvent.OnToggleFeedSelection(it)) },
-            onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) }
+            onAddNewFeedClick = { viewModel.dispatch(FeedsEvent.OnNewFeedClicked) },
           )
         }
       }
@@ -402,14 +398,14 @@ private fun SearchBar(
         Text(
           text = stringResource(Res.string.feedsSearchHint),
           color = AppTheme.colorScheme.onSurfaceVariant,
-          style = MaterialTheme.typography.bodyMedium
+          style = MaterialTheme.typography.bodyMedium,
         )
       },
       leadingIcon = {
         Icon(
           imageVector = Icons.Rounded.Search,
           contentDescription = null,
-          tint = AppTheme.colorScheme.onSurfaceVariant
+          tint = AppTheme.colorScheme.onSurfaceVariant,
         )
       },
       trailingIcon = {
@@ -418,7 +414,7 @@ private fun SearchBar(
             Icon(
               Icons.Rounded.Close,
               contentDescription = null,
-              tint = AppTheme.colorScheme.onSurfaceVariant
+              tint = AppTheme.colorScheme.onSurfaceVariant,
             )
           }
         }
@@ -434,7 +430,7 @@ private fun SearchBar(
           disabledTextColor = Color.Transparent,
           unfocusedContainerColor = translucentStyle.default.background,
           focusedContainerColor = translucentStyle.default.background,
-        )
+        ),
     )
   }
 }
@@ -454,12 +450,12 @@ fun DeleteConfirmationDialog(
           onDelete()
           dismiss()
         },
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large,
       ) {
         Text(
           text = stringResource(Res.string.delete),
           style = MaterialTheme.typography.labelLarge,
-          color = MaterialTheme.colorScheme.error
+          color = MaterialTheme.colorScheme.error,
         )
       }
     },
@@ -468,20 +464,20 @@ fun DeleteConfirmationDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.removeSources),
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.removeSourcesDesc),
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     },
     containerColor = AppTheme.colorScheme.tintedSurface,
@@ -516,7 +512,7 @@ private fun NoFeeds(onAddNewFeedClick: () -> Unit) {
         containerColor = AppTheme.colorScheme.inverseSurface,
         iconTint = AppTheme.colorScheme.inverseOnSurface,
         size = IconButtonSize.Large,
-        onClick = onAddNewFeedClick
+        onClick = onAddNewFeedClick,
       )
     }
   }

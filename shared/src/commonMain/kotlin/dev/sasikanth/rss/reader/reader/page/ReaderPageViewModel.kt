@@ -195,5 +195,5 @@ class ReaderPageViewModel(
 
 enum class ReaderProcessingProgress {
   Loading,
-  Idle
+  Idle,
 }

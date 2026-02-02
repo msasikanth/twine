@@ -24,10 +24,7 @@ import kotlinx.serialization.json.Json
 private val json = Json
 
 @Serializable
-data class PostListKey(
-  val postId: String,
-  val feedId: String,
-) {
+data class PostListKey(val postId: String, val feedId: String) {
 
   fun encode(): String = json.encodeToString(this)
 

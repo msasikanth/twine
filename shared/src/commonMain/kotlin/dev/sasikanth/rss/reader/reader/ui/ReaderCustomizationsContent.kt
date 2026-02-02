@@ -101,13 +101,7 @@ internal fun ReaderCustomizationsContent(
 
     LazyRow(
       state = typefaceListState,
-      contentPadding =
-        PaddingValues(
-          start = 28.dp,
-          top = 8.dp,
-          end = 28.dp,
-          bottom = 16.dp,
-        ),
+      contentPadding = PaddingValues(start = 28.dp, top = 8.dp, end = 28.dp, bottom = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(12.dp),
       verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -127,7 +121,7 @@ internal fun ReaderCustomizationsContent(
           selected = fontStyle == selectedFont,
           label = fontStyle.value,
           fontFamily = fontFamily,
-          onClick = { onFontChange(fontStyle) }
+          onClick = { onFontChange(fontStyle) },
         )
       }
     }
@@ -136,12 +130,12 @@ internal fun ReaderCustomizationsContent(
 
     FontScaleStepper(
       defaultValue = fontScaleFactor,
-      onValueChange = { onFontScaleFactorChange(it) }
+      onValueChange = { onFontScaleFactorChange(it) },
     )
 
     FontLineHeightStepper(
       defaultValue = fontLineHeightFactor,
-      onValueChange = { onFontLineHeightFactorChange(it) }
+      onValueChange = { onFontLineHeightFactorChange(it) },
     )
   }
 }
@@ -150,7 +144,7 @@ internal fun ReaderCustomizationsContent(
 private fun FontLineHeightStepper(
   defaultValue: Float,
   modifier: Modifier = Modifier,
-  onValueChange: (Float) -> Unit
+  onValueChange: (Float) -> Unit,
 ) {
   Row(
     modifier = modifier.fillMaxWidth().padding(horizontal = 28.dp),
@@ -181,15 +175,11 @@ private fun FontLineHeightStepper(
             Modifier.requiredSize(24.dp)
               .shadow(elevation = 2.dp, shape = CircleShape)
               .background(AppTheme.colorScheme.inverseSurface, CircleShape)
-              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape),
+              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
         )
       },
       track = {
-        SliderDefaults.Track(
-          sliderState = it,
-          thumbTrackGapSize = 0.dp,
-          colors = sliderColors,
-        )
+        SliderDefaults.Track(sliderState = it, thumbTrackGapSize = 0.dp, colors = sliderColors)
       },
     )
 
@@ -239,15 +229,11 @@ private fun FontScaleStepper(
             Modifier.requiredSize(24.dp)
               .shadow(elevation = 2.dp, shape = CircleShape)
               .background(AppTheme.colorScheme.inverseSurface, CircleShape)
-              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape),
+              .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
         )
       },
       track = {
-        SliderDefaults.Track(
-          sliderState = it,
-          thumbTrackGapSize = 0.dp,
-          colors = sliderColors,
-        )
+        SliderDefaults.Track(sliderState = it, thumbTrackGapSize = 0.dp, colors = sliderColors)
       },
     )
 
@@ -279,7 +265,7 @@ private fun CustomisationsTypefaceHeader() {
       text = stringResource(Res.string.readerCustomisationsTypeface),
       style = MaterialTheme.typography.titleMedium,
       color = AppTheme.colorScheme.onSurface,
-      modifier = Modifier.padding(16.dp)
+      modifier = Modifier.padding(16.dp),
     )
   }
 }

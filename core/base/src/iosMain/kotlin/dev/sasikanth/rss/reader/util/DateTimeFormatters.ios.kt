@@ -47,11 +47,7 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
           } else {
             TimeZone.UTC
           }
-        val dateTimeFormatter =
-          createDateFormatter(
-            pattern = pattern,
-            timeZone = timeZone,
-          )
+        val dateTimeFormatter = createDateFormatter(pattern = pattern, timeZone = timeZone)
 
         dateTimeFormatter.dateFromString(this.trim())
       }
@@ -72,7 +68,7 @@ actual fun String?.dateStringToEpochMillis(clock: Clock): Long? {
             NSCalendarUnitMinute +
             NSCalendarUnitSecond +
             NSCalendarUnitNanosecond,
-          date
+          date,
         )
 
       // 2000 seems to be the default year for gregorian calendar in iOS?
@@ -98,10 +94,7 @@ private fun hasTimeZonePattern(pattern: String) =
     pattern.contains("O", ignoreCase = true) ||
     pattern.contains("X", ignoreCase = true)
 
-private fun createDateFormatter(
-  pattern: String,
-  timeZone: TimeZone? = null,
-): NSDateFormatter {
+private fun createDateFormatter(pattern: String, timeZone: TimeZone? = null): NSDateFormatter {
   return NSDateFormatter().apply {
     dateFormat = pattern
     locale = NSLocale("en_US_POSIX")

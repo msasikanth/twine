@@ -49,12 +49,6 @@ data class OriginPayload(
   val title: String = "",
 )
 
-@Serializable
-data class SummaryPayload(
-  val content: String = "",
-)
+@Serializable data class SummaryPayload(val content: String = "")
 
-@Serializable
-data class LinksPayload(
-  val href: String = "",
-)
+@Serializable data class LinksPayload(val href: String = "")

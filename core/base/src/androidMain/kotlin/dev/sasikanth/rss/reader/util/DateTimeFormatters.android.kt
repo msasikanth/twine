@@ -67,7 +67,7 @@ private fun parseToInstant(dateTimeFormatter: DateTimeFormatter, text: String): 
 private fun fallbackParseToInstant(
   currentDate: LocalDateTime,
   dateTimeFormatter: DateTimeFormatter,
-  text: String
+  text: String,
 ): Instant {
   val parsedValue = dateTimeFormatter.parse(text)
 

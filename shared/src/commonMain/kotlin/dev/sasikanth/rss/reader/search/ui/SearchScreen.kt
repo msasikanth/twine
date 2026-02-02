@@ -111,7 +111,7 @@ internal fun SearchScreen(
   goBack: () -> Unit,
   openPost:
     (searchQuery: String, sortOrder: SearchSortOrder, postIndex: Int, post: ResolvedPost) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by searchViewModel.state.collectAsStateWithLifecycle()
   val listState = rememberLazyListState()
@@ -130,7 +130,7 @@ internal fun SearchScreen(
         onQueryChange = { searchViewModel.dispatch(SearchEvent.SearchQueryChanged(it)) },
         onBackClick = goBack,
         onClearClick = { searchViewModel.dispatch(SearchEvent.ClearSearchQuery) },
-        onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) }
+        onSortOrderChanged = { searchViewModel.dispatch(SearchEvent.SearchSortOrderChanged(it)) },
       )
     },
     content = { padding ->
@@ -141,9 +141,9 @@ internal fun SearchScreen(
           contentPadding =
             PaddingValues(
               bottom = padding.calculateBottomPadding() + 80.dp,
-              top = padding.calculateTopPadding()
+              top = padding.calculateTopPadding(),
             ),
-          state = listState
+          state = listState,
         ) {
           if (searchResults.itemCount > 0) {
             item {
@@ -152,9 +152,9 @@ internal fun SearchScreen(
                   pluralStringResource(
                     Res.plurals.searchResultsCount,
                     searchResults.itemCount,
-                    searchResults.itemCount
+                    searchResults.itemCount,
                   ),
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 8.dp),
               )
             }
           }
@@ -169,7 +169,7 @@ internal fun SearchScreen(
                     searchViewModel.searchQuery.text,
                     searchViewModel.searchSortOrder,
                     index,
-                    post
+                    post,
                   )
                 },
                 onPostBookmarkClick = {
@@ -187,13 +187,13 @@ internal fun SearchScreen(
                   )
                 },
                 reduceReadItemAlpha = true,
-                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false)
+                postMetadataConfig = PostMetadataConfig.DEFAULT.copy(enablePostSource = false),
               )
 
               if (index != searchResults.itemCount - 1) {
                 HorizontalDivider(
                   modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                  color = AppTheme.colorScheme.outlineVariant
+                  color = AppTheme.colorScheme.outlineVariant,
                 )
               }
             }
@@ -206,9 +206,9 @@ internal fun SearchScreen(
           modifier =
             Modifier.padding(
               end = padding.calculateEndPadding(layoutDirection) + 16.dp,
-              bottom = padding.calculateBottomPadding() + 16.dp
+              bottom = padding.calculateBottomPadding() + 16.dp,
             ),
-          onLoadNewArticlesClick = {}
+          onLoadNewArticlesClick = {},
         ) {
           listState.animateScrollToItem(0)
         }
@@ -275,7 +275,7 @@ private fun SearchBar(
             Text(
               text = stringResource(Res.string.postsSearchHint),
               color = AppTheme.colorScheme.textEmphasisHigh,
-              style = MaterialTheme.typography.bodyLarge
+              style = MaterialTheme.typography.bodyLarge,
             )
           },
           trailingIcon = {
@@ -304,14 +304,14 @@ private fun SearchBar(
               focusedIndicatorColor = Color.Transparent,
               disabledIndicatorColor = Color.Transparent,
               errorIndicatorColor = Color.Transparent,
-            )
+            ),
         )
       }
     }
 
     HorizontalDivider(
       modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.outlineVariant
+      color = AppTheme.colorScheme.outlineVariant,
     )
   }
 }
@@ -319,7 +319,7 @@ private fun SearchBar(
 @Composable
 private fun SearchSortButton(
   sortOrder: SearchSortOrder,
-  onSortOrderChanged: (SearchSortOrder) -> Unit
+  onSortOrderChanged: (SearchSortOrder) -> Unit,
 ) {
   Box {
     val density = LocalDensity.current
@@ -343,13 +343,13 @@ private fun SearchSortButton(
             Oldest -> stringResource(Res.string.searchSortOldest)
           },
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.onSurface
+        color = AppTheme.colorScheme.onSurface,
       )
       Spacer(Modifier.requiredWidth(8.dp))
       Icon(
         imageVector = TwineIcons.Sort,
         contentDescription = null,
-        tint = AppTheme.colorScheme.onSurface
+        tint = AppTheme.colorScheme.onSurface,
       )
       Spacer(Modifier.requiredWidth(4.dp))
     }
@@ -362,7 +362,7 @@ private fun SearchSortButton(
         onSortOrderChanged = {
           onSortOrderChanged(it)
           isDropdownExpanded = false
-        }
+        },
       )
     }
   }
@@ -375,21 +375,17 @@ private fun SortDropdownMenu(
   onSortOrderChanged: (SearchSortOrder) -> Unit,
   offset: DpOffset = DpOffset.Zero,
 ) {
-  DropdownMenu(
-    expanded = isDropdownExpanded,
-    offset = offset,
-    onDismissRequest = onDismiss,
-  ) {
+  DropdownMenu(expanded = isDropdownExpanded, offset = offset, onDismissRequest = onDismiss) {
     DropdownMenuItem(onClick = { onSortOrderChanged(Newest) }) {
       Text(
         text = stringResource(Res.string.searchSortNewestFirst),
-        style = MaterialTheme.typography.bodyLarge
+        style = MaterialTheme.typography.bodyLarge,
       )
     }
     DropdownMenuItem(onClick = { onSortOrderChanged(Oldest) }) {
       Text(
         text = stringResource(Res.string.searchSortOldestFirst),
-        style = MaterialTheme.typography.bodyLarge
+        style = MaterialTheme.typography.bodyLarge,
       )
     }
   }

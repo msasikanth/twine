@@ -30,9 +30,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class BookmarksViewModel(
-  private val rssRepository: RssRepository,
-) : ViewModel() {
+class BookmarksViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
   private val _state = MutableStateFlow(BookmarksState.DEFAULT)
   val state: StateFlow<BookmarksState>

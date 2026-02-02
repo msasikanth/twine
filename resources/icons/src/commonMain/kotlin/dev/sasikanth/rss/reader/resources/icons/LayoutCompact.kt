@@ -38,7 +38,7 @@ val TwineIcons.LayoutCompact: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 3.0f)
             lineTo(23.0f, 3.0f)
@@ -68,7 +68,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 7.0f)
             lineTo(18.0f, 7.0f)
@@ -88,7 +88,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(3.0f, 4.0f)
             lineTo(5.0f, 4.0f)
@@ -108,7 +108,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 15.0f)
             lineTo(23.0f, 15.0f)
@@ -128,7 +128,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 19.0f)
             lineTo(18.0f, 19.0f)
@@ -148,7 +148,7 @@ val TwineIcons.LayoutCompact: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(3.0f, 16.0f)
             lineTo(5.0f, 16.0f)

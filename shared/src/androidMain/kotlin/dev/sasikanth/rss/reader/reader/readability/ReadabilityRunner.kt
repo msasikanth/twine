@@ -56,7 +56,7 @@ class AndroidReadabilityRunner(
   override suspend fun parseHtml(
     link: String?,
     content: String,
-    image: String?
+    image: String?,
   ): ReadabilityResult =
     semaphore.withPermit {
       val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }

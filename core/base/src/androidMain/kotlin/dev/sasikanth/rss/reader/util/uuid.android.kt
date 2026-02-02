@@ -26,10 +26,7 @@ internal actual fun hasher(): UuidHasher {
 
 // Copied from:
 // https://github.com/benasher44/uuid/blob/f3768dd19fdd58ac01711733923d7db5a433ac79/src/jvmMain/kotlin/namebased.kt#L33
-private class JvmHasher(
-  algorithmName: String,
-  override val version: Int,
-) : UuidHasher {
+private class JvmHasher(algorithmName: String, override val version: Int) : UuidHasher {
   private val digest = MessageDigest.getInstance(algorithmName)
 
   override fun update(input: ByteArray) {

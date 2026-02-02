@@ -39,10 +39,7 @@ class NewArticleNotifier(
   private val notifier: Notifier,
 ) {
 
-  suspend fun notifyIfNewArticles(
-    title: (count: Int) -> String,
-    content: () -> String,
-  ) {
+  suspend fun notifyIfNewArticles(title: (count: Int) -> String, content: () -> String) {
     if (settingsRepository.enableNotifications.first()) {
       val lastRefreshedAtDateTime = refreshPolicy.dateTimeFlow.first()
       val now = Clock.System.now()
@@ -57,7 +54,7 @@ class NewArticleNotifier(
             sources = emptyList(),
             postsAfter = startOfDay,
             lastSyncedAt =
-              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault())
+              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault()),
           )
           .first()
 

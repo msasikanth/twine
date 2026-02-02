@@ -98,8 +98,8 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
           parser = parser,
           firstPost = firstPost,
           itemTag = TAG_RSS_ITEM,
-          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) }
-        )
+          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) },
+        ),
     )
   }
 
@@ -208,7 +208,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       audioUrl = audioUrl,
       date = date,
       commentsLink = commentsLink,
-      hostLink = hostLink
+      hostLink = hostLink,
     )
   }
 

@@ -121,7 +121,7 @@ class MinifluxSource(
     offset: Int? = null,
     after: Long? = null,
     starred: Boolean? = null,
-    feedId: Long? = null
+    feedId: Long? = null,
   ): MinifluxEntriesPayload {
     return withContext(dispatchersProvider.io) {
       if (feedId == null) {
@@ -132,7 +132,7 @@ class MinifluxSource(
               limit = limit,
               offset = offset,
               after = after,
-              starred = starred?.toString()
+              starred = starred?.toString(),
             )
           )
           .body<MinifluxEntriesPayload>()
@@ -145,7 +145,7 @@ class MinifluxSource(
               limit = limit,
               offset = offset,
               after = after,
-              starred = starred?.toString()
+              starred = starred?.toString(),
             )
           )
           .body<MinifluxEntriesPayload>()

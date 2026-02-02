@@ -81,7 +81,7 @@ fun HorizontalPageIndicators(
   unselectedColor: Color = AppTheme.colorScheme.outline,
   indicatorSize: Dp = 8.dp,
   spacing: Dp = 8.dp,
-  indicatorShape: Shape = CircleShape
+  indicatorShape: Shape = CircleShape,
 ) {
   // We want to bring offset to 0..1 range.
   // However, it can come in any range. It might be for example selectedPage = 1, with offset 2.5
@@ -121,7 +121,7 @@ fun HorizontalPageIndicators(
               lerp(
                 unselectedColor,
                 selectedColor,
-                pagesState.calculateSelectedRatio(page, normalizedOffset)
+                pagesState.calculateSelectedRatio(page, normalizedOffset),
               )
             )
       )
@@ -148,7 +148,7 @@ fun HorizontalPageIndicators(
     pagesOnScreen = pagesOnScreen,
     indicatorFactory = indicatorFactory,
     spacerLeft = spacerLeft,
-    spacerRight = spacerRight
+    spacerRight = spacerRight,
   )
 }
 
@@ -178,12 +178,12 @@ private fun LinearPageIndicator(
   pagesOnScreen: Int,
   indicatorFactory: @Composable (Int) -> Unit,
   spacerLeft: @Composable () -> Unit,
-  spacerRight: @Composable () -> Unit
+  spacerRight: @Composable () -> Unit,
 ) {
   Row(
     modifier = modifier,
     horizontalArrangement = Arrangement.Center,
-    verticalAlignment = Alignment.Bottom
+    verticalAlignment = Alignment.Bottom,
   ) {
     // drawing 1 extra spacer for transition
     spacerLeft()

@@ -27,7 +27,7 @@ interface InAppRating {
     currentTime: Instant,
     installDate: Instant,
     lastPromptDate: Instant,
-    sessionCount: Int
+    sessionCount: Int,
   ): Boolean {
     val daysSinceInstall = currentTime - installDate
     val daysSinceLastPrompt = currentTime - lastPromptDate

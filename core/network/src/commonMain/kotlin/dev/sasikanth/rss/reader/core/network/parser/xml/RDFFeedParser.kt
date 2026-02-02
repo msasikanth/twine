@@ -36,9 +36,7 @@ import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
-class RDFContentParser(
-  override val articleHtmlParser: ArticleHtmlParser,
-) : XmlContentParser() {
+class RDFContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlContentParser() {
 
   override suspend fun parse(feedUrl: String, parser: XmlPullParser): FeedPayload {
     parser.nextTag()
@@ -84,8 +82,8 @@ class RDFContentParser(
         postsFlow(
           parser = parser,
           itemTag = TAG_RSS_ITEM,
-          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) }
-        )
+          readItem = { readRssItem(it, UrlUtils.extractHost(link ?: feedUrl)) },
+        ),
     )
   }
 
@@ -140,7 +138,7 @@ class RDFContentParser(
       imageUrl = image,
       audioUrl = null,
       date = date,
-      hostLink = hostLink
+      hostLink = hostLink,
     )
   }
 }

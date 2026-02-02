@@ -39,7 +39,7 @@ data class PlaybackState(
   val duration: Long,
   val playingUrl: String? = null,
   val buffering: Boolean = false,
-  val playbackSpeed: Float = 1f
+  val playbackSpeed: Float = 1f,
 ) {
   companion object {
     val Idle =
@@ -48,7 +48,7 @@ data class PlaybackState(
         currentPosition = 0,
         duration = 0,
         buffering = false,
-        playbackSpeed = 1f
+        playbackSpeed = 1f,
       )
   }
 }
