@@ -18,10 +18,15 @@
 package dev.sasikanth.rss.reader.reader.page.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -32,6 +37,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +59,7 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -275,26 +282,28 @@ internal fun ReaderPage(
                     PlaybackState.Idle
                   }
 
-                MediaControls(
-                  playbackState = postPlaybackState,
-                  onPlayClick = pageViewModel::playAudio,
-                  onPauseClick = pageViewModel::pauseAudio,
-                  onSeek = pageViewModel::seekAudio,
-                  onSeekForward = pageViewModel::seekForward,
-                  onSeekBackward = pageViewModel::seekBackward,
-                  onPlaybackSpeedChange = {
-                    val newSpeed =
-                      when (postPlaybackState.playbackSpeed) {
-                        0.5f -> 1.0f
-                        1.0f -> 1.5f
-                        1.5f -> 2.0f
-                        2.0f -> 0.5f
-                        else -> 1.0f
-                      }
-                    pageViewModel.setPlaybackSpeed(newSpeed)
-                  },
-                  modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp),
-                )
+                DisableSelection {
+                  MediaControls(
+                    playbackState = postPlaybackState,
+                    onPlayClick = pageViewModel::playAudio,
+                    onPauseClick = pageViewModel::pauseAudio,
+                    onSeek = pageViewModel::seekAudio,
+                    onSeekForward = pageViewModel::seekForward,
+                    onSeekBackward = pageViewModel::seekBackward,
+                    onPlaybackSpeedChange = {
+                      val newSpeed =
+                        when (postPlaybackState.playbackSpeed) {
+                          0.5f -> 1.0f
+                          1.0f -> 1.5f
+                          1.5f -> 2.0f
+                          2.0f -> 0.5f
+                          else -> 1.0f
+                        }
+                      pageViewModel.setPlaybackSpeed(newSpeed)
+                    },
+                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp),
+                  )
+                }
               }
             }
 
@@ -661,7 +670,7 @@ private fun MediaControls(
   onPlaybackSpeedChange: (Float) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val isPlaying = playbackState.isPlaying
+  val isPlaying = playbackState.isPlaying || playbackState.buffering
   val progress =
     if (playbackState.duration > 0) {
       (playbackState.currentPosition.toFloat() / playbackState.duration.toFloat()).coerceIn(0f, 1f)
@@ -752,28 +761,52 @@ private fun MediaControls(
       val fabMorph by remember {
         derivedStateOf { Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided) }
       }
+      val infiniteTransition = rememberInfiniteTransition(label = "playButtonRotation")
+      val rotationAngle by
+        infiniteTransition.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec =
+            infiniteRepeatable(animation = tween(durationMillis = 6000, easing = LinearEasing)),
+          label = "playButtonRotatingAngle",
+        )
 
-      Box(
-        modifier =
-          Modifier.requiredSize(buttonSize)
-            .clip(fabMorph.toShape(progress))
-            .background(AppTheme.colorScheme.primaryContainer)
-            .clickable(onClick = if (isPlaying) onPauseClick else onPlayClick),
-        contentAlignment = Alignment.Center,
-      ) {
-        if (playbackState.buffering) {
-          CircularProgressIndicator(
-            modifier = Modifier.size(24.dp),
-            color = AppTheme.colorScheme.onPrimaryContainer,
-            strokeWidth = 2.dp,
-          )
-        } else {
-          Icon(
-            imageVector = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
-            contentDescription =
-              if (isPlaying) stringResource(Res.string.pause) else stringResource(Res.string.play),
-            tint = AppTheme.colorScheme.onPrimaryContainer,
-          )
+      Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
+        // Rotating shape background
+        Box(
+          modifier =
+            Modifier.size(buttonSize)
+              .graphicsLayer { rotationZ = if (isPlaying) rotationAngle else 0f }
+              .background(AppTheme.colorScheme.primaryContainer, fabMorph.toShape(progress))
+        )
+
+        // Non-rotating icon
+        Box(
+          modifier =
+            Modifier.matchParentSize()
+              .clip(fabMorph.toShape(progress))
+              .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = if (isPlaying) onPauseClick else onPlayClick,
+              ),
+          contentAlignment = Alignment.Center,
+        ) {
+          if (playbackState.buffering) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(24.dp),
+              color = AppTheme.colorScheme.onPrimaryContainer,
+              strokeWidth = 2.dp,
+            )
+          } else {
+            Icon(
+              imageVector = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
+              contentDescription =
+                if (isPlaying) stringResource(Res.string.pause)
+                else stringResource(Res.string.play),
+              tint = AppTheme.colorScheme.onPrimaryContainer,
+            )
+          }
         }
       }
 
