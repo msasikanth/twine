@@ -31,10 +31,17 @@ class ArticleHtmlParser {
     private const val TAG_IMG = "img"
     private const val TAG_FIGCAPTION = "figcaption"
     private const val ATTR_SRC = "src"
+    private const val TAG_AUDIO = "audio"
+    private const val TAG_SOURCE = "source"
+    private const val ATTR_TYPE = "type"
   }
 
   private val allowedContentTags by lazy {
-    Safelist().addTags(TAG_FIGCAPTION, TAG_IMG).addAttributes(TAG_IMG, ATTR_SRC)
+    Safelist()
+      .addTags(TAG_FIGCAPTION, TAG_IMG, TAG_AUDIO, TAG_SOURCE)
+      .addAttributes(TAG_IMG, ATTR_SRC)
+      .addAttributes(TAG_AUDIO, ATTR_SRC)
+      .addAttributes(TAG_SOURCE, ATTR_SRC, ATTR_TYPE)
   }
   private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
 
@@ -58,10 +65,21 @@ class ArticleHtmlParser {
           }
         }
 
+      val audioUrl =
+        body.select(TAG_AUDIO).firstOrNull()?.let { audio ->
+          val src = audio.attr(ATTR_SRC)
+          if (src.isNotBlank()) {
+            src
+          } else {
+            audio.select(TAG_SOURCE).attr(ATTR_SRC)
+          }
+        }
+
       Result(
         heroImage = heroImage,
         textContent = body.ownText(),
         cleanedHtml = originalHtmlDocument.html(),
+        audioUrl = audioUrl,
       )
     } catch (e: Exception) {
       null
@@ -71,5 +89,10 @@ class ArticleHtmlParser {
     }
   }
 
-  data class Result(val heroImage: String?, val textContent: String, val cleanedHtml: String)
+  data class Result(
+    val heroImage: String?,
+    val textContent: String,
+    val cleanedHtml: String,
+    val audioUrl: String? = null,
+  )
 }

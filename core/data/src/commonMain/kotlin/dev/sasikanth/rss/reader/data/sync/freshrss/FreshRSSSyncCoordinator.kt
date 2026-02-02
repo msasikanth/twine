@@ -502,7 +502,7 @@ class FreshRSSSyncCoordinator(
             description = htmlContent?.textContent ?: "",
             rawContent = htmlContent?.cleanedHtml ?: item.summary.content,
             imageUrl = htmlContent?.heroImage,
-            audioUrl = item.enclosure.firstOrNull()?.href,
+            audioUrl = item.enclosure.firstOrNull()?.href ?: htmlContent?.audioUrl,
             date = item.published * 1000, // FreshRSS uses seconds, we use millis
             commentsLink = null,
             fullContent = fullContent,

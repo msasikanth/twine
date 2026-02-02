@@ -172,6 +172,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
           rawContent = postContent.rawContent
           image = postContent.heroImage ?: image
           description = postContent.textContent
+          audioUrl = audioUrl ?: postContent.audioUrl
         }
         name == TAG_PUB_DATE -> {
           date = parser.nextText()
