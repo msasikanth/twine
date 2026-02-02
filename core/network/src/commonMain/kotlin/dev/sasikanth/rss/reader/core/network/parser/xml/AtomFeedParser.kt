@@ -164,6 +164,7 @@ class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: 
           rawContent = postContent.rawContent
           image = postContent.heroImage ?: image
           description = postContent.textContent
+          audioUrl = audioUrl ?: postContent.audioUrl
         }
         TAG_PUBLISHED,
         TAG_UPDATED -> {

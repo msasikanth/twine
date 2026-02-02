@@ -75,6 +75,7 @@ class JsonFeedParser(
               htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
             val audioUrl =
               jsonFeedPost.attachments.firstOrNull { it.mimeType.startsWith("audio/") }?.url
+                ?: htmlContent?.audioUrl
 
             PostPayload(
               title = jsonFeedPost.title.orEmpty(),

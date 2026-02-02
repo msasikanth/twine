@@ -94,4 +94,30 @@ class ArticleHtmlParserTest {
       result?.cleanedHtml,
     )
   }
+
+  @Test
+  fun parsingAudioContentShouldWorkCorrectly() {
+    val htmlWithAudio =
+      """
+        <html>
+          <body>
+            <p>Listen to this:</p>
+            <audio controls src="https://example.com/audio.mp3"></audio>
+            <p>Or this:</p>
+            <audio controls>
+                <source src="https://example.com/audio2.mp3" type="audio/mpeg">
+            </audio>
+          </body>
+        </html>
+      """
+
+    val result = articleHtmlParser.parse(htmlWithAudio)
+
+    assertEquals("https://example.com/audio.mp3", result?.audioUrl)
+    assert(
+      result
+        ?.cleanedHtml
+        ?.contains("<audio controls src=\"https://example.com/audio.mp3\"></audio>") == true
+    )
+  }
 }

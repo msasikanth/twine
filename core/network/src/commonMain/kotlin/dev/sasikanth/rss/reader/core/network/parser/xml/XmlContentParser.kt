@@ -96,6 +96,7 @@ abstract class XmlContentParser {
       rawContent = htmlContent?.cleanedHtml,
       heroImage = htmlContent?.heroImage,
       textContent = htmlContent?.textContent?.ifBlank { null } ?: postHtmlContent.trim(),
+      audioUrl = htmlContent?.audioUrl,
     )
   }
 
@@ -156,6 +157,7 @@ abstract class XmlContentParser {
     val rawContent: String?,
     val heroImage: String?,
     val textContent: String?,
+    val audioUrl: String? = null,
   )
 
   protected data class MediaGroupResult(val image: String?, val description: String?)
