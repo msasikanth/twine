@@ -25,7 +25,6 @@ data class Post(
   val title: String,
   val description: String,
   val imageUrl: String?,
-  val audioUrl: String?,
   val postDate: Instant,
   val createdAt: Instant,
   val updatedAt: Instant,
@@ -34,6 +33,7 @@ data class Post(
   val commentsLink: String?,
   val flags: Set<PostFlag>,
   val remoteId: String? = null,
+  val audioUrl: String?,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

@@ -8,7 +8,6 @@ CREATE TABLE post(
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   imageUrl TEXT,
-  audioUrl TEXT,
   postDate INTEGER AS Instant NOT NULL,
   createdAt INTEGER AS Instant NOT NULL,
   updatedAt INTEGER AS Instant NOT NULL,
@@ -17,6 +16,7 @@ CREATE TABLE post(
   commentsLink TEXT DEFAULT NULL,
   flags INTEGER AS Set<PostFlag> NOT NULL DEFAULT 0,
   remoteId TEXT,
+  audioUrl TEXT,
   PRIMARY KEY (id, sourceId),
   FOREIGN KEY(sourceId) REFERENCES feed(id)
 );
