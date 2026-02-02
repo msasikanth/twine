@@ -29,6 +29,7 @@ import dev.sasikanth.rss.reader.core.network.parser.common.ArticleHtmlParser
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
+import dev.sasikanth.rss.reader.data.repository.UserRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
 import dev.sasikanth.rss.reader.di.scopes.AppScope
@@ -58,6 +59,7 @@ class MinifluxSyncCoordinator(
   private val articleHtmlParser: ArticleHtmlParser,
   private val refreshPolicy: RefreshPolicy,
   private val settingsRepository: SettingsRepository,
+  private val userRepository: UserRepository,
   private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
 
@@ -327,6 +329,7 @@ class MinifluxSyncCoordinator(
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
+    val serverUrl = userRepository.currentUser()?.serverUrl?.removeSuffix("/")
     val remoteFeeds = minifluxSource.feeds()
     val localFeeds = rssRepository.allFeedsBlocking()
     var hasNewSubscriptions = false
@@ -363,6 +366,13 @@ class MinifluxSyncCoordinator(
 
     // 3. Handle new/updated subscriptions from remote
     remoteFeeds.forEach { remoteFeed ->
+      val iconUrl =
+        if (remoteFeed.icon.externalIconId.isNotBlank() && serverUrl != null) {
+          "$serverUrl/feed/icon/${remoteFeed.icon.externalIconId}"
+        } else {
+          null
+        }
+
       val localFeed =
         localFeeds.find { it.link == remoteFeed.feedUrl || it.remoteId == remoteFeed.id.toString() }
       val feedId =
@@ -370,7 +380,8 @@ class MinifluxSyncCoordinator(
           if (
             localFeed.remoteId != remoteFeed.id.toString() ||
               localFeed.name != remoteFeed.title ||
-              localFeed.homepageLink != remoteFeed.siteUrl
+              localFeed.homepageLink != remoteFeed.siteUrl ||
+              localFeed.icon != (iconUrl ?: localFeed.icon)
           ) {
             rssRepository.upsertFeeds(
               listOf(
@@ -380,6 +391,7 @@ class MinifluxSyncCoordinator(
                   remoteId = remoteFeed.id.toString(),
                   lastUpdatedAt = syncStartTime,
                   isDeleted = false,
+                  icon = iconUrl ?: localFeed.icon,
                 )
               )
             )
@@ -391,7 +403,7 @@ class MinifluxSyncCoordinator(
               feedPayload =
                 FeedPayload(
                   name = remoteFeed.title,
-                  icon = "", // Miniflux doesn't provide icon URL directly in feed object
+                  icon = iconUrl ?: "",
                   description = "",
                   homepageLink = remoteFeed.siteUrl,
                   link = remoteFeed.feedUrl,
