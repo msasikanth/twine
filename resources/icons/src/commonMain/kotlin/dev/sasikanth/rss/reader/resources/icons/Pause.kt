@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
@@ -22,49 +23,88 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
+import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val TwineIcons.Pause: ImageVector
+public val TwineIcons.Pause: ImageVector
   get() {
-    if (pause != null) {
-      return pause!!
+    if (_pause != null) {
+      return _pause!!
     }
-    pause =
-      Builder(
+    _pause =
+      ImageVector.Builder(
           name = "Pause",
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
-          viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportWidth = 960.0f,
+          viewportHeight = 960.0f
         )
         .apply {
-          path(
-            fill = SolidColor(Color(0xFF000000)),
-            stroke = null,
-            strokeLineWidth = 0.0f,
-            strokeLineCap = Butt,
-            strokeLineJoin = Miter,
-            strokeLineMiter = 4.0f,
-            pathFillType = NonZero
-          ) {
-            moveTo(6.0f, 19.0f)
-            horizontalLineTo(10.0f)
-            verticalLineTo(5.0f)
-            horizontalLineTo(6.0f)
-            verticalLineTo(19.0f)
-            close()
-            moveTo(14.0f, 5.0f)
-            verticalLineTo(19.0f)
-            horizontalLineTo(18.0f)
-            verticalLineTo(5.0f)
-            horizontalLineTo(14.0f)
-            close()
+          group(translationX = -0.0f, translationY = 960.0f) {
+            path(
+              fill = SolidColor(Color(0xFF000000)),
+              stroke = null,
+              strokeLineWidth = 0.0f,
+              strokeLineCap = Butt,
+              strokeLineJoin = Miter,
+              strokeLineMiter = 4.0f,
+              pathFillType = NonZero
+            ) {
+              /* pathData = "M600-200q-33 0-56.5-23.5T520-280v-400q0-33 23.5-56.5T600-760h80q33 0 56.5 23.5T760-680v400q0 33-23.5 56.5T680-200h-80Zm-320 0q-33 0-56.5-23.5T200-280v-400q0-33 23.5-56.5T280-760h80q33 0 56.5 23.5T440-680v400q0 33-23.5 56.5T360-200h-80Zm320-80h80v-400h-80v400Zm-320 0h80v-400h-80v400Zm0-400v400-400Zm320 0v400-400Z" */
+              moveTo(600.0f, -200.0f)
+              quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)
+              reflectiveQuadTo(520.0f, -280.0f)
+              verticalLineToRelative(-400.0f)
+              quadToRelative(0.0f, -33.0f, 23.5f, -56.5f)
+              reflectiveQuadTo(600.0f, -760.0f)
+              horizontalLineToRelative(80.0f)
+              quadToRelative(33.0f, 0.0f, 56.5f, 23.5f)
+              reflectiveQuadTo(760.0f, -680.0f)
+              verticalLineToRelative(400.0f)
+              quadToRelative(0.0f, 33.0f, -23.5f, 56.5f)
+              reflectiveQuadTo(680.0f, -200.0f)
+              horizontalLineToRelative(-80.0f)
+              close()
+              moveToRelative(-320.0f, 0.0f)
+              quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)
+              reflectiveQuadTo(200.0f, -280.0f)
+              verticalLineToRelative(-400.0f)
+              quadToRelative(0.0f, -33.0f, 23.5f, -56.5f)
+              reflectiveQuadTo(280.0f, -760.0f)
+              horizontalLineToRelative(80.0f)
+              quadToRelative(33.0f, 0.0f, 56.5f, 23.5f)
+              reflectiveQuadTo(440.0f, -680.0f)
+              verticalLineToRelative(400.0f)
+              quadToRelative(0.0f, 33.0f, -23.5f, 56.5f)
+              reflectiveQuadTo(360.0f, -200.0f)
+              horizontalLineToRelative(-80.0f)
+              close()
+              moveToRelative(320.0f, -80.0f)
+              horizontalLineToRelative(80.0f)
+              verticalLineToRelative(-400.0f)
+              horizontalLineToRelative(-80.0f)
+              verticalLineToRelative(400.0f)
+              close()
+              moveToRelative(-320.0f, 0.0f)
+              horizontalLineToRelative(80.0f)
+              verticalLineToRelative(-400.0f)
+              horizontalLineToRelative(-80.0f)
+              verticalLineToRelative(400.0f)
+              close()
+              moveToRelative(0.0f, -400.0f)
+              verticalLineToRelative(400.0f)
+              verticalLineToRelative(-400.0f)
+              close()
+              moveToRelative(320.0f, 0.0f)
+              verticalLineToRelative(400.0f)
+              verticalLineToRelative(-400.0f)
+              close()
+            }
           }
         }
         .build()
-    return pause!!
+    return _pause!!
   }
 
-private var pause: ImageVector? = null
+private var _pause: ImageVector? = null

@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 package dev.sasikanth.rss.reader.resources.icons
 
 import androidx.compose.ui.graphics.Color
@@ -22,42 +23,64 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
 import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.vector.ImageVector.Builder
+import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val TwineIcons.Play: ImageVector
+public val TwineIcons.Play: ImageVector
   get() {
-    if (play != null) {
-      return play!!
+    if (_playArrow != null) {
+      return _playArrow!!
     }
-    play =
-      Builder(
-          name = "Play",
+    _playArrow =
+      ImageVector.Builder(
+          name = "PlayArrow",
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
-          viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportWidth = 960.0f,
+          viewportHeight = 960.0f
         )
         .apply {
-          path(
-            fill = SolidColor(Color(0xFF000000)),
-            stroke = null,
-            strokeLineWidth = 0.0f,
-            strokeLineCap = Butt,
-            strokeLineJoin = Miter,
-            strokeLineMiter = 4.0f,
-            pathFillType = NonZero
-          ) {
-            moveTo(8.0f, 5.0f)
-            verticalLineTo(19.0f)
-            lineTo(19.0f, 12.0f)
-            lineTo(8.0f, 5.0f)
-            close()
+          group(translationX = -0.0f, translationY = 960.0f) {
+            path(
+              fill = SolidColor(Color(0xFF000000)),
+              stroke = null,
+              strokeLineWidth = 0.0f,
+              strokeLineCap = Butt,
+              strokeLineJoin = Miter,
+              strokeLineMiter = 4.0f,
+              pathFillType = NonZero
+            ) {
+              /* pathData = "M320-273v-414q0-17 12-28.5t28-11.5q5 0 10.5 1.5T381-721l326 207q9 6 13.5 15t4.5 19q0 10-4.5 19T707-446L381-239q-5 3-10.5 4.5T360-233q-16 0-28-11.5T320-273Zm80-207Zm0 134 210-134-210-134v268Z" */
+              moveTo(320.0f, -273.0f)
+              verticalLineToRelative(-414.0f)
+              quadToRelative(0.0f, -17.0f, 12.0f, -28.5f)
+              reflectiveQuadToRelative(28.0f, -11.5f)
+              quadToRelative(5.0f, 0.0f, 10.5f, 1.5f)
+              reflectiveQuadTo(381.0f, -721.0f)
+              lineToRelative(326.0f, 207.0f)
+              quadToRelative(9.0f, 6.0f, 13.5f, 15.0f)
+              reflectiveQuadToRelative(4.5f, 19.0f)
+              quadToRelative(0.0f, 10.0f, -4.5f, 19.0f)
+              reflectiveQuadTo(707.0f, -446.0f)
+              lineTo(381.0f, -239.0f)
+              quadToRelative(-5.0f, 3.0f, -10.5f, 4.5f)
+              reflectiveQuadTo(360.0f, -233.0f)
+              quadToRelative(-16.0f, 0.0f, -28.0f, -11.5f)
+              reflectiveQuadTo(320.0f, -273.0f)
+              close()
+              moveToRelative(80.0f, -207.0f)
+              close()
+              moveToRelative(0.0f, 134.0f)
+              lineToRelative(210.0f, -134.0f)
+              lineToRelative(-210.0f, -134.0f)
+              verticalLineToRelative(268.0f)
+              close()
+            }
           }
         }
         .build()
-    return play!!
+    return _playArrow!!
   }
 
-private var play: ImageVector? = null
+private var _playArrow: ImageVector? = null
