@@ -1,0 +1,15 @@
+-- Migration 50
+CREATE INDEX IF NOT EXISTS post_all_posts_index ON post(flags, postDate DESC, createdAt DESC);
+CREATE INDEX IF NOT EXISTS feed_isDeleted_hideFromAllFeeds_index ON feed(isDeleted, hideFromAllFeeds);
+CREATE INDEX IF NOT EXISTS post_remoteId_index ON post(remoteId) WHERE remoteId IS NOT NULL;
+CREATE INDEX IF NOT EXISTS post_link_index ON post(link);
+CREATE INDEX IF NOT EXISTS post_sync_index ON post(updatedAt, syncedAt) WHERE remoteId IS NOT NULL;
+CREATE INDEX IF NOT EXISTS post_bookmarked_index ON post(id) WHERE (flags & 1) != 0;
+CREATE INDEX IF NOT EXISTS post_read_index ON post(id) WHERE (flags & 2) != 0;
+
+CREATE INDEX IF NOT EXISTS feed_remoteId_index ON feed(remoteId) WHERE remoteId IS NOT NULL;
+
+CREATE INDEX IF NOT EXISTS feed_group_remoteId_index ON feedGroup(remoteId) WHERE remoteId IS NOT NULL;
+CREATE INDEX IF NOT EXISTS feed_group_isDeleted_index ON feedGroup(isDeleted);
+
+CREATE INDEX IF NOT EXISTS blocked_word_isDeleted_index ON blockedWord(isDeleted);
