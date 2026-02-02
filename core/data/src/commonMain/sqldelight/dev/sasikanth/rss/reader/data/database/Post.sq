@@ -31,6 +31,13 @@ CREATE INDEX post_date_index ON post (postDate);
 CREATE INDEX post_createdAt_index ON post (createdAt);
 CREATE INDEX post_sourceId_index ON post (sourceId);
 
+CREATE INDEX post_all_posts_index ON post(flags, postDate DESC, createdAt DESC);
+CREATE INDEX post_remoteId_index ON post(remoteId) WHERE remoteId IS NOT NULL;
+CREATE INDEX post_link_index ON post(link);
+CREATE INDEX post_sync_index ON post(updatedAt, syncedAt) WHERE remoteId IS NOT NULL;
+CREATE INDEX post_bookmarked_index ON post(id) WHERE (flags & 1) != 0;
+CREATE INDEX post_read_index ON post(id) WHERE (flags & 2) != 0;
+
 CREATE TRIGGER hide_post_if_blocked_word_is_present_AFTER_INSERT
 AFTER INSERT ON post
 FOR EACH ROW
@@ -130,10 +137,7 @@ WITH baseQuery AS (
     post.createdAt < :lastSyncedAt
 ),
 featuredPosts AS (
-  SELECT
-    *,
-    1 AS isFeatured
-  FROM baseQuery
+  SELECT id FROM baseQuery
   WHERE imageUrl IS NOT NULL AND postDate > :featuredPostsAfter
   ORDER BY
     CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
@@ -142,25 +146,11 @@ featuredPosts AS (
     CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
   LIMIT :numberOfFeaturedPosts
 )
-SELECT * FROM (
-  SELECT * FROM featuredPosts
-
-  UNION ALL
-
-  SELECT * FROM (
-    SELECT
-      *,
-      0 AS isFeatured
-    FROM baseQuery
-    WHERE id NOT IN (SELECT id FROM featuredPosts)
-    ORDER BY
-      CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-      CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
-      CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
-      CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
-    LIMIT :limit + :offset
-  )
-)
+SELECT
+  bq.*,
+  (fp.id IS NOT NULL) AS isFeatured
+FROM baseQuery bq
+LEFT JOIN featuredPosts fp ON bq.id = fp.id
 ORDER BY
   isFeatured DESC,
   CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,

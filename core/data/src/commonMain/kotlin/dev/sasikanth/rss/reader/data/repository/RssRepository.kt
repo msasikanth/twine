@@ -321,7 +321,7 @@ class RssRepository(
             showFeedFavIcon: Boolean,
             feedContentReadingTime: Long?,
             articleContentReadingTime: Long?,
-            _: Long ->
+            _: Boolean ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
