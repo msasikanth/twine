@@ -168,6 +168,7 @@ kotlin {
     jvmMain.dependencies {
       implementation(libs.ktor.client.okhttp)
       implementation(libs.htmlunit)
+      implementation(libs.vlcj)
     }
 
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }
