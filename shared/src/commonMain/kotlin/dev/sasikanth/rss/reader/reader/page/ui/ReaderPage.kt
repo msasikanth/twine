@@ -277,15 +277,14 @@ internal fun ReaderPage(
                       }
                     pageViewModel.setPlaybackSpeed(newSpeed)
                   },
-                  modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                  modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp)
                 )
               }
             }
 
             item(key = "divider") {
               HorizontalDivider(
-                modifier =
-                  Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
                 color = AppTheme.colorScheme.outlineVariant
               )
             }
