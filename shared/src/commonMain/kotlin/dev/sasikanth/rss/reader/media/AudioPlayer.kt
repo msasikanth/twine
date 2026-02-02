@@ -29,6 +29,8 @@ interface AudioPlayer {
   fun resume()
 
   fun seekTo(position: Long)
+
+  fun setPlaybackSpeed(speed: Float)
 }
 
 data class PlaybackState(
@@ -36,10 +38,17 @@ data class PlaybackState(
   val currentPosition: Long,
   val duration: Long,
   val playingUrl: String? = null,
-  val buffering: Boolean = false
+  val buffering: Boolean = false,
+  val playbackSpeed: Float = 1f
 ) {
   companion object {
     val Idle =
-      PlaybackState(isPlaying = false, currentPosition = 0, duration = 0, buffering = false)
+      PlaybackState(
+        isPlaying = false,
+        currentPosition = 0,
+        duration = 0,
+        buffering = false,
+        playbackSpeed = 1f
+      )
   }
 }

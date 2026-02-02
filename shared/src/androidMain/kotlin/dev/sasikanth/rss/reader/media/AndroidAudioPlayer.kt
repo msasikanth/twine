@@ -115,6 +115,10 @@ class AndroidAudioPlayer(private val context: Context) : AudioPlayer {
     controller?.seekTo(position)
   }
 
+  override fun setPlaybackSpeed(speed: Float) {
+    controller?.setPlaybackSpeed(speed)
+  }
+
   private fun updatePlaybackState() {
     val player = controller ?: return
     _playbackState.update {
@@ -123,7 +127,8 @@ class AndroidAudioPlayer(private val context: Context) : AudioPlayer {
         currentPosition = player.currentPosition,
         duration = player.duration.coerceAtLeast(0),
         playingUrl = player.currentMediaItem?.mediaId,
-        buffering = player.playbackState == Player.STATE_BUFFERING
+        buffering = player.playbackState == Player.STATE_BUFFERING,
+        playbackSpeed = player.playbackParameters.speed
       )
     }
   }

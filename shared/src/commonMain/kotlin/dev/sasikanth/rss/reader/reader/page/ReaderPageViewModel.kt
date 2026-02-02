@@ -26,7 +26,6 @@ import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
-import dev.sasikanth.rss.reader.reader.page.ui.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,11 +93,17 @@ class ReaderPageViewModel(
 
   fun playAudio() {
     val audioUrl = readerPost.audioUrl ?: return
+    val coverUrl =
+      if (readerPost.imageUrl.isNullOrBlank()) {
+        readerPost.feedIcon
+      } else {
+        readerPost.imageUrl
+      }
     audioPlayer.play(
       url = audioUrl,
       title = readerPost.title,
       artist = readerPost.feedName,
-      coverUrl = readerPost.imageUrl
+      coverUrl = coverUrl,
     )
   }
 
@@ -112,6 +117,20 @@ class ReaderPageViewModel(
 
   fun seekAudio(position: Long) {
     audioPlayer.seekTo(position)
+  }
+
+  fun seekForward() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    audioPlayer.seekTo(currentPosition + 15000)
+  }
+
+  fun seekBackward() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    audioPlayer.seekTo(currentPosition - 15000)
+  }
+
+  fun setPlaybackSpeed(speed: Float) {
+    audioPlayer.setPlaybackSpeed(speed)
   }
 
   private fun loadFullArticle() {
@@ -165,4 +184,9 @@ class ReaderPageViewModel(
       _parsingProgress.value = ReaderProcessingProgress.Idle
     }
   }
+}
+
+enum class ReaderProcessingProgress {
+  Loading,
+  Idle
 }

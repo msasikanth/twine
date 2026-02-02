@@ -59,6 +59,8 @@ class IOSAudioPlayer : AudioPlayer {
   private val cacheDirectory =
     fileManager.URLsForDirectory(NSCachesDirectory, NSUserDomainMask).first() as NSURL
 
+  private var currentSpeed: Float = 1.0f
+
   init {
     setupRemoteCommands()
 
@@ -117,7 +119,7 @@ class IOSAudioPlayer : AudioPlayer {
   private fun playInternal(url: NSURL, title: String, artist: String, coverUrl: String?) {
     val playerItem = AVPlayerItem(uRL = url)
     player.replaceCurrentItemWithPlayerItem(playerItem)
-    player.play()
+    player.playImmediatelyAtRate(currentSpeed)
 
     updateNowPlayingInfo(title, artist, coverUrl)
     startProgressUpdate()
@@ -130,7 +132,7 @@ class IOSAudioPlayer : AudioPlayer {
   }
 
   override fun resume() {
-    player.play()
+    player.playImmediatelyAtRate(currentSpeed)
     startProgressUpdate()
     updatePlaybackState()
   }
@@ -138,6 +140,14 @@ class IOSAudioPlayer : AudioPlayer {
   override fun seekTo(position: Long) {
     val cmTime = CMTimeMakeWithSeconds(position.toDouble() / 1000.0, 1000)
     player.seekToTime(cmTime)
+    updatePlaybackState()
+  }
+
+  override fun setPlaybackSpeed(speed: Float) {
+    currentSpeed = speed
+    if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying) {
+      player.playImmediatelyAtRate(speed)
+    }
     updatePlaybackState()
   }
 
@@ -228,7 +238,8 @@ class IOSAudioPlayer : AudioPlayer {
         currentPosition = currentPosition,
         duration = duration,
         playingUrl = playingUrl,
-        buffering = buffering
+        buffering = buffering,
+        playbackSpeed = currentSpeed
       )
     }
 

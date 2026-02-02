@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.reader.page.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,14 +41,19 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.FastForward
+import androidx.compose.material.icons.rounded.FastRewind
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -103,6 +109,7 @@ import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
+import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
@@ -119,7 +126,6 @@ import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.intellij.markdown.MarkdownElementTypes
 import org.jetbrains.compose.resources.stringResource
@@ -257,6 +263,19 @@ internal fun ReaderPage(
                   onPlayClick = pageViewModel::playAudio,
                   onPauseClick = pageViewModel::pauseAudio,
                   onSeek = pageViewModel::seekAudio,
+                  onSeekForward = pageViewModel::seekForward,
+                  onSeekBackward = pageViewModel::seekBackward,
+                  onPlaybackSpeedChange = {
+                    val newSpeed =
+                      when (postPlaybackState.playbackSpeed) {
+                        0.5f -> 1.0f
+                        1.0f -> 1.5f
+                        1.5f -> 2.0f
+                        2.0f -> 0.5f
+                        else -> 1.0f
+                      }
+                    pageViewModel.setPlaybackSpeed(newSpeed)
+                  },
                   modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                 )
               }
@@ -615,18 +634,15 @@ private fun PostActionButton(
   }
 }
 
-@Serializable
-enum class ReaderProcessingProgress {
-  Loading,
-  Idle
-}
-
 @Composable
 private fun MediaControls(
   playbackState: PlaybackState,
   onPlayClick: () -> Unit,
   onPauseClick: () -> Unit,
   onSeek: (Long) -> Unit,
+  onSeekForward: () -> Unit,
+  onSeekBackward: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val isPlaying = playbackState.isPlaying
@@ -642,9 +658,57 @@ private fun MediaControls(
       modifier
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
-        .padding(16.dp)
+        .padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(16.dp)
   ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Column {
+      Slider(
+        value = progress,
+        onValueChange = { onSeek((it * playbackState.duration).toLong()) },
+        colors =
+          SliderDefaults.colors(
+            thumbColor = AppTheme.colorScheme.primary,
+            activeTrackColor = AppTheme.colorScheme.primary,
+            inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f)
+          ),
+      )
+
+      Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+          text = formatDuration(playbackState.currentPosition),
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+          text = formatDuration(playbackState.duration),
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+    }
+
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+      TextButton(onClick = { onPlaybackSpeedChange(playbackState.playbackSpeed) }) {
+        Text(
+          text = "${playbackState.playbackSpeed}x",
+          style = MaterialTheme.typography.labelLarge,
+          color = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+
+      IconButton(onClick = onSeekBackward) {
+        Icon(
+          imageVector = Icons.Rounded.FastRewind,
+          contentDescription = "Seek Backward",
+          tint = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+
       Box(
         modifier =
           Modifier.requiredSize(48.dp)
@@ -669,35 +733,16 @@ private fun MediaControls(
         }
       }
 
-      Spacer(Modifier.requiredWidth(16.dp))
-
-      Column(modifier = Modifier.weight(1f)) {
-        Slider(
-          modifier = Modifier.padding(top = 16.dp),
-          value = progress,
-          onValueChange = { onSeek((it * playbackState.duration).toLong()) },
-          colors =
-            SliderDefaults.colors(
-              thumbColor = AppTheme.colorScheme.primary,
-              activeTrackColor = AppTheme.colorScheme.primary,
-              inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f)
-            ),
+      IconButton(onClick = onSeekForward) {
+        Icon(
+          imageVector = Icons.Rounded.FastForward,
+          contentDescription = "Seek Forward",
+          tint = AppTheme.colorScheme.onSurfaceVariant
         )
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-          Text(
-            text = formatDuration(playbackState.currentPosition),
-            style = MaterialTheme.typography.labelSmall,
-            color = AppTheme.colorScheme.onSurfaceVariant
-          )
-          Spacer(Modifier.weight(1f))
-          Text(
-            text = formatDuration(playbackState.duration),
-            style = MaterialTheme.typography.labelSmall,
-            color = AppTheme.colorScheme.onSurfaceVariant
-          )
-        }
       }
+
+      // Spacer to balance the layout, matching TextButton width roughly
+      Spacer(Modifier.requiredWidth(48.dp))
     }
   }
 }

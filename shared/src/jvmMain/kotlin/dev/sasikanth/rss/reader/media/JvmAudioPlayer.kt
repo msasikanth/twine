@@ -34,4 +34,6 @@ class JvmAudioPlayer : AudioPlayer {
   override fun resume() {}
 
   override fun seekTo(position: Long) {}
+
+  override fun setPlaybackSpeed(speed: Float) {}
 }
