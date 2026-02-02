@@ -29,10 +29,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.graphics.shapes.Morph
 import co.touchlab.kermit.Logger
 
 expect fun String.toClipEntry(): ClipEntry
@@ -120,4 +126,44 @@ fun <T> PagerState.CollectItemTransition(
         currentOnTransition(fromItem, toItem, offset)
       }
   }
+}
+
+fun Morph.toShape(progress: Float): Shape {
+  return object : Shape {
+    private val path = Path()
+
+    override fun createOutline(
+      size: androidx.compose.ui.geometry.Size,
+      layoutDirection: LayoutDirection,
+      density: Density,
+    ): Outline {
+      toComposePath(progress = progress, scale = size.minDimension, path = path)
+      return Outline.Generic(path)
+    }
+  }
+}
+
+/**
+ * Transforms the morph at a given progress into a [Path]. It can optionally be scaled, using the
+ * origin (0,0) as pivot point.
+ */
+fun Morph.toComposePath(progress: Float, scale: Float = 1f, path: Path = Path()): Path {
+  var first = true
+  path.rewind()
+  forEachCubic(progress) { bezier ->
+    if (first) {
+      path.moveTo(bezier.anchor0X * scale, bezier.anchor0Y * scale)
+      first = false
+    }
+    path.cubicTo(
+      bezier.control0X * scale,
+      bezier.control0Y * scale,
+      bezier.control1X * scale,
+      bezier.control1Y * scale,
+      bezier.anchor1X * scale,
+      bezier.anchor1Y * scale,
+    )
+  }
+  path.close()
+  return path
 }

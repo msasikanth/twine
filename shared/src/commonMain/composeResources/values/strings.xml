@@ -246,6 +246,7 @@
   <string name="pause">Pause</string>
   <string name="seek_forward">Seek forward 30 seconds</string>
   <string name="seek_backward">Seek backward 30 seconds</string>
+  <string name="playback_speed">%1$dx</string>
 
   <!-- Statistics -->
   <string name="statistics">Statistics</string>
