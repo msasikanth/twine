@@ -41,9 +41,6 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FastForward
-import androidx.compose.material.icons.rounded.FastRewind
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -113,8 +110,10 @@ import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Forward30
 import dev.sasikanth.rss.reader.resources.icons.Pause
 import dev.sasikanth.rss.reader.resources.icons.Play
+import dev.sasikanth.rss.reader.resources.icons.Replay30
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
@@ -136,6 +135,8 @@ import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.pause
 import twine.shared.generated.resources.play
 import twine.shared.generated.resources.readingTimeEstimate
+import twine.shared.generated.resources.seek_backward
+import twine.shared.generated.resources.seek_forward
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -663,6 +664,7 @@ private fun MediaControls(
   ) {
     Column {
       Slider(
+        modifier = Modifier.padding(top = 8.dp),
         value = progress,
         onValueChange = { onSeek((it * playbackState.duration).toLong()) },
         colors =
@@ -703,8 +705,8 @@ private fun MediaControls(
 
       IconButton(onClick = onSeekBackward) {
         Icon(
-          imageVector = Icons.Rounded.FastRewind,
-          contentDescription = "Seek Backward",
+          imageVector = TwineIcons.Replay30,
+          contentDescription = stringResource(Res.string.seek_backward),
           tint = AppTheme.colorScheme.onSurfaceVariant
         )
       }
@@ -735,8 +737,8 @@ private fun MediaControls(
 
       IconButton(onClick = onSeekForward) {
         Icon(
-          imageVector = Icons.Rounded.FastForward,
-          contentDescription = "Seek Forward",
+          imageVector = TwineIcons.Forward30,
+          contentDescription = stringResource(Res.string.seek_forward),
           tint = AppTheme.colorScheme.onSurfaceVariant
         )
       }

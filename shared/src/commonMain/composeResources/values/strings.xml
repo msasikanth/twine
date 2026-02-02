@@ -244,6 +244,8 @@
   <string name="readingTimeEstimate">%1$dM read</string>
   <string name="play">Play</string>
   <string name="pause">Pause</string>
+  <string name="seek_forward">Seek forward 30 seconds</string>
+  <string name="seek_backward">Seek backward 30 seconds</string>
 
   <!-- Statistics -->
   <string name="statistics">Statistics</string>

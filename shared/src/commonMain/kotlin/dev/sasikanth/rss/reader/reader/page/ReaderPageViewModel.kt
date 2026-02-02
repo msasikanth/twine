@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -127,12 +128,12 @@ class ReaderPageViewModel(
 
   fun seekForward() {
     val currentPosition = audioPlayer.playbackState.value.currentPosition
-    audioPlayer.seekTo(currentPosition + 15000)
+    audioPlayer.seekTo(currentPosition + 30.seconds.inWholeMilliseconds)
   }
 
   fun seekBackward() {
     val currentPosition = audioPlayer.playbackState.value.currentPosition
-    audioPlayer.seekTo(currentPosition - 15000)
+    audioPlayer.seekTo(currentPosition - 30.seconds.inWholeMilliseconds)
   }
 
   fun setPlaybackSpeed(speed: Float) {
