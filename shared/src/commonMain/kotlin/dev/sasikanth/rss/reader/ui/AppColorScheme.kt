@@ -16,43 +16,133 @@
  */
 package dev.sasikanth.rss.reader.ui
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 
-@Immutable
+@Stable
 class AppColorScheme(
-  val primary: Color,
-  val onPrimary: Color,
-  val secondary: Color,
-  val outline: Color,
-  val outlineVariant: Color,
-  val primaryContainer: Color,
-  val onPrimaryContainer: Color,
-  val surface: Color,
-  val onSurface: Color,
-  val onSurfaceVariant: Color,
-  val surfaceContainer: Color,
-  val surfaceContainerLow: Color,
-  val surfaceContainerLowest: Color,
-  val surfaceContainerHigh: Color,
-  val surfaceContainerHighest: Color,
-  val inversePrimary: Color,
-  val inverseSurface: Color,
-  val inverseOnSurface: Color,
-  val textEmphasisHigh: Color,
-  val textEmphasisMed: Color,
-  val backdrop: Color,
-  val bottomSheet: Color,
-  val bottomSheetInverse: Color,
-  val bottomSheetBorder: Color,
-  val tintedBackground: Color,
-  val tintedSurface: Color,
-  val tintedForeground: Color,
-  val tintedHighlight: Color,
-  val error: Color,
+  primary: Color,
+  onPrimary: Color,
+  secondary: Color,
+  outline: Color,
+  outlineVariant: Color,
+  primaryContainer: Color,
+  onPrimaryContainer: Color,
+  surface: Color,
+  onSurface: Color,
+  onSurfaceVariant: Color,
+  surfaceContainer: Color,
+  surfaceContainerLow: Color,
+  surfaceContainerLowest: Color,
+  surfaceContainerHigh: Color,
+  surfaceContainerHighest: Color,
+  inversePrimary: Color,
+  inverseSurface: Color,
+  inverseOnSurface: Color,
+  textEmphasisHigh: Color,
+  textEmphasisMed: Color,
+  backdrop: Color,
+  bottomSheet: Color,
+  bottomSheetInverse: Color,
+  bottomSheetBorder: Color,
+  tintedBackground: Color,
+  tintedSurface: Color,
+  tintedForeground: Color,
+  tintedHighlight: Color,
+  error: Color,
 ) {
+
+  var primary by mutableStateOf(primary)
+    internal set
+
+  var onPrimary by mutableStateOf(onPrimary)
+    internal set
+
+  var secondary by mutableStateOf(secondary)
+    internal set
+
+  var outline by mutableStateOf(outline)
+    internal set
+
+  var outlineVariant by mutableStateOf(outlineVariant)
+    internal set
+
+  var primaryContainer by mutableStateOf(primaryContainer)
+    internal set
+
+  var onPrimaryContainer by mutableStateOf(onPrimaryContainer)
+    internal set
+
+  var surface by mutableStateOf(surface)
+    internal set
+
+  var onSurface by mutableStateOf(onSurface)
+    internal set
+
+  var onSurfaceVariant by mutableStateOf(onSurfaceVariant)
+    internal set
+
+  var surfaceContainer by mutableStateOf(surfaceContainer)
+    internal set
+
+  var surfaceContainerLow by mutableStateOf(surfaceContainerLow)
+    internal set
+
+  var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest)
+    internal set
+
+  var surfaceContainerHigh by mutableStateOf(surfaceContainerHigh)
+    internal set
+
+  var surfaceContainerHighest by mutableStateOf(surfaceContainerHighest)
+    internal set
+
+  var inversePrimary by mutableStateOf(inversePrimary)
+    internal set
+
+  var inverseSurface by mutableStateOf(inverseSurface)
+    internal set
+
+  var inverseOnSurface by mutableStateOf(inverseOnSurface)
+    internal set
+
+  var textEmphasisHigh by mutableStateOf(textEmphasisHigh)
+    internal set
+
+  var textEmphasisMed by mutableStateOf(textEmphasisMed)
+    internal set
+
+  var backdrop by mutableStateOf(backdrop)
+    internal set
+
+  var bottomSheet by mutableStateOf(bottomSheet)
+    internal set
+
+  var bottomSheetInverse by mutableStateOf(bottomSheetInverse)
+    internal set
+
+  var bottomSheetBorder by mutableStateOf(bottomSheetBorder)
+    internal set
+
+  var tintedBackground by mutableStateOf(tintedBackground)
+    internal set
+
+  var tintedSurface by mutableStateOf(tintedSurface)
+    internal set
+
+  var tintedForeground by mutableStateOf(tintedForeground)
+    internal set
+
+  var tintedHighlight by mutableStateOf(tintedHighlight)
+    internal set
+
+  var error by mutableStateOf(error)
+    internal set
 
   fun copy(
     primary: Color = this.primary,
@@ -116,6 +206,38 @@ class AppColorScheme(
       tintedHighlight = tintedHighlight,
       error = error,
     )
+
+  fun updateFrom(other: AppColorScheme, amoled: Boolean = false) {
+    primary = other.primary
+    onPrimary = other.onPrimary
+    secondary = other.secondary
+    outline = other.outline
+    outlineVariant = other.outlineVariant
+    primaryContainer = other.primaryContainer
+    onPrimaryContainer = other.onPrimaryContainer
+    surface = if (amoled) Color.Black else other.surface
+    onSurface = other.onSurface
+    onSurfaceVariant = other.onSurfaceVariant
+    surfaceContainer = if (amoled) Color.Black else other.surfaceContainer
+    surfaceContainerLow = if (amoled) Color.Black else other.surfaceContainerLow
+    surfaceContainerLowest = if (amoled) Color.Black else other.surfaceContainerLowest
+    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else other.surfaceContainerHigh
+    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else other.surfaceContainerHighest
+    inversePrimary = other.inversePrimary
+    inverseSurface = other.inverseSurface
+    inverseOnSurface = other.inverseOnSurface
+    textEmphasisHigh = other.textEmphasisHigh
+    textEmphasisMed = other.textEmphasisMed
+    backdrop = if (amoled) Color.Black else other.backdrop
+    bottomSheet = if (amoled) Color.Black else other.bottomSheet
+    bottomSheetInverse = other.bottomSheetInverse
+    bottomSheetBorder = other.bottomSheetBorder
+    tintedBackground = if (amoled) Color.Black else other.tintedBackground
+    tintedSurface = other.tintedSurface
+    tintedForeground = other.tintedForeground
+    tintedHighlight = other.tintedHighlight
+    error = other.error
+  }
 
   fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
     return copy(
@@ -217,20 +339,6 @@ fun darkAppColorScheme(): AppColorScheme {
     tintedForeground = Color(0xFF9DD49D),
     tintedHighlight = Color(0xFF89938E),
     error = Color(0xFFF2B8B5),
-  )
-}
-
-fun AppColorScheme.amoled(): AppColorScheme {
-  return copy(
-    surface = Color.Black,
-    surfaceContainer = Color.Black,
-    surfaceContainerLow = Color.Black,
-    surfaceContainerLowest = Color.Black,
-    surfaceContainerHigh = Color(0xFF1D201F),
-    surfaceContainerHighest = Color(0xFF272B29),
-    backdrop = Color.Black,
-    tintedBackground = Color.Black,
-    bottomSheet = Color.Black,
   )
 }
 

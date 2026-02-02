@@ -30,6 +30,8 @@ import dev.sasikanth.rss.reader.data.database.PostQueries
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.collections.Set
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -66,12 +68,15 @@ class WidgetDataRepository(
   }
 
   fun unreadPosts(numberOfPosts: Int): Flow<List<WidgetPost>> {
+    val featuredPostsAfter = Clock.System.now().minus(24.hours)
+
     return postQueries
       .allPosts(
         isSourceIdsEmpty = true,
         sourceIds = emptyList(),
         unreadOnly = true,
         postsAfter = Instant.DISTANT_PAST,
+        featuredPostsAfter = featuredPostsAfter,
         numberOfFeaturedPosts = 0,
         lastSyncedAt = Instant.DISTANT_FUTURE,
         limit = numberOfPosts.toLong(),

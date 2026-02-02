@@ -134,7 +134,7 @@ featuredPosts AS (
     *,
     1 AS isFeatured
   FROM baseQuery
-  WHERE imageUrl IS NOT NULL
+  WHERE imageUrl IS NOT NULL AND postDate > :featuredPostsAfter
   ORDER BY
     CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
     CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,

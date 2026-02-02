@@ -275,6 +275,7 @@ class RssRepository(
     postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
+    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
@@ -294,6 +295,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
+          featuredPostsAfter = featuredPostsAfter,
           numberOfFeaturedPosts = Constants.NUMBER_OF_FEATURED_POSTS,
           lastSyncedAt = lastSyncedAt,
           orderBy = postsSortOrder.name,
