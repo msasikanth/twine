@@ -17,6 +17,18 @@
 
 package dev.sasikanth.rss.reader.reader.page.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -42,10 +54,12 @@ import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -55,8 +69,10 @@ import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,6 +94,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.Morph
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
@@ -124,6 +141,7 @@ import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+import dev.sasikanth.rss.reader.utils.toShape
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.intellij.markdown.MarkdownElementTypes
@@ -134,6 +152,7 @@ import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
 import twine.shared.generated.resources.pause
 import twine.shared.generated.resources.play
+import twine.shared.generated.resources.playback_speed
 import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.seek_backward
 import twine.shared.generated.resources.seek_forward
@@ -634,6 +653,7 @@ private fun PostActionButton(
   }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MediaControls(
   playbackState: PlaybackState,
@@ -695,11 +715,20 @@ private fun MediaControls(
       horizontalArrangement = Arrangement.SpaceEvenly
     ) {
       TextButton(onClick = { onPlaybackSpeedChange(playbackState.playbackSpeed) }) {
-        Text(
-          text = "${playbackState.playbackSpeed}x",
-          style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.onSurfaceVariant
-        )
+        AnimatedContent(
+          targetState = playbackState.playbackSpeed,
+          transitionSpec = {
+            (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
+              (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
+            )
+          }
+        ) {
+          Text(
+            text = stringResource(Res.string.playback_speed, it),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.onSurfaceVariant
+          )
+        }
       }
 
       IconButton(onClick = onSeekBackward) {
@@ -710,10 +739,28 @@ private fun MediaControls(
         )
       }
 
+      val progress by animateFloatAsState(if (isPlaying) 1f else 0f)
+      val buttonSize by
+        animateDpAsState(
+          if (isPlaying) {
+            56.dp
+          } else {
+            48.dp
+          },
+          animationSpec =
+            spring(
+              stiffness = Spring.StiffnessMedium,
+              dampingRatio = Spring.DampingRatioMediumBouncy
+            )
+        )
+      val fabMorph by remember {
+        derivedStateOf { Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided) }
+      }
+
       Box(
         modifier =
-          Modifier.requiredSize(48.dp)
-            .clip(RoundedCornerShape(12.dp))
+          Modifier.requiredSize(buttonSize)
+            .clip(fabMorph.toShape(progress))
             .background(AppTheme.colorScheme.primaryContainer)
             .clickable(onClick = if (isPlaying) onPauseClick else onPlayClick),
         contentAlignment = Alignment.Center
