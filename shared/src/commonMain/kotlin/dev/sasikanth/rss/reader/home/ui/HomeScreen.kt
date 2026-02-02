@@ -272,16 +272,29 @@ internal fun HomeScreen(
         Box(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.backdrop)) {
           val hasFeeds = state.hasFeeds
           val appBarScrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
+          val nestedScrollModifier =
+            if (platform !is Platform.Desktop) {
+              Modifier.nestedScroll(appBarScrollBehaviour.nestedScrollConnection)
+            } else {
+              Modifier
+            }
 
           HomeScreenContentScaffold(
-            modifier = Modifier.nestedScroll(appBarScrollBehaviour.nestedScrollConnection),
+            modifier = Modifier.then(nestedScrollModifier),
             homeTopAppBar = {
+              val scrollBehavior =
+                if (platform !is Platform.Desktop) {
+                  appBarScrollBehaviour
+                } else {
+                  null
+                }
+
               HomeTopAppBar(
                 source = state.activeSource,
                 postsType = state.postsType,
                 listState = postsListState,
                 hasUnreadPosts = state.hasUnreadPosts,
-                scrollBehavior = appBarScrollBehaviour,
+                scrollBehavior = scrollBehavior,
                 onMenuClicked = onMenuClicked,
                 onShowPostsSortFilter = { viewModel.dispatch(HomeEvent.ShowPostsSortFilter(true)) },
                 onMarkPostsAsRead = { viewModel.dispatch(HomeEvent.MarkPostsAsRead(it)) }

@@ -78,7 +78,7 @@ internal fun HomeTopAppBar(
   postsType: PostsType,
   listState: LazyListState,
   hasUnreadPosts: Boolean,
-  scrollBehavior: TopAppBarScrollBehavior,
+  scrollBehavior: TopAppBarScrollBehavior?,
   modifier: Modifier = Modifier,
   onMenuClicked: (() -> Unit)? = null,
   onShowPostsSortFilter: () -> Unit,
