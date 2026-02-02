@@ -9,6 +9,7 @@ CREATE TABLE blockedWord (
 );
 
 CREATE INDEX blocked_word_value_index ON blockedWord(content);
+CREATE INDEX blocked_word_isDeleted_index ON blockedWord(isDeleted);
 
 CREATE TRIGGER hide_posts_with_blocked_words_AFTER_INSERT
 AFTER INSERT ON blockedWord

@@ -102,7 +102,7 @@ class WidgetDataRepository(
           showFeedFavIcon: Boolean,
           feedContentReadingTime: Long?,
           articleContentReadingTime: Long?,
-          _: Long ->
+          isFeatured: Boolean ->
           WidgetPost(
             id = id,
             title = title,
