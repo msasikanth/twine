@@ -18,10 +18,10 @@
 package dev.sasikanth.rss.reader.media
 
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
@@ -45,13 +46,15 @@ import platform.darwin.dispatch_get_main_queue
 @OptIn(ExperimentalForeignApi::class)
 @Inject
 @AppScope
-class IOSAudioPlayer : AudioPlayer {
+class IOSAudioPlayer(
+  private val dispatchersProvider: DispatchersProvider,
+) : AudioPlayer {
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
   private val player = AVPlayer()
-  private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var progressJob: Job? = null
   private var playingUrl: String? = null
 
@@ -79,15 +82,20 @@ class IOSAudioPlayer : AudioPlayer {
   }
 
   override fun play(url: String, title: String, artist: String, coverUrl: String?) {
-    playingUrl = url
+    scope.launch {
+      playingUrl = url
 
-    val fileName = "${nameBasedUuidOf(url)}.mp3"
-    val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
+      val fileName = "${nameBasedUuidOf(url)}.mp3"
+      val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
 
-    if (fileManager.fileExistsAtPath(localUrl.path!!)) {
-      playInternal(localUrl, title, artist, coverUrl)
-    } else {
-      downloadAndPlay(url, localUrl, title, artist, coverUrl)
+      val isDownloaded =
+        withContext(dispatchersProvider.io) { fileManager.fileExistsAtPath(localUrl.path!!) }
+
+      if (isDownloaded) {
+        playInternal(localUrl, title, artist, coverUrl)
+      } else {
+        downloadAndPlay(url, localUrl, title, artist, coverUrl)
+      }
     }
   }
 

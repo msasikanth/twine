@@ -26,8 +26,8 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -41,12 +41,15 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class AndroidAudioPlayer(private val context: Context) : AudioPlayer {
+class AndroidAudioPlayer(
+  private val context: Context,
+  private val dispatchersProvider: DispatchersProvider,
+) : AudioPlayer {
 
   private val _playbackState = MutableStateFlow(PlaybackState.Idle)
   override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
-  private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+  private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var controller: MediaController? = null
   private var progressJob: Job? = null
 
