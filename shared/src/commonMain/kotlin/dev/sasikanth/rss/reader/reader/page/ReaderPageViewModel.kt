@@ -93,6 +93,12 @@ class ReaderPageViewModel(
 
   fun playAudio() {
     val audioUrl = readerPost.audioUrl ?: return
+    val currentPlayingUrl = audioPlayer.playbackState.value.playingUrl
+    if (currentPlayingUrl == audioUrl) {
+      audioPlayer.resume()
+      return
+    }
+
     val coverUrl =
       if (readerPost.imageUrl.isNullOrBlank()) {
         readerPost.feedIcon
