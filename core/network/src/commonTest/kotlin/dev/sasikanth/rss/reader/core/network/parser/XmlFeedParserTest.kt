@@ -129,7 +129,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/first-post-media-url",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with media thumbnail",
@@ -146,7 +147,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/media/post-with-media-thumbnail",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post without image",
@@ -163,7 +165,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1684999800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Podcast post",
@@ -180,7 +183,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/third-post",
               ),
               PostPayload(
                 title = "Post with enclosure image",
@@ -197,7 +201,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/enclosure-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/fourth-post",
               ),
               PostPayload(
                 title = "Post with description and encoded content",
@@ -217,7 +222,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/encoded-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with relative path image",
@@ -234,7 +240,8 @@ class XmlFeedParserTest {
                 imageUrl = "http://example.com/relative-media-url",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with comments",
@@ -251,7 +258,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1685005200000,
                 commentsLink = "https://example/post-with-comments/comments",
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with media group",
@@ -268,7 +276,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/media/maxresdefault.jpg",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
             .asFlow()
@@ -309,7 +318,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with encoded description",
@@ -329,7 +339,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/encoded-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
             .asFlow()
@@ -373,7 +384,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Second post",
@@ -392,7 +404,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1684917000000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/second-post-audio.mp3",
               ),
               PostPayload(
                 title = "Post without image",
@@ -411,7 +424,8 @@ class XmlFeedParserTest {
                 imageUrl = null,
                 date = 1684936800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with relative image",
@@ -431,7 +445,8 @@ class XmlFeedParserTest {
                 imageUrl = "http://example.com/resources/image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
             .asFlow()
@@ -467,7 +482,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg",
                 date = 1698260988000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
             .asFlow()
@@ -508,7 +524,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/episode-1-image.jpg",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/episode-1.mp3",
               ),
             )
             .asFlow()
@@ -549,7 +566,8 @@ class XmlFeedParserTest {
                 imageUrl = "https://example.com/episode-1-image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/episode-1.mp3",
               ),
             )
             .asFlow()

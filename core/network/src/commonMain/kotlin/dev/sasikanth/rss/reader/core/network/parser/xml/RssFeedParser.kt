@@ -159,6 +159,11 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
           if (link.isNullOrBlank() && enclosureType != ATTR_VALUE_IMAGE) {
             link = enclosureUrl
           }
+
+          if (image.isNullOrBlank() && enclosureType == ATTR_VALUE_IMAGE) {
+            image = enclosureUrl
+          }
+
           parser.nextTag()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
