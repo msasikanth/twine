@@ -94,7 +94,9 @@ import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderPage
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
@@ -216,11 +218,16 @@ internal fun ReaderScreen(
     val isParentThemeDark = AppTheme.isDark
     AppTheme(useDarkTheme = isParentThemeDark, typography = typography) {
       val isDarkTheme = AppTheme.isDark
+      val nestedScrollModifier =
+        if (platform !is Platform.Desktop) {
+          Modifier.nestedScroll(scrollBehaviour.nestedScrollConnection)
+        } else {
+          Modifier
+        }
 
       Scaffold(
         modifier =
-          modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection).onKeyEvent {
-            event ->
+          modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
             return@onKeyEvent when {
               event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
@@ -237,6 +244,13 @@ internal fun ReaderScreen(
           },
         topBar = {
           val topBarScrimColor = AppTheme.colorScheme.backdrop
+          val scrollBehavior =
+            if (platform !is Platform.Desktop) {
+              scrollBehaviour
+            } else {
+              null
+            }
+
           CenterAlignedTopAppBar(
             modifier =
               Modifier.drawBehind {
@@ -245,7 +259,7 @@ internal fun ReaderScreen(
                 )
               },
             expandedHeight = 72.dp,
-            scrollBehavior = scrollBehaviour,
+            scrollBehavior = scrollBehavior,
             colors =
               TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,

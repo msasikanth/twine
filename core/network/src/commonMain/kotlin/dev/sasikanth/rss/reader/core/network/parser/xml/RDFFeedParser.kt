@@ -138,6 +138,7 @@ class RDFContentParser(
       description = description,
       rawContent = rawContent,
       imageUrl = image,
+      audioUrl = null,
       date = date,
       hostLink = hostLink
     )

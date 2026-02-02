@@ -134,6 +134,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
+    var audioUrl: String? = null
     var commentsLink: String? = null
 
     while (parser.next() != EventType.END_TAG) {
@@ -147,10 +148,22 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
         link.isNullOrBlank() && (name == TAG_LINK || name == TAG_URL) -> {
           link = parser.nextText()
         }
-        name == TAG_ENCLOSURE &&
-          link.isNullOrBlank() &&
-          parser.getAttributeValue(parser.namespace, ATTR_TYPE) != ATTR_VALUE_IMAGE -> {
-          link = parser.getAttributeValue(parser.namespace, ATTR_URL)
+        name == TAG_ENCLOSURE -> {
+          val enclosureType = parser.getAttributeValue(parser.namespace, ATTR_TYPE)
+          val enclosureUrl = parser.getAttributeValue(parser.namespace, ATTR_URL)
+
+          if (enclosureType?.startsWith("audio/") == true) {
+            audioUrl = enclosureUrl
+          }
+
+          if (link.isNullOrBlank() && enclosureType != ATTR_VALUE_IMAGE) {
+            link = enclosureUrl
+          }
+
+          if (image.isNullOrBlank() && enclosureType == ATTR_VALUE_IMAGE) {
+            image = enclosureUrl
+          }
+
           parser.nextTag()
         }
         name == TAG_DESCRIPTION || name == TAG_CONTENT_ENCODED -> {
@@ -192,6 +205,7 @@ class RSSContentParser(override val articleHtmlParser: ArticleHtmlParser) : XmlC
       description = description,
       rawContent = rawContent,
       imageUrl = image,
+      audioUrl = audioUrl,
       date = date,
       commentsLink = commentsLink,
       hostLink = hostLink

@@ -37,6 +37,7 @@ SELECT
   post_search.title,
   post_search.description,
   post.imageUrl,
+  post.audioUrl,
   post.postDate,
   post.createdAt,
   post.link,

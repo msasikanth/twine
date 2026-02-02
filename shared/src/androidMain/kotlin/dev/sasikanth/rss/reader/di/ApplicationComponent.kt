@@ -28,6 +28,7 @@ import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.utils.NewArticleNotifier
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.media.AndroidAudioCache
 import dev.sasikanth.rss.reader.reader.readability.AndroidReadabilityRunner
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import me.tatarka.inject.annotations.Component
@@ -49,6 +50,8 @@ abstract class ApplicationComponent(@get:Provides val context: Context) :
   abstract val widgetDataRepository: WidgetDataRepository
 
   abstract val billingHandler: BillingHandler
+
+  abstract val audioCache: AndroidAudioCache
 
   @Provides
   @AppScope

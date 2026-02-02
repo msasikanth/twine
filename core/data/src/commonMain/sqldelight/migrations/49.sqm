@@ -1,0 +1,1 @@
+ALTER TABLE post ADD COLUMN audioUrl TEXT;

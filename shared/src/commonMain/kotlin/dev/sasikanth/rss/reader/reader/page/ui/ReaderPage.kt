@@ -17,9 +17,22 @@
 
 package dev.sasikanth.rss.reader.reader.page.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,17 +53,26 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +94,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.Morph
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.compose.LocalImageTransformer
 import com.mikepenz.markdown.compose.LocalMarkdownAnimations
@@ -97,11 +120,17 @@ import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
+import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
+import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.Bookmarked
 import dev.sasikanth.rss.reader.resources.icons.Comments
+import dev.sasikanth.rss.reader.resources.icons.Forward30
+import dev.sasikanth.rss.reader.resources.icons.Pause
+import dev.sasikanth.rss.reader.resources.icons.Play
+import dev.sasikanth.rss.reader.resources.icons.Replay30
 import dev.sasikanth.rss.reader.resources.icons.Share
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
@@ -112,8 +141,8 @@ import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
 import dev.sasikanth.rss.reader.utils.getOffsetFractionForPage
+import dev.sasikanth.rss.reader.utils.toShape
 import kotlinx.coroutines.launch
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.intellij.markdown.MarkdownElementTypes
 import org.jetbrains.compose.resources.stringResource
@@ -121,7 +150,12 @@ import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.bookmark
 import twine.shared.generated.resources.comments
 import twine.shared.generated.resources.markAsUnRead
+import twine.shared.generated.resources.pause
+import twine.shared.generated.resources.play
+import twine.shared.generated.resources.playback_speed
 import twine.shared.generated.resources.readingTimeEstimate
+import twine.shared.generated.resources.seek_backward
+import twine.shared.generated.resources.seek_forward
 import twine.shared.generated.resources.share
 import twine.shared.generated.resources.unBookmark
 
@@ -148,6 +182,7 @@ internal fun ReaderPage(
   val markdownContentState by pageViewModel.contentState.collectAsStateWithLifecycle()
   val excerptState by pageViewModel.excerptState.collectAsStateWithLifecycle()
   val contentParsingProgress by pageViewModel.parsingProgress.collectAsStateWithLifecycle()
+  val playbackState by pageViewModel.audioPlayer.playbackState.collectAsStateWithLifecycle()
 
   val linkHandler = LocalLinkHandler.current
   val sharedHandler = LocalShareHandler.current
@@ -233,10 +268,42 @@ internal fun ReaderPage(
               )
             }
 
+            if (!readerPost.audioUrl.isNullOrBlank()) {
+              item(key = "podcast-player") {
+                val isPostAudioPlaying = playbackState.playingUrl == readerPost.audioUrl
+                val postPlaybackState =
+                  if (isPostAudioPlaying) {
+                    playbackState
+                  } else {
+                    PlaybackState.Idle
+                  }
+
+                MediaControls(
+                  playbackState = postPlaybackState,
+                  onPlayClick = pageViewModel::playAudio,
+                  onPauseClick = pageViewModel::pauseAudio,
+                  onSeek = pageViewModel::seekAudio,
+                  onSeekForward = pageViewModel::seekForward,
+                  onSeekBackward = pageViewModel::seekBackward,
+                  onPlaybackSpeedChange = {
+                    val newSpeed =
+                      when (postPlaybackState.playbackSpeed) {
+                        0.5f -> 1.0f
+                        1.0f -> 1.5f
+                        1.5f -> 2.0f
+                        2.0f -> 0.5f
+                        else -> 1.0f
+                      }
+                    pageViewModel.setPlaybackSpeed(newSpeed)
+                  },
+                  modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp)
+                )
+              }
+            }
+
             item(key = "divider") {
               HorizontalDivider(
-                modifier =
-                  Modifier.padding(horizontal = 32.dp).padding(top = 20.dp, bottom = 24.dp),
+                modifier = Modifier.padding(horizontal = 32.dp, vertical = 24.dp),
                 color = AppTheme.colorScheme.outlineVariant
               )
             }
@@ -586,8 +653,156 @@ private fun PostActionButton(
   }
 }
 
-@Serializable
-enum class ReaderProcessingProgress {
-  Loading,
-  Idle
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun MediaControls(
+  playbackState: PlaybackState,
+  onPlayClick: () -> Unit,
+  onPauseClick: () -> Unit,
+  onSeek: (Long) -> Unit,
+  onSeekForward: () -> Unit,
+  onSeekBackward: () -> Unit,
+  onPlaybackSpeedChange: (Float) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val isPlaying = playbackState.isPlaying
+  val progress =
+    if (playbackState.duration > 0) {
+      (playbackState.currentPosition.toFloat() / playbackState.duration.toFloat()).coerceIn(0f, 1f)
+    } else {
+      0f
+    }
+
+  Column(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+        .padding(16.dp),
+    verticalArrangement = Arrangement.spacedBy(16.dp)
+  ) {
+    Column {
+      Slider(
+        modifier = Modifier.padding(top = 8.dp),
+        value = progress,
+        onValueChange = { onSeek((it * playbackState.duration).toLong()) },
+        colors =
+          SliderDefaults.colors(
+            thumbColor = AppTheme.colorScheme.primary,
+            activeTrackColor = AppTheme.colorScheme.primary,
+            inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f)
+          ),
+      )
+
+      Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+          text = formatDuration(playbackState.currentPosition),
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.weight(1f))
+        Text(
+          text = formatDuration(playbackState.duration),
+          style = MaterialTheme.typography.labelSmall,
+          color = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+    }
+
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+      TextButton(onClick = { onPlaybackSpeedChange(playbackState.playbackSpeed) }) {
+        AnimatedContent(
+          targetState = playbackState.playbackSpeed,
+          transitionSpec = {
+            (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
+              (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
+            )
+          }
+        ) {
+          Text(
+            text = stringResource(Res.string.playback_speed, it),
+            style = MaterialTheme.typography.labelLarge,
+            color = AppTheme.colorScheme.onSurfaceVariant
+          )
+        }
+      }
+
+      IconButton(onClick = onSeekBackward) {
+        Icon(
+          imageVector = TwineIcons.Replay30,
+          contentDescription = stringResource(Res.string.seek_backward),
+          tint = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+
+      val progress by animateFloatAsState(if (isPlaying) 1f else 0f)
+      val buttonSize by
+        animateDpAsState(
+          if (isPlaying) {
+            56.dp
+          } else {
+            48.dp
+          },
+          animationSpec =
+            spring(
+              stiffness = Spring.StiffnessMedium,
+              dampingRatio = Spring.DampingRatioMediumBouncy
+            )
+        )
+      val fabMorph by remember {
+        derivedStateOf { Morph(start = MaterialShapes.Circle, end = MaterialShapes.Cookie9Sided) }
+      }
+
+      Box(
+        modifier =
+          Modifier.requiredSize(buttonSize)
+            .clip(fabMorph.toShape(progress))
+            .background(AppTheme.colorScheme.primaryContainer)
+            .clickable(onClick = if (isPlaying) onPauseClick else onPlayClick),
+        contentAlignment = Alignment.Center
+      ) {
+        if (playbackState.buffering) {
+          CircularProgressIndicator(
+            modifier = Modifier.size(24.dp),
+            color = AppTheme.colorScheme.onPrimaryContainer,
+            strokeWidth = 2.dp
+          )
+        } else {
+          Icon(
+            imageVector = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
+            contentDescription =
+              if (isPlaying) stringResource(Res.string.pause) else stringResource(Res.string.play),
+            tint = AppTheme.colorScheme.onPrimaryContainer,
+          )
+        }
+      }
+
+      IconButton(onClick = onSeekForward) {
+        Icon(
+          imageVector = TwineIcons.Forward30,
+          contentDescription = stringResource(Res.string.seek_forward),
+          tint = AppTheme.colorScheme.onSurfaceVariant
+        )
+      }
+
+      // Spacer to balance the layout, matching TextButton width roughly
+      Spacer(Modifier.requiredWidth(48.dp))
+    }
+  }
+}
+
+private fun formatDuration(duration: Long): String {
+  val seconds = (duration / 1000) % 60
+  val minutes = (duration / (1000 * 60)) % 60
+  val hours = (duration / (1000 * 60 * 60))
+
+  return if (hours > 0) {
+    "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+  } else {
+    "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+  }
 }

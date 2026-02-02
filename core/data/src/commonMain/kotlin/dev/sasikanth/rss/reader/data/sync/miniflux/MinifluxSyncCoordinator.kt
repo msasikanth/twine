@@ -519,6 +519,7 @@ class MinifluxSyncCoordinator(
             null
           }
         val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
+        val audioUrl = entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
         val postPayload =
           PostPayload(
             title = entry.title,
@@ -526,6 +527,7 @@ class MinifluxSyncCoordinator(
             description = htmlContent?.textContent ?: "",
             rawContent = htmlContent?.cleanedHtml ?: entry.content,
             imageUrl = htmlContent?.heroImage,
+            audioUrl = audioUrl,
             date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
             commentsLink = entry.commentsUrl,
             fullContent = fullContent,

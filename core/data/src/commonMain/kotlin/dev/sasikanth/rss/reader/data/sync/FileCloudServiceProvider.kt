@@ -99,6 +99,7 @@ data class PostSyncEntity(
   val syncedAt: Long,
   val link: String,
   val commentsLink: String?,
+  val audioUrl: String? = null,
   val flags: Set<PostFlag>,
   val isDeleted: Boolean = false,
   val feedContent: String? = null,

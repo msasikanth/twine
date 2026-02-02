@@ -14,19 +14,13 @@
  * limitations under the License.
  *
  */
-package dev.sasikanth.rss.reader.core.model.remote
 
-data class PostPayload(
-  val title: String,
-  val link: String,
-  val description: String,
-  val rawContent: String?,
-  val fullContent: String?,
-  val imageUrl: String?,
-  val audioUrl: String? = null,
-  val date: Long,
-  val commentsLink: String?,
-  val isDateParsedCorrectly: Boolean
-) {
-  companion object
+package dev.sasikanth.rss.reader.media
+
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.cache.Cache
+
+@UnstableApi
+object AudioCacheProvider {
+  lateinit var cache: Cache
 }

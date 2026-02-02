@@ -12,6 +12,7 @@ SELECT
   post.title,
   post.description,
   post.imageUrl,
+  post.audioUrl,
   post.postDate AS date,
   post.createdAt,
   post.link,

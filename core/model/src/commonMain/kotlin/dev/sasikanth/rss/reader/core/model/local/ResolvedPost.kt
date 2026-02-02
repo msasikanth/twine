@@ -28,6 +28,7 @@ data class ResolvedPost(
   val title: String,
   val description: String,
   val imageUrl: String?,
+  val audioUrl: String?,
   val date: Instant,
   val createdAt: Instant,
   val link: String,
