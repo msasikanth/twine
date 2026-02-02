@@ -114,10 +114,11 @@ class ArticleHtmlParserTest {
     val result = articleHtmlParser.parse(htmlWithAudio)
 
     assertEquals("https://example.com/audio.mp3", result?.audioUrl)
-    assert(
+    assertEquals(
       result
         ?.cleanedHtml
-        ?.contains("<audio controls src=\"https://example.com/audio.mp3\"></audio>") == true
+        ?.contains("<audio controls src=\"https://example.com/audio.mp3\"></audio>"),
+      true,
     )
   }
 }
