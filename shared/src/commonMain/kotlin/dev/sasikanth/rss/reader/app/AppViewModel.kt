@@ -79,7 +79,7 @@ class AppViewModel(
           showFeedFavIcon,
           homeViewMode,
           showReaderView,
-          blockImages
+          blockImages,
         )
       }
       .onEach {

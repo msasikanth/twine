@@ -52,7 +52,7 @@ import twine.shared.generated.resources.groupNameHint
 internal fun CreateGroupDialog(
   onCreateGroup: (String) -> Unit,
   modifier: Modifier = Modifier,
-  onDismiss: () -> Unit
+  onDismiss: () -> Unit,
 ) {
   var groupName by remember { mutableStateOf("") }
   val focusRequester = remember { FocusRequester() }
@@ -73,12 +73,12 @@ internal fun CreateGroupDialog(
         colors =
           ButtonDefaults.textButtonColors(
             contentColor = AppTheme.colorScheme.tintedForeground,
-            disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-          )
+            disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+          ),
       ) {
         Text(
           text = stringResource(Res.string.buttonAdd),
-          style = MaterialTheme.typography.labelLarge
+          style = MaterialTheme.typography.labelLarge,
         )
       }
     },
@@ -87,14 +87,14 @@ internal fun CreateGroupDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.createGroup),
-        color = AppTheme.colorScheme.textEmphasisHigh
+        color = AppTheme.colorScheme.textEmphasisHigh,
       )
     },
     text = {
@@ -121,7 +121,7 @@ internal fun CreateGroupDialog(
           Text(
             text = stringResource(Res.string.groupNameHint),
             color = AppTheme.colorScheme.textEmphasisMed,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
           )
         },
         colors =
@@ -134,9 +134,9 @@ internal fun CreateGroupDialog(
             selectionColors =
               TextSelectionColors(
                 handleColor = AppTheme.colorScheme.tintedForeground,
-                backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
-              )
-          )
+                backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+              ),
+          ),
       )
     },
     containerColor = AppTheme.colorScheme.tintedSurface,

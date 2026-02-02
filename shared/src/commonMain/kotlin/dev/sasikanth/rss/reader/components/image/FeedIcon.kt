@@ -46,7 +46,7 @@ internal fun FeedIcon(
   shape: Shape,
   modifier: Modifier = Modifier,
   contentScale: ContentScale = ContentScale.Fit,
-  size: Size = Size(Dimension.Undefined, 500)
+  size: Size = Size(Dimension.Undefined, 500),
 ) {
   val globalShowFeedFavIcon = LocalShowFeedFavIconSetting.current
   val useFavIcon = showFeedFavIcon && globalShowFeedFavIcon
@@ -69,7 +69,7 @@ internal fun FeedIcon(
       contentScale = contentScale,
       imageLoader = imageLoader,
       error = { PlaceHolderIcon() },
-      loading = { PlaceHolderIcon() }
+      loading = { PlaceHolderIcon() },
     )
   }
 }

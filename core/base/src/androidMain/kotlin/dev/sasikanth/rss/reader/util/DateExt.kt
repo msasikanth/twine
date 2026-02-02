@@ -24,7 +24,7 @@ actual fun Instant.relativeDurationString(): String {
       toEpochMilliseconds(),
       System.currentTimeMillis(),
       DateUtils.MINUTE_IN_MILLIS,
-      DateUtils.FORMAT_ABBREV_ALL
+      DateUtils.FORMAT_ABBREV_ALL,
     )
     .toString()
 }

@@ -36,9 +36,7 @@ import me.tatarka.inject.annotations.Inject
 
 @Inject
 @AppScope
-class SettingsRepository(
-  private val dataStore: DataStore<Preferences>,
-) {
+class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   private val browserTypeKey = stringPreferencesKey("pref_browser_type")
   private val showUnreadPostsCountKey = booleanPreferencesKey("show_unread_posts_count")
@@ -346,12 +344,12 @@ class SettingsRepository(
 enum class AppThemeMode {
   Light,
   Dark,
-  Auto
+  Auto,
 }
 
 enum class BrowserType {
   Default,
-  InApp
+  InApp,
 }
 
 enum class Period {
@@ -360,18 +358,18 @@ enum class Period {
   THREE_MONTHS,
   SIX_MONTHS,
   ONE_YEAR,
-  NEVER
+  NEVER,
 }
 
 enum class MarkAsReadOn {
   Open,
-  Scroll
+  Scroll,
 }
 
 enum class HomeViewMode {
   Default,
   Simple,
-  Compact
+  Compact,
 }
 
 enum class ReaderFont(val value: String) {

@@ -45,9 +45,8 @@ import platform.darwin.NSObject
 
 @Inject
 @AppScope
-class IosReadabilityRunner(
-  private val dispatchersProvider: DispatchersProvider,
-) : ReadabilityRunner {
+class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider) :
+  ReadabilityRunner {
 
   private val semaphore = Semaphore(permits = 3)
   private val pool = mutableListOf<WKWebView>()
@@ -61,7 +60,7 @@ class IosReadabilityRunner(
   override suspend fun parseHtml(
     link: String?,
     content: String,
-    image: String?
+    image: String?,
   ): ReadabilityResult =
     semaphore.withPermit {
       val htmlShell = withContext(dispatchersProvider.default) { ReaderHTML.createOrGet() }
@@ -122,7 +121,7 @@ class IosReadabilityRunner(
               WKUserScript(
                 source = executionScript,
                 injectionTime = WKUserScriptInjectionTime.WKUserScriptInjectionTimeAtDocumentEnd,
-                forMainFrameOnly = true
+                forMainFrameOnly = true,
               )
             userController.addUserScript(userScript)
 
@@ -171,7 +170,7 @@ class ReaderJSHandler(private val onResult: (String) -> Unit) :
   NSObject(), WKScriptMessageHandlerProtocol {
   override fun userContentController(
     userContentController: WKUserContentController,
-    didReceiveScriptMessage: WKScriptMessage
+    didReceiveScriptMessage: WKScriptMessage,
   ) {
     val body = didReceiveScriptMessage.body as? String ?: ""
     onResult(body)

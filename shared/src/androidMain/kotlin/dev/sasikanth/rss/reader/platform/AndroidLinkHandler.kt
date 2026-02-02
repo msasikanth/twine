@@ -31,7 +31,7 @@ import me.tatarka.inject.annotations.Inject
 @ActivityScope
 class AndroidLinkHandler(
   private val activity: ComponentActivity,
-  private val settingsRepository: SettingsRepository
+  private val settingsRepository: SettingsRepository,
 ) : LinkHandler {
 
   override suspend fun openLink(link: String?, useInAppBrowser: Boolean) {

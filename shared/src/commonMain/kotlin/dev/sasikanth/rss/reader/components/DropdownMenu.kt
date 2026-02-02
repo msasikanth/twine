@@ -42,7 +42,7 @@ internal fun DropdownMenu(
   onDismissRequest: () -> Unit,
   modifier: Modifier = Modifier,
   offset: DpOffset = DpOffset.Zero,
-  content: @Composable ColumnScope.() -> Unit
+  content: @Composable ColumnScope.() -> Unit,
 ) {
   androidx.compose.material3.DropdownMenu(
     expanded = expanded,
@@ -51,7 +51,7 @@ internal fun DropdownMenu(
     shape = MaterialTheme.shapes.largeIncreased,
     modifier =
       modifier.background(color = AppTheme.colorScheme.surface, shape = MaterialTheme.shapes.large),
-    content = content
+    content = content,
   )
 }
 

@@ -28,7 +28,7 @@ actual fun createDefaultTextStyle(): TextStyle {
     platformStyle =
       PlatformTextStyle(
         spanStyle = PlatformSpanStyle.Default,
-        paragraphStyle = PlatformParagraphStyle.Default
+        paragraphStyle = PlatformParagraphStyle.Default,
       )
   )
 }

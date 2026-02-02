@@ -195,7 +195,7 @@ class LocalSyncCoordinator(
             unreadOnly = unreadOnly,
             after = postsAfter,
             lastSyncedAt =
-              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault())
+              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault()),
           )
         }
 
@@ -239,7 +239,7 @@ class LocalSyncCoordinator(
       withContext(dispatchersProvider.databaseWrite) {
         rssRepository.updateFeedRefreshInterval(
           feedId = feed.id,
-          refreshInterval = newRefreshInterval
+          refreshInterval = newRefreshInterval,
         )
       }
     }

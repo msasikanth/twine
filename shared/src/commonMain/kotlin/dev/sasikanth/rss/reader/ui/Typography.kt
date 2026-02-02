@@ -57,10 +57,7 @@ private val figmaLineHeightStyle =
 
 @Stable
 private val defaultTextStyle =
-  createDefaultTextStyle()
-    .copy(
-      textDirection = TextDirection.ContentOrLtr,
-    )
+  createDefaultTextStyle().copy(textDirection = TextDirection.ContentOrLtr)
 
 internal fun typography(
   fontFamily: FontFamily,
@@ -85,7 +82,7 @@ internal fun typography(
         fontSize = 57.sp * fontScalingFactor,
         lineHeight = 64.sp * lineHeightScalingFactor,
         lineHeightStyle = figmaLineHeightStyle,
-        letterSpacing = (-0.25).sp
+        letterSpacing = (-0.25).sp,
       ),
     displayMedium =
       defaultTextStyle.copy(
@@ -93,7 +90,7 @@ internal fun typography(
         fontWeight = FontWeight.Normal,
         fontSize = 45.sp * fontScalingFactor,
         lineHeight = 52.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     displaySmall =
       defaultTextStyle.copy(
@@ -101,7 +98,7 @@ internal fun typography(
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp * fontScalingFactor,
         lineHeight = 44.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     headlineLarge =
       defaultTextStyle.copy(
@@ -109,7 +106,7 @@ internal fun typography(
         fontWeight = FontWeight.Normal,
         fontSize = 32.sp * fontScalingFactor,
         lineHeight = 40.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     headlineMedium =
       defaultTextStyle.copy(
@@ -117,7 +114,7 @@ internal fun typography(
         fontWeight = FontWeight.Normal,
         fontSize = 28.sp * fontScalingFactor,
         lineHeight = 36.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     headlineSmall =
       defaultTextStyle.copy(
@@ -125,7 +122,7 @@ internal fun typography(
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp * fontScalingFactor,
         lineHeight = 32.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     titleLarge =
       defaultTextStyle.copy(
@@ -170,7 +167,7 @@ internal fun typography(
         fontSize = bodyMediumFontSize,
         letterSpacing = bodyMediumFontSize * 0.02, // applying 2% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     bodySmall =
       defaultTextStyle.copy(
@@ -179,7 +176,7 @@ internal fun typography(
         fontSize = bodySmallFontSize,
         letterSpacing = bodySmallFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     labelLarge =
       defaultTextStyle.copy(
@@ -188,7 +185,7 @@ internal fun typography(
         fontSize = labelLargeFontSize,
         letterSpacing = labelLargeFontSize * 0.03, // applying 3% letter spacing
         lineHeight = 20.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     labelMedium =
       defaultTextStyle.copy(
@@ -197,7 +194,7 @@ internal fun typography(
         fontSize = labelMediumFontSize,
         letterSpacing = labelMediumFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
     labelSmall =
       defaultTextStyle.copy(
@@ -206,7 +203,7 @@ internal fun typography(
         fontSize = labelSmallFontSize,
         letterSpacing = labelSmallFontSize * 0.05, // applying 5% letter spacing
         lineHeight = 16.sp * lineHeightScalingFactor,
-        lineHeightStyle = figmaLineHeightStyle
+        lineHeightStyle = figmaLineHeightStyle,
       ),
   )
 }

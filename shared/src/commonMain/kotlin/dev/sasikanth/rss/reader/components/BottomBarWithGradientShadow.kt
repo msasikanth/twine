@@ -36,7 +36,7 @@ import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 @Composable
 internal fun BottomBarWithGradientShadow(
   modifier: Modifier = Modifier,
-  content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
   val shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
   val translucentStyle = LocalTranslucentStyles.current
@@ -48,7 +48,7 @@ internal fun BottomBarWithGradientShadow(
         .heightIn(min = 120.dp)
         .background(
           color = translucentStyle.default.background.compositeOver(Color.Black),
-          shape = shape
+          shape = shape,
         )
         .pointerInput(Unit) {
           // Consume bottom bar taps

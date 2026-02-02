@@ -25,7 +25,7 @@ data class FeedReadCount(
   val feedName: String,
   val feedIcon: String,
   val homepageLink: String,
-  val readCount: Long
+  val readCount: Long,
 )
 
 @Immutable data class ReadingTrend(val date: String, val count: Long)
@@ -34,5 +34,5 @@ data class FeedReadCount(
 data class ReadingStatistics(
   val totalReadCount: Long,
   val topFeeds: List<FeedReadCount>,
-  val readingTrends: List<ReadingTrend>
+  val readingTrends: List<ReadingTrend>,
 )

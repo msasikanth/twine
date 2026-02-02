@@ -111,7 +111,7 @@ internal fun FeedsBottomSheet(
             lerp(
               start = collapsedSheetHeight,
               stop = targetSheetHeight,
-              fraction = (bottomSheetProgress * 2f).coerceAtMost(1f)
+              fraction = (bottomSheetProgress * 2f).coerceAtMost(1f),
             )
           val sheetHorizontalPadding =
             lerp(
@@ -124,17 +124,9 @@ internal fun FeedsBottomSheet(
           val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
 
           val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-          val cornerRadius =
-            CornerRadius(
-              x = cornerRadiusDp.toPx(),
-              y = cornerRadiusDp.toPx(),
-            )
+          val cornerRadius = CornerRadius(x = cornerRadiusDp.toPx(), y = cornerRadiusDp.toPx())
           val backgroundColor =
-            lerp(
-              collapsedSheetBackgroundColor,
-              Color.Black,
-              bottomSheetProgress,
-            )
+            lerp(collapsedSheetBackgroundColor, Color.Black, bottomSheetProgress)
           val borderColor =
             lerp(
               start = collapsedSheetBorderColor,
@@ -150,7 +142,7 @@ internal fun FeedsBottomSheet(
                   offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 16.dp),
                   radius = 32.dp,
                   color = shadowColor1,
-                )
+                ),
             )
 
           val shadow2Painter =
@@ -161,7 +153,7 @@ internal fun FeedsBottomSheet(
                   offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 4.dp),
                   radius = 8.dp,
                   color = shadowColor2,
-                )
+                ),
             )
 
           with(shadow1Painter) { draw(sheetSize) }
@@ -182,7 +174,7 @@ internal fun FeedsBottomSheet(
             size = sheetSize,
             topLeft = offset,
           )
-        },
+        }
     ) {
       Box(modifier = Modifier.fillMaxSize()) {
         if (isExpanding) {
@@ -207,7 +199,7 @@ internal fun FeedsBottomSheet(
             openGroupSelectionSheet = openGroupSelectionSheet,
             openAddFeedScreen = openAddFeedScreen,
             openPaywall = openPaywall,
-            closeFeeds = closeFeeds
+            closeFeeds = closeFeeds,
           )
         }
 
@@ -223,7 +215,7 @@ internal fun FeedsBottomSheet(
             canShowUnreadPostsCount = state.canShowUnreadPostsCount,
             onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
             onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
-            openFeeds = openFeeds
+            openFeeds = openFeeds,
           )
         }
       }

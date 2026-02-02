@@ -37,7 +37,7 @@ object SQLCodeMigrations {
         sql =
           "INSERT OR IGNORE INTO appConfig(id, syncFormatVersion, lastSyncedFormatVersion) VALUES (0, 1, 0)",
         parameters = 0,
-        binders = null
+        binders = null,
       )
     }
   }
@@ -65,7 +65,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newFeedId)
         bindString(1, oldFeedId)
-      }
+      },
     )
 
     driver.execute(
@@ -75,7 +75,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newFeedId)
         bindString(1, oldFeedId)
-      }
+      },
     )
 
     driver.execute(
@@ -85,7 +85,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newFeedId)
         bindString(1, oldFeedId)
-      }
+      },
     )
 
     driver.execute(
@@ -95,7 +95,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newFeedId)
         bindString(1, oldFeedId)
-      }
+      },
     )
   }
 
@@ -108,7 +108,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newPostId)
         bindString(1, oldPostId)
-      }
+      },
     )
 
     driver.execute(
@@ -118,7 +118,7 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newPostId)
         bindString(1, oldPostId)
-      }
+      },
     )
 
     driver.execute(
@@ -128,14 +128,13 @@ object SQLCodeMigrations {
       binders = {
         bindString(0, newPostId)
         bindString(1, oldPostId)
-      }
+      },
     )
   }
 }
 
-private class FeedsIdsQuery(
-  private val driver: SqlDriver,
-) : Query<String>(mapper = { cursor -> cursor.getString(0)!! }) {
+private class FeedsIdsQuery(private val driver: SqlDriver) :
+  Query<String>(mapper = { cursor -> cursor.getString(0)!! }) {
   override fun addListener(listener: Listener) {
     driver.addListener("feed", listener = listener)
   }
@@ -150,9 +149,8 @@ private class FeedsIdsQuery(
   override fun toString(): String = "Feed.sq:feedIds"
 }
 
-private class PostsIdsQuery(
-  private val driver: SqlDriver,
-) : Query<String>(mapper = { cursor -> cursor.getString(0)!! }) {
+private class PostsIdsQuery(private val driver: SqlDriver) :
+  Query<String>(mapper = { cursor -> cursor.getString(0)!! }) {
   override fun addListener(listener: Listener) {
     driver.addListener("post", listener = listener)
   }

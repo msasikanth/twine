@@ -33,6 +33,7 @@ data class Post(
   val commentsLink: String?,
   val flags: Set<PostFlag>,
   val remoteId: String? = null,
+  val audioUrl: String?,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

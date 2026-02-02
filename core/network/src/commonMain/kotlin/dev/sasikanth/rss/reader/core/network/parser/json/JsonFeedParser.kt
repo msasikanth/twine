@@ -73,6 +73,8 @@ class JsonFeedParser(
                 .orEmpty()
             val rawContent =
               htmlContent?.cleanedHtml ?: jsonFeedPost.contentText ?: jsonFeedPost.contentHtml
+            val audioUrl =
+              jsonFeedPost.attachments.firstOrNull { it.mimeType.startsWith("audio/") }?.url
 
             PostPayload(
               title = jsonFeedPost.title.orEmpty(),
@@ -81,21 +83,22 @@ class JsonFeedParser(
               rawContent = rawContent,
               fullContent = null,
               imageUrl = jsonFeedPost.imageUrl ?: image,
+              audioUrl = audioUrl,
               date = postPublishedAt ?: Clock.System.now().toEpochMilliseconds(),
               commentsLink = null,
-              isDateParsedCorrectly = postPublishedAt != null
+              isDateParsedCorrectly = postPublishedAt != null,
             )
           }
 
         val feedPayload =
           FeedPayload(
             name = jsonFeedPayload.title,
-            icon = jsonFeedPayload.icon
-                ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
+            icon =
+              jsonFeedPayload.icon ?: jsonFeedPayload.favIcon ?: UrlUtils.fallbackFeedIcon(host),
             description = jsonFeedPayload.description.orEmpty(),
             homepageLink = jsonFeedPayload.homePageUrl ?: feedUrl,
             link = jsonFeedPayload.url ?: feedUrl,
-            posts = posts.asFlow()
+            posts = posts.asFlow(),
           )
 
         return@withContext feedPayload
@@ -128,5 +131,9 @@ private data class JsonFeedPayload(
     @SerialName("image") val imageUrl: String? = null,
     @SerialName("date_published") val publishedAt: String? = null,
     val url: String? = null,
+    val attachments: List<Attachment> = emptyList(),
   )
+
+  @Serializable
+  data class Attachment(val url: String, @SerialName("mime_type") val mimeType: String)
 }

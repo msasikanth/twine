@@ -25,7 +25,7 @@ import me.tatarka.inject.annotations.Component
 @Component
 @ActivityScope
 abstract class HomeViewControllerComponent(
-  @Component val applicationComponent: ApplicationComponent,
+  @Component val applicationComponent: ApplicationComponent
 ) : PlatformComponent, ShareComponent {
 
   abstract val homeViewController: HomeViewController

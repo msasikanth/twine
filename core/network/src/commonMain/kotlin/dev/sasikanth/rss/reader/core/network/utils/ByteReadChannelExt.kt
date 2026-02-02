@@ -29,7 +29,7 @@ import kotlinx.io.readByteArray
 internal fun ByteReadChannel.toCharIterator(
   charset: Charset,
   platformPageSize: Long,
-  context: CoroutineContext = EmptyCoroutineContext
+  context: CoroutineContext = EmptyCoroutineContext,
 ): CharIterator {
   return object : CharIterator() {
 
@@ -76,8 +76,7 @@ internal fun ByteReadChannel.toCharIterator(
         } catch (e: Exception) {
           null
         }
-      }
-        ?: fallbackCharset)
+      } ?: fallbackCharset)
 
     override fun nextChar(): Char {
       if (!hasNext()) throw NoSuchElementException()

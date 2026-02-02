@@ -67,19 +67,19 @@ class JsonFeedParserTest {
                   "An overview of recent quantum computing advances and what they mean for the tech industry",
                 rawContent =
                   """
-               <html>
-                <body>
-                 <p>Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.</p>
-                 <p>The new 1000-qubit processor announced last month represents a major milestone in the industry.</p>
-                </body>
-               </html>
-              """
+                  <html>
+                   <body>
+                    <p>Quantum computing has made significant strides in the past year. Recent breakthroughs at IBM and Google have pushed the boundaries of what we thought possible.</p>
+                    <p>The new 1000-qubit processor announced last month represents a major milestone in the industry.</p>
+                   </body>
+                  </html>
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/images/quantum-2025.jpg",
                 date = 1740734100000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
               ),
               PostPayload(
                 title = "AI Ethics Frameworks: A Comparative Analysis",
@@ -94,13 +94,13 @@ class JsonFeedParserTest {
                     <p>This article examines the approaches taken by major tech companies and governments around the world.</p>
                    </body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1739629800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
               ),
               PostPayload(
                 title = "The Rise of Edge Computing",
@@ -113,7 +113,7 @@ class JsonFeedParserTest {
                 imageUrl = "https://example.com/images/edge-computing.jpg",
                 date = 1738410300000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
               ),
               PostPayload(
                 title = "Sustainable Tech: Green Innovations in Silicon Valley",
@@ -128,16 +128,16 @@ class JsonFeedParserTest {
                     <p>From carbon-neutral data centers to biodegradable electronics, we look at the most promising initiatives.</p>
                    </body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1737388800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
-              )
+                isDateParsedCorrectly = true,
+              ),
             )
-            .asFlow()
+            .asFlow(),
       )
     val jsonFeed = ByteReadChannel(jsonFeed).readBuffer()
 

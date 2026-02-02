@@ -48,7 +48,7 @@ class PostSyncTest {
           syncedAt = 0L,
           link = "",
           commentsLink = null,
-          flags = setOf(PostFlag.Read)
+          flags = setOf(PostFlag.Read),
         ),
         // Read post newer than clean-up -> should be kept
         PostSyncEntity(
@@ -63,7 +63,7 @@ class PostSyncTest {
           syncedAt = 0L,
           link = "",
           commentsLink = null,
-          flags = setOf(PostFlag.Read)
+          flags = setOf(PostFlag.Read),
         ),
         // Unread post older than clean-up -> should be kept
         PostSyncEntity(
@@ -78,7 +78,7 @@ class PostSyncTest {
           syncedAt = 0L,
           link = "",
           commentsLink = null,
-          flags = emptySet()
+          flags = emptySet(),
         ),
         // Bookmarked and read post older than clean-up -> should be kept
         PostSyncEntity(
@@ -93,8 +93,8 @@ class PostSyncTest {
           syncedAt = 0L,
           link = "",
           commentsLink = null,
-          flags = setOf(PostFlag.Read, PostFlag.Bookmarked)
-        )
+          flags = setOf(PostFlag.Read, PostFlag.Bookmarked),
+        ),
       )
 
     val filtered = FileCloudSyncService.filterPosts(posts, cleanUpAtByFeed)
@@ -123,7 +123,7 @@ class PostSyncTest {
               showFeedFavIcon = false,
               hideFromAllFeeds = false,
               lastUpdatedAt = 123456789L,
-              isDeleted = false
+              isDeleted = false,
             )
           ),
         groups =
@@ -134,7 +134,7 @@ class PostSyncTest {
               feedIds = listOf("feed-id"),
               pinnedAt = null,
               updatedAt = 123456789L,
-              isDeleted = false
+              isDeleted = false,
             )
           ),
         bookmarks = listOf("post-1"),
@@ -145,7 +145,7 @@ class PostSyncTest {
               id = "word-id",
               content = "word",
               isDeleted = false,
-              updatedAt = 123456789L
+              updatedAt = 123456789L,
             )
           ),
         posts =
@@ -163,10 +163,10 @@ class PostSyncTest {
               link = "https://example.com/post-1",
               commentsLink = null,
               flags = setOf(PostFlag.Bookmarked, PostFlag.Read),
-              isDeleted = false
+              isDeleted = false,
             )
           ),
-        postChunks = listOf("/twine_posts_chunk_0.json")
+        postChunks = listOf("/twine_posts_chunk_0.json"),
       )
 
     val serialized = json.encodeToString(syncData)
@@ -203,7 +203,7 @@ class PostSyncTest {
         "blockedWords": [],
         "posts": []
       }
-    """
+      """
         .trimIndent()
 
     val deserialized = json.decodeFromString<SyncData>(legacyJson)
@@ -235,7 +235,7 @@ class PostSyncTest {
         "blockedWords": ["elon musk", "musk", "trump"],
         "posts": []
       }
-    """
+      """
         .trimIndent()
 
     val deserialized = json.decodeFromString<SyncData>(legacyJson)
@@ -247,7 +247,7 @@ class PostSyncTest {
     // Verify ID generation
     assertEquals(
       dev.sasikanth.rss.reader.util.nameBasedUuidOf("elon musk").toString(),
-      deserialized.blockedWords[0].id
+      deserialized.blockedWords[0].id,
     )
   }
 
@@ -277,7 +277,7 @@ class PostSyncTest {
               flags = emptySet(),
               isDeleted = false,
               feedContent = "Raw content",
-              articleContent = "HTML content"
+              articleContent = "HTML content",
             )
           ),
       )
@@ -311,7 +311,7 @@ class PostSyncTest {
           syncedAt = 0L,
           link = "",
           commentsLink = null,
-          flags = setOf(PostFlag.Bookmarked)
+          flags = setOf(PostFlag.Bookmarked),
         )
       )
 
@@ -335,12 +335,12 @@ class PostSyncTest {
               feedIds = listOf("feed-1", "feed-2"),
               pinnedAt = null,
               updatedAt = 1000L,
-              isDeleted = false
+              isDeleted = false,
             )
           ),
         bookmarks = emptyList(),
         blockedWords = emptyList(),
-        posts = emptyList()
+        posts = emptyList(),
       )
 
     val serialized = json.encodeToString(syncData)

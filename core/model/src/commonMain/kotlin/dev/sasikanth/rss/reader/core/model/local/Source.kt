@@ -29,5 +29,5 @@ interface Source {
 
 enum class SourceType {
   Feed,
-  FeedGroup
+  FeedGroup,
 }

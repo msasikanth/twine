@@ -38,7 +38,7 @@ val TwineIcons.Twitter: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ val TwineIcons.Twitter: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(14.7673f, 2.5f)
             horizontalLineTo(17.3129f)

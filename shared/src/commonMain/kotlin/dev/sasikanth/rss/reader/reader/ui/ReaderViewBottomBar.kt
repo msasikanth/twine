@@ -127,7 +127,7 @@ internal fun ReaderViewBottomBar(
       label = stringResource(Res.string.openWebsite),
       icon = TwineIcons.OpenBrowser,
       onClick = openInBrowserClick,
-      minWidth = buttonMinWidth
+      minWidth = buttonMinWidth,
     )
 
     BottomBarToggleIconButton(
@@ -137,7 +137,7 @@ internal fun ReaderViewBottomBar(
       onClick = loadFullArticleClick,
       backgroundColor = readerViewToggleBackgroundColor,
       contentColor = readerViewToggleContentColor,
-      minWidth = readerViewToggleWidth
+      minWidth = readerViewToggleWidth,
     )
 
     BottomBarIconButton(
@@ -145,7 +145,7 @@ internal fun ReaderViewBottomBar(
       label = stringResource(Res.string.readerSettings),
       icon = TwineIcons.Settings,
       onClick = openReaderViewSettings,
-      minWidth = buttonMinWidth
+      minWidth = buttonMinWidth,
     )
   }
 }

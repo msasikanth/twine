@@ -83,7 +83,7 @@ fun GroupScreen(
   viewModel: GroupViewModel,
   goBack: () -> Unit,
   openGroupSelection: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val layoutDirection = LocalLayoutDirection.current
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -101,7 +101,7 @@ fun GroupScreen(
                 GroupNameTextField(
                   value = viewModel.groupName,
                   onValueChanged = { viewModel.dispatch(GroupEvent.OnGroupNameChanged(it.text)) },
-                  modifier = Modifier.weight(1f)
+                  modifier = Modifier.weight(1f),
                 )
               },
               navigationIcon = {
@@ -109,7 +109,7 @@ fun GroupScreen(
                   modifier = Modifier.padding(start = 12.dp),
                   icon = TwineIcons.ArrowBack,
                   label = stringResource(Res.string.buttonGoBack),
-                  onClick = { goBack() }
+                  onClick = { goBack() },
                 )
               },
               actions = { Spacer(Modifier.requiredSize(48.dp)) },
@@ -118,7 +118,7 @@ fun GroupScreen(
                   containerColor = AppTheme.colorScheme.tintedBackground,
                   navigationIconContentColor = AppTheme.colorScheme.onSurface,
                   titleContentColor = AppTheme.colorScheme.onSurface,
-                  actionIconContentColor = AppTheme.colorScheme.onSurface
+                  actionIconContentColor = AppTheme.colorScheme.onSurface,
                 ),
             )
 
@@ -133,7 +133,7 @@ fun GroupScreen(
 
           HorizontalDivider(
             modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-            color = AppTheme.colorScheme.tintedSurface
+            color = AppTheme.colorScheme.tintedSurface,
           )
         }
       },
@@ -141,20 +141,20 @@ fun GroupScreen(
         if (state.isInMultiSelectMode) {
           ContextActionsBottomBar(
             tooltip = null,
-            onCancel = { viewModel.dispatch(GroupEvent.OnCancelSelectionClicked) }
+            onCancel = { viewModel.dispatch(GroupEvent.OnCancelSelectionClicked) },
           ) {
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.NewGroup,
               label = stringResource(Res.string.actionMoveTo),
-              onClick = { openGroupSelection() }
+              onClick = { openGroupSelection() },
             )
 
             ContextActionItem(
               modifier = Modifier.weight(1f),
               icon = TwineIcons.UnGroup,
               label = stringResource(Res.string.actionUngroup),
-              onClick = { viewModel.dispatch(GroupEvent.OnUngroupClicked) }
+              onClick = { viewModel.dispatch(GroupEvent.OnUngroupClicked) },
             )
           }
         }
@@ -168,9 +168,9 @@ fun GroupScreen(
             start = innerPadding.calculateStartPadding(layoutDirection),
             top = innerPadding.calculateTopPadding() + 24.dp,
             end = innerPadding.calculateEndPadding(layoutDirection),
-            bottom = innerPadding.calculateBottomPadding() + 200.dp
+            bottom = innerPadding.calculateBottomPadding() + 200.dp,
           ),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
         items(
           count = feeds.itemCount,
@@ -200,7 +200,7 @@ fun GroupScreen(
 fun GroupNameTextField(
   value: TextFieldValue,
   onValueChanged: (TextFieldValue) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   var input by remember(value) { mutableStateOf(value) }
 
@@ -222,7 +222,7 @@ fun GroupNameTextField(
         Text(
           text = stringResource(Res.string.groupNameHint),
           color = AppTheme.colorScheme.tintedForeground,
-          style = MaterialTheme.typography.bodyLarge
+          style = MaterialTheme.typography.bodyLarge,
         )
       },
       shape = RoundedCornerShape(16.dp),
@@ -235,7 +235,7 @@ fun GroupNameTextField(
           disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
           focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
           disabledTextColor = Color.Transparent,
-        )
+        ),
     )
   }
 }

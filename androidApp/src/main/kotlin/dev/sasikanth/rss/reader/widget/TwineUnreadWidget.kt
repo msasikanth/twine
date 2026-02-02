@@ -102,10 +102,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
   }
 
   @Composable
-  private fun WidgetContent(
-    widgetDataRepository: WidgetDataRepository,
-    widgetId: Int,
-  ) {
+  private fun WidgetContent(widgetDataRepository: WidgetDataRepository, widgetId: Int) {
     val context = LocalContext.current
     val unreadCount by
       remember { widgetDataRepository.unreadPostsCount }.collectAsState(initial = 0L)
@@ -133,7 +130,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
                     ReaderScreenArgs(
                       postIndex = index,
                       postId = post.id,
-                      fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget
+                      fromScreen = ReaderScreenArgs.FromScreen.UnreadWidget,
                     )
                   val uri = Screen.Reader(readerScreenArgs).toRoute().toUri()
 
@@ -142,16 +139,14 @@ class TwineUnreadWidget : GlanceAppWidget() {
                       addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                   context.startActivity(deepLinkIntent)
-                }
+                },
               )
             }
           }
 
           if (unreadCount > NUMBER_OF_UNREAD_POSTS_IN_WIDGET) {
             item {
-              Box(
-                modifier = GlanceModifier.padding(vertical = 16.dp),
-              ) {
+              Box(modifier = GlanceModifier.padding(vertical = 16.dp)) {
                 OutlineButton(
                   text = context.getString(R.string.widget_see_more),
                   contentColor = GlanceTheme.colors.primary,
@@ -161,7 +156,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                       }
                     context.startActivity(intent)
-                  }
+                  },
                 )
               }
             }
@@ -172,20 +167,17 @@ class TwineUnreadWidget : GlanceAppWidget() {
   }
 
   @Composable
-  private fun TitleBar(
-    unreadPostsCount: Long,
-    context: Context,
-  ) {
+  private fun TitleBar(unreadPostsCount: Long, context: Context) {
     val coroutineScope = rememberCoroutineScope()
     Row(
       GlanceModifier.fillMaxWidth().padding(vertical = 8.dp),
-      verticalAlignment = Alignment.Vertical.CenterVertically
+      verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
       val title =
         context.resources.getQuantityString(
           R.plurals.widget_unread_posts,
           unreadPostsCount.toInt(),
-          unreadPostsCount
+          unreadPostsCount,
         )
       Text(
         text = title,
@@ -196,7 +188,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
             fontSize = 16.sp,
           ),
         maxLines = 1,
-        modifier = GlanceModifier.defaultWeight().padding(start = 16.dp)
+        modifier = GlanceModifier.defaultWeight().padding(start = 16.dp),
       )
 
       CircleIconButton(
@@ -209,11 +201,11 @@ class TwineUnreadWidget : GlanceAppWidget() {
                 Intent.ACTION_VIEW,
                 Screen.AddFeed.ROUTE.toUri(),
                 context,
-                MainActivity::class.java
+                MainActivity::class.java,
               )
               .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
           context.startActivity(deepLinkIntent)
-        }
+        },
       )
 
       Spacer(GlanceModifier.width(4.dp))
@@ -222,7 +214,7 @@ class TwineUnreadWidget : GlanceAppWidget() {
         imageProvider = ImageProvider(R.drawable.ic_refresh),
         backgroundColor = GlanceTheme.colors.widgetBackground,
         contentDescription = context.getString(R.string.widget_unread_refresh),
-        onClick = { coroutineScope.launch { this@TwineUnreadWidget.updateAll(context) } }
+        onClick = { coroutineScope.launch { this@TwineUnreadWidget.updateAll(context) } },
       )
 
       Spacer(GlanceModifier.width(16.dp))

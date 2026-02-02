@@ -15,17 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-actual fun PaywallComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier,
-) {
+actual fun PaywallComponent(onDismiss: () -> Unit, modifier: Modifier) {
   // no-op for JVM
 }
 
 @Composable
-actual fun CustomerCenterComponent(
-  onDismiss: () -> Unit,
-  modifier: Modifier,
-) {
+actual fun CustomerCenterComponent(onDismiss: () -> Unit, modifier: Modifier) {
   // no-op for JVM
 }

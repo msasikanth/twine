@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.3.0"
 android_gradle_plugin = "9.0.0"
-compose = "1.11.0-alpha01"
-compose_material3_adaptive = "1.3.0-alpha03"
+compose = "1.11.0-alpha02"
+compose_material3_adaptive = "1.3.0-alpha04"
 compose_material_icons_extended = "1.7.3"
 
 android_sdk_compile = "36"
@@ -10,31 +10,31 @@ android_sdk_target = "36"
 android_sdk_min = "26"
 
 sqldelight = "2.2.1"
-ktor = "3.3.3"
+ktor = "3.4.0"
 kotlinx_coroutines = "1.10.2"
 kotlinx_date_time = "0.7.1"
 kotlinx_immutable_collections = "0.4.0"
 kotlinx_serialization_json = "1.10.0"
 kotlinx_io = "0.8.2"
-androidx_activity = "1.12.2"
+androidx_activity = "1.12.3"
 androidx_appcompat = "1.7.1"
 androidx_core = "1.17.0"
 androidx_collection = "1.5.0"
 androidx_test_runner = "1.7.0"
 androidx_test_rules = "1.7.0"
-androidx_work = "2.11.0"
+androidx_work = "2.11.1"
 androidx_datastore = "1.2.0"
 androidx_browser = "1.9.0"
 androidx_annotation = "1.9.1"
 coil = "3.3.0"
-spotless = "8.1.0"
-ktfmt = "0.44"
+spotless = "8.2.1"
+ktfmt = "0.61"
 kotlininject = "0.9.0"
 ksp = "2.3.4"
 ksoup = "0.2.5"
 sqliteAndroid = "3.49.0"
 desugarJdk = "2.1.5"
-atomicfu = "0.30.0"
+atomicfu = "0.31.0"
 paging = "3.3.0-alpha02-0.5.1"
 stately = "2.1.0"
 xmlutil = "0.91.3"
@@ -50,14 +50,17 @@ korlibs = "6.0.0"
 filekit = "0.8.8"
 leakcanary = "2.14"
 markdown = "0.39.1"
-revenuecat = "2.2.17+17.26.1"
+revenuecat = "2.4.0+17.30.0"
 viewmodel = "2.9.6"
 navigation = "2.9.1"
 glance = "1.2.0-rc01"
 material-kolor = "4.1.0"
 htmlunit = "4.21.0"
+androidx_media3 = "1.9.1"
+vlcj = "4.12.1"
 
 [libraries]
+vlcj = { module = "uk.co.caprica:vlcj", version.ref = "vlcj" }
 htmlunit = { module = "org.htmlunit:htmlunit", version.ref = "htmlunit" }
 compose_runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose_foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
@@ -84,6 +87,7 @@ kotlin_test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx_coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx_coroutines" }
 kotlinx_coroutines_swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx_coroutines" }
+kotlinx_coroutines_guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinx_coroutines" }
 kotlinx_datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx_date_time" }
 kotlinx_immutable_collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinx_immutable_collections" }
 kotlinx_atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
@@ -144,6 +148,9 @@ navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", 
 glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }
+androidx_media3_exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "androidx_media3" }
+androidx_media3_session = { module = "androidx.media3:media3-session", version.ref = "androidx_media3" }
+androidx_media3_ui = { module = "androidx.media3:media3-ui", version.ref = "androidx_media3" }
 
 [plugins]
 android_application = { id = "com.android.application", version.ref = "android_gradle_plugin" }

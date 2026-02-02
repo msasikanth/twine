@@ -21,7 +21,4 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.core.model.local.ReadingStatistics
 
 @Immutable
-data class StatisticsState(
-  val statistics: ReadingStatistics? = null,
-  val isLoading: Boolean = true
-)
+data class StatisticsState(val statistics: ReadingStatistics? = null, val isLoading: Boolean = true)

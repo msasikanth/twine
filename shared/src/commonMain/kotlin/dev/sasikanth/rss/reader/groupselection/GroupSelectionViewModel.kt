@@ -45,8 +45,7 @@ class GroupSelectionViewModel(
     savedStateHandle
       .get<Modals.GroupSelection>(Modals.GroupSelection::class.simpleName!!)
       ?.selectedGroupIds
-      ?.toSet()
-      ?: emptySet()
+      ?.toSet() ?: emptySet()
 
   private val _state =
     MutableStateFlow(GroupSelectionState.DEFAULT.copy(selectedGroups = selectedGroupIds))

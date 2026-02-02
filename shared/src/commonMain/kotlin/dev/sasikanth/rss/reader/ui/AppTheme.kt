@@ -34,7 +34,7 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
   typography: Typography = typography(GolosFontFamily),
-  content: @Composable () -> Unit
+  content: @Composable () -> Unit,
 ) {
   val useAmoled = LocalAmoledSetting.current
 
@@ -67,17 +67,14 @@ internal fun AppTheme(
               background = secondary.copy(alpha = 0.16f),
               outline = secondary.copy(alpha = 0.16f),
               foreground = onSurface,
-            )
+            ),
         )
 
       CompositionLocalProvider(
         LocalAppColorScheme provides colorScheme,
         LocalRippleConfiguration provides
-          RippleConfiguration(
-            color = colorScheme.secondary,
-            rippleAlpha = DefaultRippleAlpha,
-          ),
-        LocalTranslucentStyles provides localTranslucentStyles
+          RippleConfiguration(color = colorScheme.secondary, rippleAlpha = DefaultRippleAlpha),
+        LocalTranslucentStyles provides localTranslucentStyles,
       ) {
         content()
       }
@@ -99,7 +96,7 @@ internal val DefaultRippleAlpha =
     pressedAlpha = 0.16f,
     focusedAlpha = 0.24f,
     draggedAlpha = 0.24f,
-    hoveredAlpha = 0.08f
+    hoveredAlpha = 0.08f,
   )
 
 internal val SYSTEM_SCRIM = Color.Black.copy(alpha = 0.8f)

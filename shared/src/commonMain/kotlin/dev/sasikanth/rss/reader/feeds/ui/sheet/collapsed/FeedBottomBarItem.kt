@@ -56,7 +56,7 @@ internal fun FeedBottomBarItem(
       modifier.size(64.dp).graphicsLayer {
         alpha = if (selected || !hasActiveSource) 1f else 0.25f
       },
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     val shape = MaterialTheme.shapes.large
     val feedIconShape = RoundedCornerShape(17.dp)
@@ -103,7 +103,7 @@ internal fun BoxScope.UnreadCountBadge(badgeCount: Long, modifier: Modifier = Mo
     Text(
       text = badgeText,
       style = MaterialTheme.typography.labelMedium,
-      modifier = Modifier.align(Alignment.CenterVertically)
+      modifier = Modifier.align(Alignment.CenterVertically),
     )
   }
 }

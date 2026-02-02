@@ -38,7 +38,7 @@ public val TwineIcons.Freshrss: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ public val TwineIcons.Freshrss: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(11.738f, 0.003f)
             curveTo(5.217f, 0.151f, 0.006f, 5.476f, 0.0f, 11.999f)

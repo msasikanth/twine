@@ -84,11 +84,7 @@ fun WidgetPostListItem(
           Text(
             text = post.title ?: context.getString(R.string.widget_no_title),
             maxLines = 2,
-            style =
-              TextStyle(
-                fontSize = 14.sp,
-                color = GlanceTheme.colors.onSurface,
-              )
+            style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurface),
           )
 
           Spacer(GlanceModifier.height(4.dp))
@@ -96,11 +92,7 @@ fun WidgetPostListItem(
           Text(
             text = post.description ?: context.getString(R.string.widget_no_title),
             maxLines = 3,
-            style =
-              TextStyle(
-                fontSize = 12.sp,
-                color = GlanceTheme.colors.onSurfaceVariant,
-              )
+            style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
           )
 
           Spacer(GlanceModifier.height(12.dp))
@@ -117,7 +109,7 @@ fun WidgetPostListItem(
             provider = ImageProvider(postImage!!),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = GlanceModifier.width(80.dp).height(80.dp).cornerRadius(16.dp)
+            modifier = GlanceModifier.width(80.dp).height(80.dp).cornerRadius(16.dp),
           )
         }
       }
@@ -135,7 +127,7 @@ fun WidgetPostListItem(
             provider = ImageProvider(feedImage!!),
             contentDescription = null,
             contentScale = ContentScale.Fit,
-            modifier = GlanceModifier.size(16.dp).cornerRadius(4.dp)
+            modifier = GlanceModifier.size(16.dp).cornerRadius(4.dp),
           )
 
           Spacer(GlanceModifier.width(8.dp))
@@ -147,11 +139,7 @@ fun WidgetPostListItem(
           modifier = GlanceModifier.defaultWeight(),
           text = post.feedName.orEmpty() + " \u2022 " + post.postedOn.relativeDurationString(),
           maxLines = 1,
-          style =
-            TextStyle(
-              fontSize = 12.sp,
-              color = GlanceTheme.colors.onSurfaceVariant,
-            )
+          style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant),
         )
       }
     }

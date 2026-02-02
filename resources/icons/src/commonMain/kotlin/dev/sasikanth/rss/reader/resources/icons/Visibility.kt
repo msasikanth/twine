@@ -38,7 +38,7 @@ public val TwineIcons.Visibility: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 960.0f,
-          viewportHeight = 960.0f
+          viewportHeight = 960.0f,
         )
         .apply {
           group(translationX = -0.0f, translationY = 960.0f) {
@@ -49,7 +49,7 @@ public val TwineIcons.Visibility: ImageVector
               strokeLineCap = Butt,
               strokeLineJoin = Miter,
               strokeLineMiter = 4.0f,
-              pathFillType = NonZero
+              pathFillType = NonZero,
             ) {
               /* pathData = "M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-134 0-244.5-72T61-462q-5-9-7.5-18.5T51-500q0-10 2.5-19.5T61-538q64-118 174.5-190T480-800q134 0 244.5 72T899-538q5 9 7.5 18.5T909-500q0 10-2.5 19.5T899-462q-64 118-174.5 190T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z" */
               moveTo(480.0f, -320.0f)

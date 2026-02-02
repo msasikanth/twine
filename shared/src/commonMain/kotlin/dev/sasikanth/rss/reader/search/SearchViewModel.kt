@@ -44,9 +44,7 @@ import me.tatarka.inject.annotations.Inject
 
 @OptIn(FlowPreview::class)
 @Inject
-class SearchViewModel(
-  private val rssRepository: RssRepository,
-) : ViewModel() {
+class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
   var searchQuery by mutableStateOf(TextFieldValue())
     private set

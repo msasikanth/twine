@@ -26,11 +26,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-data class ReaderScreenArgs(
-  val postIndex: Int,
-  val postId: String,
-  val fromScreen: FromScreen,
-) {
+data class ReaderScreenArgs(val postIndex: Int, val postId: String, val fromScreen: FromScreen) {
 
   @Serializable
   sealed interface FromScreen {
@@ -48,18 +44,11 @@ data class ReaderScreenArgs(
   companion object {
     val navTypeMap =
       object : NavType<ReaderScreenArgs>(isNullableAllowed = false) {
-        override fun put(
-          bundle: SavedState,
-          key: String,
-          value: ReaderScreenArgs,
-        ) {
+        override fun put(bundle: SavedState, key: String, value: ReaderScreenArgs) {
           bundle.write { putString(key, Json.encodeToString(value)) }
         }
 
-        override fun get(
-          bundle: SavedState,
-          key: String,
-        ): ReaderScreenArgs? {
+        override fun get(bundle: SavedState, key: String): ReaderScreenArgs? {
           return bundle.read { Json.decodeFromString(getString(key)) }
         }
 

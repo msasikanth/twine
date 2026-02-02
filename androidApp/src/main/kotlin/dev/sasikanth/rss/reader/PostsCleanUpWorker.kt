@@ -36,7 +36,7 @@ class PostsCleanUpWorker(
   context: Context,
   workerParameters: WorkerParameters,
   private val rssRepository: RssRepository,
-  private val settingsRepository: SettingsRepository
+  private val settingsRepository: SettingsRepository,
 ) : CoroutineWorker(context, workerParameters) {
 
   companion object {

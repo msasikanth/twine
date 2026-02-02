@@ -39,7 +39,7 @@ public val TwineIcons.OpenBrowser: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           path(
@@ -49,7 +49,7 @@ public val TwineIcons.OpenBrowser: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = EvenOdd
+            pathFillType = EvenOdd,
           ) {
             moveTo(3.5f, 16.0f)
             horizontalLineTo(6.25f)
@@ -85,7 +85,7 @@ public val TwineIcons.OpenBrowser: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(9.25f, 12.563f)
             verticalLineTo(16.25f)

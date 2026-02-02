@@ -38,6 +38,7 @@ data class ArticlePayload(
   val alternate: List<LinksPayload> = emptyList(),
   val origin: OriginPayload = OriginPayload(),
   val summary: SummaryPayload = SummaryPayload(),
+  val enclosure: List<LinksPayload> = emptyList(),
   val author: String? = null,
 )
 
@@ -48,12 +49,6 @@ data class OriginPayload(
   val title: String = "",
 )
 
-@Serializable
-data class SummaryPayload(
-  val content: String = "",
-)
+@Serializable data class SummaryPayload(val content: String = "")
 
-@Serializable
-data class LinksPayload(
-  val href: String = "",
-)
+@Serializable data class LinksPayload(val href: String = "")

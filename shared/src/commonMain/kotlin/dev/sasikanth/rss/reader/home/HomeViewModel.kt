@@ -147,7 +147,7 @@ class HomeViewModel(
           postsSortOrder,
           homeViewMode,
           hasUnreadPosts,
-          unreadSinceLastSync
+          unreadSinceLastSync,
         )
       }
       .distinctUntilChanged()
@@ -263,13 +263,11 @@ class HomeViewModel(
     }
   }
 
-  private fun postsThresholdTime(
-    postsType: PostsType,
-  ): Instant {
+  private fun postsThresholdTime(postsType: PostsType): Instant {
     val dateTime = _state.value.currentDateTime
     return when (postsType) {
       PostsType.ALL,
-      PostsType.UNREAD, -> Instant.DISTANT_PAST
+      PostsType.UNREAD -> Instant.DISTANT_PAST
       PostsType.TODAY -> {
         dateTime.date.atStartOfDayIn(TimeZone.currentSystemDefault())
       }

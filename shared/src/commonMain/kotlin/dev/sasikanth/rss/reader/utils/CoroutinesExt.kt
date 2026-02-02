@@ -26,7 +26,7 @@ inline fun <T1, T2, T3, T4, T5, T6, R> combine(
   flow4: Flow<T4>,
   flow5: Flow<T5>,
   flow6: Flow<T6>,
-  crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R
+  crossinline transform: suspend (T1, T2, T3, T4, T5, T6) -> R,
 ): Flow<R> {
   return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6) { args: Array<*>
     ->
@@ -50,7 +50,7 @@ inline fun <T1, T2, T3, T4, T5, T6, T7, R> combine(
   flow5: Flow<T5>,
   flow6: Flow<T6>,
   flow7: Flow<T7>,
-  crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R
+  crossinline transform: suspend (T1, T2, T3, T4, T5, T6, T7) -> R,
 ): Flow<R> {
   return kotlinx.coroutines.flow.combine(flow, flow2, flow3, flow4, flow5, flow6, flow7) {
     args: Array<*> ->
@@ -86,7 +86,7 @@ inline fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T1
   flow16: Flow<T16>,
   flow17: Flow<T17>,
   crossinline transform:
-    suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R
+    suspend (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R,
 ): Flow<R> {
   return kotlinx.coroutines.flow.combine(
     flow,

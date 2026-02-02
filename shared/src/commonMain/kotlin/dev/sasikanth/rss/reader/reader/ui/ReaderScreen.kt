@@ -94,7 +94,9 @@ import dev.sasikanth.rss.reader.reader.ReaderViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ui.ReaderPage
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
@@ -159,7 +161,7 @@ internal fun ReaderScreen(
     key = posts.itemCount,
     itemProvider = { index ->
       if (shouldBlockImage || posts.itemCount == 0) null else posts.peek(index)
-    }
+    },
   ) { fromItem, toItem, offset ->
     val fromSeedColor = seedColorExtractor.calculateSeedColor(url = fromItem?.imageUrl)
     val toSeedColor = seedColorExtractor.calculateSeedColor(url = toItem?.imageUrl)
@@ -168,7 +170,7 @@ internal fun ReaderScreen(
       dynamicColorState.animate(
         fromSeedColor = fromSeedColor,
         toSeedColor = toSeedColor,
-        progress = offset
+        progress = offset,
       )
     }
   }
@@ -192,7 +194,7 @@ internal fun ReaderScreen(
 
   CompositionLocalProvider(
     LocalDynamicColorState provides dynamicColorState,
-    LocalUriHandler provides readerLinkHandler
+    LocalUriHandler provides readerLinkHandler,
   ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -216,11 +218,16 @@ internal fun ReaderScreen(
     val isParentThemeDark = AppTheme.isDark
     AppTheme(useDarkTheme = isParentThemeDark, typography = typography) {
       val isDarkTheme = AppTheme.isDark
+      val nestedScrollModifier =
+        if (platform !is Platform.Desktop) {
+          Modifier.nestedScroll(scrollBehaviour.nestedScrollConnection)
+        } else {
+          Modifier
+        }
 
       Scaffold(
         modifier =
-          modifier.fillMaxSize().nestedScroll(scrollBehaviour.nestedScrollConnection).onKeyEvent {
-            event ->
+          modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
             return@onKeyEvent when {
               event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
@@ -237,6 +244,13 @@ internal fun ReaderScreen(
           },
         topBar = {
           val topBarScrimColor = AppTheme.colorScheme.backdrop
+          val scrollBehavior =
+            if (platform !is Platform.Desktop) {
+              scrollBehaviour
+            } else {
+              null
+            }
+
           CenterAlignedTopAppBar(
             modifier =
               Modifier.drawBehind {
@@ -245,7 +259,7 @@ internal fun ReaderScreen(
                 )
               },
             expandedHeight = 72.dp,
-            scrollBehavior = scrollBehaviour,
+            scrollBehavior = scrollBehavior,
             colors =
               TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
@@ -256,7 +270,7 @@ internal fun ReaderScreen(
                 modifier = Modifier.padding(start = 12.dp),
                 icon = TwineIcons.ArrowBack,
                 label = stringResource(Res.string.buttonGoBack),
-                onClick = onBack
+                onClick = onBack,
               )
             },
             title = {
@@ -274,9 +288,7 @@ internal fun ReaderScreen(
                   }
                 }
 
-                HorizontalPageIndicators(
-                  pageIndicatorState = pageIndicatorState,
-                )
+                HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
               }
             },
           )
@@ -310,17 +322,15 @@ internal fun ReaderScreen(
               },
               onFontLineHeightFactorChange = { fontLineHeightFactor ->
                 viewModel.dispatch(ReaderEvent.UpdateFontLineHeightFactor(fontLineHeightFactor))
-              }
+              },
             )
           }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = AppTheme.colorScheme.backdrop,
-        contentColor = Color.Unspecified
+        contentColor = Color.Unspecified,
       ) { paddingValues ->
-        Box(
-          modifier = Modifier.fillMaxSize(),
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
           val layoutDirection = LocalLayoutDirection.current
           val sizeClass = LocalWindowSizeClass.current
           val readerContentMaxWidth =
@@ -346,9 +356,8 @@ internal fun ReaderScreen(
                   val post = posts.peek(it)
                   post?.let { post.id + post.sourceId }
                 }
-                .getOrNull()
-                ?: it
-            }
+                .getOrNull() ?: it
+            },
           ) { page ->
             val readerPost = posts[page]
 
@@ -366,7 +375,7 @@ internal fun ReaderScreen(
                       content = cm.content,
                       node = cm.node,
                       highlightsBuilder = highlightsBuilder,
-                      showHeader = true
+                      showHeader = true,
                     )
                   },
                   codeFence = { cm ->
@@ -374,7 +383,7 @@ internal fun ReaderScreen(
                       content = cm.content,
                       node = cm.node,
                       highlightsBuilder = highlightsBuilder,
-                      showHeader = true
+                      showHeader = true,
                     )
                   },
                 )
@@ -399,13 +408,13 @@ internal fun ReaderScreen(
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
                       postId = readerPost.id,
-                      currentBookmarkStatus = readerPost.bookmarked
+                      currentBookmarkStatus = readerPost.bookmarked,
                     )
                   )
                 },
                 onMarkAsUnread = {
                   viewModel.dispatch(ReaderEvent.OnMarkAsUnread(postId = readerPost.id))
-                }
+                },
               )
             }
           }
@@ -463,7 +472,7 @@ private fun ReaderActionsPanel(
             },
           )
           .then(modifier),
-      contentAlignment = Alignment.Center
+      contentAlignment = Alignment.Center,
     ) {
       val (shadowColor1, shadowColor2) =
         if (isDarkTheme) {
@@ -500,7 +509,7 @@ private fun ReaderActionsPanel(
             .border(
               width = 1.dp,
               color = AppTheme.colorScheme.bottomSheetBorder,
-              shape = backgroundShape
+              shape = backgroundShape,
             )
             .graphicsLayer { clip = true }
       ) {
@@ -524,7 +533,7 @@ private fun ReaderActionsPanel(
                 loadFullArticle,
                 openInBrowserClick,
                 loadFullArticleClick,
-                openReaderViewSettings
+                openReaderViewSettings,
               )
             }
           }

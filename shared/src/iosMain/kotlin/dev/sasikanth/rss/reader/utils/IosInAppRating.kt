@@ -29,9 +29,7 @@ import platform.UIKit.UIWindowScene
 
 @Inject
 @AppScope
-class IosInAppRating(
-  private val settingsRepository: SettingsRepository,
-) : InAppRating {
+class IosInAppRating(private val settingsRepository: SettingsRepository) : InAppRating {
 
   override suspend fun request() {
     val scene =

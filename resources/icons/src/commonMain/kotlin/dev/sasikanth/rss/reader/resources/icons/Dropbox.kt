@@ -38,7 +38,7 @@ public val TwineIcons.Dropbox: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ public val TwineIcons.Dropbox: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(6.0f, 1.807f)
             lineTo(0.0f, 5.629f)

@@ -48,10 +48,8 @@ import org.kobjects.ktxml.api.EventType
 import org.kobjects.ktxml.api.XmlPullParser
 
 @Inject
-class AtomContentParser(
-  httpClient: HttpClient,
-  override val articleHtmlParser: ArticleHtmlParser,
-) : XmlContentParser() {
+class AtomContentParser(httpClient: HttpClient, override val articleHtmlParser: ArticleHtmlParser) :
+  XmlContentParser() {
 
   private val youTubeIconHttpClient = httpClient.config { followRedirects = true }
 
@@ -116,8 +114,8 @@ class AtomContentParser(
           parser = parser,
           firstPost = firstPost,
           itemTag = TAG_ATOM_ENTRY,
-          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) }
-        )
+          readItem = { readAtomEntry(it, UrlUtils.extractHost(link ?: feedUrl)) },
+        ),
     )
   }
 
@@ -136,6 +134,7 @@ class AtomContentParser(
     var rawContent: String? = null
     var date: String? = null
     var image: String? = null
+    var audioUrl: String? = null
 
     while (parser.next() != EventType.END_TAG) {
       if (parser.eventType != EventType.START_TAG) continue
@@ -145,11 +144,18 @@ class AtomContentParser(
           title = parser.nextText()
         }
         TAG_LINK -> {
-          if (link.isNullOrBlank()) {
-            link = readAtomLink(tagName, parser)
-          } else {
-            parser.skipSubTree()
+          val rel = parser.getAttributeValue(parser.namespace, ATTR_REL)
+          val href = parser.getAttributeValue(parser.namespace, ATTR_HREF)
+          val type = parser.getAttributeValue(parser.namespace, XmlFeedParser.ATTR_TYPE)
+
+          if (rel == "enclosure" && type?.startsWith("audio/") == true) {
+            audioUrl = href
           }
+
+          if (link.isNullOrBlank() && (rel == ATTR_VALUE_ALTERNATE || rel.isNullOrBlank())) {
+            link = href
+          }
+          parser.nextTag()
         }
         TAG_CONTENT,
         TAG_SUMMARY -> {
@@ -186,8 +192,9 @@ class AtomContentParser(
       description = description,
       rawContent = rawContent,
       imageUrl = image,
+      audioUrl = audioUrl,
       date = date,
-      hostLink = hostLink
+      hostLink = hostLink,
     )
   }
 

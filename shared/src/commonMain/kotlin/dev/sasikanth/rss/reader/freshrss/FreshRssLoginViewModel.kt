@@ -86,7 +86,7 @@ class FreshRssLoginViewModel(
               name = userInfo.userName,
               email = userInfo.userEmail,
               token = token,
-              serverUrl = endpoint
+              serverUrl = endpoint,
             )
           _state.update { it.copy(isLoading = false, showConfirmationDialog = true) }
         } else {
@@ -118,7 +118,7 @@ class FreshRssLoginViewModel(
           token = userInfo.token,
           refreshToken = "",
           serverUrl = userInfo.serverUrl,
-          serviceType = ServiceType.FRESH_RSS
+          serviceType = ServiceType.FRESH_RSS,
         )
 
         Logger.d { "FreshRSS login: user saved, finishing login" }
@@ -137,7 +137,7 @@ class FreshRssLoginViewModel(
     val name: String,
     val email: String,
     val token: String,
-    val serverUrl: String
+    val serverUrl: String,
   )
 }
 
@@ -148,7 +148,7 @@ data class FreshRssLoginState(
   val isLoading: Boolean,
   val loginSuccess: Boolean,
   val showConfirmationDialog: Boolean,
-  val error: FreshRssLoginError?
+  val error: FreshRssLoginError?,
 ) {
   companion object {
     val DEFAULT =
@@ -159,7 +159,7 @@ data class FreshRssLoginState(
         isLoading = false,
         loginSuccess = false,
         showConfirmationDialog = false,
-        error = null
+        error = null,
       )
   }
 }

@@ -61,7 +61,7 @@ internal fun ContextActionsBottomBar(
         Box(Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
           CompositionLocalProvider(
             LocalContentColor provides AppTheme.colorScheme.onSurfaceVariant,
-            LocalTextStyle provides MaterialTheme.typography.bodySmall
+            LocalTextStyle provides MaterialTheme.typography.bodySmall,
           ) {
             tooltip.invoke()
           }
@@ -77,14 +77,14 @@ internal fun ContextActionsBottomBar(
         colors =
           ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Unspecified,
-            contentColor = AppTheme.colorScheme.onSurface
+            contentColor = AppTheme.colorScheme.onSurface,
           ),
         border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
-        onClick = onCancel
+        onClick = onCancel,
       ) {
         Text(
           text = stringResource(Res.string.buttonCancel),
-          style = MaterialTheme.typography.labelLarge
+          style = MaterialTheme.typography.labelLarge,
         )
       }
     }
@@ -117,17 +117,12 @@ internal fun ContextActionItem(
         imageVector = icon,
         contentDescription = null,
         tint = color,
-        modifier = Modifier.requiredSize(20.dp)
+        modifier = Modifier.requiredSize(20.dp),
       )
 
       Spacer(Modifier.requiredHeight(4.dp))
 
-      Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        color = color,
-        maxLines = 1,
-      )
+      Text(text = label, style = MaterialTheme.typography.labelMedium, color = color, maxLines = 1)
     }
   }
 }

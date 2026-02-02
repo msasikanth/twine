@@ -93,7 +93,7 @@ fun FreshRssLoginScreen(
   viewModel: FreshRssLoginViewModel,
   onLoginSuccess: () -> Unit,
   goBack: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val snackbarHostState = remember { SnackbarHostState() }
@@ -121,36 +121,36 @@ fun FreshRssLoginScreen(
       title = {
         Text(
           text = stringResource(Res.string.freshRssClearDataTitle),
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
       },
       text = {
         Text(
           text = stringResource(Res.string.freshRssClearDataDesc),
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       },
       confirmButton = {
         TextButton(
           onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmClearDataClicked) },
-          shape = MaterialTheme.shapes.large
+          shape = MaterialTheme.shapes.large,
         ) {
           Text(
             text = stringResource(Res.string.freshRssClearDataPositive),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground
+            color = AppTheme.colorScheme.tintedForeground,
           )
         }
       },
       dismissButton = {
         TextButton(
           onClick = { viewModel.onEvent(FreshRssLoginEvent.OnConfirmationDismissed) },
-          shape = MaterialTheme.shapes.large
+          shape = MaterialTheme.shapes.large,
         ) {
           Text(
             text = stringResource(Res.string.buttonCancel),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed
+            color = AppTheme.colorScheme.textEmphasisMed,
           )
         }
       },
@@ -177,7 +177,7 @@ fun FreshRssLoginScreen(
               modifier = Modifier.padding(start = 12.dp),
               icon = TwineIcons.ArrowBack,
               label = stringResource(Res.string.buttonGoBack),
-              onClick = goBack
+              onClick = goBack,
             )
           },
           colors =
@@ -185,13 +185,13 @@ fun FreshRssLoginScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.align(Alignment.BottomCenter),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -207,7 +207,7 @@ fun FreshRssLoginScreen(
           shape = SnackbarDefaults.shape,
           backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
           contentColor = AppTheme.colorScheme.onSurface,
-          elevation = 0.dp
+          elevation = 0.dp,
         )
       }
     },
@@ -231,13 +231,13 @@ fun FreshRssLoginScreen(
             state.username.isNotBlank() &&
             state.password.isNotBlank(),
         shape = MaterialTheme.shapes.extraLarge,
-        onClick = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) }
+        onClick = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) },
       ) {
         if (state.isLoading) {
           CircularProgressIndicator(
             color = AppTheme.colorScheme.tintedForeground,
             modifier = Modifier.requiredSize(24.dp),
-            strokeWidth = 2.dp
+            strokeWidth = 2.dp,
           )
         } else {
           Text(
@@ -253,7 +253,7 @@ fun FreshRssLoginScreen(
     LazyColumn(
       modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp),
       horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(16.dp)
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       item { Spacer(Modifier.requiredHeight(8.dp)) }
 
@@ -271,8 +271,8 @@ fun FreshRssLoginScreen(
             KeyboardOptions(
               autoCorrectEnabled = false,
               keyboardType = KeyboardType.Uri,
-              imeAction = ImeAction.Next
-            )
+              imeAction = ImeAction.Next,
+            ),
         )
       }
 
@@ -291,8 +291,8 @@ fun FreshRssLoginScreen(
             KeyboardOptions(
               autoCorrectEnabled = false,
               keyboardType = KeyboardType.Email,
-              imeAction = ImeAction.Next
-            )
+              imeAction = ImeAction.Next,
+            ),
         )
       }
 
@@ -311,10 +311,10 @@ fun FreshRssLoginScreen(
             KeyboardOptions(
               autoCorrectEnabled = false,
               keyboardType = KeyboardType.Password,
-              imeAction = ImeAction.Done
+              imeAction = ImeAction.Done,
             ),
           keyboardActions =
-            KeyboardActions(onDone = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) })
+            KeyboardActions(onDone = { viewModel.onEvent(FreshRssLoginEvent.OnLoginClicked) }),
         )
       }
     }

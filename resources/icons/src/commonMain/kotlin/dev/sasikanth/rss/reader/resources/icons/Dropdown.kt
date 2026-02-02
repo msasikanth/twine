@@ -38,7 +38,7 @@ val TwineIcons.DropdownIcon: ImageVector
           defaultWidth = 20.0.dp,
           defaultHeight = 20.0.dp,
           viewportWidth = 20.0f,
-          viewportHeight = 20.0f
+          viewportHeight = 20.0f,
         )
         .apply {
           path(
@@ -49,7 +49,7 @@ val TwineIcons.DropdownIcon: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(0.0f, 10.0f)
             curveTo(0.0f, 4.477f, 4.477f, 0.0f, 10.0f, 0.0f)
@@ -66,7 +66,7 @@ val TwineIcons.DropdownIcon: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 0.5f)
             curveTo(15.247f, 0.5f, 19.5f, 4.753f, 19.5f, 10.0f)
@@ -82,7 +82,7 @@ val TwineIcons.DropdownIcon: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(10.0f, 13.569f)
             curveTo(9.895f, 13.569f, 9.796f, 13.553f, 9.704f, 13.52f)

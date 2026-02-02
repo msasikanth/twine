@@ -39,7 +39,7 @@ class IosAppIconManager : AppIconManager {
 
     application.setAlternateIconName(
       iconName,
-      { Logger.e { "Failed to set alternate icon: ${it?.description}" } }
+      { Logger.e { "Failed to set alternate icon: ${it?.description}" } },
     )
   }
 }

@@ -95,7 +95,7 @@ class FileCloudSyncService(
             showFeedFavIcon = it.showFeedFavIcon,
             hideFromAllFeeds = it.hideFromAllFeeds,
             lastUpdatedAt = it.lastUpdatedAt?.toEpochMilliseconds(),
-            isDeleted = it.isDeleted
+            isDeleted = it.isDeleted,
           )
         }
 
@@ -108,7 +108,7 @@ class FileCloudSyncService(
             pinnedPosition = it.pinnedPosition,
             pinnedAt = it.pinnedAt?.toEpochMilliseconds(),
             updatedAt = it.updatedAt.toEpochMilliseconds(),
-            isDeleted = it.isDeleted
+            isDeleted = it.isDeleted,
           )
         }
 
@@ -120,7 +120,7 @@ class FileCloudSyncService(
             id = it.id.toString(),
             content = it.content,
             isDeleted = it.isDeleted,
-            updatedAt = it.updatedAt.toEpochMilliseconds()
+            updatedAt = it.updatedAt.toEpochMilliseconds(),
           )
         }
 
@@ -148,9 +148,10 @@ class FileCloudSyncService(
               syncedAt = it.syncedAt.toEpochMilliseconds(),
               link = it.link,
               commentsLink = it.commentsLink,
+              audioUrl = it.audioUrl,
               flags = it.flags,
               feedContent = content?.feedContent,
-              articleContent = content?.articleContent
+              articleContent = content?.articleContent,
             )
           }
         val serializedChunk = json.encodeToString(postsSyncEntities)
@@ -167,7 +168,7 @@ class FileCloudSyncService(
           bookmarks = bookmarks,
           blockedWords = blockedWords,
           postChunks = postChunks,
-          readPosts = readPosts
+          readPosts = readPosts,
         )
 
       val serializedData = json.encodeToString(syncData)
@@ -264,7 +265,7 @@ class FileCloudSyncService(
           name = remoteGroup.name,
           pinnedAt = remoteGroup.pinnedAt?.let(Instant::fromEpochMilliseconds),
           updatedAt = remoteUpdatedAt,
-          isDeleted = remoteGroup.isDeleted
+          isDeleted = remoteGroup.isDeleted,
         )
         rssRepository.replaceFeedsInGroup(groupId = remoteGroup.id, feedIds = remoteGroup.feedIds)
       }
@@ -290,7 +291,8 @@ class FileCloudSyncService(
           syncedAt = Instant.fromEpochMilliseconds(it.syncedAt),
           link = it.link,
           commentsLink = it.commentsLink,
-          flags = it.flags
+          audioUrl = it.audioUrl,
+          flags = it.flags,
         )
       }
     rssRepository.upsertPosts(remotePosts)
@@ -313,7 +315,7 @@ class FileCloudSyncService(
           postId = remotePost.id,
           feedContent = remotePost.feedContent,
           articleContent = remotePost.articleContent,
-          createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt)
+          createdAt = Instant.fromEpochMilliseconds(remotePost.createdAt),
         )
       }
     }
@@ -322,7 +324,7 @@ class FileCloudSyncService(
   companion object {
     internal fun filterPosts(
       remotePosts: List<PostSyncEntity>,
-      cleanUpAtByFeed: Map<String, Instant>
+      cleanUpAtByFeed: Map<String, Instant>,
     ): List<PostSyncEntity> {
       return remotePosts.filter { remotePost ->
         val cleanUpAt = cleanUpAtByFeed[remotePost.sourceId] ?: Instant.DISTANT_PAST

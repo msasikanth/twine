@@ -52,7 +52,7 @@ class DropboxTokenRefreshTest {
           respond(
             content = """{"access_token": "new_token", "refresh_token": "new_refresh_token"}""",
             status = HttpStatusCode.OK,
-            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
           )
         }
         "https://content.dropboxapi.com/2/files/download" -> {
@@ -61,7 +61,7 @@ class DropboxTokenRefreshTest {
               content =
                 """{"error_summary": "expired_access_token/.", "error": {".tag": "expired_access_token"}}""",
               status = HttpStatusCode.Unauthorized,
-              headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+              headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
             )
           } else if (request.headers[HttpHeaders.Authorization] == "Bearer new_token") {
             respond(content = "success_content", status = HttpStatusCode.OK)
@@ -79,7 +79,7 @@ class DropboxTokenRefreshTest {
       DropboxCloudServiceProvider(
         httpClient = httpClient,
         tokenProvider = tokenProvider,
-        onSignOut = {}
+        onSignOut = {},
       )
     val result = provider.download("test.json")
 
@@ -92,7 +92,7 @@ class DropboxTokenRefreshTest {
 
 private class FakeTokenProvider(
   var accessToken: String? = "old_token",
-  var refreshToken: String? = "refresh_token"
+  var refreshToken: String? = "refresh_token",
 ) : OAuthTokenProvider {
   override fun isSignedIn(serviceType: ServiceType): Flow<Boolean> = flowOf(accessToken != null)
 

@@ -96,7 +96,7 @@ internal fun FeedGroupIconGrid(
         imageVector = TwineIcons.Cards,
         contentDescription = null,
         tint = AppTheme.colorScheme.onSurface,
-        modifier = Modifier.requiredSize(36.dp)
+        modifier = Modifier.requiredSize(36.dp),
       )
     }
   }
@@ -110,7 +110,7 @@ private fun FeedIcon(
   feedShowFavIconSettings: List<Boolean>,
   iconSize: Dp,
   iconShape: Shape,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val homepageLink = feedHomepageLinks.getOrNull(index)
   val iconLink = feedIconLinks.getOrNull(index)
@@ -123,7 +123,7 @@ private fun FeedIcon(
       showFeedFavIcon = showFavIconSetting,
       contentDescription = null,
       shape = iconShape,
-      modifier = Modifier.requiredSize(iconSize).background(Color.White).then(modifier)
+      modifier = Modifier.requiredSize(iconSize).background(Color.White).then(modifier),
     )
   } else {
     Box(Modifier.requiredSize(iconSize))

@@ -36,10 +36,7 @@ private val COLLAPSED_HANDLE_SIZE = 24.dp
 private val EXPANDED_HANDLE_SIZE = 64.dp
 
 @Composable
-internal fun BottomSheetHandle(
-  progress: () -> Float,
-  modifier: Modifier = Modifier,
-) {
+internal fun BottomSheetHandle(progress: () -> Float, modifier: Modifier = Modifier) {
   val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
   Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -52,11 +49,7 @@ internal fun BottomSheetHandle(
             lerp(start = collapsedTopPadding, stop = targetTopPadding, fraction = progress)
               .roundToPx()
           val targetHandleSize =
-            lerp(
-                start = COLLAPSED_HANDLE_SIZE,
-                stop = EXPANDED_HANDLE_SIZE,
-                fraction = progress,
-              )
+            lerp(start = COLLAPSED_HANDLE_SIZE, stop = EXPANDED_HANDLE_SIZE, fraction = progress)
               .roundToPx()
 
           val minHeight = 3.dp.roundToPx()

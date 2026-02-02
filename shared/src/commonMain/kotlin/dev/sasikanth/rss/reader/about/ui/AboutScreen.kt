@@ -79,10 +79,7 @@ import twine.shared.generated.resources.aboutSocialWebsite
 import twine.shared.generated.resources.buttonGoBack
 
 @Composable
-fun AboutScreen(
-  goBack: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+fun AboutScreen(goBack: () -> Unit, modifier: Modifier = Modifier) {
   val layoutDirection = LocalLayoutDirection.current
   val aboutRoleDeveloper = stringResource(Res.string.aboutRoleDeveloper)
   val aboutRoleDesigner = stringResource(Res.string.aboutRoleDesigner)
@@ -102,24 +99,24 @@ fun AboutScreen(
             Social(
               service = aboutSocialThreads,
               link = Constants.ABOUT_SASI_THREADS,
-              icon = TwineIcons.Threads
+              icon = TwineIcons.Threads,
             ),
             Social(
               service = aboutSocialTwitter,
               link = Constants.ABOUT_SASI_TWITTER,
-              icon = TwineIcons.Twitter
+              icon = TwineIcons.Twitter,
             ),
             Social(
               service = aboutSocialGitHub,
               link = Constants.ABOUT_SASI_GITHUB,
-              icon = TwineIcons.GitHub
+              icon = TwineIcons.GitHub,
             ),
             Social(
               service = aboutSocialWebsite,
               link = Constants.ABOUT_SASI_WEBSITE,
-              icon = TwineIcons.Website
+              icon = TwineIcons.Website,
             ),
-          )
+          ),
       ),
       Person(
         name = Constants.ABOUT_ED_NAME,
@@ -130,14 +127,14 @@ fun AboutScreen(
             Social(
               service = aboutSocialThreads,
               link = Constants.ABOUT_ED_THREADS,
-              icon = TwineIcons.Threads
+              icon = TwineIcons.Threads,
             ),
             Social(
               service = aboutSocialTwitter,
               link = Constants.ABOUT_ED_TWITTER,
-              icon = TwineIcons.Twitter
+              icon = TwineIcons.Twitter,
             ),
-          )
+          ),
       ),
     )
   }
@@ -159,7 +156,7 @@ fun AboutScreen(
               modifier = Modifier.padding(start = 12.dp),
               icon = TwineIcons.ArrowBack,
               label = stringResource(Res.string.buttonGoBack),
-              onClick = { goBack() }
+              onClick = { goBack() },
             )
           },
           colors =
@@ -167,13 +164,13 @@ fun AboutScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -185,8 +182,8 @@ fun AboutScreen(
               start = padding.calculateStartPadding(layoutDirection),
               top = padding.calculateTopPadding() + 8.dp,
               end = padding.calculateEndPadding(layoutDirection),
-              bottom = padding.calculateBottomPadding() + 80.dp
-            ),
+              bottom = padding.calculateBottomPadding() + 80.dp,
+            )
         ) {
           items(persons) { person -> AboutListItem(person) }
         }
@@ -208,13 +205,13 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
             Text(
               person.role,
               style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.onSurfaceVariant
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(8.dp))
             Text(
               person.name,
               style = MaterialTheme.typography.titleLarge,
-              color = AppTheme.colorScheme.onSurface
+              color = AppTheme.colorScheme.onSurface,
             )
           }
           Spacer(Modifier.width(16.dp))
@@ -233,7 +230,7 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
           person.socials.fastForEach { social ->
             SocialButton(
               social = social,
-              onClick = { coroutineScope.launch { linkHandler.openLink(social.link) } }
+              onClick = { coroutineScope.launch { linkHandler.openLink(social.link) } },
             )
           }
         }
@@ -242,35 +239,31 @@ private fun AboutListItem(person: Person, modifier: Modifier = Modifier) {
 
     HorizontalDivider(
       modifier = Modifier.align(Alignment.BottomStart),
-      color = AppTheme.colorScheme.outlineVariant
+      color = AppTheme.colorScheme.outlineVariant,
     )
   }
 }
 
 @Composable
-private fun SocialButton(
-  social: Social,
-  modifier: Modifier = Modifier,
-  onClick: () -> Unit,
-) {
+private fun SocialButton(social: Social, modifier: Modifier = Modifier, onClick: () -> Unit) {
   Column(
     modifier =
       modifier
         .clip(MaterialTheme.shapes.large)
         .clickable(onClick = onClick)
         .padding(horizontal = 16.dp, vertical = 16.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Icon(
       imageVector = social.icon,
       contentDescription = null,
-      tint = AppTheme.colorScheme.tintedForeground
+      tint = AppTheme.colorScheme.tintedForeground,
     )
     Spacer(Modifier.height(4.dp))
     Text(
       social.service,
       style = MaterialTheme.typography.labelMedium,
-      color = AppTheme.colorScheme.tintedForeground
+      color = AppTheme.colorScheme.tintedForeground,
     )
   }
 }

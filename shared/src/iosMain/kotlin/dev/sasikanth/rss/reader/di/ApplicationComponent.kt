@@ -40,7 +40,7 @@ import platform.UIKit.UIViewController
 @AppScope
 @Component
 abstract class ApplicationComponent(
-  @get:Provides val uiViewControllerProvider: () -> UIViewController,
+  @get:Provides val uiViewControllerProvider: () -> UIViewController
 ) : SharedApplicationComponent() {
 
   abstract val rssRepository: RssRepository
@@ -62,11 +62,11 @@ abstract class ApplicationComponent(
     AppInfo(
       versionCode =
         (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: 0,
-      versionName = NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String
-          ?: "",
+      versionName =
+        NSBundle.mainBundle.infoDictionary?.get("CFBundleShortVersionString") as? String ?: "",
       isDebugBuild = Platform.isDebugBinary,
       isFoss = isFoss,
-      cachePath = { NSFileManager.defaultManager.cacheDir }
+      cachePath = { NSFileManager.defaultManager.cacheDir },
     )
 
   @Provides

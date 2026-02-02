@@ -290,7 +290,7 @@ internal fun SettingsScreen(
         showDeleteAppDataConfirmation = false
         viewModel.dispatch(SettingsEvent.DeleteAppData)
       },
-      onDismiss = { showDeleteAppDataConfirmation = false }
+      onDismiss = { showDeleteAppDataConfirmation = false },
     )
   }
 
@@ -320,13 +320,13 @@ internal fun SettingsScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -338,7 +338,7 @@ internal fun SettingsScreen(
             viewModel.dispatch(SettingsEvent.OnAppIconChanged(it))
             viewModel.dispatch(SettingsEvent.CloseAppIconSelectionSheet)
           },
-          onDismiss = { viewModel.dispatch(SettingsEvent.CloseAppIconSelectionSheet) }
+          onDismiss = { viewModel.dispatch(SettingsEvent.CloseAppIconSelectionSheet) },
         )
       }
 
@@ -353,7 +353,7 @@ internal fun SettingsScreen(
             end =
               padding.calculateEndPadding(layoutDirection) +
                 settingsItemPadding.calculateEndPadding(layoutDirection),
-            bottom = padding.calculateBottomPadding() + 80.dp
+            bottom = padding.calculateBottomPadding() + 80.dp,
           ),
       ) {
         // region Twine Premium banner
@@ -361,13 +361,13 @@ internal fun SettingsScreen(
           AnimatedVisibility(
             visible = !state.appInfo.isFoss && state.subscriptionResult != null,
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
           ) {
             Column {
               TwinePremiumBanner(
                 modifier = Modifier.animateItem(),
                 subscriptionResult = state.subscriptionResult,
-                onClick = { openPaywall() }
+                onClick = { openPaywall() },
               )
 
               Divider()
@@ -384,17 +384,13 @@ internal fun SettingsScreen(
         item {
           HomeLayoutSelector(
             homeViewMode = state.homeViewMode,
-            onClick = { viewModel.dispatch(ChangeHomeViewMode(it)) }
+            onClick = { viewModel.dispatch(ChangeHomeViewMode(it)) },
           )
         }
 
         item { Divider(24.dp) }
 
-        item {
-          SubHeader(
-            text = stringResource(Res.string.settingsHeaderTheme),
-          )
-        }
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderTheme)) }
 
         item {
           val appThemeMode = state.appThemeMode
@@ -410,17 +406,17 @@ internal fun SettingsScreen(
                 ToggleableButtonItem(
                   label = stringResource(Res.string.settingsThemeLight),
                   isSelected = appThemeMode == AppThemeMode.Light,
-                  identifier = AppThemeMode.Light
+                  identifier = AppThemeMode.Light,
                 ),
                 ToggleableButtonItem(
                   label = stringResource(Res.string.settingsThemeDark),
                   isSelected = appThemeMode == AppThemeMode.Dark,
-                  identifier = AppThemeMode.Dark
-                )
+                  identifier = AppThemeMode.Dark,
+                ),
               ),
             onItemSelected = {
               viewModel.dispatch(SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode))
-            }
+            },
           )
         }
 
@@ -428,13 +424,13 @@ internal fun SettingsScreen(
           AnimatedVisibility(
             visible = AppTheme.isDark,
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
           ) {
             AmoledSettingItem(
               useAmoled = state.useAmoled,
               onValueChanged = { newValue ->
                 viewModel.dispatch(SettingsEvent.ToggleAmoled(newValue))
-              }
+              },
             )
           }
         }
@@ -444,7 +440,7 @@ internal fun SettingsScreen(
             dynamicColorEnabled = state.dynamicColorEnabled,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleDynamicColor(newValue))
-            }
+            },
           )
         }
 
@@ -455,7 +451,7 @@ internal fun SettingsScreen(
             AppIconSettingItem(
               appIcon = state.appIcon,
               isSubscribed = state.isSubscribed,
-              onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) }
+              onClick = { viewModel.dispatch(SettingsEvent.AppIconClicked) },
             )
           }
         }
@@ -493,7 +489,7 @@ internal fun SettingsScreen(
                 }
               }
             },
-            onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) }
+            onSignOutClicked = { viewModel.dispatch(SettingsEvent.SignOutClicked) },
           )
         }
 
@@ -501,18 +497,14 @@ internal fun SettingsScreen(
         // endregion
 
         // region Behaviour settings
-        item {
-          SubHeader(
-            text = stringResource(Res.string.settingsHeaderBehaviour),
-          )
-        }
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderBehaviour)) }
 
         item {
           ShowReaderViewSettingItem(
             showReaderView = state.showReaderView,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowReaderView(newValue))
-            }
+            },
           )
         }
 
@@ -523,7 +515,7 @@ internal fun SettingsScreen(
             browserType = state.browserType,
             onBrowserTypeChanged = { newBrowserType ->
               viewModel.dispatch(SettingsEvent.UpdateBrowserType(newBrowserType))
-            }
+            },
           )
         }
 
@@ -534,7 +526,7 @@ internal fun SettingsScreen(
             showUnreadCountEnabled = state.showUnreadPostsCount,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowUnreadPostsCount(newValue))
-            }
+            },
           )
         }
 
@@ -545,7 +537,7 @@ internal fun SettingsScreen(
             enableAutoSync = state.enableAutoSync,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleAutoSync(newValue))
-            }
+            },
           )
         }
 
@@ -556,7 +548,7 @@ internal fun SettingsScreen(
             showFeedFavIcon = state.showFeedFavIcon,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleShowFeedFavIcon(newValue))
-            }
+            },
           )
         }
 
@@ -567,7 +559,7 @@ internal fun SettingsScreen(
             blockImages = state.blockImages,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleBlockImages(newValue))
-            }
+            },
           )
         }
 
@@ -578,7 +570,7 @@ internal fun SettingsScreen(
             enableNotifications = state.enableNotifications,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleNotifications(newValue))
-            }
+            },
           )
         }
 
@@ -589,7 +581,7 @@ internal fun SettingsScreen(
             downloadFullContent = state.downloadFullContent,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.ToggleDownloadFullContent(newValue))
-            }
+            },
           )
         }
 
@@ -612,7 +604,7 @@ internal fun SettingsScreen(
             postsDeletionPeriod = state.postsDeletionPeriod,
             onValueChanged = { newValue ->
               viewModel.dispatch(SettingsEvent.PostsDeletionPeriodChanged(newValue))
-            }
+            },
           )
         }
 
@@ -624,7 +616,7 @@ internal fun SettingsScreen(
             hasFeeds = state.hasFeeds,
             onImportClicked = { viewModel.dispatch(SettingsEvent.ImportOpmlClicked) },
             onExportClicked = { viewModel.dispatch(SettingsEvent.ExportOpmlClicked) },
-            onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) }
+            onCancelClicked = { viewModel.dispatch(SettingsEvent.CancelOpmlImportOrExport) },
           )
         }
 
@@ -644,18 +636,14 @@ internal fun SettingsScreen(
         // endregion
 
         // region Feedback and about
-        item {
-          SubHeader(
-            text = stringResource(Res.string.settingsHeaderFeedback),
-          )
-        }
+        item { SubHeader(text = stringResource(Res.string.settingsHeaderFeedback)) }
 
         item {
           ReportIssueItem(
             appInfo = state.appInfo,
             onClick = {
               coroutineScope.launch { linkHandler.openLink(Constants.REPORT_ISSUE_LINK) }
-            }
+            },
           )
         }
 
@@ -686,14 +674,14 @@ private fun AppIconSettingItem(
         .fillMaxWidth()
         .then(modifier),
     verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.spacedBy(16.dp)
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     Column(Modifier.weight(1f)) {
       Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
           text = stringResource(Res.string.settingsAppIconTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
 
         if (!isSubscribed) {
@@ -703,7 +691,7 @@ private fun AppIconSettingItem(
             modifier = Modifier.size(16.dp),
             imageVector = Icons.Rounded.WorkspacePremium,
             contentDescription = null,
-            tint = AppTheme.colorScheme.primary
+            tint = AppTheme.colorScheme.primary,
           )
         }
       }
@@ -711,7 +699,7 @@ private fun AppIconSettingItem(
       Text(
         text = stringResource(Res.string.settingsAppIconSubtitle),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     }
 
@@ -745,7 +733,7 @@ private fun AppIconSelectionSheet(
           modifier =
             Modifier.clip(RoundedCornerShape(12.dp))
               .clickable { onAppIconChange(appIcon) }
-              .padding(8.dp)
+              .padding(8.dp),
         ) {
           Box(contentAlignment = Alignment.Center) {
             val shape = RoundedCornerShape(28.dp)
@@ -755,13 +743,13 @@ private fun AppIconSelectionSheet(
             if (isSelected) {
               Box(
                 Modifier.matchParentSize().clip(shape).background(Color.Black.copy(alpha = 0.4f)),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
               ) {
                 Icon(
                   imageVector = Icons.Default.CheckCircle,
                   contentDescription = null,
                   tint = Color.White,
-                  modifier = Modifier.size(24.dp)
+                  modifier = Modifier.size(24.dp),
                 )
               }
             }
@@ -776,7 +764,7 @@ private fun AppIconSelectionSheet(
               if (isSelected) AppTheme.colorScheme.tintedForeground
               else AppTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
-            maxLines = 1
+            maxLines = 1,
           )
         }
       }
@@ -807,34 +795,31 @@ private fun AppIconPreview(
     Brush.radialGradient(
       0.17f to backgroundColor.copy(alpha = 0.55f).compositeOver(Color.White),
       1f to backgroundColor,
-      center = Offset(20f, 24f)
+      center = Offset(20f, 24f),
     )
 
   Box(
     modifier = modifier.clip(shape).background(backgroundBrush),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Icon(
       painter = painterResource(Res.drawable.ic_launcher_foreground),
       contentDescription = null,
       tint = Color.Unspecified,
-      modifier = Modifier.scale(1.2f).fillMaxSize()
+      modifier = Modifier.scale(1.2f).fillMaxSize(),
     )
   }
 }
 
 @Composable
-private fun HomeLayoutSelector(
-  homeViewMode: HomeViewMode,
-  onClick: (HomeViewMode) -> Unit,
-) {
+private fun HomeLayoutSelector(homeViewMode: HomeViewMode, onClick: (HomeViewMode) -> Unit) {
   Row(modifier = Modifier.padding(horizontal = 8.dp)) {
     LayoutIconButton(
       modifier = Modifier.weight(1f),
       label = stringResource(Res.string.homeViewModeDefault),
       icon = TwineIcons.LayoutDefault,
       selected = homeViewMode == HomeViewMode.Default,
-      onClick = { onClick(HomeViewMode.Default) }
+      onClick = { onClick(HomeViewMode.Default) },
     )
 
     LayoutIconButton(
@@ -842,7 +827,7 @@ private fun HomeLayoutSelector(
       label = stringResource(Res.string.homeViewModeSimple),
       icon = TwineIcons.LayoutSimple,
       selected = homeViewMode == HomeViewMode.Simple,
-      onClick = { onClick(HomeViewMode.Simple) }
+      onClick = { onClick(HomeViewMode.Simple) },
     )
 
     LayoutIconButton(
@@ -850,7 +835,7 @@ private fun HomeLayoutSelector(
       label = stringResource(Res.string.homeViewModeCompact),
       icon = TwineIcons.LayoutCompact,
       selected = homeViewMode == HomeViewMode.Compact,
-      onClick = { onClick(HomeViewMode.Compact) }
+      onClick = { onClick(HomeViewMode.Compact) },
     )
   }
 }
@@ -861,7 +846,7 @@ private fun LayoutIconButton(
   label: String,
   selected: Boolean,
   modifier: Modifier = Modifier,
-  onClick: () -> Unit
+  onClick: () -> Unit,
 ) {
   Column(
     modifier =
@@ -869,7 +854,7 @@ private fun LayoutIconButton(
         .clip(MaterialTheme.shapes.medium)
         .clickable { onClick() }
         .padding(vertical = 8.dp),
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     val defaultTranslucentStyle = LocalTranslucentStyles.current.default
     val background =
@@ -904,7 +889,7 @@ private fun LayoutIconButton(
           .padding(padding)
           .background(background, shape)
           .border(1.dp, border, shape),
-      contentAlignment = Alignment.Center
+      contentAlignment = Alignment.Center,
     ) {
       val iconBackground by
         animateColorAsState(
@@ -919,14 +904,14 @@ private fun LayoutIconButton(
       Box(
         modifier =
           Modifier.requiredSize(iconBackgroundSize)
-            .background(iconBackground, MaterialTheme.shapes.small),
+            .background(iconBackground, MaterialTheme.shapes.small)
       )
 
       Icon(
         imageVector = icon,
         contentDescription = null,
         tint = iconTint,
-        modifier = Modifier.requiredSize(20.dp)
+        modifier = Modifier.requiredSize(20.dp),
       )
     }
 
@@ -934,11 +919,7 @@ private fun LayoutIconButton(
 
     val textStyle =
       if (selected) MaterialTheme.typography.labelMedium else MaterialTheme.typography.bodySmall
-    Text(
-      text = label,
-      style = textStyle,
-      color = AppTheme.colorScheme.onSurface,
-    )
+    Text(text = label, style = textStyle, color = AppTheme.colorScheme.onSurface)
   }
 }
 
@@ -946,7 +927,7 @@ private fun LayoutIconButton(
 fun TwinePremiumBanner(
   subscriptionResult: SubscriptionResult?,
   modifier: Modifier = Modifier,
-  onClick: () -> Unit
+  onClick: () -> Unit,
 ) {
   Row(
     modifier =
@@ -966,7 +947,7 @@ fun TwinePremiumBanner(
         Text(
           text = stringResource(Res.string.twinePremium),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
       }
 
@@ -979,7 +960,7 @@ fun TwinePremiumBanner(
       Text(
         text = stringResource(subscriptionDescRes),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     }
   }
@@ -988,7 +969,7 @@ fun TwinePremiumBanner(
 @Composable
 private fun MarkArticleAsReadOnSetting(
   articleMarkAsReadOn: MarkAsReadOn,
-  onMarkAsReadOnChanged: (MarkAsReadOn) -> Unit
+  onMarkAsReadOnChanged: (MarkAsReadOn) -> Unit,
 ) {
   var showDropdown by remember { mutableStateOf(false) }
 
@@ -1000,7 +981,7 @@ private fun MarkArticleAsReadOnSetting(
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.markArticleAsRead),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
     )
 
     Box {
@@ -1013,7 +994,7 @@ private fun MarkArticleAsReadOnSetting(
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
         onClick = { showDropdown = true },
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
       ) {
         val markAsReadOnLabel =
           when (articleMarkAsReadOn) {
@@ -1024,7 +1005,7 @@ private fun MarkArticleAsReadOnSetting(
         Text(
           text = markAsReadOnLabel,
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground
+          color = AppTheme.colorScheme.tintedForeground,
         )
 
         Spacer(Modifier.requiredWidth(8.dp))
@@ -1032,7 +1013,7 @@ private fun MarkArticleAsReadOnSetting(
         Icon(
           imageVector = Icons.Filled.ExpandMore,
           contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
+          tint = AppTheme.colorScheme.tintedForeground,
         )
       }
 
@@ -1060,7 +1041,7 @@ private fun MarkArticleAsReadOnSetting(
               onMarkAsReadOnChanged(markAsReadOn)
               showDropdown = false
             },
-            modifier = Modifier.background(backgroundColor)
+            modifier = Modifier.background(backgroundColor),
           ) {
             val textColor =
               if (markAsReadOn == articleMarkAsReadOn) {
@@ -1087,7 +1068,7 @@ private fun BlockedWordsSettingItem(onClick: () -> Unit) {
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.blockedWords),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
     )
   }
 }
@@ -1104,27 +1085,24 @@ private fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: (
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsShowReaderViewTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsShowReaderViewSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1141,27 +1119,24 @@ private fun AmoledSettingItem(useAmoled: Boolean, onValueChanged: (Boolean) -> U
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsAmoledTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsAmoledSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1169,7 +1144,7 @@ private fun AmoledSettingItem(useAmoled: Boolean, onValueChanged: (Boolean) -> U
 @Composable
 private fun DynamicColorSettingItem(
   dynamicColorEnabled: Boolean,
-  onValueChanged: (Boolean) -> Unit
+  onValueChanged: (Boolean) -> Unit,
 ) {
   var checked by remember(dynamicColorEnabled) { mutableStateOf(dynamicColorEnabled) }
   Box(
@@ -1181,27 +1156,24 @@ private fun DynamicColorSettingItem(
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsDynamicColorTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsDynamicColorSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1209,7 +1181,7 @@ private fun DynamicColorSettingItem(
 @Composable
 private fun PostsDeletionPeriodSettingItem(
   postsDeletionPeriod: Period?,
-  onValueChanged: (Period) -> Unit
+  onValueChanged: (Period) -> Unit,
 ) {
   var showDropdown by remember { mutableStateOf(false) }
 
@@ -1221,7 +1193,7 @@ private fun PostsDeletionPeriodSettingItem(
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.settingsPostsDeletionPeriodTitle),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh
+      color = AppTheme.colorScheme.textEmphasisHigh,
     )
 
     Box {
@@ -1234,7 +1206,7 @@ private fun PostsDeletionPeriodSettingItem(
             buttonHeight = with(density) { coordinates.size.height.toDp() }
           },
         onClick = { showDropdown = true },
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
       ) {
         val period =
           when (postsDeletionPeriod) {
@@ -1250,7 +1222,7 @@ private fun PostsDeletionPeriodSettingItem(
         Text(
           text = period,
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground
+          color = AppTheme.colorScheme.tintedForeground,
         )
 
         Spacer(Modifier.requiredWidth(8.dp))
@@ -1258,7 +1230,7 @@ private fun PostsDeletionPeriodSettingItem(
         Icon(
           imageVector = Icons.Filled.ExpandMore,
           contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground
+          tint = AppTheme.colorScheme.tintedForeground,
         )
       }
 
@@ -1290,7 +1262,7 @@ private fun PostsDeletionPeriodSettingItem(
               onValueChanged(period)
               showDropdown = false
             },
-            modifier = Modifier.background(backgroundColor)
+            modifier = Modifier.background(backgroundColor),
           ) {
             val textColor =
               if (period == postsDeletionPeriod) {
@@ -1319,27 +1291,24 @@ private fun BlockImagesSettingItem(blockImages: Boolean, onValueChanged: (Boolea
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsBlockImagesTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsBlockImagesSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1347,7 +1316,7 @@ private fun BlockImagesSettingItem(blockImages: Boolean, onValueChanged: (Boolea
 @Composable
 private fun ShowFeedFavIconSettingItem(
   showFeedFavIcon: Boolean,
-  onValueChanged: (Boolean) -> Unit
+  onValueChanged: (Boolean) -> Unit,
 ) {
   var checked by remember(showFeedFavIcon) { mutableStateOf(showFeedFavIcon) }
   Box(
@@ -1359,27 +1328,24 @@ private fun ShowFeedFavIconSettingItem(
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.showFeedFavIconTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.showFeedFavIconDesc),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1387,7 +1353,7 @@ private fun ShowFeedFavIconSettingItem(
 @Composable
 private fun NotificationsSettingItem(
   enableNotifications: Boolean,
-  onValueChanged: (Boolean) -> Unit
+  onValueChanged: (Boolean) -> Unit,
 ) {
   val translucentStyles = LocalTranslucentStyles.current
   val linkHandler = LocalLinkHandler.current
@@ -1396,33 +1362,30 @@ private fun NotificationsSettingItem(
   Column(
     modifier =
       Modifier.clickable { onValueChanged(!enableNotifications) }
-        .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
+        .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp)
   ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           text = stringResource(Res.string.settingsEnableNotificationsTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           text = stringResource(Res.string.settingsEnableNotificationsSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = enableNotifications,
-        onCheckedChange = onValueChanged,
-      )
+      Switch(checked = enableNotifications, onCheckedChange = onValueChanged)
     }
 
     AnimatedVisibility(
       modifier = Modifier.ignoreHorizontalParentPadding(horizontal = 12.dp),
-      visible = platform == Platform.Android && enableNotifications
+      visible = platform == Platform.Android && enableNotifications,
     ) {
       Column {
         Spacer(modifier = Modifier.height(16.dp))
@@ -1438,7 +1401,7 @@ private fun NotificationsSettingItem(
               .padding(horizontal = 12.dp, vertical = 8.dp),
           text = stringResource(Res.string.settingsNotificationWarningAndroid),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.secondary
+          color = AppTheme.colorScheme.secondary,
         )
       }
     }
@@ -1448,7 +1411,7 @@ private fun NotificationsSettingItem(
 @Composable
 private fun DownloadFullContentSettingItem(
   downloadFullContent: Boolean,
-  onValueChanged: (Boolean) -> Unit
+  onValueChanged: (Boolean) -> Unit,
 ) {
   val translucentStyles = LocalTranslucentStyles.current
   Column(
@@ -1461,12 +1424,12 @@ private fun DownloadFullContentSettingItem(
         Text(
           stringResource(Res.string.settingsDownloadFullContentTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsDownloadFullContentSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
@@ -1485,13 +1448,13 @@ private fun DownloadFullContentSettingItem(
         Modifier.ignoreHorizontalParentPadding(horizontal = 12.dp)
           .background(
             AppTheme.colorScheme.error.copy(alpha = translucentStyles.default.background.alpha),
-            MaterialTheme.shapes.small
+            MaterialTheme.shapes.small,
           )
           .border(1.dp, AppTheme.colorScheme.error, MaterialTheme.shapes.small)
           .padding(horizontal = 12.dp, vertical = 8.dp),
       text = stringResource(Res.string.settingsDownloadFullContentWarning),
       style = MaterialTheme.typography.labelLarge,
-      color = AppTheme.colorScheme.error
+      color = AppTheme.colorScheme.error,
     )
   }
 }
@@ -1508,27 +1471,24 @@ private fun AutoSyncSettingItem(enableAutoSync: Boolean, onValueChanged: (Boolea
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.enableAutoSyncTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.enableAutoSyncDesc),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1536,7 +1496,7 @@ private fun AutoSyncSettingItem(enableAutoSync: Boolean, onValueChanged: (Boolea
 @Composable
 private fun UnreadPostsCountSettingItem(
   showUnreadCountEnabled: Boolean,
-  onValueChanged: (Boolean) -> Unit
+  onValueChanged: (Boolean) -> Unit,
 ) {
   var checked by remember(showUnreadCountEnabled) { mutableStateOf(showUnreadCountEnabled) }
   Box(
@@ -1548,27 +1508,24 @@ private fun UnreadPostsCountSettingItem(
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsShowUnreadCountTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsShowUnreadCountSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
       Spacer(Modifier.width(16.dp))
 
-      Switch(
-        checked = checked,
-        onCheckedChange = { checked -> onValueChanged(checked) },
-      )
+      Switch(checked = checked, onCheckedChange = { checked -> onValueChanged(checked) })
     }
   }
 }
@@ -1576,7 +1533,7 @@ private fun UnreadPostsCountSettingItem(
 @Composable
 private fun BrowserTypeSettingItem(
   browserType: BrowserType,
-  onBrowserTypeChanged: (BrowserType) -> Unit
+  onBrowserTypeChanged: (BrowserType) -> Unit,
 ) {
   var checked by remember(browserType) { mutableStateOf(browserType == BrowserType.InApp) }
 
@@ -1596,18 +1553,18 @@ private fun BrowserTypeSettingItem(
   ) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsBrowserTypeTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsBrowserTypeSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
@@ -1636,7 +1593,7 @@ private fun OPMLSettingItem(
   hasFeeds: Boolean,
   onImportClicked: () -> Unit,
   onExportClicked: () -> Unit,
-  onCancelClicked: () -> Unit
+  onCancelClicked: () -> Unit,
 ) {
   Column {
     SubHeader(text = stringResource(Res.string.settingsHeaderOpml))
@@ -1646,7 +1603,7 @@ private fun OPMLSettingItem(
       is OpmlResult.InProgress.Exporting -> {
         Row(
           modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(16.dp)
+          horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           OutlinedButton(
             modifier = Modifier.weight(1f),
@@ -1661,7 +1618,7 @@ private fun OPMLSettingItem(
                 contentColor = AppTheme.colorScheme.tintedForeground,
                 disabledContentColor = AppTheme.colorScheme.tintedForeground,
               ),
-            border = null
+            border = null,
           ) {
             val string =
               when (opmlResult) {
@@ -1676,11 +1633,7 @@ private fun OPMLSettingItem(
                 }
               }
 
-            Text(
-              text = string,
-              maxLines = 1,
-              overflow = TextOverflow.MiddleEllipsis,
-            )
+            Text(text = string, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
           }
 
           OutlinedButton(
@@ -1700,15 +1653,12 @@ private fun OPMLSettingItem(
       // TODO: Handle error states
       OpmlResult.Idle,
       OpmlResult.Error.NoContentInOpmlFile,
-      is OpmlResult.Error.UnknownFailure, -> {
+      is OpmlResult.Error.UnknownFailure -> {
         Row(
           modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-          horizontalArrangement = Arrangement.spacedBy(16.dp)
+          horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          OutlinedButton(
-            modifier = Modifier.weight(1f),
-            onClick = onImportClicked,
-          ) {
+          OutlinedButton(modifier = Modifier.weight(1f), onClick = onImportClicked) {
             Text(stringResource(Res.string.settingsOpmlImport))
           }
 
@@ -1733,18 +1683,18 @@ private fun ReportIssueItem(appInfo: AppInfo, onClick: () -> Unit) {
   Box(modifier = Modifier.clickable(onClick = onClick)) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsReportIssue),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsVersion, appInfo.versionName, appInfo.versionCode),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
     }
@@ -1757,18 +1707,18 @@ private fun DeleteAppDataSettingItem(onClick: () -> Unit) {
     modifier =
       Modifier.clickable(onClick = onClick)
         .padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Column(modifier = Modifier.weight(1f)) {
       Text(
         stringResource(Res.string.settingsDeleteAppDataTitle),
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.error
+        color = AppTheme.colorScheme.error,
       )
       Text(
         stringResource(Res.string.settingsDeleteAppDataSubtitle),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     }
   }
@@ -1782,7 +1732,7 @@ private fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: ()
       TextButton(onClick = onConfirm) {
         Text(
           text = stringResource(Res.string.settingsDeleteAppDataButton),
-          color = AppTheme.colorScheme.error
+          color = AppTheme.colorScheme.error,
         )
       }
     },
@@ -1790,20 +1740,20 @@ private fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: ()
       TextButton(onClick = onDismiss) {
         Text(
           text = stringResource(Res.string.buttonCancel),
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.settingsDeleteAppDataDialogTitle),
-        color = AppTheme.colorScheme.textEmphasisHigh
+        color = AppTheme.colorScheme.textEmphasisHigh,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.settingsDeleteAppDataDialogDesc),
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
@@ -1817,18 +1767,18 @@ private fun StatisticsItem(onClick: () -> Unit) {
   Box(modifier = Modifier.clickable(onClick = onClick)) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsStatisticsTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsStatisticsSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
     }
@@ -1840,18 +1790,18 @@ private fun AboutItem(onClick: () -> Unit) {
   Box(modifier = Modifier.clickable(onClick = onClick)) {
     Row(
       modifier = Modifier.padding(start = 24.dp, top = 16.dp, end = 24.dp, bottom = 20.dp),
-      verticalAlignment = Alignment.CenterVertically
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Column(modifier = Modifier.weight(1f)) {
         Text(
           stringResource(Res.string.settingsAboutTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh
+          color = AppTheme.colorScheme.textEmphasisHigh,
         )
         Text(
           stringResource(Res.string.settingsAboutSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
 
@@ -1872,15 +1822,9 @@ private fun AboutProfileImages() {
       modifier =
         Modifier.padding(start = 72.dp)
           .requiredSize(62.dp)
-          .drawWithCache {
-            onDrawBehind {
-              drawCircle(
-                color = backgroundColor,
-              )
-            }
-          }
+          .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
           .padding(8.dp)
-          .clip(CircleShape)
+          .clip(CircleShape),
     )
 
     AsyncImage(
@@ -1889,15 +1833,9 @@ private fun AboutProfileImages() {
       contentScale = ContentScale.Crop,
       modifier =
         Modifier.requiredSize(62.dp)
-          .drawWithCache {
-            onDrawBehind {
-              drawCircle(
-                color = backgroundColor,
-              )
-            }
-          }
+          .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
           .padding(8.dp)
-          .clip(CircleShape)
+          .clip(CircleShape),
     )
   }
 }
@@ -1911,7 +1849,7 @@ private fun CloudSyncSettingItem(
   isSubscribed: Boolean,
   onSyncClicked: (CloudServiceProvider) -> Unit,
   onAPIServiceClicked: (APIServiceProvider) -> Unit,
-  onSignOutClicked: () -> Unit
+  onSignOutClicked: () -> Unit,
 ) {
   availableProviders.forEach { provider ->
     val label =
@@ -1939,7 +1877,7 @@ private fun CloudSyncSettingItem(
     ) {
       Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
       ) {
         val icon =
           when (provider.cloudService) {
@@ -1948,18 +1886,14 @@ private fun CloudSyncSettingItem(
             ServiceType.DROPBOX -> TwineIcons.Dropbox
           }
 
-        Icon(
-          imageVector = icon,
-          contentDescription = null,
-          tint = AppTheme.colorScheme.onSurface,
-        )
+        Icon(imageVector = icon, contentDescription = null, tint = AppTheme.colorScheme.onSurface)
 
         Column(modifier = Modifier.weight(1f)) {
           Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = label,
               style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.textEmphasisHigh
+              color = AppTheme.colorScheme.textEmphasisHigh,
             )
 
             if (provider.isPremium && !isSubscribed) {
@@ -1969,7 +1903,7 @@ private fun CloudSyncSettingItem(
                 modifier = Modifier.size(16.dp),
                 imageVector = Icons.Rounded.WorkspacePremium,
                 contentDescription = null,
-                tint = AppTheme.colorScheme.primary
+                tint = AppTheme.colorScheme.primary,
               )
             }
           }
@@ -2000,7 +1934,7 @@ private fun CloudSyncSettingItem(
             Text(
               text = statusString,
               style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.textEmphasisMed
+              color = AppTheme.colorScheme.textEmphasisMed,
             )
           }
         }
@@ -2008,15 +1942,12 @@ private fun CloudSyncSettingItem(
         if (isSignedIn) {
           val actionLabel = stringResource(Res.string.settingsSyncSignOut)
 
-          TextButton(
-            enabled = canInteract,
-            onClick = { onSignOutClicked() },
-          ) {
+          TextButton(enabled = canInteract, onClick = { onSignOutClicked() }) {
             Text(
               text = actionLabel,
               style = MaterialTheme.typography.bodyMedium,
               fontWeight = FontWeight.SemiBold,
-              color = AppTheme.colorScheme.primary
+              color = AppTheme.colorScheme.primary,
             )
           }
         } else {
@@ -2031,6 +1962,6 @@ private fun CloudSyncSettingItem(
 private fun Divider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = AppTheme.colorScheme.outlineVariant
+    color = AppTheme.colorScheme.outlineVariant,
   )
 }

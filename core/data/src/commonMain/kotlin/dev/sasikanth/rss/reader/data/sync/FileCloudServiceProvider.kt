@@ -81,7 +81,7 @@ data class SyncData(
   val blockedWords: List<BlockedWordSyncEntity> = emptyList(),
   val posts: List<PostSyncEntity> = emptyList(),
   val postChunks: List<String> = emptyList(),
-  val readPosts: List<ReadPostSyncEntity> = emptyList()
+  val readPosts: List<ReadPostSyncEntity> = emptyList(),
 )
 
 @Serializable data class ReadPostSyncEntity(val id: String, val updatedAt: Long)
@@ -99,10 +99,11 @@ data class PostSyncEntity(
   val syncedAt: Long,
   val link: String,
   val commentsLink: String?,
+  val audioUrl: String? = null,
   val flags: Set<PostFlag>,
   val isDeleted: Boolean = false,
   val feedContent: String? = null,
-  val articleContent: String? = null
+  val articleContent: String? = null,
 )
 
 @Serializable
@@ -120,7 +121,7 @@ data class FeedSyncEntity(
   val showFeedFavIcon: Boolean = true,
   val hideFromAllFeeds: Boolean = false,
   val lastUpdatedAt: Long? = null,
-  val isDeleted: Boolean = false
+  val isDeleted: Boolean = false,
 )
 
 @Serializable
@@ -131,7 +132,7 @@ data class GroupSyncEntity(
   val pinnedPosition: Double = 0.0,
   val pinnedAt: Long? = null,
   val updatedAt: Long? = null,
-  val isDeleted: Boolean = false
+  val isDeleted: Boolean = false,
 )
 
 @Serializable
@@ -141,7 +142,7 @@ data class UserSyncEntity(
   val profileId: String,
   val email: String,
   val token: String,
-  val serverUrl: String
+  val serverUrl: String,
 )
 
 @Serializable
@@ -149,7 +150,7 @@ data class BlockedWordSyncEntity(
   val id: String,
   val content: String,
   val isDeleted: Boolean,
-  val updatedAt: Long
+  val updatedAt: Long,
 )
 
 object BlockedWordSyncEntityListSerializer : KSerializer<List<BlockedWordSyncEntity>> {
@@ -171,7 +172,7 @@ object BlockedWordSyncEntityListSerializer : KSerializer<List<BlockedWordSyncEnt
           id = nameBasedUuidOf(content.lowercase()).toString(),
           content = content,
           isDeleted = false,
-          updatedAt = Instant.DISTANT_PAST.toEpochMilliseconds()
+          updatedAt = Instant.DISTANT_PAST.toEpochMilliseconds(),
         )
       } else {
         input.json.decodeFromJsonElement(BlockedWordSyncEntity.serializer(), element)

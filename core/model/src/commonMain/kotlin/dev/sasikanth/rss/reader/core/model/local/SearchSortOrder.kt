@@ -18,5 +18,5 @@ package dev.sasikanth.rss.reader.core.model.local
 
 enum class SearchSortOrder(val value: String) {
   Newest("newest"),
-  Oldest("oldest")
+  Oldest("oldest"),
 }

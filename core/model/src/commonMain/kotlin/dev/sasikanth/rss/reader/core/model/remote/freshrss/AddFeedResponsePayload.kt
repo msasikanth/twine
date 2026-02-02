@@ -24,5 +24,5 @@ data class AddFeedResponsePayload(
   val numResults: Int,
   val query: String,
   val streamId: String,
-  val streamName: String
+  val streamName: String,
 )

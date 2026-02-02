@@ -23,7 +23,7 @@ internal data class Person(
   val name: String,
   val role: String,
   val profilePicture: String,
-  val socials: List<Social>
+  val socials: List<Social>,
 )
 
 internal data class Social(val service: String, val link: String, val icon: ImageVector)

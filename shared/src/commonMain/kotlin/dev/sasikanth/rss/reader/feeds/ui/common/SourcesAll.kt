@@ -143,7 +143,7 @@ internal fun LazyListScope.allSources(
                       start = startPadding,
                       top = topPadding,
                       end = endPadding,
-                      bottom = bottomPadding
+                      bottom = bottomPadding,
                     )
                     .animateItem(),
               )
@@ -176,9 +176,9 @@ internal fun LazyListScope.allSources(
                       start = startPadding,
                       top = topPadding,
                       end = endPadding,
-                      bottom = bottomPadding
+                      bottom = bottomPadding,
                     )
-                    .animateItem()
+                    .animateItem(),
               )
             }
           }
@@ -206,7 +206,7 @@ internal fun AllFeedsHeader(
         .background(AppTheme.colorScheme.bottomSheet)
         .padding(start = 32.dp, end = 24.dp)
         .padding(vertical = 12.dp),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     var showSortDropdown by remember { mutableStateOf(false) }
     val allFeedsLabel = stringResource(Res.string.allFeeds)
@@ -246,14 +246,14 @@ internal fun AllFeedsHeader(
           },
         icon = TwineIcons.Sort,
         label = "",
-        onClick = { showSortDropdown = true }
+        onClick = { showSortDropdown = true },
       )
 
       DropdownMenu(
         modifier = Modifier.widthIn(min = 132.dp),
         expanded = showSortDropdown,
         offset = DpOffset(0.dp, buttonHeight.unaryMinus()),
-        onDismissRequest = { showSortDropdown = false }
+        onDismissRequest = { showSortDropdown = false },
       ) {
         val translucentStyle = LocalTranslucentStyles.current
 
@@ -291,7 +291,7 @@ internal fun AllFeedsHeader(
                 onFeedsSortChanged(sortOrder)
                 showSortDropdown = false
               },
-              text = { Text(label, color = labelColor) }
+              text = { Text(label, color = labelColor) },
             )
           }
       }
@@ -305,7 +305,7 @@ internal fun AllFeedsHeader(
         contentDescription = null,
         containerColor = AppTheme.colorScheme.inverseSurface,
         iconTint = AppTheme.colorScheme.inverseOnSurface,
-        onClick = { onAddNewFeedClick?.invoke() }
+        onClick = { onAddNewFeedClick?.invoke() },
       )
     }
   }

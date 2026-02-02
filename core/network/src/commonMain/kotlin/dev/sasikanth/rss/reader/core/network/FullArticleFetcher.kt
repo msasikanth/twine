@@ -80,7 +80,7 @@ class FullArticleFetcher(
           headers {
             append(
               HttpHeaders.Accept,
-              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             )
             append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
             append(HttpHeaders.Connection, "keep-alive")
@@ -88,7 +88,7 @@ class FullArticleFetcher(
             append("Upgrade-Insecure-Requests", "1")
             append(
               "sec-ch-ua",
-              "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\""
+              "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
             )
             append("sec-ch-ua-mobile", "?0")
             append("sec-ch-ua-platform", "\"Windows\"")

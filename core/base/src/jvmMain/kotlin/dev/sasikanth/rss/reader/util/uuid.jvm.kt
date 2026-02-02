@@ -18,10 +18,7 @@ internal actual fun hasher(): UuidHasher {
   return JvmHasher("SHA-1", 5)
 }
 
-private class JvmHasher(
-  algorithmName: String,
-  override val version: Int,
-) : UuidHasher {
+private class JvmHasher(algorithmName: String, override val version: Int) : UuidHasher {
   private val digest = MessageDigest.getInstance(algorithmName)
 
   override fun update(input: ByteArray) {

@@ -27,13 +27,7 @@ import kotlinx.datetime.toInstant
 object TestClock : Clock {
 
   override fun now(): Instant {
-    return LocalDateTime(
-        year = 2023,
-        month = Month.JANUARY,
-        day = 1,
-        hour = 8,
-        minute = 0,
-      )
+    return LocalDateTime(year = 2023, month = Month.JANUARY, day = 1, hour = 8, minute = 0)
       .toInstant(TimeZone.UTC)
   }
 }

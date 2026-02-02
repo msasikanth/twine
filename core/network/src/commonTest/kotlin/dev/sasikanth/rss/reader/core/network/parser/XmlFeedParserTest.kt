@@ -80,13 +80,13 @@ class XmlFeedParserTest {
               respond(
                 content = ByteReadChannel(youtubeChannelHtml.toByteArray()),
                 status = HttpStatusCode.OK,
-                headers = headersOf(HttpHeaders.ContentType, "html")
+                headers = headersOf(HttpHeaders.ContentType, "html"),
               )
             } else {
               respond(
                 content = ByteReadChannel("".toByteArray()),
                 status = HttpStatusCode.InternalServerError,
-                headers = headersOf()
+                headers = headersOf(),
               )
             }
           }
@@ -98,7 +98,7 @@ class XmlFeedParserTest {
         rssContentParser = RSSContentParser(articleHtmlParser),
         atomContentParser = AtomContentParser(httpClient, articleHtmlParser),
         dispatchersProvider = TestDispatchersProvider(),
-        platformPageSize = 4096L
+        platformPageSize = 4096L,
       )
   }
 
@@ -123,13 +123,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>First post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/first-post-media-url",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with media thumbnail",
@@ -140,13 +141,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Post with media thumbnail</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/media/post-with-media-thumbnail",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post without image",
@@ -157,13 +159,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Second post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1684999800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Podcast post",
@@ -174,13 +177,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Third post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/third-post",
               ),
               PostPayload(
                 title = "Post with enclosure image",
@@ -191,13 +195,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Fourth post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/enclosure-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/fourth-post",
               ),
               PostPayload(
                 title = "Post with description and encoded content",
@@ -211,13 +216,14 @@ class XmlFeedParserTest {
                     <img src="https://example.com/encoded-image" alt="encoded image">
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/encoded-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with relative path image",
@@ -228,13 +234,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Relative image post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "http://example.com/relative-media-url",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with comments",
@@ -245,13 +252,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>Really long post with comments.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1685005200000,
                 commentsLink = "https://example/post-with-comments/comments",
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with media group",
@@ -262,16 +270,17 @@ class XmlFeedParserTest {
                   <html>
                    <body>Media group description</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/media/maxresdefault.jpg",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -303,13 +312,14 @@ class XmlFeedParserTest {
                   <html>
                    <body>First post description.</body>
                   </html>
-              """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with encoded description",
@@ -323,16 +333,17 @@ class XmlFeedParserTest {
                     <img src="https://example.com/encoded-image" alt="encoded image">
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/encoded-image",
                 date = 1684924200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -367,13 +378,14 @@ class XmlFeedParserTest {
                     <p>Post summary with an image.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Second post",
@@ -386,13 +398,14 @@ class XmlFeedParserTest {
                     <p>Post summary of the second post.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1684917000000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/second-post-audio.mp3",
               ),
               PostPayload(
                 title = "Post without image",
@@ -405,13 +418,14 @@ class XmlFeedParserTest {
                     <p>Post summary of the third post. <a href="https://example.com/hyperlink">click here</a>.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = null,
                 date = 1684936800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
               PostPayload(
                 title = "Post with relative image",
@@ -425,16 +439,17 @@ class XmlFeedParserTest {
                     <p>Post summary with an image.</p>
                    </body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "http://example.com/resources/image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
+                isDateParsedCorrectly = true,
+                audioUrl = null,
               ),
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -467,10 +482,11 @@ class XmlFeedParserTest {
                 imageUrl = "https://i.ytimg.com/vi/2QpWq3iQdC4/maxresdefault.jpg",
                 date = 1698260988000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
-              ),
+                isDateParsedCorrectly = true,
+                audioUrl = null,
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -502,16 +518,17 @@ class XmlFeedParserTest {
                   <html>
                    <body>Episode 1 description</body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/episode-1-image.jpg",
                 date = 1685005200000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
-              ),
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/episode-1.mp3",
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when
@@ -543,16 +560,17 @@ class XmlFeedParserTest {
                   <html>
                    <body>Episode 1 description</body>
                   </html>
-                """
+                  """
                     .trimIndent(),
                 fullContent = null,
                 imageUrl = "https://example.com/episode-1-image.jpg",
                 date = 1685008800000,
                 commentsLink = null,
-                isDateParsedCorrectly = true
-              ),
+                isDateParsedCorrectly = true,
+                audioUrl = "https://example.com/episode-1.mp3",
+              )
             )
-            .asFlow()
+            .asFlow(),
       )
 
     // when

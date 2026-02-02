@@ -36,7 +36,7 @@ fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Bo
         primary = AppTheme.colorScheme.primary,
         onPrimary = AppTheme.colorScheme.onPrimary,
         outline = AppTheme.colorScheme.outline,
-        surfaceContainerHighest = AppTheme.colorScheme.surfaceContainerHighest
+        surfaceContainerHighest = AppTheme.colorScheme.surfaceContainerHighest,
       )
   ) {
     androidx.compose.material3.Switch(
@@ -46,7 +46,7 @@ fun Switch(checked: Boolean, modifier: Modifier = Modifier, onCheckedChange: (Bo
         val icon = if (checked) TwineIcons.Check else TwineIcons.Close
         Icon(modifier = Modifier.size(16.dp), imageVector = icon, contentDescription = null)
       },
-      onCheckedChange = onCheckedChange
+      onCheckedChange = onCheckedChange,
     )
   }
 }

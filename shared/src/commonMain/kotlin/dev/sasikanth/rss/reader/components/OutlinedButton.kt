@@ -37,11 +37,11 @@ fun OutlinedButton(
   colors: ButtonColors =
     ButtonDefaults.outlinedButtonColors(
       containerColor = Color.Transparent,
-      contentColor = AppTheme.colorScheme.primary
+      contentColor = AppTheme.colorScheme.primary,
     ),
   border: BorderStroke? = BorderStroke(1.dp, AppTheme.colorScheme.outlineVariant),
   shape: Shape = MaterialTheme.shapes.medium,
-  content: @Composable RowScope.() -> Unit
+  content: @Composable RowScope.() -> Unit,
 ) {
   androidx.compose.material3.OutlinedButton(
     modifier = modifier,
@@ -50,6 +50,6 @@ fun OutlinedButton(
     colors = colors,
     shape = shape,
     content = content,
-    enabled = enabled
+    enabled = enabled,
   )
 }

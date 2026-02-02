@@ -54,7 +54,7 @@ actual interface DataStorePlatformComponent {
       },
       corruptionHandler = null,
       migrations = emptyList(),
-      scope = CoroutineScope(dispatchersProvider.io + SupervisorJob())
+      scope = CoroutineScope(dispatchersProvider.io + SupervisorJob()),
     )
   }
 }

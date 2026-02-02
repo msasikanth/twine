@@ -57,7 +57,7 @@ internal fun FeedGroupBottomBarItem(
             .clip(shape)
             .then(clickableModifier)
             .background(AppTheme.colorScheme.secondary.copy(alpha = 0.16f)),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
       ) {
         val iconSize = 16.dp
         val iconSpacing = 2.dp

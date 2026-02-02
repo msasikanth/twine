@@ -96,7 +96,7 @@ internal fun FeedListItem(
           onLongClick = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             onFeedSelected(feed)
-          }
+          },
         )
   ) {
     Row(modifier = Modifier.padding(all = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -118,7 +118,7 @@ internal fun FeedListItem(
         style = MaterialTheme.typography.titleSmall,
         color = AppTheme.colorScheme.textEmphasisHigh,
         maxLines = 1,
-        overflow = TextOverflow.Clip
+        overflow = TextOverflow.Clip,
       )
 
       Spacer(Modifier.requiredWidth(12.dp))
@@ -128,12 +128,12 @@ internal fun FeedListItem(
         Badge(
           containerColor = translucentStyle.prominent.background,
           contentColor = AppTheme.colorScheme.secondary,
-          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp)
+          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp),
         ) {
           Text(
             text = feed.numberOfUnreadPosts.toString(),
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier.align(Alignment.CenterVertically),
           )
         }
       }
@@ -147,10 +147,7 @@ internal fun FeedListItem(
       }
 
       if (!isInMultiSelectMode && dragHandle == null) {
-        IconButton(
-          modifier = Modifier.requiredSize(40.dp),
-          onClick = onOptionsClick,
-        ) {
+        IconButton(modifier = Modifier.requiredSize(40.dp), onClick = onOptionsClick) {
           Icon(
             modifier = Modifier.requiredSize(20.dp),
             imageVector = Icons.Filled.MoreVert,

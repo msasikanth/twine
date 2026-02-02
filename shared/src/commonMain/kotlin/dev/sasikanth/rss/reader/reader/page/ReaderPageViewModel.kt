@@ -25,9 +25,10 @@ import dev.sasikanth.rss.reader.core.model.local.ReadabilityResult
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
-import dev.sasikanth.rss.reader.reader.page.ui.ReaderProcessingProgress
+import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +52,7 @@ class ReaderPageViewModel(
   private val postContentRepository: PostContentRepository,
   private val fullArticleFetcher: FullArticleFetcher,
   private val readabilityRunner: ReadabilityRunner,
+  val audioPlayer: AudioPlayer,
   @Assisted private val readerPost: ResolvedPost,
 ) : ViewModel() {
 
@@ -88,6 +90,54 @@ class ReaderPageViewModel(
     if (_showFullArticle.value) {
       loadFullArticle()
     }
+  }
+
+  fun playAudio() {
+    val audioUrl = readerPost.audioUrl ?: return
+    val currentPlayingUrl = audioPlayer.playbackState.value.playingUrl
+    if (currentPlayingUrl == audioUrl) {
+      audioPlayer.resume()
+      return
+    }
+
+    val coverUrl =
+      if (readerPost.imageUrl.isNullOrBlank()) {
+        readerPost.feedIcon
+      } else {
+        readerPost.imageUrl
+      }
+    audioPlayer.play(
+      url = audioUrl,
+      title = readerPost.title,
+      artist = readerPost.feedName,
+      coverUrl = coverUrl,
+    )
+  }
+
+  fun pauseAudio() {
+    audioPlayer.pause()
+  }
+
+  fun resumeAudio() {
+    audioPlayer.resume()
+  }
+
+  fun seekAudio(position: Long) {
+    audioPlayer.seekTo(position)
+  }
+
+  fun seekForward() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    audioPlayer.seekTo(currentPosition + 30.seconds.inWholeMilliseconds)
+  }
+
+  fun seekBackward() {
+    val currentPosition = audioPlayer.playbackState.value.currentPosition
+    audioPlayer.seekTo(currentPosition - 30.seconds.inWholeMilliseconds)
+  }
+
+  fun setPlaybackSpeed(speed: Float) {
+    audioPlayer.setPlaybackSpeed(speed)
   }
 
   private fun loadFullArticle() {
@@ -141,4 +191,9 @@ class ReaderPageViewModel(
       _parsingProgress.value = ReaderProcessingProgress.Idle
     }
   }
+}
+
+enum class ReaderProcessingProgress {
+  Loading,
+  Idle,
 }

@@ -19,6 +19,8 @@ package dev.sasikanth.rss.reader
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
+import androidx.media3.common.util.UnstableApi
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ListenableWorker
@@ -29,6 +31,7 @@ import co.touchlab.crashkios.bugsnag.enableBugsnag
 import com.bugsnag.android.Bugsnag
 import dev.sasikanth.rss.reader.di.ApplicationComponent
 import dev.sasikanth.rss.reader.di.create
+import dev.sasikanth.rss.reader.media.AudioCacheProvider
 
 class ReaderApplication : Application(), Configuration.Provider {
 
@@ -52,7 +55,7 @@ class ReaderApplication : Application(), Configuration.Provider {
             override fun createWorker(
               appContext: Context,
               workerClassName: String,
-              workerParameters: WorkerParameters
+              workerParameters: WorkerParameters,
             ): ListenableWorker? {
               return when (workerClassName) {
                 FeedsRefreshWorker::class.qualifiedName -> {
@@ -77,7 +80,7 @@ class ReaderApplication : Application(), Configuration.Provider {
                     context = appContext,
                     workerParameters = workerParameters,
                     rssRepository = appComponent.rssRepository,
-                    settingsRepository = appComponent.settingsRepository
+                    settingsRepository = appComponent.settingsRepository,
                   )
                 }
                 else -> null
@@ -87,6 +90,7 @@ class ReaderApplication : Application(), Configuration.Provider {
         )
         .build()
 
+  @OptIn(UnstableApi::class)
   override fun onCreate() {
     super.onCreate()
 
@@ -99,6 +103,8 @@ class ReaderApplication : Application(), Configuration.Provider {
     enqueuePeriodicPostsCleanUp()
     enqueueCloudSyncWorker()
 
+    AudioCacheProvider.cache = appComponent.audioCache.cache
+
     appComponent.initializers.forEach { it.initialize() }
   }
 
@@ -106,7 +112,7 @@ class ReaderApplication : Application(), Configuration.Provider {
     workManager.enqueueUniquePeriodicWork(
       CloudSyncWorker.TAG,
       ExistingPeriodicWorkPolicy.KEEP,
-      CloudSyncWorker.periodicRequest()
+      CloudSyncWorker.periodicRequest(),
     )
   }
 
@@ -114,7 +120,7 @@ class ReaderApplication : Application(), Configuration.Provider {
     workManager.enqueueUniquePeriodicWork(
       PostsCleanUpWorker.TAG,
       ExistingPeriodicWorkPolicy.KEEP,
-      PostsCleanUpWorker.periodicRequest()
+      PostsCleanUpWorker.periodicRequest(),
     )
   }
 
@@ -122,7 +128,7 @@ class ReaderApplication : Application(), Configuration.Provider {
     workManager.enqueueUniquePeriodicWork(
       FeedsRefreshWorker.TAG,
       ExistingPeriodicWorkPolicy.KEEP,
-      FeedsRefreshWorker.periodicRequest()
+      FeedsRefreshWorker.periodicRequest(),
     )
   }
 }

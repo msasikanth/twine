@@ -65,7 +65,7 @@ import twine.shared.generated.resources.onboardingSubtitle2
 internal fun OnboardingScreen(
   viewModel: OnboardingViewModel,
   onOnboardingDone: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -83,7 +83,7 @@ internal fun OnboardingScreen(
         Brush.verticalGradient(
           0f to Color.Transparent,
           0.60f to AppTheme.colorScheme.primary.copy(alpha = 0.15f),
-          1f to AppTheme.colorScheme.primary.copy(alpha = 0.65f)
+          1f to AppTheme.colorScheme.primary.copy(alpha = 0.65f),
         )
       ),
     containerColor = Color.Transparent,
@@ -111,17 +111,14 @@ internal fun OnboardingScreen(
               containerColor = AppTheme.colorScheme.onPrimary,
               contentColor = AppTheme.colorScheme.primary,
             ),
-          elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 6.dp)
+          elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 6.dp),
         ) {
-          Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-          ) {
+          Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             if (state.isPrePopulating) {
               CircularProgressIndicator(
                 modifier = Modifier.requiredSize(24.dp),
                 color = AppTheme.colorScheme.primary,
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
               )
             } else {
               Text(
@@ -133,7 +130,7 @@ internal fun OnboardingScreen(
           }
         }
       }
-    }
+    },
   ) { paddingValues ->
     Column(
       modifier =
@@ -148,13 +145,13 @@ internal fun OnboardingScreen(
         Brush.radialGradient(
           0.17f to backgroundColor.copy(alpha = 0.55f).compositeOver(Color.White),
           1f to backgroundColor,
-          center = Offset(20f, 24f)
+          center = Offset(20f, 24f),
         )
 
       Box(
         modifier =
           Modifier.requiredSize(128.dp).background(backgroundBrush, RoundedCornerShape(32.dp)),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
       ) {
         Icon(
           painter = painterResource(Res.drawable.ic_launcher_foreground),
@@ -170,13 +167,13 @@ internal fun OnboardingScreen(
         text = stringResource(Res.string.appName),
         style = MaterialTheme.typography.displayLarge,
         fontWeight = FontWeight.Bold,
-        color = AppTheme.colorScheme.textEmphasisHigh
+        color = AppTheme.colorScheme.textEmphasisHigh,
       )
 
       Text(
         text = stringResource(Res.string.onboardingSubtitle),
         style = MaterialTheme.typography.bodyLarge,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     }
   }

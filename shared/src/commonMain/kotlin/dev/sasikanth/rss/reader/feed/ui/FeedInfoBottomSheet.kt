@@ -142,9 +142,7 @@ fun FeedInfoBottomSheet(
       sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
       scrimColor = Color.Transparent,
     ) {
-      Column(
-        modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-      ) {
+      Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
         val feed = state.feed
         if (feed != null) {
           FeedLabelInput(
@@ -154,7 +152,7 @@ fun FeedInfoBottomSheet(
               feedViewModel.dispatch(
                 FeedEvent.OnFeedNameChanged(newFeedName = newFeedName, feedId = feed.id)
               )
-            }
+            },
           )
 
           Spacer(Modifier.requiredHeight(8.dp))
@@ -162,7 +160,7 @@ fun FeedInfoBottomSheet(
           FeedUnreadCount(
             modifier = Modifier.fillMaxWidth().padding(horizontal = HORIZONTAL_PADDING),
             numberOfUnreadPosts = feed.numberOfUnreadPosts,
-            onMarkPostsAsRead = { feedViewModel.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) }
+            onMarkPostsAsRead = { feedViewModel.dispatch(FeedEvent.OnMarkPostsAsRead(feed.id)) },
           )
 
           Divider()
@@ -171,7 +169,7 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnAlwaysFetchSourceArticleChanged(newValue, feedId))
-            }
+            },
           )
 
           Divider(horizontalInsets = HORIZONTAL_PADDING)
@@ -180,7 +178,7 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnShowFeedFavIconChanged(newValue, feedId))
-            }
+            },
           )
 
           Divider(horizontalInsets = HORIZONTAL_PADDING)
@@ -189,7 +187,7 @@ fun FeedInfoBottomSheet(
             feed = feed,
             onValueChanged = { newValue, feedId ->
               feedViewModel.dispatch(FeedEvent.OnHideFromAllFeedsChanged(newValue, feedId))
-            }
+            },
           )
 
           Divider()
@@ -197,14 +195,14 @@ fun FeedInfoBottomSheet(
           FeedOptions(
             modifier = Modifier.padding(horizontal = HORIZONTAL_PADDING),
             feed = feed,
-            onRemoveFeedClick = { feedViewModel.dispatch(FeedEvent.RemoveFeedClicked) }
+            onRemoveFeedClick = { feedViewModel.dispatch(FeedEvent.RemoveFeedClicked) },
           )
 
           Spacer(Modifier.requiredHeight(8.dp))
         } else {
           CircularProgressIndicator(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = AppTheme.colorScheme.tintedForeground
+            color = AppTheme.colorScheme.tintedForeground,
           )
         }
       }
@@ -221,7 +219,7 @@ private fun FeedUnreadCount(
   Row(
     modifier = modifier,
     horizontalArrangement = Arrangement.SpaceBetween,
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Spacer(Modifier.requiredWidth(8.dp))
 
@@ -231,7 +229,7 @@ private fun FeedUnreadCount(
         pluralStringResource(
           Res.plurals.numberOfUnreadPostsInFeed,
           numberOfUnreadPosts.toInt(),
-          numberOfUnreadPosts
+          numberOfUnreadPosts,
         )
       } else {
         stringResource(Res.string.noUnreadPostsInFeed)
@@ -252,8 +250,8 @@ private fun FeedUnreadCount(
       colors =
         ButtonDefaults.textButtonColors(
           disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-          contentColor = AppTheme.colorScheme.tintedForeground
-        )
+          contentColor = AppTheme.colorScheme.tintedForeground,
+        ),
     ) {
       Icon(
         modifier = Modifier.requiredSize(18.dp),
@@ -265,7 +263,7 @@ private fun FeedUnreadCount(
 
       Text(
         text = stringResource(Res.string.markAsRead),
-        style = MaterialTheme.typography.labelLarge
+        style = MaterialTheme.typography.labelLarge,
       )
     }
   }
@@ -299,7 +297,7 @@ private fun FeedLabelInput(
       Text(
         text = stringResource(Res.string.feedTitleHint),
         style = MaterialTheme.typography.labelSmall,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
 
       var input by remember(feed.name) { mutableStateOf(feed.name) }
@@ -313,7 +311,7 @@ private fun FeedLabelInput(
       val textSelectionColors =
         TextSelectionColors(
           handleColor = AppTheme.colorScheme.tintedForeground,
-          backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f)
+          backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
         )
 
       // Debounce input changes
@@ -347,7 +345,7 @@ private fun FeedLabelInput(
 
       HorizontalDivider(
         color = AppTheme.colorScheme.tintedHighlight,
-        modifier = Modifier.padding(end = 32.dp)
+        modifier = Modifier.padding(end = 32.dp),
       )
 
       Text(
@@ -356,7 +354,7 @@ private fun FeedLabelInput(
         maxLines = 2,
         overflow = TextOverflow.MiddleEllipsis,
         style = MaterialTheme.typography.labelSmall,
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     }
   }
@@ -374,21 +372,21 @@ private fun FeedOptions(feed: Feed, onRemoveFeedClick: () -> Unit, modifier: Mod
       icon = TwineIcons.CopyLink,
       label = stringResource(Res.string.feedOptionCopyLink),
       modifier = Modifier.weight(1f),
-      onClick = { coroutineScope.launch { clipboard.setClipEntry(feed.link.toClipEntry()) } }
+      onClick = { coroutineScope.launch { clipboard.setClipEntry(feed.link.toClipEntry()) } },
     )
 
     ContextActionItem(
       icon = TwineIcons.Website,
       label = stringResource(Res.string.feedOptionWebsite),
       modifier = Modifier.weight(1f),
-      onClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } }
+      onClick = { coroutineScope.launch { linkHandler.openLink(feed.link) } },
     )
 
     ContextActionItem(
       icon = TwineIcons.DeleteOutline,
       label = stringResource(Res.string.actionDelete),
       modifier = Modifier.weight(1f),
-      onClick = { showConfirmDialog = true }
+      onClick = { showConfirmDialog = true },
     )
   }
 
@@ -411,7 +409,7 @@ private fun AlwaysFetchSourceArticleSwitch(
     title = stringResource(Res.string.alwaysFetchSourceArticle),
     checked = feed.alwaysFetchSourceArticle,
     modifier = modifier,
-    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )
 }
 
@@ -425,7 +423,7 @@ private fun ShowFeedFavIconSwitch(
     title = stringResource(Res.string.showFeedFavIconTitle),
     checked = feed.showFeedFavIcon,
     modifier = modifier,
-    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )
 }
 
@@ -439,7 +437,7 @@ private fun HidePostsFromAllFeedsSwitch(
     title = stringResource(Res.string.hidePostsFromHome),
     checked = feed.hideFromAllFeeds,
     modifier = modifier,
-    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) }
+    onValueChanged = { newValue -> onValueChanged(newValue, feed.id) },
   )
 }
 
@@ -459,13 +457,13 @@ private fun FeedOptionSwitch(
           onValueChanged(checkedState)
         }
         .padding(vertical = 4.dp, horizontal = HORIZONTAL_PADDING),
-    verticalAlignment = Alignment.CenterVertically
+    verticalAlignment = Alignment.CenterVertically,
   ) {
     Text(
       modifier = Modifier.weight(1f),
       text = title,
       color = AppTheme.colorScheme.textEmphasisHigh,
-      style = MaterialTheme.typography.titleMedium
+      style = MaterialTheme.typography.titleMedium,
     )
 
     Spacer(Modifier.width(16.dp))
@@ -473,7 +471,7 @@ private fun FeedOptionSwitch(
     Switch(
       modifier = modifier,
       checked = checkedState,
-      onCheckedChange = { newValue -> onValueChanged(newValue) }
+      onCheckedChange = { newValue -> onValueChanged(newValue) },
     )
   }
 }
@@ -482,6 +480,6 @@ private fun FeedOptionSwitch(
 private fun Divider(horizontalInsets: Dp = 0.dp) {
   HorizontalDivider(
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
-    color = AppTheme.colorScheme.outlineVariant
+    color = AppTheme.colorScheme.outlineVariant,
   )
 }

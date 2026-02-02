@@ -61,8 +61,8 @@ internal fun LazyListScope.sourcesSearchResults(
             start = startPadding,
             top = topPadding,
             end = endPadding,
-            bottom = bottomPadding
-          )
+            bottom = bottomPadding,
+          ),
       )
     }
   }

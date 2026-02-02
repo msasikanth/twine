@@ -31,7 +31,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class PlaceholderViewModel(
   private val rssRepository: RssRepository,
-  private val settingsRepository: SettingsRepository
+  private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
   private val _navigateToHome = MutableStateFlow(false)

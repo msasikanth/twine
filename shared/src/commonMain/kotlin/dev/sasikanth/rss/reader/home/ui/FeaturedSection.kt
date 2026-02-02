@@ -101,7 +101,7 @@ internal fun FeaturedSection(
         PaddingValues(
           start = systemBarsHorizontalPadding + 16.dp,
           end = systemBarsHorizontalPadding + 16.dp,
-          bottom = 24.dp
+          bottom = 24.dp,
         )
       }
 
@@ -146,7 +146,7 @@ internal fun FeaturedSection(
                       radiusY = blurRadius.toPx(),
                       edgeTreatment = TileMode.Decal,
                     )
-                },
+                }
             ) {
               if (isImageRecorded) {
                 val imageWidth = imageGraphicsLayer.size.width
@@ -158,11 +158,7 @@ internal fun FeaturedSection(
                 val scaleX = canvasWidth / imageWidth
                 val scaleY = canvasHeight / imageHeight
 
-                scale(
-                  scaleX = scaleX,
-                  scaleY = scaleY,
-                  pivot = Offset.Zero,
-                ) {
+                scale(scaleX = scaleX, scaleY = scaleY, pivot = Offset.Zero) {
                   drawLayer(imageGraphicsLayer)
                 }
               }
@@ -195,9 +191,9 @@ internal fun FeaturedSection(
                       horizontalBias = { pagerState.getOffsetFractionForPage(page) },
                       multiplier = 2f,
                     )
-                  }
+                  },
               )
-            }
+            },
           )
         }
       }
@@ -219,7 +215,7 @@ internal fun FeaturedSection(
 
       HorizontalPageIndicators(
         modifier = Modifier.padding(vertical = 8.dp).align(Alignment.BottomCenter),
-        pageIndicatorState = pageIndicatorState
+        pageIndicatorState = pageIndicatorState,
       )
     }
   }

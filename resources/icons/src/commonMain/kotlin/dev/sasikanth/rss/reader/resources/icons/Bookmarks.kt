@@ -37,7 +37,7 @@ val TwineIcons.Bookmarks: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 24.0f,
-          viewportHeight = 24.0f
+          viewportHeight = 24.0f,
         )
         .apply {
           path(
@@ -47,7 +47,7 @@ val TwineIcons.Bookmarks: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(3.0f, 23.0f)
             verticalLineTo(7.0f)

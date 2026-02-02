@@ -77,7 +77,7 @@ class MinifluxLoginViewModel(
               id = userInfo.id.toString(),
               name = userInfo.username,
               token = apiKey,
-              serverUrl = endpoint
+              serverUrl = endpoint,
             )
           _state.update { it.copy(isLoading = false, showConfirmationDialog = true) }
         } else {
@@ -109,7 +109,7 @@ class MinifluxLoginViewModel(
           token = userInfo.token,
           refreshToken = "",
           serverUrl = userInfo.serverUrl,
-          serviceType = ServiceType.MINIFLUX
+          serviceType = ServiceType.MINIFLUX,
         )
 
         Logger.d { "Miniflux login: user saved, finishing login" }
@@ -127,7 +127,7 @@ class MinifluxLoginViewModel(
     val id: String,
     val name: String,
     val token: String,
-    val serverUrl: String
+    val serverUrl: String,
   )
 }
 
@@ -137,7 +137,7 @@ data class MinifluxLoginState(
   val isLoading: Boolean,
   val loginSuccess: Boolean,
   val showConfirmationDialog: Boolean,
-  val error: MinifluxLoginError?
+  val error: MinifluxLoginError?,
 ) {
   companion object {
     val DEFAULT =
@@ -147,7 +147,7 @@ data class MinifluxLoginState(
         isLoading = false,
         loginSuccess = false,
         showConfirmationDialog = false,
-        error = null
+        error = null,
       )
   }
 }

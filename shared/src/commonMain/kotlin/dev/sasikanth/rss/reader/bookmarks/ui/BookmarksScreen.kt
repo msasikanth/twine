@@ -71,7 +71,7 @@ internal fun BookmarksScreen(
   bookmarksViewModel: BookmarksViewModel,
   goBack: () -> Unit,
   openPost: (postIndex: Int, post: ResolvedPost) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by bookmarksViewModel.state.collectAsStateWithLifecycle()
   val bookmarks = state.bookmarks.collectAsLazyPagingItems()
@@ -107,13 +107,13 @@ internal fun BookmarksScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -124,9 +124,9 @@ internal fun BookmarksScreen(
             contentPadding =
               PaddingValues(
                 bottom = padding.calculateBottomPadding() + 80.dp,
-                top = padding.calculateTopPadding()
+                top = padding.calculateTopPadding(),
               ),
-            state = listState
+            state = listState,
           ) {
             items(count = bookmarks.itemCount) { index ->
               val post = bookmarks[index]
@@ -152,13 +152,13 @@ internal fun BookmarksScreen(
                     PostMetadataConfig.DEFAULT.copy(
                       showUnreadIndicator = false,
                       showToggleReadUnreadOption = false,
-                      enablePostSource = false
-                    )
+                      enablePostSource = false,
+                    ),
                 )
                 if (index != bookmarks.itemCount - 1) {
                   HorizontalDivider(
                     modifier = Modifier.fillParentMaxWidth().padding(horizontal = 24.dp),
-                    color = AppTheme.colorScheme.outlineVariant
+                    color = AppTheme.colorScheme.outlineVariant,
                   )
                 }
               }
@@ -171,9 +171,9 @@ internal fun BookmarksScreen(
             modifier =
               Modifier.padding(
                 end = padding.calculateEndPadding(layoutDirection) + 16.dp,
-                bottom = padding.calculateBottomPadding() + 16.dp
+                bottom = padding.calculateBottomPadding() + 16.dp,
               ),
-            onLoadNewArticlesClick = {}
+            onLoadNewArticlesClick = {},
           ) {
             listState.animateScrollToItem(0)
           }
@@ -185,7 +185,7 @@ internal fun BookmarksScreen(
               imageVector = TwineIcons.BookmarkStacks,
               contentDescription = null,
               modifier = Modifier.size(80.dp),
-              tint = AppTheme.colorScheme.textEmphasisHigh
+              tint = AppTheme.colorScheme.textEmphasisHigh,
             )
 
             Spacer(Modifier.requiredHeight(16.dp))
@@ -193,13 +193,13 @@ internal fun BookmarksScreen(
             Text(
               text = stringResource(Res.string.bookmarksPlaceholder),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.textEmphasisMed
+              color = AppTheme.colorScheme.textEmphasisMed,
             )
           }
         }
       }
     },
     containerColor = AppTheme.colorScheme.backdrop,
-    contentColor = Color.Unspecified
+    contentColor = Color.Unspecified,
   )
 }

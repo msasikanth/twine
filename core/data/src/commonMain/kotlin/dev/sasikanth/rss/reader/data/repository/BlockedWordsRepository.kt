@@ -47,7 +47,7 @@ class BlockedWordsRepository(
       blockedWordsQueries.insert(
         id = uuid.toString(),
         content = word,
-        updatedAt = Clock.System.now()
+        updatedAt = Clock.System.now(),
       )
     }
   }
@@ -88,7 +88,7 @@ class BlockedWordsRepository(
             id = blockedWord.id,
             content = blockedWord.content,
             isDeleted = blockedWord.isDeleted,
-            updatedAt = Instant.fromEpochMilliseconds(blockedWord.updatedAt)
+            updatedAt = Instant.fromEpochMilliseconds(blockedWord.updatedAt),
           )
         }
       }

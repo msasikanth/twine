@@ -395,9 +395,9 @@ class MinifluxSyncCoordinator(
                   description = "",
                   homepageLink = remoteFeed.siteUrl,
                   link = remoteFeed.feedUrl,
-                  posts = emptyFlow()
+                  posts = emptyFlow(),
                 ),
-              updateFeed = true
+              updateFeed = true,
             )
             .also {
               hasNewSubscriptions = true
@@ -421,7 +421,7 @@ class MinifluxSyncCoordinator(
               pinnedAt = localGroup.pinnedAt,
               updatedAt = syncStartTime,
               isDeleted = false,
-              remoteId = category.id.toString()
+              remoteId = category.id.toString(),
             )
           }
           localGroup.id
@@ -432,7 +432,7 @@ class MinifluxSyncCoordinator(
             pinnedAt = null,
             updatedAt = syncStartTime,
             isDeleted = false,
-            remoteId = category.id.toString()
+            remoteId = category.id.toString(),
           )
           rssRepository.feedGroupByRemoteId(category.id.toString())!!.id
         }
@@ -444,7 +444,7 @@ class MinifluxSyncCoordinator(
       if (groupsContainingFeed.isNotEmpty()) {
         rssRepository.removeFeedIdsFromGroups(
           groupIds = groupsContainingFeed.map { it.id }.toSet(),
-          feedIds = listOf(feedId)
+          feedIds = listOf(feedId),
         )
       }
 
@@ -496,10 +496,7 @@ class MinifluxSyncCoordinator(
     return hasNewArticles
   }
 
-  private suspend fun upsertArticle(
-    entry: MinifluxEntry,
-    downloadFullContent: Boolean,
-  ): Boolean {
+  private suspend fun upsertArticle(entry: MinifluxEntry, downloadFullContent: Boolean): Boolean {
     val remoteId = entry.id.toString()
     val localPost = rssRepository.postByRemoteId(remoteId) ?: rssRepository.postByLink(entry.url)
 
@@ -519,6 +516,7 @@ class MinifluxSyncCoordinator(
             null
           }
         val postPubDateInMillis = entry.publishedAt.dateStringToEpochMillis()
+        val audioUrl = entry.enclosures.firstOrNull { it.mimeType.startsWith("audio/") }?.url
         val postPayload =
           PostPayload(
             title = entry.title,
@@ -526,10 +524,11 @@ class MinifluxSyncCoordinator(
             description = htmlContent?.textContent ?: "",
             rawContent = htmlContent?.cleanedHtml ?: entry.content,
             imageUrl = htmlContent?.heroImage,
+            audioUrl = audioUrl,
             date = postPubDateInMillis ?: Clock.System.now().toEpochMilliseconds(),
             commentsLink = entry.commentsUrl,
             fullContent = fullContent,
-            isDateParsedCorrectly = postPubDateInMillis != null
+            isDateParsedCorrectly = postPubDateInMillis != null,
           )
 
         rssRepository.upsertFeedWithPosts(
@@ -540,10 +539,10 @@ class MinifluxSyncCoordinator(
               description = feed.description,
               homepageLink = feed.homepageLink,
               link = feed.link,
-              posts = flowOf(postPayload)
+              posts = flowOf(postPayload),
             ),
           feedId = feed.id,
-          updateFeed = false
+          updateFeed = false,
         )
 
         rssRepository.postByLink(postPayload.link)?.let {
@@ -618,10 +617,7 @@ class MinifluxSyncCoordinator(
 
     while (true) {
       val dirtyPosts =
-        rssRepository.postsWithLocalChangesPaged(
-          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
-          offset = 0,
-        )
+        rssRepository.postsWithLocalChangesPaged(limit = LOCAL_POSTS_PAGE_SIZE.toLong(), offset = 0)
       if (dirtyPosts.isEmpty()) return
 
       val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
@@ -692,7 +688,7 @@ class MinifluxSyncCoordinator(
 
   private suspend fun findOrCreateDefaultCategory(
     categories: List<MinifluxCategory>,
-    syncStartTime: Instant
+    syncStartTime: Instant,
   ): MinifluxCategory {
     val category =
       categories.find { it.title.equals(DEFAULT_CATEGORY_TITLE, ignoreCase = true) }

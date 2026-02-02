@@ -114,7 +114,8 @@ class FavIconFetcher(
     val faviconUrl =
       linkRelTag(document, "apple-touch-icon")
         ?: linkRelTag(document, "apple-touch-icon-precomposed")
-          ?: linkRelTag(document, "shortcut icon") ?: linkRelTag(document, "icon")
+        ?: linkRelTag(document, "shortcut icon")
+        ?: linkRelTag(document, "icon")
 
     return faviconUrl
   }
@@ -256,19 +257,13 @@ class FavIconFetcher(
   private val fileSystem: FileSystem
     get() = diskCache.value?.fileSystem ?: options.fileSystem
 
-  class Factory(
-    networkClient: () -> NetworkClient,
-    cacheStrategy: () -> CacheStrategy,
-  ) : Fetcher.Factory<Uri> {
+  class Factory(networkClient: () -> NetworkClient, cacheStrategy: () -> CacheStrategy) :
+    Fetcher.Factory<Uri> {
 
     private val networkClientLazy = lazy(networkClient)
     private val cacheStrategyLazy = lazy(cacheStrategy)
 
-    override fun create(
-      data: Uri,
-      options: Options,
-      imageLoader: ImageLoader,
-    ): Fetcher? {
+    override fun create(data: Uri, options: Options, imageLoader: ImageLoader): Fetcher? {
       if (!isApplicable(data)) return null
       val diskCacheLazy = lazy { imageLoader.diskCache }
 
@@ -285,9 +280,9 @@ class FavIconFetcher(
             networkClient = networkClientLazy,
             diskCache = diskCacheLazy,
             cacheStrategy = cacheStrategyLazy,
-            connectivityChecker = ConnectivityChecker.ONLINE
+            connectivityChecker = ConnectivityChecker.ONLINE,
           )
-        }
+        },
       )
     }
 

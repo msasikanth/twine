@@ -44,7 +44,7 @@ class HtmlReadabilityRunner(private val dispatchersProvider: DispatchersProvider
   override suspend fun parseHtml(
     link: String?,
     content: String,
-    image: String?
+    image: String?,
   ): ReadabilityResult =
     withContext(dispatchersProvider.io) {
       // Use CHROME as it is generally the most compatible, but Rhino is the engine.

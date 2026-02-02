@@ -38,7 +38,7 @@ public val TwineIcons.Newsstand: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 960.0f,
-          viewportHeight = 960.0f
+          viewportHeight = 960.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ public val TwineIcons.Newsstand: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(120.0f, 800.0f)
             quadToRelative(-17.0f, 0.0f, -28.5f, -11.5f)

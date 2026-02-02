@@ -25,6 +25,5 @@ internal sealed interface Modals {
 
   @Serializable data class FeedInfo(val feedId: String) : Modals
 
-  @Serializable
-  data class GroupSelection(val selectedGroupIds: List<String> = emptyList()) : Modals
+  @Serializable data class GroupSelection(val selectedGroupIds: List<String> = emptyList()) : Modals
 }

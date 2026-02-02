@@ -40,7 +40,7 @@ actual interface NetworkComponent {
           setAllowsCellularAccess(true)
           request { timeout { connectTimeoutMillis = 10_000 } }
         }
-      }
+      },
     )
   }
 

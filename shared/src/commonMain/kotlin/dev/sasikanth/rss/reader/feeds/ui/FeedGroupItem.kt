@@ -101,7 +101,7 @@ internal fun FeedGroupItem(
           onLongClick = {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
             onFeedGroupSelected(feedGroup)
-          }
+          },
         )
         .padding(8.dp)
   ) {
@@ -127,7 +127,7 @@ internal fun FeedGroupItem(
           style = MaterialTheme.typography.titleSmall,
           color = AppTheme.colorScheme.textEmphasisHigh,
           maxLines = 1,
-          overflow = TextOverflow.Ellipsis
+          overflow = TextOverflow.Ellipsis,
         )
 
         val text =
@@ -137,7 +137,7 @@ internal fun FeedGroupItem(
             pluralStringResource(
               Res.plurals.feedGroupFeeds,
               feedGroup.feedIds.size,
-              feedGroup.feedIds.size
+              feedGroup.feedIds.size,
             )
           }
 
@@ -146,7 +146,7 @@ internal fun FeedGroupItem(
           style = MaterialTheme.typography.bodyMedium,
           color = AppTheme.colorScheme.textEmphasisMed,
           maxLines = 1,
-          overflow = TextOverflow.Ellipsis
+          overflow = TextOverflow.Ellipsis,
         )
       }
 
@@ -157,12 +157,12 @@ internal fun FeedGroupItem(
         Badge(
           containerColor = translucentStyle.prominent.background,
           contentColor = AppTheme.colorScheme.secondary,
-          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp)
+          modifier = Modifier.sizeIn(minWidth = 36.dp, minHeight = 24.dp),
         ) {
           Text(
             text = feedGroup.numberOfUnreadPosts.toString(),
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = Modifier.align(Alignment.CenterVertically),
           )
         }
       }
@@ -176,10 +176,7 @@ internal fun FeedGroupItem(
       }
 
       if (!isInMultiSelectMode && dragHandle == null) {
-        IconButton(
-          modifier = Modifier.requiredSize(40.dp),
-          onClick = onOptionsClick,
-        ) {
+        IconButton(modifier = Modifier.requiredSize(40.dp), onClick = onOptionsClick) {
           Icon(
             modifier = Modifier.requiredSize(20.dp),
             imageVector = Icons.Filled.MoreVert,

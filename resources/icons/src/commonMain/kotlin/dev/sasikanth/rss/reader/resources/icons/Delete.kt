@@ -38,7 +38,7 @@ val TwineIcons.Delete: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 960.0f,
-          viewportHeight = 960.0f
+          viewportHeight = 960.0f,
         )
         .apply {
           path(
@@ -48,7 +48,7 @@ val TwineIcons.Delete: ImageVector
             strokeLineCap = Butt,
             strokeLineJoin = Miter,
             strokeLineMiter = 4.0f,
-            pathFillType = NonZero
+            pathFillType = NonZero,
           ) {
             moveTo(280.0f, 840.0f)
             quadToRelative(-33.0f, 0.0f, -56.5f, -23.5f)

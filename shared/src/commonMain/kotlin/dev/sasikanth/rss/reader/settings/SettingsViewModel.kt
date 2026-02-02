@@ -61,7 +61,7 @@ class SettingsViewModel(
   private val appIconManager: AppIconManager,
   private val refreshPolicy: RefreshPolicy,
   private val imageLoader: ImageLoader,
-  val availableProviders: Set<CloudServiceProvider>
+  val availableProviders: Set<CloudServiceProvider>,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(SettingsState.default(appInfo))
@@ -157,7 +157,7 @@ class SettingsViewModel(
                 SettingsState.SyncProgress.Syncing
               } else {
                 settings.lastSyncStatus
-              }
+              },
           )
         }
       }

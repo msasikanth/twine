@@ -38,7 +38,7 @@ public val TwineIcons.FilterList: ImageVector
           defaultWidth = 24.0.dp,
           defaultHeight = 24.0.dp,
           viewportWidth = 960.0f,
-          viewportHeight = 960.0f
+          viewportHeight = 960.0f,
         )
         .apply {
           group(translationX = -0.0f, translationY = 960.0f) {
@@ -49,7 +49,7 @@ public val TwineIcons.FilterList: ImageVector
               strokeLineCap = Butt,
               strokeLineJoin = Miter,
               strokeLineMiter = 4.0f,
-              pathFillType = NonZero
+              pathFillType = NonZero,
             ) {
               moveTo(440.0f, -240.0f)
               quadToRelative(-17.0f, 0.0f, -28.5f, -11.5f)

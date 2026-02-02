@@ -52,7 +52,7 @@ class PostContentRepository(
           feedContent = feedContent,
           articleContent = articleContent,
           feedContentReadingTime = feedContentReadingTime?.toInt(),
-          articleContentReadingTime = articleContentReadingTime?.toInt()
+          articleContentReadingTime = articleContentReadingTime?.toInt(),
         )
       }
       .asFlow()
@@ -69,7 +69,7 @@ class PostContentRepository(
       postContentQueries.updateArticleContent(
         articleContent = articleContent,
         articleContentReadingTime = readingTime.toLong(),
-        id = postId
+        id = postId,
       )
     }
   }

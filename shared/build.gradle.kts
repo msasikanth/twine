@@ -42,6 +42,8 @@ kotlin {
       "-linker-option", "-framework", "-linker-option", "Metal",
       "-linker-option", "-framework", "-linker-option", "CoreText",
       "-linker-option", "-framework", "-linker-option", "CoreGraphics",
+      "-linker-option", "-framework", "-linker-option", "AVFoundation",
+      "-linker-option", "-framework", "-linker-option", "MediaPlayer",
     )
   // spotless:on
 
@@ -144,6 +146,10 @@ kotlin {
         implementation(libs.kermit.bugsnag)
         implementation(libs.purchases.core)
         implementation(libs.purchases.ui)
+        api(libs.androidx.media3.exoplayer)
+        api(libs.androidx.media3.session)
+        api(libs.androidx.media3.ui)
+        implementation(libs.kotlinx.coroutines.guava)
 
         if (!isFoss) {
           implementation(libs.googlePlayReview)
@@ -162,6 +168,7 @@ kotlin {
     jvmMain.dependencies {
       implementation(libs.ktor.client.okhttp)
       implementation(libs.htmlunit)
+      implementation(libs.vlcj)
     }
 
     compilerOptions { optIn.add("kotlin.time.ExperimentalTime") }

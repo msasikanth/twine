@@ -63,10 +63,10 @@ fun Button(
       containerColor = AppTheme.colorScheme.tintedForeground,
       contentColor = AppTheme.colorScheme.tintedBackground,
       disabledContainerColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-      disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+      disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
     ),
   elevation: ButtonElevation? = null,
-  content: @Composable RowScope.() -> Unit
+  content: @Composable RowScope.() -> Unit,
 ) {
   androidx.compose.material3.Button(
     modifier = modifier,
@@ -104,16 +104,16 @@ fun FilledIconButton(
           interactionSource = interactionSource,
           indication = ripple(color = AppTheme.colorScheme.secondary),
           enabled = enabled,
-          onClick = onClick
+          onClick = onClick,
         )
         .then(modifier),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Icon(
       modifier = Modifier.requiredSize(size.iconSize),
       imageVector = icon,
       contentDescription = contentDescription,
-      tint = iconTint
+      tint = iconTint,
     )
   }
 }
@@ -139,16 +139,16 @@ fun IconButton(
           interactionSource = interactionSource,
           indication = ripple(color = AppTheme.colorScheme.secondary),
           enabled = enabled,
-          onClick = onClick
+          onClick = onClick,
         )
         .then(modifier),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Icon(
       modifier = Modifier.requiredSize(20.dp),
       imageVector = icon,
       contentDescription = contentDescription,
-      tint = AppTheme.colorScheme.secondary
+      tint = AppTheme.colorScheme.secondary,
     )
   }
 }
@@ -159,7 +159,7 @@ fun CircularIconButton(
   label: String,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
-  onClick: () -> Unit
+  onClick: () -> Unit,
 ) {
   val animatedAlpha by animateFloatAsState(if (enabled) 1.0f else 0.12f)
   val translucentStyle = LocalTranslucentStyles.current
@@ -177,7 +177,7 @@ fun CircularIconButton(
           role = Role.Button
         }
         .graphicsLayer { alpha = animatedAlpha },
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     Icon(
       modifier = Modifier.requiredSize(20.dp),
@@ -188,10 +188,7 @@ fun CircularIconButton(
   }
 }
 
-enum class IconButtonSize(
-  val containerSize: Dp,
-  val iconSize: Dp,
-) {
+enum class IconButtonSize(val containerSize: Dp, val iconSize: Dp) {
   Default(containerSize = 40.dp, iconSize = 20.dp),
-  Large(containerSize = 56.dp, iconSize = 24.dp)
+  Large(containerSize = 56.dp, iconSize = 24.dp),
 }

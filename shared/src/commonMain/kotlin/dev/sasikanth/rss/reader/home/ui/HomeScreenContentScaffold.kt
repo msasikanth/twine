@@ -47,9 +47,7 @@ internal fun HomeScreenContentScaffold(
   val homeTopAppBarContent = remember { @Composable { latestHomeTopAppBar() } }
   val bodyContent = remember { @Composable { latestBody(paddingValues) } }
 
-  SubcomposeLayout(
-    modifier = Modifier.fillMaxSize().then(modifier),
-  ) { constraints ->
+  SubcomposeLayout(modifier = Modifier.fillMaxSize().then(modifier)) { constraints ->
     val layoutWidth = constraints.maxWidth
     val layoutHeight = constraints.maxHeight
     val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)

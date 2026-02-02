@@ -85,7 +85,7 @@ import twine.shared.generated.resources.delete
 fun BlockedWordsScreen(
   viewModel: BlockedWordsViewModel,
   goBack: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -106,7 +106,7 @@ fun BlockedWordsScreen(
               modifier = Modifier.padding(start = 12.dp),
               icon = TwineIcons.ArrowBack,
               label = stringResource(Res.string.buttonGoBack),
-              onClick = { goBack() }
+              onClick = { goBack() },
             )
           },
           colors =
@@ -114,13 +114,13 @@ fun BlockedWordsScreen(
               containerColor = AppTheme.colorScheme.surface,
               navigationIconContentColor = AppTheme.colorScheme.onSurface,
               titleContentColor = AppTheme.colorScheme.onSurface,
-              actionIconContentColor = AppTheme.colorScheme.onSurface
+              actionIconContentColor = AppTheme.colorScheme.onSurface,
             ),
         )
 
         HorizontalDivider(
           modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-          color = AppTheme.colorScheme.outlineVariant
+          color = AppTheme.colorScheme.outlineVariant,
         )
       }
     },
@@ -143,10 +143,7 @@ fun BlockedWordsScreen(
       TextField(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).requiredHeight(56.dp),
         state = newBlockedWord,
-        keyboardOptions =
-          KeyboardOptions(
-            imeAction = ImeAction.Done,
-          ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         onKeyboardAction = {
           viewModel.dispatch(BlockedWordsEvent.AddBlockedWord(newBlockedWord.text.toString()))
           newBlockedWord.clearText()
@@ -168,14 +165,14 @@ fun BlockedWordsScreen(
             selectionColors =
               TextSelectionColors(
                 handleColor = AppTheme.colorScheme.tintedHighlight,
-                backgroundColor = AppTheme.colorScheme.tintedHighlight.copy(0.4f)
-              )
+                backgroundColor = AppTheme.colorScheme.tintedHighlight.copy(0.4f),
+              ),
           ),
         placeholder = {
           Text(
             text = stringResource(Res.string.blockedWordsHint),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisHigh
+            color = AppTheme.colorScheme.textEmphasisHigh,
           )
         },
         trailingIcon = {
@@ -183,7 +180,7 @@ fun BlockedWordsScreen(
           AnimatedVisibility(
             visible = hasContent,
             enter = fadeIn() + expandHorizontally(expandFrom = Alignment.Start),
-            exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start)
+            exit = fadeOut() + shrinkHorizontally(shrinkTowards = Alignment.Start),
           ) {
             IconButton(
               onClick = {
@@ -193,7 +190,7 @@ fun BlockedWordsScreen(
             ) {
               Icon(
                 imageVector = Icons.Rounded.Check,
-                contentDescription = stringResource(Res.string.buttonAdd)
+                contentDescription = stringResource(Res.string.buttonAdd),
               )
             }
           }
@@ -209,12 +206,12 @@ fun BlockedWordsScreen(
               modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
               text = stringResource(Res.string.blockedWordsDesc),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.textEmphasisMed
+              color = AppTheme.colorScheme.textEmphasisMed,
             )
 
             HorizontalDivider(
               modifier = Modifier.padding(vertical = 16.dp),
-              color = AppTheme.colorScheme.outlineVariant
+              color = AppTheme.colorScheme.outlineVariant,
             )
           }
         }
@@ -239,13 +236,13 @@ fun BlockedWordsScreen(
               word = blockedWord,
               removeClicked = {
                 viewModel.dispatch(BlockedWordsEvent.DeleteBlockedWord(blockedWord.id))
-              }
+              },
             )
 
             if (index < state.blockedWords.lastIndex) {
               HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp),
-                color = AppTheme.colorScheme.outlineVariant
+                color = AppTheme.colorScheme.outlineVariant,
               )
             }
           }
@@ -259,12 +256,9 @@ fun BlockedWordsScreen(
 private fun BlockedWordItem(
   word: BlockedWord,
   removeClicked: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
-  Row(
-    modifier = modifier.then(modifier),
-    verticalAlignment = Alignment.CenterVertically,
-  ) {
+  Row(modifier = modifier.then(modifier), verticalAlignment = Alignment.CenterVertically) {
     Text(
       modifier = Modifier.weight(1f),
       text = word.content,

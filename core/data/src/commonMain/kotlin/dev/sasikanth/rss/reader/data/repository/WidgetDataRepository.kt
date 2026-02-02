@@ -83,6 +83,7 @@ class WidgetDataRepository(
           title: String,
           description: String,
           imageUrl: String?,
+          audioUrl: String?,
           date: Instant,
           createdAt: Instant,
           link: String,
@@ -106,7 +107,7 @@ class WidgetDataRepository(
             feedName = feedName,
             feedIcon = feedIcon,
           )
-        }
+        },
       )
       .asFlow()
       .mapToList(dispatchersProvider.databaseRead)
@@ -124,6 +125,7 @@ class WidgetDataRepository(
             title: String,
             description: String,
             imageUrl: String?,
+            audioUrl: String?,
             date: Instant,
             createdAt: Instant,
             link: String,
@@ -146,7 +148,7 @@ class WidgetDataRepository(
               feedName = feedName,
               feedIcon = feedIcon,
             )
-          }
+          },
         )
         .executeAsList()
     }
@@ -167,6 +169,7 @@ class WidgetDataRepository(
             title,
             description,
             imageUrl,
+            audioUrl,
             date,
             createdAt,
             link,
@@ -186,6 +189,7 @@ class WidgetDataRepository(
               title = title,
               description = description,
               imageUrl = imageUrl,
+              audioUrl = audioUrl,
               date = date,
               createdAt = createdAt,
               link = link,
@@ -200,9 +204,9 @@ class WidgetDataRepository(
               articleContentReadingTime = articleContentReadingTime?.toInt(),
               remoteId = remoteId,
             )
-          }
+          },
         )
-      }
+      },
     )
   }
 }

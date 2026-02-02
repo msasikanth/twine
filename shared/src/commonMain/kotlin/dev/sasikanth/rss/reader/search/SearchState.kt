@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.emptyFlow
 data class SearchState(
   val searchResults: Flow<PagingData<ResolvedPost>>,
   val searchInProgress: Boolean,
-  val searchSortOrder: SearchSortOrder
+  val searchSortOrder: SearchSortOrder,
 ) {
 
   companion object {
@@ -35,7 +35,7 @@ data class SearchState(
       SearchState(
         searchResults = emptyFlow(),
         searchInProgress = false,
-        searchSortOrder = SearchSortOrder.Newest
+        searchSortOrder = SearchSortOrder.Newest,
       )
   }
 
@@ -43,6 +43,6 @@ data class SearchState(
     copy(
       searchResults = emptyFlow(),
       searchInProgress = false,
-      searchSortOrder = SearchSortOrder.Newest
+      searchSortOrder = SearchSortOrder.Newest,
     )
 }

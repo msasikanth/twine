@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
     enableEdgeToEdge(
       statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
-      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
+      navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
     )
 
     intent.data?.let { ExternalUriHandler.onNewUri(it.toString()) }
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
         { isLightNavBar ->
           WindowCompat.getInsetsController(window, window.decorView)
             .isAppearanceLightNavigationBars = isLightNavBar
-        }
+        },
       )
     }
   }
@@ -117,7 +117,7 @@ fun ApplicationComponent.Companion.from(activity: Activity) =
 @ActivityScope
 abstract class ActivityComponent(
   @get:Provides val activity: ComponentActivity,
-  @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity)
+  @Component val applicationComponent: ApplicationComponent = ApplicationComponent.from(activity),
 ) : PlatformComponent, ShareComponent {
 
   abstract val app: App

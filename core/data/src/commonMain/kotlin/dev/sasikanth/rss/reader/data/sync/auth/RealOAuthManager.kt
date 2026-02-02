@@ -88,7 +88,7 @@ class RealOAuthManager(
                   append("client_id", DROPBOX_CLIENT_ID)
                   append("redirect_uri", redirectUri)
                   append("code_verifier", verifier)
-                }
+                },
             )
             .body()
 
@@ -136,7 +136,4 @@ internal data class DropboxTokenResponse(
   @SerialName("refresh_token") val refreshToken: String? = null,
 )
 
-@Serializable
-internal data class DropboxName(
-  @SerialName("display_name") val displayName: String,
-)
+@Serializable internal data class DropboxName(@SerialName("display_name") val displayName: String)

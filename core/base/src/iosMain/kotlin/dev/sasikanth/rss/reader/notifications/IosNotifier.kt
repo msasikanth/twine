@@ -51,7 +51,7 @@ class IosNotifier : Notifier {
       UNNotificationRequest.requestWithIdentifier(
         identifier = notificationId.toString(),
         content = notificationContent,
-        trigger = null
+        trigger = null,
       )
 
     UNUserNotificationCenter.currentNotificationCenter().addNotificationRequest(request) { error ->
@@ -95,7 +95,7 @@ class IosNotifier : Notifier {
       UIApplication.sharedApplication.openURL(
         url = url,
         options = emptyMap<Any?, Any>(),
-        completionHandler = null
+        completionHandler = null,
       )
     }
   }

@@ -23,7 +23,7 @@ data class NTuple6<T1, T2, T3, T4, T5, T6>(
   val t3: T3,
   val t4: T4,
   val t5: T5,
-  val t6: T6
+  val t6: T6,
 )
 
 data class NTuple7<T1, T2, T3, T4, T5, T6, T7>(
@@ -33,5 +33,5 @@ data class NTuple7<T1, T2, T3, T4, T5, T6, T7>(
   val t4: T4,
   val t5: T5,
   val t6: T6,
-  val t7: T7
+  val t7: T7,
 )

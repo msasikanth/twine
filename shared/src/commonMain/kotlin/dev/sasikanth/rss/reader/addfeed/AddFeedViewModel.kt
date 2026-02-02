@@ -53,7 +53,7 @@ class AddFeedViewModel(
         addFeed(
           feedLink = event.feedLink,
           title = event.name,
-          groups = _state.value.selectedFeedGroups
+          groups = _state.value.selectedFeedGroups,
         )
       is AddFeedEvent.OnGroupsSelected -> onGroupsSelected(event.selectedGroupIds)
       is AddFeedEvent.OnRemoveGroupClicked -> onRemoveSelectedGroup(event.group)
@@ -83,11 +83,7 @@ class AddFeedViewModel(
     }
   }
 
-  private fun addFeed(
-    feedLink: String,
-    title: String?,
-    groups: Set<FeedGroup>,
-  ) {
+  private fun addFeed(feedLink: String, title: String?, groups: Set<FeedGroup>) {
     if (feedLink.isBlank()) return
 
     viewModelScope.launch {
@@ -112,7 +108,7 @@ class AddFeedViewModel(
                 )
               rssRepository.addFeedIdsToGroups(
                 groupIds = groups.map { it.id }.toSet(),
-                feedIds = listOf(feedId)
+                feedIds = listOf(feedId),
               )
             } catch (e: Exception) {
               handleDatabaseErrors(FeedAddResult.DatabaseError(e), feedLink)
@@ -132,10 +128,7 @@ class AddFeedViewModel(
     }
   }
 
-  private fun handleNetworkErrors(
-    error: FeedFetchResult.Error,
-    feedLink: String,
-  ) {
+  private fun handleNetworkErrors(error: FeedFetchResult.Error, feedLink: String) {
     when (error.exception) {
       is UnsupportedOperationException -> {
         _state.update { it.copy(error = AddFeedErrorType.UnknownFeedType) }
@@ -146,7 +139,7 @@ class AddFeedViewModel(
         _state.update { it.copy(error = AddFeedErrorType.FailedToParseXML) }
       }
       is ConnectTimeoutException,
-      is SocketTimeoutException, -> {
+      is SocketTimeoutException -> {
         _state.update { it.copy(error = AddFeedErrorType.Timeout) }
       }
       else -> {
@@ -162,7 +155,7 @@ class AddFeedViewModel(
       HttpStatusCode.BadRequest,
       HttpStatusCode.Unauthorized,
       HttpStatusCode.PaymentRequired,
-      HttpStatusCode.Forbidden, -> {
+      HttpStatusCode.Forbidden -> {
         _state.update { it.copy(error = AddFeedErrorType.UnAuthorized(statusCode)) }
       }
       HttpStatusCode.NotFound -> {
@@ -172,7 +165,7 @@ class AddFeedViewModel(
       HttpStatusCode.NotImplemented,
       HttpStatusCode.BadGateway,
       HttpStatusCode.ServiceUnavailable,
-      HttpStatusCode.GatewayTimeout, -> {
+      HttpStatusCode.GatewayTimeout -> {
         _state.update { it.copy(error = AddFeedErrorType.ServerError(statusCode)) }
       }
       else -> {

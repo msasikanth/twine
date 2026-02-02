@@ -47,12 +47,12 @@ internal fun ConfirmFeedDeleteDialog(
           onRemoveFeed()
           dismiss()
         },
-        shape = MaterialTheme.shapes.large
+        shape = MaterialTheme.shapes.large,
       ) {
         Text(
           text = stringResource(Res.string.delete),
           style = MaterialTheme.typography.labelLarge,
-          color = MaterialTheme.colorScheme.error
+          color = MaterialTheme.colorScheme.error,
         )
       }
     },
@@ -61,20 +61,20 @@ internal fun ConfirmFeedDeleteDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed
+          color = AppTheme.colorScheme.textEmphasisMed,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.removeFeed),
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.removeFeedDesc, feedName),
-        color = AppTheme.colorScheme.textEmphasisMed
+        color = AppTheme.colorScheme.textEmphasisMed,
       )
     },
     containerColor = AppTheme.colorScheme.tintedSurface,

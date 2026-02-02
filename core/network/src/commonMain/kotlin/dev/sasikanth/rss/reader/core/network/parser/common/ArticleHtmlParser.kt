@@ -61,7 +61,7 @@ class ArticleHtmlParser {
       Result(
         heroImage = heroImage,
         textContent = body.ownText(),
-        cleanedHtml = originalHtmlDocument.html()
+        cleanedHtml = originalHtmlDocument.html(),
       )
     } catch (e: Exception) {
       null

@@ -74,7 +74,7 @@ class ReaderViewModel(
   private val defaultReaderState =
     ReaderState.default(
       initialPostIndex = readerScreenArgs.postIndex,
-      initialPostId = readerScreenArgs.postId
+      initialPostId = readerScreenArgs.postId,
     )
   private val _state = MutableStateFlow(defaultReaderState)
   val state: StateFlow<ReaderState>
@@ -154,13 +154,7 @@ class ReaderViewModel(
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {
         val posts =
-          createPager(
-              config =
-                createPagingConfig(
-                  pageSize = 4,
-                  enablePlaceholders = true,
-                ),
-            ) {
+          createPager(config = createPagingConfig(pageSize = 4, enablePlaceholders = true)) {
               when (readerScreenArgs.fromScreen) {
                 is Search -> {
                   rssRepository.search(
@@ -189,14 +183,14 @@ class ReaderViewModel(
             settingsRepository.readerLineHeightScaleFactor,
             { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
               Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
-            }
+            },
           )
           .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
             _state.update {
               it.copy(
                 selectedReaderFont = fontStyle,
                 readerFontScaleFactor = fontScaleFactor,
-                readerLineHeightScaleFactor = lineHeightScaleFactor
+                readerLineHeightScaleFactor = lineHeightScaleFactor,
               )
             }
           }

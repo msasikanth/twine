@@ -19,8 +19,4 @@ package dev.sasikanth.rss.reader.core.model.local
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class ReadabilityResult(
-  val content: String? = null,
-  val excerpt: String? = null,
-)
+@Serializable data class ReadabilityResult(val content: String? = null, val excerpt: String? = null)

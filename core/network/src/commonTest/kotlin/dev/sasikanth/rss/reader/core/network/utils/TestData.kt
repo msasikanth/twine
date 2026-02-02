@@ -48,14 +48,14 @@ const val rssXmlContent =
       <title>Podcast post</title>
       <description>Third post description.</description>
       <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
-      <enclosure url="https://example.com/third-post" />
+      <enclosure url="https://example.com/third-post" type="audio/mpeg" />
     </item>
     <item>
       <title>Post with enclosure image</title>
       <description>Fourth post description.</description>
       <pubDate>Wed, 24 May 2023 10:30:00 +0000</pubDate>
       <enclosure type="image/jpeg" url="https://example.com/enclosure-image" />
-      <enclosure url="https://example.com/fourth-post" />
+      <enclosure url="https://example.com/fourth-post" type="audio/mpeg" />
     </item>
     <item>
       <title>Post with description and encoded content</title>
@@ -144,6 +144,7 @@ const val atomXmlContent =
       <content type="html">
         &lt;p&gt;Post summary of the second post.&lt;/p&gt;
       </content>
+      <link rel="enclosure" type="audio/mpeg" href="https://example.com/second-post-audio.mp3" />
     </entry>
     <entry>
       <title>Post without image</title>
@@ -221,6 +222,7 @@ const val podcastRssXmlContent =
       <description>Episode 1 description</description>
       <pubDate>Thu, 25 May 2023 09:00:00 +0000</pubDate>
       <itunes:image href="https://example.com/episode-1-image.jpg" />
+      <enclosure url="https://example.com/episode-1.mp3" type="audio/mpeg" />
     </item>
   </channel>
   </rss>
@@ -240,6 +242,7 @@ const val podcastAtomXmlContent =
       <published>2023-05-25T10:00:00Z</published>
       <content type="html">Episode 1 description</content>
       <itunes:image href="https://example.com/episode-1-image.jpg" />
+      <link rel="enclosure" type="audio/mpeg" href="https://example.com/episode-1.mp3" />
     </entry>
   </feed>
   """

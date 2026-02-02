@@ -59,17 +59,17 @@ class ArticleHtmlParserTest {
     )
     assertEquals(
       """
-        <html>
-         <body>
-          <figure>
-           <img alt="A screenshot from DOOM + DOOM II." src="https://cdn.vox-cdn.com/thumbor/LJt9a0BM9fnTyZtP68Ba1Mr1YDY=/150x0:1770x1080/1310x873/cdn.vox-cdn.com/uploads/chorus_image/image/73510530/ss_c5781b8f9a8181e6c989869b86d0b455ccca344a.0.jpg">
-           <figcaption>Image: Bethesda</figcaption>
-          </figure>
-          <p id="2Z0e9a">If you haven’t played <em>Doom</em> or <em>Doom II</em> for a while — or ever — a new re-release that Bethesda <a href="https://slayersclub.bethesda.net/en-US/article/doom-doomii-release-notes?linkId=100000279162898">surprise-dropped</a> (<a href="https://x.com/Wario64/status/1821578978462699748">sorta</a>) on Thursday might be the perfect excuse to jump in to the classic games. The re-release, which combines both games into one package called <em>Doom + Doom II</em> and is a free update for anyone who already owns <em>Doom (1993)</em> or <em>Doom II</em>, offers a long list of great new features — including a brand new single-player episode and online, cross-platform deathmatch multiplayer.</p>
-          <p id="Pm12nB">With <em>Doom + Doom II, </em>you’ll have access to both of those two games as well as extra single-player content like John Romero’s <em>Sigil</em> episode <a href="https://romero.com/sigil">released in 2019</a> and <em>Legacy of Rust</em>, which is a new <em>Doom</em> episode created by “individuals from id Software, Nightdive Studios...</p>
-          <p><a href="https://www.theverge.com/2024/8/8/24216379/doom-doom-ii-definitive-re-release">Continue reading…</a></p>
-         </body>
-        </html>
+      <html>
+       <body>
+        <figure>
+         <img alt="A screenshot from DOOM + DOOM II." src="https://cdn.vox-cdn.com/thumbor/LJt9a0BM9fnTyZtP68Ba1Mr1YDY=/150x0:1770x1080/1310x873/cdn.vox-cdn.com/uploads/chorus_image/image/73510530/ss_c5781b8f9a8181e6c989869b86d0b455ccca344a.0.jpg">
+         <figcaption>Image: Bethesda</figcaption>
+        </figure>
+        <p id="2Z0e9a">If you haven’t played <em>Doom</em> or <em>Doom II</em> for a while — or ever — a new re-release that Bethesda <a href="https://slayersclub.bethesda.net/en-US/article/doom-doomii-release-notes?linkId=100000279162898">surprise-dropped</a> (<a href="https://x.com/Wario64/status/1821578978462699748">sorta</a>) on Thursday might be the perfect excuse to jump in to the classic games. The re-release, which combines both games into one package called <em>Doom + Doom II</em> and is a free update for anyone who already owns <em>Doom (1993)</em> or <em>Doom II</em>, offers a long list of great new features — including a brand new single-player episode and online, cross-platform deathmatch multiplayer.</p>
+        <p id="Pm12nB">With <em>Doom + Doom II, </em>you’ll have access to both of those two games as well as extra single-player content like John Romero’s <em>Sigil</em> episode <a href="https://romero.com/sigil">released in 2019</a> and <em>Legacy of Rust</em>, which is a new <em>Doom</em> episode created by “individuals from id Software, Nightdive Studios...</p>
+        <p><a href="https://www.theverge.com/2024/8/8/24216379/doom-doom-ii-definitive-re-release">Continue reading…</a></p>
+       </body>
+      </html>
       """
         .trimIndent(),
       result?.cleanedHtml,
@@ -89,9 +89,9 @@ class ArticleHtmlParserTest {
       <html>
        <body>This is a normal text</body>
       </html>
-    """
+      """
         .trimIndent(),
-      result?.cleanedHtml
+      result?.cleanedHtml,
     )
   }
 }

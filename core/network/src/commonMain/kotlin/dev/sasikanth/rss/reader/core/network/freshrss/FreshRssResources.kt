@@ -27,23 +27,12 @@ import kotlinx.serialization.Serializable
 @Resource("/reader/api/0")
 class Reader {
 
-  @Resource("user-info")
-  class UserInfo(
-    val parent: Reader = Reader(),
-    val output: String = "json",
-  )
+  @Resource("user-info") class UserInfo(val parent: Reader = Reader(), val output: String = "json")
 
-  @Resource("tag/list")
-  class Tags(
-    val parent: Reader = Reader(),
-    val output: String = "json",
-  )
+  @Resource("tag/list") class Tags(val parent: Reader = Reader(), val output: String = "json")
 
   @Resource("subscription/list")
-  class Subscriptions(
-    val parent: Reader = Reader(),
-    val output: String = "json",
-  )
+  class Subscriptions(val parent: Reader = Reader(), val output: String = "json")
 
   @Serializable
   @Resource("stream/contents")
@@ -60,10 +49,7 @@ class Reader {
   @Resource("edit-tag") class EditTag(val parent: Reader = Reader())
 
   @Resource("subscription/quickadd")
-  class AddFeed(
-    val parent: Reader = Reader(),
-    val quickadd: String = "",
-  )
+  class AddFeed(val parent: Reader = Reader(), val quickadd: String = "")
 
   @Resource("subscription/edit") class EditFeed(val parent: Reader = Reader())
 
@@ -77,6 +63,6 @@ class Reader {
     val parent: Reader = Reader(),
     @SerialName("s") val state: String,
     @SerialName("xt") val excludeState: String? = null,
-    @SerialName("n") val limit: Int = 50000
+    @SerialName("n") val limit: Int = 50000,
   )
 }

@@ -78,7 +78,7 @@ fun GroupSelectionSheet(
   viewModel: GroupSelectionViewModel,
   dismiss: () -> Unit,
   onGroupsSelected: (Set<String>) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   AppTheme(useDarkTheme = true) {
     val translucentStyle = LocalTranslucentStyles.current
@@ -104,7 +104,7 @@ fun GroupSelectionSheet(
       if (showCreateGroupDialog) {
         CreateGroupDialog(
           onCreateGroup = { viewModel.dispatch(GroupSelectionEvent.OnCreateGroup(it)) },
-          onDismiss = { showCreateGroupDialog = false }
+          onDismiss = { showCreateGroupDialog = false },
         )
       }
 
@@ -122,13 +122,13 @@ fun GroupSelectionSheet(
                 .background(AppTheme.colorScheme.tintedSurface)
                 .clickable { showCreateGroupDialog = true }
                 .padding(vertical = 16.dp),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
           ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
               Icon(
                 imageVector = TwineIcons.Add,
                 contentDescription = null,
-                tint = AppTheme.colorScheme.tintedForeground
+                tint = AppTheme.colorScheme.tintedForeground,
               )
 
               Spacer(Modifier.requiredWidth(8.dp))
@@ -158,7 +158,7 @@ fun GroupSelectionSheet(
               },
               onOptionsClick = {
                 // no-op
-              }
+              },
             )
           }
         }
@@ -173,10 +173,10 @@ fun GroupSelectionSheet(
           colors =
             ButtonDefaults.outlinedButtonColors(
               containerColor = Color.Transparent,
-              contentColor = AppTheme.colorScheme.tintedForeground
+              contentColor = AppTheme.colorScheme.tintedForeground,
             ),
           border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
-          onClick = { dismiss() }
+          onClick = { dismiss() },
         ) {
           Text(text = stringResource(Res.string.buttonGoBack))
         }
@@ -186,7 +186,7 @@ fun GroupSelectionSheet(
         Button(
           modifier = Modifier.weight(1f),
           enabled = state.areGroupsSelected,
-          onClick = { onGroupsSelected(state.selectedGroups) }
+          onClick = { onGroupsSelected(state.selectedGroups) },
         ) {
           Text(text = stringResource(Res.string.buttonConfirm))
         }

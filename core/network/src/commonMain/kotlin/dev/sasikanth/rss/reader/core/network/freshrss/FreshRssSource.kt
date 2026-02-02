@@ -150,7 +150,7 @@ class FreshRssSource(
             limit = limit,
             newerThan = newerThan,
             continuation = continuation ?: "",
-            excludeState = excludeState
+            excludeState = excludeState,
           )
         )
         .body()

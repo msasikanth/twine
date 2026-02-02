@@ -20,7 +20,4 @@ package dev.sasikanth.rss.reader.core.model.remote.miniflux
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class MinifluxCreateFeedResponse(
-  @SerialName("feed_id") val feedId: Long,
-)
+@Serializable data class MinifluxCreateFeedResponse(@SerialName("feed_id") val feedId: Long)

@@ -37,11 +37,7 @@ class XmlFeedParser(
   private val platformPageSize: Long,
 ) {
 
-  suspend fun parse(
-    content: ByteReadChannel,
-    feedUrl: String,
-    charset: Charset,
-  ): FeedPayload {
+  suspend fun parse(content: ByteReadChannel, feedUrl: String, charset: Charset): FeedPayload {
     return try {
       withContext(dispatchersProvider.io) {
         val parser =

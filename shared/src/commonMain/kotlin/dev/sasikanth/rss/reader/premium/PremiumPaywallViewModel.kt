@@ -27,9 +27,7 @@ import kotlinx.coroutines.flow.stateIn
 import me.tatarka.inject.annotations.Inject
 
 @Inject
-class PremiumPaywallViewModel(
-  private val billingHandler: BillingHandler,
-) : ViewModel() {
+class PremiumPaywallViewModel(private val billingHandler: BillingHandler) : ViewModel() {
 
   private val _hasPremium = MutableStateFlow(false)
   val hasPremium =
@@ -38,7 +36,7 @@ class PremiumPaywallViewModel(
       .stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = false
+        initialValue = false,
       )
 
   private suspend fun checkSubscription() {

@@ -32,7 +32,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
       defaultWidth = 24.0.dp,
       defaultHeight = 24.0.dp,
       viewportWidth = 24.0f,
-      viewportHeight = 24.0f
+      viewportHeight = 24.0f,
     )
     .apply {
       group(name = "rotate", pivotX = 12f, pivotY = 12f, rotate = 180 * progress) {
@@ -45,10 +45,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
           scaleX = lerp(1f, 0.5f, 1f - dotProgress),
           scaleY = lerp(1f, 0.5f, 1f - dotProgress),
         ) {
-          group(
-            name = "dot_mov_01",
-            translationX = -6f * dotProgress,
-          ) {
+          group(name = "dot_mov_01", translationX = -6f * dotProgress) {
             path(
               stroke = SolidColor(Color(0xFF000000)),
               strokeLineWidth = 6.0f,
@@ -60,10 +57,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
             }
           }
 
-          group(
-            name = "dot_mov_02",
-            translationY = -6f * dotProgress,
-          ) {
+          group(name = "dot_mov_02", translationY = -6f * dotProgress) {
             path(
               stroke = SolidColor(Color(0xFF000000)),
               strokeLineWidth = 6.0f,
@@ -75,10 +69,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
             }
           }
 
-          group(
-            name = "dot_mov_03",
-            translationX = 6f * dotProgress,
-          ) {
+          group(name = "dot_mov_03", translationX = 6f * dotProgress) {
             path(
               stroke = SolidColor(Color(0xFF000000)),
               strokeLineWidth = 6.0f,
@@ -90,10 +81,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
             }
           }
 
-          group(
-            name = "dot_mov_04",
-            translationY = 6f * dotProgress,
-          ) {
+          group(name = "dot_mov_04", translationY = 6f * dotProgress) {
             path(
               stroke = SolidColor(Color(0xFF000000)),
               strokeLineWidth = 6.0f,
@@ -107,11 +95,7 @@ fun TwineIcons.allToPlus(progress: Float): ImageVector {
         }
 
         if (progress >= 0.16f) {
-          group(
-            name = "plus",
-            pivotX = 12.0f,
-            pivotY = 12.0f,
-          ) {
+          group(name = "plus", pivotX = 12.0f, pivotY = 12.0f) {
             val transformedMove = lerp(12.0f, 5.0f, progress)
             val transformedLine = lerp(12.0f, 19.0f, progress)
 

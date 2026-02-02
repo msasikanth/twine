@@ -20,5 +20,5 @@ package dev.sasikanth.rss.reader.core.model.local
 enum class ServiceType {
   DROPBOX,
   FRESH_RSS,
-  MINIFLUX
+  MINIFLUX,
 }

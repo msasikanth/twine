@@ -28,7 +28,7 @@ object UrlUtils {
       "https://imgs.xkcd.com/comics/",
       "https://preview.redd.it/",
       "https://i.redd.it/",
-      "https://external-preview.redd.it/"
+      "https://external-preview.redd.it/",
     )
 
   fun isYouTubeLink(url: String): Boolean {

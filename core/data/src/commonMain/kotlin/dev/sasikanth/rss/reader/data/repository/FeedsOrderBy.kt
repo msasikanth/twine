@@ -21,5 +21,5 @@ enum class FeedsOrderBy(val value: String) {
   Latest("latest"),
   Oldest("oldest"),
   Alphabetical("alphabetical"),
-  Pinned("pinned")
+  Pinned("pinned"),
 }

@@ -77,7 +77,7 @@ fun FeaturedImage(
           .then(modifier),
       contentDescription = null,
       contentScale = adaptiveContentScale,
-      alignment = alignment
+      alignment = alignment,
     )
   }
 }

@@ -188,7 +188,7 @@ fun App(
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
     LocalBlockImage provides appState.blockImages,
-    LocalAmoledSetting provides appState.useAmoled
+    LocalAmoledSetting provides appState.useAmoled,
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
@@ -213,7 +213,7 @@ fun App(
                 linkHandler.openLink(post.link)
                 appViewModel.onPostOpened(post.id, index)
               }
-            }
+            },
           )
         }
       }
@@ -267,9 +267,9 @@ fun App(
         popExitTransition = {
           scaleOut(
             targetScale = 0.9f,
-            transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f)
+            transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f),
           )
-        }
+        },
       ) {
         composable<Screen.Placeholder> {
           val viewModel = viewModel { placeholderViewModel() }
@@ -285,7 +285,7 @@ fun App(
               navController.navigate(Screen.Onboarding) {
                 popUpTo(Screen.Placeholder) { inclusive = true }
               }
-            }
+            },
           )
         }
 
@@ -297,7 +297,7 @@ fun App(
               navController.navigate(Screen.Main) {
                 popUpTo(Screen.Onboarding) { inclusive = true }
               }
-            }
+            },
           )
         }
 
@@ -372,7 +372,7 @@ fun App(
                 openPost = { searchQuery, sortOrder, index, post ->
                   openPost(index, post, FromScreen.Search(searchQuery, sortOrder))
                 },
-                modifier = screenModifier
+                modifier = screenModifier,
               )
             },
             bookmarksContent = { goBack ->
@@ -382,7 +382,7 @@ fun App(
                 bookmarksViewModel = viewModel,
                 goBack = goBack,
                 openPost = { index, post -> openPost(index, post, FromScreen.Bookmarks) },
-                modifier = screenModifier
+                modifier = screenModifier,
               )
             },
             settingsContent = { goBack ->
@@ -398,8 +398,7 @@ fun App(
                         navController.currentBackStackEntry
                           ?.savedStateHandle
                           ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, false)
-                      }
-                      ?: emptyFlow(),
+                      } ?: emptyFlow(),
                     navController.currentBackStackEntry
                       ?.savedStateHandle
                       ?.getStateFlow(MINIFLUX_LOGIN_SUCCESS_KEY, false)
@@ -408,8 +407,7 @@ fun App(
                         navController.currentBackStackEntry
                           ?.savedStateHandle
                           ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, false)
-                      }
-                      ?: emptyFlow()
+                      } ?: emptyFlow(),
                   )
                   .onEach { viewModel.dispatch(SettingsEvent.TriggerSync) }
                   .launchIn(this)
@@ -424,9 +422,9 @@ fun App(
                 openPaywall = { navController.navigate(Screen.Paywall) },
                 openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
                 openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
-                modifier = screenModifier
+                modifier = screenModifier,
               )
-            }
+            },
           )
         }
 
@@ -440,7 +438,7 @@ fun App(
                 ?.set(FRESH_RSS_LOGIN_SUCCESS_KEY, true)
               navController.popBackStack()
             },
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -454,7 +452,7 @@ fun App(
                 ?.set(MINIFLUX_LOGIN_SUCCESS_KEY, true)
               navController.popBackStack()
             },
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -464,9 +462,9 @@ fun App(
             listOf(
               navDeepLink<Screen.Reader>(
                 basePath = Screen.Reader.ROUTE,
-                typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap)
+                typeMap = mapOf(typeOf<ReaderScreenArgs>() to ReaderScreenArgs.navTypeMap),
               )
-            )
+            ),
         ) {
           val viewModel = viewModel { readerViewModel(it.savedStateHandle) }
           val fromScreen = it.toRoute<Screen.Reader>().readerScreenArgs.fromScreen
@@ -483,7 +481,7 @@ fun App(
             },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) },
-            modifier = roundedCornerScreenModifier
+            modifier = roundedCornerScreenModifier,
           )
         }
 
@@ -515,14 +513,14 @@ fun App(
             goBack = { navController.popBackStack() },
             openGroupSelection = { selectedGroupIds ->
               navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
-            }
+            },
           )
         }
 
         composable<Screen.About> {
           AboutScreen(
             modifier = roundedCornerScreenModifier,
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -531,7 +529,7 @@ fun App(
           StatisticsScreen(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -555,7 +553,7 @@ fun App(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             goBack = { navController.popBackStack() },
-            openGroupSelection = { navController.navigate(Modals.GroupSelection()) }
+            openGroupSelection = { navController.navigate(Modals.GroupSelection()) },
           )
         }
 
@@ -564,7 +562,7 @@ fun App(
           BlockedWordsScreen(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -575,7 +573,7 @@ fun App(
           PremiumPaywallScreen(
             modifier = roundedCornerScreenModifier,
             hasPremium = hasPremium,
-            goBack = { navController.popBackStack() }
+            goBack = { navController.popBackStack() },
           )
         }
 
@@ -595,7 +593,7 @@ fun App(
                 ?.set(SELECTED_GROUPS_KEY, selectedGroupIds)
 
               navController.popBackStack()
-            }
+            },
           )
         }
       }
@@ -612,13 +610,7 @@ private fun NavHostController.navigateToReaderOrOpenLink(
 ) {
   if (showReader) {
     val route =
-      Screen.Reader(
-        ReaderScreenArgs(
-          postIndex = index,
-          postId = post.id,
-          fromScreen = fromScreen,
-        )
-      )
+      Screen.Reader(ReaderScreenArgs(postIndex = index, postId = post.id, fromScreen = fromScreen))
 
     navigate(route)
   } else {

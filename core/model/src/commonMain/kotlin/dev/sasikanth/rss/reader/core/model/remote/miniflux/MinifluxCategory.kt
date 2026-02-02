@@ -19,8 +19,4 @@ package dev.sasikanth.rss.reader.core.model.remote.miniflux
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class MinifluxCategory(
-  val id: Long,
-  val title: String,
-)
+@Serializable data class MinifluxCategory(val id: Long, val title: String)
