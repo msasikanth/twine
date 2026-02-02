@@ -21,7 +21,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -53,11 +52,8 @@ internal class DynamicColorState(
   private val defaultDarkAppColorScheme: AppColorScheme,
   private val useTonalSpotScheme: Boolean,
 ) {
-  var lightAppColorScheme by mutableStateOf(defaultLightAppColorScheme)
-    private set
-
-  var darkAppColorScheme by mutableStateOf(defaultDarkAppColorScheme)
-    private set
+  val lightAppColorScheme = defaultLightAppColorScheme.copy()
+  val darkAppColorScheme = defaultDarkAppColorScheme.copy()
 
   private var lastFromSeedColor: Color? = null
   private var lastToSeedColor: Color? = null
@@ -135,14 +131,16 @@ internal class DynamicColorState(
         )
 
       if (normalizedProgress < EPSILON) {
-        lightAppColorScheme = startLight
-        darkAppColorScheme = startDark
+        lightAppColorScheme.updateFrom(startLight)
+        darkAppColorScheme.updateFrom(startDark)
       } else if (normalizedProgress > 1f - EPSILON) {
-        lightAppColorScheme = endLight
-        darkAppColorScheme = endDark
+        lightAppColorScheme.updateFrom(endLight)
+        darkAppColorScheme.updateFrom(endDark)
       } else {
-        lightAppColorScheme = startLight.lerp(to = endLight, fraction = normalizedProgress)
-        darkAppColorScheme = startDark.lerp(to = endDark, fraction = normalizedProgress)
+        lightAppColorScheme.updateFrom(
+          startLight.lerp(to = endLight, fraction = normalizedProgress)
+        )
+        darkAppColorScheme.updateFrom(startDark.lerp(to = endDark, fraction = normalizedProgress))
       }
     }
   }
@@ -159,8 +157,8 @@ internal class DynamicColorState(
     startDark = defaultDarkAppColorScheme
     endLight = defaultLightAppColorScheme
     endDark = defaultDarkAppColorScheme
-    lightAppColorScheme = defaultLightAppColorScheme
-    darkAppColorScheme = defaultDarkAppColorScheme
+    lightAppColorScheme.updateFrom(defaultLightAppColorScheme)
+    darkAppColorScheme.updateFrom(defaultDarkAppColorScheme)
   }
 
   private fun ease(progress: Float): Float {
