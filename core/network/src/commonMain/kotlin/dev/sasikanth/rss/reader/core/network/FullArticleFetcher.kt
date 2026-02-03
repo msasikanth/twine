@@ -39,6 +39,10 @@ class FullArticleFetcher(
   private val dispatchersProvider: DispatchersProvider,
 ) {
 
+  companion object {
+    private const val MAX_CONTENT_SIZE = 10 * 1024 * 1024 // 10MB
+  }
+
   private val fullArticleHttpClient by lazy {
     httpClient.config {
       followRedirects = true
@@ -59,7 +63,8 @@ class FullArticleFetcher(
             user != null &&
               !(remoteId.isNullOrBlank()) &&
               user.serviceType == ServiceType.MINIFLUX -> {
-              minifluxSource.fetchEntryContent(remoteId.toLong()).content
+              val content = minifluxSource.fetchEntryContent(remoteId.toLong()).content
+              cleanHtml(content)
             }
             else -> {
               fetchFullArticleByUrl(url)
@@ -74,41 +79,51 @@ class FullArticleFetcher(
   }
 
   private suspend fun fetchFullArticleByUrl(url: String): String {
-    val htmlContent =
-      fullArticleHttpClient
-        .get(url) {
-          headers {
-            append(
-              HttpHeaders.Accept,
-              "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            )
-            append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
-            append(HttpHeaders.Connection, "keep-alive")
-            append("Referer", url)
-            append("Upgrade-Insecure-Requests", "1")
-            append(
-              "sec-ch-ua",
-              "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
-            )
-            append("sec-ch-ua-mobile", "?0")
-            append("sec-ch-ua-platform", "\"Windows\"")
-            append("Sec-Fetch-Dest", "document")
-            append("Sec-Fetch-Mode", "navigate")
-            append("Sec-Fetch-Site", "none")
-            append("Sec-Fetch-User", "?1")
-          }
+    val response =
+      fullArticleHttpClient.get(url) {
+        headers {
+          append(
+            HttpHeaders.Accept,
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          )
+          append(HttpHeaders.AcceptLanguage, "en-US,en;q=0.9")
+          append(HttpHeaders.Connection, "keep-alive")
+          append("Referer", url)
+          append("Upgrade-Insecure-Requests", "1")
+          append(
+            "sec-ch-ua",
+            "\"Not_A Brand\";v=\"8\", \"Chromium\";v=\"120\", \"Google Chrome\";v=\"120\"",
+          )
+          append("sec-ch-ua-mobile", "?0")
+          append("sec-ch-ua-platform", "\"Windows\"")
+          append("Sec-Fetch-Dest", "document")
+          append("Sec-Fetch-Mode", "navigate")
+          append("Sec-Fetch-Site", "none")
+          append("Sec-Fetch-User", "?1")
         }
-        .bodyAsText()
+      }
+
+    val contentLength = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
+    if (contentLength != null && contentLength > MAX_CONTENT_SIZE) {
+      throw Exception("Content too large: $contentLength bytes")
+    }
+
+    val htmlContent = response.bodyAsText()
 
     if (isJsRequired(htmlContent)) {
       throw Exception("JavaScript is required to view this content")
     }
 
-    val htmlDocument = Ksoup.parse(htmlContent)
+    return cleanHtml(htmlContent)
+  }
 
-    htmlDocument.head().remove()
-
-    return htmlDocument.html()
+  private fun cleanHtml(htmlContent: String): String {
+    return Ksoup.parse(htmlContent)
+      .also {
+        it.head().remove()
+        it.select("script, style, noscript").remove()
+      }
+      .html()
   }
 
   private fun isJsRequired(html: String): Boolean {
