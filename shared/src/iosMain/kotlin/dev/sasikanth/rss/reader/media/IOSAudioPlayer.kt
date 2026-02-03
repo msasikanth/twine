@@ -55,6 +55,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var progressJob: Job? = null
   private var playingUrl: String? = null
+  private var sleepTimerJob: Job? = null
+  private var sleepTimerRemainingMillis: Long? = null
+  private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
 
   private val fileManager = NSFileManager.defaultManager
   private val cacheDirectory =
@@ -74,6 +77,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       null,
       null,
     ) {
+      if (_playbackState.value.sleepTimerRemaining == -1L) {
+        setSleepTimer(SleepTimerOption.None)
+      }
       pause()
       seekTo(0)
     }
@@ -153,6 +159,36 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     currentSpeed = speed
     if (player.timeControlStatus == AVPlayerTimeControlStatusPlaying) {
       player.playImmediatelyAtRate(speed)
+    }
+    updatePlaybackState()
+  }
+
+  override fun setSleepTimer(option: SleepTimerOption) {
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = option
+
+    when (option) {
+      SleepTimerOption.None -> {
+        // No-op
+      }
+      SleepTimerOption.EndOfTrack -> {
+        sleepTimerRemainingMillis = -1L
+      }
+      is SleepTimerOption.Minutes -> {
+        val millis = option.minutes * 60 * 1000L
+        sleepTimerRemainingMillis = millis
+        sleepTimerJob =
+          scope.launch {
+            while (sleepTimerRemainingMillis!! > 0) {
+              delay(1000)
+              sleepTimerRemainingMillis = sleepTimerRemainingMillis!! - 1000
+              updatePlaybackState()
+            }
+            pause()
+            setSleepTimer(SleepTimerOption.None)
+          }
+      }
     }
     updatePlaybackState()
   }
@@ -246,6 +282,8 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         playingUrl = playingUrl,
         buffering = buffering,
         playbackSpeed = currentSpeed,
+        sleepTimerRemaining = sleepTimerRemainingMillis,
+        selectedSleepTimerOption = selectedSleepTimerOption,
       )
     }
 

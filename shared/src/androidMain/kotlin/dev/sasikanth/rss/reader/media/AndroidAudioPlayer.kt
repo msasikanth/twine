@@ -52,6 +52,9 @@ class AndroidAudioPlayer(
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var controller: MediaController? = null
   private var progressJob: Job? = null
+  private var sleepTimerJob: Job? = null
+  private var sleepTimerRemainingMillis: Long? = null
+  private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
 
   init {
     scope.launch {
@@ -70,6 +73,13 @@ class AndroidAudioPlayer(
 
           override fun onPlaybackStateChanged(state: Int) {
             updatePlaybackState()
+            if (
+              state == Player.STATE_ENDED &&
+                _playbackState.value.sleepTimerRemaining == -1L // End of track marker
+            ) {
+              pause()
+              setSleepTimer(SleepTimerOption.None)
+            }
           }
 
           override fun onPositionDiscontinuity(
@@ -122,6 +132,36 @@ class AndroidAudioPlayer(
     controller?.setPlaybackSpeed(speed)
   }
 
+  override fun setSleepTimer(option: SleepTimerOption) {
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = option
+
+    when (option) {
+      SleepTimerOption.None -> {
+        // No-op
+      }
+      SleepTimerOption.EndOfTrack -> {
+        sleepTimerRemainingMillis = -1L // Use -1 as a marker for end of track
+      }
+      is SleepTimerOption.Minutes -> {
+        val millis = option.minutes * 60 * 1000L
+        sleepTimerRemainingMillis = millis
+        sleepTimerJob =
+          scope.launch {
+            while (sleepTimerRemainingMillis!! > 0) {
+              delay(1000)
+              sleepTimerRemainingMillis = sleepTimerRemainingMillis!! - 1000
+              updatePlaybackState()
+            }
+            pause()
+            setSleepTimer(SleepTimerOption.None)
+          }
+      }
+    }
+    updatePlaybackState()
+  }
+
   private fun updatePlaybackState() {
     val player = controller ?: return
     _playbackState.update {
@@ -132,6 +172,8 @@ class AndroidAudioPlayer(
         playingUrl = player.currentMediaItem?.mediaId,
         buffering = player.playbackState == Player.STATE_BUFFERING,
         playbackSpeed = player.playbackParameters.speed,
+        sleepTimerRemaining = sleepTimerRemainingMillis,
+        selectedSleepTimerOption = selectedSleepTimerOption,
       )
     }
   }
