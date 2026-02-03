@@ -34,6 +34,8 @@ class ArticleHtmlParser {
     private const val TAG_AUDIO = "audio"
     private const val TAG_SOURCE = "source"
     private const val ATTR_TYPE = "type"
+
+    private const val MAX_CONTENT_SIZE = 10 * 1024 * 1024 // 10MB
   }
 
   private val allowedContentTags by lazy {
@@ -46,15 +48,16 @@ class ArticleHtmlParser {
   private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
 
   fun parse(htmlContent: String): Result? {
-    if (htmlContent.isBlank()) return null
+    if (htmlContent.isBlank() || htmlContent.length > MAX_CONTENT_SIZE) return null
 
     return try {
-      val originalHtmlDocument = Ksoup.parse(htmlContent)
+      val originalHtmlDocument =
+        Ksoup.parse(htmlContent).also {
+          it.head().remove()
+          it.select("script, style, noscript").remove()
+        }
       val cleanedHtmlDocument = Cleaner(allowedContentTags).clean(originalHtmlDocument)
       val body = cleanedHtmlDocument.body().first()
-
-      originalHtmlDocument.head().remove()
-
       val heroImage =
         body.firstNotNullOfOrNull {
           val imageUrl = it.attr(ATTR_SRC)
@@ -68,11 +71,7 @@ class ArticleHtmlParser {
       val audioUrl =
         body.select(TAG_AUDIO).firstOrNull()?.let { audio ->
           val src = audio.attr(ATTR_SRC)
-          if (src.isNotBlank()) {
-            src
-          } else {
-            audio.select(TAG_SOURCE).attr(ATTR_SRC)
-          }
+          src.ifBlank { audio.select(TAG_SOURCE).attr(ATTR_SRC) }
         }
 
       Result(
