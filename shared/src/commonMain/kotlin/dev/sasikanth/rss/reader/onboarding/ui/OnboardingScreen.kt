@@ -51,6 +51,8 @@ import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.onboarding.OnboardingEffect
 import dev.sasikanth.rss.reader.onboarding.OnboardingEvent
 import dev.sasikanth.rss.reader.onboarding.OnboardingViewModel
+import dev.sasikanth.rss.reader.resources.icons.Platform
+import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -68,6 +70,7 @@ internal fun OnboardingScreen(
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
+  val backgroundColor = AppTheme.colorScheme.primary
 
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->
@@ -79,13 +82,15 @@ internal fun OnboardingScreen(
 
   Scaffold(
     modifier =
-      modifier.background(
-        Brush.verticalGradient(
-          0f to Color.Transparent,
-          0.60f to AppTheme.colorScheme.primary.copy(alpha = 0.15f),
-          1f to AppTheme.colorScheme.primary.copy(alpha = 0.65f),
-        )
-      ),
+      modifier
+        .background(AppTheme.colorScheme.surface)
+        .background(
+          Brush.verticalGradient(
+            0f to backgroundColor.copy(alpha = 0f),
+            0.60f to backgroundColor.copy(alpha = 0.15f),
+            1f to backgroundColor.copy(alpha = 0.65f),
+          )
+        ),
     containerColor = Color.Transparent,
     bottomBar = {
       Column(
@@ -128,6 +133,10 @@ internal fun OnboardingScreen(
               )
             }
           }
+        }
+
+        if (platform !is Platform.Apple) {
+          Spacer(Modifier.height(16.dp))
         }
       }
     },
