@@ -20,6 +20,7 @@ import androidx.compose.runtime.Immutable
 import app.cash.paging.PagingData
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.core.model.local.Source
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
@@ -28,6 +29,9 @@ data class SearchState(
   val searchResults: Flow<PagingData<ResolvedPost>>,
   val searchInProgress: Boolean,
   val searchSortOrder: SearchSortOrder,
+  val selectedSource: Source?,
+  val onlyBookmarked: Boolean,
+  val onlyUnread: Boolean,
 ) {
 
   companion object {
@@ -36,6 +40,9 @@ data class SearchState(
         searchResults = emptyFlow(),
         searchInProgress = false,
         searchSortOrder = SearchSortOrder.Newest,
+        selectedSource = null,
+        onlyBookmarked = false,
+        onlyUnread = false,
       )
   }
 
@@ -44,5 +51,8 @@ data class SearchState(
       searchResults = emptyFlow(),
       searchInProgress = false,
       searchSortOrder = SearchSortOrder.Newest,
+      selectedSource = null,
+      onlyBookmarked = false,
+      onlyUnread = false,
     )
 }

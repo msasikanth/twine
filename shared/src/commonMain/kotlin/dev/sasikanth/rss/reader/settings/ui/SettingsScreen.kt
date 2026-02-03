@@ -1813,7 +1813,7 @@ private fun AboutItem(onClick: () -> Unit) {
 @Composable
 private fun AboutProfileImages() {
   Box(contentAlignment = Alignment.Center) {
-    val backgroundColor = AppTheme.colorScheme.surfaceContainerLowest
+    val backgroundColor = AppTheme.colorScheme.backdrop
 
     AsyncImage(
       model = Constants.ABOUT_ED_PIC,
@@ -1823,7 +1823,7 @@ private fun AboutProfileImages() {
         Modifier.padding(start = 72.dp)
           .requiredSize(62.dp)
           .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
-          .padding(8.dp)
+          .padding(6.dp)
           .clip(CircleShape),
     )
 
@@ -1834,7 +1834,7 @@ private fun AboutProfileImages() {
       modifier =
         Modifier.requiredSize(62.dp)
           .drawWithCache { onDrawBehind { drawCircle(color = backgroundColor) } }
-          .padding(8.dp)
+          .padding(6.dp)
           .clip(CircleShape),
     )
   }

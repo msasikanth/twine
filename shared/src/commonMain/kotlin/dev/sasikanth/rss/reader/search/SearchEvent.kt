@@ -19,20 +19,33 @@ package dev.sasikanth.rss.reader.search
 import androidx.compose.ui.text.input.TextFieldValue
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.core.model.local.Source
 
 sealed interface SearchEvent {
 
   data class SearchQueryChanged(val query: TextFieldValue) : SearchEvent
 
-  data class SearchPosts(val query: String, val searchSortOrder: SearchSortOrder) : SearchEvent
+  data class SearchPosts(
+    val query: String,
+    val searchSortOrder: SearchSortOrder,
+    val sourceIds: List<String> = emptyList(),
+    val onlyBookmarked: Boolean = false,
+    val onlyUnread: Boolean = false,
+  ) : SearchEvent
 
   data object ClearSearchResults : SearchEvent
 
   data class SearchSortOrderChanged(val searchSortOrder: SearchSortOrder) : SearchEvent
+
+  data class OnOnlyBookmarkedChanged(val onlyBookmarked: Boolean) : SearchEvent
+
+  data class OnOnlyUnreadChanged(val onlyUnread: Boolean) : SearchEvent
 
   data object ClearSearchQuery : SearchEvent
 
   data class OnPostBookmarkClick(val post: ResolvedPost) : SearchEvent
 
   data class UpdatePostReadStatus(val postId: String, val updatedReadStatus: Boolean) : SearchEvent
+
+  data class OnSourceChanged(val source: Source?) : SearchEvent
 }

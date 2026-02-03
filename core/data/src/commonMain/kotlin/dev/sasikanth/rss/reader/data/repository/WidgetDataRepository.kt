@@ -23,7 +23,6 @@ import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOne
 import app.cash.sqldelight.paging3.QueryPagingSource
 import dev.sasikanth.rss.reader.core.model.local.PostFlag
-import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.WidgetPost
 import dev.sasikanth.rss.reader.data.database.PostQueries
@@ -71,38 +70,29 @@ class WidgetDataRepository(
     val featuredPostsAfter = Clock.System.now().minus(24.hours)
 
     return postQueries
-      .allPosts(
-        isSourceIdsEmpty = true,
-        sourceIds = emptyList(),
-        unreadOnly = true,
-        postsAfter = Instant.DISTANT_PAST,
-        featuredPostsAfter = featuredPostsAfter,
-        numberOfFeaturedPosts = 0,
-        lastSyncedAt = Instant.DISTANT_FUTURE,
-        limit = numberOfPosts.toLong(),
+      .widgetUnreadPosts(
+        numberOfPosts = numberOfPosts.toLong(),
         offset = 0,
-        orderBy = PostsSortOrder.Latest.name,
         mapper = {
           id: String,
-          sourceId: String,
+          _: String,
           title: String,
           description: String,
           imageUrl: String?,
-          audioUrl: String?,
+          _: String?,
           date: Instant,
-          createdAt: Instant,
-          link: String,
-          commentsLink: String?,
-          flags: Set<PostFlag>,
-          remoteId: String?,
+          _: Instant,
+          _: String,
+          _: String?,
+          _: Set<PostFlag>,
+          _: String?,
           feedName: String,
           feedIcon: String,
-          feedHomepageLink: String,
-          alwaysFetchSourceArticle: Boolean,
-          showFeedFavIcon: Boolean,
-          feedContentReadingTime: Long?,
-          articleContentReadingTime: Long?,
-          isFeatured: Boolean ->
+          _: String,
+          _: Boolean,
+          _: Boolean,
+          _: Long?,
+          _: Long? ->
           WidgetPost(
             id = id,
             title = title,
@@ -126,24 +116,24 @@ class WidgetDataRepository(
           offset = 0,
           mapper = {
             id: String,
-            sourceId: String,
+            _: String,
             title: String,
             description: String,
             imageUrl: String?,
-            audioUrl: String?,
+            _: String?,
             date: Instant,
-            createdAt: Instant,
-            link: String,
-            commentsLink: String?,
-            flags: Set<PostFlag>,
-            remoteId: String?,
+            _: Instant,
+            _: String,
+            _: String?,
+            _: Set<PostFlag>,
+            _: String?,
             feedName: String,
             feedIcon: String,
-            feedHomepageLink: String,
-            alwaysFetchSourceArticle: Boolean,
-            showFeedFavIcon: Boolean,
-            feedContentReadingTime: Long?,
-            articleContentReadingTime: Long? ->
+            _: String,
+            _: Boolean,
+            _: Boolean,
+            _: Long?,
+            _: Long? ->
             WidgetPost(
               id = id,
               title = title,

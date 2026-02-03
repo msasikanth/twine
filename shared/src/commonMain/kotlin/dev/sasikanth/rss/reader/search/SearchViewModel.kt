@@ -26,8 +26,11 @@ import androidx.lifecycle.viewModelScope
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import dev.sasikanth.rss.reader.core.model.local.Feed
+import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.FlowPreview
@@ -46,10 +49,24 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
+  val sources =
+    createPager(config = createPagingConfig(pageSize = 20)) { rssRepository.sources() }
+      .flow
+      .cachedIn(viewModelScope)
+
   var searchQuery by mutableStateOf(TextFieldValue())
     private set
 
   var searchSortOrder by mutableStateOf(SearchSortOrder.Newest)
+    private set
+
+  var selectedSource by mutableStateOf<Source?>(null)
+    private set
+
+  var onlyBookmarked by mutableStateOf(false)
+    private set
+
+  var onlyUnread by mutableStateOf(false)
     private set
 
   private val _state = MutableStateFlow(SearchState.DEFAULT)
@@ -59,13 +76,37 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
   init {
     val searchQueryFlow = snapshotFlow { searchQuery }.debounce(500.milliseconds)
     val searchSortOrderFlow = snapshotFlow { searchSortOrder }
+    val selectedSourceFlow = snapshotFlow { selectedSource }
+    val onlyBookmarkedFlow = snapshotFlow { onlyBookmarked }
+    val onlyUnreadFlow = snapshotFlow { onlyUnread }
 
-    searchQueryFlow
-      .combine(searchSortOrderFlow) { searchQuery, sortOrder -> searchQuery to sortOrder }
+    combine(
+        searchQueryFlow,
+        searchSortOrderFlow,
+        selectedSourceFlow,
+        onlyBookmarkedFlow,
+        onlyUnreadFlow,
+      ) { searchQuery, sortOrder, selectedSource, onlyBookmarked, onlyUnread ->
+        SearchParameters(searchQuery, sortOrder, selectedSource, onlyBookmarked, onlyUnread)
+      }
       .distinctUntilChanged()
-      .onEach { (searchQuery, sortOrder) ->
+      .onEach { (searchQuery, sortOrder, selectedSource, onlyBookmarked, onlyUnread) ->
         if (searchQuery.text.isNotBlank()) {
-          dispatch(SearchEvent.SearchPosts(searchQuery.text, sortOrder))
+          val sourceIds =
+            when (selectedSource) {
+              is Feed -> listOf(selectedSource.id)
+              is FeedGroup -> selectedSource.feedIds
+              else -> emptyList()
+            }
+          dispatch(
+            SearchEvent.SearchPosts(
+              query = searchQuery.text,
+              searchSortOrder = sortOrder,
+              sourceIds = sourceIds,
+              onlyBookmarked = onlyBookmarked,
+              onlyUnread = onlyUnread,
+            )
+          )
         } else {
           dispatch(SearchEvent.ClearSearchResults)
         }
@@ -78,7 +119,14 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
       is SearchEvent.SearchQueryChanged -> {
         searchQuery = event.query
       }
-      is SearchEvent.SearchPosts -> searchPosts(event.query, event.searchSortOrder)
+      is SearchEvent.SearchPosts ->
+        searchPosts(
+          event.query,
+          event.searchSortOrder,
+          event.sourceIds,
+          event.onlyBookmarked,
+          event.onlyUnread,
+        )
       SearchEvent.ClearSearchResults -> clearSearchResults()
       is SearchEvent.SearchSortOrderChanged -> {
         searchSortOrder = event.searchSortOrder
@@ -89,6 +137,18 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
       is SearchEvent.OnPostBookmarkClick -> onPostBookmarkClick(event.post)
       is SearchEvent.UpdatePostReadStatus ->
         updatePostReadStatus(event.postId, event.updatedReadStatus)
+      is SearchEvent.OnSourceChanged -> {
+        selectedSource = event.source
+        _state.update { it.copy(selectedSource = event.source) }
+      }
+      is SearchEvent.OnOnlyBookmarkedChanged -> {
+        onlyBookmarked = event.onlyBookmarked
+        _state.update { it.copy(onlyBookmarked = event.onlyBookmarked) }
+      }
+      is SearchEvent.OnOnlyUnreadChanged -> {
+        onlyUnread = event.onlyUnread
+        _state.update { it.copy(onlyUnread = event.onlyUnread) }
+      }
     }
   }
 
@@ -108,14 +168,34 @@ class SearchViewModel(private val rssRepository: RssRepository) : ViewModel() {
     _state.update { it.reset() }
   }
 
-  private fun searchPosts(query: String, sortOrder: SearchSortOrder) {
+  private fun searchPosts(
+    query: String,
+    sortOrder: SearchSortOrder,
+    sourceIds: List<String>,
+    onlyBookmarked: Boolean,
+    onlyUnread: Boolean,
+  ) {
     val searchResults =
       createPager(config = createPagingConfig(pageSize = 20)) {
-          rssRepository.search(query, sortOrder)
+          rssRepository.search(
+            searchQuery = query,
+            sortOrder = sortOrder,
+            sourceIds = sourceIds,
+            onlyBookmarked = onlyBookmarked,
+            onlyUnread = onlyUnread,
+          )
         }
         .flow
         .cachedIn(viewModelScope)
 
     _state.update { it.copy(searchResults = searchResults) }
   }
+
+  private data class SearchParameters(
+    val searchQuery: TextFieldValue,
+    val sortOrder: SearchSortOrder,
+    val selectedSource: Source?,
+    val onlyBookmarked: Boolean,
+    val onlyUnread: Boolean,
+  )
 }

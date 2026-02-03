@@ -290,61 +290,56 @@ class RssRepository(
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        postQueries.allPosts(
-          isSourceIdsEmpty = activeSourceIds.isEmpty(),
-          sourceIds = activeSourceIds,
-          unreadOnly = unreadOnly,
-          postsAfter = after,
-          featuredPostsAfter = featuredPostsAfter,
-          numberOfFeaturedPosts = Constants.NUMBER_OF_FEATURED_POSTS,
-          lastSyncedAt = lastSyncedAt,
-          orderBy = postsSortOrder.name,
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            sourceId: String,
-            title: String,
-            description: String,
-            imageUrl: String?,
-            audioUrl: String?,
-            date: Instant,
-            createdAt: Instant,
-            link: String,
-            commentsLink: String?,
-            flags: Set<PostFlag>,
-            remoteId: String?,
-            feedName: String,
-            feedIcon: String,
-            feedHomepageLink: String,
-            alwaysFetchFullArticle: Boolean,
-            showFeedFavIcon: Boolean,
-            feedContentReadingTime: Long?,
-            articleContentReadingTime: Long?,
-            _: Boolean ->
-            ResolvedPost(
-              id = id,
-              sourceId = sourceId,
-              title = title,
-              description = description,
-              imageUrl = imageUrl,
-              audioUrl = audioUrl,
-              date = date,
-              createdAt = createdAt,
-              link = link,
-              commentsLink = commentsLink,
-              flags = flags,
-              feedName = feedName,
-              feedIcon = feedIcon,
-              feedHomepageLink = feedHomepageLink,
-              alwaysFetchFullArticle = alwaysFetchFullArticle,
-              showFeedFavIcon = showFeedFavIcon,
-              feedContentReadingTime = feedContentReadingTime?.toInt(),
-              articleContentReadingTime = articleContentReadingTime?.toInt(),
-              remoteId = remoteId,
+        when (postsSortOrder) {
+          PostsSortOrder.Latest ->
+            postQueries.allPostsLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
             )
-          },
-        )
+          PostsSortOrder.Oldest ->
+            postQueries.allPostsOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedLatest ->
+            postQueries.allPostsAddedLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedOldest ->
+            postQueries.allPostsAddedOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+        }
       },
     )
   }
@@ -699,17 +694,34 @@ class RssRepository(
     }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, ResolvedPost> {
+  fun search(
+    searchQuery: String,
+    sortOrder: SearchSortOrder,
+    sourceIds: List<String> = emptyList(),
+    onlyBookmarked: Boolean = false,
+    onlyUnread: Boolean = false,
+  ): PagingSource<Int, ResolvedPost> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
-      countQuery = postSearchFTSQueries.countSearchResults(sanitizedSearchQuery),
+      countQuery =
+        postSearchFTSQueries.countSearchResults(
+          searchQuery = sanitizedSearchQuery,
+          isSourceIdsEmpty = sourceIds.isEmpty(),
+          sourceIds = sourceIds,
+          onlyBookmarked = if (onlyBookmarked) 1L else 0L,
+          onlyUnread = if (onlyUnread) 1L else 0L,
+        ),
       transacter = postSearchFTSQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
         postSearchFTSQueries.search(
           searchQuery = sanitizedSearchQuery,
           sortOrder = sortOrder.value,
+          isSourceIdsEmpty = sourceIds.isEmpty(),
+          sourceIds = sourceIds,
+          onlyBookmarked = if (onlyBookmarked) 1L else 0L,
+          onlyUnread = if (onlyUnread) 1L else 0L,
           limit = limit,
           offset = offset,
           mapper = {
@@ -1887,6 +1899,51 @@ class RssRepository(
         )
       )
     }
+  }
+
+  private fun mapToResolvedPost(
+    id: String,
+    sourceId: String,
+    title: String,
+    description: String,
+    imageUrl: String?,
+    audioUrl: String?,
+    date: Instant,
+    createdAt: Instant,
+    link: String,
+    commentsLink: String?,
+    flags: Set<PostFlag>,
+    remoteId: String?,
+    feedName: String,
+    feedIcon: String,
+    feedHomepageLink: String,
+    alwaysFetchFullArticle: Boolean,
+    showFeedFavIcon: Boolean,
+    feedContentReadingTime: Long?,
+    articleContentReadingTime: Long?,
+    isFeatured: Boolean,
+  ): ResolvedPost {
+    return ResolvedPost(
+      id = id,
+      sourceId = sourceId,
+      title = title,
+      description = description,
+      imageUrl = imageUrl,
+      audioUrl = audioUrl,
+      date = date,
+      createdAt = createdAt,
+      link = link,
+      commentsLink = commentsLink,
+      flags = flags,
+      feedName = feedName,
+      feedIcon = feedIcon,
+      feedHomepageLink = feedHomepageLink,
+      alwaysFetchFullArticle = alwaysFetchFullArticle,
+      showFeedFavIcon = showFeedFavIcon,
+      feedContentReadingTime = feedContentReadingTime?.toInt(),
+      articleContentReadingTime = articleContentReadingTime?.toInt(),
+      remoteId = remoteId,
+    )
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
