@@ -17,9 +17,11 @@
 
 package dev.sasikanth.rss.reader.core.model.local
 
+import androidx.compose.runtime.Stable
 import com.benasher44.uuid.Uuid
 import kotlin.time.Instant
 
+@Stable
 data class BlockedWord(
   val id: Uuid,
   val content: String,

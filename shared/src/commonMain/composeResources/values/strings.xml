@@ -173,6 +173,8 @@
   <string name="blockedWordsHint">Enter a word</string>
   <string name="blockedWordsDesc">Post can be hidden from the home screen based on their text. We recommend avoiding common words that appear in many posts, since it can result in no posts being shown or negatively impacting app performance. \n\nHidden posts will still be displayed in search &amp; bookmarks.</string>
   <string name="blockedWordsEmpty">You haven't blocked any words yet</string>
+  <string name="readMore">Read more</string>
+  <string name="readLess">Read less</string>
   <string name="markArticleAsRead">Mark article as read</string>
   <string name="markArticleAsReadOnOpen">On Open</string>
   <string name="markArticleAsReadOnScroll">On Scroll</string>
