@@ -141,7 +141,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
-  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  (imageUrl IS NOT NULL AND postDate > :featuredPostsAfter) DESC,
   post.postDate DESC,
   post.createdAt DESC
 LIMIT :limit OFFSET :offset;
@@ -180,7 +180,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
-  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  (imageUrl IS NOT NULL AND postDate > :featuredPostsAfter) DESC,
   post.postDate ASC,
   post.createdAt ASC
 LIMIT :limit OFFSET :offset;
@@ -219,7 +219,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
-  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  (imageUrl IS NOT NULL AND postDate > :featuredPostsAfter) DESC,
   post.createdAt DESC,
   post.postDate DESC
 LIMIT :limit OFFSET :offset;
@@ -258,7 +258,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
-  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  (imageUrl IS NOT NULL AND postDate > :featuredPostsAfter) DESC,
   post.createdAt ASC,
   post.postDate ASC
 LIMIT :limit OFFSET :offset;
