@@ -28,7 +28,12 @@ countSearchResults:
 SELECT COUNT(*) FROM post_search ps
 INNER JOIN post p ON p.id = ps.id
 INNER JOIN feed f ON p.sourceId = f.id
-WHERE ps.post_search MATCH :searchQuery AND f.isDeleted = 0 AND (p.flags & 4) == 0;
+WHERE ps.post_search MATCH :searchQuery 
+  AND f.isDeleted = 0 
+  AND (p.flags & 4) == 0
+  AND (:isSourceIdsEmpty OR p.sourceId IN :sourceIds)
+  AND (:onlyBookmarked = 0 OR (p.flags & 1) != 0)
+  AND (:onlyUnread = 0 OR (p.flags & 2) == 0);
 
 search:
 SELECT
@@ -54,7 +59,12 @@ FROM post_search
 INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN postContent pc ON post.id == pc.id
-WHERE post_search MATCH :searchQuery AND feed.isDeleted = 0 AND (post.flags & 4) == 0
+WHERE post_search MATCH :searchQuery 
+  AND feed.isDeleted = 0 
+  AND (post.flags & 4) == 0
+  AND (:isSourceIdsEmpty OR post.sourceId IN :sourceIds)
+  AND (:onlyBookmarked = 0 OR (post.flags & 1) != 0)
+  AND (:onlyUnread = 0 OR (post.flags & 2) == 0)
 ORDER BY
   CASE WHEN :sortOrder = 'oldest' THEN post.postDate END ASC,
   CASE WHEN :sortOrder = 'newest' THEN post.postDate END DESC
