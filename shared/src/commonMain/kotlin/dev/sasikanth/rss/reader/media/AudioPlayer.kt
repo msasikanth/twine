@@ -31,6 +31,16 @@ interface AudioPlayer {
   fun seekTo(position: Long)
 
   fun setPlaybackSpeed(speed: Float)
+
+  fun setSleepTimer(option: SleepTimerOption)
+}
+
+sealed interface SleepTimerOption {
+  data object None : SleepTimerOption
+
+  data object EndOfTrack : SleepTimerOption
+
+  data class Minutes(val minutes: Int) : SleepTimerOption
 }
 
 data class PlaybackState(
@@ -40,6 +50,8 @@ data class PlaybackState(
   val playingUrl: String? = null,
   val buffering: Boolean = false,
   val playbackSpeed: Float = 1f,
+  val sleepTimerRemaining: Long? = null,
+  val selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None,
 ) {
   companion object {
     val Idle =
@@ -49,6 +61,8 @@ data class PlaybackState(
         duration = 0,
         buffering = false,
         playbackSpeed = 1f,
+        sleepTimerRemaining = null,
+        selectedSleepTimerOption = SleepTimerOption.None,
       )
   }
 }

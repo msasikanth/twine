@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.FullArticleFetcher
 import dev.sasikanth.rss.reader.data.repository.PostContentRepository
 import dev.sasikanth.rss.reader.media.AudioPlayer
+import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.reader.redability.ReadabilityRunner
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.seconds
@@ -138,6 +139,10 @@ class ReaderPageViewModel(
 
   fun setPlaybackSpeed(speed: Float) {
     audioPlayer.setPlaybackSpeed(speed)
+  }
+
+  fun setSleepTimer(option: SleepTimerOption) {
+    audioPlayer.setSleepTimer(option)
   }
 
   private fun loadFullArticle() {

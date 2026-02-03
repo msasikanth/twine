@@ -53,6 +53,9 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
 
   private var progressJob: Job? = null
   private var playingUrl: String? = null
+  private var sleepTimerJob: Job? = null
+  private var sleepTimerRemainingMillis: Long? = null
+  private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
 
   init {
     mediaPlayer
@@ -75,6 +78,9 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
           }
 
           override fun finished(mediaPlayer: MediaPlayer?) {
+            if (_playbackState.value.sleepTimerRemaining == -1L) {
+              setSleepTimer(SleepTimerOption.None)
+            }
             updatePlaybackState()
             stopProgressUpdate()
             seekTo(0)
@@ -116,6 +122,36 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     updatePlaybackState()
   }
 
+  override fun setSleepTimer(option: SleepTimerOption) {
+    sleepTimerJob?.cancel()
+    sleepTimerRemainingMillis = null
+    selectedSleepTimerOption = option
+
+    when (option) {
+      SleepTimerOption.None -> {
+        // No-op
+      }
+      SleepTimerOption.EndOfTrack -> {
+        sleepTimerRemainingMillis = -1L
+      }
+      is SleepTimerOption.Minutes -> {
+        val millis = option.minutes * 60 * 1000L
+        sleepTimerRemainingMillis = millis
+        sleepTimerJob =
+          scope.launch {
+            while (sleepTimerRemainingMillis!! > 0) {
+              delay(1000)
+              sleepTimerRemainingMillis = sleepTimerRemainingMillis!! - 1000
+              updatePlaybackState()
+            }
+            pause()
+            setSleepTimer(SleepTimerOption.None)
+          }
+      }
+    }
+    updatePlaybackState()
+  }
+
   private fun updatePlaybackState() {
     _playbackState.update {
       it.copy(
@@ -125,6 +161,8 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         playingUrl = playingUrl,
         buffering = it.buffering,
         playbackSpeed = mediaPlayer?.status()?.rate() ?: 1f,
+        sleepTimerRemaining = sleepTimerRemainingMillis,
+        selectedSleepTimerOption = selectedSleepTimerOption,
       )
     }
   }
