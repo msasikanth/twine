@@ -31,7 +31,11 @@ CREATE INDEX post_date_index ON post (postDate);
 CREATE INDEX post_createdAt_index ON post (createdAt);
 CREATE INDEX post_sourceId_index ON post (sourceId);
 
-CREATE INDEX post_all_posts_index ON post(flags, postDate DESC, createdAt DESC);
+CREATE INDEX post_all_posts_latest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, postDate DESC, createdAt DESC);
+CREATE INDEX post_all_posts_oldest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, postDate ASC, createdAt ASC);
+CREATE INDEX post_all_posts_added_latest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, createdAt DESC, postDate DESC);
+CREATE INDEX post_all_posts_added_oldest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, createdAt ASC, postDate ASC);
+
 CREATE INDEX post_remoteId_index ON post(remoteId) WHERE remoteId IS NOT NULL;
 CREATE INDEX post_link_index ON post(link);
 CREATE INDEX post_sync_index ON post(updatedAt, syncedAt) WHERE remoteId IS NOT NULL;
@@ -103,60 +107,160 @@ WHERE
   post.postDate > :postsAfter AND
   post.createdAt < :lastSyncedAt;
 
-allPosts:
-WITH baseQuery AS (
-  SELECT
-    post.id AS id,
-    post.sourceId AS sourceId,
-    post.title AS title,
-    post.description AS description,
-    post.imageUrl AS imageUrl,
-    post.audioUrl AS audioUrl,
-    post.postDate AS postDate,
-    post.createdAt AS createdAt,
-    post.link AS link,
-    post.commentsLink AS commentsLink,
-    post.flags AS flags,
-    post.remoteId AS remoteId,
-    feed.name AS feedName,
-    feed.icon AS feedIcon,
-    feed.homepageLink AS feedHomepageLink,
-    feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
-    feed.showFeedFavIcon AS showFeedFavIcon,
-    pc.feedContentReadingTime AS feedContentReadingTime,
-    pc.articleContentReadingTime AS articleContentReadingTime
-  FROM post
-  INNER JOIN feed ON post.sourceId == feed.id
-  LEFT JOIN postContent pc ON post.id == pc.id
-  WHERE
-    ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
-    (post.flags & 4) == 0 AND
-    feed.isDeleted = 0 AND
-    (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
-    post.postDate > :postsAfter AND
-    post.createdAt < :lastSyncedAt
-),
-featuredPosts AS (
-  SELECT id FROM baseQuery
-  WHERE imageUrl IS NOT NULL AND postDate > :featuredPostsAfter
-  ORDER BY
-    CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-    CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
-    CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
-    CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
-  LIMIT :numberOfFeaturedPosts
-)
+allPostsLatest:
 SELECT
-  bq.*,
-  (fp.id IS NOT NULL) AS isFeatured
-FROM baseQuery bq
-LEFT JOIN featuredPosts fp ON bq.id = fp.id
+  post.id AS id,
+  post.sourceId AS sourceId,
+  post.title AS title,
+  post.description AS description,
+  post.imageUrl AS imageUrl,
+  post.audioUrl AS audioUrl,
+  post.postDate AS postDate,
+  post.createdAt AS createdAt,
+  post.link AS link,
+  post.commentsLink AS commentsLink,
+  post.flags AS flags,
+  post.remoteId AS remoteId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  (post.imageUrl IS NOT NULL AND post.postDate > :featuredPostsAfter) AS isFeatured
+FROM post INDEXED BY post_all_posts_latest_index
+INNER JOIN feed ON post.sourceId = feed.id
+LEFT JOIN postContent pc ON post.id = pc.id
+WHERE
+  (post.imageUrl IS NOT NULL AND post.postDate > 0) >= 0 AND
+  post.postDate > :postsAfter AND
+  post.createdAt < :lastSyncedAt AND
+  (post.flags & 4) = 0 AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
 ORDER BY
-  isFeatured DESC,
-  CASE WHEN :orderBy = 'Latest' THEN postDate END DESC,
-  CASE WHEN :orderBy = 'Oldest' THEN postDate END ASC,
-  CASE WHEN :orderBy = 'AddedLatest' THEN createdAt END DESC,
-  CASE WHEN :orderBy = 'AddedOldest' THEN createdAt END ASC
+  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  post.postDate DESC,
+  post.createdAt DESC
+LIMIT :limit OFFSET :offset;
+
+allPostsOldest:
+SELECT
+  post.id AS id,
+  post.sourceId AS sourceId,
+  post.title AS title,
+  post.description AS description,
+  post.imageUrl AS imageUrl,
+  post.audioUrl AS audioUrl,
+  post.postDate AS postDate,
+  post.createdAt AS createdAt,
+  post.link AS link,
+  post.commentsLink AS commentsLink,
+  post.flags AS flags,
+  post.remoteId AS remoteId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  (post.imageUrl IS NOT NULL AND post.postDate > :featuredPostsAfter) AS isFeatured
+FROM post INDEXED BY post_all_posts_oldest_index
+INNER JOIN feed ON post.sourceId = feed.id
+LEFT JOIN postContent pc ON post.id = pc.id
+WHERE
+  (post.imageUrl IS NOT NULL AND post.postDate > 0) >= 0 AND
+  post.postDate > :postsAfter AND
+  post.createdAt < :lastSyncedAt AND
+  (post.flags & 4) = 0 AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+ORDER BY
+  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  post.postDate ASC,
+  post.createdAt ASC
+LIMIT :limit OFFSET :offset;
+
+allPostsAddedLatest:
+SELECT
+  post.id AS id,
+  post.sourceId AS sourceId,
+  post.title AS title,
+  post.description AS description,
+  post.imageUrl AS imageUrl,
+  post.audioUrl AS audioUrl,
+  post.postDate AS postDate,
+  post.createdAt AS createdAt,
+  post.link AS link,
+  post.commentsLink AS commentsLink,
+  post.flags AS flags,
+  post.remoteId AS remoteId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  (post.imageUrl IS NOT NULL AND post.postDate > :featuredPostsAfter) AS isFeatured
+FROM post INDEXED BY post_all_posts_added_latest_index
+INNER JOIN feed ON post.sourceId = feed.id
+LEFT JOIN postContent pc ON post.id = pc.id
+WHERE
+  (post.imageUrl IS NOT NULL AND post.postDate > 0) >= 0 AND
+  post.postDate > :postsAfter AND
+  post.createdAt < :lastSyncedAt AND
+  (post.flags & 4) = 0 AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+ORDER BY
+  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  post.createdAt DESC,
+  post.postDate DESC
+LIMIT :limit OFFSET :offset;
+
+allPostsAddedOldest:
+SELECT
+  post.id AS id,
+  post.sourceId AS sourceId,
+  post.title AS title,
+  post.description AS description,
+  post.imageUrl AS imageUrl,
+  post.audioUrl AS audioUrl,
+  post.postDate AS postDate,
+  post.createdAt AS createdAt,
+  post.link AS link,
+  post.commentsLink AS commentsLink,
+  post.flags AS flags,
+  post.remoteId AS remoteId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  (post.imageUrl IS NOT NULL AND post.postDate > :featuredPostsAfter) AS isFeatured
+FROM post INDEXED BY post_all_posts_added_oldest_index
+INNER JOIN feed ON post.sourceId = feed.id
+LEFT JOIN postContent pc ON post.id = pc.id
+WHERE
+  (post.imageUrl IS NOT NULL AND post.postDate > 0) >= 0 AND
+  post.postDate > :postsAfter AND
+  post.createdAt < :lastSyncedAt AND
+  (post.flags & 4) = 0 AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+ORDER BY
+  (imageUrl IS NOT NULL AND postDate > 0) DESC,
+  post.createdAt ASC,
+  post.postDate ASC
 LIMIT :limit OFFSET :offset;
 
 updateBookmarkStatus:
