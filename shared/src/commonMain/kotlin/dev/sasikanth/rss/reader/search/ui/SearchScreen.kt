@@ -326,13 +326,10 @@ private fun SourceFilterChips(
   modifier: Modifier = Modifier,
 ) {
   LazyRow(
-    modifier =
-      modifier
-        .fillMaxWidth()
-        .background(AppTheme.colorScheme.surface)
-        .padding(horizontal = 16.dp, vertical = 8.dp),
+    modifier = modifier.fillMaxWidth().background(AppTheme.colorScheme.surface),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
+    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
   ) {
     item {
       SourceChip(
