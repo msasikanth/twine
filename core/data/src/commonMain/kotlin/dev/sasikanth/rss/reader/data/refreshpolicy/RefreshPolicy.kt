@@ -41,39 +41,55 @@ class RefreshPolicy(private val dataStore: DataStore<Preferences>) {
     private val UPDATE_DURATION = 60.minutes
   }
 
-  private val lastUpdatedAtKey = stringPreferencesKey("pref_last_updated_at")
+  private val lastRefreshedAtKey = stringPreferencesKey("pref_last_updated_at")
+  private val lastSyncedAtKey = stringPreferencesKey("pref_last_sync_time")
 
-  val dateTimeFlow: Flow<LocalDateTime> =
+  val lastRefreshedAtFlow: Flow<LocalDateTime> =
     dataStore.data.map { preferences ->
       val timeZone = TimeZone.currentSystemDefault()
       val instantString =
-        preferences[lastUpdatedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
+        preferences[lastRefreshedAtKey] ?: return@map Clock.System.now().toLocalDateTime(timeZone)
       val instant = Instant.parse(instantString)
       instant.toLocalDateTime(timeZone)
     }
 
-  val instantFlow: Flow<Instant?> =
-    dataStore.data.map { preferences -> preferences[lastUpdatedAtKey]?.let { Instant.parse(it) } }
+  val lastSyncedAtFlow: Flow<Instant?> =
+    dataStore.data.map { preferences -> preferences[lastSyncedAtKey]?.let { Instant.parse(it) } }
 
-  suspend fun refresh() {
-    dataStore.edit { preferences -> preferences[lastUpdatedAtKey] = Clock.System.now().toString() }
+  suspend fun updateLastRefreshedAt() {
+    dataStore.edit { preferences ->
+      preferences[lastRefreshedAtKey] = Clock.System.now().toString()
+    }
+  }
+
+  suspend fun updateLastSyncedAt() {
+    dataStore.edit { preferences -> preferences[lastSyncedAtKey] = Clock.System.now().toString() }
   }
 
   suspend fun hasExpired(): Boolean {
-    val lastUpdatedAt = fetchLastUpdatedAt() ?: return true
+    val lastSyncedAt = fetchLastSyncedAt() ?: return true
     val currentTime = Clock.System.now()
-    val lastUpdateDuration = currentTime - lastUpdatedAt
+    val lastSyncDuration = currentTime - lastSyncedAt
 
-    return lastUpdateDuration > UPDATE_DURATION
+    return lastSyncDuration > UPDATE_DURATION
   }
 
-  suspend fun fetchLastUpdatedAt(): Instant? =
+  suspend fun fetchLastRefreshedAt(): Instant? =
     dataStore.data
-      .map { preferences -> preferences[lastUpdatedAtKey] ?: return@map null }
+      .map { preferences -> preferences[lastRefreshedAtKey] ?: return@map null }
+      .first()
+      ?.let { Instant.parse(it) }
+
+  suspend fun fetchLastSyncedAt(): Instant? =
+    dataStore.data
+      .map { preferences -> preferences[lastSyncedAtKey] ?: return@map null }
       .first()
       ?.let { Instant.parse(it) }
 
   suspend fun clear() {
-    dataStore.edit { preferences -> preferences.remove(lastUpdatedAtKey) }
+    dataStore.edit { preferences ->
+      preferences.remove(lastRefreshedAtKey)
+      preferences.remove(lastSyncedAtKey)
+    }
   }
 }

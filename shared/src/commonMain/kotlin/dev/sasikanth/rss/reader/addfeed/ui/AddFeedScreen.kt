@@ -178,8 +178,8 @@ fun AddFeedScreen(
           action = null,
           actionOnNewLine = false,
           shape = SnackbarDefaults.shape,
-          backgroundColor = SnackbarDefaults.color,
-          contentColor = SnackbarDefaults.contentColor,
+          backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
+          contentColor = AppTheme.colorScheme.onSurface,
           elevation = 0.dp,
         )
       }

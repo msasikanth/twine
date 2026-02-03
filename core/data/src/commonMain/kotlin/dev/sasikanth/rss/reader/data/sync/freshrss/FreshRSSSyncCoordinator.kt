@@ -112,7 +112,7 @@ class FreshRSSSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime
+      val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: syncStartTime
       val newerThan = lastSyncedAt.minus(24.hours).toEpochMilliseconds()
 
       val hasNewArticles = syncArticles(newerThan = newerThan)
@@ -126,7 +126,7 @@ class FreshRSSSyncCoordinator(
       // Always update lastSyncedAt after a successful sync. The 24-hour overlap
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
-      refreshPolicy.refresh()
+      refreshPolicy.updateLastSyncedAt()
       updateSyncState(SyncState.Complete)
 
       true
@@ -181,7 +181,7 @@ class FreshRSSSyncCoordinator(
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no feeds have been updated since last sync
     val hasUpdatedFeeds =
@@ -222,16 +222,12 @@ class FreshRSSSyncCoordinator(
         freshRssSource.editFeedName(feed.remoteId!!, feed.name)
         rssRepository.updateFeedLastUpdatedAt(feed.id, syncStartTime)
       }
-
-    // Update lastSyncedAt after successful push to prevent redundant push attempts
-    // This ensures early returns work correctly on subsequent syncs when no new articles
-    refreshPolicy.refresh()
   }
 
   private suspend fun pushGroupChanges(syncStartTime: Instant) {
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no groups have been updated since last sync
     val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }
@@ -301,10 +297,6 @@ class FreshRSSSyncCoordinator(
           }
         }
       }
-
-    // Update lastSyncedAt after successful push to prevent redundant push attempts
-    // This ensures early returns work correctly on subsequent syncs when no new articles
-    refreshPolicy.refresh()
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {

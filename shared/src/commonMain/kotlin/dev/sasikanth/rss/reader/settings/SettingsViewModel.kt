@@ -38,6 +38,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.combine
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -84,7 +85,7 @@ class SettingsViewModel(
         settingsRepository.blockImages,
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
-        refreshPolicy.instantFlow,
+        refreshPolicy.lastSyncedAtFlow,
         userRepository.user(),
         settingsRepository.appIcon,
       ) {
@@ -381,7 +382,7 @@ private data class Settings(
   val blockImages: Boolean,
   val enableNotifications: Boolean,
   val downloadFullContent: Boolean,
-  val lastSyncedAt: kotlin.time.Instant?,
+  val lastSyncedAt: Instant?,
   val lastSyncStatus: SettingsState.SyncProgress,
   val hasCloudServiceSignedIn: Boolean,
   val appIcon: AppIcon,

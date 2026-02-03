@@ -272,7 +272,7 @@ class FeedsViewModel(
     val searchQueryFlow =
       snapshotFlow { searchQuery }.debounce(500.milliseconds).distinctUntilChangedBy { it.text }
 
-    combine(searchQueryFlow, settingsRepository.postsType, refreshPolicy.dateTimeFlow) {
+    combine(searchQueryFlow, settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) {
         searchQuery,
         postsType,
         dateTime ->
@@ -305,7 +305,7 @@ class FeedsViewModel(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
 
-    combine(activeSourceFlow, refreshPolicy.dateTimeFlow, postsTypeFlow) {
+    combine(activeSourceFlow, refreshPolicy.lastRefreshedAtFlow, postsTypeFlow) {
         activeSource,
         lastRefreshedAt,
         postsType ->
@@ -346,7 +346,8 @@ class FeedsViewModel(
       .launchIn(viewModelScope)
 
     val pinnedSourcesFlow =
-      combine(settingsRepository.postsType, refreshPolicy.dateTimeFlow) { postsType, dateTime ->
+      combine(settingsRepository.postsType, refreshPolicy.lastRefreshedAtFlow) { postsType, dateTime
+          ->
           Pair(postsType, dateTime)
         }
         .flatMapLatest { (postsType, dateTime) ->
@@ -361,7 +362,7 @@ class FeedsViewModel(
       combine(
           settingsRepository.postsType,
           settingsRepository.feedsSortOrder,
-          refreshPolicy.dateTimeFlow,
+          refreshPolicy.lastRefreshedAtFlow,
         ) { postsType, feedsSortOrder, dateTime ->
           Triple(postsType, feedsSortOrder, dateTime)
         }

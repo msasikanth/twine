@@ -183,7 +183,7 @@ class HomeViewModel(
   private fun loadNewArticles() {
     viewModelScope.launch {
       _state.update { it.copy(unreadSinceLastSync = null) }
-      refreshPolicy.refresh()
+      refreshPolicy.updateLastRefreshedAt()
       inAppRating.request()
     }
   }

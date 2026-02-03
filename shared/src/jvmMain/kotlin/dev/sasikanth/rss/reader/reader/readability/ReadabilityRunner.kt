@@ -28,6 +28,7 @@ import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 import org.htmlunit.BrowserVersion
 import org.htmlunit.WebClient
+import org.htmlunit.corejs.javascript.Undefined
 import org.htmlunit.html.HtmlPage
 
 @Inject
@@ -98,12 +99,12 @@ class HtmlReadabilityRunner(private val dispatchersProvider: DispatchersProvider
           webClient.waitForBackgroundJavaScript(100)
 
           val errorObj = page.executeJavaScript("parsingError").javaScriptResult
-          if (errorObj != null && errorObj != org.htmlunit.corejs.javascript.Undefined.instance) {
+          if (errorObj != null && errorObj != Undefined.instance) {
             throw RuntimeException("JS parsing failed: ${errorObj}")
           }
 
           val resultObj = page.executeJavaScript("parsingResult").javaScriptResult
-          if (resultObj != null && resultObj != org.htmlunit.corejs.javascript.Undefined.instance) {
+          if (resultObj != null && resultObj != Undefined.instance) {
             result = resultObj.toString()
             break
           }

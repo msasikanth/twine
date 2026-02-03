@@ -48,13 +48,16 @@ import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.parseSource
 import kotlin.math.min
 import kotlinx.io.Buffer
-import kotlinx.io.EOFException
+import kotlinx.io.EOFException as KxEOFException
+import kotlinx.io.IOException as KxIOException
 import kotlinx.io.RawSource
-import kotlinx.io.Source
 import kotlinx.io.UnsafeIoApi
 import kotlinx.io.unsafe.UnsafeBufferOperations
+import okio.Buffer as OkioBuffer
+import okio.EOFException as OkioEOFException
 import okio.FileSystem
-import okio.IOException
+import okio.IOException as OkioIOException
+import okio.Source as OkioSource
 
 private const val CACHE_CONTROL = "Cache-Control"
 private const val CONTENT_TYPE = "Content-Type"
@@ -213,7 +216,7 @@ class FavIconFetcher(
   private fun DiskCache.Snapshot.toCacheResponse(): NetworkResponse? {
     return try {
       fileSystem.read(metadata) { NetworkResponse(body = NetworkResponseBody(this)) }
-    } catch (_: IOException) {
+    } catch (_: OkioIOException) {
       // If we can't parse the metadata, ignore this entry.
       null
     }
@@ -298,10 +301,10 @@ class FavIconFetcher(
  *
  * Closing one of these sources will also close another one.
  */
-public fun okio.Source.asKotlinxIoRawSource(): RawSource =
+public fun OkioSource.asKotlinxIoRawSource(): RawSource =
   object : RawSource {
     private val buffer =
-      okio.Buffer() // TODO: optimization - reuse BufferedSource's buffer if possible
+      OkioBuffer() // TODO: optimization - reuse BufferedSource's buffer if possible
 
     override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = withOkio2KxIOExceptionMapping {
       val readBytes = this@asKotlinxIoRawSource.read(buffer, byteCount)
@@ -329,14 +332,13 @@ internal inline fun <T> withOkio2KxIOExceptionMapping(block: () -> T): T {
   try {
     return block()
   } catch (
-    bypassIOE:
-      kotlinx.io.IOException) { // on JVM, kotlinx.io.IOException and okio.IOException are the same
+    bypassIOE: KxIOException) { // on JVM, kotlinx.io.IOException and okio.IOException are the same
     throw bypassIOE
-  } catch (bypassEOF: kotlinx.io.EOFException) { // see above
+  } catch (bypassEOF: KxEOFException) { // see above
     throw bypassEOF
-  } catch (eofe: okio.EOFException) {
-    throw kotlinx.io.IOException(eofe.message, eofe)
-  } catch (ioe: okio.IOException) {
-    throw kotlinx.io.IOException(ioe.message, ioe)
+  } catch (eofe: OkioEOFException) {
+    throw KxIOException(eofe.message, eofe)
+  } catch (ioe: OkioIOException) {
+    throw KxIOException(ioe.message, ioe)
   }
 }
