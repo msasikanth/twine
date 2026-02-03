@@ -168,6 +168,8 @@
   <string name="blockedWordsHint">输入关键字</string>
   <string name="blockedWordsDesc">可基于文本内容从主屏中隐藏文章。我们建议避免大多数文章内容中的常用词，否则会导致文章内容不可见甚至影响应用性能。\n\n被隐藏的文章仍会在搜索&amp;书签中显示。</string>
   <string name="blockedWordsEmpty">你还没有设置任何屏蔽词</string>
+  <string name="readMore">Read more</string>
+  <string name="readLess">Read less</string>
   <string name="markArticleAsRead">标记文章为已读</string>
   <string name="markArticleAsReadOnOpen">打开后</string>
   <string name="markArticleAsReadOnScroll">滚动时</string>

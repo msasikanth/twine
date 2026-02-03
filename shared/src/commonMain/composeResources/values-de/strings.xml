@@ -168,6 +168,8 @@
   <string name="blockedWordsHint">Geben Sie ein Wort ein</string>
   <string name="blockedWordsDesc">Beiträge können aufgrund ihres Textes auf dem Startbildschirm ausgeblendet werden. Wir empfehlen, häufige Wörter, die in vielen Beiträgen vorkommen, zu vermeiden, da dies dazu führen kann, dass keine Beiträge angezeigt werden oder die Leistung der App negativ beeinflusst wird. \n\nAusgeblendete Beiträge werden weiterhin in der Suche und in den Lesezeichen angezeigt.</string>
   <string name="blockedWordsEmpty">Sie haben noch keine Wörter blockiert</string>
+  <string name="readMore">Read more</string>
+  <string name="readLess">Read less</string>
   <string name="markArticleAsRead">Beitrag als gelesen markieren</string>
   <string name="markArticleAsReadOnOpen">Beim Öffnen</string>
   <string name="markArticleAsReadOnScroll">Beim Scrollen</string>
