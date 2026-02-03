@@ -237,7 +237,7 @@ internal fun SearchScreen(
             key = { index ->
               val post = searchResults[index]
               if (post != null) {
-                PostListKey.from(post)
+                PostListKey.from(post).encode()
               } else {
                 index
               }
