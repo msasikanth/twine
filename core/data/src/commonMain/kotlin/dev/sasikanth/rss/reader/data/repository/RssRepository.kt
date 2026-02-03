@@ -57,12 +57,14 @@ import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Instant
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.chunked
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
@@ -1891,11 +1893,11 @@ class RssRepository(
           ReadingTrend(date = it.date, count = it.count)
         }
 
-      kotlinx.coroutines.flow.flowOf(
+      flowOf(
         ReadingStatistics(
           totalReadCount = totalReadCount,
-          topFeeds = topFeeds,
-          readingTrends = readingTrends,
+          topFeeds = topFeeds.toImmutableList(),
+          readingTrends = readingTrends.toImmutableList(),
         )
       )
     }

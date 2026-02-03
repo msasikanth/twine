@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.core.model.local
 
 import androidx.compose.runtime.Immutable
+import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
 data class FeedReadCount(
@@ -33,6 +34,6 @@ data class FeedReadCount(
 @Immutable
 data class ReadingStatistics(
   val totalReadCount: Long,
-  val topFeeds: List<FeedReadCount>,
-  val readingTrends: List<ReadingTrend>,
+  val topFeeds: ImmutableList<FeedReadCount>,
+  val readingTrends: ImmutableList<ReadingTrend>,
 )

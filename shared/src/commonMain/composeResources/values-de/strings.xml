@@ -244,7 +244,9 @@
   <string name="statisticsNoData">No reading data available yet</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
   <string name="statisticsTopFeeds">Top 10 Feeds</string>
-  <string name="statisticsReadingTrends">Reading Trends (Last 30 Days)</string>
+  <string name="statisticsReadingTrends">Reading Trends</string>
+  <string name="statisticsLess">Less</string>
+  <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
   <!-- Plurals -->

@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.statistics.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +32,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,8 +48,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,10 +66,20 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.statistics.StatisticsViewModel
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.formatReadingTrendDate
+import kotlin.time.Clock
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.statistics
+import twine.shared.generated.resources.statisticsLess
+import twine.shared.generated.resources.statisticsMore
 import twine.shared.generated.resources.statisticsNoData
 import twine.shared.generated.resources.statisticsReadingTrends
 import twine.shared.generated.resources.statisticsTopFeeds
@@ -153,6 +168,15 @@ fun StatisticsScreen(
 
           item { Spacer(modifier = Modifier.height(24.dp)) }
 
+          item {
+            ReadingHeatmap(
+              readingTrends = statistics.readingTrends,
+              modifier = Modifier.padding(horizontal = 24.dp),
+            )
+          }
+
+          item { Spacer(modifier = Modifier.height(24.dp)) }
+
           if (statistics.topFeeds.isNotEmpty()) {
             item { SubHeader(text = stringResource(Res.string.statisticsTopFeeds)) }
 
@@ -179,6 +203,133 @@ fun StatisticsScreen(
         }
       }
     }
+  }
+}
+
+@Composable
+private fun ReadingHeatmap(
+  readingTrends: ImmutableList<ReadingTrend>,
+  modifier: Modifier = Modifier,
+) {
+  val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+  val sixMonthsAgo = today.minus(6, DateTimeUnit.MONTH)
+  val startDay = sixMonthsAgo.minus((sixMonthsAgo.dayOfWeek.ordinal + 1) % 7, DateTimeUnit.DAY)
+  val allDates =
+    remember(startDay, today) {
+      val dates = mutableListOf<LocalDate>()
+      var currentDate = startDay
+      while (currentDate <= today) {
+        dates.add(currentDate)
+        currentDate = currentDate.plus(1, DateTimeUnit.DAY)
+      }
+      dates
+    }
+  val trendsMap =
+    remember(readingTrends) {
+      readingTrends.associate {
+        try {
+          LocalDate.parse(it.date) to it.count
+        } catch (_: Exception) {
+          today to 0L
+        }
+      }
+    }
+  val weeks = remember(allDates) { allDates.chunked(7) }
+
+  Column(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .clip(RoundedCornerShape(16.dp))
+        .background(AppTheme.colorScheme.surface)
+        .horizontalScroll(rememberScrollState(), reverseScrolling = true)
+        .padding(16.dp)
+  ) {
+    Column {
+      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        weeks.forEachIndexed { index, week ->
+          val firstDay = week.first()
+          val prevMonth = weeks.getOrNull(index - 1)?.first()?.month
+          val showMonth = index == 0 || firstDay.month != prevMonth
+
+          Box(modifier = Modifier.width(12.dp)) {
+            if (showMonth) {
+              val monthName =
+                firstDay.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+              Text(
+                modifier = Modifier.requiredWidth(40.dp),
+                text = monthName,
+                style = MaterialTheme.typography.labelSmall,
+                color = AppTheme.colorScheme.textEmphasisMed,
+                maxLines = 1,
+              )
+            }
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        weeks.forEach { week ->
+          Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            week.forEach { date ->
+              val count = trendsMap[date] ?: 0L
+              HeatmapCell(count = count)
+            }
+          }
+        }
+      }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    HeatmapLegend(modifier = Modifier.align(Alignment.End))
+  }
+}
+
+@Composable
+private fun HeatmapCell(count: Long) {
+  val color =
+    when {
+      count == 0L -> AppTheme.colorScheme.surfaceContainerHighest
+      count < 3L -> AppTheme.colorScheme.primary.copy(alpha = 0.2f)
+      count < 6L -> AppTheme.colorScheme.primary.copy(alpha = 0.4f)
+      count < 10L -> AppTheme.colorScheme.primary.copy(alpha = 0.7f)
+      else -> AppTheme.colorScheme.primary
+    }
+
+  Box(modifier = Modifier.requiredSize(12.dp).clip(RoundedCornerShape(2.dp)).background(color))
+}
+
+@Composable
+private fun HeatmapLegend(modifier: Modifier = Modifier) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.End,
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Text(
+      text = stringResource(Res.string.statisticsLess),
+      style = MaterialTheme.typography.labelSmall,
+      color = AppTheme.colorScheme.textEmphasisMed,
+    )
+    Spacer(modifier = Modifier.width(4.dp))
+    HeatmapCell(count = 0)
+    Spacer(modifier = Modifier.width(2.dp))
+    HeatmapCell(count = 2)
+    Spacer(modifier = Modifier.width(2.dp))
+    HeatmapCell(count = 5)
+    Spacer(modifier = Modifier.width(2.dp))
+    HeatmapCell(count = 8)
+    Spacer(modifier = Modifier.width(2.dp))
+    HeatmapCell(count = 12)
+    Spacer(modifier = Modifier.width(4.dp))
+    Text(
+      text = stringResource(Res.string.statisticsMore),
+      style = MaterialTheme.typography.labelSmall,
+      color = AppTheme.colorScheme.textEmphasisMed,
+    )
   }
 }
 

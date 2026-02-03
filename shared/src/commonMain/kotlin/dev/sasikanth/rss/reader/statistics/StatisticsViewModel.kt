@@ -17,11 +17,12 @@
 
 package dev.sasikanth.rss.reader.statistics
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.data.repository.Period
 import dev.sasikanth.rss.reader.data.repository.RssRepository
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
+import dev.sasikanth.rss.reader.utils.calculateInstantBeforePeriod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -31,6 +32,7 @@ import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
 @Inject
+@Stable
 class StatisticsViewModel(private val rssRepository: RssRepository) : ViewModel() {
 
   private val _state = MutableStateFlow(StatisticsState())
@@ -51,7 +53,7 @@ class StatisticsViewModel(private val rssRepository: RssRepository) : ViewModel(
     viewModelScope.launch {
       _state.update { it.copy(isLoading = true) }
 
-      val startDate = Clock.System.now() - 30.days
+      val startDate = Period.SIX_MONTHS.calculateInstantBeforePeriod()
 
       rssRepository
         .getReadingStatistics(startDate)

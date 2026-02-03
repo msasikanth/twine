@@ -48,6 +48,7 @@ kotlin {
 
       implementation(libs.kotlinx.datetime)
       implementation(libs.kotlinx.coroutines)
+      implementation(libs.kotlinx.immutable.collections)
       implementation(libs.kotlininject.runtime)
       implementation(libs.kermit)
       api(libs.sqldelight.extensions.coroutines)
