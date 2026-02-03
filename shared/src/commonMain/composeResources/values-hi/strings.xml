@@ -239,6 +239,10 @@
   <string name="seek_forward">Seek forward 30 seconds</string>
   <string name="seek_backward">Seek backward 30 seconds</string>
   <string name="playback_speed">%1$dx</string>
+  <string name="sleep_timer">Sleep timer</string>
+  <string name="sleep_timer_off">Off</string>
+  <string name="sleep_timer_end_of_track">End of track</string>
+  <string name="sleep_timer_minutes">%1$d minutes</string>
   <!-- Statistics -->
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
