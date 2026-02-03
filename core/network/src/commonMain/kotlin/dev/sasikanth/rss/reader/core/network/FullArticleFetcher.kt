@@ -26,8 +26,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
@@ -79,8 +83,8 @@ class FullArticleFetcher(
   }
 
   private suspend fun fetchFullArticleByUrl(url: String): String {
-    val response =
-      fullArticleHttpClient.get(url) {
+    return fullArticleHttpClient
+      .prepareGet(url) {
         headers {
           append(
             HttpHeaders.Accept,
@@ -102,19 +106,39 @@ class FullArticleFetcher(
           append("Sec-Fetch-User", "?1")
         }
       }
+      .execute { response ->
+        if (!response.status.isSuccess()) {
+          throw Exception("Failed to fetch article: ${response.status}")
+        }
 
-    val contentLength = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
-    if (contentLength != null && contentLength > MAX_CONTENT_SIZE) {
-      throw Exception("Content too large: $contentLength bytes")
-    }
+        val contentType =
+          try {
+            response.contentType()
+          } catch (e: Exception) {
+            null
+          }
 
-    val htmlContent = response.bodyAsText()
+        val isHtml =
+          contentType?.let {
+            it.match(ContentType.Text.Html) || it.match(ContentType("application", "xhtml+xml"))
+          } ?: false
 
-    if (isJsRequired(htmlContent)) {
-      throw Exception("JavaScript is required to view this content")
-    }
+        if (!isHtml) {
+          throw Exception("No content to read")
+        }
 
-    return cleanHtml(htmlContent)
+        val contentLength = response.headers[HttpHeaders.ContentLength]?.toLongOrNull()
+        if (contentLength != null && contentLength > MAX_CONTENT_SIZE) {
+          throw Exception("Content too large: $contentLength bytes")
+        }
+
+        val htmlContent = response.bodyAsText()
+        if (isJsRequired(htmlContent)) {
+          throw Exception("JavaScript is required to view this content")
+        }
+
+        cleanHtml(htmlContent)
+      }
   }
 
   private fun cleanHtml(htmlContent: String): String {
