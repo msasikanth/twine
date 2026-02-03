@@ -81,7 +81,7 @@ class AllPostsPager(
         observableActiveSource.activeSource,
         settingsRepository.postsType,
         settingsRepository.postsSortOrder,
-        refreshPolicy.dateTimeFlow,
+        refreshPolicy.lastRefreshedAtFlow,
       ) { activeSource, postsType, postsSortOrder, dateTime ->
         computeParameters(activeSource, postsType, postsSortOrder, dateTime)
       }

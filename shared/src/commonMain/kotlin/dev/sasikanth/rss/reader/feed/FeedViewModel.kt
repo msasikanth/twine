@@ -84,7 +84,7 @@ class FeedViewModel(
       val (postsType, dateTime) =
         withContext(dispatchersProvider.io) {
           val postsType = settingsRepository.postsType.first()
-          val dateTime = refreshPolicy.dateTimeFlow.first()
+          val dateTime = refreshPolicy.lastRefreshedAtFlow.first()
 
           Pair(postsType, dateTime)
         }
@@ -120,7 +120,7 @@ class FeedViewModel(
       val (postsType, dateTime) =
         withContext(dispatchersProvider.io) {
           val postsType = settingsRepository.postsType.first()
-          val dateTime = refreshPolicy.dateTimeFlow.first()
+          val dateTime = refreshPolicy.lastRefreshedAtFlow.first()
 
           Pair(postsType, dateTime)
         }

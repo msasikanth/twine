@@ -118,7 +118,7 @@ class MinifluxSyncCoordinator(
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: syncStartTime
+      val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: syncStartTime
       val after = lastSyncedAt.minus(24.hours).epochSeconds
 
       val hasNewArticles = syncArticles(after = after)
@@ -132,7 +132,7 @@ class MinifluxSyncCoordinator(
       // Always update lastSyncedAt after a successful sync. The 24-hour overlap
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
-      refreshPolicy.refresh()
+      refreshPolicy.updateLastSyncedAt()
       updateSyncState(SyncState.Complete)
 
       true
@@ -187,7 +187,7 @@ class MinifluxSyncCoordinator(
 
   private suspend fun pushFeedChanges(syncStartTime: Instant) {
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no feeds have been updated since last sync
     val hasUpdatedFeeds =
@@ -241,7 +241,7 @@ class MinifluxSyncCoordinator(
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
     val localGroups = rssRepository.allFeedGroupsBlocking()
     val localFeeds = rssRepository.allFeedsBlocking()
-    val lastSyncedAt = refreshPolicy.fetchLastUpdatedAt() ?: Instant.DISTANT_PAST
+    val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: Instant.DISTANT_PAST
 
     // Early return if no groups have been updated since last sync
     val hasUpdatedGroups = localGroups.any { it.updatedAt > lastSyncedAt }

@@ -90,6 +90,7 @@ class LocalSyncCoordinator(
           }
         }
 
+        refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
@@ -116,6 +117,7 @@ class LocalSyncCoordinator(
           updateSyncState(SyncState.InProgress((index + 1).toFloat() / feedIds.size))
         }
 
+        refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
@@ -141,6 +143,7 @@ class LocalSyncCoordinator(
           }
         }
 
+        refreshPolicy.updateLastSyncedAt()
         updateSyncState(SyncState.Complete)
       } catch (e: Exception) {
         updateSyncState(SyncState.Error(e))
@@ -182,7 +185,7 @@ class LocalSyncCoordinator(
     withContext(dispatchersProvider.default) {
       val activeSource = observableActiveSource.activeSource.firstOrNull()
       val postsType = settingsRepository.postsType.first()
-      val lastRefreshedAtDateTime = refreshPolicy.dateTimeFlow.first()
+      val lastRefreshedAtDateTime = refreshPolicy.lastRefreshedAtFlow.first()
 
       val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType)
       val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAtDateTime)
@@ -202,7 +205,7 @@ class LocalSyncCoordinator(
       block()
 
       if (allPostsCount == 0L) {
-        refreshPolicy.refresh()
+        refreshPolicy.updateLastRefreshedAt()
       }
     }
   }

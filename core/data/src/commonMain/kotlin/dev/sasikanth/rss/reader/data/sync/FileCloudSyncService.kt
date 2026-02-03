@@ -177,7 +177,7 @@ class FileCloudSyncService(
       if (result) {
         appConfigQueries.updateLastSyncedFormatVersion(currentSyncVersion.toLong())
         userRepository.updateLastSyncStatus("SUCCESS")
-        refreshPolicy.refresh()
+        refreshPolicy.updateLastSyncedAt()
 
         val allFiles = provider.listFiles("/twine_")
         val activeFiles = postChunks + metadataFileName

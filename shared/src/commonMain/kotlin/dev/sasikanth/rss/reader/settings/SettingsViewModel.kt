@@ -84,7 +84,7 @@ class SettingsViewModel(
         settingsRepository.blockImages,
         settingsRepository.enableNotifications,
         settingsRepository.downloadFullContent,
-        refreshPolicy.instantFlow,
+        refreshPolicy.lastSyncedAtFlow,
         userRepository.user(),
         settingsRepository.appIcon,
       ) {
