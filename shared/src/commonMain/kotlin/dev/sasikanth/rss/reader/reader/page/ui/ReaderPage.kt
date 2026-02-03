@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,6 +69,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -75,14 +79,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -128,6 +135,7 @@ import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.media.PlaybackState
+import dev.sasikanth.rss.reader.media.SleepTimerOption
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.reader.page.ReaderPageViewModel
 import dev.sasikanth.rss.reader.reader.page.ReaderProcessingProgress
@@ -139,6 +147,7 @@ import dev.sasikanth.rss.reader.resources.icons.Pause
 import dev.sasikanth.rss.reader.resources.icons.Play
 import dev.sasikanth.rss.reader.resources.icons.Replay30
 import dev.sasikanth.rss.reader.resources.icons.Share
+import dev.sasikanth.rss.reader.resources.icons.Timer
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.share.LocalShareHandler
@@ -164,6 +173,10 @@ import twine.shared.generated.resources.readingTimeEstimate
 import twine.shared.generated.resources.seek_backward
 import twine.shared.generated.resources.seek_forward
 import twine.shared.generated.resources.share
+import twine.shared.generated.resources.sleep_timer
+import twine.shared.generated.resources.sleep_timer_end_of_track
+import twine.shared.generated.resources.sleep_timer_minutes
+import twine.shared.generated.resources.sleep_timer_off
 import twine.shared.generated.resources.unBookmark
 
 private val json = Json {
@@ -196,6 +209,7 @@ internal fun ReaderPage(
   val shouldBlockImage = LocalBlockImage.current
 
   val coroutineScope = rememberCoroutineScope()
+  var showSleepTimerSheet by remember { mutableStateOf(false) }
 
   val textSelectionColors =
     TextSelectionColors(
@@ -301,6 +315,7 @@ internal fun ReaderPage(
                         }
                       pageViewModel.setPlaybackSpeed(newSpeed)
                     },
+                    onSleepTimerClick = { showSleepTimerSheet = true },
                     modifier = Modifier.padding(horizontal = 24.dp).padding(top = 24.dp),
                   )
                 }
@@ -336,6 +351,17 @@ internal fun ReaderPage(
               }
             }
           }
+        }
+
+        if (showSleepTimerSheet) {
+          SleepTimerBottomSheet(
+            playbackState = playbackState,
+            onOptionSelected = {
+              pageViewModel.setSleepTimer(it)
+              showSleepTimerSheet = false
+            },
+            onDismiss = { showSleepTimerSheet = false },
+          )
         }
       }
     }
@@ -668,6 +694,7 @@ private fun MediaControls(
   onSeekForward: () -> Unit,
   onSeekBackward: () -> Unit,
   onPlaybackSpeedChange: (Float) -> Unit,
+  onSleepTimerClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val isPlaying = playbackState.isPlaying || playbackState.buffering
@@ -818,8 +845,23 @@ private fun MediaControls(
         )
       }
 
-      // Spacer to balance the layout, matching TextButton width roughly
-      Spacer(Modifier.requiredWidth(48.dp))
+      IconButton(onClick = onSleepTimerClick) {
+        val sleepTimerRemaining = playbackState.sleepTimerRemaining
+        val text =
+          if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
+            formatDuration(sleepTimerRemaining)
+          } else if (sleepTimerRemaining == -1L) {
+            stringResource(Res.string.sleep_timer_end_of_track)
+          } else {
+            stringResource(Res.string.sleep_timer)
+          }
+
+        Icon(
+          imageVector = TwineIcons.Timer,
+          contentDescription = text,
+          tint = AppTheme.colorScheme.onSurfaceVariant,
+        )
+      }
     }
   }
 }
@@ -833,5 +875,83 @@ private fun formatDuration(duration: Long): String {
     "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
   } else {
     "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
+  }
+}
+
+@Composable
+private fun SleepTimerBottomSheet(
+  playbackState: PlaybackState,
+  onOptionSelected: (SleepTimerOption) -> Unit,
+  onDismiss: () -> Unit,
+) {
+  ModalBottomSheet(
+    onDismissRequest = onDismiss,
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    contentColor = AppTheme.colorScheme.onSurface,
+    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+  ) {
+    Column(
+      modifier =
+        Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(top = 8.dp, bottom = 48.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Text(
+        text = stringResource(Res.string.sleep_timer),
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(bottom = 16.dp),
+      )
+
+      val currentOption = playbackState.selectedSleepTimerOption
+
+      SleepTimerOptionItem(
+        label = stringResource(Res.string.sleep_timer_off),
+        isSelected = currentOption is SleepTimerOption.None,
+        onClick = { onOptionSelected(SleepTimerOption.None) },
+      )
+
+      SleepTimerOptionItem(
+        label = stringResource(Res.string.sleep_timer_end_of_track),
+        isSelected = currentOption is SleepTimerOption.EndOfTrack,
+        onClick = { onOptionSelected(SleepTimerOption.EndOfTrack) },
+      )
+
+      listOf(15, 30, 45, 60).forEach { minutes ->
+        val option = SleepTimerOption.Minutes(minutes)
+        SleepTimerOptionItem(
+          label = stringResource(Res.string.sleep_timer_minutes, minutes),
+          isSelected = currentOption == option,
+          onClick = { onOptionSelected(option) },
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun SleepTimerOptionItem(label: String, isSelected: Boolean, onClick: () -> Unit) {
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clip(RoundedCornerShape(12.dp))
+        .clickable(onClick = onClick)
+        .padding(vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(16.dp),
+  ) {
+    RadioButton(
+      selected = isSelected,
+      onClick = null,
+      colors =
+        RadioButtonDefaults.colors(
+          selectedColor = AppTheme.colorScheme.primary,
+          unselectedColor = AppTheme.colorScheme.outline,
+        ),
+    )
+
+    Text(
+      text = label,
+      style = MaterialTheme.typography.bodyLarge,
+      color = if (isSelected) AppTheme.colorScheme.primary else AppTheme.colorScheme.onSurface,
+    )
   }
 }
