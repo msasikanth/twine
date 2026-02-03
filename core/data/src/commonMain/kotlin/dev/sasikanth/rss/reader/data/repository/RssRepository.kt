@@ -694,17 +694,34 @@ class RssRepository(
     }
   }
 
-  fun search(searchQuery: String, sortOrder: SearchSortOrder): PagingSource<Int, ResolvedPost> {
+  fun search(
+    searchQuery: String,
+    sortOrder: SearchSortOrder,
+    sourceIds: List<String> = emptyList(),
+    onlyBookmarked: Boolean = false,
+    onlyUnread: Boolean = false,
+  ): PagingSource<Int, ResolvedPost> {
     val sanitizedSearchQuery = sanitizeSearchQuery(searchQuery)
 
     return QueryPagingSource(
-      countQuery = postSearchFTSQueries.countSearchResults(sanitizedSearchQuery),
+      countQuery =
+        postSearchFTSQueries.countSearchResults(
+          searchQuery = sanitizedSearchQuery,
+          isSourceIdsEmpty = sourceIds.isEmpty(),
+          sourceIds = sourceIds,
+          onlyBookmarked = if (onlyBookmarked) 1L else 0L,
+          onlyUnread = if (onlyUnread) 1L else 0L,
+        ),
       transacter = postSearchFTSQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
         postSearchFTSQueries.search(
           searchQuery = sanitizedSearchQuery,
           sortOrder = sortOrder.value,
+          isSourceIdsEmpty = sourceIds.isEmpty(),
+          sourceIds = sourceIds,
+          onlyBookmarked = if (onlyBookmarked) 1L else 0L,
+          onlyUnread = if (onlyUnread) 1L else 0L,
           limit = limit,
           offset = offset,
           mapper = {
