@@ -31,6 +31,8 @@ class ReadingTimeCalculator(private val dispatchersProvider: DispatchersProvider
 
     // An average word is ~5 chars; 1000 chars is roughly 200 words (1 min)
     private const val FAST_PATH_THRESHOLD = 1000
+
+    private const val MAX_HTML_SIZE = 1_000_000 // 1MB
   }
 
   /**
@@ -44,6 +46,11 @@ class ReadingTimeCalculator(private val dispatchersProvider: DispatchersProvider
 
       if (htmlContent.length < FAST_PATH_THRESHOLD && !htmlContent.contains("<")) {
         return@withContext calculateFromPlainText(htmlContent)
+      }
+
+      if (htmlContent.length > MAX_HTML_SIZE) {
+        val fallbackText = htmlContent.take(MAX_HTML_SIZE).replace(Regex("<[^>]*>"), " ")
+        return@withContext calculateFromPlainText(fallbackText)
       }
 
       try {
