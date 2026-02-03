@@ -114,7 +114,7 @@ class MinifluxSyncCoordinator(
       pushChanges(syncStartTime)
 
       // 2. Sync Subscriptions
-      val hasNewSubscriptions = syncSubscriptions(syncStartTime)
+      syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
@@ -168,8 +168,8 @@ class MinifluxSyncCoordinator(
 
   private suspend fun pushChanges(syncStartTime: Instant = Clock.System.now()) {
     pushStatusChanges()
-    pushCategoryChanges(syncStartTime)
     pushFeedChanges(syncStartTime)
+    pushCategoryChanges(syncStartTime)
     purgeDeletedSources()
   }
 
@@ -236,10 +236,6 @@ class MinifluxSyncCoordinator(
         }
       }
     }
-
-    // Update lastSyncedAt after successful push to prevent redundant push attempts
-    // This ensures early returns work correctly on subsequent syncs when no new articles
-    refreshPolicy.refresh()
   }
 
   private suspend fun pushCategoryChanges(syncStartTime: Instant) {
@@ -322,10 +318,6 @@ class MinifluxSyncCoordinator(
           }
         }
       }
-
-    // Update lastSyncedAt after successful push to prevent redundant push attempts
-    // This ensures early returns work correctly on subsequent syncs when no new articles
-    refreshPolicy.refresh()
   }
 
   private suspend fun syncSubscriptions(syncStartTime: Instant): Boolean {
