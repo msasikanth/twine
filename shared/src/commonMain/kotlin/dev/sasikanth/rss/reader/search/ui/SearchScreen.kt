@@ -105,6 +105,7 @@ import dev.sasikanth.rss.reader.core.model.local.SearchSortOrder.Oldest
 import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.feeds.ui.FeedGroupIconGrid
 import dev.sasikanth.rss.reader.home.ui.PostListItem
+import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.All
@@ -231,10 +232,21 @@ internal fun SearchScreen(
             }
           }
 
-          items(count = searchResults.itemCount) { index ->
+          items(
+            count = searchResults.itemCount,
+            key = { index ->
+              val post = searchResults[index]
+              if (post != null) {
+                PostListKey.from(post)
+              } else {
+                index
+              }
+            },
+          ) { index ->
             val post = searchResults[index]
             if (post != null) {
               PostListItem(
+                modifier = Modifier.animateItem(),
                 item = post,
                 onClick = {
                   openPost(
