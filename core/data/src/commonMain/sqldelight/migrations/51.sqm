@@ -1,0 +1,12 @@
+-- Migration 51
+DROP INDEX IF EXISTS post_all_posts_index;
+DROP INDEX IF EXISTS post_all_posts_latest_index;
+DROP INDEX IF EXISTS post_all_posts_oldest_index;
+DROP INDEX IF EXISTS post_all_posts_added_latest_index;
+DROP INDEX IF EXISTS post_all_posts_added_oldest_index;
+
+-- Specialized indexes for each sort order, leading with isFeatured expression
+CREATE INDEX post_all_posts_latest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, postDate DESC, createdAt DESC);
+CREATE INDEX post_all_posts_oldest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, postDate ASC, createdAt ASC);
+CREATE INDEX post_all_posts_added_latest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, createdAt DESC, postDate DESC);
+CREATE INDEX post_all_posts_added_oldest_index ON post((imageUrl IS NOT NULL AND postDate > 0) DESC, createdAt ASC, postDate ASC);
