@@ -313,10 +313,6 @@ internal fun HomeScreen(
                 }
 
               LaunchedEffect(state.activePostIndex, featuredPosts.isNotEmpty()) {
-                if (featuredPosts.isEmpty()) {
-                  return@LaunchedEffect
-                }
-
                 val activePostIndex = state.activePostIndex
                 val numberOfFeaturedPosts = featuredPosts.size
 
@@ -343,7 +339,9 @@ internal fun HomeScreen(
                     ?.index ?: 0
 
                 val adjustedIndex =
-                  if (firstVisibleItemIndexAfterOffset == 0) {
+                  if (featuredPosts.isEmpty()) {
+                    firstVisibleItemIndexAfterOffset
+                  } else if (firstVisibleItemIndexAfterOffset == 0) {
                     featuredPostsPagerState.settledPage
                   } else {
                     firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
