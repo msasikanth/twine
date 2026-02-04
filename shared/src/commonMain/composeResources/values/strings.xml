@@ -73,6 +73,10 @@
   <string name="settingsOpmlImporting">Importing.. %1$d%</string>
   <string name="settingsOpmlExporting">Exporting.. %1$d%</string>
   <string name="settingsOpmlCancel">Cancel</string>
+  <string name="settingsOpmlSelectionTitle">Select feeds</string>
+  <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
+  <string name="settingsFreeFeedLimitReached">You have reached the maximum number of free feeds.</string>
+  <string name="settingsUpgradeToPremium">Go Premium</string>
   <string name="settingsPostsDeletionPeriodTitle">Delete read posts older than</string>
   <string name="settingsPostsDeletionPeriodOneWeek">1 week</string>
   <string name="settingsPostsDeletionPeriodOneMonth">1 month</string>
