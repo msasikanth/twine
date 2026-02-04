@@ -144,8 +144,10 @@ kotlin {
         implementation(libs.ktor.client.okhttp)
         api(libs.crashkios.bugsnag)
         implementation(libs.kermit.bugsnag)
-        implementation(libs.purchases.core)
-        implementation(libs.purchases.ui)
+        if (!isFoss) {
+          implementation(libs.purchases.core)
+          implementation(libs.purchases.ui)
+        }
         api(libs.androidx.media3.exoplayer)
         api(libs.androidx.media3.session)
         api(libs.androidx.media3.ui)
