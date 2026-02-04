@@ -40,6 +40,7 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.Constants.MINIMUM_REQUIRED_SEARCH_CHARACTERS
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Instant
@@ -107,7 +108,7 @@ class FeedsViewModel(
         viewModelScope.launch {
           val feedsCount = state.value.numberOfFeeds
           val isSubscribed = billingHandler.isSubscribed()
-          if (!isSubscribed && feedsCount >= 10) {
+          if (!isSubscribed && feedsCount >= Constants.MAX_FREE_FEEDS) {
             _state.update { it.copy(openPaywall = true) }
             return@launch
           }
