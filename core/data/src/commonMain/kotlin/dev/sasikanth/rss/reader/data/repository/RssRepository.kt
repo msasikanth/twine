@@ -470,6 +470,34 @@ class RssRepository(
     }
   }
 
+  suspend fun nonFeaturedPostPosition(
+    postId: String,
+    activeSourceIds: List<String>,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+  ): Int {
+    return withContext(dispatchersProvider.databaseRead) {
+      val post = postQueries.post(postId, ::Post).executeAsOne()
+      postQueries
+        .nonFeaturedPostPosition(
+          featuredPostsAfter = featuredPostsAfter,
+          postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
+          numberOfFeaturedPosts = numberOfFeaturedPosts,
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          postDate = post.postDate,
+          postCreatedAt = post.createdAt,
+        )
+        .executeAsOne()
+        .toInt()
+    }
+  }
+
   suspend fun updateBookmarkStatus(bookmarked: Boolean, id: String) {
     withContext(dispatchersProvider.databaseWrite) {
       postQueries.updateBookmarkStatus(

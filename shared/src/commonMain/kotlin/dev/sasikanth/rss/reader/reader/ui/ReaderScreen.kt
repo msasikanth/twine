@@ -126,7 +126,7 @@ import twine.shared.generated.resources.buttonGoBack
 internal fun ReaderScreen(
   viewModel: ReaderViewModel,
   pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
-  onPostChanged: (Int) -> Unit,
+  onPostChanged: (Int, String) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
   modifier: Modifier = Modifier,
@@ -392,7 +392,7 @@ internal fun ReaderScreen(
                 modifier =
                   Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
                     if (it) {
-                      onPostChanged(page)
+                      onPostChanged(page, readerPost.id)
                       viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
                     }
                   },

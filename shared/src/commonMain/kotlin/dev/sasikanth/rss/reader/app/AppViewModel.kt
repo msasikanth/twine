@@ -107,7 +107,7 @@ class AppViewModel(
   }
 
   fun onPostOpened(postId: String, index: Int) {
-    updateActivePostIndex(index)
+    updateActivePostIndex(index, postId)
     markPostAsRead(postId)
   }
 
@@ -115,8 +115,8 @@ class AppViewModel(
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
   }
 
-  fun updateActivePostIndex(index: Int) {
-    _state.update { it.copy(activePostIndex = index) }
+  fun updateActivePostIndex(index: Int, postId: String? = null) {
+    _state.update { it.copy(activePostIndex = index, activePostId = postId) }
   }
 
   fun onOAuthRedirect(uri: String) {
