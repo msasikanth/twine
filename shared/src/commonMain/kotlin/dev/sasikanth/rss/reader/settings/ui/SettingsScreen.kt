@@ -23,6 +23,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,8 +48,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Snackbar
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ExpandMore
@@ -62,6 +68,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -69,7 +76,9 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -104,6 +113,7 @@ import coil3.compose.AsyncImage
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.components.Button
 import dev.sasikanth.rss.reader.components.CircularIconButton
 import dev.sasikanth.rss.reader.components.DropdownMenu
 import dev.sasikanth.rss.reader.components.DropdownMenuItem
@@ -113,6 +123,7 @@ import dev.sasikanth.rss.reader.components.Switch
 import dev.sasikanth.rss.reader.components.ToggleableButtonGroup
 import dev.sasikanth.rss.reader.components.ToggleableButtonItem
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
+import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -127,6 +138,7 @@ import dev.sasikanth.rss.reader.data.repository.Period.SIX_MONTHS
 import dev.sasikanth.rss.reader.data.repository.Period.THREE_MONTHS
 import dev.sasikanth.rss.reader.data.sync.APIServiceProvider
 import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.feeds.ui.SelectedCheckIndicator
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
@@ -148,7 +160,9 @@ import dev.sasikanth.rss.reader.util.relativeDurationString
 import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -190,6 +204,7 @@ import twine.shared.generated.resources.settingsDynamicColorSubtitle
 import twine.shared.generated.resources.settingsDynamicColorTitle
 import twine.shared.generated.resources.settingsEnableNotificationsSubtitle
 import twine.shared.generated.resources.settingsEnableNotificationsTitle
+import twine.shared.generated.resources.settingsFreeFeedLimitReached
 import twine.shared.generated.resources.settingsHeaderBehaviour
 import twine.shared.generated.resources.settingsHeaderData
 import twine.shared.generated.resources.settingsHeaderFeedback
@@ -202,6 +217,8 @@ import twine.shared.generated.resources.settingsOpmlExport
 import twine.shared.generated.resources.settingsOpmlExporting
 import twine.shared.generated.resources.settingsOpmlImport
 import twine.shared.generated.resources.settingsOpmlImporting
+import twine.shared.generated.resources.settingsOpmlSelectionSubtitle
+import twine.shared.generated.resources.settingsOpmlSelectionTitle
 import twine.shared.generated.resources.settingsPostsDeletionPeriodNever
 import twine.shared.generated.resources.settingsPostsDeletionPeriodOneMonth
 import twine.shared.generated.resources.settingsPostsDeletionPeriodOneWeek
@@ -227,6 +244,7 @@ import twine.shared.generated.resources.settingsSyncStatusSyncing
 import twine.shared.generated.resources.settingsThemeAuto
 import twine.shared.generated.resources.settingsThemeDark
 import twine.shared.generated.resources.settingsThemeLight
+import twine.shared.generated.resources.settingsUpgradeToPremium
 import twine.shared.generated.resources.settingsVersion
 import twine.shared.generated.resources.showFeedFavIconDesc
 import twine.shared.generated.resources.showFeedFavIconTitle
@@ -265,6 +283,9 @@ internal fun SettingsScreen(
   val linkHandler = LocalLinkHandler.current
 
   var showDeleteAppDataConfirmation by remember { mutableStateOf(false) }
+  val snackbarHostState = remember { SnackbarHostState() }
+  val freeFeedLimitReachedString = stringResource(Res.string.settingsFreeFeedLimitReached)
+  val upgradeToPremiumString = stringResource(Res.string.settingsUpgradeToPremium)
 
   LaunchedEffect(state.authUrlToOpen) {
     state.authUrlToOpen?.let { url ->
@@ -277,6 +298,25 @@ internal fun SettingsScreen(
     if (state.openPaywall) {
       openPaywall()
       viewModel.dispatch(SettingsEvent.MarkOpenPaywallAsDone)
+    }
+  }
+
+  LaunchedEffect(state.showFreeFeedLimitWarning) {
+    if (state.showFreeFeedLimitWarning) {
+      launch {
+        delay(2.seconds)
+        viewModel.dispatch(SettingsEvent.MarkFreeFeedLimitWarningAsDone)
+      }
+
+      val result =
+        snackbarHostState.showSnackbar(
+          message = freeFeedLimitReachedString,
+          actionLabel = upgradeToPremiumString,
+        )
+
+      if (result == SnackbarResult.ActionPerformed) {
+        openPaywall()
+      }
     }
   }
 
@@ -330,7 +370,44 @@ internal fun SettingsScreen(
         )
       }
     },
+    snackbarHost = {
+      SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+        Snackbar(
+          modifier = Modifier.padding(12.dp),
+          content = {
+            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+          },
+          action = {
+            snackbarData.actionLabel?.let { actionLabel ->
+              TextButton(
+                onClick = { snackbarHostState.currentSnackbarData?.performAction() },
+                colors =
+                  ButtonDefaults.textButtonColors(
+                    contentColor = AppTheme.colorScheme.tintedForeground
+                  ),
+                shape = MaterialTheme.shapes.medium,
+              ) {
+                Text(text = actionLabel, style = MaterialTheme.typography.labelLarge)
+              }
+            }
+          },
+          actionOnNewLine = false,
+          shape = SnackbarDefaults.shape,
+          backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
+          contentColor = AppTheme.colorScheme.onSurface,
+          elevation = 0.dp,
+        )
+      }
+    },
     content = { padding ->
+      if (state.opmlFeedsToSelect != null) {
+        OpmlFeedSelectionSheet(
+          feeds = state.opmlFeedsToSelect!!,
+          onFeedsSelected = { viewModel.dispatch(SettingsEvent.OnOpmlFeedsSelected(it)) },
+          onDismiss = { viewModel.dispatch(SettingsEvent.ClearOpmlFeedsToSelect) },
+        )
+      }
+
       if (state.showAppIconSelectionSheet) {
         AppIconSelectionSheet(
           currentAppIcon = state.appIcon,
@@ -1964,4 +2041,141 @@ private fun Divider(horizontalInsets: Dp = 0.dp) {
     modifier = Modifier.padding(vertical = 8.dp, horizontal = horizontalInsets),
     color = AppTheme.colorScheme.outlineVariant,
   )
+}
+
+@Composable
+private fun OpmlFeedSelectionSheet(
+  feeds: List<OpmlFeed>,
+  onFeedsSelected: (List<OpmlFeed>) -> Unit,
+  onDismiss: () -> Unit,
+) {
+  ModalBottomSheet(
+    onDismissRequest = onDismiss,
+    containerColor = AppTheme.colorScheme.surfaceContainerLowest,
+    contentColor = AppTheme.colorScheme.onSurface,
+    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+  ) {
+    val selectedFeeds = remember { mutableStateListOf<OpmlFeed>() }
+    val canSelectMore by remember {
+      derivedStateOf { selectedFeeds.size < Constants.MAX_FREE_FEEDS }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+      LazyColumn(
+        modifier = Modifier.weight(1f, fill = false),
+        contentPadding = PaddingValues(bottom = 16.dp),
+      ) {
+        stickyHeader {
+          Column(modifier = Modifier.background(AppTheme.colorScheme.surfaceContainerLowest)) {
+            Text(
+              modifier = Modifier.padding(horizontal = 24.dp).padding(top = 16.dp),
+              text = stringResource(Res.string.settingsOpmlSelectionTitle),
+              color = AppTheme.colorScheme.textEmphasisHigh,
+              style = MaterialTheme.typography.titleLarge,
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+              modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 16.dp),
+              text =
+                stringResource(Res.string.settingsOpmlSelectionSubtitle, Constants.MAX_FREE_FEEDS),
+              style = MaterialTheme.typography.labelLarge,
+              color = AppTheme.colorScheme.textEmphasisMed,
+            )
+
+            HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
+          }
+        }
+
+        items(feeds) { feed ->
+          val isSelected = selectedFeeds.contains(feed)
+          OpmlFeedItem(
+            feed = feed,
+            isSelected = isSelected,
+            canSelectMore = canSelectMore,
+            onClick = {
+              if (isSelected) {
+                selectedFeeds.remove(feed)
+              } else if (canSelectMore) {
+                selectedFeeds.add(feed)
+              }
+            },
+          )
+        }
+      }
+
+      Row(
+        modifier =
+          Modifier.fillMaxWidth().padding(start = 24.dp, top = 40.dp, end = 24.dp, bottom = 24.dp)
+      ) {
+        OutlinedButton(
+          modifier = Modifier.weight(1f),
+          colors =
+            ButtonDefaults.outlinedButtonColors(
+              containerColor = Color.Transparent,
+              contentColor = AppTheme.colorScheme.primary,
+            ),
+          border = BorderStroke(1.dp, AppTheme.colorScheme.primary),
+          onClick = onDismiss,
+        ) {
+          Text(text = stringResource(Res.string.buttonGoBack))
+        }
+
+        Spacer(Modifier.requiredWidth(16.dp))
+
+        Button(
+          modifier = Modifier.weight(1f),
+          enabled = selectedFeeds.isNotEmpty(),
+          colors =
+            ButtonDefaults.buttonColors(
+              containerColor = AppTheme.colorScheme.primary,
+              contentColor = AppTheme.colorScheme.onPrimary,
+            ),
+          onClick = { onFeedsSelected(selectedFeeds.toList()) },
+        ) {
+          Text(text = stringResource(Res.string.settingsOpmlImport))
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun OpmlFeedItem(
+  feed: OpmlFeed,
+  isSelected: Boolean,
+  canSelectMore: Boolean,
+  onClick: () -> Unit,
+) {
+  val enabled = isSelected || canSelectMore
+  Row(
+    modifier =
+      Modifier.fillMaxWidth()
+        .clickable(enabled = enabled, onClick = onClick)
+        .padding(horizontal = 24.dp, vertical = 12.dp)
+        .alpha(if (enabled) 1f else 0.38f),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = feed.title ?: feed.link,
+        style = MaterialTheme.typography.titleMedium,
+        color = AppTheme.colorScheme.textEmphasisHigh,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+      Text(
+        text = feed.link,
+        style = MaterialTheme.typography.labelLarge,
+        color = AppTheme.colorScheme.textEmphasisMed,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+    }
+
+    Spacer(Modifier.requiredWidth(16.dp))
+
+    SelectedCheckIndicator(selected = isSelected, enabled = enabled)
+  }
 }
