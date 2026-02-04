@@ -331,7 +331,7 @@ fun App(
                   .launchIn(this)
               }
 
-              LaunchedEffect(Unit) {
+              LaunchedEffect(appState.activePostIndex) {
                 viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
               }
 
