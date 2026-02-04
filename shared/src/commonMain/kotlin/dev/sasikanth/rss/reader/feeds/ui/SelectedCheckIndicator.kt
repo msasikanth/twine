@@ -30,7 +30,11 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 
 @Composable
-fun SelectedCheckIndicator(selected: Boolean, modifier: Modifier = Modifier) {
+fun SelectedCheckIndicator(
+  selected: Boolean,
+  modifier: Modifier = Modifier,
+  enabled: Boolean = true,
+) {
   val icon =
     if (selected) {
       TwineIcons.RadioSelected
@@ -39,10 +43,10 @@ fun SelectedCheckIndicator(selected: Boolean, modifier: Modifier = Modifier) {
     }
 
   val tint =
-    if (selected) {
-      AppTheme.colorScheme.tintedForeground
-    } else {
-      AppTheme.colorScheme.onSurface
+    when {
+      !enabled -> AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+      selected -> AppTheme.colorScheme.primary
+      else -> AppTheme.colorScheme.onSurface
     }
 
   Box(modifier = modifier.requiredSize(40.dp), contentAlignment = Alignment.Center) {

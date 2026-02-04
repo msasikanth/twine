@@ -78,30 +78,12 @@ class OpmlManager(
   suspend fun import() {
     val duration = measureTime {
       try {
-        val file =
-          FileKit.pickFile(
-            title = "Import OPML",
-            type = PickerType.File(extensions = listOf("xml", "opml", "bin")),
-            mode = PickerMode.Single,
-            initialDirectory = "downloads",
-          )
+        val opmlSources = pickAndDecode()
 
-        withContext(dispatchersProvider.io + job) {
-          val opmlXmlContent = file?.readBytes()?.decodeToString()
-
-          Logger.i { opmlXmlContent.orEmpty() }
-
-          if (!opmlXmlContent.isNullOrBlank()) {
-            _result.emit(OpmlResult.InProgress.Importing(0))
-            val opmlSources = sourcesOpml.decode(opmlXmlContent)
-
-            addOpmlSources(opmlSources)
-              .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
-              .onCompletion { _result.emit(OpmlResult.Idle) }
-              .collect()
-          } else {
-            _result.emit(OpmlResult.Error.NoContentInOpmlFile)
-          }
+        if (!opmlSources.isNullOrEmpty()) {
+          import(opmlSources)
+        } else if (opmlSources != null && opmlSources.isEmpty()) {
+          _result.emit(OpmlResult.Error.NoContentInOpmlFile)
         }
       } catch (e: Exception) {
         if (e is CancellationException) {
@@ -114,6 +96,56 @@ class OpmlManager(
     }
 
     Logger.i("OPMLImport") { "Took: ${duration.inWholeMinutes} minutes" }
+  }
+
+  suspend fun pickAndDecode(): List<OpmlSource>? {
+    return try {
+      val file =
+        FileKit.pickFile(
+          title = "Import OPML",
+          type = PickerType.File(),
+          mode = PickerMode.Single,
+          initialDirectory = "downloads",
+        )
+
+      withContext(dispatchersProvider.io + job) {
+        val opmlXmlContent = file?.readBytes()?.decodeToString()
+
+        Logger.i { opmlXmlContent.orEmpty() }
+
+        if (!opmlXmlContent.isNullOrBlank()) {
+          sourcesOpml.decode(opmlXmlContent)
+        } else {
+          null
+        }
+      }
+    } catch (e: Exception) {
+      if (e is CancellationException) {
+        return null
+      }
+
+      CrashReporter.log(e)
+      _result.emit(OpmlResult.Error.UnknownFailure(e))
+      null
+    }
+  }
+
+  suspend fun import(sources: List<OpmlSource>) {
+    try {
+      _result.emit(OpmlResult.InProgress.Importing(0))
+
+      addOpmlSources(sources)
+        .onEach { progress -> _result.emit(OpmlResult.InProgress.Importing(progress)) }
+        .onCompletion { _result.emit(OpmlResult.Idle) }
+        .collect()
+    } catch (e: Exception) {
+      if (e is CancellationException) {
+        return
+      }
+
+      CrashReporter.log(e)
+      _result.emit(OpmlResult.Error.UnknownFailure(e))
+    }
   }
 
   suspend fun export() {

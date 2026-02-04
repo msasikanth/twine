@@ -331,7 +331,7 @@ fun App(
                   .launchIn(this)
               }
 
-              LaunchedEffect(Unit) {
+              LaunchedEffect(appState.activePostIndex) {
                 viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
               }
 
@@ -359,7 +359,6 @@ fun App(
                   toggleLightStatusBar(!showDarkSystemBars)
                   toggleLightNavBar(!showDarkSystemBars)
                 },
-                onScrolledToTop = { appViewModel.updateActivePostIndex(0) },
                 modifier = screenModifier,
               )
             },

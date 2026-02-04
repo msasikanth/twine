@@ -26,6 +26,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paging.compose.LazyPagingItems
+import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
@@ -48,6 +49,7 @@ internal fun PostsList(
   markScrolledPostsAsRead: () -> Unit,
   markPostAsReadOnScroll: (String) -> Unit,
   onPostClicked: (post: ResolvedPost, postIndex: Int) -> Unit,
+  onFeaturedPostClicked: (post: ResolvedPost) -> Unit,
   onPostBookmarkClick: (ResolvedPost) -> Unit,
   onPostCommentsClick: (String) -> Unit,
   onPostSourceClick: (String) -> Unit,
@@ -92,7 +94,7 @@ internal fun PostsList(
           featuredPosts = featuredPosts,
           pagerState = featuredPostsPagerState,
           markPostAsReadOnScroll = markPostAsReadOnScroll,
-          onItemClick = onPostClicked,
+          onItemClick = { post, _ -> onFeaturedPostClicked(post) },
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
           onPostSourceClick = onPostSourceClick,
@@ -103,28 +105,26 @@ internal fun PostsList(
 
     val posts = posts.invoke()
     items(
-      count = (posts.itemCount - featuredPosts.size).coerceAtLeast(0),
+      count = posts.itemCount,
       key = { index ->
-        val adjustedIndex = index + featuredPosts.size
-        val post = posts.peek(adjustedIndex)
+        val post = posts.peek(index)
 
         if (post != null) {
           PostListKey.from(post).encode()
         } else {
-          adjustedIndex
+          index
         }
       },
       contentType = { "post_item" },
     ) { index ->
-      val adjustedIndex = index + featuredPosts.size
-      val post = posts[adjustedIndex] ?: return@items
+      val post = posts[index] ?: return@items
 
       when (homeViewMode) {
         HomeViewMode.Default,
         HomeViewMode.Simple -> {
           PostListItem(
             item = post,
-            onClick = { onPostClicked(post, adjustedIndex) },
+            onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             onPostSourceClick = { onPostSourceClick(post.sourceId) },
@@ -138,7 +138,7 @@ internal fun PostsList(
           CompactPostListItem(
             item = post,
             showDivider = index != posts.itemCount - 1,
-            onClick = { onPostClicked(post, adjustedIndex) },
+            onClick = { onPostClicked(post, index) },
             onPostBookmarkClick = { onPostBookmarkClick(post) },
             onPostCommentsClick = { onPostCommentsClick(post.commentsLink!!) },
             updatePostReadStatus = { updatedReadStatus ->

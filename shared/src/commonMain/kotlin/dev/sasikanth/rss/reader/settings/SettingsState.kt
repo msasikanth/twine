@@ -20,6 +20,7 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -56,6 +57,8 @@ data class SettingsState(
   val appIcon: AppIcon,
   val showAppIconSelectionSheet: Boolean,
   val canSubscribe: Boolean,
+  val opmlFeedsToSelect: List<OpmlFeed>?,
+  val showFreeFeedLimitWarning: Boolean,
 ) {
 
   val isSubscribed: Boolean
@@ -98,6 +101,8 @@ data class SettingsState(
         appIcon = AppIcon.DarkJade,
         showAppIconSelectionSheet = false,
         canSubscribe = true,
+        opmlFeedsToSelect = null,
+        showFreeFeedLimitWarning = false,
       )
   }
 }

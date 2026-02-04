@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.settings
 
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -79,4 +80,10 @@ sealed interface SettingsEvent {
   data class OnAppIconChanged(val appIcon: AppIcon) : SettingsEvent
 
   data object DeleteAppData : SettingsEvent
+
+  data class OnOpmlFeedsSelected(val feeds: List<OpmlFeed>) : SettingsEvent
+
+  data object ClearOpmlFeedsToSelect : SettingsEvent
+
+  data object MarkFreeFeedLimitWarningAsDone : SettingsEvent
 }

@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,8 +61,6 @@ private val featuredItemPadding: PaddingValues
       else -> PaddingValues(0.dp)
     }
   }
-
-@Immutable data class FeaturedPostItem(val resolvedPost: ResolvedPost, val seedColor: Int?)
 
 @Composable
 internal fun FeaturedPostItem(

@@ -47,8 +47,9 @@ internal object Constants {
   const val ITEM_READ_ALPHA = 0.65f
   const val ITEM_UNREAD_ALPHA = 1f
 
-  const val NUMBER_OF_FEATURED_POSTS = Constants.NUMBER_OF_FEATURED_POSTS
   const val IOS_APP_GROUP = Constants.APP_GROUP
+
+  const val MAX_FREE_FEEDS = 15
 
   internal const val ENTITLEMENT_PREMIUM = "Premium"
 }
