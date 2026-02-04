@@ -1,0 +1,10 @@
+-- Migration 52
+DROP INDEX IF EXISTS post_all_posts_latest_index;
+DROP INDEX IF EXISTS post_all_posts_oldest_index;
+DROP INDEX IF EXISTS post_all_posts_added_latest_index;
+DROP INDEX IF EXISTS post_all_posts_added_oldest_index;
+
+CREATE INDEX post_all_posts_latest_index ON post(postDate DESC, createdAt DESC);
+CREATE INDEX post_all_posts_oldest_index ON post(postDate ASC, createdAt ASC);
+CREATE INDEX post_all_posts_added_latest_index ON post(createdAt DESC, postDate DESC);
+CREATE INDEX post_all_posts_added_oldest_index ON post(createdAt ASC, postDate ASC);

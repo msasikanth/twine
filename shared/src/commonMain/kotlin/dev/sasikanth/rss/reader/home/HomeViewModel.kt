@@ -33,15 +33,20 @@ import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
+import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.NTuple6
-import dev.sasikanth.rss.reader.utils.combine
+import dev.sasikanth.rss.reader.utils.combine as flowCombine
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
@@ -75,6 +80,10 @@ class HomeViewModel(
   val state: StateFlow<HomeState>
     get() = _state
 
+  private val _openPost = MutableSharedFlow<Pair<Int, ResolvedPost>>()
+  val openPost: SharedFlow<Pair<Int, ResolvedPost>>
+    get() = _openPost
+
   init {
     init()
   }
@@ -100,8 +109,34 @@ class HomeViewModel(
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
       is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
       is HomeEvent.ShowPostsSortFilter -> showPostsSortFilter(event.show)
+      is HomeEvent.OnPostClicked -> onPostClicked(event.post)
     }
   }
+
+  private fun onPostClicked(post: ResolvedPost) {
+    viewModelScope.launch {
+      val postsAfter = postsThresholdTime(_state.value.postsType)
+      val activeSourceIds = activeSourceIds(_state.value.activeSource)
+      val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+
+      val position =
+        rssRepository.postPosition(
+          postId = post.id,
+          activeSourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          after = postsAfter,
+        )
+
+      _openPost.emit(position to post)
+    }
+  }
+
+  private fun activeSourceIds(activeSource: Source?) =
+    when (activeSource) {
+      is Feed -> listOf(activeSource.id)
+      is FeedGroup -> activeSource.feedIds
+      else -> emptyList()
+    }
 
   private fun showPostsSortFilter(show: Boolean) {
     _state.update { it.copy(showPostsSortFilter = show) }
@@ -119,8 +154,26 @@ class HomeViewModel(
     val activeSourceFlow = observableActiveSource.activeSource
     val postsTypeFlow = settingsRepository.postsType
     val allPostsPagingData = allPostsPager.allPostsPagingData.cachedIn(viewModelScope)
+    val feedPostsPagingData = allPostsPager.nonFeaturedPostsPagingData.cachedIn(viewModelScope)
 
-    _state.update { it.copy(posts = allPostsPagingData) }
+    val featuredPosts =
+      combine(allPostsPager.featuredPosts, settingsRepository.homeViewMode) {
+        featuredPosts,
+        homeViewMode ->
+        if (homeViewMode == HomeViewMode.Default) {
+          featuredPosts
+        } else {
+          persistentListOf()
+        }
+      }
+
+    _state.update {
+      it.copy(
+        allPosts = allPostsPagingData,
+        feedPosts = feedPostsPagingData,
+        featuredPosts = featuredPosts,
+      )
+    }
 
     syncCoordinator.syncState
       .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
@@ -132,7 +185,7 @@ class HomeViewModel(
       .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
       .launchIn(viewModelScope)
 
-    combine(
+    flowCombine(
         activeSourceFlow,
         postsTypeFlow,
         settingsRepository.postsSortOrder,

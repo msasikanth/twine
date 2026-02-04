@@ -277,7 +277,6 @@ class RssRepository(
     postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
-    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
@@ -295,7 +294,6 @@ class RssRepository(
         when (postsSortOrder) {
           PostsSortOrder.Latest ->
             postQueries.allPostsLatest(
-              featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               lastSyncedAt = lastSyncedAt,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -307,7 +305,6 @@ class RssRepository(
             )
           PostsSortOrder.Oldest ->
             postQueries.allPostsOldest(
-              featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               lastSyncedAt = lastSyncedAt,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -319,7 +316,6 @@ class RssRepository(
             )
           PostsSortOrder.AddedLatest ->
             postQueries.allPostsAddedLatest(
-              featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               lastSyncedAt = lastSyncedAt,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -331,7 +327,6 @@ class RssRepository(
             )
           PostsSortOrder.AddedOldest ->
             postQueries.allPostsAddedOldest(
-              featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
               lastSyncedAt = lastSyncedAt,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -344,6 +339,135 @@ class RssRepository(
         }
       },
     )
+  }
+
+  suspend fun featuredPosts(
+    activeSourceIds: List<String>,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+  ): List<ResolvedPost> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .featuredPosts(
+          featuredPostsAfter = featuredPostsAfter,
+          postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          limit = limit,
+          mapper = ::mapToResolvedPost,
+        )
+        .executeAsList()
+    }
+  }
+
+  fun nonFeaturedPosts(
+    activeSourceIds: List<String>,
+    postsSortOrder: PostsSortOrder,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+  ): PagingSource<Int, ResolvedPost> {
+    return QueryPagingSource(
+      countQuery =
+        postQueries.nonFeaturedPostsCount(
+          featuredPostsAfter = featuredPostsAfter,
+          postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          numberOfFeaturedPosts = numberOfFeaturedPosts,
+        ),
+      transacter = postQueries,
+      context = dispatchersProvider.databaseRead,
+      queryProvider = { limit, offset ->
+        when (postsSortOrder) {
+          PostsSortOrder.Latest ->
+            postQueries.nonFeaturedPostsLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.Oldest ->
+            postQueries.nonFeaturedPostsOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedLatest ->
+            postQueries.nonFeaturedPostsAddedLatest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+          PostsSortOrder.AddedOldest ->
+            postQueries.nonFeaturedPostsAddedOldest(
+              featuredPostsAfter = featuredPostsAfter,
+              postsAfter = after,
+              lastSyncedAt = lastSyncedAt,
+              isSourceIdsEmpty = activeSourceIds.isEmpty(),
+              sourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              numberOfFeaturedPosts = numberOfFeaturedPosts,
+              limit = limit,
+              offset = offset,
+              mapper = ::mapToResolvedPost,
+            )
+        }
+      },
+    )
+  }
+
+  suspend fun postPosition(
+    postId: String,
+    activeSourceIds: List<String>,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+  ): Int {
+    return withContext(dispatchersProvider.databaseRead) {
+      val post = postQueries.post(postId, ::Post).executeAsOne()
+      postQueries
+        .postPosition(
+          isSourceIdsEmpty = activeSourceIds.isEmpty(),
+          sourceIds = activeSourceIds,
+          unreadOnly = unreadOnly,
+          postsAfter = after,
+          lastSyncedAt = lastSyncedAt,
+          postDate = post.postDate,
+          postCreatedAt = post.createdAt,
+        )
+        .executeAsOne()
+        .toInt()
+    }
   }
 
   suspend fun updateBookmarkStatus(bookmarked: Boolean, id: String) {
@@ -1923,7 +2047,6 @@ class RssRepository(
     showFeedFavIcon: Boolean,
     feedContentReadingTime: Long?,
     articleContentReadingTime: Long?,
-    isFeatured: Boolean,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
