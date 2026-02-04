@@ -331,14 +331,21 @@ fun App(
                   .launchIn(this)
               }
 
-              LaunchedEffect(appState.activePostIndex) {
-                viewModel.dispatch(HomeEvent.UpdateVisibleItemIndex(appState.activePostIndex))
+              LaunchedEffect(appState.activePostIndex, appState.activePostId) {
+                viewModel.dispatch(
+                  HomeEvent.UpdateVisibleItemIndex(
+                    index = appState.activePostIndex,
+                    postId = appState.activePostId,
+                  )
+                )
               }
 
               HomeScreen(
                 viewModel = viewModel,
                 feedsViewModel = feedsViewModel,
-                onVisiblePostChanged = { index -> appViewModel.updateActivePostIndex(index) },
+                onVisiblePostChanged = { index, postId ->
+                  appViewModel.updateActivePostIndex(index, postId)
+                },
                 openPost = { index, post -> openPost(index, post, FromScreen.Home) },
                 openGroupSelectionSheet = {
                   feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked)
@@ -473,9 +480,9 @@ fun App(
             pageViewModelFactory = { post ->
               viewModel(key = post.id) { readerPageViewModel(post) }
             },
-            onPostChanged = { activePostIndex ->
+            onPostChanged = { activePostIndex, postId ->
               if (fromScreen !is FromScreen.UnreadWidget) {
-                appViewModel.updateActivePostIndex(activePostIndex)
+                appViewModel.updateActivePostIndex(activePostIndex, postId)
               }
             },
             onBack = { navController.popBackStack() },

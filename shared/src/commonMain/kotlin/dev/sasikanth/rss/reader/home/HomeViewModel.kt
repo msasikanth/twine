@@ -103,7 +103,7 @@ class HomeViewModel(
       HomeEvent.MarkScrolledPostsAsRead -> markScrolledPostsAsRead()
       is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
       is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
-      is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index)
+      is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index, event.postId)
       is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
       is HomeEvent.UpdateDate -> updateDate()
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
@@ -241,8 +241,37 @@ class HomeViewModel(
     }
   }
 
-  private fun updateVisibleItemIndex(index: Int) {
-    viewModelScope.launch { _state.update { it.copy(activePostIndex = index) } }
+  private fun updateVisibleItemIndex(index: Int, postId: String?) {
+    viewModelScope.launch {
+      if (postId != null) {
+        val featuredPosts = _state.value.featuredPosts.first()
+        val featuredPostIndex = featuredPosts.indexOfFirst { it.resolvedPost.id == postId }
+
+        if (featuredPostIndex != -1) {
+          _state.update { it.copy(activePostIndex = featuredPostIndex) }
+        } else {
+          val postsAfter = postsThresholdTime(_state.value.postsType)
+          val featuredPostsAfter =
+            _state.value.currentDateTime.toInstant(TimeZone.currentSystemDefault()).minus(24.hours)
+          val activeSourceIds = activeSourceIds(_state.value.activeSource)
+          val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+
+          val position =
+            rssRepository.nonFeaturedPostPosition(
+              postId = postId,
+              activeSourceIds = activeSourceIds,
+              unreadOnly = unreadOnly,
+              after = postsAfter,
+              featuredPostsAfter = featuredPostsAfter,
+            )
+
+          val adjustedIndex = position + featuredPosts.size
+          _state.update { it.copy(activePostIndex = adjustedIndex) }
+        }
+      } else {
+        _state.update { it.copy(activePostIndex = index) }
+      }
+    }
   }
 
   private fun changeHomeViewMode(homeViewMode: HomeViewMode) {

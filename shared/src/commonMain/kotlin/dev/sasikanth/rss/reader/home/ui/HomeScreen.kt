@@ -125,7 +125,7 @@ import twine.shared.generated.resources.swipeUpGetStarted
 internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
-  onVisiblePostChanged: (Int) -> Unit,
+  onVisiblePostChanged: (Int, String?) -> Unit,
   openPost: (Int, ResolvedPost) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
@@ -331,23 +331,33 @@ internal fun HomeScreen(
               }
 
               LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
-                val firstVisibleItemIndexAfterOffset =
-                  postsListState.layoutInfo.visibleItemsInfo
-                    .firstOrNull { itemInfo ->
-                      itemInfo.offset >= topOffset || itemInfo.offset == 0
-                    }
-                    ?.index ?: 0
+                val firstVisibleItemInfoAfterOffset =
+                  postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
+                    itemInfo.offset >= topOffset || itemInfo.offset == 0
+                  }
+                val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
 
-                val adjustedIndex =
+                val (adjustedIndex, postId) =
                   if (featuredPosts.isEmpty()) {
-                    firstVisibleItemIndexAfterOffset
+                    val postId =
+                      (firstVisibleItemInfoAfterOffset?.key as? String)?.let {
+                        PostListKey.decode(it).postId
+                      }
+                    firstVisibleItemIndexAfterOffset to postId
                   } else if (firstVisibleItemIndexAfterOffset == 0) {
-                    featuredPostsPagerState.settledPage
+                    val settledPage = featuredPostsPagerState.settledPage
+                    val postId = featuredPosts.getOrNull(settledPage)?.resolvedPost?.id
+                    settledPage to postId
                   } else {
-                    firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)
+                    val postId =
+                      (firstVisibleItemInfoAfterOffset?.key as? String)?.let {
+                        PostListKey.decode(it).postId
+                      }
+                    (firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)) to
+                      postId
                   }
 
-                onVisiblePostChanged(adjustedIndex)
+                onVisiblePostChanged(adjustedIndex, postId)
               }
 
               val pullToRefreshState = rememberPullToRefreshState()

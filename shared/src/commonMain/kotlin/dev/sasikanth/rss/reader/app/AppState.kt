@@ -28,6 +28,7 @@ data class AppState(
   val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
   val activePostIndex: Int,
+  val activePostId: String?,
   val blockImages: Boolean,
 ) {
 
@@ -41,6 +42,7 @@ data class AppState(
         homeViewMode = HomeViewMode.Default,
         showReaderView = false,
         activePostIndex = 0,
+        activePostId = null,
         blockImages = false,
       )
   }

@@ -563,6 +563,33 @@ WHERE
   post.createdAt < :lastSyncedAt AND
   (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
 
+nonFeaturedPostPosition:
+SELECT COUNT(*) FROM post
+INNER JOIN feed ON post.sourceId = feed.id
+WHERE
+  post.id NOT IN (
+    SELECT p2.id FROM post p2
+    INNER JOIN feed f2 ON p2.sourceId = f2.id
+    WHERE
+      p2.imageUrl IS NOT NULL AND
+      p2.postDate > :featuredPostsAfter AND
+      p2.postDate > :postsAfter AND
+      p2.createdAt < :lastSyncedAt AND
+      (p2.flags & 4) = 0 AND
+      ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
+      f2.isDeleted = 0 AND
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+    ORDER BY p2.postDate DESC, p2.createdAt DESC
+    LIMIT :numberOfFeaturedPosts
+  ) AND
+  ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
+  (post.flags & 4) == 0 AND
+  feed.isDeleted = 0 AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
+  post.postDate > :postsAfter AND
+  post.createdAt < :lastSyncedAt AND
+  (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
+
 updatePostRemoteId:
 UPDATE post SET remoteId = :remoteId, updatedAt = :updatedAt, syncedAt = :updatedAt WHERE id = :id;
 
