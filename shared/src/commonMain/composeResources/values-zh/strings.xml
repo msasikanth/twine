@@ -71,6 +71,10 @@
   <string name="settingsOpmlImporting">正在导入……%1$d%</string>
   <string name="settingsOpmlExporting">正在导出……%1$d%</string>
   <string name="settingsOpmlCancel">取消</string>
+  <string name="settingsOpmlSelectionTitle">Select feeds</string>
+  <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
+  <string name="settingsFreeFeedLimitReached">You have reached the maximum number of free feeds.</string>
+  <string name="settingsUpgradeToPremium">Go Premium</string>
   <string name="settingsPostsDeletionPeriodTitle">删除早于以下时间的已读文章</string>
   <string name="settingsPostsDeletionPeriodOneWeek">一周</string>
   <string name="settingsPostsDeletionPeriodOneMonth">一个月</string>
