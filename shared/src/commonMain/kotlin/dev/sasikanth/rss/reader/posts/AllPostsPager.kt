@@ -17,9 +17,11 @@
 
 package dev.sasikanth.rss.reader.posts
 
+import androidx.compose.ui.graphics.toArgb
 import androidx.paging.PagingData
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
@@ -33,11 +35,15 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
+import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +54,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.LocalDateTime
@@ -63,6 +70,7 @@ class AllPostsPager(
   refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
+  private val seedColorExtractor: SeedColorExtractor,
   dispatchersProvider: DispatchersProvider,
 ) {
   private val coroutineScope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
@@ -95,11 +103,74 @@ class AllPostsPager(
             postsSortOrder = params.postsSortOrder,
             unreadOnly = params.unreadOnly,
             after = params.postsAfter,
+            lastSyncedAt = params.lastSyncedAt,
+          )
+        }
+        .flow
+    }
+
+  val nonFeaturedPostsPagingData: Flow<PagingData<ResolvedPost>> =
+    baseParameters.flatMapLatest { params ->
+      createPager(config = createPagingConfig(pageSize = 20, enablePlaceholders = true)) {
+          rssRepository.nonFeaturedPosts(
+            activeSourceIds = params.activeSourceIds,
+            postsSortOrder = params.postsSortOrder,
+            unreadOnly = params.unreadOnly,
+            after = params.postsAfter,
             featuredPostsAfter = params.featuredPostsAfter,
             lastSyncedAt = params.lastSyncedAt,
           )
         }
         .flow
+    }
+
+  val featuredPosts: Flow<ImmutableList<FeaturedPostItem>> =
+    baseParameters.flatMapLatest { params ->
+      flow {
+        val featuredPosts =
+          rssRepository.featuredPosts(
+            activeSourceIds = params.activeSourceIds,
+            unreadOnly = params.unreadOnly,
+            after = params.postsAfter,
+            featuredPostsAfter = params.featuredPostsAfter,
+            lastSyncedAt = params.lastSyncedAt,
+          )
+
+        val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
+        val actualFeaturedPostsCount = minOf(featuredPosts.size, featuredPostsCount)
+        val mutablePostsList =
+          MutableList(actualFeaturedPostsCount) { index ->
+            val post = featuredPosts[index]
+            if (post.imageUrl.isNullOrBlank().not()) {
+              val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl!!)
+
+              FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
+            } else {
+              null
+            }
+          }
+
+        emit(mutablePostsList.filterNotNull().toImmutableList())
+
+        val updatedPosts =
+          mutablePostsList
+            .mapNotNull { item ->
+              if (item == null) return@mapNotNull null
+
+              if (item.seedColor != null) return@mapNotNull item
+
+              return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
+                val seedColor =
+                  seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl!!)
+                item.copy(seedColor = seedColor?.toArgb())
+              } else {
+                null
+              }
+            }
+            .toImmutableList()
+
+        emit(updatedPosts)
+      }
     }
 
   private val _hasUnreadPosts = MutableStateFlow(false)
