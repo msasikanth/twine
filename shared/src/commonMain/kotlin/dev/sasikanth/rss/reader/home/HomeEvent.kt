@@ -60,7 +60,7 @@ sealed interface HomeEvent {
 
   data class UpdatePrevActiveSource(val source: Source?) : HomeEvent
 
-  data class OnFeaturedPostClicked(val post: ResolvedPost) : HomeEvent
+  data class OnPostClicked(val post: ResolvedPost) : HomeEvent
 
   data class ShowPostsSortFilter(val show: Boolean) : HomeEvent
 

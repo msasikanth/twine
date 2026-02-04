@@ -109,11 +109,11 @@ class HomeViewModel(
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
       is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
       is HomeEvent.ShowPostsSortFilter -> showPostsSortFilter(event.show)
-      is HomeEvent.OnFeaturedPostClicked -> onFeaturedPostClicked(event.post)
+      is HomeEvent.OnPostClicked -> onPostClicked(event.post)
     }
   }
 
-  private fun onFeaturedPostClicked(post: ResolvedPost) {
+  private fun onPostClicked(post: ResolvedPost) {
     viewModelScope.launch {
       val postsAfter = postsThresholdTime(_state.value.postsType)
       val activeSourceIds = activeSourceIds(_state.value.activeSource)

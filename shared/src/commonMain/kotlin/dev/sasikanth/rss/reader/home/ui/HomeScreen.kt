@@ -408,10 +408,10 @@ internal fun HomeScreen(
                         viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                       },
                       onPostClicked = { post, _ ->
-                        viewModel.dispatch(HomeEvent.OnFeaturedPostClicked(post))
+                        viewModel.dispatch(HomeEvent.OnPostClicked(post))
                       },
                       onFeaturedPostClicked = { post ->
-                        viewModel.dispatch(HomeEvent.OnFeaturedPostClicked(post))
+                        viewModel.dispatch(HomeEvent.OnPostClicked(post))
                       },
                       onPostBookmarkClick = {
                         viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
