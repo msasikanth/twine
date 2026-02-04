@@ -341,7 +341,30 @@ class RssRepository(
     )
   }
 
-  suspend fun featuredPosts(
+  fun featuredPosts(
+    activeSourceIds: List<String>,
+    unreadOnly: Boolean? = null,
+    after: Instant = Instant.DISTANT_PAST,
+    featuredPostsAfter: Instant = Instant.DISTANT_PAST,
+    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
+  ): Flow<List<ResolvedPost>> {
+    return postQueries
+      .featuredPosts(
+        featuredPostsAfter = featuredPostsAfter,
+        postsAfter = after,
+        lastSyncedAt = lastSyncedAt,
+        isSourceIdsEmpty = activeSourceIds.isEmpty(),
+        sourceIds = activeSourceIds,
+        unreadOnly = unreadOnly,
+        limit = limit,
+        mapper = ::mapToResolvedPost,
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
+  suspend fun featuredPostsBlocking(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,

@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -126,51 +127,50 @@ class AllPostsPager(
 
   val featuredPosts: Flow<ImmutableList<FeaturedPostItem>> =
     baseParameters.flatMapLatest { params ->
-      flow {
-        val featuredPosts =
-          rssRepository.featuredPosts(
-            activeSourceIds = params.activeSourceIds,
-            unreadOnly = params.unreadOnly,
-            after = params.postsAfter,
-            featuredPostsAfter = params.featuredPostsAfter,
-            lastSyncedAt = params.lastSyncedAt,
-          )
+      rssRepository
+        .featuredPosts(
+          activeSourceIds = params.activeSourceIds,
+          unreadOnly = params.unreadOnly,
+          after = params.postsAfter,
+          featuredPostsAfter = params.featuredPostsAfter,
+          lastSyncedAt = params.lastSyncedAt,
+        )
+        .transformLatest { featuredPosts ->
+          val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
+          val actualFeaturedPostsCount = minOf(featuredPosts.size, featuredPostsCount)
+          val mutablePostsList =
+            MutableList(actualFeaturedPostsCount) { index ->
+              val post = featuredPosts[index]
+              if (post.imageUrl.isNullOrBlank().not()) {
+                val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl!!)
 
-        val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
-        val actualFeaturedPostsCount = minOf(featuredPosts.size, featuredPostsCount)
-        val mutablePostsList =
-          MutableList(actualFeaturedPostsCount) { index ->
-            val post = featuredPosts[index]
-            if (post.imageUrl.isNullOrBlank().not()) {
-              val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl!!)
-
-              FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
-            } else {
-              null
-            }
-          }
-
-        emit(mutablePostsList.filterNotNull().toImmutableList())
-
-        val updatedPosts =
-          mutablePostsList
-            .mapNotNull { item ->
-              if (item == null) return@mapNotNull null
-
-              if (item.seedColor != null) return@mapNotNull item
-
-              return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
-                val seedColor =
-                  seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl!!)
-                item.copy(seedColor = seedColor?.toArgb())
+                FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
               } else {
                 null
               }
             }
-            .toImmutableList()
 
-        emit(updatedPosts)
-      }
+          emit(mutablePostsList.filterNotNull().toImmutableList())
+
+          val updatedPosts =
+            mutablePostsList
+              .mapNotNull { item ->
+                if (item == null) return@mapNotNull null
+
+                if (item.seedColor != null) return@mapNotNull item
+
+                return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
+                  val seedColor =
+                    seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl!!)
+                  item.copy(seedColor = seedColor?.toArgb())
+                } else {
+                  null
+                }
+              }
+              .toImmutableList()
+
+          emit(updatedPosts)
+        }
     }
 
   private val _hasUnreadPosts = MutableStateFlow(false)
