@@ -113,7 +113,7 @@ internal fun FeaturedSection(
       pageSpacing = 16.dp,
       key = { page ->
         val post = featuredPosts.getOrNull(page)
-        post?.let { post.resolvedPost.id + post.resolvedPost.sourceId } ?: page
+        post?.let { PostListKey.from(post.resolvedPost).encode() } ?: page
       },
     ) { page ->
       val featuredPost = featuredPosts.getOrNull(page)
