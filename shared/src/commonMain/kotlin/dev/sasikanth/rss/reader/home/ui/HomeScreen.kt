@@ -71,7 +71,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isMetaPressed
@@ -88,7 +87,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
-import app.cash.paging.compose.LazyPagingItems
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
@@ -106,20 +104,13 @@ import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
-import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.SYSTEM_SCRIM
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
-import dev.sasikanth.rss.reader.utils.Constants
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
-import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -153,12 +144,36 @@ internal fun HomeScreen(
   val density = LocalDensity.current
   val dynamicColorState = LocalDynamicColorState.current
   val dynamicColorEnabled = LocalDynamicColorEnabled.current
+  val sizeClass = LocalWindowSizeClass.current
+  val shouldBlockImage = LocalBlockImage.current
 
-  val posts = state.posts?.collectAsLazyPagingItems()
+  LaunchedEffect(Unit) { viewModel.openPost.collect { (index, post) -> openPost(index, post) } }
+
+  val posts =
+    remember(state.homeViewMode, state.allPosts, state.feedPosts, shouldBlockImage, sizeClass) {
+        val forceShowAllPosts =
+          shouldBlockImage ||
+            sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
+
+        if (state.homeViewMode == HomeViewMode.Default && !forceShowAllPosts) {
+          state.feedPosts
+        } else {
+          state.allPosts
+        }
+      }
+      ?.collectAsLazyPagingItems()
   val featuredPosts by
-    featuredPosts({ posts }, state.homeViewMode)
+    remember(state.featuredPosts, dynamicColorEnabled, sizeClass, shouldBlockImage) {
+        if (
+          shouldBlockImage ||
+            sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)
+        ) {
+          flowOf(persistentListOf())
+        } else {
+          state.featuredPosts
+        }
+      }
       .collectAsStateWithLifecycle(initialValue = persistentListOf())
-
   val postsListState = rememberLazyListState()
   val featuredPostsPagerState = rememberPagerState(pageCount = { featuredPosts.size })
   val bottomSheetState =
@@ -392,7 +407,12 @@ internal fun HomeScreen(
                       markPostAsReadOnScroll = {
                         viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
                       },
-                      onPostClicked = { post, postIndex -> openPost(postIndex, post) },
+                      onPostClicked = { post, _ ->
+                        viewModel.dispatch(HomeEvent.OnFeaturedPostClicked(post))
+                      },
+                      onFeaturedPostClicked = { post ->
+                        viewModel.dispatch(HomeEvent.OnFeaturedPostClicked(post))
+                      },
                       onPostBookmarkClick = {
                         viewModel.dispatch(HomeEvent.OnPostBookmarkClick(it))
                       },
@@ -608,70 +628,6 @@ private fun NoNewPosts() {
       color = AppTheme.colorScheme.textEmphasisMed,
       textAlign = TextAlign.Center,
     )
-  }
-}
-
-@Composable
-fun featuredPosts(
-  posts: () -> LazyPagingItems<ResolvedPost>?,
-  homeViewMode: HomeViewMode,
-): Flow<ImmutableList<FeaturedPostItem>> {
-  val seedColorExtractor = LocalSeedColorExtractor.current
-  val shouldBlockImage = LocalBlockImage.current
-  val sizeClass = LocalWindowSizeClass.current
-
-  if (sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_LARGE_LOWER_BOUND)) {
-    return flowOf(persistentListOf())
-  }
-
-  val posts = posts.invoke()
-
-  if (shouldBlockImage) return emptyFlow()
-
-  val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
-  val featuredPostsSnapshot = posts?.itemSnapshotList?.take(featuredPostsCount)
-
-  return remember(featuredPostsSnapshot, homeViewMode) {
-    flow {
-      if (homeViewMode != HomeViewMode.Default || posts == null || posts.itemCount == 0) {
-        emit(persistentListOf())
-        return@flow
-      }
-
-      val actualFeaturedPostsCount = minOf(posts.itemCount, featuredPostsCount)
-      val mutablePostsList =
-        MutableList(actualFeaturedPostsCount) { index ->
-          val post = posts[index]
-          if (post != null && post.imageUrl.isNullOrBlank().not()) {
-            val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl)
-
-            FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
-          } else {
-            null
-          }
-        }
-
-      emit(mutablePostsList.filterNotNull().toImmutableList())
-
-      val updatedPosts =
-        mutablePostsList
-          .mapNotNull { item ->
-            if (item == null) return@mapNotNull null
-
-            if (item.seedColor != null) return@mapNotNull item
-
-            return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
-              val seedColor =
-                seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl)
-              item.copy(seedColor = seedColor?.toArgb())
-            } else {
-              null
-            }
-          }
-          .toImmutableList()
-
-      emit(updatedPosts)
-    }
   }
 }
 
