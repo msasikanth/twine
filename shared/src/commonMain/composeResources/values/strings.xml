@@ -243,6 +243,7 @@
   <string name="minifluxClearDataPositive">Clear and Login</string>
   <string name="minifluxErrorLoginFailed">Login failed. Please check your credentials and URL.</string>
   <string name="minifluxErrorUnknown">An unknown error occurred</string>
+  <string name="minifluxAPIKeyHint" translatable="false">Miniflux settings > API Keys > Create a new API key</string>
   <string name="settingsNotificationWarningAndroid">Having notification issues? Your device may be closing the app in background. Tap here to find out how to fix it.</string>
   <string name="onboardingGetStarted">Get started</string>
   <string name="onboardingSubtitle">Build your feed</string>
@@ -257,8 +258,7 @@
   <string name="sleep_timer_off">Off</string>
   <string name="sleep_timer_end_of_track">End of track</string>
   <string name="sleep_timer_minutes">%1$d minutes</string>
-
-  <!-- Statistics -->
+  <string name="readerPageCount">%1$d of %2$d</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
