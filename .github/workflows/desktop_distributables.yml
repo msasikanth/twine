@@ -1,0 +1,70 @@
+name: Desktop Distributables
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'desktopApp/**'
+      - 'shared/**'
+      - 'core/**'
+      - '.github/workflows/desktop_distributables.yml'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+      - name: Build DMG
+        run: ./gradlew :desktopApp:packageReleaseDmg --no-daemon
+      - name: Upload DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Twine-macOS
+          path: desktopApp/build/compose/binaries/main/dmg/*.dmg
+
+  build-windows:
+    name: Build Windows MSI
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+      - name: Build MSI
+        run: ./gradlew :desktopApp:packageReleaseMsi --no-daemon
+      - name: Upload MSI
+        uses: actions/upload-artifact@v4
+        with:
+          name: Twine-Windows
+          path: desktopApp/build/compose/binaries/main/msi/*.msi
+
+  build-linux:
+    name: Build Linux DEB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: 21
+          distribution: zulu
+          cache: 'gradle'
+      - name: Build DEB
+        run: ./gradlew :desktopApp:packageReleaseDeb --no-daemon
+      - name: Upload DEB
+        uses: actions/upload-artifact@v4
+        with:
+          name: Twine-Linux
+          path: desktopApp/build/compose/binaries/main/deb/*.deb
