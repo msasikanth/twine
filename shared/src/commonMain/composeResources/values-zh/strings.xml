@@ -247,7 +247,7 @@
   <string name="sleep_timer_off">Off</string>
   <string name="sleep_timer_end_of_track">End of track</string>
   <string name="sleep_timer_minutes">%1$d minutes</string>
-  <!-- Statistics -->
+  <string name="readerPageCount">第 %1$d 页，共 %2$d 页</string>
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
