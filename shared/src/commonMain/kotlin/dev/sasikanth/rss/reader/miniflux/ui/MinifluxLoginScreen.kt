@@ -75,6 +75,7 @@ import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonCancel
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.minifluxAPIKeyHint
 import twine.shared.generated.resources.minifluxApiKey
 import twine.shared.generated.resources.minifluxClearDataDesc
 import twine.shared.generated.resources.minifluxClearDataPositive
@@ -285,6 +286,13 @@ fun MinifluxLoginScreen(
             ),
           keyboardActions =
             KeyboardActions(onDone = { viewModel.onEvent(MinifluxLoginEvent.OnLoginClicked) }),
+          supportingText = {
+            Text(
+              text = stringResource(Res.string.minifluxAPIKeyHint),
+              style = MaterialTheme.typography.labelMedium,
+              color = AppTheme.colorScheme.textEmphasisMed,
+            )
+          },
         )
       }
     }
