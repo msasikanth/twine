@@ -45,6 +45,8 @@ compose.desktop {
       modules("java.sql")
       modules("jdk.unsupported")
 
+      buildTypes.release.proguard { configurationFiles.from(project.file("proguard-rules.pro")) }
+
       macOS {
         bundleID = "dev.sasikanth.rss.reader"
         iconFile.set(project.file("icon.icns"))

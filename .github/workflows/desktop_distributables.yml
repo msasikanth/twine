@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Twine-macOS
-          path: desktopApp/build/compose/binaries/main/dmg/*.dmg
+          path: desktopApp/build/compose/binaries/main-release/dmg/*.dmg
 
   build-windows:
     name: Build Windows MSI
@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Twine-Windows
-          path: desktopApp/build/compose/binaries/main/msi/*.msi
+          path: desktopApp/build/compose/binaries/main-release/msi/*.msi
 
   build-linux:
     name: Build Linux DEB
@@ -67,4 +67,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Twine-Linux
-          path: desktopApp/build/compose/binaries/main/deb/*.deb
+          path: desktopApp/build/compose/binaries/main-release/deb/*.deb

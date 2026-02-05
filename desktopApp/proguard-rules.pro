@@ -1,0 +1,24 @@
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.servlet.**
+-dontwarn org.apache.commons.logging.**
+-dontwarn org.apache.log4j.**
+-dontwarn org.apache.log.**
+-dontwarn org.apache.avalon.**
+-dontwarn org.apache.logging.log4j.**
+-dontwarn org.htmlunit.jetty.**
+-dontwarn org.htmlunit.platform.util.**
+-dontwarn org.apache.xerces.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+-dontwarn org.graalvm.nativeimage.**
+-dontwarn com.oracle.svm.core.annotate.**
+-dontwarn nl.adaptivity.xmlutil.**
+-dontwarn org.slf4j.impl.**
+-dontwarn uk.co.caprica.vlcj.**
+
+# Keep everything for now to ensure functionality while we fix packaging
+-keep class ** { *; }
+-keep interface ** { *; }
+-keep enum ** { *; }
