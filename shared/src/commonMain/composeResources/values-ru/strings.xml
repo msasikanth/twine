@@ -239,6 +239,7 @@
   <string name="seek_forward">Seek forward 30 seconds</string>
   <string name="seek_backward">Seek backward 30 seconds</string>
   <string name="playback_speed">%1$dx</string>
+  <string name="readerPageCount">%1$d из %2$d</string>
   <!-- Statistics -->
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>

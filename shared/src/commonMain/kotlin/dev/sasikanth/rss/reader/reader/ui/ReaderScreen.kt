@@ -25,7 +25,9 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -42,9 +44,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -105,7 +109,6 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
-import dev.sasikanth.rss.reader.ui.RethinkSansFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
@@ -120,6 +123,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.readerPageCount
 
 @OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
 @Composable
@@ -206,7 +210,6 @@ internal fun ReaderScreen(
         ReaderFont.Lora -> LoraFontFamily
         ReaderFont.Merriweather -> MerriWeatherFontFamily
         ReaderFont.RobotoSerif -> RobotoSerifFontFamily
-        ReaderFont.RethinkSans -> RethinkSansFontFamily
       }
     val typography =
       typography(
@@ -288,7 +291,23 @@ internal fun ReaderScreen(
                   }
                 }
 
-                HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
+                Column(
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Text(
+                    text =
+                      stringResource(
+                        Res.string.readerPageCount,
+                        pagerState.currentPage + 1,
+                        pagerState.pageCount,
+                      ),
+                    color = AppTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.labelSmall,
+                  )
+
+                  HorizontalPageIndicators(pageIndicatorState = pageIndicatorState)
+                }
               }
             },
           )

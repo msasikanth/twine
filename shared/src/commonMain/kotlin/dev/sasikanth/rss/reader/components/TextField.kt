@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -47,16 +48,13 @@ fun TextField(
   enabled: Boolean = true,
   visualTransformation: VisualTransformation = VisualTransformation.None,
   trailingIcon: @Composable (() -> Unit)? = null,
+  supportingText: @Composable (() -> Unit)? = null,
 ) {
   val translucentStyles = LocalTranslucentStyles.current
   val containerShape = RoundedCornerShape(50)
 
-  androidx.compose.material3.TextField(
-    modifier =
-      modifier
-        .requiredHeight(56.dp)
-        .fillMaxWidth()
-        .border(1.dp, translucentStyles.default.outline, containerShape),
+  androidx.compose.material3.OutlinedTextField(
+    modifier = modifier.fillMaxWidth(),
     value = value,
     onValueChange = onValueChange,
     keyboardOptions = keyboardOptions,
@@ -67,20 +65,18 @@ fun TextField(
     enabled = enabled,
     visualTransformation = visualTransformation,
     colors =
-      TextFieldDefaults.colors(
+      OutlinedTextFieldDefaults.colors(
         unfocusedContainerColor = translucentStyles.default.background,
         focusedContainerColor = translucentStyles.default.background,
         disabledContainerColor = translucentStyles.default.background,
-        focusedIndicatorColor = Color.Transparent,
-        unfocusedIndicatorColor = Color.Transparent,
-        disabledIndicatorColor = Color.Transparent,
-        errorIndicatorColor = Color.Transparent,
         cursorColor = AppTheme.colorScheme.primary,
         selectionColors =
           TextSelectionColors(
             handleColor = AppTheme.colorScheme.tintedForeground,
             backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
           ),
+        unfocusedBorderColor = translucentStyles.default.outline,
+        focusedBorderColor = translucentStyles.default.outline,
       ),
     placeholder = {
       Text(
@@ -89,6 +85,7 @@ fun TextField(
         color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
       )
     },
+    supportingText = supportingText,
     trailingIcon = trailingIcon,
   )
 }

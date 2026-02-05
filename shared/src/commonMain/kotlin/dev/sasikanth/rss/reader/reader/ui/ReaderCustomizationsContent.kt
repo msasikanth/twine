@@ -62,7 +62,6 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Golos
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.GoogleSans
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
-import dev.sasikanth.rss.reader.data.repository.ReaderFont.RethinkSans
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
@@ -73,7 +72,6 @@ import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
-import dev.sasikanth.rss.reader.ui.RethinkSansFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
@@ -114,7 +112,6 @@ internal fun ReaderCustomizationsContent(
             Lora -> LoraFontFamily
             Merriweather -> MerriWeatherFontFamily
             RobotoSerif -> RobotoSerifFontFamily
-            RethinkSans -> RethinkSansFontFamily
           }
 
         TypefaceChip(

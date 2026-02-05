@@ -378,6 +378,5 @@ enum class ReaderFont(val value: String) {
   Golos("Golos Text"),
   Lora("Lora"),
   Merriweather("Merriweather"),
-  RethinkSans("Rethink Sans"),
   RobotoSerif("Roboto Serif"),
 }
