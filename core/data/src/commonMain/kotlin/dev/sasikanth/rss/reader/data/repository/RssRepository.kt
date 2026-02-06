@@ -561,6 +561,52 @@ class RssRepository(
     }
   }
 
+  fun allFeeds(): Flow<List<Feed>> {
+    return feedQueries
+      .allFeedsBlocking(
+        mapper = {
+          id: String,
+          name: String,
+          icon: String,
+          description: String,
+          link: String,
+          homepageLink: String,
+          createdAt: Instant,
+          pinnedAt: Instant?,
+          lastCleanUpAt: Instant?,
+          alwaysFetchSourceArticle: Boolean,
+          pinnedPosition: Double,
+          showFeedFavIcon: Boolean,
+          lastUpdatedAt: Instant?,
+          refreshInterval: String,
+          isDeleted: Boolean,
+          hideFromAllFeeds: Boolean,
+          remoteId: String? ->
+          Feed(
+            id = id,
+            name = name,
+            icon = icon,
+            description = description,
+            homepageLink = homepageLink,
+            createdAt = createdAt,
+            link = link,
+            pinnedAt = pinnedAt,
+            lastCleanUpAt = lastCleanUpAt,
+            lastUpdatedAt = lastUpdatedAt,
+            refreshInterval = Duration.parse(refreshInterval),
+            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+            pinnedPosition = pinnedPosition,
+            showFeedFavIcon = showFeedFavIcon,
+            hideFromAllFeeds = hideFromAllFeeds,
+            isDeleted = isDeleted,
+            remoteId = remoteId,
+          )
+        }
+      )
+      .asFlow()
+      .mapToList(dispatchersProvider.databaseRead)
+  }
+
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(dispatchersProvider.databaseRead) {
       feedQueries
