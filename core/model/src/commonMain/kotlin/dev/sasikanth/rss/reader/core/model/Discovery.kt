@@ -30,4 +30,5 @@ data class DiscoveryFeed(
   val description: String,
   val homepageLink: String,
   val icon: String,
+  val useFeedIcon: Boolean,
 )
