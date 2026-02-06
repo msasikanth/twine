@@ -34,6 +34,7 @@ data class ReaderState(
   val readerFontScaleFactor: Float,
   val readerLineHeightScaleFactor: Float,
   val openPaywall: Boolean,
+  val isSubscribed: Boolean,
 ) {
 
   companion object {
@@ -48,6 +49,7 @@ data class ReaderState(
         readerFontScaleFactor = 1f,
         readerLineHeightScaleFactor = 1f,
         openPaywall = false,
+        isSubscribed = false,
       )
     }
   }

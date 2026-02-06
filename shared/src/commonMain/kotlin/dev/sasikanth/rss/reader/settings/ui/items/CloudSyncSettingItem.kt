@@ -29,8 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,6 +48,7 @@ import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 import dev.sasikanth.rss.reader.resources.icons.Dropbox
 import dev.sasikanth.rss.reader.resources.icons.Freshrss
 import dev.sasikanth.rss.reader.resources.icons.Miniflux
+import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.settings.SettingsState
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -127,7 +126,7 @@ internal fun CloudSyncSettingItem(
 
               Icon(
                 modifier = Modifier.size(16.dp),
-                imageVector = Icons.Rounded.WorkspacePremium,
+                imageVector = TwineIcons.StarShine,
                 contentDescription = null,
                 tint = AppTheme.colorScheme.primary,
               )

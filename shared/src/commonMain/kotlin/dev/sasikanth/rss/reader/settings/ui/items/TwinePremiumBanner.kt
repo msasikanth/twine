@@ -24,8 +24,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -34,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.resources.icons.StarShine
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -55,7 +55,7 @@ internal fun TwinePremiumBanner(
   ) {
     Icon(
       modifier = Modifier.requiredSize(32.dp),
-      imageVector = Icons.Rounded.WorkspacePremium,
+      imageVector = TwineIcons.StarShine,
       contentDescription = null,
       tint = AppTheme.colorScheme.primary,
     )
