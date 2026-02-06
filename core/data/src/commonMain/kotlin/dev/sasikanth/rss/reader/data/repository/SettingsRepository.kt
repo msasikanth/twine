@@ -374,17 +374,18 @@ enum class HomeViewMode {
 
 enum class ReaderFont(val value: String) {
   ComicNeue("Comic Neue"),
-  GoogleSans("Google Sans"),
   Golos("Golos Text"),
+  RobotoSerif("Roboto Serif"),
+  GoogleSans("Google Sans"),
   Lora("Lora"),
   Merriweather("Merriweather"),
-  RobotoSerif("Roboto Serif"),
 }
 
 val ReaderFont.isPremium: Boolean
   get() =
     when (this) {
+      ReaderFont.Lora -> true
+      ReaderFont.Merriweather -> true
       ReaderFont.GoogleSans -> true
-      ReaderFont.RobotoSerif -> true
       else -> false
     }

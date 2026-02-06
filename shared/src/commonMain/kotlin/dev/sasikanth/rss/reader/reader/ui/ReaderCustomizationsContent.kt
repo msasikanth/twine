@@ -41,7 +41,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FormatLineSpacing
 import androidx.compose.material.icons.rounded.FormatSize
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -66,6 +65,7 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
+import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
@@ -315,7 +315,7 @@ private fun TypefaceChip(
       if (isPremium && !isSubscribed) {
         Icon(
           modifier = Modifier.requiredSize(16.dp),
-          imageVector = Icons.Rounded.Lock,
+          imageVector = TwineIcons.StarShine,
           contentDescription = null,
           tint = contentColor,
         )
