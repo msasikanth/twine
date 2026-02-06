@@ -17,21 +17,35 @@
 
 package dev.sasikanth.rss.reader.discovery
 
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.DiscoveryGroup
 import dev.sasikanth.rss.reader.di.scopes.AppScope
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
 import me.tatarka.inject.annotations.Inject
 import twine.shared.generated.resources.Res
 
+private const val DISCOVERY_FEEDS_URL =
+  "https://raw.githubusercontent.com/msasikanth/twine/refs/heads/main/shared/src/commonMain/composeResources/files/discovery_feeds.json"
+
 @Inject
 @AppScope
-class DiscoveryRepository {
+class DiscoveryRepository(private val httpClient: HttpClient) {
 
   private val json = Json { ignoreUnknownKeys = true }
 
   suspend fun groups(): List<DiscoveryGroup> {
-    val bytes = Res.readBytes("files/discovery_feeds.json")
-    val content = bytes.decodeToString()
-    return json.decodeFromString<List<DiscoveryGroup>>(content)
+    return try {
+      val response = httpClient.get(DISCOVERY_FEEDS_URL)
+      val content = response.bodyAsText()
+      json.decodeFromString<List<DiscoveryGroup>>(content)
+    } catch (e: Exception) {
+      Logger.e(e) { "Failed to fetch discovery feeds from remote, falling back to local" }
+      val bytes = Res.readBytes("files/discovery_feeds.json")
+      val content = bytes.decodeToString()
+      json.decodeFromString<List<DiscoveryGroup>>(content)
+    }
   }
 }
