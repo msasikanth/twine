@@ -37,7 +37,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -56,6 +55,8 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.resources.icons.StarShine
+import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -93,7 +94,7 @@ internal fun AppIconSettingItem(
 
           Icon(
             modifier = Modifier.size(16.dp),
-            imageVector = Icons.Rounded.WorkspacePremium,
+            imageVector = TwineIcons.StarShine,
             contentDescription = null,
             tint = AppTheme.colorScheme.primary,
           )

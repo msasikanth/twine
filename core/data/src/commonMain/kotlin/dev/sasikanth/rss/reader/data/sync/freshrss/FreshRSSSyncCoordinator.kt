@@ -34,6 +34,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import dev.sasikanth.rss.reader.util.nameBasedUuidOf
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,12 +109,13 @@ class FreshRSSSyncCoordinator(
       pushChanges(syncStartTime)
 
       // 2. Sync Subscriptions
-      val hasNewSubscriptions = syncSubscriptions(syncStartTime)
+      syncSubscriptions(syncStartTime)
       updateSyncState(SyncState.InProgress(0.3f))
 
       // 3. Sync Articles
-      val lastSyncedAt = refreshPolicy.fetchLastSyncedAt() ?: syncStartTime
-      val newerThan = lastSyncedAt.minus(24.hours).toEpochMilliseconds()
+      val lastSyncedAt =
+        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(30.days)
+      val newerThan = lastSyncedAt.toEpochMilliseconds()
 
       val hasNewArticles = syncArticles(newerThan = newerThan)
       syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)

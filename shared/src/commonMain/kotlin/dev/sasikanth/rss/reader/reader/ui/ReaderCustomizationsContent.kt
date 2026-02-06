@@ -63,7 +63,9 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.GoogleSans
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Lora
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
+import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
+import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
@@ -83,6 +85,7 @@ internal fun ReaderCustomizationsContent(
   selectedFont: ReaderFont,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
+  isSubscribed: Boolean,
   onFontChange: (ReaderFont) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
@@ -118,6 +121,8 @@ internal fun ReaderCustomizationsContent(
           selected = fontStyle == selectedFont,
           label = fontStyle.value,
           fontFamily = fontFamily,
+          isPremium = fontStyle.isPremium,
+          isSubscribed = isSubscribed,
           onClick = { onFontChange(fontStyle) },
         )
       }
@@ -271,6 +276,8 @@ private fun CustomisationsTypefaceHeader() {
 private fun TypefaceChip(
   selected: Boolean,
   label: String,
+  isPremium: Boolean,
+  isSubscribed: Boolean,
   modifier: Modifier = Modifier,
   onClick: () -> Unit,
   fontFamily: FontFamily = FontFamily.Default,
@@ -296,12 +303,23 @@ private fun TypefaceChip(
         if (selected) AppTheme.colorScheme.inverseOnSurface else AppTheme.colorScheme.onSurface
       )
 
-    Box(
+    Row(
       modifier =
         Modifier.background(background, RoundedCornerShape(50))
-          .padding(horizontal = 20.dp, vertical = 8.dp)
+          .padding(horizontal = 20.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
       Text(text = label, color = contentColor, fontFamily = fontFamily)
+
+      if (isPremium && !isSubscribed) {
+        Icon(
+          modifier = Modifier.requiredSize(16.dp),
+          imageVector = TwineIcons.StarShine,
+          contentDescription = null,
+          tint = contentColor,
+        )
+      }
     }
   }
 }

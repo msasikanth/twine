@@ -269,6 +269,11 @@
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
 
+  <string name="discoveryTitle">Discovery</string>
+  <string name="discoverySearchHint">Search for feeds</string>
+  <string name="discoveryAddFeed">Add</string>
+  <string name="discoveryAdded">Added</string>
+
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d result</item>

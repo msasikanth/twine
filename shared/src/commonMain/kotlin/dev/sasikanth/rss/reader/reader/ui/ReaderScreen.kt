@@ -330,6 +330,7 @@ internal fun ReaderScreen(
               selectedFont = state.selectedReaderFont,
               fontScaleFactor = state.readerFontScaleFactor,
               fontLineHeightFactor = state.readerLineHeightScaleFactor,
+              isSubscribed = state.isSubscribed,
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
@@ -463,6 +464,7 @@ private fun ReaderActionsPanel(
   selectedFont: ReaderFont,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
+  isSubscribed: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
   openReaderViewSettings: () -> Unit,
@@ -543,6 +545,7 @@ private fun ReaderActionsPanel(
                 selectedFont = selectedFont,
                 fontScaleFactor = fontScaleFactor,
                 fontLineHeightFactor = fontLineHeightFactor,
+                isSubscribed = isSubscribed,
                 onFontChange = onFontChange,
                 onFontScaleFactorChange = onFontScaleFactorChange,
                 onFontLineHeightFactorChange = onFontLineHeightFactorChange,

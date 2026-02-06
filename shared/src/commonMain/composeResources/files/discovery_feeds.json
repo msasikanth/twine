@@ -1,0 +1,1172 @@
+[
+  {
+    "name": "Technology",
+    "feeds": [
+      {
+        "name": "The Verge",
+        "link": "https://www.theverge.com/rss/index.xml",
+        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
+        "homepageLink": "https://www.theverge.com"
+      },
+      {
+        "name": "The Verge | Front page",
+        "link": "https://www.theverge.com/rss/front-page/index.xml",
+        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
+        "homepageLink": "https://www.theverge.com"
+      },
+      {
+        "name": "The Verge | Reviews",
+        "link": "https://www.theverge.com/rss/reviews/index.xml",
+        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
+        "homepageLink": "https://www.theverge.com/reviews"
+      },
+      {
+        "name": "The Verge | Tech",
+        "link": "https://www.theverge.com/rss/tech/index.xml",
+        "description": "The Verge is about technology and how it makes us feel. Founded in 2011, we offer our audience everything from breaking news to reviews to award-winning features and investigations, on our site, in video, and in podcasts.",
+        "homepageLink": "https://www.theverge.com/tech"
+      },
+      {
+        "name": "TechCrunch",
+        "link": "https://techcrunch.com/feed/",
+        "description": "Startup and Technology News",
+        "homepageLink": "https://techcrunch.com/"
+      },
+      {
+        "name": "WIRED",
+        "link": "https://www.wired.com/feed/rss",
+        "description": "The latest from www.wired.com",
+        "homepageLink": "https://www.wired.com"
+      },
+      {
+        "name": "Ars Technica",
+        "link": "https://arstechnica.com/feed/",
+        "description": "Serving the Technologist since 1998. News, reviews, and analysis.",
+        "homepageLink": "https://arstechnica.com"
+      },
+      {
+        "name": "Engadget",
+        "link": "https://www.engadget.com/rss.xml",
+        "description": "Engadget is a web magazine with obsessive daily coverage of everything new in gadgets and consumer electronics",
+        "homepageLink": "https://www.engadget.com/"
+      },
+      {
+        "name": "9to5Mac",
+        "link": "https://9to5mac.com/feed/",
+        "description": "Apple News & Mac Rumors Breaking All Day",
+        "homepageLink": "https://9to5mac.com/"
+      },
+      {
+        "name": "Android Authority",
+        "link": "https://www.androidauthority.com/feed/",
+        "description": "Android News, Reviews, How To",
+        "homepageLink": "https://www.androidauthority.com/"
+      },
+      {
+        "name": "ZDNET",
+        "link": "https://www.zdnet.com/news/rss.xml",
+        "description": "Most recent news",
+        "homepageLink": "https://www.zdnet.com/"
+      },
+      {
+        "name": "CNET",
+        "link": "https://www.cnet.com/rss/news/",
+        "description": "CNET news editors and reporters provide top technology news, with investigative reporting and in-depth coverage of tech issues and events.",
+        "homepageLink": "https://www.cnet.com/"
+      },
+      {
+        "name": "Digital Trends",
+        "link": "https://www.digitaltrends.com/feed/",
+        "description": "Tech Product Reviews, How To, Best Ofs, deals and Advice",
+        "homepageLink": "https://www.digitaltrends.com/"
+      },
+      {
+        "name": "Mashable",
+        "link": "https://mashable.com/feeds/rss/all",
+        "description": "Mashable is a global, multi-platform media and entertainment company.",
+        "homepageLink": "https://mashable.com"
+      },
+      {
+        "name": "SlashGear",
+        "link": "https://www.slashgear.com/feed/",
+        "description": "The latest news and reviews in the world of tech, automotive, gaming, science, and entertainment - since 2005.",
+        "homepageLink": "https://www.slashgear.com/"
+      },
+      {
+        "name": "Android Central",
+        "link": "https://www.androidcentral.com/feeds.xml",
+        "description": "All the latest content from the Android Central team",
+        "homepageLink": "https://www.androidcentral.com"
+      },
+      {
+        "name": "ReadWrite",
+        "link": "https://feeds.feedburner.com/readwriteweb",
+        "description": "Crypto, Gaming & Emerging Tech News",
+        "homepageLink": "https://readwrite.com/"
+      },
+      {
+        "name": "Gizmodo",
+        "link": "https://gizmodo.com/feed",
+        "description": "The Future Is Here",
+        "homepageLink": "https://gizmodo.com/"
+      },
+      {
+        "name": "Lifehacker",
+        "link": "https://lifehacker.com/feed/rss",
+        "description": "Do everything better.",
+        "homepageLink": "https://lifehacker.com"
+      },
+      {
+        "name": "Fast Company",
+        "link": "https://www.fastcompany.com/latest/rss",
+        "description": "Fast Company inspires a new breed of innovative and creative thought leaders who are actively inventing the future of business.",
+        "homepageLink": "https://www.fastcompany.com"
+      },
+      {
+        "name": "MIT Technology Review",
+        "link": "https://www.technologyreview.com/feed/",
+        "description": "",
+        "homepageLink": "https://www.technologyreview.com"
+      },
+      {
+        "name": "Daily-Tech",
+        "link": "https://feeds.feedburner.com/daily-tech",
+        "description": "",
+        "homepageLink": "https://daily-tech18.blogspot.com/"
+      },
+      {
+        "name": "TechRadar",
+        "link": "https://www.techradar.com/feeds.xml",
+        "description": "All the latest content from the TechRadar team",
+        "homepageLink": "https://www.techradar.com"
+      },
+      {
+        "name": "Tom's Hardware",
+        "link": "https://www.tomshardware.com/feeds.xml",
+        "description": "All the latest content from the Tom's Hardware team",
+        "homepageLink": "https://www.tomshardware.com"
+      },
+      {
+        "name": "BGR",
+        "link": "https://www.bgr.com/feed/",
+        "description": "Expert analysis of the leading stories in tech and entertainment plus reviews of the latest gadgets.",
+        "homepageLink": "https://www.bgr.com/"
+      }
+    ]
+  },
+  {
+    "name": "News",
+    "feeds": [
+      {
+        "name": "BBC News",
+        "link": "https://feeds.bbci.co.uk/news/rss.xml",
+        "description": "BBC News - News Front Page",
+        "homepageLink": "https://www.bbc.co.uk/news"
+      },
+      {
+        "name": "Al Jazeera",
+        "link": "https://www.aljazeera.com/xml/rss/all.xml",
+        "description": "Breaking News, World News and Video from Al Jazeera",
+        "homepageLink": "https://www.aljazeera.com"
+      },
+      {
+        "name": "NPR News",
+        "link": "https://feeds.npr.org/1001/rss.xml",
+        "description": "NPR news, audio, and podcasts. Coverage of breaking stories, national and world news, politics, business, science, technology, and extended coverage of major national and world events.",
+        "homepageLink": "https://www.npr.org/templates/story/story.php?storyId=1001"
+      },
+      {
+        "name": "New York Times",
+        "link": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+        "description": "",
+        "homepageLink": "https://www.nytimes.com"
+      },
+      {
+        "name": "The Guardian | World news",
+        "link": "https://www.theguardian.com/world/rss",
+        "description": "Latest World news news, comment and analysis from the Guardian, the world's leading liberal voice",
+        "homepageLink": "https://www.theguardian.com/world"
+      },
+      {
+        "name": "CNBC | US",
+        "link": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+        "description": "CNBC is the world leader in business news and real-time financial market coverage. Find fast, actionable information.",
+        "homepageLink": "https://www.cnbc.com/us-top-news-and-analysis/"
+      },
+      {
+        "name": "France 24",
+        "link": "https://www.france24.com/en/rss",
+        "description": "Breaking news and world news from France 24 on Business, Sports, Culture. Video news. News from the US, Europe, Asia Pacific, Africa, Middle East, America",
+        "homepageLink": "https://www.france24.com/en/"
+      },
+      {
+        "name": "Wall Street Journal",
+        "link": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+        "description": "World News",
+        "homepageLink": "http://online.wsj.com/page/2_0006.html"
+      },
+      {
+        "name": "Washington Post",
+        "link": "https://www.washingtonpost.com/arcio/rss/",
+        "description": "Washington Post News Feed",
+        "homepageLink": "https://www.washingtonpost.com"
+      },
+      {
+        "name": "TIME",
+        "link": "https://time.com/feed/",
+        "description": "Breaking news and analysis from time.com. Politics, world news, photos, video, tech reviews, health, science, and entertainment news.",
+        "homepageLink": "https://time.com"
+      },
+      {
+        "name": "The Atlantic",
+        "link": "https://www.theatlantic.com/feed/all/",
+        "description": "",
+        "homepageLink": "https://www.theatlantic.com/newsletters/2026/02/trump-administration-information-war/685901/?utm_source=feed"
+      },
+      {
+        "name": "Vox",
+        "link": "https://www.vox.com/rss/index.xml",
+        "description": "Our world has too much noise and too little context. Vox helps you understand what matters.",
+        "homepageLink": "https://www.vox.com"
+      },
+      {
+        "name": "Huffington Post",
+        "link": "https://chaski.huffpost.com/us/auto/vertical/front-page",
+        "description": "HuffPost - United States",
+        "homepageLink": "https://www.huffpost.com/news/front-page"
+      },
+      {
+        "name": "Newsweek",
+        "link": "https://www.newsweek.com/rss",
+        "description": "Latest News",
+        "homepageLink": "https://www.newsweek.com"
+      },
+      {
+        "name": "Slate Magazine",
+        "link": "https://slate.com/feeds/all.rss",
+        "description": "Slate RSS",
+        "homepageLink": "https://slate.com/"
+      },
+      {
+        "name": "The New Yorker",
+        "link": "https://www.newyorker.com/feed/everything",
+        "description": "Channel Description",
+        "homepageLink": "https://www.newyorker.com"
+      },
+      {
+        "name": "Euronews",
+        "link": "https://feeds.feedburner.com/euronews/en/home",
+        "description": "Latest news from Euronews",
+        "homepageLink": "http://www.euronews.com"
+      },
+      {
+        "name": "SCMP",
+        "link": "https://www.scmp.com/rss/91/feed/",
+        "description": "All the latest breaking news from Hong Kong, China and around the world",
+        "homepageLink": "https://www.scmp.com"
+      },
+      {
+        "name": "Japan Times",
+        "link": "https://www.japantimes.co.jp/feed/",
+        "description": "News on Japan, Business News, Opinion, Sports, Entertainment and More",
+        "homepageLink": "https://www.japantimes.co.jp/"
+      },
+      {
+        "name": "The Straits Times World News",
+        "link": "https://www.straitstimes.com/news/world/rss.xml",
+        "description": "The Straits Times - Get exclusive stories, in-depth analyses and award-winning multimedia content about Singapore, Asia and the world.",
+        "homepageLink": "https://www.straitstimes.com/"
+      },
+      {
+        "name": "Sky News",
+        "link": "https://feeds.skynews.com/feeds/rss/world.xml",
+        "description": "The latest international news from Sky, featuring top stories from around the world and breaking news, as it happens.",
+        "homepageLink": "https://news.sky.com/world"
+      },
+      {
+        "name": "NDTV",
+        "link": "https://feeds.feedburner.com/ndtvnews-top-stories",
+        "description": "NDTV.com provides the latest information from and in-depth coverage of India and the world. Find breaking news, India news, top stories, elections, politics, business, cricket, movies, lifestyle, health, live TV, videos, photos and more.",
+        "homepageLink": "https://www.ndtv.com/"
+      },
+      {
+        "name": "The Hindu",
+        "link": "https://www.thehindu.com/news/international/feeder/default.rss",
+        "description": "World news today: Stay informed with the latest international news and live updates on breaking global events from The Hindu. Explore in-depth coverage of stories from across the globe, including the Americas, Asia, Europe, Australia &amp; Oceania, and West Asia &amp; Africa, all reported by our dedicated correspondents.",
+        "homepageLink": "https://www.thehindu.com/news/international/"
+      },
+      {
+        "name": "The Independent World",
+        "link": "https://www.independent.co.uk/news/world/rss",
+        "description": "Visit now for the latest news direct from The Independent World and updated throughout the day",
+        "homepageLink": "https://www.independent.co.uk/news/world/rss"
+      }
+    ]
+  },
+  {
+    "name": "Science",
+    "feeds": [
+      {
+        "name": "NASA",
+        "link": "https://www.nasa.gov/news-release/feed/",
+        "description": "Official National Aeronautics and Space Administration Website",
+        "homepageLink": "https://www.nasa.gov"
+      },
+      {
+        "name": "Science Daily",
+        "link": "https://www.sciencedaily.com/rss/all.xml",
+        "description": "",
+        "homepageLink": "https://www.sciencedaily.com/news/"
+      },
+      {
+        "name": "Science Daily | All Top News",
+        "link": "https://www.sciencedaily.com/rss/top/science.xml",
+        "description": "Top science stories featured on ScienceDaily's home page.",
+        "homepageLink": "https://www.sciencedaily.com/news/top/"
+      },
+      {
+        "name": "Space.com",
+        "link": "https://www.space.com/feeds.xml",
+        "description": "All the latest content from the Space.com team",
+        "homepageLink": "https://www.space.com"
+      },
+      {
+        "name": "Quanta Magazine",
+        "link": "https://www.quantamagazine.org/feed/",
+        "description": "Illuminating science",
+        "homepageLink": "https://www.quantamagazine.org"
+      },
+      {
+        "name": "New Scientist",
+        "link": "https://www.newscientist.com/feed/home/",
+        "description": "New Scientist - Home",
+        "homepageLink": "https://www.newscientist.com/"
+      },
+      {
+        "name": "Science News",
+        "link": "https://www.sciencenews.org/feed",
+        "description": "INDEPENDENT JOURNALISM SINCE 1921",
+        "homepageLink": "https://www.sciencenews.org"
+      },
+      {
+        "name": "Live Science",
+        "link": "https://www.livescience.com/feeds.xml",
+        "description": "All the latest content from the Live Science team",
+        "homepageLink": "https://www.livescience.com"
+      },
+      {
+        "name": "Phys.org",
+        "link": "https://phys.org/rss-feed/",
+        "description": "Phys.org internet news portal provides the latest news on science including: Physics, Nanotechnology, Life Sciences, Space Science, Earth Science, Environment, Health and Medicine.",
+        "homepageLink": "https://phys.org/"
+      },
+      {
+        "name": "Popular Science",
+        "link": "https://www.popsci.com/feed/",
+        "description": "Awe-inspiring science reporting, technology news, and DIY projects. Skunks to space robots, primates to climates. That&#039;s Popular Science, 150 years strong.",
+        "homepageLink": "https://www.popsci.com"
+      },
+      {
+        "name": "Psychology Today: The Latest",
+        "link": "https://www.psychologytoday.com/us/front/feed",
+        "description": "The latest blog posts from Psychology Today",
+        "homepageLink": "https://www.psychologytoday.com/us"
+      },
+      {
+        "name": "Undark Magazine",
+        "link": "https://www.undark.org/feed/",
+        "description": "Truth, Beauty, Science.",
+        "homepageLink": "https://undark.org/"
+      },
+      {
+        "name": "Science Friday",
+        "link": "https://www.sciencefriday.com/feed/",
+        "description": "Science, technology, and other cool stuff from public radio's Science Friday.",
+        "homepageLink": "https://www.sciencefriday.com/"
+      },
+      {
+        "name": "Astronomy News",
+        "link": "https://www.sciencedaily.com/rss/space_time/astronomy.xml",
+        "description": "Astronomy news. New! Earth-like extrasolar planet found; double helix nebula; supermassive black holes, astronomy articles, astronomy pictures. Updated daily.",
+        "homepageLink": "https://www.sciencedaily.com/news/space_time/astronomy/"
+      },
+      {
+        "name": "Physics News",
+        "link": "https://www.sciencedaily.com/rss/matter_energy/physics.xml",
+        "description": "Physics News and Research. Why is the universe more partial to matter than antimatter? How could fuel cells be more efficient? Read current science articles on physics.",
+        "homepageLink": "https://www.sciencedaily.com/news/matter_energy/physics/"
+      },
+      {
+        "name": "Nature News",
+        "link": "https://www.sciencedaily.com/rss/plants_animals/nature.xml",
+        "description": "Nature. Read the latest scientific research on the natural world, ecology and climate change.",
+        "homepageLink": "https://www.sciencedaily.com/news/plants_animals/nature/"
+      },
+      {
+        "name": "Earth Science News",
+        "link": "https://www.sciencedaily.com/rss/earth_climate/earth_science.xml",
+        "description": "Earth science research and news. Read science articles on air quality, geology, meteorology, oceanography, paleontology and science and the environment.",
+        "homepageLink": "https://www.sciencedaily.com/news/earth_climate/earth_science/"
+      },
+      {
+        "name": "Smithsonian Magazine",
+        "link": "https://www.smithsonianmag.com/rss/science-nature/",
+        "description": "RSS feed for Science",
+        "homepageLink": "https://www.smithsonianmag.com/rss/science-nature/"
+      }
+    ]
+  },
+  {
+    "name": "Gaming",
+    "feeds": [
+      {
+        "name": "Kotaku",
+        "link": "https://kotaku.com/feed",
+        "description": "Gaming Reviews, News, Tips and More.",
+        "homepageLink": "https://kotaku.com/"
+      },
+      {
+        "name": "PCGamer latest",
+        "link": "https://www.pcgamer.com/rss/",
+        "description": "",
+        "homepageLink": "https://www.pcgamer.com"
+      },
+      {
+        "name": "Polygon",
+        "link": "https://www.polygon.com/feed/",
+        "description": "Your source for the latest in video games, sci-fi, fantasy, tabletop games, anime, horror, books, and comics.",
+        "homepageLink": "https://www.polygon.com"
+      },
+      {
+        "name": "Destructoid",
+        "link": "https://www.destructoid.com/feed/",
+        "description": "A Site About Video Games",
+        "homepageLink": "https://www.destructoid.com/"
+      },
+      {
+        "name": "Rock Paper Shotgun | Latest Articles",
+        "link": "https://www.rockpapershotgun.com/feed",
+        "description": "This is a feed of the latest articles from Rock Paper Shotgun.",
+        "homepageLink": "https://www.rockpapershotgun.com"
+      },
+      {
+        "name": "Gematsu",
+        "link": "https://www.gematsu.com/feed",
+        "description": "Japanese Video Game News",
+        "homepageLink": "https://www.gematsu.com"
+      },
+      {
+        "name": "Siliconera",
+        "link": "https://www.siliconera.com/feed/",
+        "description": "The secret level in the world of video game news.",
+        "homepageLink": "https://www.siliconera.com/"
+      },
+      {
+        "name": "Nintendo Life",
+        "link": "https://www.nintendolife.com/feeds/latest",
+        "description": "",
+        "homepageLink": "https://www.nintendolife.com"
+      },
+      {
+        "name": "Push Square",
+        "link": "https://www.pushsquare.com/feeds/latest",
+        "description": "",
+        "homepageLink": "https://www.pushsquare.com"
+      },
+      {
+        "name": "Pure Xbox",
+        "link": "https://www.purexbox.com/feeds/latest",
+        "description": "",
+        "homepageLink": "https://www.purexbox.com"
+      },
+      {
+        "name": "VGC",
+        "link": "https://www.videogameschronicle.com/feed/",
+        "description": "Best video game news first, plus reviews and guides",
+        "homepageLink": "https://www.videogameschronicle.com"
+      },
+      {
+        "name": "Shacknews",
+        "link": "https://www.shacknews.com/feed/rss",
+        "description": "Shacknews",
+        "homepageLink": "http://www.shacknews.com/"
+      },
+      {
+        "name": "PC Invasion",
+        "link": "https://www.pcinvasion.com/feed/",
+        "description": "The home of PC Gaming",
+        "homepageLink": "https://www.pcinvasion.com/"
+      },
+      {
+        "name": "DualShockers",
+        "link": "https://www.dualshockers.com/feed/",
+        "description": "DualShockers is the definitive destination for video game fans. From gaming news to in-depth guides, we\u2019ve got you covered with our expert coverage.",
+        "homepageLink": "https://www.dualshockers.com"
+      },
+      {
+        "name": "gamedeveloper",
+        "link": "https://www.gamedeveloper.com/rss.xml",
+        "description": "Public RSS feed",
+        "homepageLink": "https://www.gamedeveloper.com"
+      },
+      {
+        "name": "Game Informer",
+        "link": "https://gameinformer.com/rss.xml",
+        "description": "Game Informer is your source for the latest in video game news, reviews, previews, podcasts, and features.",
+        "homepageLink": "https://gameinformer.com/"
+      },
+      {
+        "name": "Eurogamer",
+        "link": "https://www.eurogamer.net/feed",
+        "description": "This is a feed of the latest articles from Eurogamer.net.",
+        "homepageLink": "https://www.eurogamer.net"
+      },
+      {
+        "name": "GameSpot",
+        "link": "https://www.gamespot.com/feeds/news/",
+        "description": "The latest News from GameSpot",
+        "homepageLink": "https://www.gamespot.com"
+      },
+      {
+        "name": "RPG Site",
+        "link": "https://www.rpgsite.net/feed",
+        "description": "",
+        "homepageLink": "https://www.rpgsite.net"
+      },
+      {
+        "name": "PSU",
+        "link": "https://www.psu.com/feed/",
+        "description": "PS5, PS4, PSVR, PS Vita News and Reviews",
+        "homepageLink": "https://www.psu.com"
+      },
+      {
+        "name": "PlayStation LifeStyle",
+        "link": "https://www.playstationlifestyle.net/feed/",
+        "description": "PS5, PS4, PS Plus, and PSN News, Guides, Trophies, Reviews, and More!",
+        "homepageLink": "https://www.playstationlifestyle.net/"
+      }
+    ]
+  },
+  {
+    "name": "Development",
+    "feeds": [
+      {
+        "name": "Hacker News",
+        "link": "https://news.ycombinator.com/rss",
+        "description": "Links for the intellectually curious, ranked by readers.",
+        "homepageLink": "https://news.ycombinator.com/"
+      },
+      {
+        "name": "DEV Community",
+        "link": "https://dev.to/feed",
+        "description": "The most recent home feed on DEV Community.",
+        "homepageLink": "https://dev.to"
+      },
+      {
+        "name": "CSS-Tricks",
+        "link": "https://css-tricks.com/feed/",
+        "description": "Tips, Tricks, and Techniques on using Cascading Style Sheets.",
+        "homepageLink": "https://css-tricks.com"
+      },
+      {
+        "name": "Techworld",
+        "link": "https://www.techworld.com/rss",
+        "description": "",
+        "homepageLink": "https://www.techworld.com/rss"
+      },
+      {
+        "name": "The Hacker News",
+        "link": "https://feeds.feedburner.com/TheHackersNews",
+        "description": "Most trusted, widely-read independent cybersecurity news source for everyone; supported by hackers and IT professionals \u2014 Send TIPs to admin@thehackernews.com",
+        "homepageLink": "https://thehackernews.com"
+      },
+      {
+        "name": "Krebs on Security",
+        "link": "https://krebsonsecurity.com/feed/",
+        "description": "In-depth security news and investigation",
+        "homepageLink": "https://krebsonsecurity.com"
+      },
+      {
+        "name": "Schneier on Security",
+        "link": "https://www.schneier.com/feed/atom/",
+        "description": "",
+        "homepageLink": "https://www.schneier.com/"
+      },
+      {
+        "name": "Troy Hunt",
+        "link": "https://www.troyhunt.com/rss/",
+        "description": "Hi, I'm Troy Hunt, I write this blog, run \"Have I Been Pwned\" and am a Microsoft Regional Director and MVP who travels the world speaking at events and training technology professionals",
+        "homepageLink": "https://www.troyhunt.com/"
+      },
+      {
+        "name": "GRAHAM CLULEY",
+        "link": "https://grahamcluley.com/feed/",
+        "description": "Cybersecurity keynote speaker",
+        "homepageLink": "https://grahamcluley.com"
+      },
+      {
+        "name": "Stack Overflow Blog",
+        "link": "https://stackoverflow.blog/feed/",
+        "description": "Essays, opinions, and advice on the act of computer programming from Stack Overflow.",
+        "homepageLink": "https://stackoverflow.blog/"
+      },
+      {
+        "name": "Google Developers Blog",
+        "link": "https://developers.googleblog.com/atom.xml/",
+        "description": "Updates on changes and additions to the Google Developers Blog.",
+        "homepageLink": "https://developers.googleblog.com/rss/"
+      },
+      {
+        "name": "AWS News Blog",
+        "link": "https://aws.amazon.com/blogs/aws/feed/",
+        "description": "Announcements, Updates, and Launches",
+        "homepageLink": "https://aws.amazon.com/blogs/aws/"
+      },
+      {
+        "name": "Microsoft for Developers",
+        "link": "https://devblogs.microsoft.com/feed",
+        "description": "Get the latest information, insights, and news from Microsoft.",
+        "homepageLink": "https://devblogs.microsoft.com/"
+      },
+      {
+        "name": "Engineering at Meta",
+        "link": "https://engineering.fb.com/feed/",
+        "description": "Engineering at Meta Blog",
+        "homepageLink": "https://engineering.fb.com/"
+      },
+      {
+        "name": "Netflix TechBlog",
+        "link": "https://netflixtechblog.com/feed",
+        "description": "Learn about Netflix\u2019s world class engineering efforts, company culture, product developments and more. - Medium",
+        "homepageLink": "https://netflixtechblog.com?source=rss----2615bd06b42e---4"
+      },
+      {
+        "name": "The Airbnb Tech Blog",
+        "link": "https://medium.com/feed/airbnb-engineering",
+        "description": "Creative engineers and data scientists building a world where you can belong anywhere. http://airbnb.io - Medium",
+        "homepageLink": "https://medium.com/airbnb-engineering?source=rss----53c7c27702d5---4"
+      },
+      {
+        "name": "Engineering at Slack",
+        "link": "https://slack.engineering/feed/",
+        "description": "Hear directly from Slack's engineers about what we build, why and how we build it, and how you can use it.",
+        "homepageLink": "https://slack.engineering"
+      },
+      {
+        "name": "The GitHub Blog",
+        "link": "https://github.blog/feed/",
+        "description": "Updates, ideas, and inspiration from GitHub to help developers build and design software.",
+        "homepageLink": "https://github.blog/"
+      },
+      {
+        "name": "The Cloudflare Blog",
+        "link": "https://blog.cloudflare.com/rss/",
+        "description": "Get the latest news on how products at Cloudflare are built, technologies used, and join the teams helping to build a better Internet.",
+        "homepageLink": "https://blog.cloudflare.com"
+      },
+      {
+        "name": "Docker",
+        "link": "https://www.docker.com/feed/",
+        "description": "",
+        "homepageLink": "https://www.docker.com"
+      },
+      {
+        "name": "Kubernetes Blog",
+        "link": "https://kubernetes.io/feed.xml",
+        "description": "The Kubernetes blog is used by the project to communicate new features, community reports, and any news that might be relevant to the Kubernetes community.",
+        "homepageLink": "https://kubernetes.io/"
+      },
+      {
+        "name": "Rust Blog",
+        "link": "https://blog.rust-lang.org/feed.xml",
+        "description": "Empowering everyone to build reliable and efficient software.",
+        "homepageLink": "https://blog.rust-lang.org/"
+      },
+      {
+        "name": "The Go Blog",
+        "link": "https://go.dev/blog/feed.atom",
+        "description": "",
+        "homepageLink": "https://go.dev"
+      }
+    ]
+  },
+  {
+    "name": "Design",
+    "feeds": [
+      {
+        "name": "Smashing Magazine",
+        "link": "https://www.smashingmagazine.com/feed/",
+        "description": "Recent content in Articles on Smashing Magazine \u2014 For Web Designers And Developers",
+        "homepageLink": "https://www.smashingmagazine.com/"
+      },
+      {
+        "name": "Design Milk",
+        "link": "https://design-milk.com/feed/",
+        "description": "Dedicated to modern design",
+        "homepageLink": "https://design-milk.com/"
+      },
+      {
+        "name": "designboom",
+        "link": "https://www.designboom.com/feed/",
+        "description": "designboom magazine | your first source for architecture, design & art news",
+        "homepageLink": "https://www.designboom.com/"
+      },
+      {
+        "name": "Wallpaper",
+        "link": "https://www.wallpaper.com/feeds.xml",
+        "description": "All the latest content from the Wallpaper team",
+        "homepageLink": "https://www.wallpaper.com"
+      },
+      {
+        "name": "Architectural Digest",
+        "link": "https://www.architecturaldigest.com/feed/rss",
+        "description": "The latest from www.architecturaldigest.com",
+        "homepageLink": "https://www.architecturaldigest.com"
+      },
+      {
+        "name": "Creative Bloq",
+        "link": "https://www.creativebloq.com/feed",
+        "description": "",
+        "homepageLink": "https://www.creativebloq.com"
+      },
+      {
+        "name": "Behance",
+        "link": "https://www.behance.net/feeds/projects",
+        "description": "The latest projects featured on the",
+        "homepageLink": "http://www.behance.net"
+      },
+      {
+        "name": "Web Designer Depot",
+        "link": "https://webdesignerdepot.com/feed/",
+        "description": "Web Design Blog",
+        "homepageLink": "https://webdesignerdepot.com"
+      },
+      {
+        "name": "Hongkiat",
+        "link": "https://www.hongkiat.com/blog/feed/",
+        "description": "Tech and Design Tips",
+        "homepageLink": "https://www.hongkiat.com/blog/"
+      },
+      {
+        "name": "Typographica",
+        "link": "https://typographica.org/feed/",
+        "description": "A review of typefaces and typography books, with occasional commentary on fonts and typographic design.",
+        "homepageLink": "https://typographica.org"
+      },
+      {
+        "name": "PRINT Magazine",
+        "link": "https://www.printmag.com/feed/",
+        "description": "A creative community that embraces every attendee, validates your work, and empowers you to do great things.",
+        "homepageLink": "https://www.printmag.com/"
+      },
+      {
+        "name": "HOW Design Live",
+        "link": "https://www.howdesign.com/feed",
+        "description": "Conference & Expo for Creative Professionals",
+        "homepageLink": "https://howdesignlive.com"
+      },
+      {
+        "name": "DesignObserver",
+        "link": "https://designobserver.com/feed/",
+        "description": "Writings on Design + Visual Culture",
+        "homepageLink": "https://designobserver.com/"
+      },
+      {
+        "name": "Creative Boom",
+        "link": "https://www.creativeboom.com/feed/",
+        "description": "Creative Boom is a UK-based online magazine for the creative industries, offering inspiration and ideas for creatives worldwide",
+        "homepageLink": "https://www.creativeboom.com/"
+      },
+      {
+        "name": "Yanko Design",
+        "link": "https://www.yankodesign.com/feed/",
+        "description": "Modern Industrial Design News",
+        "homepageLink": "https://www.yankodesign.com"
+      }
+    ]
+  },
+  {
+    "name": "Business",
+    "feeds": [
+      {
+        "name": "Forbes | Most popular",
+        "link": "https://www.forbes.com/most-popular/feed/",
+        "description": "Forbes news stream features up-to-date activity throughout Forbes.com. News stories, photo galleries and video content publish in real time.",
+        "homepageLink": "https://www.forbes.com"
+      },
+      {
+        "name": "Entrepreneur",
+        "link": "https://feeds.feedburner.com/entrepreneur/latest",
+        "description": "The latest small business tips and advice from Entrepreneur",
+        "homepageLink": "https://www.entrepreneur.com/"
+      },
+      {
+        "name": "Business Insider",
+        "link": "https://feeds.businessinsider.com/custom/all",
+        "description": "All Content from Business Insider Excluding Premium",
+        "homepageLink": "https://feeds.businessinsider.com"
+      },
+      {
+        "name": "MarketWatch",
+        "link": "https://feeds.content.dowjones.io/public/rss/mw_topstories",
+        "description": "MarketWatch, a leading publisher of business and financial news, offers users up-to-the minute news, investment tools, and subscription products.",
+        "homepageLink": "http://www.marketwatch.com/"
+      },
+      {
+        "name": "Investor's Business Daily",
+        "link": "https://www.investors.com/feed/",
+        "description": "",
+        "homepageLink": "https://www.investors.com/"
+      },
+      {
+        "name": "Money",
+        "link": "https://money.com/money/feed/",
+        "description": "Money.com",
+        "homepageLink": "https://money.com"
+      },
+      {
+        "name": "Fortune",
+        "link": "https://fortune.com/feed/fortune-feeds/?id=3230629",
+        "description": "Fortune 500 Daily & Breaking Business News",
+        "homepageLink": "https://fortune.com"
+      },
+      {
+        "name": "Quartz",
+        "link": "https://qz.com/rss",
+        "description": "Quartz is a guide to the new global economy for people who are excited by change. We cover business, finance, economics, technology, lifestyle, and leadership.",
+        "homepageLink": "https://qz.com"
+      },
+      {
+        "name": "Skift",
+        "link": "https://skift.com/feed/",
+        "description": "Travel News, Airline News, Hotel News & Tourism News",
+        "homepageLink": "https://skift.com/"
+      },
+      {
+        "name": "Adweek Feed",
+        "link": "https://www.adweek.com/feed/",
+        "description": "Breaking News in Advertising, Media and Technology",
+        "homepageLink": "https://www.adweek.com"
+      },
+      {
+        "name": "Wall Street Journal",
+        "link": "https://feeds.a.dj.com/rss/RSSMarketsMain.xml",
+        "description": "Markets",
+        "homepageLink": "http://online.wsj.com"
+      },
+      {
+        "name": "Financial Times",
+        "link": "https://www.ft.com/rss/home/",
+        "description": "UK homepage",
+        "homepageLink": "https://www.ft.com"
+      },
+      {
+        "name": "Inc",
+        "link": "https://www.inc.com/rss",
+        "description": "Inc.com, the daily resource for entrepreneurs.",
+        "homepageLink": "https://www.inc.com/"
+      },
+      {
+        "name": "Kiplinger",
+        "link": "https://www.kiplinger.com/feeds.xml",
+        "description": "All the latest content from the Kiplinger team",
+        "homepageLink": "https://www.kiplinger.com"
+      },
+      {
+        "name": "Moneycontrol",
+        "link": "https://www.moneycontrol.com/rss/latestnews.xml",
+        "description": "Latest News from Moneycontrol.com",
+        "homepageLink": "https://www.moneycontrol.com"
+      }
+    ]
+  },
+  {
+    "name": "Entertainment",
+    "feeds": [
+      {
+        "name": "Variety",
+        "link": "https://variety.com/feed/",
+        "description": "Entertainment news, film reviews, awards, film festivals, box office, entertainment industry conferences",
+        "homepageLink": "https://variety.com"
+      },
+      {
+        "name": "The Hollywood Reporter",
+        "link": "https://www.hollywoodreporter.com/feed/",
+        "description": "Movie news, TV news, awards news, lifestyle news, business news and more from The Hollywood Reporter.",
+        "homepageLink": "https://www.hollywoodreporter.com"
+      },
+      {
+        "name": "Rolling Stone",
+        "link": "https://www.rollingstone.com/feed/",
+        "description": "Music, Film, TV and Political News Coverage",
+        "homepageLink": "https://www.rollingstone.com"
+      },
+      {
+        "name": "Billboard",
+        "link": "https://www.billboard.com/feed/",
+        "description": "Music Charts, News, Photos & Video",
+        "homepageLink": "https://www.billboard.com"
+      },
+      {
+        "name": "Pitchfork",
+        "link": "https://www.pitchfork.com/rss/all",
+        "description": "The latest from pitchfork.com",
+        "homepageLink": "https://pitchfork.com"
+      },
+      {
+        "name": "Deadline",
+        "link": "https://deadline.com/feed/",
+        "description": "Hollywood Entertainment Breaking News",
+        "homepageLink": "https://deadline.com"
+      },
+      {
+        "name": "TMZ",
+        "link": "https://www.tmz.com/rss.xml",
+        "description": "Celebrity Gossip and Entertainment News, Covering Celebrity News and Hollywood Rumors. Get All The Latest Gossip at TMZ - Thirty Mile Zone.",
+        "homepageLink": "https://www.tmz.com/"
+      },
+      {
+        "name": "E! Online (US)",
+        "link": "https://eol-feeds.eonline.com/rssfeed/us/top_stories",
+        "description": "News from across the show-biz spectrum-TV, movies, music and celebrities",
+        "homepageLink": "https://www.eonline.com/"
+      },
+      {
+        "name": "IndieWire",
+        "link": "https://www.indiewire.com/feed/",
+        "description": "The Voice of Creative Independence",
+        "homepageLink": "https://www.indiewire.com"
+      },
+      {
+        "name": "Den of Geek",
+        "link": "https://www.denofgeek.com/feed/",
+        "description": "",
+        "homepageLink": "https://www.denofgeek.com/"
+      },
+      {
+        "name": "Collider",
+        "link": "https://collider.com/feed/",
+        "description": "Stay up to date with new movie news, watch the latest movie trailers & get trusted reviews of upcoming movies & more from the team at Collider.",
+        "homepageLink": "https://collider.com"
+      },
+      {
+        "name": "/Film",
+        "link": "https://www.slashfilm.com/feed/",
+        "description": "The latest movie and television news, reviews, film trailers, exclusive interviews, and opinions - since 2005.",
+        "homepageLink": "https://www.slashfilm.com/"
+      },
+      {
+        "name": "Dark Horizons",
+        "link": "https://www.darkhorizons.com/feed/",
+        "description": "",
+        "homepageLink": "https://www.darkhorizons.com/"
+      },
+      {
+        "name": "ComingSoon",
+        "link": "https://www.comingsoon.net/feed",
+        "description": "ComingSoon.net features the latest movie trailers and news, TV updates, video game reviews, anime releases, and more.",
+        "homepageLink": "https://www.comingsoon.net/"
+      },
+      {
+        "name": "AV Club",
+        "link": "https://www.avclub.com/feed",
+        "description": "Pop culture obsessives writing for the pop culture obsessed.",
+        "homepageLink": "https://www.avclub.com/"
+      },
+      {
+        "name": "NME",
+        "link": "https://www.nme.com/feed",
+        "description": "NME brings you the latest music and pop culture news and reviews, along with videos and galleries, band features, concert tickets, magazine, radio and more.",
+        "homepageLink": "https://www.nme.com/"
+      },
+      {
+        "name": "SPIN",
+        "link": "https://www.spin.com/feed/",
+        "description": "Music News, Album Reviews, Concert Photos, Videos and More",
+        "homepageLink": "https://www.spin.com/"
+      }
+    ]
+  },
+  {
+    "name": "Lifestyle",
+    "feeds": [
+      {
+        "name": "Vogue",
+        "link": "https://www.vogue.com/feed/rss",
+        "description": "The latest from www.vogue.com",
+        "homepageLink": "https://www.vogue.com"
+      },
+      {
+        "name": "Cup of Jo",
+        "link": "https://cupofjo.com/feed/",
+        "description": "Fashion, Beauty, Design, Culture, Food, Relationships, Motherhood",
+        "homepageLink": "https://cupofjo.com/"
+      },
+      {
+        "name": "The Blonde Abroad",
+        "link": "https://www.theblondeabroad.com/feed/",
+        "description": "Popular travel and lifestyle blog featuring travel tips, fashion, food and photography from around the world. Follow Kiersten on her adventures!",
+        "homepageLink": "https://www.theblondeabroad.com/"
+      },
+      {
+        "name": "Camille Styles",
+        "link": "https://camillestyles.com/feed/",
+        "description": "Create your most beautiful life\u2014design, food, & gatherings.",
+        "homepageLink": "https://camillestyles.com/"
+      },
+      {
+        "name": "The Art of Manliness",
+        "link": "https://www.artofmanliness.com/feed/",
+        "description": "Men's Interest and Lifestyle",
+        "homepageLink": "https://www.artofmanliness.com/"
+      },
+      {
+        "name": "Pouted Magazine",
+        "link": "https://www.pouted.com/feed/",
+        "description": "Latest Design Trends, Creative Decorating Ideas, Stylish Interior Designs & Gift Ideas",
+        "homepageLink": "https://www.pouted.com"
+      },
+      {
+        "name": "GQ",
+        "link": "https://www.gq.com/feed/rss",
+        "description": "The latest from www.gq.com",
+        "homepageLink": "https://www.gq.com"
+      },
+      {
+        "name": "Vanity Fair",
+        "link": "https://www.vanityfair.com/feed/rss",
+        "description": "The latest from www.vanityfair.com",
+        "homepageLink": "https://www.vanityfair.com"
+      },
+      {
+        "name": "Marie Claire",
+        "link": "https://www.marieclaire.com/feeds.xml",
+        "description": "All the latest content from the Marie Claire team",
+        "homepageLink": "https://www.marieclaire.com"
+      },
+      {
+        "name": "Cosmopolitan",
+        "link": "https://www.cosmopolitan.com/rss/all.xml/",
+        "description": "RSS feed for Latest Content - Cosmopolitan",
+        "homepageLink": "https://www.cosmopolitan.com/"
+      },
+      {
+        "name": "Self",
+        "link": "https://www.self.com/feed/rss",
+        "description": "The latest from www.self.com",
+        "homepageLink": "https://www.self.com"
+      }
+    ]
+  },
+  {
+    "name": "Health",
+    "feeds": [
+      {
+        "name": "Science Daily",
+        "link": "https://www.sciencedaily.com/rss/health_medicine.xml",
+        "description": "Latest research news on allergies and allergy treatments. Learn the symptoms of a food allergy, how to treat dog allergies, cat allergies, mold allergies and other allergy problems.",
+        "homepageLink": "https://www.sciencedaily.com/news/health_medicine/"
+      },
+      {
+        "name": "Medical Xpress",
+        "link": "https://medicalxpress.com/rss-feed/",
+        "description": "Medical Xpress internet news portal provides the latest news on science including: Physics, Nanotechnology, Life Sciences, Space Science, Earth Science, Environment, Health and Medicine.",
+        "homepageLink": "https://medicalxpress.com/"
+      },
+      {
+        "name": "World Health Organization (WHO)",
+        "link": "https://www.who.int/rss-feeds/news-english.xml",
+        "description": "Corporate news releases, statements, and notes for media issued by the World Health Organization.",
+        "homepageLink": "https://www.who.int/"
+      }
+    ]
+  },
+  {
+    "name": "Food",
+    "feeds": [
+      {
+        "name": "Pinch of Yum",
+        "link": "https://pinchofyum.com/feed",
+        "description": "A food blog with simple and tasty recipes.",
+        "homepageLink": "https://pinchofyum.com/"
+      },
+      {
+        "name": "smitten kitchen",
+        "link": "http://feeds.feedburner.com/smittenkitchen",
+        "description": "Fearless cooking from a tiny NYC kitchen.",
+        "homepageLink": "https://smittenkitchen.com"
+      },
+      {
+        "name": "The Recipe Critic",
+        "link": "https://therecipecritic.com/feed/",
+        "description": "Tried and True Recipes for Families | Food Blog",
+        "homepageLink": "https://therecipecritic.com/"
+      },
+      {
+        "name": "Inspired Taste",
+        "link": "https://www.inspiredtaste.net/feed/",
+        "description": "",
+        "homepageLink": "https://www.inspiredtaste.net"
+      },
+      {
+        "name": "Minimalist Baker",
+        "link": "https://minimalistbaker.com/feed/",
+        "description": "Simple Food, Simply Delicious",
+        "homepageLink": "https://minimalistbaker.com/"
+      },
+      {
+        "name": "Bon App\u00e9tit",
+        "link": "https://www.bonappetit.com/feed/rss",
+        "description": "The latest from www.bonappetit.com",
+        "homepageLink": "https://www.bonappetit.com"
+      },
+      {
+        "name": "Epicurious",
+        "link": "https://www.epicurious.com/feed/rss",
+        "description": "The latest from www.epicurious.com",
+        "homepageLink": "https://www.epicurious.com"
+      },
+      {
+        "name": "Eater",
+        "link": "https://www.eater.com/rss/index.xml",
+        "description": "A national site covering food and dining culture, with 23 city sites tracking local dining scenes across hundreds of maps.",
+        "homepageLink": "https://www.eater.com"
+      }
+    ]
+  },
+  {
+    "name": "Travel",
+    "feeds": [
+      {
+        "name": "The Planet D",
+        "link": "https://theplanetd.com/feed/",
+        "description": "The #1 Adventure Travel blog featuring travel advice, tips, and inspiration from around the world. Plan your next adventure today!",
+        "homepageLink": "https://theplanetd.com/"
+      },
+      {
+        "name": "Nomadic Matt",
+        "link": "https://www.nomadicmatt.com/feed/",
+        "description": "Travel Better, Cheaper, Longer",
+        "homepageLink": "https://www.nomadicmatt.com/"
+      },
+      {
+        "name": "Cond\u00e9 Nast Traveler",
+        "link": "https://www.cntraveler.com/feed/rss",
+        "description": "The latest from www.cntraveler.com",
+        "homepageLink": "https://www.cntraveler.com"
+      },
+      {
+        "name": "New York Times | Travel",
+        "link": "https://rss.nytimes.com/services/xml/rss/nyt/Travel.xml",
+        "description": "",
+        "homepageLink": "https://www.nytimes.com/section/travel"
+      },
+      {
+        "name": "The Guardian | Travel",
+        "link": "https://www.theguardian.com/uk/travel/rss",
+        "description": "Latest travel news and reviews on UK and world holidays, travel guides to global destinations, city breaks, hotels and restaurant information from the Guardian, the world's leading liberal voice",
+        "homepageLink": "https://www.theguardian.com/uk/travel"
+      }
+    ]
+  }
+]

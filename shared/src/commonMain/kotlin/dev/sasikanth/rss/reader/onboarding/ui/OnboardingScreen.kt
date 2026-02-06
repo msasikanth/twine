@@ -67,6 +67,7 @@ import twine.shared.generated.resources.onboardingSubtitle2
 internal fun OnboardingScreen(
   viewModel: OnboardingViewModel,
   onOnboardingDone: () -> Unit,
+  onNavigateToDiscovery: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -76,6 +77,7 @@ internal fun OnboardingScreen(
     viewModel.effects.collect { effect ->
       when (effect) {
         OnboardingEffect.NavigateToHome -> onOnboardingDone()
+        OnboardingEffect.NavigateToDiscovery -> onNavigateToDiscovery()
       }
     }
   }
