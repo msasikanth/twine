@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -126,6 +127,8 @@ fun DiscoveryScreen(
             )
 
             if (showDoneButton) {
+              Spacer(Modifier.width(8.dp))
+
               CircularIconButton(
                 modifier = Modifier.padding(end = 12.dp),
                 icon = TwineIcons.Check,
