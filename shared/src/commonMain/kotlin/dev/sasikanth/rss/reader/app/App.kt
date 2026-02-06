@@ -60,6 +60,8 @@ import dev.sasikanth.rss.reader.bookmarks.ui.BookmarksScreen
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
+import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
+import dev.sasikanth.rss.reader.discovery.ui.DiscoveryScreen
 import dev.sasikanth.rss.reader.feed.FeedViewModel
 import dev.sasikanth.rss.reader.feed.ui.FeedInfoBottomSheet
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
@@ -161,8 +163,9 @@ fun App(
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
   blockedWordsViewModel: () -> BlockedWordsViewModel,
-  premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   statisticsViewModel: () -> StatisticsViewModel,
+  discoveryViewModel: () -> DiscoveryViewModel,
+  premiumPaywallViewModel: () -> PremiumPaywallViewModel,
   @Assisted onThemeChange: (useDarkTheme: Boolean) -> Unit,
   @Assisted toggleLightStatusBar: (isLightStatusBar: Boolean) -> Unit,
   @Assisted toggleLightNavBar: (isLightNavBar: Boolean) -> Unit,
@@ -246,7 +249,7 @@ fun App(
           if (navController.graph.hasDeepLink(deepLinkRequest)) {
             if (!navController.popBackStack(Screen.Main, inclusive = false)) {
               navController.navigate(Screen.Main) {
-                popUpTo(Screen.Placeholder) { inclusive = true }
+                popUpTo<Screen.Placeholder> { inclusive = true }
                 launchSingleTop = true
               }
             }
@@ -278,12 +281,12 @@ fun App(
             viewModel = viewModel,
             navigateHome = {
               navController.navigate(Screen.Main) {
-                popUpTo(Screen.Placeholder) { inclusive = true }
+                popUpTo<Screen.Placeholder> { inclusive = true }
               }
             },
             navigateOnboarding = {
               navController.navigate(Screen.Onboarding) {
-                popUpTo(Screen.Placeholder) { inclusive = true }
+                popUpTo<Screen.Placeholder> { inclusive = true }
               }
             },
           )
@@ -295,7 +298,12 @@ fun App(
             viewModel = viewModel,
             onOnboardingDone = {
               navController.navigate(Screen.Main) {
-                popUpTo(Screen.Onboarding) { inclusive = true }
+                popUpTo<Screen.Onboarding> { inclusive = true }
+              }
+            },
+            onNavigateToDiscovery = {
+              navController.navigate(Screen.Discovery(isFromOnboarding = true)) {
+                popUpTo<Screen.Onboarding> { inclusive = true }
               }
             },
           )
@@ -431,6 +439,16 @@ fun App(
                 modifier = screenModifier,
               )
             },
+            discoveryContent = { goBack ->
+              val viewModel = viewModel { discoveryViewModel() }
+
+              DiscoveryScreen(
+                viewModel = viewModel,
+                showDoneButton = false,
+                goBack = goBack,
+                modifier = screenModifier,
+              )
+            },
           )
         }
 
@@ -520,6 +538,28 @@ fun App(
             openGroupSelection = { selectedGroupIds ->
               navController.navigate(Modals.GroupSelection(selectedGroupIds.toList()))
             },
+            openDiscovery = { navController.navigate(Screen.Discovery()) },
+          )
+        }
+
+        composable<Screen.Discovery> {
+          val viewModel = viewModel { discoveryViewModel() }
+          val isFromOnboarding = it.toRoute<Screen.Discovery>().isFromOnboarding
+
+          DiscoveryScreen(
+            viewModel = viewModel,
+            showDoneButton = isFromOnboarding,
+            onDone = {
+              if (isFromOnboarding) {
+                navController.navigate(Screen.Main) {
+                  popUpTo<Screen.Discovery> { inclusive = true }
+                }
+              } else {
+                navController.popBackStack()
+              }
+            },
+            goBack = { navController.popBackStack() },
+            modifier = screenModifier,
           )
         }
 
