@@ -71,6 +71,10 @@
   <string name="settingsOpmlImporting">正在导入……%1$d%</string>
   <string name="settingsOpmlExporting">正在导出……%1$d%</string>
   <string name="settingsOpmlCancel">取消</string>
+  <string name="settingsOpmlSelectionTitle">Select feeds</string>
+  <string name="settingsOpmlSelectionSubtitle">You can select up to %1$d feeds under the free plan.</string>
+  <string name="settingsFreeFeedLimitReached">You have reached the maximum number of free feeds.</string>
+  <string name="settingsUpgradeToPremium">Go Premium</string>
   <string name="settingsPostsDeletionPeriodTitle">删除早于以下时间的已读文章</string>
   <string name="settingsPostsDeletionPeriodOneWeek">一周</string>
   <string name="settingsPostsDeletionPeriodOneMonth">一个月</string>
@@ -239,8 +243,11 @@
   <string name="seek_forward">Seek forward 30 seconds</string>
   <string name="seek_backward">Seek backward 30 seconds</string>
   <string name="playback_speed">%1$dx</string>
+  <string name="sleep_timer">Sleep timer</string>
+  <string name="sleep_timer_off">Off</string>
+  <string name="sleep_timer_end_of_track">End of track</string>
+  <string name="sleep_timer_minutes">%1$d minutes</string>
   <string name="readerPageCount">第 %1$d 页，共 %2$d 页</string>
-  <!-- Statistics -->
   <string name="statistics">Statistics</string>
   <string name="statisticsNoData">No reading data available yet</string>
   <string name="statisticsTotalRead">Total Articles Read</string>
@@ -250,6 +257,10 @@
   <string name="statisticsMore">More</string>
   <string name="settingsStatisticsTitle">Statistics</string>
   <string name="settingsStatisticsSubtitle">View your reading habits and insights</string>
+  <string name="discoveryTitle">Discovery</string>
+  <string name="discoverySearchHint">Search for feeds</string>
+  <string name="discoveryAddFeed">Add</string>
+  <string name="discoveryAdded">Added</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="other">%1$d 个结果</item>
