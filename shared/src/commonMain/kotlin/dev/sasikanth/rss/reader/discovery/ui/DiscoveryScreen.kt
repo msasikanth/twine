@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -69,6 +70,7 @@ import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Close
+import dev.sasikanth.rss.reader.resources.icons.Refresh
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
@@ -77,6 +79,7 @@ import twine.shared.generated.resources.buttonChange
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.discoveryAddFeed
 import twine.shared.generated.resources.discoveryAdded
+import twine.shared.generated.resources.discoveryRefresh
 import twine.shared.generated.resources.discoverySearchHint
 import twine.shared.generated.resources.discoveryTitle
 
@@ -115,7 +118,17 @@ fun DiscoveryScreen(
             )
           },
           actions = {
+            val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
+            CircularIconButton(
+              modifier = Modifier.padding(end = refreshButtonPaddingEnd),
+              icon = TwineIcons.Refresh,
+              label = stringResource(Res.string.discoveryRefresh),
+              onClick = { viewModel.dispatch(DiscoveryEvent.Refresh) },
+            )
+
             if (showDoneButton) {
+              Spacer(Modifier.width(8.dp))
+
               CircularIconButton(
                 modifier = Modifier.padding(end = 12.dp),
                 icon = TwineIcons.Check,
@@ -181,7 +194,7 @@ fun DiscoveryScreen(
               group = group,
               addedFeedLinks = state.addedFeedLinks,
               inProgressFeedLinks = state.inProgressFeedLinks,
-              onAddFeed = { link -> viewModel.dispatch(DiscoveryEvent.AddFeedClicked(link)) },
+              onAddFeed = { feed -> viewModel.dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
             )
           }
         }
@@ -196,7 +209,7 @@ private fun DiscoveryGroupItem(
   group: DiscoveryGroup,
   addedFeedLinks: Set<String>,
   inProgressFeedLinks: Set<String>,
-  onAddFeed: (String) -> Unit,
+  onAddFeed: (DiscoveryFeed) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(modifier = modifier.fillMaxWidth().padding(vertical = 16.dp)) {
@@ -230,7 +243,7 @@ private fun DiscoveryGroupItem(
             addedFeedLinks.contains(feed.link) ||
               addedFeedLinks.contains(feed.link.removeSuffix("/")),
           isLoading = inProgressFeedLinks.contains(feed.link),
-          onAddFeed = { onAddFeed(feed.link) },
+          onAddFeed = { onAddFeed(feed) },
         )
       }
     }
@@ -256,9 +269,9 @@ private fun DiscoveryFeedItem(
   ) {
     FeedIcon(
       modifier = Modifier.requiredSize(48.dp),
-      icon = "",
+      icon = feed.icon,
       homepageLink = feed.homepageLink,
-      showFeedFavIcon = true,
+      showFeedFavIcon = !(feed.useFeedIcon),
       contentDescription = null,
       shape = MaterialTheme.shapes.small,
     )

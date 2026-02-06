@@ -18,12 +18,15 @@
 package dev.sasikanth.rss.reader.discovery
 
 import androidx.compose.ui.text.input.TextFieldValue
+import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 
 sealed interface DiscoveryEvent {
 
   data object LoadDiscoveryGroups : DiscoveryEvent
 
+  data object Refresh : DiscoveryEvent
+
   data class SearchQueryChanged(val query: TextFieldValue) : DiscoveryEvent
 
-  data class AddFeedClicked(val link: String) : DiscoveryEvent
+  data class AddFeedClicked(val feed: DiscoveryFeed) : DiscoveryEvent
 }

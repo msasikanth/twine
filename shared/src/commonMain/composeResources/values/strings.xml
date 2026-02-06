@@ -273,6 +273,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
 
   <!-- Plurals -->
   <plurals name="searchResultsCount">
