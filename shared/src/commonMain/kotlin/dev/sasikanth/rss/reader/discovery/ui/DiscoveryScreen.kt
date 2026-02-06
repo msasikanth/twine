@@ -191,7 +191,7 @@ fun DiscoveryScreen(
               group = group,
               addedFeedLinks = state.addedFeedLinks,
               inProgressFeedLinks = state.inProgressFeedLinks,
-              onAddFeed = { link -> viewModel.dispatch(DiscoveryEvent.AddFeedClicked(link)) },
+              onAddFeed = { feed -> viewModel.dispatch(DiscoveryEvent.AddFeedClicked(feed)) },
             )
           }
         }
@@ -206,7 +206,7 @@ private fun DiscoveryGroupItem(
   group: DiscoveryGroup,
   addedFeedLinks: Set<String>,
   inProgressFeedLinks: Set<String>,
-  onAddFeed: (String) -> Unit,
+  onAddFeed: (DiscoveryFeed) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   Column(modifier = modifier.fillMaxWidth().padding(vertical = 16.dp)) {
@@ -240,7 +240,7 @@ private fun DiscoveryGroupItem(
             addedFeedLinks.contains(feed.link) ||
               addedFeedLinks.contains(feed.link.removeSuffix("/")),
           isLoading = inProgressFeedLinks.contains(feed.link),
-          onAddFeed = { onAddFeed(feed.link) },
+          onAddFeed = { onAddFeed(feed) },
         )
       }
     }
@@ -268,7 +268,7 @@ private fun DiscoveryFeedItem(
       modifier = Modifier.requiredSize(48.dp),
       icon = feed.icon,
       homepageLink = feed.homepageLink,
-      showFeedFavIcon = false,
+      showFeedFavIcon = !(feed.useFeedIcon),
       contentDescription = null,
       shape = MaterialTheme.shapes.small,
     )

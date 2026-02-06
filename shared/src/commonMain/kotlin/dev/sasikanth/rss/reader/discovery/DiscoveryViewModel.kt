@@ -19,6 +19,7 @@ package dev.sasikanth.rss.reader.discovery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.sasikanth.rss.reader.core.model.DiscoveryFeed
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetchResult
 import dev.sasikanth.rss.reader.core.network.fetcher.FeedFetcher
 import dev.sasikanth.rss.reader.data.repository.RssRepository
@@ -63,7 +64,7 @@ class DiscoveryViewModel(
       is DiscoveryEvent.SearchQueryChanged -> {
         _state.update { it.copy(searchQuery = event.query) }
       }
-      is DiscoveryEvent.AddFeedClicked -> addFeed(event.link)
+      is DiscoveryEvent.AddFeedClicked -> addFeed(event.feed)
     }
   }
 
@@ -75,13 +76,17 @@ class DiscoveryViewModel(
     }
   }
 
-  private fun addFeed(link: String) {
+  private fun addFeed(feed: DiscoveryFeed) {
     viewModelScope.launch(dispatchersProvider.io) {
+      val link = feed.link
       _state.update { it.copy(inProgressFeedLinks = it.inProgressFeedLinks + link) }
       try {
         when (val result = feedFetcher.fetch(link)) {
           is FeedFetchResult.Success -> {
-            rssRepository.upsertFeedWithPosts(feedPayload = result.feedPayload)
+            rssRepository.upsertFeedWithPosts(
+              feedPayload = result.feedPayload,
+              showWebsiteFavIcon = !(feed.useFeedIcon),
+            )
           }
           else -> {
             // Handle error or just ignore for now in discovery
