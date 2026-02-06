@@ -63,6 +63,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val appIconKey = stringPreferencesKey("app_icon")
   private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
   private val dynamicColorEnabledKey = booleanPreferencesKey("dynamic_color_enabled")
+  private val discoveryFeedsLastFetchTimeKey = longPreferencesKey("discovery_feeds_last_fetch_time")
+  private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
 
   val browserType: Flow<BrowserType> =
     dataStore.data.map { preferences ->
@@ -152,6 +154,14 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val appIcon: Flow<AppIcon> =
     dataStore.data.map { preferences -> mapToAppIcon(preferences[appIconKey]) }
+
+  val discoveryFeedsCache: Flow<Pair<Instant?, String?>> =
+    dataStore.data.map { preferences ->
+      val lastFetchTime =
+        preferences[discoveryFeedsLastFetchTimeKey]?.let(Instant::fromEpochMilliseconds)
+      val cache = preferences[discoveryFeedsCacheKey]
+      lastFetchTime to cache
+    }
 
   suspend fun enableAutoSyncImmediate(): Boolean {
     return enableAutoSync.first()
@@ -267,6 +277,13 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences ->
       val currentSessionCount = preferences[userSessionCountKey] ?: 0
       preferences[userSessionCountKey] = currentSessionCount + 1
+    }
+  }
+
+  suspend fun updateDiscoveryFeedsCache(cache: String, lastFetchTime: Instant) {
+    dataStore.edit { preferences ->
+      preferences[discoveryFeedsCacheKey] = cache
+      preferences[discoveryFeedsLastFetchTimeKey] = lastFetchTime.toEpochMilliseconds()
     }
   }
 
