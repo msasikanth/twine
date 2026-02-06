@@ -1231,6 +1231,54 @@
         "link": "https://lexfridman.com/feed/podcast/",
         "description": "Conversations about AI, science, technology, history, philosophy and the nature of intelligence, consciousness, love, and power.",
         "homepageLink": "https://lexfridman.com/podcast/"
+      },
+      {
+        "name": "Today, Explained",
+        "link": "https://feeds.megaphone.fm/VMP5705694065",
+        "description": "Vox's daily news explainer podcast. Every weekday, we give you the information you need to understand the world's most important news stories.",
+        "homepageLink": "https://www.vox.com/today-explained-podcast"
+      },
+      {
+        "name": "The Vergecast",
+        "link": "https://feeds.megaphone.fm/vergecast",
+        "description": "The only podcast you need to make sense of the week in tech. Every Friday, Nilay Patel and David Pierce break down the week's biggest tech news.",
+        "homepageLink": "https://www.theverge.com/the-vergecast-podcast"
+      },
+      {
+        "name": "Decoder with Nilay Patel",
+        "link": "https://feeds.megaphone.fm/recodedecode",
+        "description": "A show about big ideas — and other problems. Hosted by Nilay Patel, Decoder features interviews with leaders in tech, business, and policy.",
+        "homepageLink": "https://www.theverge.com/decoder-podcast-with-nilay-patel"
+      },
+      {
+        "name": "Pivot",
+        "link": "https://feeds.megaphone.fm/pivot",
+        "description": "Sharp, unfiltered insights into the biggest stories in tech, business, and politics. Hosted by Kara Swisher and Scott Galloway.",
+        "homepageLink": "https://www.vox.com/pivot-podcast"
+      },
+      {
+        "name": "Waveform: The MKBHD Podcast",
+        "link": "https://feeds.megaphone.fm/STU4418364045",
+        "description": "A weekly podcast from MKBHD and the team about everything tech, from gadgets to the future of the internet.",
+        "homepageLink": "https://www.youtube.com/@Waveform"
+      },
+      {
+        "name": "Criminal",
+        "link": "https://feeds.megaphone.fm/VMP7924981569",
+        "description": "Criminal is an award-winning podcast about crime. Stories of people who've done wrong, been wronged, or gotten caught somewhere in the middle.",
+        "homepageLink": "https://thisiscriminal.com/"
+      },
+      {
+        "name": "The Prof G Pod with Scott Galloway",
+        "link": "https://feeds.megaphone.fm/GLT9190936013",
+        "description": "Scott Galloway shares his take on the big winners and losers in the tech economy, and answers your questions about business, money, and tech.",
+        "homepageLink": "https://www.profgmedia.com/the-prof-g-pod/"
+      },
+      {
+        "name": "Unexplainable",
+        "link": "https://feeds.megaphone.fm/unexplainable",
+        "description": "A science podcast from Vox about everything we don't know.",
+        "homepageLink": "https://www.vox.com/unexplainable"
       }
     ]
   },
