@@ -30,6 +30,7 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
+import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
@@ -125,17 +126,17 @@ class ReaderViewModel(
   }
 
   private fun updateReaderFont(font: ReaderFont) {
-    coroutineScope.launch { settingsRepository.updateReaderFont(font) }
+    coroutineScope.launch {
+      if (font.isPremium && !billingHandler.isSubscribed()) {
+        _state.update { it.copy(openPaywall = true) }
+      } else {
+        settingsRepository.updateReaderFont(font)
+      }
+    }
   }
 
   private fun toggleReaderCustomisations(show: Boolean) {
-    coroutineScope.launch {
-      if (!billingHandler.isSubscribed()) {
-        _state.update { it.copy(openPaywall = true) }
-      } else {
-        _state.update { it.copy(showReaderCustomisations = show) }
-      }
-    }
+    coroutineScope.launch { _state.update { it.copy(showReaderCustomisations = show) } }
   }
 
   private fun postPageChange(postIndex: Int, post: ResolvedPost) {
@@ -176,26 +177,27 @@ class ReaderViewModel(
         _state.update { it.copy(posts = posts) }
       }
 
-      if (billingHandler.isSubscribed()) {
-        combine(
-            settingsRepository.readerFontStyle,
-            settingsRepository.readerFontScaleFactor,
-            settingsRepository.readerLineHeightScaleFactor,
-            { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
-              Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
-            },
-          )
-          .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
-            _state.update {
-              it.copy(
-                selectedReaderFont = fontStyle,
-                readerFontScaleFactor = fontScaleFactor,
-                readerLineHeightScaleFactor = lineHeightScaleFactor,
-              )
-            }
+      val isSubscribed = billingHandler.isSubscribed()
+      _state.update { it.copy(isSubscribed = isSubscribed) }
+
+      combine(
+          settingsRepository.readerFontStyle,
+          settingsRepository.readerFontScaleFactor,
+          settingsRepository.readerLineHeightScaleFactor,
+          { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
+            Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+          },
+        )
+        .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
+          _state.update {
+            it.copy(
+              selectedReaderFont = fontStyle,
+              readerFontScaleFactor = fontScaleFactor,
+              readerLineHeightScaleFactor = lineHeightScaleFactor,
+            )
           }
-          .launchIn(coroutineScope)
-      }
+        }
+        .launchIn(coroutineScope)
     }
   }
 

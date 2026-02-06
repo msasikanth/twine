@@ -380,3 +380,11 @@ enum class ReaderFont(val value: String) {
   Merriweather("Merriweather"),
   RobotoSerif("Roboto Serif"),
 }
+
+val ReaderFont.isPremium: Boolean
+  get() =
+    when (this) {
+      ReaderFont.GoogleSans -> true
+      ReaderFont.RobotoSerif -> true
+      else -> false
+    }
