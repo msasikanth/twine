@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.reader.page.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
@@ -27,10 +28,14 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -97,6 +102,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -107,6 +114,7 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.Morph
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -697,6 +705,7 @@ private fun MediaControls(
   onSleepTimerClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val haptic = LocalHapticFeedback.current
   val isPlaying = playbackState.isPlaying || playbackState.buffering
   val progress =
     if (playbackState.duration > 0) {
@@ -704,6 +713,9 @@ private fun MediaControls(
     } else {
       0f
     }
+  val showExtendedControls = playbackState.duration > 0
+  val extendedControlsAnimationSpec =
+    spring<IntSize>(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioMediumBouncy)
 
   Column(
     modifier =
@@ -711,33 +723,46 @@ private fun MediaControls(
         .fillMaxWidth()
         .background(AppTheme.colorScheme.surface, RoundedCornerShape(16.dp))
         .padding(16.dp),
-    verticalArrangement = Arrangement.spacedBy(16.dp),
+    verticalArrangement = Arrangement.spacedBy(if (showExtendedControls) 16.dp else 0.dp),
   ) {
-    Column {
-      Slider(
-        modifier = Modifier.padding(top = 8.dp),
-        value = progress,
-        onValueChange = { onSeek((it * playbackState.duration).toLong()) },
-        colors =
-          SliderDefaults.colors(
-            thumbColor = AppTheme.colorScheme.primary,
-            activeTrackColor = AppTheme.colorScheme.primary,
-            inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f),
-          ),
-      )
+    AnimatedVisibility(
+      visible = showExtendedControls,
+      enter = fadeIn() + expandVertically(animationSpec = extendedControlsAnimationSpec),
+      exit = fadeOut() + shrinkVertically(animationSpec = extendedControlsAnimationSpec),
+    ) {
+      Column {
+        Slider(
+          modifier = Modifier.padding(top = 8.dp),
+          value = progress,
+          onValueChange = {
+            val newPosition = (it * playbackState.duration).toLong()
+            val currentPosition = (progress * playbackState.duration).toLong()
+            if (newPosition / 1000 != currentPosition / 1000) {
+              haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            }
+            onSeek(newPosition)
+          },
+          colors =
+            SliderDefaults.colors(
+              thumbColor = AppTheme.colorScheme.primary,
+              activeTrackColor = AppTheme.colorScheme.primary,
+              inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f),
+            ),
+        )
 
-      Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-          text = formatDuration(playbackState.currentPosition),
-          style = MaterialTheme.typography.labelSmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.weight(1f))
-        Text(
-          text = formatDuration(playbackState.duration),
-          style = MaterialTheme.typography.labelSmall,
-          color = AppTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+          Text(
+            text = formatDuration(playbackState.currentPosition),
+            style = MaterialTheme.typography.labelSmall,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+          )
+          Spacer(Modifier.weight(1f))
+          Text(
+            text = formatDuration(playbackState.duration),
+            style = MaterialTheme.typography.labelSmall,
+            color = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
     }
 
@@ -746,38 +771,84 @@ private fun MediaControls(
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-      TextButton(onClick = { onPlaybackSpeedChange(playbackState.playbackSpeed) }) {
-        AnimatedContent(
-          targetState = playbackState.playbackSpeed,
-          transitionSpec = {
-            (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
-              (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
-            )
-          },
+      AnimatedVisibility(
+        visible = showExtendedControls,
+        enter =
+          fadeIn() +
+            expandIn(
+              animationSpec = extendedControlsAnimationSpec,
+              expandFrom = Alignment.Center,
+              clip = false,
+            ),
+        exit =
+          fadeOut() +
+            shrinkOut(
+              animationSpec = extendedControlsAnimationSpec,
+              shrinkTowards = Alignment.Center,
+              clip = false,
+            ),
+      ) {
+        TextButton(
+          onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onPlaybackSpeedChange(playbackState.playbackSpeed)
+          }
         ) {
-          Text(
-            text = stringResource(Res.string.playback_speed, it),
-            style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.onSurfaceVariant,
-          )
+          AnimatedContent(
+            targetState = playbackState.playbackSpeed,
+            transitionSpec = {
+              (fadeIn() + scaleIn() + slideInVertically()).togetherWith(
+                (fadeOut() + scaleOut() + slideOutVertically { it / 2 })
+              )
+            },
+          ) {
+            Text(
+              text = stringResource(Res.string.playback_speed, it),
+              style = MaterialTheme.typography.labelLarge,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
       }
 
-      IconButton(onClick = onSeekBackward) {
-        Icon(
-          imageVector = TwineIcons.Replay30,
-          contentDescription = stringResource(Res.string.seek_backward),
-          tint = AppTheme.colorScheme.onSurfaceVariant,
-        )
+      AnimatedVisibility(
+        visible = showExtendedControls,
+        enter =
+          fadeIn() +
+            expandIn(
+              animationSpec = extendedControlsAnimationSpec,
+              expandFrom = Alignment.Center,
+              clip = false,
+            ),
+        exit =
+          fadeOut() +
+            shrinkOut(
+              animationSpec = extendedControlsAnimationSpec,
+              shrinkTowards = Alignment.Center,
+              clip = false,
+            ),
+      ) {
+        IconButton(
+          onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onSeekBackward()
+          }
+        ) {
+          Icon(
+            imageVector = TwineIcons.Replay30,
+            contentDescription = stringResource(Res.string.seek_backward),
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
 
       val progress by animateFloatAsState(if (isPlaying) 1f else 0f)
       val buttonSize by
         animateDpAsState(
           if (isPlaying) {
-            56.dp
+            64.dp
           } else {
-            48.dp
+            56.dp
           },
           animationSpec =
             spring(
@@ -798,7 +869,7 @@ private fun MediaControls(
           label = "playButtonRotatingAngle",
         )
 
-      Box(contentAlignment = Alignment.Center, modifier = Modifier.size(56.dp)) {
+      Box(contentAlignment = Alignment.Center, modifier = Modifier.size(64.dp)) {
         // Rotating shape background
         Box(
           modifier =
@@ -815,18 +886,22 @@ private fun MediaControls(
               .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = if (isPlaying) onPauseClick else onPlayClick,
+                onClick = {
+                  haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                  if (isPlaying) onPauseClick() else onPlayClick()
+                },
               ),
           contentAlignment = Alignment.Center,
         ) {
           if (playbackState.buffering) {
             CircularProgressIndicator(
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(32.dp),
               color = AppTheme.colorScheme.onPrimaryContainer,
               strokeWidth = 2.dp,
             )
           } else {
             Icon(
+              modifier = Modifier.size(32.dp),
               imageVector = if (isPlaying) TwineIcons.Pause else TwineIcons.Play,
               contentDescription =
                 if (isPlaying) stringResource(Res.string.pause)
@@ -837,30 +912,76 @@ private fun MediaControls(
         }
       }
 
-      IconButton(onClick = onSeekForward) {
-        Icon(
-          imageVector = TwineIcons.Forward30,
-          contentDescription = stringResource(Res.string.seek_forward),
-          tint = AppTheme.colorScheme.onSurfaceVariant,
-        )
+      AnimatedVisibility(
+        visible = showExtendedControls,
+        enter =
+          fadeIn() +
+            expandIn(
+              animationSpec = extendedControlsAnimationSpec,
+              expandFrom = Alignment.Center,
+              clip = false,
+            ),
+        exit =
+          fadeOut() +
+            shrinkOut(
+              animationSpec = extendedControlsAnimationSpec,
+              shrinkTowards = Alignment.Center,
+              clip = false,
+            ),
+      ) {
+        IconButton(
+          onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onSeekForward()
+          }
+        ) {
+          Icon(
+            imageVector = TwineIcons.Forward30,
+            contentDescription = stringResource(Res.string.seek_forward),
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
 
-      IconButton(onClick = onSleepTimerClick) {
-        val sleepTimerRemaining = playbackState.sleepTimerRemaining
-        val text =
-          if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
-            formatDuration(sleepTimerRemaining)
-          } else if (sleepTimerRemaining == -1L) {
-            stringResource(Res.string.sleep_timer_end_of_track)
-          } else {
-            stringResource(Res.string.sleep_timer)
+      AnimatedVisibility(
+        visible = showExtendedControls,
+        enter =
+          fadeIn() +
+            expandIn(
+              animationSpec = extendedControlsAnimationSpec,
+              expandFrom = Alignment.Center,
+              clip = false,
+            ),
+        exit =
+          fadeOut() +
+            shrinkOut(
+              animationSpec = extendedControlsAnimationSpec,
+              shrinkTowards = Alignment.Center,
+              clip = false,
+            ),
+      ) {
+        IconButton(
+          onClick = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            onSleepTimerClick()
           }
+        ) {
+          val sleepTimerRemaining = playbackState.sleepTimerRemaining
+          val text =
+            if (sleepTimerRemaining != null && sleepTimerRemaining > 0) {
+              formatDuration(sleepTimerRemaining)
+            } else if (sleepTimerRemaining == -1L) {
+              stringResource(Res.string.sleep_timer_end_of_track)
+            } else {
+              stringResource(Res.string.sleep_timer)
+            }
 
-        Icon(
-          imageVector = TwineIcons.Timer,
-          contentDescription = text,
-          tint = AppTheme.colorScheme.onSurfaceVariant,
-        )
+          Icon(
+            imageVector = TwineIcons.Timer,
+            contentDescription = text,
+            tint = AppTheme.colorScheme.onSurfaceVariant,
+          )
+        }
       }
     }
   }
