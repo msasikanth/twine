@@ -19,25 +19,20 @@ package dev.sasikanth.rss.reader.onboarding
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dev.sasikanth.rss.reader.data.database.FeedPrePopulator
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
-import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
 class OnboardingViewModel(
-  private val feedPrePopulator: FeedPrePopulator,
   private val settingsRepository: SettingsRepository,
-  private val syncCoordinator: SyncCoordinator,
   private val dispatchersProvider: DispatchersProvider,
 ) : ViewModel() {
 
@@ -55,16 +50,8 @@ class OnboardingViewModel(
 
   private fun getStartedClicked() {
     viewModelScope.launch {
-      _state.update { it.copy(isPrePopulating = true) }
-      withContext(dispatchersProvider.io) {
-        val feedsPrePopulated = feedPrePopulator.prePopulate()
-        if (feedsPrePopulated) {
-          syncCoordinator.pull()
-        }
-        settingsRepository.completeOnboarding()
-      }
-      _effects.emit(OnboardingEffect.NavigateToHome)
-      _state.update { it.copy(isPrePopulating = false) }
+      withContext(dispatchersProvider.io) { settingsRepository.completeOnboarding() }
+      _effects.emit(OnboardingEffect.NavigateToDiscovery)
     }
   }
 }

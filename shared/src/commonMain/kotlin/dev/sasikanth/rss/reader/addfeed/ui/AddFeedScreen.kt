@@ -92,6 +92,7 @@ import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.FeedGroupBottomBarItem
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Close
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
+import dev.sasikanth.rss.reader.resources.icons.Newsstand
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.utils.ignoreHorizontalParentPadding
@@ -102,6 +103,7 @@ import twine.shared.generated.resources.addToGroup
 import twine.shared.generated.resources.alwaysFetchSourceArticle
 import twine.shared.generated.resources.buttonAddFeed
 import twine.shared.generated.resources.buttonGoBack
+import twine.shared.generated.resources.discoveryTitle
 import twine.shared.generated.resources.errorFeedNotFound
 import twine.shared.generated.resources.errorMalformedXml
 import twine.shared.generated.resources.errorRequestTimeout
@@ -119,6 +121,7 @@ fun AddFeedScreen(
   viewModel: AddFeedViewModel,
   goBack: () -> Unit,
   openGroupSelection: (Set<String>) -> Unit,
+  openDiscovery: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -158,6 +161,27 @@ fun AddFeedScreen(
             label = stringResource(Res.string.buttonGoBack),
             onClick = { goBack() },
           )
+        },
+        actions = {
+          OutlinedButton(
+            modifier = Modifier.padding(end = 12.dp),
+            onClick = openDiscovery,
+            shape = RoundedCornerShape(50),
+          ) {
+            Icon(
+              imageVector = TwineIcons.Newsstand,
+              contentDescription = null,
+              tint = AppTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Spacer(Modifier.requiredWidth(8.dp))
+
+            Text(
+              text = stringResource(Res.string.discoveryTitle),
+              style = MaterialTheme.typography.labelLarge,
+              color = AppTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         },
         colors =
           TopAppBarDefaults.topAppBarColors(

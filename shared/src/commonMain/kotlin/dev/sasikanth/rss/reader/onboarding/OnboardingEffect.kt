@@ -19,4 +19,6 @@ package dev.sasikanth.rss.reader.onboarding
 
 sealed interface OnboardingEffect {
   data object NavigateToHome : OnboardingEffect
+
+  data object NavigateToDiscovery : OnboardingEffect
 }
