@@ -266,9 +266,9 @@ private fun DiscoveryFeedItem(
   ) {
     FeedIcon(
       modifier = Modifier.requiredSize(48.dp),
-      icon = "",
+      icon = feed.icon,
       homepageLink = feed.homepageLink,
-      showFeedFavIcon = true,
+      showFeedFavIcon = false,
       contentDescription = null,
       shape = MaterialTheme.shapes.small,
     )
