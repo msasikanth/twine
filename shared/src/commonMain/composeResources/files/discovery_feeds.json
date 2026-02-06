@@ -1168,5 +1168,183 @@
         "homepageLink": "https://www.theguardian.com/uk/travel"
       }
     ]
+  },
+  {
+    "name": "Podcasts",
+    "feeds": [
+      {
+        "name": "The Daily",
+        "link": "https://feeds.simplecast.com/54nAGcIl",
+        "description": "This is what the news should sound like. Twenty minutes a day, five days a week, hosted by Michael Barbaro and Sabrina Tavernise and powered by New York Times journalism.",
+        "homepageLink": "https://www.nytimes.com/column/the-daily"
+      },
+      {
+        "name": "Up First",
+        "link": "https://feeds.npr.org/510318/podcast.xml",
+        "description": "NPR's Up First is the news you need to start your day. The biggest stories and ideas, from politics to pop culture to show tunes.",
+        "homepageLink": "https://www.npr.org/podcasts/510318/up-first"
+      },
+      {
+        "name": "BBC Global News Podcast",
+        "link": "https://podcasts.files.bbci.co.uk/p02nq0gn.rss",
+        "description": "The day's top stories from BBC News. Delivered twice a day on weekdays, once a day at weekends.",
+        "homepageLink": "https://www.bbc.co.uk/programmes/p02nq0gn"
+      },
+      {
+        "name": "Planet Money",
+        "link": "https://feeds.npr.org/510289/podcast.xml",
+        "description": "The economy explained. Imagine you could call up a friend and say, \"Meet me at the bar and tell me what's going on with the economy.\" Now imagine that's actually a fun evening. That's Planet Money.",
+        "homepageLink": "https://www.npr.org/sections/money/"
+      },
+      {
+        "name": "99% Invisible",
+        "link": "https://feeds.simplecast.com/BqbsxVfO",
+        "description": "99% Invisible is about all the thought that goes into the things we don\u2019t think about \u2014 the unnoticed architecture and design that shape our world.",
+        "homepageLink": "https://99percentinvisible.org/"
+      },
+      {
+        "name": "Radiolab",
+        "link": "https://www.wnycstudios.org/feeds/series/podcasts",
+        "description": "Radiolab is a show about curiosity. Where sound illuminates ideas, and the boundaries between science, philosophy, and human experience disappear.",
+        "homepageLink": "https://www.radiolab.org/"
+      },
+      {
+        "name": "Science Vs",
+        "link": "https://feeds.megaphone.fm/sciencevs",
+        "description": "There are a lot of strong opinions, but then there\u2019s SCIENCE. Science Vs takes on fads, wizardry, and the internet to find out what\u2019s fact, what\u2019s not, and what\u2019s somewhere in between.",
+        "homepageLink": "https://gimletmedia.com/shows/science-vs"
+      },
+      {
+        "name": "The Tim Ferriss Show",
+        "link": "https://tim.blog/feed/podcast/",
+        "description": "The Tim Ferriss Show is often the #1 business podcast on all of Apple Podcasts. It is the first business/interview podcast to pass 1,000,000,000 downloads.",
+        "homepageLink": "https://tim.blog/podcast/"
+      },
+      {
+        "name": "Hardcore History",
+        "link": "https://feeds.feedburner.com/dancarlin/history",
+        "description": "In \"Hardcore History\" journalist and broadcaster Dan Carlin takes his \"Martian\", unorthodox way of thinking and applies it to the past.",
+        "homepageLink": "https://www.dancarlin.com/hardcore-history-series/"
+      },
+      {
+        "name": "Lex Fridman Podcast",
+        "link": "https://lexfridman.com/feed/podcast/",
+        "description": "Conversations about AI, science, technology, history, philosophy and the nature of intelligence, consciousness, love, and power.",
+        "homepageLink": "https://lexfridman.com/podcast/"
+      },
+      {
+        "name": "Today, Explained",
+        "link": "https://feeds.megaphone.fm/VMP5705694065",
+        "description": "Vox's daily news explainer podcast. Every weekday, we give you the information you need to understand the world's most important news stories.",
+        "homepageLink": "https://www.vox.com/today-explained-podcast"
+      },
+      {
+        "name": "The Vergecast",
+        "link": "https://feeds.megaphone.fm/vergecast",
+        "description": "The only podcast you need to make sense of the week in tech. Every Friday, Nilay Patel and David Pierce break down the week's biggest tech news.",
+        "homepageLink": "https://www.theverge.com/the-vergecast-podcast"
+      },
+      {
+        "name": "Decoder with Nilay Patel",
+        "link": "https://feeds.megaphone.fm/recodedecode",
+        "description": "A show about big ideas — and other problems. Hosted by Nilay Patel, Decoder features interviews with leaders in tech, business, and policy.",
+        "homepageLink": "https://www.theverge.com/decoder-podcast-with-nilay-patel"
+      },
+      {
+        "name": "Pivot",
+        "link": "https://feeds.megaphone.fm/pivot",
+        "description": "Sharp, unfiltered insights into the biggest stories in tech, business, and politics. Hosted by Kara Swisher and Scott Galloway.",
+        "homepageLink": "https://www.vox.com/pivot-podcast"
+      },
+      {
+        "name": "Waveform: The MKBHD Podcast",
+        "link": "https://feeds.megaphone.fm/STU4418364045",
+        "description": "A weekly podcast from MKBHD and the team about everything tech, from gadgets to the future of the internet.",
+        "homepageLink": "https://www.youtube.com/@Waveform"
+      },
+      {
+        "name": "Criminal",
+        "link": "https://feeds.megaphone.fm/VMP7924981569",
+        "description": "Criminal is an award-winning podcast about crime. Stories of people who've done wrong, been wronged, or gotten caught somewhere in the middle.",
+        "homepageLink": "https://thisiscriminal.com/"
+      },
+      {
+        "name": "The Prof G Pod with Scott Galloway",
+        "link": "https://feeds.megaphone.fm/GLT9190936013",
+        "description": "Scott Galloway shares his take on the big winners and losers in the tech economy, and answers your questions about business, money, and tech.",
+        "homepageLink": "https://www.profgmedia.com/the-prof-g-pod/"
+      },
+      {
+        "name": "Unexplainable",
+        "link": "https://feeds.megaphone.fm/unexplainable",
+        "description": "A science podcast from Vox about everything we don't know.",
+        "homepageLink": "https://www.vox.com/unexplainable"
+      }
+    ]
+  },
+  {
+    "name": "Newsletters",
+    "feeds": [
+      {
+        "name": "Stratechery",
+        "link": "https://stratechery.com/feed/",
+        "description": "Stratechery provides analysis of the strategy and business of technology, and its impact on society. By Ben Thompson.",
+        "homepageLink": "https://stratechery.com"
+      },
+      {
+        "name": "Platformer",
+        "link": "https://www.platformer.news/rss/",
+        "description": "The intersection of big tech and democracy. By Casey Newton.",
+        "homepageLink": "https://www.platformer.news"
+      },
+      {
+        "name": "Garbage Day",
+        "link": "https://garbageday.substack.com/feed",
+        "description": "A newsletter about having fun on the internet. By Ryan Broderick.",
+        "homepageLink": "https://www.garbageday.email"
+      },
+      {
+        "name": "The Browser",
+        "link": "https://thebrowser-feed.nfshost.com/thebrowser.xml",
+        "description": "Writing worth reading. We select five pieces of writing each day that we think are of lasting value.",
+        "homepageLink": "https://thebrowser.com"
+      },
+      {
+        "name": "TLDR",
+        "link": "https://tldr.tech/api/rss/tech",
+        "description": "TLDR is a daily newsletter with links and summaries of the most interesting stories in tech, science and business.",
+        "homepageLink": "https://tldr.tech"
+      },
+      {
+        "name": "Letters from an American",
+        "link": "https://heathercoxrichardson.substack.com/feed",
+        "description": "A newsletter about the history behind today's politics. By Heather Cox Richardson.",
+        "homepageLink": "https://heathercoxrichardson.substack.com"
+      },
+      {
+        "name": "Sinocism",
+        "link": "https://sinocism.com/feed",
+        "description": "Essential insights on China. By Bill Bishop.",
+        "homepageLink": "https://sinocism.com"
+      },
+      {
+        "name": "WSJ What's News",
+        "link": "https://feeds.a.dj.com/rss/RSSWhatsNews.xml",
+        "description": "The business news you need to start your day.",
+        "homepageLink": "https://www.wsj.com/podcasts/whats-news"
+      },
+      {
+        "name": "The Pragmatic Engineer",
+        "link": "https://blog.pragmaticengineer.com/rss/",
+        "description": "The #1 newsletter for software engineers and managers. By Gergely Orosz.",
+        "homepageLink": "https://blog.pragmaticengineer.com"
+      },
+      {
+        "name": "Tangle",
+        "link": "https://www.readtangle.com/archive/rss/",
+        "description": "An independent, ad-free, non-partisan politics newsletter that summarizes the best arguments from across the political spectrum.",
+        "homepageLink": "https://www.tangle.news"
+      }
+    ]
   }
 ]

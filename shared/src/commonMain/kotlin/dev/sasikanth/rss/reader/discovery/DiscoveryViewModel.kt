@@ -50,7 +50,7 @@ class DiscoveryViewModel(
     rssRepository
       .allFeeds()
       .onEach { feeds ->
-        val addedFeedLinks = feeds.map { it.link }.toSet()
+        val addedFeedLinks = feeds.filterNot { it.isDeleted }.map { it.link }.toSet()
         _state.update { it.copy(addedFeedLinks = addedFeedLinks) }
       }
       .launchIn(viewModelScope)
