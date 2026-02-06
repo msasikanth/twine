@@ -59,6 +59,7 @@ class DiscoveryViewModel(
   fun dispatch(event: DiscoveryEvent) {
     when (event) {
       DiscoveryEvent.LoadDiscoveryGroups -> loadDiscoveryGroups()
+      DiscoveryEvent.Refresh -> loadDiscoveryGroups(forceRefresh = true)
       is DiscoveryEvent.SearchQueryChanged -> {
         _state.update { it.copy(searchQuery = event.query) }
       }
@@ -66,10 +67,10 @@ class DiscoveryViewModel(
     }
   }
 
-  private fun loadDiscoveryGroups() {
+  private fun loadDiscoveryGroups(forceRefresh: Boolean = false) {
     viewModelScope.launch(dispatchersProvider.io) {
       _state.update { it.copy(isLoading = true) }
-      val groups = discoveryRepository.groups()
+      val groups = discoveryRepository.groups(forceRefresh = forceRefresh)
       _state.update { it.copy(groups = groups.toImmutableList(), isLoading = false) }
     }
   }

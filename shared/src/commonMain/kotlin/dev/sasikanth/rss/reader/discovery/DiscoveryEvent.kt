@@ -23,6 +23,8 @@ sealed interface DiscoveryEvent {
 
   data object LoadDiscoveryGroups : DiscoveryEvent
 
+  data object Refresh : DiscoveryEvent
+
   data class SearchQueryChanged(val query: TextFieldValue) : DiscoveryEvent
 
   data class AddFeedClicked(val link: String) : DiscoveryEvent

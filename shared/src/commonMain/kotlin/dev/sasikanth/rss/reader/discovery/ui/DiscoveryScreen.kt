@@ -69,6 +69,7 @@ import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Check
 import dev.sasikanth.rss.reader.resources.icons.Close
+import dev.sasikanth.rss.reader.resources.icons.Refresh
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
@@ -77,6 +78,7 @@ import twine.shared.generated.resources.buttonChange
 import twine.shared.generated.resources.buttonGoBack
 import twine.shared.generated.resources.discoveryAddFeed
 import twine.shared.generated.resources.discoveryAdded
+import twine.shared.generated.resources.discoveryRefresh
 import twine.shared.generated.resources.discoverySearchHint
 import twine.shared.generated.resources.discoveryTitle
 
@@ -115,6 +117,14 @@ fun DiscoveryScreen(
             )
           },
           actions = {
+            val refreshButtonPaddingEnd = if (showDoneButton) 0.dp else 12.dp
+            CircularIconButton(
+              modifier = Modifier.padding(end = refreshButtonPaddingEnd),
+              icon = TwineIcons.Refresh,
+              label = stringResource(Res.string.discoveryRefresh),
+              onClick = { viewModel.dispatch(DiscoveryEvent.Refresh) },
+            )
+
             if (showDoneButton) {
               CircularIconButton(
                 modifier = Modifier.padding(end = 12.dp),

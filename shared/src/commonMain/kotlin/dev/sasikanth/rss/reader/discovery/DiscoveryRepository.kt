@@ -44,14 +44,14 @@ class DiscoveryRepository(
 
   private val json = Json { ignoreUnknownKeys = true }
 
-  suspend fun groups(): List<DiscoveryGroup> {
+  suspend fun groups(forceRefresh: Boolean = false): List<DiscoveryGroup> {
     val (lastFetchTime, cache) = settingsRepository.discoveryFeedsCache.first()
     val isCacheExpired =
       lastFetchTime == null ||
         (Instant.currentMoment() - lastFetchTime) >= 1.days ||
         cache.isNullOrBlank()
 
-    if (!isCacheExpired && cache.isNotBlank()) {
+    if (!forceRefresh && !isCacheExpired && cache.isNotBlank()) {
       return try {
         json.decodeFromString<List<DiscoveryGroup>>(cache)
       } catch (e: Exception) {
