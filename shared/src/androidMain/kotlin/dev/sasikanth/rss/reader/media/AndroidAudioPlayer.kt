@@ -27,6 +27,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.util.DispatchersProvider
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.guava.await
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import me.tatarka.inject.annotations.Inject
 
@@ -51,6 +53,8 @@ class AndroidAudioPlayer(
 
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var controller: MediaController? = null
+  private val controllerDeferred = CompletableDeferred<MediaController>()
+  private var playJob: Job? = null
   private var progressJob: Job? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
@@ -59,8 +63,11 @@ class AndroidAudioPlayer(
   init {
     scope.launch {
       val sessionToken = SessionToken(context, ComponentName(context, MediaService::class.java))
-      controller = MediaController.Builder(context, sessionToken).buildAsync().await()
-      controller?.addListener(
+      val controller = MediaController.Builder(context, sessionToken).buildAsync().await()
+      this@AndroidAudioPlayer.controller = controller
+      controllerDeferred.complete(controller)
+
+      controller.addListener(
         object : Player.Listener {
           override fun onIsPlayingChanged(isPlaying: Boolean) {
             updatePlaybackState()
@@ -96,27 +103,34 @@ class AndroidAudioPlayer(
   }
 
   override fun play(url: String, title: String, artist: String, coverUrl: String?) {
-    scope.launch {
-      val mediaItem =
-        MediaItem.Builder()
-          .setMediaId(url)
-          .setUri(url)
-          .setMediaMetadata(
-            MediaMetadata.Builder()
-              .setTitle(title)
-              .setArtist(artist)
-              .setArtworkUri(coverUrl?.toUri())
-              .build()
-          )
-          .build()
+    playJob?.cancel()
+    playJob =
+      scope.launch {
+        val mediaItem =
+          MediaItem.Builder()
+            .setMediaId(url)
+            .setUri(url)
+            .setMediaMetadata(
+              MediaMetadata.Builder()
+                .setTitle(title)
+                .setArtist(artist)
+                .setArtworkUri(coverUrl?.toUri())
+                .build()
+            )
+            .build()
 
-      controller?.setMediaItem(mediaItem)
-      controller?.prepare()
-      controller?.play()
-    }
+        val controller = controllerDeferred.await()
+        controller.setMediaItem(mediaItem)
+        controller.prepare()
+
+        if (isActive) {
+          controller.play()
+        }
+      }
   }
 
   override fun pause() {
+    playJob?.cancel()
     controller?.pause()
   }
 
