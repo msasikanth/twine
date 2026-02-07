@@ -136,8 +136,7 @@ internal fun ReaderCustomizationsContent(
             ReaderColorScheme.Midnight ->
               midnightColorScheme().surface to midnightColorScheme().onSurface
             ReaderColorScheme.Forest -> forestColorScheme().surface to forestColorScheme().onSurface
-            ReaderColorScheme.Slate ->
-              slateColorScheme(isDark).surface to slateColorScheme(isDark).onSurface
+            ReaderColorScheme.Slate -> slateColorScheme().surface to slateColorScheme().onSurface
           }
 
         val label =

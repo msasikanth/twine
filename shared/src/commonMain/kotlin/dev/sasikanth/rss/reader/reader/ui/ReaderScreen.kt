@@ -223,15 +223,7 @@ internal fun ReaderScreen(
     val isParentThemeDark = AppTheme.isDark
     val isDarkTheme =
       remember(state.selectedReaderColorScheme, isParentThemeDark) {
-        when (state.selectedReaderColorScheme) {
-          ReaderColorScheme.Dynamic,
-          ReaderColorScheme.Sepia,
-          ReaderColorScheme.Solarized,
-          ReaderColorScheme.Parchment,
-          ReaderColorScheme.Forest,
-          ReaderColorScheme.Slate -> isParentThemeDark
-          ReaderColorScheme.Midnight -> true
-        }
+        state.selectedReaderColorScheme.isDark(isParentThemeDark)
       }
     val overriddenColorScheme =
       remember(state.selectedReaderColorScheme, isDarkTheme) {
@@ -242,7 +234,7 @@ internal fun ReaderScreen(
           ReaderColorScheme.Parchment -> parchmentColorScheme()
           ReaderColorScheme.Midnight -> midnightColorScheme()
           ReaderColorScheme.Forest -> forestColorScheme()
-          ReaderColorScheme.Slate -> slateColorScheme(isDarkTheme)
+          ReaderColorScheme.Slate -> slateColorScheme()
         }
       }
 
