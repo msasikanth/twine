@@ -36,6 +36,7 @@ import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 internal fun AppTheme(
   useDarkTheme: Boolean = false,
   typography: Typography = typography(GolosFontFamily),
+  overriddenColorScheme: AppColorScheme? = null,
   content: @Composable () -> Unit,
 ) {
   val useAmoled = LocalAmoledSetting.current
@@ -47,15 +48,16 @@ internal fun AppTheme(
     ) {
       val dynamicColorState = LocalDynamicColorState.current
       val sourceColorScheme =
-        if (useDarkTheme) dynamicColorState.darkAppColorScheme
-        else dynamicColorState.lightAppColorScheme
+        overriddenColorScheme
+          ?: if (useDarkTheme) dynamicColorState.darkAppColorScheme
+          else dynamicColorState.lightAppColorScheme
 
       // We read a property from the source color scheme to ensure that AppTheme recomposes
       // whenever the dynamic colors change. This allows us to update the stable color scheme
       // instance that is provided to the rest of the app.
       sourceColorScheme.primary
 
-      val colorScheme = remember(useDarkTheme) { sourceColorScheme.copy() }
+      val colorScheme = remember(useDarkTheme, overriddenColorScheme) { sourceColorScheme.copy() }
 
       SideEffect { colorScheme.updateFrom(sourceColorScheme, amoled = useDarkTheme && useAmoled) }
 
