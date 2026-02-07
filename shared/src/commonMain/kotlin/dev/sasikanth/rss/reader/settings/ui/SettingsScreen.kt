@@ -264,8 +264,8 @@ internal fun SettingsScreen(
           },
           actionOnNewLine = false,
           shape = SnackbarDefaults.shape,
-          backgroundColor = AppTheme.colorScheme.surfaceContainerLow,
-          contentColor = AppTheme.colorScheme.onSurface,
+          backgroundColor = AppTheme.colorScheme.inverseSurface,
+          contentColor = AppTheme.colorScheme.inverseOnSurface,
           elevation = 0.dp,
         )
       }
