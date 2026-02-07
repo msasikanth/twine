@@ -54,6 +54,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
   private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
   private val readerFontStyleKey = stringPreferencesKey("reader_font_style")
+  private val readerColorSchemeKey = stringPreferencesKey("reader_color_scheme")
   private val blockImagesKey = booleanPreferencesKey("block_images")
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
@@ -129,6 +130,9 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
 
   val readerFontStyle: Flow<ReaderFont> =
     dataStore.data.map { preferences -> mapToReaderFont(preferences[readerFontStyleKey]) }
+
+  val readerColorScheme: Flow<ReaderColorScheme> =
+    dataStore.data.map { preferences -> mapToReaderColorScheme(preferences[readerColorSchemeKey]) }
 
   val blockImages: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[blockImagesKey] ?: false }
@@ -247,6 +251,10 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[readerFontStyleKey] = value.name }
   }
 
+  suspend fun updateReaderColorScheme(value: ReaderColorScheme) {
+    dataStore.edit { preferences -> preferences[readerColorSchemeKey] = value.name }
+  }
+
   suspend fun toggleBlockImages(value: Boolean) {
     dataStore.edit { preferences -> preferences[blockImagesKey] = value }
   }
@@ -348,6 +356,15 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     }
   }
 
+  private fun mapToReaderColorScheme(pref: String?): ReaderColorScheme {
+    if (pref.isNullOrBlank()) return ReaderColorScheme.Dynamic
+    return try {
+      ReaderColorScheme.valueOf(pref)
+    } catch (e: Exception) {
+      ReaderColorScheme.Dynamic
+    }
+  }
+
   private fun mapToAppIcon(pref: String?): AppIcon {
     if (pref.isNullOrBlank()) return AppIcon.DarkJade
     return try {
@@ -404,5 +421,24 @@ val ReaderFont.isPremium: Boolean
       ReaderFont.Lora -> true
       ReaderFont.Merriweather -> true
       ReaderFont.GoogleSans -> true
+      else -> false
+    }
+
+enum class ReaderColorScheme {
+  Dynamic,
+  Sepia,
+  Solarized,
+  Parchment,
+  Midnight,
+  Forest,
+  Slate,
+}
+
+val ReaderColorScheme.isPremium: Boolean
+  get() =
+    when (this) {
+      ReaderColorScheme.Parchment -> true
+      ReaderColorScheme.Midnight -> true
+      ReaderColorScheme.Forest -> true
       else -> false
     }
