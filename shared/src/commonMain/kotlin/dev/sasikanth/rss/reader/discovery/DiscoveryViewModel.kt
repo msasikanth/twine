@@ -84,6 +84,7 @@ class DiscoveryViewModel(
         when (val result = feedFetcher.fetch(link)) {
           is FeedFetchResult.Success -> {
             rssRepository.upsertFeedWithPosts(
+              title = feed.name,
               feedPayload = result.feedPayload,
               showWebsiteFavIcon = !(feed.useFeedIcon),
             )
