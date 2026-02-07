@@ -124,7 +124,7 @@ WHERE
   post.imageUrl IS NOT NULL AND
   post.postDate > :featuredPostsAfter AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -141,7 +141,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt;
+  post.createdAt < :postsUpperBound;
 
 allPostsLatest:
 SELECT
@@ -169,7 +169,7 @@ INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
 WHERE
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -205,7 +205,7 @@ INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
 WHERE
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -241,7 +241,7 @@ INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
 WHERE
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -277,7 +277,7 @@ INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
 WHERE
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -319,7 +319,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -328,7 +328,7 @@ WHERE
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -370,7 +370,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -379,7 +379,7 @@ WHERE
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -421,7 +421,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -430,7 +430,7 @@ WHERE
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -472,7 +472,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -481,7 +481,7 @@ WHERE
     LIMIT :numberOfFeaturedPosts
   ) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
@@ -502,7 +502,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -515,7 +515,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt;
+  post.createdAt < :postsUpperBound;
 
 updateBookmarkStatus:
 UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1 END, updatedAt = :updatedAt WHERE id = :id;
@@ -560,7 +560,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
 
 nonFeaturedPostPosition:
@@ -574,7 +574,7 @@ WHERE
       p2.imageUrl IS NOT NULL AND
       p2.postDate > :featuredPostsAfter AND
       p2.postDate > :postsAfter AND
-      p2.createdAt < :lastSyncedAt AND
+      p2.createdAt < :postsUpperBound AND
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
@@ -587,7 +587,7 @@ WHERE
   feed.isDeleted = 0 AND
   (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
   post.postDate > :postsAfter AND
-  post.createdAt < :lastSyncedAt AND
+  post.createdAt < :postsUpperBound AND
   (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
 
 updatePostRemoteId:
@@ -718,7 +718,7 @@ WITH unreadPosts AS (
     AND f.isDeleted = 0
     AND (p.flags & 2) = 0
     AND p.postDate > :postsAfter
-    AND p.createdAt > :lastSyncedAt
+    AND p.createdAt > :postsUpperBound
 )
 SELECT
   COUNT(*) AS count,

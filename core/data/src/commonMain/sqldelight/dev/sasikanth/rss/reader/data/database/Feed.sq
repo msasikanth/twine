@@ -78,7 +78,7 @@ SELECT
   f.isDeleted,
   f.remoteId
 FROM feed f
-LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
 WHERE f.id = :id AND f.isDeleted = 0
 ORDER BY pinnedAt DESC, f.createdAt DESC LIMIT 1;
 

@@ -84,7 +84,7 @@ FROM (
     f.showFeedFavIcon,
     f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.isDeleted = 0
   GROUP BY f.id
 
@@ -113,7 +113,7 @@ FROM (
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.isDeleted = 0
   GROUP BY fg.id
@@ -197,7 +197,7 @@ FROM (
     f.showFeedFavIcon,
     f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.isDeleted = 0
   GROUP BY f.id
 
@@ -226,7 +226,7 @@ FROM (
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.isDeleted = 0
   GROUP BY fg.id
@@ -315,7 +315,7 @@ FROM (
     f.showFeedFavIcon,
     f.remoteId
   FROM feed f
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   WHERE f.id = :id AND f.isDeleted = 0
   GROUP BY f.id
 
@@ -344,7 +344,7 @@ FROM (
   FROM feedGroup fg
   LEFT JOIN feedGroupFeed gf ON fg.id = gf.feedGroupId
   LEFT JOIN feed f ON gf.feedId = f.id AND f.isDeleted = 0
-  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :lastSyncedAt
+  LEFT JOIN post p ON f.id = p.sourceId AND p.postDate > :postsAfter AND p.createdAt < :postsUpperBound
   LEFT JOIN feed_group_metadata fgm ON fg.id = fgm.feedGroupId
   WHERE fg.id = :id AND fg.isDeleted = 0
   GROUP BY fg.id

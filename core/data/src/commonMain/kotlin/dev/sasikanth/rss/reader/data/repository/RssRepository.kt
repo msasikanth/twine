@@ -257,7 +257,7 @@ class RssRepository(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Long? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
@@ -266,7 +266,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
         )
         .executeAsOneOrNull()
     }
@@ -277,7 +277,7 @@ class RssRepository(
     postsSortOrder: PostsSortOrder,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
       countQuery =
@@ -286,7 +286,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
         ),
       transacter = postQueries,
       context = dispatchersProvider.databaseRead,
@@ -295,7 +295,7 @@ class RssRepository(
           PostsSortOrder.Latest ->
             postQueries.allPostsLatest(
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -306,7 +306,7 @@ class RssRepository(
           PostsSortOrder.Oldest ->
             postQueries.allPostsOldest(
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -317,7 +317,7 @@ class RssRepository(
           PostsSortOrder.AddedLatest ->
             postQueries.allPostsAddedLatest(
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -328,7 +328,7 @@ class RssRepository(
           PostsSortOrder.AddedOldest ->
             postQueries.allPostsAddedOldest(
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -346,14 +346,14 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): Flow<List<ResolvedPost>> {
     return postQueries
       .featuredPosts(
         featuredPostsAfter = featuredPostsAfter,
         postsAfter = after,
-        lastSyncedAt = lastSyncedAt,
+        postsUpperBound = postsUpperBound,
         isSourceIdsEmpty = activeSourceIds.isEmpty(),
         sourceIds = activeSourceIds,
         unreadOnly = unreadOnly,
@@ -369,7 +369,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     limit: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): List<ResolvedPost> {
     return withContext(dispatchersProvider.databaseRead) {
@@ -377,7 +377,7 @@ class RssRepository(
         .featuredPosts(
           featuredPostsAfter = featuredPostsAfter,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
@@ -394,7 +394,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): PagingSource<Int, ResolvedPost> {
     return QueryPagingSource(
@@ -402,7 +402,7 @@ class RssRepository(
         postQueries.nonFeaturedPostsCount(
           featuredPostsAfter = featuredPostsAfter,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
@@ -416,7 +416,7 @@ class RssRepository(
             postQueries.nonFeaturedPostsLatest(
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -429,7 +429,7 @@ class RssRepository(
             postQueries.nonFeaturedPostsOldest(
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -442,7 +442,7 @@ class RssRepository(
             postQueries.nonFeaturedPostsAddedLatest(
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -455,7 +455,7 @@ class RssRepository(
             postQueries.nonFeaturedPostsAddedOldest(
               featuredPostsAfter = featuredPostsAfter,
               postsAfter = after,
-              lastSyncedAt = lastSyncedAt,
+              postsUpperBound = postsUpperBound,
               isSourceIdsEmpty = activeSourceIds.isEmpty(),
               sourceIds = activeSourceIds,
               unreadOnly = unreadOnly,
@@ -474,7 +474,7 @@ class RssRepository(
     activeSourceIds: List<String>,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Int {
     return withContext(dispatchersProvider.databaseRead) {
       val post = postQueries.post(postId, ::Post).executeAsOne()
@@ -484,7 +484,7 @@ class RssRepository(
           sourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           postDate = post.postDate,
           postCreatedAt = post.createdAt,
         )
@@ -499,7 +499,7 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): Int {
     return withContext(dispatchersProvider.databaseRead) {
@@ -508,7 +508,7 @@ class RssRepository(
         .nonFeaturedPostPosition(
           featuredPostsAfter = featuredPostsAfter,
           postsAfter = after,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           numberOfFeaturedPosts = numberOfFeaturedPosts,
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
           sourceIds = activeSourceIds,
@@ -766,13 +766,13 @@ class RssRepository(
   fun feed(
     feedId: String,
     postsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<Feed> {
     return feedQueries
       .feedWithUnreadPostsCount(
         id = feedId,
         postsAfter = postsAfter,
-        lastSyncedAt = lastSyncedAt,
+        postsUpperBound = postsUpperBound,
         mapper = {
           id: String,
           name: String,
@@ -817,14 +817,14 @@ class RssRepository(
   suspend fun feedBlocking(
     feedId: String,
     postsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Feed {
     return withContext(dispatchersProvider.databaseRead) {
       feedQueries
         .feedWithUnreadPostsCount(
           id = feedId,
           postsAfter = postsAfter,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           mapper = {
             id: String,
             name: String,
@@ -1609,12 +1609,12 @@ class RssRepository(
 
   fun pinnedSources(
     postsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<List<Source>> {
     return sourceQueries
       .pinnedSources(
         postsAfter = postsAfter,
-        lastSyncedAt = lastSyncedAt,
+        postsUpperBound = postsUpperBound,
         mapper = {
           type: String,
           id: String,
@@ -1685,7 +1685,7 @@ class RssRepository(
 
   fun sources(
     postsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     orderBy: FeedsOrderBy = FeedsOrderBy.Latest,
   ): PagingSource<Int, Source> {
     return QueryPagingSource(
@@ -1695,7 +1695,7 @@ class RssRepository(
       queryProvider = { limit, offset ->
         sourceQueries.sources(
           postsAfter = postsAfter,
-          lastSyncedAt = lastSyncedAt,
+          postsUpperBound = postsUpperBound,
           orderBy = orderBy.value,
           limit = limit,
           offset = offset,
@@ -1770,12 +1770,12 @@ class RssRepository(
   fun source(
     id: String,
     postsAfter: Instant = Instant.DISTANT_PAST,
-    lastSyncedAt: Instant = Instant.DISTANT_FUTURE,
+    postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Flow<Source?> {
     return sourceQueries
       .source(
         postsAfter = postsAfter,
-        lastSyncedAt = lastSyncedAt,
+        postsUpperBound = postsUpperBound,
         id = id,
         mapper = {
           type: String,
@@ -2066,14 +2066,14 @@ class RssRepository(
   fun unreadSinceLastSync(
     sources: List<String>,
     postsAfter: Instant,
-    lastSyncedAt: Instant,
+    postsUpperBound: Instant,
   ): Flow<UnreadSinceLastSync> {
     return postQueries
       .unreadSinceLastSync(
         isSourceIdsEmpty = sources.isEmpty(),
         sourceIds = sources,
         postsAfter = postsAfter,
-        lastSyncedAt = lastSyncedAt,
+        postsUpperBound = postsUpperBound,
         mapper = { count, feedHomepageLinks, feedIcons, feedShowFavIconSettings ->
           UnreadSinceLastSync(
             newArticleCount = count,

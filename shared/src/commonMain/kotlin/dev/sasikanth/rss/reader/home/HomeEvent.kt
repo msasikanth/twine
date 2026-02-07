@@ -56,8 +56,6 @@ sealed interface HomeEvent {
 
   data object LoadNewArticlesClick : HomeEvent
 
-  data object UpdateDate : HomeEvent
-
   data class UpdatePrevActiveSource(val source: Source?) : HomeEvent
 
   data class OnPostClicked(val post: ResolvedPost) : HomeEvent

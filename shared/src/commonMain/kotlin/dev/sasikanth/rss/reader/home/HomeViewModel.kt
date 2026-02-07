@@ -36,7 +36,7 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
-import dev.sasikanth.rss.reader.utils.NTuple6
+import dev.sasikanth.rss.reader.utils.NTuple7
 import dev.sasikanth.rss.reader.utils.combine as flowCombine
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
@@ -105,7 +105,6 @@ class HomeViewModel(
       is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index, event.postId)
       is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
-      is HomeEvent.UpdateDate -> updateDate()
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
       is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
       is HomeEvent.ShowPostsSortFilter -> showPostsSortFilter(event.show)
@@ -118,6 +117,7 @@ class HomeViewModel(
       val postsAfter = postsThresholdTime(_state.value.postsType)
       val activeSourceIds = activeSourceIds(_state.value.activeSource)
       val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+      val postsUpperBound = _state.value.currentDateTime.toInstant(TimeZone.currentSystemDefault())
 
       val position =
         rssRepository.postPosition(
@@ -125,6 +125,7 @@ class HomeViewModel(
           activeSourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           after = postsAfter,
+          postsUpperBound = postsUpperBound,
         )
 
       _openPost.emit(position to post)
@@ -192,21 +193,35 @@ class HomeViewModel(
         settingsRepository.homeViewMode,
         allPostsPager.hasUnreadPosts,
         allPostsPager.unreadSinceLastSync,
-      ) { activeSource, postsType, postsSortOrder, homeViewMode, hasUnreadPosts, unreadSinceLastSync
-        ->
-        NTuple6(
+        refreshPolicy.lastRefreshedAtFlow,
+      ) {
+        activeSource,
+        postsType,
+        postsSortOrder,
+        homeViewMode,
+        hasUnreadPosts,
+        unreadSinceLastSync,
+        lastRefreshedAt ->
+        NTuple7(
           activeSource,
           postsType,
           postsSortOrder,
           homeViewMode,
           hasUnreadPosts,
           unreadSinceLastSync,
+          lastRefreshedAt,
         )
       }
       .distinctUntilChanged()
       .onEach {
-        (activeSource, postsType, postsSortOrder, homeViewMode, hasUnreadPosts, unreadSinceLastSync)
-        ->
+        (
+          activeSource,
+          postsType,
+          postsSortOrder,
+          homeViewMode,
+          hasUnreadPosts,
+          unreadSinceLastSync,
+          lastRefreshedAt) ->
         _state.update {
           it.copy(
             activeSource = activeSource,
@@ -215,6 +230,7 @@ class HomeViewModel(
             homeViewMode = homeViewMode,
             hasUnreadPosts = hasUnreadPosts,
             unreadSinceLastSync = unreadSinceLastSync,
+            currentDateTime = lastRefreshedAt,
           )
         }
       }
@@ -223,14 +239,6 @@ class HomeViewModel(
 
   private fun updatePrevActiveSource(event: HomeEvent.UpdatePrevActiveSource) {
     _state.update { it.copy(prevActiveSource = event.source) }
-  }
-
-  private fun updateDate() {
-    val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-
-    if (_state.value.currentDateTime.date != currentDate.date) {
-      _state.update { it.copy(currentDateTime = currentDate) }
-    }
   }
 
   private fun loadNewArticles() {
@@ -255,6 +263,7 @@ class HomeViewModel(
             _state.value.currentDateTime.toInstant(TimeZone.currentSystemDefault()).minus(24.hours)
           val activeSourceIds = activeSourceIds(_state.value.activeSource)
           val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+          val lastSyncedAt = _state.value.currentDateTime.toInstant(TimeZone.currentSystemDefault())
 
           val position =
             rssRepository.nonFeaturedPostPosition(
@@ -263,6 +272,7 @@ class HomeViewModel(
               unreadOnly = unreadOnly,
               after = postsAfter,
               featuredPostsAfter = featuredPostsAfter,
+              postsUpperBound = lastSyncedAt,
             )
 
           val adjustedIndex = position + featuredPosts.size
