@@ -424,21 +424,12 @@ val ReaderFont.isPremium: Boolean
       else -> false
     }
 
-enum class ReaderColorScheme {
-  Dynamic,
-  Sepia,
-  Solarized,
-  Parchment,
-  Midnight,
-  Forest,
-  Slate,
+enum class ReaderColorScheme(val isPremium: Boolean, val hasDarkMode: Boolean) {
+  Dynamic(isPremium = false, hasDarkMode = true),
+  Sepia(isPremium = false, hasDarkMode = false),
+  Solarized(isPremium = false, hasDarkMode = true),
+  Parchment(isPremium = true, hasDarkMode = false),
+  Midnight(isPremium = true, hasDarkMode = true),
+  Forest(isPremium = true, hasDarkMode = true),
+  Slate(isPremium = false, hasDarkMode = true),
 }
-
-val ReaderColorScheme.isPremium: Boolean
-  get() =
-    when (this) {
-      ReaderColorScheme.Parchment -> true
-      ReaderColorScheme.Midnight -> true
-      ReaderColorScheme.Forest -> true
-      else -> false
-    }

@@ -128,16 +128,14 @@ internal fun ReaderCustomizationsContent(
             ReaderColorScheme.Dynamic ->
               appDynamicColorState.lightAppColorScheme.primaryContainer to
                 appDynamicColorState.lightAppColorScheme.onPrimaryContainer
-            ReaderColorScheme.Sepia ->
-              sepiaColorScheme(isDark).surface to sepiaColorScheme(isDark).onSurface
+            ReaderColorScheme.Sepia -> sepiaColorScheme().surface to sepiaColorScheme().onSurface
             ReaderColorScheme.Solarized ->
               solarizedColorScheme(isDark).surface to solarizedColorScheme(isDark).onSurface
             ReaderColorScheme.Parchment ->
-              parchmentColorScheme(isDark).surface to parchmentColorScheme(isDark).onSurface
+              parchmentColorScheme().surface to parchmentColorScheme().onSurface
             ReaderColorScheme.Midnight ->
               midnightColorScheme().surface to midnightColorScheme().onSurface
-            ReaderColorScheme.Forest ->
-              forestColorScheme(isDark).surface to forestColorScheme(isDark).onSurface
+            ReaderColorScheme.Forest -> forestColorScheme().surface to forestColorScheme().onSurface
             ReaderColorScheme.Slate ->
               slateColorScheme(isDark).surface to slateColorScheme(isDark).onSurface
           }
