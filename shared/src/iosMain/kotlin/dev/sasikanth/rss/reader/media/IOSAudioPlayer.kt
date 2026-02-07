@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
@@ -55,6 +56,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var progressJob: Job? = null
   private var playingUrl: String? = null
+  private var playJob: Job? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
   private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
@@ -86,21 +88,25 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   }
 
   override fun play(url: String, title: String, artist: String, coverUrl: String?) {
-    scope.launch {
-      playingUrl = url
+    playJob?.cancel()
+    playJob =
+      scope.launch {
+        playingUrl = url
 
-      val fileName = "${nameBasedUuidOf(url)}.mp3"
-      val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
+        val fileName = "${nameBasedUuidOf(url)}.mp3"
+        val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
 
-      val isDownloaded =
-        withContext(dispatchersProvider.io) { fileManager.fileExistsAtPath(localUrl.path!!) }
+        val isDownloaded =
+          withContext(dispatchersProvider.io) { fileManager.fileExistsAtPath(localUrl.path!!) }
 
-      if (isDownloaded) {
-        playInternal(localUrl, title, artist, coverUrl)
-      } else {
-        downloadAndPlay(url, localUrl, title, artist, coverUrl)
+        if (!isActive) return@launch
+
+        if (isDownloaded) {
+          playInternal(localUrl, title, artist, coverUrl)
+        } else {
+          downloadAndPlay(url, localUrl, title, artist, coverUrl)
+        }
       }
-    }
   }
 
   private fun downloadAndPlay(
@@ -116,7 +122,9 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         if (location != null) {
           fileManager.moveItemAtURL(location, localUrl, null)
           dispatch_async(dispatch_get_main_queue()) {
-            playInternal(localUrl, title, artist, coverUrl)
+            if (playingUrl == remoteUrl && _playbackState.value.isPlaying) {
+              playInternal(localUrl, title, artist, coverUrl)
+            }
           }
         }
       }
@@ -138,6 +146,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   }
 
   override fun pause() {
+    playJob?.cancel()
     player.pause()
     stopProgressUpdate()
     updatePlaybackState()
