@@ -346,6 +346,7 @@ internal fun ReaderScreen(
             val showFullArticle by pageViewModel.showFullArticle.collectAsStateWithLifecycle()
 
             ReaderActionsPanel(
+              isParentThemeDark = isParentThemeDark,
               isDarkTheme = isDarkTheme,
               loadFullArticle = showFullArticle,
               showReaderCustomisations = state.showReaderCustomisations,
@@ -485,6 +486,7 @@ internal fun ReaderScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun ReaderActionsPanel(
+  isParentThemeDark: Boolean,
   isDarkTheme: Boolean,
   loadFullArticle: Boolean,
   showReaderCustomisations: Boolean,
@@ -576,6 +578,7 @@ private fun ReaderActionsPanel(
                 fontScaleFactor = fontScaleFactor,
                 fontLineHeightFactor = fontLineHeightFactor,
                 isSubscribed = isSubscribed,
+                isParentThemeDark = isParentThemeDark,
                 onFontChange = onFontChange,
                 onColorSchemeChange = onColorSchemeChange,
                 onFontScaleFactorChange = onFontScaleFactorChange,

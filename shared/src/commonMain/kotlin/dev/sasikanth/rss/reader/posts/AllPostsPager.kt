@@ -80,7 +80,7 @@ class AllPostsPager(
     val activeSourceIds: List<String>,
     val postsAfter: Instant,
     val featuredPostsAfter: Instant,
-    val lastSyncedAt: Instant,
+    val postsUpperBound: Instant,
     val unreadOnly: Boolean?,
     val postsSortOrder: PostsSortOrder,
   )
@@ -104,7 +104,7 @@ class AllPostsPager(
             postsSortOrder = params.postsSortOrder,
             unreadOnly = params.unreadOnly,
             after = params.postsAfter,
-            lastSyncedAt = params.lastSyncedAt,
+            postsUpperBound = params.postsUpperBound,
           )
         }
         .flow
@@ -119,7 +119,7 @@ class AllPostsPager(
             unreadOnly = params.unreadOnly,
             after = params.postsAfter,
             featuredPostsAfter = params.featuredPostsAfter,
-            lastSyncedAt = params.lastSyncedAt,
+            postsUpperBound = params.postsUpperBound,
           )
         }
         .flow
@@ -133,7 +133,7 @@ class AllPostsPager(
           unreadOnly = params.unreadOnly,
           after = params.postsAfter,
           featuredPostsAfter = params.featuredPostsAfter,
-          lastSyncedAt = params.lastSyncedAt,
+          postsUpperBound = params.postsUpperBound,
         )
         .transformLatest { featuredPosts ->
           val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
@@ -194,7 +194,7 @@ class AllPostsPager(
             rssRepository.unreadSinceLastSync(
               sources = params.activeSourceIds,
               postsAfter = params.postsAfter,
-              lastSyncedAt = params.lastSyncedAt,
+              postsUpperBound = params.postsUpperBound,
             )
           }
         }
@@ -229,7 +229,7 @@ class AllPostsPager(
       activeSourceIds = activeSourceIds(activeSource),
       postsAfter = postsAfter,
       featuredPostsAfter = featuredPostsAfter,
-      lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault()),
+      postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
       unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(postsType),
       postsSortOrder = postsSortOrder,
     )

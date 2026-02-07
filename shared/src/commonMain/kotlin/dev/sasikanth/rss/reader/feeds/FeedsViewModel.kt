@@ -322,7 +322,7 @@ class FeedsViewModel(
 
             rssRepository.source(
               id = activeSource.id,
-              lastSyncedAt = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault()),
+              postsUpperBound = lastRefreshedAt.toInstant(TimeZone.currentSystemDefault()),
               postsAfter = postsAfter,
             )
           }
@@ -355,7 +355,7 @@ class FeedsViewModel(
           val postsAfter = PostsFilterUtils.postsThresholdTime(postsType, dateTime)
           rssRepository.pinnedSources(
             postsAfter = postsAfter,
-            lastSyncedAt = dateTime.toInstant(TimeZone.currentSystemDefault()),
+            postsUpperBound = dateTime.toInstant(TimeZone.currentSystemDefault()),
           )
         }
 
@@ -372,7 +372,7 @@ class FeedsViewModel(
           val sources =
             sources(
               postsAfter = postsAfter,
-              lastSyncedAt = dateTime,
+              postsUpperBound = dateTime,
               feedsSortOrder = feedsSortOrder,
             )
 
@@ -396,13 +396,13 @@ class FeedsViewModel(
 
   private fun sources(
     postsAfter: Instant,
-    lastSyncedAt: LocalDateTime,
+    postsUpperBound: LocalDateTime,
     feedsSortOrder: FeedsOrderBy,
   ) =
     createPager(config = createPagingConfig(pageSize = 20)) {
         rssRepository.sources(
           postsAfter = postsAfter,
-          lastSyncedAt = lastSyncedAt.toInstant(TimeZone.currentSystemDefault()),
+          postsUpperBound = postsUpperBound.toInstant(TimeZone.currentSystemDefault()),
           orderBy = feedsSortOrder,
         )
       }
