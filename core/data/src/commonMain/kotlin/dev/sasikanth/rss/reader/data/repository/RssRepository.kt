@@ -1530,11 +1530,7 @@ class RssRepository(
 
   suspend fun groupIdsForFeed(feedId: String): List<String> {
     return withContext(dispatchersProvider.io) {
-      feedGroupFeedQueries
-        .groupIdsForFeed(feedId)
-        .executeAsList()
-        .map { it.feedGroupId }
-        .filterNotNull()
+      feedGroupFeedQueries.groupIdsForFeed(feedId).executeAsList().mapNotNull { it.feedGroupId }
     }
   }
 
