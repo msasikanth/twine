@@ -194,6 +194,14 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
+  <string name="readerColorSchemeSepia" translatable="false">Sepia</string>
+  <string name="readerColorSchemeSolarized" translatable="false">Solarized</string>
+  <string name="readerColorSchemeParchment" translatable="false">Parchment</string>
+  <string name="readerColorSchemeMidnight" translatable="false">Midnight</string>
+  <string name="readerColorSchemeForest" translatable="false">Forest</string>
+  <string name="readerColorSchemeSlate" translatable="false">Slate</string>
   <string name="postsFilter">Posts filter</string>
   <string name="postsSortBy">Sort by</string>
   <string name="postsSortByPostDate">Post date</string>

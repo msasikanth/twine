@@ -37,7 +37,7 @@ internal fun rememberDynamicColorState(
   defaultDarkAppColorScheme: AppColorScheme,
   useTonalSpotScheme: Boolean = true,
 ): DynamicColorState {
-  return remember {
+  return remember(defaultLightAppColorScheme, defaultDarkAppColorScheme, useTonalSpotScheme) {
     DynamicColorState(
       defaultLightAppColorScheme = defaultLightAppColorScheme,
       defaultDarkAppColorScheme = defaultDarkAppColorScheme,
