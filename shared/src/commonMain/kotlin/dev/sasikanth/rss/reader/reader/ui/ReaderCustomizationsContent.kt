@@ -98,6 +98,7 @@ internal fun ReaderCustomizationsContent(
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
   isSubscribed: Boolean,
+  isParentThemeDark: Boolean,
   onFontChange: (ReaderFont) -> Unit,
   onColorSchemeChange: (ReaderColorScheme) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
@@ -122,12 +123,17 @@ internal fun ReaderCustomizationsContent(
     ) {
       items(ReaderColorScheme.entries) { colorScheme ->
         val appDynamicColorState = LocalDynamicColorState.current
-        val isDark = AppTheme.isDark
+        val isDark = colorScheme.isDark(isParentThemeDark)
         val (backgroundColor, contentColor) =
           when (colorScheme) {
-            ReaderColorScheme.Dynamic ->
-              appDynamicColorState.lightAppColorScheme.primaryContainer to
-                appDynamicColorState.lightAppColorScheme.onPrimaryContainer
+            ReaderColorScheme.Dynamic -> {
+              val colorSchemeForDynamic =
+                if (isDark) appDynamicColorState.darkAppColorScheme
+                else appDynamicColorState.lightAppColorScheme
+
+              colorSchemeForDynamic.primaryContainer to colorSchemeForDynamic.onPrimaryContainer
+            }
+
             ReaderColorScheme.Sepia -> sepiaColorScheme().surface to sepiaColorScheme().onSurface
             ReaderColorScheme.Solarized ->
               solarizedColorScheme(isDark).surface to solarizedColorScheme(isDark).onSurface
