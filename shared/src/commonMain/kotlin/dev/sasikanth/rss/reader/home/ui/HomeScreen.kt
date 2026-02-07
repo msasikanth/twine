@@ -216,7 +216,7 @@ internal fun HomeScreen(
   }
 
   featuredPostsPagerState.CollectItemTransition(
-    key = featuredPosts,
+    featuredPosts,
     itemProvider = { index -> featuredPosts.getOrNull(index) },
   ) { fromItem, toItem, offset ->
     val fromSeedColor = fromItem?.seedColor?.let { Color(it) }

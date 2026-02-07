@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.reader
 
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 
 sealed interface ReaderEvent {
@@ -32,6 +33,8 @@ sealed interface ReaderEvent {
   data object HideReaderCustomisations : ReaderEvent
 
   data class UpdateReaderFont(val font: ReaderFont) : ReaderEvent
+
+  data class UpdateReaderColorScheme(val colorScheme: ReaderColorScheme) : ReaderEvent
 
   data class UpdateFontScaleFactor(val fontScaleFactor: Float) : ReaderEvent
 

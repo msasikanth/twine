@@ -26,6 +26,7 @@ import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -97,6 +98,7 @@ class ReaderViewModel(
       is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
       is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
       is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
+      is ReaderEvent.UpdateReaderColorScheme -> updateReaderColorScheme(event.colorScheme)
       is ReaderEvent.UpdateFontScaleFactor -> updateFontScaleFactor(event.fontScaleFactor)
       is ReaderEvent.UpdateFontLineHeightFactor ->
         updateFontLineHeightFactor(event.fontLineHeightFactor)
@@ -131,6 +133,16 @@ class ReaderViewModel(
         _state.update { it.copy(openPaywall = true) }
       } else {
         settingsRepository.updateReaderFont(font)
+      }
+    }
+  }
+
+  private fun updateReaderColorScheme(colorScheme: ReaderColorScheme) {
+    coroutineScope.launch {
+      if (colorScheme.isPremium && !billingHandler.isSubscribed()) {
+        _state.update { it.copy(openPaywall = true) }
+      } else {
+        settingsRepository.updateReaderColorScheme(colorScheme)
       }
     }
   }
@@ -182,18 +194,27 @@ class ReaderViewModel(
 
       combine(
           settingsRepository.readerFontStyle,
+          settingsRepository.readerColorScheme,
           settingsRepository.readerFontScaleFactor,
           settingsRepository.readerLineHeightScaleFactor,
-          { fontStyle, fontScaleFactor, lineHeightScaleFactor ->
-            Triple(fontStyle, fontScaleFactor, lineHeightScaleFactor)
+          { fontStyle, colorScheme, fontScaleFactor, lineHeightScaleFactor ->
+            val result =
+              object {
+                val fontStyle = fontStyle
+                val colorScheme = colorScheme
+                val fontScaleFactor = fontScaleFactor
+                val lineHeightScaleFactor = lineHeightScaleFactor
+              }
+            result
           },
         )
-        .onEach { (fontStyle, fontScaleFactor, lineHeightScaleFactor) ->
+        .onEach { result ->
           _state.update {
             it.copy(
-              selectedReaderFont = fontStyle,
-              readerFontScaleFactor = fontScaleFactor,
-              readerLineHeightScaleFactor = lineHeightScaleFactor,
+              selectedReaderFont = result.fontStyle,
+              selectedReaderColorScheme = result.colorScheme,
+              readerFontScaleFactor = result.fontScaleFactor,
+              readerLineHeightScaleFactor = result.lineHeightScaleFactor,
             )
           }
         }

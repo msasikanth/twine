@@ -49,7 +49,7 @@ internal object Constants {
 
   const val IOS_APP_GROUP = Constants.APP_GROUP
 
-  const val MAX_FREE_FEEDS = 15
+  const val MAX_FREE_FEEDS = 30
 
   internal const val ENTITLEMENT_PREMIUM = "Premium"
 }

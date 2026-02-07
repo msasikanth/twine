@@ -75,6 +75,14 @@
         "useFeedIcon": false
       },
       {
+        "name": "9to5Google",
+        "link": "https://9to5google.com/feed/",
+        "description": "9to5Google - Google news, Pixel, Android, Home, Chrome OS, more",
+        "homepageLink": "https://9to5google.com/",
+        "icon": "https://9to5google.com/wp-content/uploads/sites/4/2017/03/favicon-bg-none-face-white.png?w=32",
+        "useFeedIcon": false
+      },
+      {
         "name": "Android Authority",
         "link": "https://www.androidauthority.com/feed/",
         "description": "Android News, Reviews, How To",
