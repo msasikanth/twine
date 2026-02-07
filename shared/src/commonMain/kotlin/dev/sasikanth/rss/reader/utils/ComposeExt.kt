@@ -92,7 +92,7 @@ fun PagerState.getOffsetFractionForPage(page: Int): Float {
 
 @Composable
 fun <T> PagerState.CollectItemTransition(
-  key: Any? = null,
+  vararg key: Any?,
   itemProvider: (Int) -> T?,
   onTransition: suspend (from: T?, to: T?, progress: Float) -> Unit,
 ) {
