@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">Filtre des publications</string>
   <string name="postsSortBy">Trier par</string>
   <string name="postsSortByPostDate">Date de publication</string>
