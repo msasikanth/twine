@@ -56,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.ComicNeue
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.Golos
@@ -65,12 +66,14 @@ import dev.sasikanth.rss.reader.data.repository.ReaderFont.Merriweather
 import dev.sasikanth.rss.reader.data.repository.ReaderFont.RobotoSerif
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.resources.icons.CustomTypography
+import dev.sasikanth.rss.reader.resources.icons.Palette
 import dev.sasikanth.rss.reader.resources.icons.StarShine
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
 import dev.sasikanth.rss.reader.ui.GoogleSansFontFamily
+import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalTranslucentStyles
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
@@ -78,15 +81,25 @@ import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.readerColorSchemeDynamic
+import twine.shared.generated.resources.readerColorSchemeForest
+import twine.shared.generated.resources.readerColorSchemeMidnight
+import twine.shared.generated.resources.readerColorSchemeParchment
+import twine.shared.generated.resources.readerColorSchemeSepia
+import twine.shared.generated.resources.readerColorSchemeSlate
+import twine.shared.generated.resources.readerColorSchemeSolarized
+import twine.shared.generated.resources.readerCustomisationsColorScheme
 import twine.shared.generated.resources.readerCustomisationsTypeface
 
 @Composable
 internal fun ReaderCustomizationsContent(
   selectedFont: ReaderFont,
+  selectedColorScheme: ReaderColorScheme,
   fontScaleFactor: Float,
   fontLineHeightFactor: Float,
   isSubscribed: Boolean,
   onFontChange: (ReaderFont) -> Unit,
+  onColorSchemeChange: (ReaderColorScheme) -> Unit,
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
 ) {
@@ -94,6 +107,64 @@ internal fun ReaderCustomizationsContent(
     modifier =
       Modifier.fillMaxWidth().background(AppTheme.colorScheme.bottomSheet).padding(vertical = 16.dp)
   ) {
+    ColorSchemeHeader()
+
+    val colorSchemeListState =
+      rememberLazyListState(
+        initialFirstVisibleItemIndex = ReaderColorScheme.entries.indexOf(selectedColorScheme)
+      )
+
+    LazyRow(
+      state = colorSchemeListState,
+      contentPadding = PaddingValues(start = 28.dp, top = 8.dp, end = 28.dp, bottom = 16.dp),
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      items(ReaderColorScheme.entries) { colorScheme ->
+        val appDynamicColorState = LocalDynamicColorState.current
+        val isDark = AppTheme.isDark
+        val (backgroundColor, contentColor) =
+          when (colorScheme) {
+            ReaderColorScheme.Dynamic ->
+              appDynamicColorState.lightAppColorScheme.primaryContainer to
+                appDynamicColorState.lightAppColorScheme.onPrimaryContainer
+            ReaderColorScheme.Sepia ->
+              sepiaColorScheme(isDark).surface to sepiaColorScheme(isDark).onSurface
+            ReaderColorScheme.Solarized ->
+              solarizedColorScheme(isDark).surface to solarizedColorScheme(isDark).onSurface
+            ReaderColorScheme.Parchment ->
+              parchmentColorScheme(isDark).surface to parchmentColorScheme(isDark).onSurface
+            ReaderColorScheme.Midnight ->
+              midnightColorScheme().surface to midnightColorScheme().onSurface
+            ReaderColorScheme.Forest ->
+              forestColorScheme(isDark).surface to forestColorScheme(isDark).onSurface
+            ReaderColorScheme.Slate ->
+              slateColorScheme(isDark).surface to slateColorScheme(isDark).onSurface
+          }
+
+        val label =
+          when (colorScheme) {
+            ReaderColorScheme.Dynamic -> stringResource(Res.string.readerColorSchemeDynamic)
+            ReaderColorScheme.Sepia -> stringResource(Res.string.readerColorSchemeSepia)
+            ReaderColorScheme.Solarized -> stringResource(Res.string.readerColorSchemeSolarized)
+            ReaderColorScheme.Parchment -> stringResource(Res.string.readerColorSchemeParchment)
+            ReaderColorScheme.Midnight -> stringResource(Res.string.readerColorSchemeMidnight)
+            ReaderColorScheme.Forest -> stringResource(Res.string.readerColorSchemeForest)
+            ReaderColorScheme.Slate -> stringResource(Res.string.readerColorSchemeSlate)
+          }
+
+        ColorSchemeChip(
+          selected = colorScheme == selectedColorScheme,
+          label = label,
+          backgroundColor = backgroundColor,
+          contentColor = contentColor,
+          isPremium = colorScheme.isPremium,
+          isSubscribed = isSubscribed,
+          onClick = { onColorSchemeChange(colorScheme) },
+        )
+      }
+    }
+
     CustomisationsTypefaceHeader()
 
     val activeTypefaceIndex = ReaderFont.entries.indexOf(selectedFont)
@@ -318,6 +389,92 @@ private fun TypefaceChip(
           imageVector = TwineIcons.StarShine,
           contentDescription = null,
           tint = contentColor,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun ColorSchemeHeader() {
+  Row(
+    modifier = Modifier.fillMaxWidth().padding(horizontal = 28.dp),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    Icon(
+      modifier = Modifier.requiredSize(20.dp),
+      imageVector = TwineIcons.Palette,
+      contentDescription = null,
+      tint = AppTheme.colorScheme.onSurface,
+    )
+
+    Text(
+      text = stringResource(Res.string.readerCustomisationsColorScheme),
+      style = MaterialTheme.typography.titleMedium,
+      color = AppTheme.colorScheme.onSurface,
+      modifier = Modifier.padding(16.dp),
+    )
+  }
+}
+
+@Composable
+private fun ColorSchemeChip(
+  selected: Boolean,
+  label: String,
+  backgroundColor: Color,
+  contentColor: Color,
+  isPremium: Boolean,
+  isSubscribed: Boolean,
+  modifier: Modifier = Modifier,
+  onClick: () -> Unit,
+) {
+  val chipOuterPadding by animateDpAsState(if (!selected) 4.dp else 0.dp)
+  val chipPadding by animateDpAsState(if (selected) 4.dp else 0.dp)
+
+  Box(
+    modifier =
+      Modifier.then(modifier)
+        .clip(RoundedCornerShape(50))
+        .clickable { onClick() }
+        .padding(vertical = chipOuterPadding)
+        .background(AppTheme.colorScheme.surface, RoundedCornerShape(50))
+        .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
+        .padding(chipPadding)
+  ) {
+    val background by
+      animateColorAsState(if (selected) AppTheme.colorScheme.inverseSurface else backgroundColor)
+    val contentColorTransition by
+      animateColorAsState(if (selected) AppTheme.colorScheme.inverseOnSurface else contentColor)
+
+    Row(
+      modifier =
+        Modifier.background(background, RoundedCornerShape(50))
+          .padding(horizontal = 20.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Box(
+        modifier =
+          Modifier.requiredSize(16.dp)
+            .background(backgroundColor, CircleShape)
+            .border(1.dp, contentColor.copy(alpha = 0.4f), CircleShape)
+      ) {
+        Text(
+          text = "A",
+          modifier = Modifier.align(Alignment.Center),
+          style = MaterialTheme.typography.labelSmall,
+          color = contentColor,
+        )
+      }
+
+      Text(text = label, color = contentColorTransition)
+
+      if (isPremium && !isSubscribed) {
+        Icon(
+          modifier = Modifier.requiredSize(16.dp),
+          imageVector = TwineIcons.StarShine,
+          contentDescription = null,
+          tint = contentColorTransition,
         )
       }
     }
