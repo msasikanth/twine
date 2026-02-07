@@ -139,6 +139,7 @@ import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
+import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
@@ -202,6 +203,7 @@ internal fun ReaderPage(
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
   isDarkTheme: Boolean,
+  readerColorScheme: ReaderColorScheme,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
@@ -285,6 +287,7 @@ internal fun ReaderPage(
                 pagerState = pagerState,
                 excerpt = excerptState,
                 darkTheme = isDarkTheme,
+                readerColorScheme = readerColorScheme,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },
@@ -397,6 +400,7 @@ private fun PostHeader(
   pagerState: PagerState,
   excerpt: String,
   darkTheme: Boolean,
+  readerColorScheme: ReaderColorScheme,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
@@ -467,10 +471,13 @@ private fun PostHeader(
         modifier =
           Modifier.padding(top = 12.dp).graphicsLayer {
             blendMode =
-              if (darkTheme) {
-                BlendMode.Screen
-              } else {
-                BlendMode.Multiply
+              when {
+                darkTheme && readerColorScheme.hasDarkMode -> {
+                  BlendMode.Screen
+                }
+                else -> {
+                  BlendMode.Multiply
+                }
               }
           },
         text = title.ifBlank { description },

@@ -111,8 +111,6 @@ import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.LoraFontFamily
 import dev.sasikanth.rss.reader.ui.MerriWeatherFontFamily
 import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
-import dev.sasikanth.rss.reader.ui.darkAppColorScheme
-import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.ui.typography
 import dev.sasikanth.rss.reader.utils.CollectItemTransition
@@ -239,11 +237,11 @@ internal fun ReaderScreen(
       remember(state.selectedReaderColorScheme, isDarkTheme) {
         when (state.selectedReaderColorScheme) {
           ReaderColorScheme.Dynamic -> null
-          ReaderColorScheme.Sepia -> sepiaColorScheme(isDarkTheme)
+          ReaderColorScheme.Sepia -> sepiaColorScheme()
           ReaderColorScheme.Solarized -> solarizedColorScheme(isDarkTheme)
-          ReaderColorScheme.Parchment -> parchmentColorScheme(isDarkTheme)
+          ReaderColorScheme.Parchment -> parchmentColorScheme()
           ReaderColorScheme.Midnight -> midnightColorScheme()
-          ReaderColorScheme.Forest -> forestColorScheme(isDarkTheme)
+          ReaderColorScheme.Forest -> forestColorScheme()
           ReaderColorScheme.Slate -> slateColorScheme(isDarkTheme)
         }
       }
@@ -460,6 +458,7 @@ internal fun ReaderScreen(
                 pagerState = pagerState,
                 markdownComponents = markdownComponents,
                 isDarkTheme = isDarkTheme,
+                readerColorScheme = state.selectedReaderColorScheme,
                 onBookmarkClick = {
                   viewModel.dispatch(
                     ReaderEvent.TogglePostBookmark(
