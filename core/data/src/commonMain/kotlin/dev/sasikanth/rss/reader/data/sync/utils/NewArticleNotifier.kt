@@ -43,7 +43,7 @@ class NewArticleNotifier(
     if (settingsRepository.enableNotifications.first()) {
       val lastRefreshedAtDateTime = refreshPolicy.lastRefreshedAtFlow.first()
       val now = Clock.System.now()
-      val tz = TimeZone.Companion.currentSystemDefault()
+      val tz = TimeZone.currentSystemDefault()
 
       val today = now.toLocalDateTime(tz).date
       val startOfDay = today.atStartOfDayIn(tz)
@@ -53,8 +53,7 @@ class NewArticleNotifier(
           .unreadSinceLastSync(
             sources = emptyList(),
             postsAfter = startOfDay,
-            lastSyncedAt =
-              lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault()),
+            postsUpperBound = lastRefreshedAtDateTime.toInstant(TimeZone.currentSystemDefault()),
           )
           .first()
 

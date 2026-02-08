@@ -197,7 +197,7 @@ class LocalSyncCoordinator(
             activeSourceIds = activeSourceIds,
             unreadOnly = unreadOnly,
             after = postsAfter,
-            lastSyncedAt =
+            postsUpperBound =
               lastRefreshedAtDateTime.toInstant(TimeZone.Companion.currentSystemDefault()),
           )
         }
