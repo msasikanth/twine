@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">Premium'a Geç: Her şeyin kilidini aç ve gelecekteki gelişimi destekle.</string>
   <string name="twinePremiumSubscribedDesc">Twine premium'a abonesiniz. Desteklediğiniz için teşekkürler ❤️</string>
   <string name="readerCustomisationsTypeface">Yazı Tipi</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">Gönderi filtresi</string>
   <string name="postsSortBy">Sırala</string>
   <string name="postsSortByPostDate">Yayın tarihi</string>
@@ -261,6 +263,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d sonuç</item>

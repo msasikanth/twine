@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">Переходите на премиум: открывайте все возможности приложения и стимулируйте его дальнейшее развитие.</string>
   <string name="twinePremiumSubscribedDesc">Вы подписаны на Twine премиум. Спасибо за поддержку ❤️</string>
   <string name="readerCustomisationsTypeface">Шрифт</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">Фильтр постов</string>
   <string name="postsSortBy">Сортировать по</string>
   <string name="postsSortByPostDate">Дата публикации</string>
@@ -261,6 +263,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">Один</item>
