@@ -234,6 +234,7 @@ class SettingsViewModel(
       settingsRepository.clear()
       imageLoader.diskCache?.clear()
       imageLoader.memoryCache?.clear()
+      refreshPolicy.clear()
       settingsRepository.completeOnboarding()
     }
   }
