@@ -70,10 +70,6 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   init {
     setupRemoteCommands()
 
-    val audioSession = AVAudioSession.sharedInstance()
-    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
-    audioSession.setActive(true, null)
-
     NSNotificationCenter.defaultCenter.addObserverForName(
       AVPlayerItemDidPlayToEndTimeNotification,
       null,
@@ -137,6 +133,10 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   }
 
   private fun playInternal(url: NSURL, title: String, artist: String, coverUrl: String?) {
+    val audioSession = AVAudioSession.sharedInstance()
+    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
+    audioSession.setActive(true, null)
+
     val playerItem = AVPlayerItem(uRL = url)
     player.replaceCurrentItemWithPlayerItem(playerItem)
     player.playImmediatelyAtRate(currentSpeed)
@@ -153,6 +153,10 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   }
 
   override fun resume() {
+    val audioSession = AVAudioSession.sharedInstance()
+    audioSession.setCategory(AVAudioSessionCategoryPlayback, null)
+    audioSession.setActive(true, null)
+
     player.playImmediatelyAtRate(currentSpeed)
     startProgressUpdate()
     updatePlaybackState()
