@@ -53,6 +53,7 @@ import dev.sasikanth.rss.reader.resources.icons.ArticleShortcut
 import dev.sasikanth.rss.reader.resources.icons.OpenBrowser
 import dev.sasikanth.rss.reader.resources.icons.Settings
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
+import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
@@ -62,6 +63,7 @@ import twine.shared.generated.resources.readerSettings
 
 @Composable
 internal fun ReaderViewBottomBar(
+  selectedAppColorScheme: AppColorScheme?,
   loadFullArticle: Boolean,
   openInBrowserClick: () -> Unit,
   loadFullArticleClick: () -> Unit,
@@ -72,6 +74,7 @@ internal fun ReaderViewBottomBar(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     verticalAlignment = Alignment.CenterVertically,
   ) {
+    val colorScheme = selectedAppColorScheme ?: AppTheme.colorScheme
     val transition = updateTransition(loadFullArticle)
     val buttonMinWidth by
       transition.animateDp {
@@ -108,17 +111,17 @@ internal fun ReaderViewBottomBar(
     val readerViewToggleBackgroundColor by
       transition.animateColor {
         if (it) {
-          AppTheme.colorScheme.primaryContainer
+          colorScheme.primaryContainer
         } else {
-          AppTheme.colorScheme.surfaceContainerHighest
+          colorScheme.surfaceContainerHighest
         }
       }
     val readerViewToggleContentColor by
       transition.animateColor {
         if (it) {
-          AppTheme.colorScheme.onPrimaryContainer
+          colorScheme.onPrimaryContainer
         } else {
-          AppTheme.colorScheme.onSurface
+          colorScheme.onSurface
         }
       }
 

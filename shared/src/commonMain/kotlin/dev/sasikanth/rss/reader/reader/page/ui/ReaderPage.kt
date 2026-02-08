@@ -59,6 +59,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -95,6 +96,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -733,6 +735,11 @@ private fun MediaControls(
       exit = fadeOut() + shrinkVertically(animationSpec = extendedControlsAnimationSpec),
     ) {
       Column {
+        val sliderColors =
+          SliderDefaults.colors(
+            activeTrackColor = AppTheme.colorScheme.primaryContainer,
+            inactiveTrackColor = AppTheme.colorScheme.surfaceContainerHigh,
+          )
         Slider(
           modifier = Modifier.padding(top = 8.dp),
           value = progress,
@@ -744,12 +751,18 @@ private fun MediaControls(
             }
             onSeek(newPosition)
           },
-          colors =
-            SliderDefaults.colors(
-              thumbColor = AppTheme.colorScheme.primary,
-              activeTrackColor = AppTheme.colorScheme.primary,
-              inactiveTrackColor = AppTheme.colorScheme.primary.copy(alpha = 0.24f),
-            ),
+          thumb = {
+            Box(
+              modifier =
+                Modifier.requiredSize(24.dp)
+                  .shadow(elevation = 2.dp, shape = CircleShape)
+                  .background(AppTheme.colorScheme.inverseSurface, CircleShape)
+                  .border(1.dp, AppTheme.colorScheme.secondary, CircleShape)
+            )
+          },
+          track = {
+            SliderDefaults.Track(sliderState = it, thumbTrackGapSize = 0.dp, colors = sliderColors)
+          },
         )
 
         Row(modifier = Modifier.fillMaxWidth()) {
