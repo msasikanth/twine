@@ -310,6 +310,11 @@ fun App(
         }
 
         composable<Screen.Main> {
+          LaunchedEffect(useDarkTheme) {
+            toggleLightStatusBar(!useDarkTheme)
+            toggleLightNavBar(!useDarkTheme)
+          }
+
           MainScreen(
             homeContent = { openDrawer ->
               val viewModel = viewModel { homeViewModel() }
@@ -505,6 +510,8 @@ fun App(
             },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) },
+            toggleLightStatusBar = toggleLightStatusBar,
+            toggleLightNavBar = toggleLightNavBar,
             modifier = roundedCornerScreenModifier,
           )
         }
@@ -527,7 +534,7 @@ fun App(
               .launchIn(this)
           }
 
-          LaunchedEffect(Unit) {
+          LaunchedEffect(useDarkTheme) {
             toggleLightStatusBar(!useDarkTheme)
             toggleLightNavBar(!useDarkTheme)
           }

@@ -135,6 +135,8 @@ internal fun ReaderScreen(
   onPostChanged: (Int, String) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
+  toggleLightStatusBar: (Boolean) -> Unit,
+  toggleLightNavBar: (Boolean) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val coroutineScope = rememberCoroutineScope()
@@ -199,33 +201,39 @@ internal fun ReaderScreen(
     viewModel.dispatch(ReaderEvent.HideReaderCustomisations)
   }
 
+  val isParentThemeDark = AppTheme.isDark
+  val isDarkTheme =
+    remember(state.selectedReaderColorScheme, isParentThemeDark) {
+      state.selectedReaderColorScheme.isDark(isParentThemeDark)
+    }
+
+  LaunchedEffect(isDarkTheme) {
+    toggleLightStatusBar(!isDarkTheme)
+    toggleLightNavBar(!isDarkTheme)
+  }
+
+  val snackbarHostState = remember { SnackbarHostState() }
+  val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+  val fontFamily =
+    when (state.selectedReaderFont) {
+      ReaderFont.ComicNeue -> ComicNeueFontFamily
+      ReaderFont.GoogleSans -> GoogleSansFontFamily
+      ReaderFont.Golos -> GolosFontFamily
+      ReaderFont.Lora -> LoraFontFamily
+      ReaderFont.Merriweather -> MerriWeatherFontFamily
+      ReaderFont.RobotoSerif -> RobotoSerifFontFamily
+    }
+  val typography =
+    typography(
+      fontFamily = fontFamily,
+      fontScalingFactor = state.readerFontScaleFactor,
+      lineHeightScalingFactor = state.readerLineHeightScaleFactor,
+    )
+
   CompositionLocalProvider(
     LocalDynamicColorState provides articleDynamicColorState,
     LocalUriHandler provides readerLinkHandler,
   ) {
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scrollBehaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val fontFamily =
-      when (state.selectedReaderFont) {
-        ReaderFont.ComicNeue -> ComicNeueFontFamily
-        ReaderFont.GoogleSans -> GoogleSansFontFamily
-        ReaderFont.Golos -> GolosFontFamily
-        ReaderFont.Lora -> LoraFontFamily
-        ReaderFont.Merriweather -> MerriWeatherFontFamily
-        ReaderFont.RobotoSerif -> RobotoSerifFontFamily
-      }
-    val typography =
-      typography(
-        fontFamily = fontFamily,
-        fontScalingFactor = state.readerFontScaleFactor,
-        lineHeightScalingFactor = state.readerLineHeightScaleFactor,
-      )
-
-    val isParentThemeDark = AppTheme.isDark
-    val isDarkTheme =
-      remember(state.selectedReaderColorScheme, isParentThemeDark) {
-        state.selectedReaderColorScheme.isDark(isParentThemeDark)
-      }
     val overriddenColorScheme =
       remember(state.selectedReaderColorScheme, isDarkTheme) {
         when (state.selectedReaderColorScheme) {
