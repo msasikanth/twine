@@ -102,6 +102,7 @@ import dev.sasikanth.rss.reader.resources.icons.ArrowBack
 import dev.sasikanth.rss.reader.resources.icons.Platform
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.platform
+import dev.sasikanth.rss.reader.ui.AppColorScheme
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.ComicNeueFontFamily
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
@@ -355,6 +356,7 @@ internal fun ReaderScreen(
               fontScaleFactor = state.readerFontScaleFactor,
               fontLineHeightFactor = state.readerLineHeightScaleFactor,
               isSubscribed = state.isSubscribed,
+              overriddenColorScheme = overriddenColorScheme,
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
@@ -503,6 +505,7 @@ private fun ReaderActionsPanel(
   onFontScaleFactorChange: (Float) -> Unit,
   onFontLineHeightFactorChange: (Float) -> Unit,
   modifier: Modifier = Modifier,
+  overriddenColorScheme: AppColorScheme? = null,
 ) {
   val navBarScrimColor = AppTheme.colorScheme.backdrop
 
@@ -586,10 +589,11 @@ private fun ReaderActionsPanel(
               )
             } else {
               ReaderViewBottomBar(
-                loadFullArticle,
-                openInBrowserClick,
-                loadFullArticleClick,
-                openReaderViewSettings,
+                selectedAppColorScheme = overriddenColorScheme,
+                loadFullArticle = loadFullArticle,
+                openInBrowserClick = openInBrowserClick,
+                loadFullArticleClick = loadFullArticleClick,
+                openReaderViewSettings = openReaderViewSettings,
               )
             }
           }
