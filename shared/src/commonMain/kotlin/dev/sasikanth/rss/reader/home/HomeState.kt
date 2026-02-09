@@ -47,8 +47,8 @@ data class HomeState(
   val postsType: PostsType,
   val postsSortOrder: PostsSortOrder,
   val hasUnreadPosts: Boolean,
-  val currentDateTime: LocalDateTime,
   val homeViewMode: HomeViewMode,
+  val lastRefreshedAt: LocalDateTime?,
   val unreadSinceLastSync: UnreadSinceLastSync?,
   val prevActiveSource: Source?,
   val activePostIndex: Int,
@@ -57,7 +57,7 @@ data class HomeState(
 
   companion object {
 
-    fun default(currentDateTime: LocalDateTime) =
+    fun default() =
       HomeState(
         allPosts = emptyFlow(),
         feedPosts = null,
@@ -69,7 +69,7 @@ data class HomeState(
         postsType = PostsType.ALL,
         postsSortOrder = PostsSortOrder.Latest,
         hasUnreadPosts = false,
-        currentDateTime = currentDateTime,
+        lastRefreshedAt = null,
         homeViewMode = HomeViewMode.Default,
         unreadSinceLastSync = null,
         prevActiveSource = null,
