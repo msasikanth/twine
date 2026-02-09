@@ -444,14 +444,9 @@ private fun ColorSchemeChip(
         .border(1.dp, AppTheme.colorScheme.secondary, RoundedCornerShape(50))
         .padding(chipPadding)
   ) {
-    val background by
-      animateColorAsState(if (selected) AppTheme.colorScheme.inverseSurface else backgroundColor)
-    val contentColorTransition by
-      animateColorAsState(if (selected) AppTheme.colorScheme.inverseOnSurface else contentColor)
-
     Row(
       modifier =
-        Modifier.background(background, RoundedCornerShape(50))
+        Modifier.background(backgroundColor, RoundedCornerShape(50))
           .padding(horizontal = 20.dp, vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically,
       horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -470,14 +465,14 @@ private fun ColorSchemeChip(
         )
       }
 
-      Text(text = label, color = contentColorTransition)
+      Text(text = label, color = contentColor)
 
       if (isPremium && !isSubscribed) {
         Icon(
           modifier = Modifier.requiredSize(16.dp),
           imageVector = TwineIcons.StarShine,
           contentDescription = null,
-          tint = contentColorTransition,
+          tint = contentColor,
         )
       }
     }
