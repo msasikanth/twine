@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
   <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
   <string name="readerCustomisationsTypeface">排版</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">文章过滤</string>
   <string name="postsSortBy">排序方式</string>
   <string name="postsSortByPostDate">发布日期</string>
@@ -261,6 +263,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="other">%1$d 个结果</item>
