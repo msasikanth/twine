@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">Abonnieren Sie Premium: Alles freischalten und die zukünftige Entwicklung vorantreiben.</string>
   <string name="twinePremiumSubscribedDesc">Sie haben Twine Premium abonniert. Danke für die Unterstützung ❤️</string>
   <string name="readerCustomisationsTypeface">Schriftart</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">Beitragsfilter</string>
   <string name="postsSortBy">Sortieren nach</string>
   <string name="postsSortByPostDate">Beitragsdatum</string>
@@ -261,6 +263,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d Ergebnis</item>

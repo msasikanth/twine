@@ -189,6 +189,8 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
+  <string name="readerCustomisationsColorScheme">Color scheme</string>
+  <string name="readerColorSchemeDynamic">Dynamic</string>
   <string name="postsFilter">पोस्ट फ़िल्टर</string>
   <string name="postsSortBy">क्रमबद्ध करें</string>
   <string name="postsSortByPostDate">पोस्ट की तारीख</string>
@@ -261,6 +263,7 @@
   <string name="discoverySearchHint">Search for feeds</string>
   <string name="discoveryAddFeed">Add</string>
   <string name="discoveryAdded">Added</string>
+  <string name="discoveryRefresh">Refresh</string>
   <!-- Plurals -->
   <plurals name="searchResultsCount">
     <item quantity="one">%1$d result</item>
