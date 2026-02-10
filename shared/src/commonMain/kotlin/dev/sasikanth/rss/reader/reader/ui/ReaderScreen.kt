@@ -152,8 +152,8 @@ internal fun ReaderScreen(
   val defaultDark = remember { appDynamicColorState.darkAppColorScheme }
   val articleDynamicColorState =
     rememberDynamicColorState(
-      defaultLightAppColorScheme = defaultLight,
-      defaultDarkAppColorScheme = defaultDark,
+      defaultLightAppColorScheme = defaultLight.toValues(),
+      defaultDarkAppColorScheme = defaultDark.toValues(),
     )
 
   val readerLinkHandler = remember {
@@ -277,7 +277,7 @@ internal fun ReaderScreen(
             }
           },
         topBar = {
-          val topBarScrimColor = AppTheme.colorScheme.backdrop
+          val colorScheme = AppTheme.colorScheme
           val scrollBehavior =
             if (platform !is Platform.Desktop) {
               scrollBehaviour
@@ -289,7 +289,7 @@ internal fun ReaderScreen(
             modifier =
               Modifier.drawBehind {
                 drawRect(
-                  brush = Brush.verticalGradient(listOf(topBarScrimColor, Color.Transparent))
+                  brush = Brush.verticalGradient(listOf(colorScheme.backdrop, Color.Transparent))
                 )
               },
             expandedHeight = 72.dp,
@@ -515,7 +515,7 @@ private fun ReaderActionsPanel(
   modifier: Modifier = Modifier,
   overriddenColorScheme: AppColorScheme? = null,
 ) {
-  val navBarScrimColor = AppTheme.colorScheme.backdrop
+  val colorScheme = AppTheme.colorScheme
 
   LookaheadScope {
     Box(
@@ -523,7 +523,9 @@ private fun ReaderActionsPanel(
         Modifier.fillMaxWidth()
           .wrapContentHeight()
           .drawBehind {
-            drawRect(brush = Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+            drawRect(
+              brush = Brush.verticalGradient(listOf(Color.Transparent, colorScheme.backdrop))
+            )
           }
           .animateBounds(
             lookaheadScope = this,

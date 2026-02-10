@@ -66,8 +66,8 @@ internal object TwineDynamicColors {
     seedColor: Color,
     useDarkTheme: Boolean,
     useTonalSpotScheme: Boolean,
-    defaultColorScheme: AppColorScheme,
-  ): AppColorScheme {
+    defaultColorScheme: AppColorValues,
+  ): AppColorValues {
     val sourceColorHct = Hct.fromInt(seedColor.toArgb())
     val scheme =
       if (useTonalSpotScheme) {
@@ -76,7 +76,7 @@ internal object TwineDynamicColors {
         SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
       }
 
-    return AppColorScheme(
+    return AppColorValues(
       primary = dynamicColors.primary().getColor(scheme),
       onPrimary = dynamicColors.onPrimary().getColor(scheme),
       secondary = dynamicColors.secondary().getColor(scheme),

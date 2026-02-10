@@ -470,12 +470,14 @@ private fun PostHeader(
       Text(
         modifier =
           Modifier.padding(top = 12.dp).graphicsLayer {
-            blendMode =
-              if (readerColorScheme.isDark(darkTheme)) {
-                BlendMode.Screen
-              } else {
-                BlendMode.Multiply
-              }
+            if (readerColorScheme == ReaderColorScheme.Dynamic) {
+              blendMode =
+                if (readerColorScheme.isDark(darkTheme)) {
+                  BlendMode.Screen
+                } else {
+                  BlendMode.Multiply
+                }
+            }
           },
         text = title.ifBlank { description },
         style = MaterialTheme.typography.headlineMedium,

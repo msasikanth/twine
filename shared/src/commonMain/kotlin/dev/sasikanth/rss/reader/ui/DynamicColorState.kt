@@ -33,14 +33,14 @@ import kotlinx.coroutines.withContext
 
 @Composable
 internal fun rememberDynamicColorState(
-  defaultLightAppColorScheme: AppColorScheme,
-  defaultDarkAppColorScheme: AppColorScheme,
+  defaultLightAppColorScheme: AppColorValues,
+  defaultDarkAppColorScheme: AppColorValues,
   useTonalSpotScheme: Boolean = true,
 ): DynamicColorState {
   return remember(defaultLightAppColorScheme, defaultDarkAppColorScheme, useTonalSpotScheme) {
     DynamicColorState(
-      defaultLightAppColorScheme = defaultLightAppColorScheme,
-      defaultDarkAppColorScheme = defaultDarkAppColorScheme,
+      defaultLightValues = defaultLightAppColorScheme,
+      defaultDarkValues = defaultDarkAppColorScheme,
       useTonalSpotScheme = useTonalSpotScheme,
     )
   }
@@ -48,26 +48,29 @@ internal fun rememberDynamicColorState(
 
 @Stable
 internal class DynamicColorState(
-  private val defaultLightAppColorScheme: AppColorScheme,
-  private val defaultDarkAppColorScheme: AppColorScheme,
+  private val defaultLightValues: AppColorValues,
+  private val defaultDarkValues: AppColorValues,
   private val useTonalSpotScheme: Boolean,
 ) {
-  val lightAppColorScheme = defaultLightAppColorScheme.copy()
-  val darkAppColorScheme = defaultDarkAppColorScheme.copy()
+  val lightAppColorScheme = AppColorScheme(defaultLightValues)
+  val darkAppColorScheme = AppColorScheme(defaultDarkValues)
 
   private var lastFromSeedColor: Color? = null
   private var lastToSeedColor: Color? = null
   private var lastProgress: Float = 0f
 
-  private var startLight: AppColorScheme = defaultLightAppColorScheme
-  private var startDark: AppColorScheme = defaultDarkAppColorScheme
-  private var endLight: AppColorScheme = defaultLightAppColorScheme
-  private var endDark: AppColorScheme = defaultDarkAppColorScheme
+  private var startLight: AppColorValues = defaultLightValues
+  private var startDark: AppColorValues = defaultDarkValues
+  private var endLight: AppColorValues = defaultLightValues
+  private var endDark: AppColorValues = defaultDarkValues
 
-  private val cache = lruCache<String, AppColorScheme>(maxSize = 10)
+  private val cache = lruCache<String, AppColorValues>(maxSize = 10)
 
   suspend fun animate(fromSeedColor: Color?, toSeedColor: Color?, progress: Float) {
     val seedColorsChanged = fromSeedColor != lastFromSeedColor || toSeedColor != lastToSeedColor
+    if (!seedColorsChanged && (progress - lastProgress).absoluteValue < 0.02f) {
+      return
+    }
 
     lastFromSeedColor = fromSeedColor
     lastToSeedColor = toSeedColor
@@ -75,8 +78,8 @@ internal class DynamicColorState(
 
     if (seedColorsChanged) {
       withContext(Dispatchers.Default) {
-        val defaultLightSeedColor = defaultLightAppColorScheme.primary
-        val defaultDarkSeedColor = defaultDarkAppColorScheme.primary
+        val defaultLightSeedColor = defaultLightValues.primary
+        val defaultDarkSeedColor = defaultDarkValues.primary
 
         startLight =
           cache["light_$fromSeedColor"]
@@ -84,7 +87,7 @@ internal class DynamicColorState(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = false,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightAppColorScheme,
+                defaultColorScheme = defaultLightValues,
               )
               .also { cache.put("light_$fromSeedColor", it) }
 
@@ -94,7 +97,7 @@ internal class DynamicColorState(
                 seedColor = fromSeedColor ?: defaultLightSeedColor,
                 useDarkTheme = true,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkAppColorScheme,
+                defaultColorScheme = defaultDarkValues,
               )
               .also { cache.put("dark_$fromSeedColor", it) }
 
@@ -104,7 +107,7 @@ internal class DynamicColorState(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = false,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultLightAppColorScheme,
+                defaultColorScheme = defaultLightValues,
               )
               .also { cache.put("light_$toSeedColor", it) }
 
@@ -114,34 +117,43 @@ internal class DynamicColorState(
                 seedColor = toSeedColor ?: defaultDarkSeedColor,
                 useDarkTheme = true,
                 useTonalSpotScheme = useTonalSpotScheme,
-                defaultColorScheme = defaultDarkAppColorScheme,
+                defaultColorScheme = defaultDarkValues,
               )
               .also { cache.put("dark_$toSeedColor", it) }
       }
     }
 
-    withContext(Dispatchers.Default) {
-      val normalizedProgress =
-        ease(
-          if (progress < -EPSILON) {
-            progress.absoluteValue.inverse()
-          } else {
-            progress
-          }
-        )
+    val (interpolatedLight, interpolatedDark) =
+      withContext(Dispatchers.Default) {
+        val normalizedProgress =
+          ease(
+            if (progress < -EPSILON) {
+              progress.absoluteValue.inverse()
+            } else {
+              progress
+            }
+          )
 
-      if (normalizedProgress < EPSILON) {
-        lightAppColorScheme.updateFrom(startLight)
-        darkAppColorScheme.updateFrom(startDark)
-      } else if (normalizedProgress > 1f - EPSILON) {
-        lightAppColorScheme.updateFrom(endLight)
-        darkAppColorScheme.updateFrom(endDark)
-      } else {
-        lightAppColorScheme.updateFrom(
-          startLight.lerp(to = endLight, fraction = normalizedProgress)
-        )
-        darkAppColorScheme.updateFrom(startDark.lerp(to = endDark, fraction = normalizedProgress))
+        val light =
+          when {
+            normalizedProgress < EPSILON -> startLight
+            normalizedProgress > 1f - EPSILON -> endLight
+            else -> startLight.lerp(to = endLight, fraction = normalizedProgress)
+          }
+
+        val dark =
+          when {
+            normalizedProgress < EPSILON -> startDark
+            normalizedProgress > 1f - EPSILON -> endDark
+            else -> startDark.lerp(to = endDark, fraction = normalizedProgress)
+          }
+
+        light to dark
       }
+
+    withContext(Dispatchers.Main.immediate) {
+      lightAppColorScheme.updateFrom(interpolatedLight)
+      darkAppColorScheme.updateFrom(interpolatedDark)
     }
   }
 
@@ -153,12 +165,12 @@ internal class DynamicColorState(
     lastFromSeedColor = null
     lastToSeedColor = null
     lastProgress = 0f
-    startLight = defaultLightAppColorScheme
-    startDark = defaultDarkAppColorScheme
-    endLight = defaultLightAppColorScheme
-    endDark = defaultDarkAppColorScheme
-    lightAppColorScheme.updateFrom(defaultLightAppColorScheme)
-    darkAppColorScheme.updateFrom(defaultDarkAppColorScheme)
+    startLight = defaultLightValues
+    startDark = defaultDarkValues
+    endLight = defaultLightValues
+    endDark = defaultDarkValues
+    lightAppColorScheme.updateFrom(defaultLightValues)
+    darkAppColorScheme.updateFrom(defaultDarkValues)
   }
 
   private fun ease(progress: Float): Float {
