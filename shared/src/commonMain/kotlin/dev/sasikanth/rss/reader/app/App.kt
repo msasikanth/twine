@@ -16,7 +16,9 @@
  */
 package dev.sasikanth.rss.reader.app
 
-import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
@@ -266,12 +268,20 @@ fun App(
       NavHost(
         navController = navController,
         startDestination = Screen.Placeholder,
-        popEnterTransition = { EnterTransition.None },
+        popEnterTransition = {
+          fadeIn(
+            animationSpec =
+              spring(
+                dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+                stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
+              )
+          )
+        },
         popExitTransition = {
           scaleOut(
-            targetScale = 0.9f,
+            targetScale = 0.7f,
             transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f),
-          )
+          ) + fadeOut()
         },
       ) {
         composable<Screen.Placeholder> {
