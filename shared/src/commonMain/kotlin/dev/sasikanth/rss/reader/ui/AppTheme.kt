@@ -55,11 +55,16 @@ internal fun AppTheme(
       // We read a property from the source color scheme to ensure that AppTheme recomposes
       // whenever the dynamic colors change. This allows us to update the stable color scheme
       // instance that is provided to the rest of the app.
-      sourceColorScheme.primary
+      val sourceColorValues = sourceColorScheme.toValues()
 
-      val colorScheme = remember(useDarkTheme, overriddenColorScheme) { sourceColorScheme.copy() }
+      val colorScheme =
+        remember(useDarkTheme, overriddenColorScheme) {
+          AppColorScheme(sourceColorValues).apply {
+            updateFrom(sourceColorValues, amoled = useDarkTheme && useAmoled)
+          }
+        }
 
-      SideEffect { colorScheme.updateFrom(sourceColorScheme, amoled = useDarkTheme && useAmoled) }
+      SideEffect { colorScheme.updateFrom(sourceColorValues, amoled = useDarkTheme && useAmoled) }
 
       val secondary = colorScheme.secondary
       val onSurface = colorScheme.onSurface
