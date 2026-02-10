@@ -25,222 +25,40 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 
 @Stable
-class AppColorScheme(
-  primary: Color,
-  onPrimary: Color,
-  secondary: Color,
-  outline: Color,
-  outlineVariant: Color,
-  primaryContainer: Color,
-  onPrimaryContainer: Color,
-  surface: Color,
-  onSurface: Color,
-  onSurfaceVariant: Color,
-  surfaceContainer: Color,
-  surfaceContainerLow: Color,
-  surfaceContainerLowest: Color,
-  surfaceContainerHigh: Color,
-  surfaceContainerHighest: Color,
-  inversePrimary: Color,
-  inverseSurface: Color,
-  inverseOnSurface: Color,
-  textEmphasisHigh: Color,
-  textEmphasisMed: Color,
-  backdrop: Color,
-  bottomSheet: Color,
-  bottomSheetInverse: Color,
-  bottomSheetBorder: Color,
-  tintedBackground: Color,
-  tintedSurface: Color,
-  tintedForeground: Color,
-  tintedHighlight: Color,
-  error: Color,
+data class AppColorValues(
+  val primary: Color,
+  val onPrimary: Color,
+  val secondary: Color,
+  val outline: Color,
+  val outlineVariant: Color,
+  val primaryContainer: Color,
+  val onPrimaryContainer: Color,
+  val surface: Color,
+  val onSurface: Color,
+  val onSurfaceVariant: Color,
+  val surfaceContainer: Color,
+  val surfaceContainerLow: Color,
+  val surfaceContainerLowest: Color,
+  val surfaceContainerHigh: Color,
+  val surfaceContainerHighest: Color,
+  val inversePrimary: Color,
+  val inverseSurface: Color,
+  val inverseOnSurface: Color,
+  val textEmphasisHigh: Color,
+  val textEmphasisMed: Color,
+  val backdrop: Color,
+  val bottomSheet: Color,
+  val bottomSheetInverse: Color,
+  val bottomSheetBorder: Color,
+  val tintedBackground: Color,
+  val tintedSurface: Color,
+  val tintedForeground: Color,
+  val tintedHighlight: Color,
+  val error: Color,
 ) {
 
-  var primary by mutableStateOf(primary)
-    internal set
-
-  var onPrimary by mutableStateOf(onPrimary)
-    internal set
-
-  var secondary by mutableStateOf(secondary)
-    internal set
-
-  var outline by mutableStateOf(outline)
-    internal set
-
-  var outlineVariant by mutableStateOf(outlineVariant)
-    internal set
-
-  var primaryContainer by mutableStateOf(primaryContainer)
-    internal set
-
-  var onPrimaryContainer by mutableStateOf(onPrimaryContainer)
-    internal set
-
-  var surface by mutableStateOf(surface)
-    internal set
-
-  var onSurface by mutableStateOf(onSurface)
-    internal set
-
-  var onSurfaceVariant by mutableStateOf(onSurfaceVariant)
-    internal set
-
-  var surfaceContainer by mutableStateOf(surfaceContainer)
-    internal set
-
-  var surfaceContainerLow by mutableStateOf(surfaceContainerLow)
-    internal set
-
-  var surfaceContainerLowest by mutableStateOf(surfaceContainerLowest)
-    internal set
-
-  var surfaceContainerHigh by mutableStateOf(surfaceContainerHigh)
-    internal set
-
-  var surfaceContainerHighest by mutableStateOf(surfaceContainerHighest)
-    internal set
-
-  var inversePrimary by mutableStateOf(inversePrimary)
-    internal set
-
-  var inverseSurface by mutableStateOf(inverseSurface)
-    internal set
-
-  var inverseOnSurface by mutableStateOf(inverseOnSurface)
-    internal set
-
-  var textEmphasisHigh by mutableStateOf(textEmphasisHigh)
-    internal set
-
-  var textEmphasisMed by mutableStateOf(textEmphasisMed)
-    internal set
-
-  var backdrop by mutableStateOf(backdrop)
-    internal set
-
-  var bottomSheet by mutableStateOf(bottomSheet)
-    internal set
-
-  var bottomSheetInverse by mutableStateOf(bottomSheetInverse)
-    internal set
-
-  var bottomSheetBorder by mutableStateOf(bottomSheetBorder)
-    internal set
-
-  var tintedBackground by mutableStateOf(tintedBackground)
-    internal set
-
-  var tintedSurface by mutableStateOf(tintedSurface)
-    internal set
-
-  var tintedForeground by mutableStateOf(tintedForeground)
-    internal set
-
-  var tintedHighlight by mutableStateOf(tintedHighlight)
-    internal set
-
-  var error by mutableStateOf(error)
-    internal set
-
-  fun copy(
-    primary: Color = this.primary,
-    onPrimary: Color = this.onPrimary,
-    secondary: Color = this.secondary,
-    outline: Color = this.outline,
-    outlineVariant: Color = this.outlineVariant,
-    primaryContainer: Color = this.primaryContainer,
-    onPrimaryContainer: Color = this.onPrimaryContainer,
-    surface: Color = this.surface,
-    onSurface: Color = this.onSurface,
-    onSurfaceVariant: Color = this.onSurfaceVariant,
-    surfaceContainer: Color = this.surfaceContainer,
-    surfaceContainerLow: Color = this.surfaceContainerLow,
-    surfaceContainerLowest: Color = this.surfaceContainerLowest,
-    surfaceContainerHigh: Color = this.surfaceContainerHigh,
-    surfaceContainerHighest: Color = this.surfaceContainerHighest,
-    inversePrimary: Color = this.inversePrimary,
-    inverseSurface: Color = this.inverseSurface,
-    inverseOnSurface: Color = this.inverseOnSurface,
-    textEmphasisHigh: Color = this.textEmphasisHigh,
-    textEmphasisMed: Color = this.textEmphasisMed,
-    backdrop: Color = this.backdrop,
-    bottomSheet: Color = this.bottomSheet,
-    bottomSheetInverse: Color = this.bottomSheetInverse,
-    bottomSheetBorder: Color = this.bottomSheetBorder,
-    tintedBackground: Color = this.tintedBackground,
-    tintedSurface: Color = this.tintedSurface,
-    tintedForeground: Color = this.tintedForeground,
-    tintedHighlight: Color = this.tintedHighlight,
-    error: Color = this.error,
-  ): AppColorScheme =
-    AppColorScheme(
-      primary = primary,
-      onPrimary = onPrimary,
-      secondary = secondary,
-      outline = outline,
-      outlineVariant = outlineVariant,
-      primaryContainer = primaryContainer,
-      onPrimaryContainer = onPrimaryContainer,
-      surface = surface,
-      onSurface = onSurface,
-      onSurfaceVariant = onSurfaceVariant,
-      surfaceContainer = surfaceContainer,
-      surfaceContainerLow = surfaceContainerLow,
-      surfaceContainerLowest = surfaceContainerLowest,
-      surfaceContainerHigh = surfaceContainerHigh,
-      surfaceContainerHighest = surfaceContainerHighest,
-      inversePrimary = inversePrimary,
-      inverseSurface = inverseSurface,
-      inverseOnSurface = inverseOnSurface,
-      textEmphasisHigh = textEmphasisHigh,
-      textEmphasisMed = textEmphasisMed,
-      backdrop = backdrop,
-      bottomSheet = bottomSheet,
-      bottomSheetInverse = bottomSheetInverse,
-      bottomSheetBorder = bottomSheetBorder,
-      tintedBackground = tintedBackground,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
-      tintedHighlight = tintedHighlight,
-      error = error,
-    )
-
-  fun updateFrom(other: AppColorScheme, amoled: Boolean = false) {
-    primary = other.primary
-    onPrimary = other.onPrimary
-    secondary = other.secondary
-    outline = other.outline
-    outlineVariant = other.outlineVariant
-    primaryContainer = other.primaryContainer
-    onPrimaryContainer = other.onPrimaryContainer
-    surface = if (amoled) Color.Black else other.surface
-    onSurface = other.onSurface
-    onSurfaceVariant = other.onSurfaceVariant
-    surfaceContainer = if (amoled) Color.Black else other.surfaceContainer
-    surfaceContainerLow = if (amoled) Color.Black else other.surfaceContainerLow
-    surfaceContainerLowest = if (amoled) Color.Black else other.surfaceContainerLowest
-    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else other.surfaceContainerHigh
-    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else other.surfaceContainerHighest
-    inversePrimary = other.inversePrimary
-    inverseSurface = other.inverseSurface
-    inverseOnSurface = other.inverseOnSurface
-    textEmphasisHigh = other.textEmphasisHigh
-    textEmphasisMed = other.textEmphasisMed
-    backdrop = if (amoled) Color.Black else other.backdrop
-    bottomSheet = if (amoled) Color.Black else other.bottomSheet
-    bottomSheetInverse = other.bottomSheetInverse
-    bottomSheetBorder = other.bottomSheetBorder
-    tintedBackground = if (amoled) Color.Black else other.tintedBackground
-    tintedSurface = other.tintedSurface
-    tintedForeground = other.tintedForeground
-    tintedHighlight = other.tintedHighlight
-    error = other.error
-  }
-
-  fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
-    return copy(
+  fun lerp(to: AppColorValues, fraction: Float): AppColorValues {
+    return AppColorValues(
       primary = lerp(primary, to.primary, fraction),
       onPrimary = lerp(onPrimary, to.onPrimary, fraction),
       secondary = lerp(secondary, to.secondary, fraction),
@@ -274,8 +92,235 @@ class AppColorScheme(
   }
 }
 
-fun lightAppColorScheme(): AppColorScheme {
-  return AppColorScheme(
+@Stable
+class AppColorScheme(values: AppColorValues) {
+
+  var primary by mutableStateOf(values.primary)
+    internal set
+
+  var onPrimary by mutableStateOf(values.onPrimary)
+    internal set
+
+  var secondary by mutableStateOf(values.secondary)
+    internal set
+
+  var outline by mutableStateOf(values.outline)
+    internal set
+
+  var outlineVariant by mutableStateOf(values.outlineVariant)
+    internal set
+
+  var primaryContainer by mutableStateOf(values.primaryContainer)
+    internal set
+
+  var onPrimaryContainer by mutableStateOf(values.onPrimaryContainer)
+    internal set
+
+  var surface by mutableStateOf(values.surface)
+    internal set
+
+  var onSurface by mutableStateOf(values.onSurface)
+    internal set
+
+  var onSurfaceVariant by mutableStateOf(values.onSurfaceVariant)
+    internal set
+
+  var surfaceContainer by mutableStateOf(values.surfaceContainer)
+    internal set
+
+  var surfaceContainerLow by mutableStateOf(values.surfaceContainerLow)
+    internal set
+
+  var surfaceContainerLowest by mutableStateOf(values.surfaceContainerLowest)
+    internal set
+
+  var surfaceContainerHigh by mutableStateOf(values.surfaceContainerHigh)
+    internal set
+
+  var surfaceContainerHighest by mutableStateOf(values.surfaceContainerHighest)
+    internal set
+
+  var inversePrimary by mutableStateOf(values.inversePrimary)
+    internal set
+
+  var inverseSurface by mutableStateOf(values.inverseSurface)
+    internal set
+
+  var inverseOnSurface by mutableStateOf(values.inverseOnSurface)
+    internal set
+
+  var textEmphasisHigh by mutableStateOf(values.textEmphasisHigh)
+    internal set
+
+  var textEmphasisMed by mutableStateOf(values.textEmphasisMed)
+    internal set
+
+  var backdrop by mutableStateOf(values.backdrop)
+    internal set
+
+  var bottomSheet by mutableStateOf(values.bottomSheet)
+    internal set
+
+  var bottomSheetInverse by mutableStateOf(values.bottomSheetInverse)
+    internal set
+
+  var bottomSheetBorder by mutableStateOf(values.bottomSheetBorder)
+    internal set
+
+  var tintedBackground by mutableStateOf(values.tintedBackground)
+    internal set
+
+  var tintedSurface by mutableStateOf(values.tintedSurface)
+    internal set
+
+  var tintedForeground by mutableStateOf(values.tintedForeground)
+    internal set
+
+  var tintedHighlight by mutableStateOf(values.tintedHighlight)
+    internal set
+
+  var error by mutableStateOf(values.error)
+    internal set
+
+  fun toValues(): AppColorValues =
+    AppColorValues(
+      primary = primary,
+      onPrimary = onPrimary,
+      secondary = secondary,
+      outline = outline,
+      outlineVariant = outlineVariant,
+      primaryContainer = primaryContainer,
+      onPrimaryContainer = onPrimaryContainer,
+      surface = surface,
+      onSurface = onSurface,
+      onSurfaceVariant = onSurfaceVariant,
+      surfaceContainer = surfaceContainer,
+      surfaceContainerLow = surfaceContainerLow,
+      surfaceContainerLowest = surfaceContainerLowest,
+      surfaceContainerHigh = surfaceContainerHigh,
+      surfaceContainerHighest = surfaceContainerHighest,
+      inversePrimary = inversePrimary,
+      inverseSurface = inverseSurface,
+      inverseOnSurface = inverseOnSurface,
+      textEmphasisHigh = textEmphasisHigh,
+      textEmphasisMed = textEmphasisMed,
+      backdrop = backdrop,
+      bottomSheet = bottomSheet,
+      bottomSheetInverse = bottomSheetInverse,
+      bottomSheetBorder = bottomSheetBorder,
+      tintedBackground = tintedBackground,
+      tintedSurface = tintedSurface,
+      tintedForeground = tintedForeground,
+      tintedHighlight = tintedHighlight,
+      error = error,
+    )
+
+  fun copy(): AppColorScheme = AppColorScheme(toValues())
+
+  fun updateFrom(other: AppColorScheme, amoled: Boolean = false) {
+    primary = other.primary
+    onPrimary = other.onPrimary
+    secondary = other.secondary
+    outline = other.outline
+    outlineVariant = other.outlineVariant
+    primaryContainer = other.primaryContainer
+    onPrimaryContainer = other.onPrimaryContainer
+    surface = if (amoled) Color.Black else other.surface
+    onSurface = other.onSurface
+    onSurfaceVariant = other.onSurfaceVariant
+    surfaceContainer = if (amoled) Color.Black else other.surfaceContainer
+    surfaceContainerLow = if (amoled) Color.Black else other.surfaceContainerLow
+    surfaceContainerLowest = if (amoled) Color.Black else other.surfaceContainerLowest
+    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else other.surfaceContainerHigh
+    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else other.surfaceContainerHighest
+    inversePrimary = other.inversePrimary
+    inverseSurface = other.inverseSurface
+    inverseOnSurface = other.inverseOnSurface
+    textEmphasisHigh = other.textEmphasisHigh
+    textEmphasisMed = other.textEmphasisMed
+    backdrop = if (amoled) Color.Black else other.backdrop
+    bottomSheet = if (amoled) Color.Black else other.bottomSheet
+    bottomSheetInverse = other.bottomSheetInverse
+    bottomSheetBorder = other.bottomSheetBorder
+    tintedBackground = if (amoled) Color.Black else other.tintedBackground
+    tintedSurface = other.tintedSurface
+    tintedForeground = other.tintedForeground
+    tintedHighlight = other.tintedHighlight
+    error = other.error
+  }
+
+  fun updateFrom(values: AppColorValues, amoled: Boolean = false) {
+    primary = values.primary
+    onPrimary = values.onPrimary
+    secondary = values.secondary
+    outline = values.outline
+    outlineVariant = values.outlineVariant
+    primaryContainer = values.primaryContainer
+    onPrimaryContainer = values.onPrimaryContainer
+    surface = if (amoled) Color.Black else values.surface
+    onSurface = values.onSurface
+    onSurfaceVariant = values.onSurfaceVariant
+    surfaceContainer = if (amoled) Color.Black else values.surfaceContainer
+    surfaceContainerLow = if (amoled) Color.Black else values.surfaceContainerLow
+    surfaceContainerLowest = if (amoled) Color.Black else values.surfaceContainerLowest
+    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else values.surfaceContainerHigh
+    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else values.surfaceContainerHighest
+    inversePrimary = values.inversePrimary
+    inverseSurface = values.inverseSurface
+    inverseOnSurface = values.inverseOnSurface
+    textEmphasisHigh = values.textEmphasisHigh
+    textEmphasisMed = values.textEmphasisMed
+    backdrop = if (amoled) Color.Black else values.backdrop
+    bottomSheet = if (amoled) Color.Black else values.bottomSheet
+    bottomSheetInverse = values.bottomSheetInverse
+    bottomSheetBorder = values.bottomSheetBorder
+    tintedBackground = if (amoled) Color.Black else values.tintedBackground
+    tintedSurface = values.tintedSurface
+    tintedForeground = values.tintedForeground
+    tintedHighlight = values.tintedHighlight
+    error = values.error
+  }
+
+  fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
+    return AppColorScheme(
+      AppColorValues(
+        primary = lerp(primary, to.primary, fraction),
+        onPrimary = lerp(onPrimary, to.onPrimary, fraction),
+        secondary = lerp(secondary, to.secondary, fraction),
+        outline = lerp(outline, to.outline, fraction),
+        outlineVariant = lerp(outlineVariant, to.outlineVariant, fraction),
+        primaryContainer = lerp(primaryContainer, to.primaryContainer, fraction),
+        onPrimaryContainer = lerp(onPrimaryContainer, to.onPrimaryContainer, fraction),
+        surface = lerp(surface, to.surface, fraction),
+        onSurface = lerp(onSurface, to.onSurface, fraction),
+        onSurfaceVariant = lerp(onSurfaceVariant, to.onSurfaceVariant, fraction),
+        surfaceContainer = lerp(surfaceContainer, to.surfaceContainer, fraction),
+        surfaceContainerLow = lerp(surfaceContainerLow, to.surfaceContainerLow, fraction),
+        surfaceContainerLowest = lerp(surfaceContainerLowest, to.surfaceContainerLowest, fraction),
+        surfaceContainerHigh = lerp(surfaceContainerHigh, to.surfaceContainerHigh, fraction),
+        surfaceContainerHighest =
+          lerp(surfaceContainerHighest, to.surfaceContainerHighest, fraction),
+        inversePrimary = lerp(inversePrimary, to.inversePrimary, fraction),
+        inverseSurface = lerp(inverseSurface, to.inverseSurface, fraction),
+        inverseOnSurface = lerp(inverseOnSurface, to.inverseOnSurface, fraction),
+        textEmphasisHigh = lerp(textEmphasisHigh, to.textEmphasisHigh, fraction),
+        textEmphasisMed = lerp(textEmphasisMed, to.textEmphasisMed, fraction),
+        backdrop = lerp(backdrop, to.backdrop, fraction),
+        bottomSheet = lerp(bottomSheet, to.bottomSheet, fraction),
+        bottomSheetInverse = lerp(bottomSheetInverse, to.bottomSheetInverse, fraction),
+        bottomSheetBorder = lerp(bottomSheetBorder, to.bottomSheetBorder, fraction),
+        tintedBackground = lerp(tintedBackground, to.tintedBackground, fraction),
+        tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
+        tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
+        tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
+        error = lerp(error, to.error, fraction),
+      )
+    )
+  }
+}
+
+fun lightAppColorScheme(): AppColorValues {
+  return AppColorValues(
     primary = Color(0xFF006B54),
     onPrimary = Color.White,
     secondary = Color(0xFF4C635D),
@@ -308,8 +353,8 @@ fun lightAppColorScheme(): AppColorScheme {
   )
 }
 
-fun darkAppColorScheme(): AppColorScheme {
-  return AppColorScheme(
+fun darkAppColorScheme(): AppColorValues {
+  return AppColorValues(
     primary = Color(0xFF51DEB8),
     onPrimary = Color(0xFF00382B),
     secondary = Color(0xFFB3CCC3),
@@ -342,4 +387,4 @@ fun darkAppColorScheme(): AppColorScheme {
   )
 }
 
-internal val LocalAppColorScheme = compositionLocalOf { darkAppColorScheme() }
+internal val LocalAppColorScheme = compositionLocalOf { AppColorScheme(darkAppColorScheme()) }
