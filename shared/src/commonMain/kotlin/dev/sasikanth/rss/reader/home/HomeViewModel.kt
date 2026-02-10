@@ -125,7 +125,9 @@ class HomeViewModel(
           postsUpperBound = postsUpperBound,
         )
 
-      _openPost.emit(position to post)
+      if (position != null) {
+        _openPost.emit(position to post)
+      }
     }
   }
 
@@ -280,8 +282,12 @@ class HomeViewModel(
               postsUpperBound = lastRefreshedAt,
             )
 
-          val adjustedIndex = position + featuredPosts.size
-          _state.update { it.copy(activePostIndex = adjustedIndex) }
+          if (position != null) {
+            val adjustedIndex = position + featuredPosts.size
+            _state.update { it.copy(activePostIndex = adjustedIndex) }
+          } else {
+            _state.update { it.copy(activePostIndex = index) }
+          }
         }
       } else {
         _state.update { it.copy(activePostIndex = index) }

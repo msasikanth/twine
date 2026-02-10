@@ -475,9 +475,9 @@ class RssRepository(
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
-  ): Int {
+  ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
-      val post = postQueries.post(postId, ::Post).executeAsOne()
+      val post = postQueries.post(postId, ::Post).executeAsOneOrNull() ?: return@withContext null
       postQueries
         .postPosition(
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -501,9 +501,9 @@ class RssRepository(
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
-  ): Int {
+  ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
-      val post = postQueries.post(postId, ::Post).executeAsOne()
+      val post = postQueries.post(postId, ::Post).executeAsOneOrNull() ?: return@withContext null
       postQueries
         .nonFeaturedPostPosition(
           featuredPostsAfter = featuredPostsAfter,
