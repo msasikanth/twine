@@ -18,6 +18,7 @@
 package dev.sasikanth.rss.reader.data.utils
 
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
@@ -27,7 +28,15 @@ import kotlinx.datetime.toInstant
 
 object PostsFilterUtils {
 
-  fun postsThresholdTime(postsType: PostsType, dateTime: LocalDateTime): Instant {
+  fun postsThresholdTime(postsType: PostsType, dateTime: LocalDateTime?): Instant {
+    if (dateTime == null) {
+      return when (postsType) {
+        PostsType.ALL,
+        PostsType.UNREAD -> Instant.DISTANT_PAST
+        else -> Clock.System.now().minus(24.hours)
+      }
+    }
+
     return when (postsType) {
       PostsType.ALL,
       PostsType.UNREAD -> Instant.DISTANT_PAST
