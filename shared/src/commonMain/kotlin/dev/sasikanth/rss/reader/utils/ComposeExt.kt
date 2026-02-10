@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.graphics.shapes.Morph
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 expect fun String.toClipEntry(): ClipEntry
 
@@ -103,8 +104,12 @@ fun <T> PagerState.CollectItemTransition(
     snapshotFlow {
         val settledPage = settledPage
         val offset = getOffsetFractionForPage(settledPage)
-        settledPage to offset
+
+        // Quantize offset to 2 decimal places to throttle transitions
+        val quantizedOffset = (offset * 100).toInt() / 100f
+        settledPage to quantizedOffset
       }
+      .distinctUntilChanged()
       .collect { (settledPage, offset) ->
         val activePost = currentItemProvider(settledPage)
         if (activePost == null) return@collect

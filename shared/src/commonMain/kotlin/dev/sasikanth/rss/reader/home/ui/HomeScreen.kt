@@ -428,7 +428,7 @@ internal fun HomeScreen(
             },
           )
 
-          val navBarScrimColor = AppTheme.colorScheme.backdrop
+          val colorScheme = AppTheme.colorScheme
           AnimatedVisibility(
             modifier =
               Modifier.fillMaxWidth()
@@ -440,8 +440,9 @@ internal fun HomeScreen(
           ) {
             Box(
               modifier =
-                Modifier.matchParentSize()
-                  .background(Brush.verticalGradient(listOf(Color.Transparent, navBarScrimColor)))
+                Modifier.matchParentSize().drawBehind {
+                  drawRect(Brush.verticalGradient(listOf(Color.Transparent, colorScheme.backdrop)))
+                }
             )
           }
 
