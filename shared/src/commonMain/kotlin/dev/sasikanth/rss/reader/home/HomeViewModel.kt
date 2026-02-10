@@ -40,7 +40,6 @@ import dev.sasikanth.rss.reader.utils.NTuple7
 import dev.sasikanth.rss.reader.utils.combine as flowCombine
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Instant
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -109,7 +108,8 @@ class HomeViewModel(
 
   private fun onPostClicked(post: ResolvedPost) {
     viewModelScope.launch {
-      val postsAfter = postsThresholdTime(_state.value.postsType)
+      val postsAfter =
+        PostsFilterUtils.postsThresholdTime(_state.value.postsType, _state.value.lastRefreshedAt)
       val activeSourceIds = activeSourceIds(_state.value.activeSource)
       val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
       val postsUpperBound =
@@ -255,7 +255,11 @@ class HomeViewModel(
         if (featuredPostIndex != -1) {
           _state.update { it.copy(activePostIndex = featuredPostIndex) }
         } else {
-          val postsAfter = postsThresholdTime(_state.value.postsType)
+          val postsAfter =
+            PostsFilterUtils.postsThresholdTime(
+              _state.value.postsType,
+              _state.value.lastRefreshedAt,
+            )
           val featuredPostsAfter =
             (_state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault())
                 ?: Clock.System.now())
@@ -317,7 +321,8 @@ class HomeViewModel(
 
   private fun markPostsAsRead(source: Source?) {
     viewModelScope.launch {
-      val postsAfter = postsThresholdTime(_state.value.postsType)
+      val postsAfter =
+        PostsFilterUtils.postsThresholdTime(_state.value.postsType, _state.value.lastRefreshedAt)
 
       when (source) {
         is Feed -> {
@@ -353,19 +358,6 @@ class HomeViewModel(
   private fun onPostBookmarkClicked(post: ResolvedPost) {
     viewModelScope.launch {
       rssRepository.updateBookmarkStatus(bookmarked = !post.bookmarked, id = post.id)
-    }
-  }
-
-  private fun postsThresholdTime(postsType: PostsType): Instant {
-    val lastRefreshedAt = _state.value.lastRefreshedAt
-    return if (lastRefreshedAt != null) {
-      PostsFilterUtils.postsThresholdTime(postsType, lastRefreshedAt)
-    } else {
-      when (postsType) {
-        PostsType.ALL,
-        PostsType.UNREAD -> Instant.DISTANT_PAST
-        else -> Clock.System.now().minus(24.hours)
-      }
     }
   }
 

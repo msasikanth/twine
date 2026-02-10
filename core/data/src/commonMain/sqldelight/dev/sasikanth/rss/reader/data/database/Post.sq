@@ -128,7 +128,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY post.postDate DESC, post.createdAt DESC
 LIMIT :limit;
 
@@ -139,7 +139,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   (post.flags & 4) == 0 AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound;
 
@@ -173,7 +173,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.postDate DESC,
   post.createdAt DESC
@@ -209,7 +209,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.postDate ASC,
   post.createdAt ASC
@@ -245,7 +245,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.createdAt DESC,
   post.postDate DESC
@@ -281,7 +281,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.createdAt ASC,
   post.postDate ASC
@@ -323,7 +323,7 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
@@ -332,7 +332,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.postDate DESC,
   post.createdAt DESC
@@ -374,7 +374,7 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
@@ -383,7 +383,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.postDate ASC,
   post.createdAt ASC
@@ -425,7 +425,7 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
@@ -434,7 +434,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.createdAt DESC,
   post.postDate DESC
@@ -476,7 +476,7 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
@@ -485,7 +485,7 @@ WHERE
   (post.flags & 4) = 0 AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly)
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound)
 ORDER BY
   post.createdAt ASC,
   post.postDate ASC
@@ -506,14 +506,14 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   (post.flags & 4) == 0 AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound;
 
@@ -558,7 +558,7 @@ WHERE
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   (post.flags & 4) == 0 AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
   (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
@@ -578,14 +578,14 @@ WHERE
       (p2.flags & 4) = 0 AND
       ((:isSourceIdsEmpty AND f2.hideFromAllFeeds = 0) OR p2.sourceId IN :sourceIds) AND
       f2.isDeleted = 0 AND
-      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly)
+      (:unreadOnly IS NULL OR ((p2.flags & 2) != 0) != :unreadOnly OR p2.updatedAt > :postsUpperBound)
     ORDER BY p2.postDate DESC, p2.createdAt DESC
     LIMIT :numberOfFeaturedPosts
   ) AND
   ((:isSourceIdsEmpty AND feed.hideFromAllFeeds = 0) OR post.sourceId IN :sourceIds) AND
   (post.flags & 4) == 0 AND
   feed.isDeleted = 0 AND
-  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly) AND
+  (:unreadOnly IS NULL OR ((post.flags & 2) != 0) != :unreadOnly OR post.updatedAt > :postsUpperBound) AND
   post.postDate > :postsAfter AND
   post.createdAt < :postsUpperBound AND
   (post.postDate > :postDate OR (post.postDate = :postDate AND post.createdAt > :postCreatedAt));
