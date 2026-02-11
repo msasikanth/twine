@@ -16,7 +16,10 @@
  */
 package dev.sasikanth.rss.reader.app
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleOut
@@ -278,10 +281,18 @@ fun App(
           )
         },
         popExitTransition = {
-          scaleOut(
-            targetScale = 0.7f,
-            transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f),
-          ) + fadeOut()
+          if (platform == Platform.Apple) {
+            slideOutOfContainer(
+              towards = AnimatedContentTransitionScope.SlideDirection.End,
+              animationSpec = tween(durationMillis = 200, easing = LinearEasing),
+              targetOffset = { fullOffset -> (fullOffset * 0.3f).toInt() },
+            )
+          } else {
+            scaleOut(
+              targetScale = 0.7f,
+              transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f),
+            ) + fadeOut()
+          }
         },
       ) {
         composable<Screen.Placeholder> {
