@@ -277,10 +277,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[installDateKey] = value.toEpochMilliseconds() }
   }
 
-  suspend fun updateUserSessionCount(value: Int) {
-    dataStore.edit { preferences -> preferences[userSessionCountKey] = value }
-  }
-
   suspend fun incrementUserSessionCount() {
     dataStore.edit { preferences ->
       val currentSessionCount = preferences[userSessionCountKey] ?: 0
