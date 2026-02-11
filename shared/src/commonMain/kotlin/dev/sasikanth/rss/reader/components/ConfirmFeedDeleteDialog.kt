@@ -61,23 +61,23 @@ internal fun ConfirmFeedDeleteDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.removeFeed),
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.removeFeedDesc, feedName),
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     },
-    containerColor = AppTheme.colorScheme.tintedSurface,
+    containerColor = AppTheme.colorScheme.surfaceContainerLow,
     titleContentColor = AppTheme.colorScheme.onSurface,
     textContentColor = AppTheme.colorScheme.onSurface,
   )

@@ -41,7 +41,7 @@ internal fun BlockedWordsSettingItem(onClick: () -> Unit) {
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.blockedWords),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
   }
 }

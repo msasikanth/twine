@@ -59,12 +59,12 @@ internal fun AmoledSettingItem(useAmoled: Boolean, onValueChanged: (Boolean) -> 
         Text(
           stringResource(Res.string.settingsAmoledTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsAmoledSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

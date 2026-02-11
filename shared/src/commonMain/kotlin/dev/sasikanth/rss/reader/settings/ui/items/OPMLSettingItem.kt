@@ -96,10 +96,10 @@ internal fun OPMLSettingItem(
             enabled = false,
             colors =
               ButtonDefaults.outlinedButtonColors(
-                containerColor = AppTheme.colorScheme.tintedSurface,
-                disabledContainerColor = AppTheme.colorScheme.tintedSurface,
-                contentColor = AppTheme.colorScheme.tintedForeground,
-                disabledContentColor = AppTheme.colorScheme.tintedForeground,
+                containerColor = AppTheme.colorScheme.surfaceContainerLow,
+                disabledContainerColor = AppTheme.colorScheme.surfaceContainerLow,
+                contentColor = AppTheme.colorScheme.primary,
+                disabledContentColor = AppTheme.colorScheme.primary,
               ),
             border = null,
           ) {
@@ -127,7 +127,7 @@ internal fun OPMLSettingItem(
             colors =
               ButtonDefaults.outlinedButtonColors(
                 containerColor = Color.Unspecified,
-                contentColor = AppTheme.colorScheme.tintedForeground,
+                contentColor = AppTheme.colorScheme.primary,
               ),
           ) {
             Text(stringResource(Res.string.settingsOpmlCancel))
@@ -191,7 +191,7 @@ internal fun OpmlFeedSelectionSheet(
             Text(
               modifier = Modifier.padding(horizontal = 24.dp).padding(top = 16.dp),
               text = stringResource(Res.string.settingsOpmlSelectionTitle),
-              color = AppTheme.colorScheme.textEmphasisHigh,
+              color = AppTheme.colorScheme.onSurface,
               style = MaterialTheme.typography.titleLarge,
             )
 
@@ -202,7 +202,7 @@ internal fun OpmlFeedSelectionSheet(
               text =
                 stringResource(Res.string.settingsOpmlSelectionSubtitle, Constants.MAX_FREE_FEEDS),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.textEmphasisMed,
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
 
             HorizontalDivider(color = AppTheme.colorScheme.outlineVariant)
@@ -282,14 +282,14 @@ private fun OpmlFeedItem(
       Text(
         text = feed.title ?: feed.link,
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
       Text(
         text = feed.link,
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )

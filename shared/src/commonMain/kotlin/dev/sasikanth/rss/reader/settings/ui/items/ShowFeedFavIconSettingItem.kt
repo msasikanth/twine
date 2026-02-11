@@ -62,12 +62,12 @@ internal fun ShowFeedFavIconSettingItem(
         Text(
           stringResource(Res.string.showFeedFavIconTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.showFeedFavIconDesc),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

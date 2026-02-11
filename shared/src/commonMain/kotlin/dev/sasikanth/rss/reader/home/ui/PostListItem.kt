@@ -131,7 +131,7 @@ internal fun PostListItem(
         Text(
           style = MaterialTheme.typography.titleMedium,
           text = item.title.ifBlank { item.description },
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
           maxLines = 3,
           overflow = TextOverflow.Ellipsis,
         )

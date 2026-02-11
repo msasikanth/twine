@@ -119,7 +119,7 @@ fun GroupSelectionSheet(
           Box(
             modifier =
               Modifier.clip(MaterialTheme.shapes.large)
-                .background(AppTheme.colorScheme.tintedSurface)
+                .background(AppTheme.colorScheme.surfaceContainerLow)
                 .clickable { showCreateGroupDialog = true }
                 .padding(vertical = 16.dp),
             contentAlignment = Alignment.Center,
@@ -128,7 +128,7 @@ fun GroupSelectionSheet(
               Icon(
                 imageVector = TwineIcons.Add,
                 contentDescription = null,
-                tint = AppTheme.colorScheme.tintedForeground,
+                tint = AppTheme.colorScheme.primary,
               )
 
               Spacer(Modifier.requiredWidth(8.dp))
@@ -136,7 +136,7 @@ fun GroupSelectionSheet(
               Text(
                 text = stringResource(Res.string.groupAddNew),
                 style = MaterialTheme.typography.labelLarge,
-                color = AppTheme.colorScheme.tintedForeground,
+                color = AppTheme.colorScheme.primary,
               )
             }
           }
@@ -173,9 +173,9 @@ fun GroupSelectionSheet(
           colors =
             ButtonDefaults.outlinedButtonColors(
               containerColor = Color.Transparent,
-              contentColor = AppTheme.colorScheme.tintedForeground,
+              contentColor = AppTheme.colorScheme.primary,
             ),
-          border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
+          border = BorderStroke(1.dp, AppTheme.colorScheme.outline),
           onClick = { dismiss() },
         ) {
           Text(text = stringResource(Res.string.buttonGoBack))

@@ -233,7 +233,7 @@ fun AddFeedScreen(
       ) {
         if (state.feedFetchingState == FeedFetchingState.Loading) {
           CircularProgressIndicator(
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
             modifier = Modifier.requiredSize(24.dp),
             strokeWidth = 2.dp,
           )
@@ -375,7 +375,7 @@ private fun FeedOptionSwitch(
     Text(
       modifier = Modifier.weight(1f),
       text = title,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
       style = MaterialTheme.typography.titleMedium,
     )
 

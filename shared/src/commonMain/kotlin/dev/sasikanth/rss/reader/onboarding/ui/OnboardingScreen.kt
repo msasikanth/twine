@@ -102,7 +102,7 @@ internal fun OnboardingScreen(
         Text(
           text = stringResource(Res.string.onboardingSubtitle2),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
           textAlign = TextAlign.Center,
         )
 
@@ -178,13 +178,13 @@ internal fun OnboardingScreen(
         text = stringResource(Res.string.appName),
         style = MaterialTheme.typography.displayLarge,
         fontWeight = FontWeight.Bold,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
       )
 
       Text(
         text = stringResource(Res.string.onboardingSubtitle),
         style = MaterialTheme.typography.bodyLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
   }

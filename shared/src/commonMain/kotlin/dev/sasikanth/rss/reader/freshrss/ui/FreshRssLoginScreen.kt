@@ -121,13 +121,13 @@ fun FreshRssLoginScreen(
       title = {
         Text(
           text = stringResource(Res.string.freshRssClearDataTitle),
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
       },
       text = {
         Text(
           text = stringResource(Res.string.freshRssClearDataDesc),
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       },
       confirmButton = {
@@ -138,7 +138,7 @@ fun FreshRssLoginScreen(
           Text(
             text = stringResource(Res.string.freshRssClearDataPositive),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
           )
         }
       },
@@ -150,11 +150,11 @@ fun FreshRssLoginScreen(
           Text(
             text = stringResource(Res.string.buttonCancel),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed,
+            color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }
       },
-      containerColor = AppTheme.colorScheme.tintedSurface,
+      containerColor = AppTheme.colorScheme.surfaceContainerLow,
       titleContentColor = AppTheme.colorScheme.onSurface,
       textContentColor = AppTheme.colorScheme.onSurface,
     )
@@ -235,7 +235,7 @@ fun FreshRssLoginScreen(
       ) {
         if (state.isLoading) {
           CircularProgressIndicator(
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
             modifier = Modifier.requiredSize(24.dp),
             strokeWidth = 2.dp,
           )

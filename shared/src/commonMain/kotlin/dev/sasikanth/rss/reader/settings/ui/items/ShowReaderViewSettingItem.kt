@@ -59,12 +59,12 @@ internal fun ShowReaderViewSettingItem(showReaderView: Boolean, onValueChanged: 
         Text(
           stringResource(Res.string.settingsShowReaderViewTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsShowReaderViewSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

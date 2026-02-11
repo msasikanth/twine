@@ -44,16 +44,10 @@ data class AppColorValues(
   val inversePrimary: Color,
   val inverseSurface: Color,
   val inverseOnSurface: Color,
-  val textEmphasisHigh: Color,
-  val textEmphasisMed: Color,
   val backdrop: Color,
   val bottomSheet: Color,
   val bottomSheetInverse: Color,
   val bottomSheetBorder: Color,
-  val tintedBackground: Color,
-  val tintedSurface: Color,
-  val tintedForeground: Color,
-  val tintedHighlight: Color,
   val error: Color,
 ) {
 
@@ -77,16 +71,10 @@ data class AppColorValues(
       inversePrimary = lerp(inversePrimary, to.inversePrimary, fraction),
       inverseSurface = lerp(inverseSurface, to.inverseSurface, fraction),
       inverseOnSurface = lerp(inverseOnSurface, to.inverseOnSurface, fraction),
-      textEmphasisHigh = lerp(textEmphasisHigh, to.textEmphasisHigh, fraction),
-      textEmphasisMed = lerp(textEmphasisMed, to.textEmphasisMed, fraction),
       backdrop = lerp(backdrop, to.backdrop, fraction),
       bottomSheet = lerp(bottomSheet, to.bottomSheet, fraction),
       bottomSheetInverse = lerp(bottomSheetInverse, to.bottomSheetInverse, fraction),
       bottomSheetBorder = lerp(bottomSheetBorder, to.bottomSheetBorder, fraction),
-      tintedBackground = lerp(tintedBackground, to.tintedBackground, fraction),
-      tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
-      tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
-      tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
       error = lerp(error, to.error, fraction),
     )
   }
@@ -149,12 +137,6 @@ class AppColorScheme(values: AppColorValues) {
   var inverseOnSurface by mutableStateOf(values.inverseOnSurface)
     internal set
 
-  var textEmphasisHigh by mutableStateOf(values.textEmphasisHigh)
-    internal set
-
-  var textEmphasisMed by mutableStateOf(values.textEmphasisMed)
-    internal set
-
   var backdrop by mutableStateOf(values.backdrop)
     internal set
 
@@ -165,18 +147,6 @@ class AppColorScheme(values: AppColorValues) {
     internal set
 
   var bottomSheetBorder by mutableStateOf(values.bottomSheetBorder)
-    internal set
-
-  var tintedBackground by mutableStateOf(values.tintedBackground)
-    internal set
-
-  var tintedSurface by mutableStateOf(values.tintedSurface)
-    internal set
-
-  var tintedForeground by mutableStateOf(values.tintedForeground)
-    internal set
-
-  var tintedHighlight by mutableStateOf(values.tintedHighlight)
     internal set
 
   var error by mutableStateOf(values.error)
@@ -202,52 +172,14 @@ class AppColorScheme(values: AppColorValues) {
       inversePrimary = inversePrimary,
       inverseSurface = inverseSurface,
       inverseOnSurface = inverseOnSurface,
-      textEmphasisHigh = textEmphasisHigh,
-      textEmphasisMed = textEmphasisMed,
       backdrop = backdrop,
       bottomSheet = bottomSheet,
       bottomSheetInverse = bottomSheetInverse,
       bottomSheetBorder = bottomSheetBorder,
-      tintedBackground = tintedBackground,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
-      tintedHighlight = tintedHighlight,
       error = error,
     )
 
   fun copy(): AppColorScheme = AppColorScheme(toValues())
-
-  fun updateFrom(other: AppColorScheme, amoled: Boolean = false) {
-    primary = other.primary
-    onPrimary = other.onPrimary
-    secondary = other.secondary
-    outline = other.outline
-    outlineVariant = other.outlineVariant
-    primaryContainer = other.primaryContainer
-    onPrimaryContainer = other.onPrimaryContainer
-    surface = if (amoled) Color.Black else other.surface
-    onSurface = other.onSurface
-    onSurfaceVariant = other.onSurfaceVariant
-    surfaceContainer = if (amoled) Color.Black else other.surfaceContainer
-    surfaceContainerLow = if (amoled) Color.Black else other.surfaceContainerLow
-    surfaceContainerLowest = if (amoled) Color.Black else other.surfaceContainerLowest
-    surfaceContainerHigh = if (amoled) Color(0xFF1D201F) else other.surfaceContainerHigh
-    surfaceContainerHighest = if (amoled) Color(0xFF272B29) else other.surfaceContainerHighest
-    inversePrimary = other.inversePrimary
-    inverseSurface = other.inverseSurface
-    inverseOnSurface = other.inverseOnSurface
-    textEmphasisHigh = other.textEmphasisHigh
-    textEmphasisMed = other.textEmphasisMed
-    backdrop = if (amoled) Color.Black else other.backdrop
-    bottomSheet = if (amoled) Color.Black else other.bottomSheet
-    bottomSheetInverse = other.bottomSheetInverse
-    bottomSheetBorder = other.bottomSheetBorder
-    tintedBackground = if (amoled) Color.Black else other.tintedBackground
-    tintedSurface = other.tintedSurface
-    tintedForeground = other.tintedForeground
-    tintedHighlight = other.tintedHighlight
-    error = other.error
-  }
 
   fun updateFrom(values: AppColorValues, amoled: Boolean = false) {
     primary = values.primary
@@ -268,54 +200,11 @@ class AppColorScheme(values: AppColorValues) {
     inversePrimary = values.inversePrimary
     inverseSurface = values.inverseSurface
     inverseOnSurface = values.inverseOnSurface
-    textEmphasisHigh = values.textEmphasisHigh
-    textEmphasisMed = values.textEmphasisMed
     backdrop = if (amoled) Color.Black else values.backdrop
     bottomSheet = if (amoled) Color.Black else values.bottomSheet
     bottomSheetInverse = values.bottomSheetInverse
     bottomSheetBorder = values.bottomSheetBorder
-    tintedBackground = if (amoled) Color.Black else values.tintedBackground
-    tintedSurface = values.tintedSurface
-    tintedForeground = values.tintedForeground
-    tintedHighlight = values.tintedHighlight
     error = values.error
-  }
-
-  fun lerp(to: AppColorScheme, fraction: Float): AppColorScheme {
-    return AppColorScheme(
-      AppColorValues(
-        primary = lerp(primary, to.primary, fraction),
-        onPrimary = lerp(onPrimary, to.onPrimary, fraction),
-        secondary = lerp(secondary, to.secondary, fraction),
-        outline = lerp(outline, to.outline, fraction),
-        outlineVariant = lerp(outlineVariant, to.outlineVariant, fraction),
-        primaryContainer = lerp(primaryContainer, to.primaryContainer, fraction),
-        onPrimaryContainer = lerp(onPrimaryContainer, to.onPrimaryContainer, fraction),
-        surface = lerp(surface, to.surface, fraction),
-        onSurface = lerp(onSurface, to.onSurface, fraction),
-        onSurfaceVariant = lerp(onSurfaceVariant, to.onSurfaceVariant, fraction),
-        surfaceContainer = lerp(surfaceContainer, to.surfaceContainer, fraction),
-        surfaceContainerLow = lerp(surfaceContainerLow, to.surfaceContainerLow, fraction),
-        surfaceContainerLowest = lerp(surfaceContainerLowest, to.surfaceContainerLowest, fraction),
-        surfaceContainerHigh = lerp(surfaceContainerHigh, to.surfaceContainerHigh, fraction),
-        surfaceContainerHighest =
-          lerp(surfaceContainerHighest, to.surfaceContainerHighest, fraction),
-        inversePrimary = lerp(inversePrimary, to.inversePrimary, fraction),
-        inverseSurface = lerp(inverseSurface, to.inverseSurface, fraction),
-        inverseOnSurface = lerp(inverseOnSurface, to.inverseOnSurface, fraction),
-        textEmphasisHigh = lerp(textEmphasisHigh, to.textEmphasisHigh, fraction),
-        textEmphasisMed = lerp(textEmphasisMed, to.textEmphasisMed, fraction),
-        backdrop = lerp(backdrop, to.backdrop, fraction),
-        bottomSheet = lerp(bottomSheet, to.bottomSheet, fraction),
-        bottomSheetInverse = lerp(bottomSheetInverse, to.bottomSheetInverse, fraction),
-        bottomSheetBorder = lerp(bottomSheetBorder, to.bottomSheetBorder, fraction),
-        tintedBackground = lerp(tintedBackground, to.tintedBackground, fraction),
-        tintedSurface = lerp(tintedSurface, to.tintedSurface, fraction),
-        tintedForeground = lerp(tintedForeground, to.tintedForeground, fraction),
-        tintedHighlight = lerp(tintedHighlight, to.tintedHighlight, fraction),
-        error = lerp(error, to.error, fraction),
-      )
-    )
   }
 }
 
@@ -339,16 +228,10 @@ fun lightAppColorScheme(): AppColorValues {
     inversePrimary = Color(0xFF51DEB8),
     inverseSurface = Color(0xFF2B322F),
     inverseOnSurface = Color(0xFFEFF2F0),
-    textEmphasisHigh = Color.Black.copy(alpha = 0.9f),
-    textEmphasisMed = Color.Black.copy(alpha = 0.7f),
     backdrop = Color(0xFFE5EEEB),
     bottomSheet = Color(0xFF002118),
     bottomSheetInverse = Color.Black,
     bottomSheetBorder = Color(0xFF303E39),
-    tintedBackground = Color(0xFF002118),
-    tintedSurface = Color(0xFFEEF5F3),
-    tintedForeground = Color(0xFF006B54),
-    tintedHighlight = Color(0xFF707976),
     error = Color(0xFFBA1A1A),
   )
 }
@@ -373,16 +256,10 @@ fun darkAppColorScheme(): AppColorValues {
     inversePrimary = Color(0xFF006B54),
     inverseSurface = Color(0xFFF4FBF9),
     inverseOnSurface = Color(0xFF161D1B),
-    textEmphasisHigh = Color.White.copy(alpha = 0.9f),
-    textEmphasisMed = Color.White.copy(alpha = 0.7f),
     backdrop = Color(0xFF090F0D),
     bottomSheet = Color.Black,
     bottomSheetInverse = Color(0xFF002118),
     bottomSheetBorder = Color(0xFF303E39),
-    tintedBackground = Color.Black,
-    tintedSurface = Color(0xFF1A211E),
-    tintedForeground = Color(0xFF51DEB8),
-    tintedHighlight = Color(0xFF89938F),
     error = Color(0xFFFFB4AB),
   )
 }

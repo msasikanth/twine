@@ -123,9 +123,9 @@ internal fun MainScreen(
         drawerContent = {
           val drawerItemColors =
             NavigationDrawerItemDefaults.colors(
-              selectedIconColor = AppTheme.colorScheme.tintedForeground,
+              selectedIconColor = AppTheme.colorScheme.primary,
               unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
-              selectedTextColor = AppTheme.colorScheme.tintedForeground,
+              selectedTextColor = AppTheme.colorScheme.primary,
               unselectedTextColor = AppTheme.colorScheme.onSurfaceVariant,
               selectedContainerColor = Color.Transparent,
               unselectedContainerColor = Color.Transparent,
@@ -206,7 +206,7 @@ internal fun MainScreen(
         ) {
           val navigationRailItemColors =
             NavigationRailItemDefaults.colors(
-              selectedIconColor = AppTheme.colorScheme.tintedForeground,
+              selectedIconColor = AppTheme.colorScheme.primary,
               unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
               indicatorColor = Color.Transparent,
             )
@@ -252,9 +252,9 @@ internal fun MainScreen(
         drawerContent = {
           val drawerItemColors =
             NavigationDrawerItemDefaults.colors(
-              selectedIconColor = AppTheme.colorScheme.tintedForeground,
+              selectedIconColor = AppTheme.colorScheme.primary,
               unselectedIconColor = AppTheme.colorScheme.onSurfaceVariant,
-              selectedTextColor = AppTheme.colorScheme.tintedForeground,
+              selectedTextColor = AppTheme.colorScheme.primary,
               unselectedTextColor = AppTheme.colorScheme.onSurfaceVariant,
               selectedContainerColor = Color.Transparent,
               unselectedContainerColor = Color.Transparent,

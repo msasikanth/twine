@@ -121,13 +121,13 @@ fun MinifluxLoginScreen(
       title = {
         Text(
           text = stringResource(Res.string.minifluxClearDataTitle),
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
       },
       text = {
         Text(
           text = stringResource(Res.string.minifluxClearDataDesc),
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       },
       confirmButton = {
@@ -138,7 +138,7 @@ fun MinifluxLoginScreen(
           Text(
             text = stringResource(Res.string.minifluxClearDataPositive),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
           )
         }
       },
@@ -150,11 +150,11 @@ fun MinifluxLoginScreen(
           Text(
             text = stringResource(Res.string.buttonCancel),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed,
+            color = AppTheme.colorScheme.onSurfaceVariant,
           )
         }
       },
-      containerColor = AppTheme.colorScheme.tintedSurface,
+      containerColor = AppTheme.colorScheme.surfaceContainerLow,
       titleContentColor = AppTheme.colorScheme.onSurface,
       textContentColor = AppTheme.colorScheme.onSurface,
     )
@@ -231,7 +231,7 @@ fun MinifluxLoginScreen(
       ) {
         if (state.isLoading) {
           CircularProgressIndicator(
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
             modifier = Modifier.requiredSize(24.dp),
             strokeWidth = 2.dp,
           )
@@ -290,7 +290,7 @@ fun MinifluxLoginScreen(
             Text(
               text = stringResource(Res.string.minifluxAPIKeyHint),
               style = MaterialTheme.typography.labelMedium,
-              color = AppTheme.colorScheme.textEmphasisMed,
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
           },
         )

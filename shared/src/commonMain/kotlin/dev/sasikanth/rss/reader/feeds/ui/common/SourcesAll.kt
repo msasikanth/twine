@@ -221,7 +221,7 @@ internal fun AllFeedsHeader(
       Text(
         text = allFeedsLabel,
         style = MaterialTheme.typography.titleMedium,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
       )
 
       Spacer(Modifier.requiredWidth(8.dp))
@@ -282,7 +282,7 @@ internal fun AllFeedsHeader(
               if (feedsSortOrder == sortOrder) {
                 AppTheme.colorScheme.secondary
               } else {
-                AppTheme.colorScheme.textEmphasisHigh
+                AppTheme.colorScheme.onSurface
               }
 
             DropdownMenuItem(

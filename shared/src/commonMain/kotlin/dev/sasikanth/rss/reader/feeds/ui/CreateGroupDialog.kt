@@ -72,7 +72,7 @@ internal fun CreateGroupDialog(
         enabled = groupName.isNotBlank(),
         colors =
           ButtonDefaults.textButtonColors(
-            contentColor = AppTheme.colorScheme.tintedForeground,
+            contentColor = AppTheme.colorScheme.primary,
             disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
           ),
       ) {
@@ -87,15 +87,12 @@ internal fun CreateGroupDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
       }
     },
     title = {
-      Text(
-        text = stringResource(Res.string.createGroup),
-        color = AppTheme.colorScheme.textEmphasisHigh,
-      )
+      Text(text = stringResource(Res.string.createGroup), color = AppTheme.colorScheme.onSurface)
     },
     text = {
       TextField(
@@ -120,26 +117,26 @@ internal fun CreateGroupDialog(
         placeholder = {
           Text(
             text = stringResource(Res.string.groupNameHint),
-            color = AppTheme.colorScheme.textEmphasisMed,
+            color = AppTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyLarge,
           )
         },
         colors =
           TextFieldDefaults.colors(
-            unfocusedContainerColor = AppTheme.colorScheme.tintedBackground,
-            focusedContainerColor = AppTheme.colorScheme.tintedBackground,
+            unfocusedContainerColor = AppTheme.colorScheme.surface,
+            focusedContainerColor = AppTheme.colorScheme.surface,
             unfocusedIndicatorColor = Color.Unspecified,
-            focusedIndicatorColor = AppTheme.colorScheme.tintedForeground,
-            cursorColor = AppTheme.colorScheme.tintedForeground,
+            focusedIndicatorColor = AppTheme.colorScheme.primary,
+            cursorColor = AppTheme.colorScheme.primary,
             selectionColors =
               TextSelectionColors(
-                handleColor = AppTheme.colorScheme.tintedForeground,
-                backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+                handleColor = AppTheme.colorScheme.primary,
+                backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
               ),
           ),
       )
     },
-    containerColor = AppTheme.colorScheme.tintedSurface,
+    containerColor = AppTheme.colorScheme.surfaceContainerLow,
     titleContentColor = AppTheme.colorScheme.onSurface,
     textContentColor = AppTheme.colorScheme.onSurface,
   )

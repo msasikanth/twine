@@ -62,12 +62,12 @@ internal fun DynamicColorSettingItem(
         Text(
           stringResource(Res.string.settingsDynamicColorTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsDynamicColorSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

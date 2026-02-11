@@ -52,12 +52,12 @@ internal fun AboutItem(onClick: () -> Unit) {
         Text(
           stringResource(Res.string.settingsAboutTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsAboutSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

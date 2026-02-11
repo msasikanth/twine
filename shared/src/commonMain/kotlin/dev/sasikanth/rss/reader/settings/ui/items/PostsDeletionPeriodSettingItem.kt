@@ -72,7 +72,7 @@ internal fun PostsDeletionPeriodSettingItem(
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.settingsPostsDeletionPeriodTitle),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
 
     Box {
@@ -101,7 +101,7 @@ internal fun PostsDeletionPeriodSettingItem(
         Text(
           text = period,
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground,
+          color = AppTheme.colorScheme.primary,
         )
 
         Spacer(Modifier.requiredWidth(8.dp))
@@ -109,7 +109,7 @@ internal fun PostsDeletionPeriodSettingItem(
         Icon(
           imageVector = Icons.Filled.ExpandMore,
           contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground,
+          tint = AppTheme.colorScheme.primary,
         )
       }
 
@@ -132,7 +132,7 @@ internal fun PostsDeletionPeriodSettingItem(
 
           val backgroundColor =
             if (period == postsDeletionPeriod) {
-              AppTheme.colorScheme.tintedHighlight
+              AppTheme.colorScheme.outline
             } else {
               Color.Unspecified
             }
@@ -148,7 +148,7 @@ internal fun PostsDeletionPeriodSettingItem(
               if (period == postsDeletionPeriod) {
                 AppTheme.colorScheme.inverseOnSurface
               } else {
-                AppTheme.colorScheme.textEmphasisHigh
+                AppTheme.colorScheme.onSurface
               }
 
             Text(text = periodString, style = MaterialTheme.typography.bodyLarge, color = textColor)

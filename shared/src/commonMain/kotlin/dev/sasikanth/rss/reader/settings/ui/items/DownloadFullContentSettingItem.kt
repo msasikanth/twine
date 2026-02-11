@@ -58,12 +58,12 @@ internal fun DownloadFullContentSettingItem(
         Text(
           stringResource(Res.string.settingsDownloadFullContentTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsDownloadFullContentSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

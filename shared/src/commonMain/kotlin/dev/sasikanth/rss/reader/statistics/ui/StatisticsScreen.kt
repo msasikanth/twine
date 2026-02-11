@@ -260,7 +260,7 @@ private fun ReadingHeatmap(
                 modifier = Modifier.requiredWidth(40.dp),
                 text = monthName,
                 style = MaterialTheme.typography.labelSmall,
-                color = AppTheme.colorScheme.textEmphasisMed,
+                color = AppTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
               )
             }
@@ -312,7 +312,7 @@ private fun HeatmapLegend(modifier: Modifier = Modifier) {
     Text(
       text = stringResource(Res.string.statisticsLess),
       style = MaterialTheme.typography.labelSmall,
-      color = AppTheme.colorScheme.textEmphasisMed,
+      color = AppTheme.colorScheme.onSurfaceVariant,
     )
     Spacer(modifier = Modifier.width(4.dp))
     HeatmapCell(count = 0)
@@ -328,7 +328,7 @@ private fun HeatmapLegend(modifier: Modifier = Modifier) {
     Text(
       text = stringResource(Res.string.statisticsMore),
       style = MaterialTheme.typography.labelSmall,
-      color = AppTheme.colorScheme.textEmphasisMed,
+      color = AppTheme.colorScheme.onSurfaceVariant,
     )
   }
 }
@@ -377,7 +377,7 @@ private fun FeedReadCountItem(feedReadCount: FeedReadCount, modifier: Modifier =
         text = feedReadCount.feedName,
         style = MaterialTheme.typography.bodyLarge,
         fontWeight = FontWeight.Medium,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
@@ -402,13 +402,13 @@ private fun ReadingTrendItem(trend: ReadingTrend, modifier: Modifier = Modifier)
     Text(
       text = trend.date.formatReadingTrendDate(),
       style = MaterialTheme.typography.bodyMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
     Text(
       text = trend.count.toString(),
       style = MaterialTheme.typography.bodyMedium,
       fontWeight = FontWeight.Medium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
   }
 }

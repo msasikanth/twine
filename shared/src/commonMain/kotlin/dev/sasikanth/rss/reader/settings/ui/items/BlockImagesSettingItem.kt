@@ -59,12 +59,12 @@ internal fun BlockImagesSettingItem(blockImages: Boolean, onValueChanged: (Boole
         Text(
           stringResource(Res.string.settingsBlockImagesTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           stringResource(Res.string.settingsBlockImagesSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

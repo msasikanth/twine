@@ -125,7 +125,7 @@ internal fun FeedGroupItem(
         Text(
           text = feedGroup.name,
           style = MaterialTheme.typography.titleSmall,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
@@ -144,7 +144,7 @@ internal fun FeedGroupItem(
         Text(
           text = text,
           style = MaterialTheme.typography.bodyMedium,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )

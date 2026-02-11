@@ -69,12 +69,12 @@ internal fun NotificationsSettingItem(
         Text(
           text = stringResource(Res.string.settingsEnableNotificationsTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
         Text(
           text = stringResource(Res.string.settingsEnableNotificationsSubtitle),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 

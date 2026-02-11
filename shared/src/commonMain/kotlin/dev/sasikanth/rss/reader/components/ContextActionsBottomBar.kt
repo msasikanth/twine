@@ -79,7 +79,7 @@ internal fun ContextActionsBottomBar(
             containerColor = Color.Unspecified,
             contentColor = AppTheme.colorScheme.onSurface,
           ),
-        border = BorderStroke(1.dp, AppTheme.colorScheme.tintedHighlight),
+        border = BorderStroke(1.dp, AppTheme.colorScheme.outline),
         onClick = onCancel,
       ) {
         Text(
