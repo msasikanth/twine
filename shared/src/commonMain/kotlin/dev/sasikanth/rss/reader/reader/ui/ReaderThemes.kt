@@ -36,9 +36,6 @@ internal data class ReaderThemeTokens(
   val backdrop: Color,
   val bottomSheet: Color,
   val bottomSheetBorder: Color,
-  val tintedSurface: Color,
-  val tintedForeground: Color,
-  val textEmphasisHigh: Color,
 )
 
 internal fun ReaderThemeTokens.toAppColorScheme(sourceColorScheme: AppColorScheme): AppColorScheme {
@@ -57,12 +54,9 @@ internal fun ReaderThemeTokens.toAppColorScheme(sourceColorScheme: AppColorSchem
       surfaceContainerLowest = surfaceContainerLowest,
       surfaceContainerHigh = surfaceContainerHigh,
       inverseSurface = inverseSurface,
-      textEmphasisHigh = textEmphasisHigh,
       backdrop = backdrop,
       bottomSheet = bottomSheet,
       bottomSheetBorder = bottomSheetBorder,
-      tintedSurface = tintedSurface,
-      tintedForeground = tintedForeground,
     )
   )
 }
@@ -84,9 +78,6 @@ internal fun sepiaColorScheme(sourceColorScheme: AppColorScheme): AppColorScheme
       backdrop = Color(0xFFEFE6D5),
       bottomSheet = Color(0xFF2D1E19),
       bottomSheetBorder = Color(0xFF4E342E),
-      tintedSurface = Color(0xFFF4ECD8),
-      tintedForeground = Color(0xFF704F36),
-      textEmphasisHigh = Color(0xFF3E2723).copy(alpha = 0.95f),
     )
     .toAppColorScheme(sourceColorScheme)
 }
@@ -108,9 +99,6 @@ internal fun parchmentColorScheme(sourceColorScheme: AppColorScheme): AppColorSc
       backdrop = Color(0xFFF5F2EA),
       bottomSheet = Color(0xFF1A1915),
       bottomSheetBorder = Color(0xFF322F2A),
-      tintedSurface = Color(0xFFFBF8F1),
-      tintedForeground = Color(0xFF5A5243),
-      textEmphasisHigh = Color(0xFF121212).copy(alpha = 0.95f),
     )
     .toAppColorScheme(sourceColorScheme)
 }
@@ -136,9 +124,6 @@ internal fun solarizedColorScheme(
         backdrop = Color(0xFF002B36),
         bottomSheet = Color(0xFF000000),
         bottomSheetBorder = Color(0xFF263033),
-        tintedSurface = Color(0xFF073642),
-        tintedForeground = Color(0xFF268BD2),
-        textEmphasisHigh = Color(0xFF93A1A1).copy(alpha = 0.95f),
       )
       .toAppColorScheme(sourceColorScheme)
   } else {
@@ -158,9 +143,6 @@ internal fun solarizedColorScheme(
         backdrop = Color(0xFFFDF6E3),
         bottomSheet = Color(0xFF000E14),
         bottomSheetBorder = Color(0xFF263033),
-        tintedSurface = Color(0xFFEEE8D5),
-        tintedForeground = Color(0xFF268BD2),
-        textEmphasisHigh = Color(0xFF586E75).copy(alpha = 0.95f),
       )
       .toAppColorScheme(sourceColorScheme)
   }
@@ -183,9 +165,6 @@ internal fun midnightColorScheme(sourceColorScheme: AppColorScheme): AppColorSch
       backdrop = Color(0xFF080808),
       bottomSheet = Color(0xFF000000),
       bottomSheetBorder = Color(0xFF222222),
-      tintedSurface = Color(0xFF101010),
-      tintedForeground = Color(0xFFAEC6FF),
-      textEmphasisHigh = Color(0xFFE2E2E6).copy(alpha = 0.90f),
     )
     .toAppColorScheme(sourceColorScheme)
 }
@@ -207,9 +186,6 @@ internal fun forestColorScheme(sourceColorScheme: AppColorScheme): AppColorSchem
       backdrop = Color(0xFF101912),
       bottomSheet = Color(0xFF0A120B),
       bottomSheetBorder = Color(0xFF253026),
-      tintedSurface = Color(0xFF18221A),
-      tintedForeground = Color(0xFF9CD67D),
-      textEmphasisHigh = Color(0xFFE2E3DE).copy(alpha = 0.95f),
     )
     .toAppColorScheme(sourceColorScheme)
 }
@@ -231,9 +207,6 @@ internal fun slateColorScheme(sourceColorScheme: AppColorScheme): AppColorScheme
       backdrop = Color(0xFF181A1F),
       bottomSheet = Color(0xFF121316),
       bottomSheetBorder = Color(0xFF2F3138),
-      tintedSurface = Color(0xFF23252A),
-      tintedForeground = Color(0xFFA8C7FA),
-      textEmphasisHigh = Color(0xFFE3E2E6).copy(alpha = 0.95f),
     )
     .toAppColorScheme(sourceColorScheme)
 }

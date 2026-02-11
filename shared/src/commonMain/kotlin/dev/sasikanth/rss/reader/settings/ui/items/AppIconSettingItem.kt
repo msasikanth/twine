@@ -86,7 +86,7 @@ internal fun AppIconSettingItem(
         Text(
           text = stringResource(Res.string.settingsAppIconTitle),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
 
         if (!isSubscribed) {
@@ -104,7 +104,7 @@ internal fun AppIconSettingItem(
       Text(
         text = stringResource(Res.string.settingsAppIconSubtitle),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
 
@@ -166,8 +166,7 @@ internal fun AppIconSelectionSheet(
             text = appIcon.title,
             style = MaterialTheme.typography.labelMedium,
             color =
-              if (isSelected) AppTheme.colorScheme.tintedForeground
-              else AppTheme.colorScheme.onSurface,
+              if (isSelected) AppTheme.colorScheme.primary else AppTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             maxLines = 1,
           )

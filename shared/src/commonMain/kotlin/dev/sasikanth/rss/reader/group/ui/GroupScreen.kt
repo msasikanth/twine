@@ -115,7 +115,7 @@ fun GroupScreen(
               actions = { Spacer(Modifier.requiredSize(48.dp)) },
               colors =
                 TopAppBarDefaults.topAppBarColors(
-                  containerColor = AppTheme.colorScheme.tintedBackground,
+                  containerColor = AppTheme.colorScheme.surface,
                   navigationIconContentColor = AppTheme.colorScheme.onSurface,
                   titleContentColor = AppTheme.colorScheme.onSurface,
                   actionIconContentColor = AppTheme.colorScheme.onSurface,
@@ -123,7 +123,7 @@ fun GroupScreen(
             )
 
             AllFeedsHeader(
-              modifier = Modifier.background(AppTheme.colorScheme.tintedBackground),
+              modifier = Modifier.background(AppTheme.colorScheme.surface),
               feedsCount = feeds.itemCount,
               feedsSortOrder = state.feedsOrderBy,
               showAddButton = false,
@@ -133,7 +133,7 @@ fun GroupScreen(
 
           HorizontalDivider(
             modifier = Modifier.fillMaxWidth().align(Alignment.BottomStart),
-            color = AppTheme.colorScheme.tintedSurface,
+            color = AppTheme.colorScheme.surfaceContainerLow,
           )
         }
       },
@@ -159,7 +159,7 @@ fun GroupScreen(
           }
         }
       },
-      containerColor = AppTheme.colorScheme.tintedBackground,
+      containerColor = AppTheme.colorScheme.surface,
     ) { innerPadding ->
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -212,7 +212,7 @@ fun GroupNameTextField(
   }
 
   MaterialTheme(
-    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.primary)
   ) {
     OutlinedTextField(
       modifier = modifier,
@@ -221,7 +221,7 @@ fun GroupNameTextField(
       placeholder = {
         Text(
           text = stringResource(Res.string.groupNameHint),
-          color = AppTheme.colorScheme.tintedForeground,
+          color = AppTheme.colorScheme.primary,
           style = MaterialTheme.typography.bodyLarge,
         )
       },
@@ -230,10 +230,10 @@ fun GroupNameTextField(
       textStyle = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.Center),
       colors =
         OutlinedTextFieldDefaults.colors(
-          focusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-          unfocusedBorderColor = AppTheme.colorScheme.tintedHighlight,
-          disabledBorderColor = AppTheme.colorScheme.tintedHighlight,
-          focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+          focusedBorderColor = AppTheme.colorScheme.outline,
+          unfocusedBorderColor = AppTheme.colorScheme.outline,
+          disabledBorderColor = AppTheme.colorScheme.outline,
+          focusedTextColor = AppTheme.colorScheme.onSurface,
           disabledTextColor = Color.Transparent,
         ),
     )

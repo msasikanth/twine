@@ -147,7 +147,7 @@ internal fun LazyListScope.pinnedSources(
     item {
       HorizontalDivider(
         modifier = Modifier.padding(top = 24.dp).animateItem(),
-        color = AppTheme.colorScheme.tintedSurface,
+        color = AppTheme.colorScheme.surfaceContainerLow,
       )
     }
   }
@@ -189,7 +189,7 @@ private fun PinnedFeedsHeader(
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.pinnedFeeds),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
 
     val icon =

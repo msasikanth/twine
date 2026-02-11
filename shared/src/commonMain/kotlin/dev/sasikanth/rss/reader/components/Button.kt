@@ -60,8 +60,8 @@ fun Button(
   shape: Shape = MaterialTheme.shapes.medium,
   colors: ButtonColors =
     ButtonDefaults.buttonColors(
-      containerColor = AppTheme.colorScheme.tintedForeground,
-      contentColor = AppTheme.colorScheme.tintedBackground,
+      containerColor = AppTheme.colorScheme.primary,
+      contentColor = AppTheme.colorScheme.onPrimary,
       disabledContainerColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.12f),
       disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
     ),

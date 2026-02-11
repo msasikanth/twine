@@ -388,7 +388,7 @@ private fun SearchBar(
   }
 
   MaterialTheme(
-    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.primary)
   ) {
     OutlinedTextField(
       modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp),
@@ -464,23 +464,23 @@ fun DeleteConfirmationDialog(
         Text(
           text = stringResource(Res.string.buttonCancel),
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.removeSources),
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.removeSourcesDesc),
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     },
-    containerColor = AppTheme.colorScheme.tintedSurface,
+    containerColor = AppTheme.colorScheme.surfaceContainerLow,
     titleContentColor = AppTheme.colorScheme.onSurface,
     textContentColor = AppTheme.colorScheme.onSurface,
   )
@@ -500,7 +500,7 @@ private fun NoFeeds(onAddNewFeedClick: () -> Unit) {
         modifier = Modifier.padding(horizontal = 32.dp),
         text = stringResource(Res.string.feedsLetsStart),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
       )
 

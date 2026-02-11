@@ -199,8 +199,8 @@ internal fun PostsPreferencesSheet(
         },
         colors =
           ButtonDefaults.textButtonColors(
-            contentColor = AppTheme.colorScheme.tintedForeground,
-            containerColor = AppTheme.colorScheme.tintedSurface,
+            contentColor = AppTheme.colorScheme.primary,
+            containerColor = AppTheme.colorScheme.surfaceContainerLow,
           ),
         shape = MaterialTheme.shapes.medium,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -265,7 +265,7 @@ private fun PostsFilterButton(
   val backgroundColor by
     animateColorAsState(
       if (isSelected) {
-        AppTheme.colorScheme.tintedForeground
+        AppTheme.colorScheme.primary
       } else {
         Color.Transparent
       }
@@ -281,9 +281,9 @@ private fun PostsFilterButton(
   val textColor by
     animateColorAsState(
       if (isSelected) {
-        AppTheme.colorScheme.tintedSurface
+        AppTheme.colorScheme.surfaceContainerLow
       } else {
-        AppTheme.colorScheme.tintedForeground
+        AppTheme.colorScheme.primary
       }
     )
 

@@ -96,16 +96,10 @@ internal object TwineDynamicColors {
       inverseSurface = dynamicColors.inverseSurface().getColor(scheme),
       inverseOnSurface = dynamicColors.inverseOnSurface().getColor(scheme),
       error = dynamicColors.error().getColor(scheme),
-      textEmphasisHigh = defaultColorScheme.textEmphasisHigh,
-      textEmphasisMed = defaultColorScheme.textEmphasisMed,
       backdrop = backdrop.getColor(scheme),
       bottomSheet = bottomSheet.getColor(scheme),
       bottomSheetInverse = bottomSheetInverse.getColor(scheme),
       bottomSheetBorder = bottomSheetBorder.getColor(scheme),
-      tintedBackground = bottomSheet.getColor(scheme),
-      tintedSurface = dynamicColors.surfaceContainerLow().getColor(scheme),
-      tintedForeground = dynamicColors.primary().getColor(scheme),
-      tintedHighlight = dynamicColors.outline().getColor(scheme),
     )
   }
 }

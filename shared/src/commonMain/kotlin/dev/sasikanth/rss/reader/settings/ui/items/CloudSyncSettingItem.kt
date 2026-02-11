@@ -118,7 +118,7 @@ internal fun CloudSyncSettingItem(
             Text(
               text = label,
               style = MaterialTheme.typography.titleMedium,
-              color = AppTheme.colorScheme.textEmphasisHigh,
+              color = AppTheme.colorScheme.onSurface,
             )
 
             if (provider.isPremium && !isSubscribed) {
@@ -161,7 +161,7 @@ internal fun CloudSyncSettingItem(
             Text(
               text = statusString,
               style = MaterialTheme.typography.bodyMedium,
-              color = AppTheme.colorScheme.textEmphasisMed,
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
           }
         }

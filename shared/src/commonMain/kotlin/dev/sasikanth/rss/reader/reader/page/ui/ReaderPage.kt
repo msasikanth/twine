@@ -386,8 +386,8 @@ private fun ProgressIndicator() {
     contentAlignment = Alignment.Center,
   ) {
     LinearProgressIndicator(
-      trackColor = AppTheme.colorScheme.tintedSurface,
-      color = AppTheme.colorScheme.tintedForeground,
+      trackColor = AppTheme.colorScheme.surfaceContainerLow,
+      color = AppTheme.colorScheme.primary,
     )
   }
 }
@@ -646,7 +646,7 @@ private fun PostActions(
         },
       iconTint =
         if (postBookmarked) {
-          AppTheme.colorScheme.tintedForeground
+          AppTheme.colorScheme.primary
         } else {
           AppTheme.colorScheme.onSurfaceVariant
         },
@@ -660,7 +660,7 @@ private fun PostActionButton(
   icon: ImageVector,
   label: String,
   modifier: Modifier = Modifier,
-  iconTint: Color = AppTheme.colorScheme.textEmphasisHigh,
+  iconTint: Color = AppTheme.colorScheme.onSurface,
   onClick: () -> Unit,
 ) {
   TooltipBox(

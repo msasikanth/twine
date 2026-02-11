@@ -65,7 +65,7 @@ internal fun TwinePremiumBanner(
         Text(
           text = stringResource(Res.string.twinePremium),
           style = MaterialTheme.typography.titleMedium,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
       }
 
@@ -78,7 +78,7 @@ internal fun TwinePremiumBanner(
       Text(
         text = stringResource(subscriptionDescRes),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
   }

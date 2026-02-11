@@ -91,7 +91,7 @@ fun PlaceholderScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         CircularProgressIndicator(
-          color = AppTheme.colorScheme.tintedForeground,
+          color = AppTheme.colorScheme.primary,
           modifier = Modifier.requiredSize(24.dp),
           strokeWidth = 2.dp,
         )
@@ -102,14 +102,14 @@ fun PlaceholderScreen(
           text = stringResource(Res.string.databaseMaintainenceTitle),
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.titleLarge,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
 
         Text(
           text = stringResource(Res.string.databaseMaintainenceSubtitle),
           textAlign = TextAlign.Center,
           style = MaterialTheme.typography.bodySmall,
-          color = AppTheme.colorScheme.textEmphasisHigh,
+          color = AppTheme.colorScheme.onSurface,
         )
       }
     }

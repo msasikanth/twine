@@ -67,7 +67,7 @@ internal fun MarkAsReadOnSettingItem(
       modifier = Modifier.weight(1f),
       text = stringResource(Res.string.markArticleAsRead),
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
 
     Box {
@@ -91,7 +91,7 @@ internal fun MarkAsReadOnSettingItem(
         Text(
           text = markAsReadOnLabel,
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.tintedForeground,
+          color = AppTheme.colorScheme.primary,
         )
 
         Spacer(Modifier.requiredWidth(8.dp))
@@ -99,7 +99,7 @@ internal fun MarkAsReadOnSettingItem(
         Icon(
           imageVector = Icons.Filled.ExpandMore,
           contentDescription = null,
-          tint = AppTheme.colorScheme.tintedForeground,
+          tint = AppTheme.colorScheme.primary,
         )
       }
 
@@ -117,7 +117,7 @@ internal fun MarkAsReadOnSettingItem(
 
           val backgroundColor =
             if (markAsReadOn == articleMarkAsReadOn) {
-              AppTheme.colorScheme.tintedHighlight
+              AppTheme.colorScheme.outline
             } else {
               Color.Unspecified
             }
@@ -133,7 +133,7 @@ internal fun MarkAsReadOnSettingItem(
               if (markAsReadOn == articleMarkAsReadOn) {
                 AppTheme.colorScheme.inverseOnSurface
               } else {
-                AppTheme.colorScheme.textEmphasisHigh
+                AppTheme.colorScheme.onSurface
               }
 
             Text(text = label, style = MaterialTheme.typography.bodyLarge, color = textColor)

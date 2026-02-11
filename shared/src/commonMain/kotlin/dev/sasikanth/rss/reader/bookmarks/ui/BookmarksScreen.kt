@@ -185,7 +185,7 @@ internal fun BookmarksScreen(
               imageVector = TwineIcons.BookmarkStacks,
               contentDescription = null,
               modifier = Modifier.size(80.dp),
-              tint = AppTheme.colorScheme.textEmphasisHigh,
+              tint = AppTheme.colorScheme.onSurface,
             )
 
             Spacer(Modifier.requiredHeight(16.dp))
@@ -193,7 +193,7 @@ internal fun BookmarksScreen(
             Text(
               text = stringResource(Res.string.bookmarksPlaceholder),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.textEmphasisMed,
+              color = AppTheme.colorScheme.onSurfaceVariant,
             )
           }
         }

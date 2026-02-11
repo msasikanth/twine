@@ -116,7 +116,7 @@ internal fun FeedListItem(
         modifier = Modifier.weight(1f),
         text = feed.name,
         style = MaterialTheme.typography.titleSmall,
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
         maxLines = 1,
         overflow = TextOverflow.Clip,
       )

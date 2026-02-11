@@ -55,7 +55,7 @@ fun ToggleableButtonGroup(
           shape = MaterialTheme.shapes.large,
         )
   ) {
-    val backgroundColor = AppTheme.colorScheme.tintedForeground
+    val backgroundColor = AppTheme.colorScheme.primary
     val selectedItemIndex by
       animateFloatAsState(items.indexOfFirst { it.isSelected }.toFloat(), label = "selected_index")
 
@@ -88,9 +88,9 @@ fun ToggleableButtonGroup(
             ButtonDefaults.textButtonColors(
               contentColor =
                 if (toggleableButtonItem.isSelected) {
-                  AppTheme.colorScheme.tintedSurface
+                  AppTheme.colorScheme.surfaceContainerLow
                 } else {
-                  AppTheme.colorScheme.tintedForeground
+                  AppTheme.colorScheme.primary
                 }
             ),
           onClick = { onItemSelected(toggleableButtonItem) },

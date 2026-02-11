@@ -253,9 +253,7 @@ internal fun SettingsScreen(
               TextButton(
                 onClick = { snackbarHostState.currentSnackbarData?.performAction() },
                 colors =
-                  ButtonDefaults.textButtonColors(
-                    contentColor = AppTheme.colorScheme.tintedForeground
-                  ),
+                  ButtonDefaults.textButtonColors(contentColor = AppTheme.colorScheme.primary),
                 shape = MaterialTheme.shapes.medium,
               ) {
                 Text(text = actionLabel, style = MaterialTheme.typography.labelLarge)

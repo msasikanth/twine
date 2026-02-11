@@ -185,15 +185,15 @@ fun BlockedWordsScreen(
               cursorColor = AppTheme.colorScheme.primary,
               selectionColors =
                 TextSelectionColors(
-                  handleColor = AppTheme.colorScheme.tintedForeground,
-                  backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+                  handleColor = AppTheme.colorScheme.primary,
+                  backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
                 ),
             ),
           placeholder = {
             Text(
               text = stringResource(Res.string.blockedWordsHint),
               style = MaterialTheme.typography.labelLarge,
-              color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
+              color = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
             )
           },
           trailingIcon = {
@@ -245,10 +245,7 @@ fun BlockedWordsScreen(
                 append(text)
                 append(" ")
                 withStyle(
-                  SpanStyle(
-                    color = AppTheme.colorScheme.tintedForeground,
-                    fontWeight = FontWeight.Bold,
-                  )
+                  SpanStyle(color = AppTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 ) {
                   append(readLess)
                 }
@@ -258,10 +255,7 @@ fun BlockedWordsScreen(
                   append(text.take(maxCharCount).substringBeforeLast(" "))
                   append("... ")
                   withStyle(
-                    SpanStyle(
-                      color = AppTheme.colorScheme.tintedForeground,
-                      fontWeight = FontWeight.Bold,
-                    )
+                    SpanStyle(color = AppTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                   ) {
                     append(readMore)
                   }
@@ -271,7 +265,7 @@ fun BlockedWordsScreen(
               }
             },
           style = MaterialTheme.typography.labelLarge,
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
 
@@ -288,7 +282,7 @@ fun BlockedWordsScreen(
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 24.dp),
             text = stringResource(Res.string.blockedWordsEmpty),
             style = MaterialTheme.typography.labelLarge,
-            color = AppTheme.colorScheme.textEmphasisMed,
+            color = AppTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
           )
         }
@@ -332,14 +326,14 @@ private fun BlockedWordItem(
       modifier = Modifier.weight(1f),
       text = word.content,
       style = MaterialTheme.typography.titleMedium,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
     )
 
     IconButton(onClick = removeClicked) {
       Icon(
         imageVector = TwineIcons.DeleteOutline,
         contentDescription = stringResource(Res.string.delete),
-        tint = AppTheme.colorScheme.textEmphasisHigh,
+        tint = AppTheme.colorScheme.onSurface,
       )
     }
   }

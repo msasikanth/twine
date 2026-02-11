@@ -56,7 +56,7 @@ internal fun DeleteAppDataSettingItem(onClick: () -> Unit) {
       Text(
         stringResource(Res.string.settingsDeleteAppDataSubtitle),
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
   }
@@ -78,24 +78,24 @@ internal fun DeleteAppDataConfirmationDialog(onConfirm: () -> Unit, onDismiss: (
       TextButton(onClick = onDismiss) {
         Text(
           text = stringResource(Res.string.buttonCancel),
-          color = AppTheme.colorScheme.textEmphasisMed,
+          color = AppTheme.colorScheme.onSurfaceVariant,
         )
       }
     },
     title = {
       Text(
         text = stringResource(Res.string.settingsDeleteAppDataDialogTitle),
-        color = AppTheme.colorScheme.textEmphasisHigh,
+        color = AppTheme.colorScheme.onSurface,
       )
     },
     text = {
       Text(
         text = stringResource(Res.string.settingsDeleteAppDataDialogDesc),
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     },
     containerColor = AppTheme.colorScheme.surfaceContainerLowest,
-    titleContentColor = AppTheme.colorScheme.textEmphasisHigh,
-    textContentColor = AppTheme.colorScheme.textEmphasisMed,
+    titleContentColor = AppTheme.colorScheme.onSurface,
+    textContentColor = AppTheme.colorScheme.onSurfaceVariant,
   )
 }

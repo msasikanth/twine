@@ -202,7 +202,7 @@ fun FeedInfoBottomSheet(
         } else {
           CircularProgressIndicator(
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = AppTheme.colorScheme.tintedForeground,
+            color = AppTheme.colorScheme.primary,
           )
         }
       }
@@ -238,7 +238,7 @@ private fun FeedUnreadCount(
     Text(
       modifier = Modifier.weight(1f),
       text = text,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
       style = MaterialTheme.typography.labelLarge,
       textAlign = TextAlign.Start,
     )
@@ -250,7 +250,7 @@ private fun FeedUnreadCount(
       colors =
         ButtonDefaults.textButtonColors(
           disabledContentColor = AppTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-          contentColor = AppTheme.colorScheme.tintedForeground,
+          contentColor = AppTheme.colorScheme.primary,
         ),
     ) {
       Icon(
@@ -278,7 +278,7 @@ private fun FeedLabelInput(
   Row(
     Modifier.then(modifier)
       .clip(RoundedCornerShape(24.dp))
-      .background(AppTheme.colorScheme.tintedSurface)
+      .background(AppTheme.colorScheme.surfaceContainerLow)
       .padding(8.dp)
       .fillMaxWidth()
   ) {
@@ -297,7 +297,7 @@ private fun FeedLabelInput(
       Text(
         text = stringResource(Res.string.feedTitleHint),
         style = MaterialTheme.typography.labelSmall,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
 
       var input by remember(feed.name) { mutableStateOf(feed.name) }
@@ -310,8 +310,8 @@ private fun FeedLabelInput(
 
       val textSelectionColors =
         TextSelectionColors(
-          handleColor = AppTheme.colorScheme.tintedForeground,
-          backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+          handleColor = AppTheme.colorScheme.primary,
+          backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
         )
 
       // Debounce input changes
@@ -336,15 +336,13 @@ private fun FeedLabelInput(
             ),
           singleLine = true,
           textStyle =
-            MaterialTheme.typography.titleMedium.copy(
-              color = AppTheme.colorScheme.textEmphasisHigh
-            ),
-          cursorBrush = SolidColor(AppTheme.colorScheme.textEmphasisHigh),
+            MaterialTheme.typography.titleMedium.copy(color = AppTheme.colorScheme.onSurface),
+          cursorBrush = SolidColor(AppTheme.colorScheme.onSurface),
         )
       }
 
       HorizontalDivider(
-        color = AppTheme.colorScheme.tintedHighlight,
+        color = AppTheme.colorScheme.outline,
         modifier = Modifier.padding(end = 32.dp),
       )
 
@@ -354,7 +352,7 @@ private fun FeedLabelInput(
         maxLines = 2,
         overflow = TextOverflow.MiddleEllipsis,
         style = MaterialTheme.typography.labelSmall,
-        color = AppTheme.colorScheme.textEmphasisMed,
+        color = AppTheme.colorScheme.onSurfaceVariant,
       )
     }
   }
@@ -462,7 +460,7 @@ private fun FeedOptionSwitch(
     Text(
       modifier = Modifier.weight(1f),
       text = title,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
       style = MaterialTheme.typography.titleMedium,
     )
 

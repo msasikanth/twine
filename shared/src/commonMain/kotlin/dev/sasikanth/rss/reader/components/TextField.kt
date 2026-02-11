@@ -72,8 +72,8 @@ fun TextField(
         cursorColor = AppTheme.colorScheme.primary,
         selectionColors =
           TextSelectionColors(
-            handleColor = AppTheme.colorScheme.tintedForeground,
-            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+            handleColor = AppTheme.colorScheme.primary,
+            backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
           ),
         unfocusedBorderColor = translucentStyles.default.outline,
         focusedBorderColor = translucentStyles.default.outline,
@@ -82,7 +82,7 @@ fun TextField(
       Text(
         text = hint,
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
+        color = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
       )
     },
     supportingText = supportingText,
@@ -132,15 +132,15 @@ fun TextField(
         cursorColor = AppTheme.colorScheme.primary,
         selectionColors =
           TextSelectionColors(
-            handleColor = AppTheme.colorScheme.tintedForeground,
-            backgroundColor = AppTheme.colorScheme.tintedForeground.copy(0.4f),
+            handleColor = AppTheme.colorScheme.primary,
+            backgroundColor = AppTheme.colorScheme.primary.copy(0.4f),
           ),
       ),
     placeholder = {
       Text(
         text = hint,
         style = MaterialTheme.typography.labelLarge,
-        color = AppTheme.colorScheme.tintedForeground.copy(alpha = 0.4f),
+        color = AppTheme.colorScheme.primary.copy(alpha = 0.4f),
       )
     },
     trailingIcon = trailingIcon,

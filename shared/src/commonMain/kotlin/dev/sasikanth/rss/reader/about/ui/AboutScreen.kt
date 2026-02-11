@@ -254,16 +254,12 @@ private fun SocialButton(social: Social, modifier: Modifier = Modifier, onClick:
         .padding(horizontal = 16.dp, vertical = 16.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
   ) {
-    Icon(
-      imageVector = social.icon,
-      contentDescription = null,
-      tint = AppTheme.colorScheme.tintedForeground,
-    )
+    Icon(imageVector = social.icon, contentDescription = null, tint = AppTheme.colorScheme.primary)
     Spacer(Modifier.height(4.dp))
     Text(
       social.service,
       style = MaterialTheme.typography.labelMedium,
-      color = AppTheme.colorScheme.tintedForeground,
+      color = AppTheme.colorScheme.primary,
     )
   }
 }

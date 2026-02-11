@@ -521,7 +521,7 @@ private fun SourcePickerItem(source: Source, onClick: () -> Unit, modifier: Modi
           else -> ""
         },
       style = MaterialTheme.typography.bodyLarge,
-      color = AppTheme.colorScheme.textEmphasisHigh,
+      color = AppTheme.colorScheme.onSurface,
       maxLines = 1,
       overflow = TextOverflow.Ellipsis,
     )
@@ -551,7 +551,7 @@ private fun SearchBar(
   LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
   MaterialTheme(
-    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.tintedForeground)
+    colorScheme = MaterialTheme.colorScheme.copy(primary = AppTheme.colorScheme.primary)
   ) {
     Row(
       modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -575,7 +575,7 @@ private fun SearchBar(
         placeholder = {
           Text(
             text = stringResource(Res.string.postsSearchHint),
-            color = AppTheme.colorScheme.textEmphasisHigh,
+            color = AppTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyLarge,
           )
         },
@@ -600,7 +600,7 @@ private fun SearchBar(
           TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedTextColor = AppTheme.colorScheme.textEmphasisHigh,
+            focusedTextColor = AppTheme.colorScheme.onSurface,
             unfocusedIndicatorColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
