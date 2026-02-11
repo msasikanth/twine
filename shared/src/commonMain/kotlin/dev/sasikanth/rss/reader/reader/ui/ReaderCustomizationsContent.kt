@@ -124,6 +124,7 @@ internal fun ReaderCustomizationsContent(
       items(ReaderColorScheme.entries) { colorScheme ->
         val appDynamicColorState = LocalDynamicColorState.current
         val isDark = colorScheme.isDark(isParentThemeDark)
+        val sourceColorScheme = AppTheme.colorScheme
         val (backgroundColor, contentColor) =
           when (colorScheme) {
             ReaderColorScheme.Dynamic -> {
@@ -134,15 +135,30 @@ internal fun ReaderCustomizationsContent(
               colorSchemeForDynamic.primaryContainer to colorSchemeForDynamic.onPrimaryContainer
             }
 
-            ReaderColorScheme.Sepia -> sepiaColorScheme().surface to sepiaColorScheme().onSurface
-            ReaderColorScheme.Solarized ->
-              solarizedColorScheme(isDark).surface to solarizedColorScheme(isDark).onSurface
-            ReaderColorScheme.Parchment ->
-              parchmentColorScheme().surface to parchmentColorScheme().onSurface
-            ReaderColorScheme.Midnight ->
-              midnightColorScheme().surface to midnightColorScheme().onSurface
-            ReaderColorScheme.Forest -> forestColorScheme().surface to forestColorScheme().onSurface
-            ReaderColorScheme.Slate -> slateColorScheme().surface to slateColorScheme().onSurface
+            ReaderColorScheme.Sepia -> {
+              val sepiaColorScheme = sepiaColorScheme(sourceColorScheme)
+              sepiaColorScheme.surface to sepiaColorScheme.onSurface
+            }
+            ReaderColorScheme.Solarized -> {
+              val solarizedColorScheme = solarizedColorScheme(isDark, sourceColorScheme)
+              solarizedColorScheme.surface to solarizedColorScheme.onSurface
+            }
+            ReaderColorScheme.Parchment -> {
+              val parchmentColorScheme = parchmentColorScheme(sourceColorScheme)
+              parchmentColorScheme.surface to parchmentColorScheme.onSurface
+            }
+            ReaderColorScheme.Midnight -> {
+              val midnightColorScheme = midnightColorScheme(sourceColorScheme)
+              midnightColorScheme.surface to midnightColorScheme.onSurface
+            }
+            ReaderColorScheme.Forest -> {
+              val forestColorScheme = forestColorScheme(sourceColorScheme)
+              forestColorScheme.surface to forestColorScheme.onSurface
+            }
+            ReaderColorScheme.Slate -> {
+              val slateColorScheme = slateColorScheme(sourceColorScheme)
+              slateColorScheme.surface to slateColorScheme.onSurface
+            }
           }
 
         val label =

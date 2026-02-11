@@ -234,16 +234,17 @@ internal fun ReaderScreen(
     LocalDynamicColorState provides articleDynamicColorState,
     LocalUriHandler provides readerLinkHandler,
   ) {
+    val sourceColorScheme = AppTheme.colorScheme
     val overriddenColorScheme =
-      remember(state.selectedReaderColorScheme, isDarkTheme) {
+      remember(state.selectedReaderColorScheme, isDarkTheme, sourceColorScheme) {
         when (state.selectedReaderColorScheme) {
           ReaderColorScheme.Dynamic -> null
-          ReaderColorScheme.Sepia -> sepiaColorScheme()
-          ReaderColorScheme.Solarized -> solarizedColorScheme(isDarkTheme)
-          ReaderColorScheme.Parchment -> parchmentColorScheme()
-          ReaderColorScheme.Midnight -> midnightColorScheme()
-          ReaderColorScheme.Forest -> forestColorScheme()
-          ReaderColorScheme.Slate -> slateColorScheme()
+          ReaderColorScheme.Sepia -> sepiaColorScheme(sourceColorScheme)
+          ReaderColorScheme.Solarized -> solarizedColorScheme(isDarkTheme, sourceColorScheme)
+          ReaderColorScheme.Parchment -> parchmentColorScheme(sourceColorScheme)
+          ReaderColorScheme.Midnight -> midnightColorScheme(sourceColorScheme)
+          ReaderColorScheme.Forest -> forestColorScheme(sourceColorScheme)
+          ReaderColorScheme.Slate -> slateColorScheme(sourceColorScheme)
         }
       }
 
