@@ -393,9 +393,8 @@ internal fun HomeScreen(
                       featuredPostsPagerState = featuredPostsPagerState,
                       homeViewMode = state.homeViewMode,
                       posts = { posts },
-                      postsScrolled = { viewModel.dispatch(HomeEvent.OnPostItemsScrolled(it)) },
-                      markScrolledPostsAsRead = {
-                        viewModel.dispatch(HomeEvent.MarkScrolledPostsAsRead)
+                      markPostsAsReadByIds = {
+                        viewModel.dispatch(HomeEvent.MarkPostsAsReadByIds(it))
                       },
                       markPostAsReadOnScroll = {
                         viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))

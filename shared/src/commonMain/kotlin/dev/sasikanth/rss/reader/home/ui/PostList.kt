@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -30,11 +32,10 @@ import dev.sasikanth.rss.reader.core.model.local.FeaturedPostItem
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -45,8 +46,7 @@ internal fun PostsList(
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
   posts: () -> LazyPagingItems<ResolvedPost>,
-  postsScrolled: (List<String>) -> Unit,
-  markScrolledPostsAsRead: () -> Unit,
+  markPostsAsReadByIds: (postIds: Set<String>) -> Unit,
   markPostAsReadOnScroll: (String) -> Unit,
   onPostClicked: (post: ResolvedPost, postIndex: Int) -> Unit,
   onFeaturedPostClicked: (post: ResolvedPost) -> Unit,
@@ -63,22 +63,34 @@ internal fun PostsList(
       0.dp
     }
 
+  val markPostsAsReadByIds by rememberUpdatedState(markPostsAsReadByIds)
   LaunchedEffect(listState) {
-    snapshotFlow { listState.layoutInfo.visibleItemsInfo }
-      .onEach { items ->
-        val postIds: List<String> =
-          items.mapNotNull {
-            val keyString = (it.key as? String)
-            if (keyString.isNullOrBlank()) {
-              null
-            } else {
-              PostListKey.decode(keyString).postId
-            }
+    var previousVisibleItemIds = emptySet<String>()
+
+    snapshotFlow {
+        val visibleItems = listState.layoutInfo.visibleItemsInfo
+        if (visibleItems.isEmpty()) return@snapshotFlow emptySet<String>() to 0
+
+        val firstVisibleIndex = listState.firstVisibleItemIndex
+
+        val ids =
+          visibleItems.mapNotNullTo(mutableSetOf()) { item ->
+            val keyString = item.key as? String
+            if (keyString.isNullOrBlank()) null else PostListKey.decode(keyString).postId
           }
-        postsScrolled(postIds)
+
+        ids to firstVisibleIndex
       }
-      .debounce(2.seconds)
-      .collect { markScrolledPostsAsRead() }
+      .distinctUntilChanged()
+      .collectLatest { (currentVisiblePostIds, _) ->
+        val newlyHiddenIds = previousVisibleItemIds - currentVisiblePostIds
+
+        if (newlyHiddenIds.isNotEmpty()) {
+          markPostsAsReadByIds(newlyHiddenIds)
+        }
+
+        previousVisibleItemIds = currentVisiblePostIds
+      }
   }
 
   LazyColumn(

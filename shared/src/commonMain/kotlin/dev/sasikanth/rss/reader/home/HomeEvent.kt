@@ -44,9 +44,7 @@ sealed interface HomeEvent {
 
   data class MarkPostsAsRead(val source: Source?) : HomeEvent
 
-  data class OnPostItemsScrolled(val postIds: List<String>) : HomeEvent
-
-  data object MarkScrolledPostsAsRead : HomeEvent
+  data class MarkPostsAsReadByIds(val postIds: Set<String>) : HomeEvent
 
   data class MarkFeaturedPostsAsRead(val postId: String) : HomeEvent
 
