@@ -48,9 +48,20 @@ sealed interface HomeEvent {
 
   data class MarkFeaturedPostsAsRead(val postId: String) : HomeEvent
 
+  data class OnVisiblePostsChanged(
+    val visiblePosts: Map<String, Int>,
+    val firstVisibleItemIndex: Int,
+  ) : HomeEvent
+
   data class ChangeHomeViewMode(val homeViewMode: HomeViewMode) : HomeEvent
 
   data class UpdateVisibleItemIndex(val index: Int, val postId: String? = null) : HomeEvent
+
+  data class OnScreenStopped(
+    val firstVisibleItemIndex: Int,
+    val firstVisibleItemKey: String?,
+    val settledPage: Int,
+  ) : HomeEvent
 
   data object LoadNewArticlesClick : HomeEvent
 

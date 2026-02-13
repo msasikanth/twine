@@ -17,7 +17,6 @@
 
 package dev.sasikanth.rss.reader.utils
 
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
@@ -35,7 +34,7 @@ interface InAppRating {
 
     if (daysSinceInstall < 48.hours) return false
 
-    if (daysSinceLastPrompt in 1.days..7.days) return false
+    if (daysSinceLastPrompt < 48.hours) return false
 
     if (sessionCount < 5) return false
 

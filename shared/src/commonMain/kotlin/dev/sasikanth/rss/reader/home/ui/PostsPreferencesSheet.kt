@@ -229,9 +229,9 @@ private fun PostsFilterGrid(
         modifier = Modifier.weight(1f),
       )
       PostsFilterButton(
-        label = getPostTypeLabel(PostsType.UNREAD),
-        isSelected = selectedPostsType == PostsType.UNREAD,
-        onClick = { onPostTypeSelected(PostsType.UNREAD) },
+        label = getPostTypeLabel(PostsType.LAST_24_HOURS),
+        isSelected = selectedPostsType == PostsType.LAST_24_HOURS,
+        onClick = { onPostTypeSelected(PostsType.LAST_24_HOURS) },
         modifier = Modifier.weight(1f),
       )
     }
@@ -246,9 +246,9 @@ private fun PostsFilterGrid(
         modifier = Modifier.weight(1f),
       )
       PostsFilterButton(
-        label = getPostTypeLabel(PostsType.LAST_24_HOURS),
-        isSelected = selectedPostsType == PostsType.LAST_24_HOURS,
-        onClick = { onPostTypeSelected(PostsType.LAST_24_HOURS) },
+        label = getPostTypeLabel(PostsType.UNREAD),
+        isSelected = selectedPostsType == PostsType.UNREAD,
+        onClick = { onPostTypeSelected(PostsType.UNREAD) },
         modifier = Modifier.weight(1f),
       )
     }

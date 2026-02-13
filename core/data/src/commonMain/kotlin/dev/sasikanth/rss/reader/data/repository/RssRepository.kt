@@ -472,12 +472,19 @@ class RssRepository(
   suspend fun postPosition(
     postId: String,
     activeSourceIds: List<String>,
+    sourceId: String? = null,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     postsUpperBound: Instant = Instant.DISTANT_FUTURE,
   ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
-      val post = postQueries.post(postId, ::Post).executeAsOneOrNull() ?: return@withContext null
+      val post =
+        if (sourceId != null) {
+          postQueries.post(id = postId, sourceId = sourceId, mapper = ::Post).executeAsOneOrNull()
+        } else {
+          postQueries.postById(id = postId, mapper = ::Post).executeAsList().firstOrNull()
+        } ?: return@withContext null
+
       postQueries
         .postPosition(
           isSourceIdsEmpty = activeSourceIds.isEmpty(),
@@ -496,6 +503,7 @@ class RssRepository(
   suspend fun nonFeaturedPostPosition(
     postId: String,
     activeSourceIds: List<String>,
+    sourceId: String? = null,
     unreadOnly: Boolean? = null,
     after: Instant = Instant.DISTANT_PAST,
     featuredPostsAfter: Instant = Instant.DISTANT_PAST,
@@ -503,7 +511,13 @@ class RssRepository(
     numberOfFeaturedPosts: Long = Constants.NUMBER_OF_FEATURED_POSTS,
   ): Int? {
     return withContext(dispatchersProvider.databaseRead) {
-      val post = postQueries.post(postId, ::Post).executeAsOneOrNull() ?: return@withContext null
+      val post =
+        if (sourceId != null) {
+          postQueries.post(id = postId, sourceId = sourceId, mapper = ::Post).executeAsOneOrNull()
+        } else {
+          postQueries.postById(id = postId, mapper = ::Post).executeAsList().firstOrNull()
+        } ?: return@withContext null
+
       postQueries
         .nonFeaturedPostPosition(
           featuredPostsAfter = featuredPostsAfter,
@@ -1051,7 +1065,7 @@ class RssRepository(
 
   suspend fun hasPost(id: String): Boolean {
     return withContext(dispatchersProvider.databaseRead) {
-      postQueries.post(id).executeAsOneOrNull() != null
+      postQueries.postById(id).executeAsOneOrNull() != null
     }
   }
 
@@ -1138,13 +1152,13 @@ class RssRepository(
 
   suspend fun post(postId: String): Post {
     return withContext(dispatchersProvider.databaseRead) {
-      postQueries.post(postId, ::Post).executeAsOne()
+      postQueries.postById(postId, ::Post).executeAsList().first()
     }
   }
 
   suspend fun postOrNull(postId: String): Post? {
     return withContext(dispatchersProvider.databaseRead) {
-      postQueries.post(postId, ::Post).executeAsList().firstOrNull()
+      postQueries.postById(postId, ::Post).executeAsList().firstOrNull()
     }
   }
 

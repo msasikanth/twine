@@ -125,7 +125,6 @@ import twine.shared.generated.resources.swipeUpGetStarted
 internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
-  onVisiblePostChanged: (Int, String?) -> Unit,
   openPost: (Int, ResolvedPost) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
@@ -336,28 +335,16 @@ internal fun HomeScreen(
                     itemInfo.offset >= topOffset || itemInfo.offset == 0
                   }
                 val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
+                val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
+                val settledPage = featuredPostsPagerState.settledPage
 
-                val (adjustedIndex, postId) =
-                  if (featuredPosts.isEmpty()) {
-                    val postId =
-                      (firstVisibleItemInfoAfterOffset?.key as? String)?.let {
-                        PostListKey.decode(it).postId
-                      }
-                    firstVisibleItemIndexAfterOffset to postId
-                  } else if (firstVisibleItemIndexAfterOffset == 0) {
-                    val settledPage = featuredPostsPagerState.settledPage
-                    val postId = featuredPosts.getOrNull(settledPage)?.resolvedPost?.id
-                    settledPage to postId
-                  } else {
-                    val postId =
-                      (firstVisibleItemInfoAfterOffset?.key as? String)?.let {
-                        PostListKey.decode(it).postId
-                      }
-                    (firstVisibleItemIndexAfterOffset + featuredPosts.lastIndex.coerceAtLeast(0)) to
-                      postId
-                  }
-
-                onVisiblePostChanged(adjustedIndex, postId)
+                viewModel.dispatch(
+                  HomeEvent.OnScreenStopped(
+                    firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
+                    firstVisibleItemKey = firstVisibleItemKey,
+                    settledPage = settledPage,
+                  )
+                )
               }
 
               val pullToRefreshState = rememberPullToRefreshState()
@@ -393,11 +380,16 @@ internal fun HomeScreen(
                       featuredPostsPagerState = featuredPostsPagerState,
                       homeViewMode = state.homeViewMode,
                       posts = { posts },
-                      markPostsAsReadByIds = {
-                        viewModel.dispatch(HomeEvent.MarkPostsAsReadByIds(it))
-                      },
-                      markPostAsReadOnScroll = {
+                      markFeaturedPostAsReadOnScroll = {
                         viewModel.dispatch(HomeEvent.MarkFeaturedPostsAsRead(it))
+                      },
+                      onVisiblePostsChanged = { visiblePosts, firstVisibleItemIndex ->
+                        viewModel.dispatch(
+                          HomeEvent.OnVisiblePostsChanged(
+                            visiblePosts = visiblePosts,
+                            firstVisibleItemIndex = firstVisibleItemIndex,
+                          )
+                        )
                       },
                       onPostClicked = { post, _ ->
                         viewModel.dispatch(HomeEvent.OnPostClicked(post))
