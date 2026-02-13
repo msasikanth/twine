@@ -539,9 +539,13 @@ WHERE (sourceId = :sourceId OR :sourceId IS NULL)
   AND postDate > :after
   AND (flags & 2) == 0;
 
-post:
+postById:
 SELECT * FROM post
 WHERE post.id = :id;
+
+post:
+SELECT * FROM post
+WHERE post.id = :id AND post.sourceId = :sourceId;
 
 postByRemoteId:
 SELECT * FROM post

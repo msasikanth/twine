@@ -173,6 +173,7 @@ class HomeViewModel(
       val position =
         rssRepository.postPosition(
           postId = post.id,
+          sourceId = post.sourceId,
           activeSourceIds = activeSourceIds,
           unreadOnly = unreadOnly,
           after = postsAfter,
