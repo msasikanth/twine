@@ -34,6 +34,7 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
+import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
 import dev.sasikanth.rss.reader.utils.NTuple7
@@ -77,6 +78,12 @@ class HomeViewModel(
   val openPost: SharedFlow<Pair<Int, ResolvedPost>>
     get() = _openPost
 
+  private val _activePostChanged = MutableSharedFlow<Pair<Int, String?>>()
+  val activePostChanged: SharedFlow<Pair<Int, String?>>
+    get() = _activePostChanged
+
+  private var previousVisibleItems = emptyMap<String, Int>()
+
   init {
     init()
   }
@@ -94,14 +101,55 @@ class HomeViewModel(
       is HomeEvent.MarkPostsAsRead -> markPostsAsRead(event.source)
       is HomeEvent.MarkPostsAsReadByIds -> markPostsAsReadByIds(event.postIds)
       is HomeEvent.MarkFeaturedPostsAsRead -> markFeaturedPostAsRead(event.postId)
+      is HomeEvent.OnVisiblePostsChanged ->
+        onVisiblePostsChanged(event.visiblePosts, event.firstVisibleItemIndex)
       is HomeEvent.ChangeHomeViewMode -> changeHomeViewMode(event.homeViewMode)
       is HomeEvent.UpdateVisibleItemIndex -> updateVisibleItemIndex(event.index, event.postId)
-      is HomeEvent.LoadNewArticlesClick -> loadNewArticles()
+      is HomeEvent.OnScreenStopped -> onScreenStopped(event)
+      HomeEvent.LoadNewArticlesClick -> loadNewArticles()
       is HomeEvent.UpdatePrevActiveSource -> updatePrevActiveSource(event)
       is HomeEvent.OnPostsSortFilterApplied -> onPostsSortFilterApplied(event)
       is HomeEvent.ShowPostsSortFilter -> showPostsSortFilter(event.show)
       is HomeEvent.OnPostClicked -> onPostClicked(event.post)
     }
+  }
+
+  private fun onScreenStopped(event: HomeEvent.OnScreenStopped) {
+    viewModelScope.launch {
+      val featuredPosts = _state.value.featuredPosts.first()
+      val (adjustedIndex, postId) =
+        if (featuredPosts.isEmpty()) {
+          val postId = event.firstVisibleItemKey?.let { PostListKey.decode(it).postId }
+          event.firstVisibleItemIndex to postId
+        } else if (event.firstVisibleItemIndex == 0) {
+          val postId = featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
+          event.settledPage to postId
+        } else {
+          val postId = event.firstVisibleItemKey?.let { PostListKey.decode(it).postId }
+          (event.firstVisibleItemIndex + featuredPosts.lastIndex.coerceAtLeast(0)) to postId
+        }
+
+      _state.update { it.copy(activePostIndex = adjustedIndex) }
+      _activePostChanged.emit(adjustedIndex to postId)
+    }
+  }
+
+  private fun onVisiblePostsChanged(visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) {
+    val newlyHiddenIds = previousVisibleItems.keys - visiblePosts.keys
+    if (newlyHiddenIds.isNotEmpty()) {
+      val itemsHiddenFromTop =
+        newlyHiddenIds
+          .filter { id ->
+            val previousIndex = previousVisibleItems[id]
+            previousIndex != null && previousIndex < firstVisibleItemIndex
+          }
+          .toSet()
+
+      if (itemsHiddenFromTop.isNotEmpty()) {
+        markPostsAsReadByIds(itemsHiddenFromTop)
+      }
+    }
+    previousVisibleItems = visiblePosts
   }
 
   private fun markPostsAsReadByIds(postIds: Set<String>) {

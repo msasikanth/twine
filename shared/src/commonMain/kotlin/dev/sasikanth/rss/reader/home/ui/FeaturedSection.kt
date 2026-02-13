@@ -75,7 +75,7 @@ internal fun FeaturedSection(
   featuredPosts: ImmutableList<FeaturedPostItem>,
   pagerState: PagerState,
   modifier: Modifier = Modifier,
-  markPostAsReadOnScroll: (String) -> Unit,
+  markFeaturedPostAsReadOnScroll: (String) -> Unit,
   onItemClick: (ResolvedPost, postIndex: Int) -> Unit,
   onPostBookmarkClick: (ResolvedPost) -> Unit,
   onPostCommentsClick: (String) -> Unit,
@@ -126,10 +126,13 @@ internal fun FeaturedSection(
         Box(
           modifier =
             Modifier.onVisibilityChanged(minDurationMs = 500) {
-              if (featuredPost.resolvedPost.read) return@onVisibilityChanged
+              val previousFeaturedPost = featuredPosts.getOrNull(page - 1)
+
+              if (previousFeaturedPost == null) return@onVisibilityChanged
+              if (previousFeaturedPost.resolvedPost.read) return@onVisibilityChanged
 
               if (it) {
-                markPostAsReadOnScroll(postWithMetadata.id)
+                markFeaturedPostAsReadOnScroll(previousFeaturedPost.resolvedPost.id)
               }
             }
         ) {

@@ -374,12 +374,15 @@ fun App(
                 )
               }
 
+              LaunchedEffect(Unit) {
+                viewModel.activePostChanged
+                  .onEach { (index, postId) -> appViewModel.updateActivePostIndex(index, postId) }
+                  .launchIn(this)
+              }
+
               HomeScreen(
                 viewModel = viewModel,
                 feedsViewModel = feedsViewModel,
-                onVisiblePostChanged = { index, postId ->
-                  appViewModel.updateActivePostIndex(index, postId)
-                },
                 openPost = { index, post -> openPost(index, post, FromScreen.Home) },
                 openGroupSelectionSheet = {
                   feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked)

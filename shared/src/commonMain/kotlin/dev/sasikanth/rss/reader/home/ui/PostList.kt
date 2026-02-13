@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,8 +32,9 @@ import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.feeds.ui.sheet.BOTTOM_SHEET_PEEK_HEIGHT
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -46,8 +45,8 @@ internal fun PostsList(
   featuredPostsPagerState: PagerState,
   homeViewMode: HomeViewMode,
   posts: () -> LazyPagingItems<ResolvedPost>,
-  markPostsAsReadByIds: (postIds: Set<String>) -> Unit,
-  markPostAsReadOnScroll: (String) -> Unit,
+  markFeaturedPostAsReadOnScroll: (String) -> Unit,
+  onVisiblePostsChanged: (visiblePosts: Map<String, Int>, firstVisibleItemIndex: Int) -> Unit,
   onPostClicked: (post: ResolvedPost, postIndex: Int) -> Unit,
   onFeaturedPostClicked: (post: ResolvedPost) -> Unit,
   onPostBookmarkClick: (ResolvedPost) -> Unit,
@@ -63,34 +62,35 @@ internal fun PostsList(
       0.dp
     }
 
-  val markPostsAsReadByIds by rememberUpdatedState(markPostsAsReadByIds)
-  LaunchedEffect(listState) {
-    var previousVisibleItemIds = emptySet<String>()
-
+  LaunchedEffect(listState, featuredPosts, featuredPostsPagerState) {
     snapshotFlow {
-        val visibleItems = listState.layoutInfo.visibleItemsInfo
-        if (visibleItems.isEmpty()) return@snapshotFlow emptySet<String>() to 0
+        val visibleItems =
+          listState.layoutInfo.visibleItemsInfo
+            .mapNotNull { item ->
+              val keyString = item.key as? String
+              if (keyString.isNullOrBlank()) {
+                null
+              } else if (keyString == "featured_items") {
+                val post = featuredPosts.getOrNull(featuredPostsPagerState.currentPage)
+                post?.resolvedPost?.id?.let { it to item.index }
+              } else {
+                try {
+                  val postId = PostListKey.decode(keyString).postId
+                  postId to item.index
+                } catch (e: Exception) {
+                  null
+                }
+              }
+            }
+            .toMap()
 
-        val firstVisibleIndex = listState.firstVisibleItemIndex
-
-        val ids =
-          visibleItems.mapNotNullTo(mutableSetOf()) { item ->
-            val keyString = item.key as? String
-            if (keyString.isNullOrBlank()) null else PostListKey.decode(keyString).postId
-          }
-
-        ids to firstVisibleIndex
+        visibleItems to listState.firstVisibleItemIndex
       }
       .distinctUntilChanged()
-      .collectLatest { (currentVisiblePostIds, _) ->
-        val newlyHiddenIds = previousVisibleItemIds - currentVisiblePostIds
-
-        if (newlyHiddenIds.isNotEmpty()) {
-          markPostsAsReadByIds(newlyHiddenIds)
-        }
-
-        previousVisibleItemIds = currentVisiblePostIds
+      .onEach { (visiblePosts, firstVisibleItemIndex) ->
+        onVisiblePostsChanged(visiblePosts, firstVisibleItemIndex)
       }
+      .launchIn(this)
   }
 
   LazyColumn(
@@ -100,12 +100,12 @@ internal fun PostsList(
       PaddingValues(top = topContentPadding, bottom = BOTTOM_SHEET_PEEK_HEIGHT + 120.dp),
   ) {
     if (featuredPosts.isNotEmpty()) {
-      item(contentType = "featured_items") {
+      item(key = "featured_items", contentType = "featured_items") {
         FeaturedSection(
           paddingValues = paddingValues,
           featuredPosts = featuredPosts,
           pagerState = featuredPostsPagerState,
-          markPostAsReadOnScroll = markPostAsReadOnScroll,
+          markFeaturedPostAsReadOnScroll = markFeaturedPostAsReadOnScroll,
           onItemClick = { post, _ -> onFeaturedPostClicked(post) },
           onPostBookmarkClick = onPostBookmarkClick,
           onPostCommentsClick = onPostCommentsClick,
