@@ -29,7 +29,7 @@ actual interface NetworkComponent {
       appInfo = appInfo,
       config = {
         config {
-          connectTimeout(10_000, TimeUnit.MILLISECONDS)
+          connectTimeout(60_000, TimeUnit.MILLISECONDS)
           retryOnConnectionFailure(true)
 
           protocols(listOf(Protocol.HTTP_1_1, Protocol.HTTP_2))

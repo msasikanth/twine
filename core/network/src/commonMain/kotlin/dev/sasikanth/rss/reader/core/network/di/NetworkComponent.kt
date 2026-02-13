@@ -21,6 +21,7 @@ import dev.sasikanth.rss.reader.app.AppInfo
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.cache.HttpCache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -42,6 +43,12 @@ fun <T : HttpClientEngineConfig> httpClient(
     followRedirects = false
 
     engine { config() }
+
+    install(HttpTimeout) {
+      requestTimeoutMillis = 60_000
+      connectTimeoutMillis = 60_000
+      socketTimeoutMillis = 60_000
+    }
 
     install(UserAgent) {
       agent = "Twine/${appInfo.versionName} (https://github.com/msasikanth/twine)"

@@ -38,7 +38,7 @@ actual interface NetworkComponent {
       config = {
         configureRequest {
           setAllowsCellularAccess(true)
-          request { timeout { connectTimeoutMillis = 10_000 } }
+          request { timeout { connectTimeoutMillis = 60_000 } }
         }
       },
     )
