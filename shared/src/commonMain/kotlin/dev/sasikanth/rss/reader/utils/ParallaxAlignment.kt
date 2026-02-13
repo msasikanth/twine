@@ -30,7 +30,7 @@ internal class ParallaxAlignment(
   private val multiplier: Float = 1f,
 ) : Alignment {
   override fun align(size: IntSize, space: IntSize, layoutDirection: LayoutDirection): IntOffset {
-    val horizontalBiasValue = horizontalBias() * multiplier
+    val horizontalBiasValue = (horizontalBias() * multiplier).coerceIn(-1f, 1f)
     val centerX = (space.width - size.width).toFloat() / 2f
     val centerY = (space.height - size.height).toFloat() / 2f
     val resolvedHorizontalBias =
