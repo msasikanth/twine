@@ -17,7 +17,9 @@
 
 package dev.sasikanth.rss.reader.media
 
+import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
@@ -53,7 +55,20 @@ class MediaService : MediaSessionService() {
         .setMediaSourceFactory(DefaultMediaSourceFactory(cacheDataSourceFactory))
         .build()
 
-    mediaSession = MediaSession.Builder(this, player).build()
+    mediaSession =
+      MediaSession.Builder(this, player)
+        .setSessionActivity(
+          PendingIntent.getActivity(
+            this,
+            0,
+            packageManager.getLaunchIntentForPackage(packageName)!!.apply {
+              action = Intent.ACTION_VIEW
+              data = Uri.parse("twine://reader/currently-playing")
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+          )
+        )
+        .build()
   }
 
   override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
