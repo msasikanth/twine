@@ -33,6 +33,7 @@ import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.repository.WidgetDataRepository
 import dev.sasikanth.rss.reader.data.repository.isPremium
 import dev.sasikanth.rss.reader.posts.AllPostsPager
+import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.AudioPlayer
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Bookmarks
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Home
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.Search
@@ -162,7 +163,7 @@ class ReaderViewModel(
 
   private fun init() {
     coroutineScope.launch {
-      if (readerScreenArgs.fromScreen == Home) {
+      if (readerScreenArgs.fromScreen == Home || readerScreenArgs.fromScreen == AudioPlayer) {
         val allPostsPagingData = allPostsPager.allPostsPagingData.cachedIn(coroutineScope)
         _state.update { it.copy(posts = allPostsPagingData) }
       } else {

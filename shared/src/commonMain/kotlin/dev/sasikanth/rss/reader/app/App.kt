@@ -83,6 +83,7 @@ import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.main.ui.MainScreen
+import dev.sasikanth.rss.reader.media.AudioPlayer
 import dev.sasikanth.rss.reader.miniflux.MinifluxLoginViewModel
 import dev.sasikanth.rss.reader.miniflux.ui.MINIFLUX_LOGIN_SUCCESS_KEY
 import dev.sasikanth.rss.reader.miniflux.ui.MinifluxLoginScreen
@@ -147,6 +148,7 @@ typealias App =
 @Composable
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 fun App(
+  audioPlayer: AudioPlayer,
   shareHandler: ShareHandler,
   linkHandler: LinkHandler,
   imageLoader: ImageLoader,
@@ -244,10 +246,30 @@ fun App(
       }
     }
 
+    LaunchedEffect(Unit) {
+      appViewModel.navigateToReader
+        .onEach { args ->
+          val route = Screen.Reader(args)
+          if (!navController.popBackStack(Screen.Main, inclusive = false)) {
+            navController.navigate(Screen.Main) {
+              popUpTo<Screen.Placeholder> { inclusive = true }
+              launchSingleTop = true
+            }
+          }
+          navController.navigate(route)
+        }
+        .launchIn(this)
+    }
+
     DisposableEffect(Unit) {
-      ExternalUriHandler.listener = { uri ->
+      val listener: (String) -> Unit = { uri ->
         if (uri.startsWith("twine://oauth")) {
           appViewModel.onOAuthRedirect(uri)
+        } else if (uri == "twine://reader/currently-playing") {
+          val playingPostId = audioPlayer.playbackState.value.playingPostId
+          if (playingPostId != null) {
+            appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
+          }
         } else {
           val deepLinkRequest =
             NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
@@ -263,8 +285,9 @@ fun App(
           }
         }
       }
+      ExternalUriHandler.addListener(listener)
 
-      onDispose { ExternalUriHandler.listener = null }
+      onDispose { ExternalUriHandler.removeListener(listener) }
     }
 
     AppTheme(useDarkTheme = useDarkTheme) {
