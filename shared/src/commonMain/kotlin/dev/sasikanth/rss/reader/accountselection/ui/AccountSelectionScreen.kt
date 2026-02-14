@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionEffect
 import dev.sasikanth.rss.reader.accountselection.AccountSelectionEvent
@@ -80,6 +82,10 @@ internal fun AccountSelectionScreen(
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
   val linkHandler = LocalLinkHandler.current
+
+  LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    viewModel.dispatch(AccountSelectionEvent.Refresh)
+  }
 
   LaunchedEffect(Unit) {
     viewModel.effects.collect { effect ->

@@ -25,4 +25,6 @@ sealed interface AccountSelectionEvent {
   data class CloudServiceClicked(val provider: CloudServiceProvider) : AccountSelectionEvent
 
   data object ClearAuthUrl : AccountSelectionEvent
+
+  data object Refresh : AccountSelectionEvent
 }
