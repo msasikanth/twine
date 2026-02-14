@@ -21,4 +21,6 @@ sealed interface OnboardingEffect {
   data object NavigateToHome : OnboardingEffect
 
   data object NavigateToDiscovery : OnboardingEffect
+
+  data object NavigateToAccountSelection : OnboardingEffect
 }

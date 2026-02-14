@@ -26,7 +26,7 @@ sealed interface Screen {
 
   @Serializable data object Onboarding : Screen
 
-  @Serializable data object Main : Screen
+  @Serializable data class Main(val triggerSync: Boolean = false) : Screen
 
   @Serializable data object Home : Screen
 
@@ -47,6 +47,8 @@ sealed interface Screen {
   @Serializable data object Bookmarks : Screen
 
   @Serializable data object Settings : Screen
+
+  @Serializable data object AccountSelection : Screen
 
   @Serializable data class Discovery(val isFromOnboarding: Boolean = false) : Screen
 

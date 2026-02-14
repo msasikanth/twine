@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.tatarka.inject.annotations.Inject
 
 @Inject
@@ -49,9 +48,6 @@ class OnboardingViewModel(
   }
 
   private fun getStartedClicked() {
-    viewModelScope.launch {
-      withContext(dispatchersProvider.io) { settingsRepository.completeOnboarding() }
-      _effects.emit(OnboardingEffect.NavigateToDiscovery)
-    }
+    viewModelScope.launch { _effects.emit(OnboardingEffect.NavigateToAccountSelection) }
   }
 }
