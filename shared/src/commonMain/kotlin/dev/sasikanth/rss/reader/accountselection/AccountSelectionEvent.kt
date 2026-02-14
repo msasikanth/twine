@@ -15,12 +15,14 @@
  *
  */
 
-package dev.sasikanth.rss.reader.onboarding
+package dev.sasikanth.rss.reader.accountselection
 
-sealed interface OnboardingEffect {
-  data object NavigateToHome : OnboardingEffect
+import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
 
-  data object NavigateToDiscovery : OnboardingEffect
+sealed interface AccountSelectionEvent {
+  data object LocalAccountClicked : AccountSelectionEvent
 
-  data object NavigateToAccountSelection : OnboardingEffect
+  data class CloudServiceClicked(val provider: CloudServiceProvider) : AccountSelectionEvent
+
+  data object ClearAuthUrl : AccountSelectionEvent
 }
