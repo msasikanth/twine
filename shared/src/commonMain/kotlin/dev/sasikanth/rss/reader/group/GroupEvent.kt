@@ -33,4 +33,10 @@ sealed interface GroupEvent {
   data object OnCancelSelectionClicked : GroupEvent
 
   data class OnFeedClicked(val feed: Feed) : GroupEvent
+
+  data object OnDeleteSelectedFeedsClicked : GroupEvent
+
+  data object DeleteSelectedSources : GroupEvent
+
+  data object DismissDeleteConfirmation : GroupEvent
 }

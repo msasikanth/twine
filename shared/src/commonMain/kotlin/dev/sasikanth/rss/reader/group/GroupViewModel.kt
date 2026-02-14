@@ -28,9 +28,11 @@ import androidx.navigation.toRoute
 import app.cash.paging.cachedIn
 import app.cash.paging.createPager
 import app.cash.paging.createPagingConfig
+import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.data.repository.FeedsOrderBy
+import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +48,7 @@ import me.tatarka.inject.annotations.Inject
 @Inject
 class GroupViewModel(
   private val rssRepository: RssRepository,
+  private val observableActiveSource: ObservableActiveSource,
   @Assisted savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -69,7 +72,37 @@ class GroupViewModel(
       is GroupEvent.OnFeedsSortOrderChanged -> onFeedsSortOrderChanged(event.feedsOrderBy)
       GroupEvent.OnCancelSelectionClicked -> onCancelSelectionClicked()
       is GroupEvent.OnFeedClicked -> onFeedClicked(event.feed)
+      GroupEvent.OnDeleteSelectedFeedsClicked -> onDeleteSelectedFeedsClicked()
+      GroupEvent.DeleteSelectedSources -> deleteSelectedSources()
+      GroupEvent.DismissDeleteConfirmation -> dismissDeleteConfirmation()
     }
+  }
+
+  private fun deleteSelectedSources() {
+    viewModelScope
+      .launch {
+        try {
+          rssRepository.removeFeedIdsFromGroups(
+            groupIds = setOf(groupId),
+            feedIds = _state.value.selectedSources.map { it.id },
+          )
+          rssRepository.markSourcesAsDeleted(_state.value.selectedSources)
+        } catch (e: Exception) {
+          Logger.e("Failed to delete feeds from group: $e")
+        }
+      }
+      .invokeOnCompletion {
+        observableActiveSource.clearSelection()
+        dispatch(GroupEvent.OnCancelSelectionClicked)
+      }
+  }
+
+  private fun dismissDeleteConfirmation() {
+    _state.update { it.copy(showDeleteConfirmation = false) }
+  }
+
+  private fun onDeleteSelectedFeedsClicked() {
+    _state.update { it.copy(showDeleteConfirmation = true) }
   }
 
   private fun init() {
