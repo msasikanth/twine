@@ -62,9 +62,11 @@ import dev.sasikanth.rss.reader.components.ContextActionItem
 import dev.sasikanth.rss.reader.components.ContextActionsBottomBar
 import dev.sasikanth.rss.reader.feeds.ui.FeedListItem
 import dev.sasikanth.rss.reader.feeds.ui.common.AllFeedsHeader
+import dev.sasikanth.rss.reader.feeds.ui.sheet.expanded.DeleteConfirmationDialog
 import dev.sasikanth.rss.reader.group.GroupEvent
 import dev.sasikanth.rss.reader.group.GroupViewModel
 import dev.sasikanth.rss.reader.resources.icons.ArrowBack
+import dev.sasikanth.rss.reader.resources.icons.Delete
 import dev.sasikanth.rss.reader.resources.icons.NewGroup
 import dev.sasikanth.rss.reader.resources.icons.TwineIcons
 import dev.sasikanth.rss.reader.resources.icons.UnGroup
@@ -73,6 +75,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.actionDelete
 import twine.shared.generated.resources.actionMoveTo
 import twine.shared.generated.resources.actionUngroup
 import twine.shared.generated.resources.buttonGoBack
@@ -90,6 +93,13 @@ fun GroupScreen(
   val feeds = state.feeds.collectAsLazyPagingItems()
 
   AppTheme(useDarkTheme = true) {
+    if (state.showDeleteConfirmation) {
+      DeleteConfirmationDialog(
+        onDelete = { viewModel.dispatch(GroupEvent.DeleteSelectedSources) },
+        dismiss = { viewModel.dispatch(GroupEvent.DismissDeleteConfirmation) },
+      )
+    }
+
     Scaffold(
       modifier = modifier,
       topBar = {
@@ -148,6 +158,13 @@ fun GroupScreen(
               icon = TwineIcons.NewGroup,
               label = stringResource(Res.string.actionMoveTo),
               onClick = { openGroupSelection() },
+            )
+
+            ContextActionItem(
+              modifier = Modifier.weight(1f),
+              icon = TwineIcons.Delete,
+              label = stringResource(Res.string.actionDelete),
+              onClick = { viewModel.dispatch(GroupEvent.OnDeleteSelectedFeedsClicked) },
             )
 
             ContextActionItem(
