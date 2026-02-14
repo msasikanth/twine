@@ -21,7 +21,10 @@ import androidx.lifecycle.viewModelScope
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
+import dev.sasikanth.rss.reader.data.repository.AppThemeMode
+import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -32,18 +35,16 @@ import dev.sasikanth.rss.reader.di.scopes.ActivityScope
 import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
-import dev.sasikanth.rss.reader.utils.NTuple9
-import dev.sasikanth.rss.reader.utils.combine
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -75,59 +76,33 @@ class AppViewModel(
     setupSessionTracking()
 
     combine(
-        settingsRepository.appThemeMode,
-        settingsRepository.useAmoled,
-        settingsRepository.dynamicColorEnabled,
-        settingsRepository.showFeedFavIcon,
-        settingsRepository.homeViewMode,
-        settingsRepository.showReaderView,
-        settingsRepository.blockImages,
-        observableActiveSource.activeSource,
-        settingsRepository.postsType,
-      ) {
-        appThemeMode,
-        useAmoled,
-        dynamicColorEnabled,
-        showFeedFavIcon,
-        homeViewMode,
-        showReaderView,
-        blockImages,
-        activeSource,
-        postsType ->
-        NTuple9(
-          appThemeMode,
-          useAmoled,
-          dynamicColorEnabled,
-          showFeedFavIcon,
-          homeViewMode,
-          showReaderView,
-          blockImages,
-          activeSource,
-          postsType,
-        )
-      }
-      .onEach {
-        (
-          appThemeMode,
-          useAmoled,
-          dynamicColorEnabled,
-          showFeedFavIcon,
-          homeViewMode,
-          showReaderView,
-          blockImages,
-          activeSource,
-          postsType) ->
+        combine(
+          settingsRepository.appThemeMode,
+          settingsRepository.useAmoled,
+          settingsRepository.dynamicColorEnabled,
+          settingsRepository.showFeedFavIcon,
+          settingsRepository.homeViewMode,
+          ::AppAppearanceSettings,
+        ),
+        combine(
+          settingsRepository.showReaderView,
+          settingsRepository.blockImages,
+          observableActiveSource.activeSource,
+          settingsRepository.postsType,
+          ::AppContentSettings,
+        ),
+      ) { appearanceSettings, contentSettings ->
         _state.update {
           it.copy(
-            appThemeMode = appThemeMode,
-            useAmoled = useAmoled,
-            dynamicColorEnabled = dynamicColorEnabled,
-            showFeedFavIcon = showFeedFavIcon,
-            homeViewMode = homeViewMode,
-            showReaderView = showReaderView,
-            blockImages = blockImages,
-            activeSource = activeSource,
-            postsType = postsType,
+            appThemeMode = appearanceSettings.appThemeMode,
+            useAmoled = appearanceSettings.useAmoled,
+            dynamicColorEnabled = appearanceSettings.dynamicColorEnabled,
+            showFeedFavIcon = appearanceSettings.showFeedFavIcon,
+            homeViewMode = appearanceSettings.homeViewMode,
+            showReaderView = contentSettings.showReaderView,
+            blockImages = contentSettings.blockImages,
+            activeSource = contentSettings.activeSource,
+            postsType = contentSettings.postsType,
           )
         }
       }
@@ -259,3 +234,18 @@ class AppViewModel(
     }
   }
 }
+
+private data class AppAppearanceSettings(
+  val appThemeMode: AppThemeMode,
+  val useAmoled: Boolean,
+  val dynamicColorEnabled: Boolean,
+  val showFeedFavIcon: Boolean,
+  val homeViewMode: HomeViewMode,
+)
+
+private data class AppContentSettings(
+  val showReaderView: Boolean,
+  val blockImages: Boolean,
+  val activeSource: Source?,
+  val postsType: PostsType,
+)

@@ -23,9 +23,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
+import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
@@ -37,8 +39,6 @@ import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.home.ui.PostListKey
 import dev.sasikanth.rss.reader.posts.AllPostsPager
 import dev.sasikanth.rss.reader.utils.InAppRating
-import dev.sasikanth.rss.reader.utils.NTuple7
-import dev.sasikanth.rss.reader.utils.combine as flowCombine
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import me.tatarka.inject.annotations.Inject
@@ -241,51 +242,30 @@ class HomeViewModel(
       .onEach { hasFeeds -> _state.update { it.copy(hasFeeds = hasFeeds) } }
       .launchIn(viewModelScope)
 
-    flowCombine(
-        activeSourceFlow,
-        postsTypeFlow,
-        settingsRepository.postsSortOrder,
-        settingsRepository.homeViewMode,
-        allPostsPager.hasUnreadPosts,
-        allPostsPager.unreadSinceLastSync,
-        refreshPolicy.lastRefreshedAtFlow,
-      ) {
-        activeSource,
-        postsType,
-        postsSortOrder,
-        homeViewMode,
-        hasUnreadPosts,
-        unreadSinceLastSync,
-        lastRefreshedAt ->
-        NTuple7(
-          activeSource,
-          postsType,
-          postsSortOrder,
-          homeViewMode,
-          hasUnreadPosts,
-          unreadSinceLastSync,
-          lastRefreshedAt,
-        )
-      }
-      .distinctUntilChanged()
-      .onEach {
-        (
-          activeSource,
-          postsType,
-          postsSortOrder,
-          homeViewMode,
-          hasUnreadPosts,
-          unreadSinceLastSync,
-          lastRefreshedAt) ->
+    combine(
+        combine(
+          activeSourceFlow,
+          postsTypeFlow,
+          settingsRepository.postsSortOrder,
+          settingsRepository.homeViewMode,
+          ::HomeSelectionFilters,
+        ),
+        combine(
+          allPostsPager.hasUnreadPosts,
+          allPostsPager.unreadSinceLastSync,
+          refreshPolicy.lastRefreshedAtFlow,
+          ::HomeUnreadStatus,
+        ),
+      ) { selectionFilters, unreadStatus ->
         _state.update {
           it.copy(
-            activeSource = activeSource,
-            postsType = postsType,
-            postsSortOrder = postsSortOrder,
-            homeViewMode = homeViewMode,
-            hasUnreadPosts = hasUnreadPosts,
-            unreadSinceLastSync = unreadSinceLastSync,
-            lastRefreshedAt = lastRefreshedAt,
+            activeSource = selectionFilters.activeSource,
+            postsType = selectionFilters.postsType,
+            postsSortOrder = selectionFilters.postsSortOrder,
+            homeViewMode = selectionFilters.homeViewMode,
+            hasUnreadPosts = unreadStatus.hasUnreadPosts,
+            unreadSinceLastSync = unreadStatus.unreadSinceLastSync,
+            lastRefreshedAt = unreadStatus.lastRefreshedAt,
           )
         }
       }
@@ -433,3 +413,16 @@ class HomeViewModel(
     }
   }
 }
+
+private data class HomeSelectionFilters(
+  val activeSource: Source?,
+  val postsType: PostsType,
+  val postsSortOrder: PostsSortOrder,
+  val homeViewMode: HomeViewMode,
+)
+
+private data class HomeUnreadStatus(
+  val hasUnreadPosts: Boolean,
+  val unreadSinceLastSync: UnreadSinceLastSync?,
+  val lastRefreshedAt: LocalDateTime?,
+)

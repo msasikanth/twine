@@ -40,10 +40,10 @@ import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.auth.OAuthManager
 import dev.sasikanth.rss.reader.notifications.Notifier
 import dev.sasikanth.rss.reader.utils.Constants
-import dev.sasikanth.rss.reader.utils.combine
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -74,66 +74,61 @@ class SettingsViewModel(
 
   init {
     combine(
-        settingsRepository.browserType,
-        settingsRepository.showUnreadPostsCount,
-        settingsRepository.postsDeletionPeriod,
-        settingsRepository.showReaderView,
-        settingsRepository.appThemeMode,
-        settingsRepository.useAmoled,
-        settingsRepository.dynamicColorEnabled,
-        settingsRepository.enableAutoSync,
-        settingsRepository.showFeedFavIcon,
-        settingsRepository.markAsReadOn,
-        settingsRepository.homeViewMode,
-        settingsRepository.blockImages,
-        settingsRepository.enableNotifications,
-        settingsRepository.downloadFullContent,
-        refreshPolicy.lastSyncedAtFlow,
-        userRepository.user(),
-        settingsRepository.appIcon,
-      ) {
-        browserType,
-        showUnreadPostsCount,
-        postsDeletionPeriod,
-        showReaderView,
-        appThemeMode,
-        useAmoled,
-        dynamicColorEnabled,
-        enableAutoSync,
-        showFeedFavIcon,
-        markAsReadOn,
-        homeViewMode,
-        blockImages,
-        enableNotifications,
-        downloadFullContent,
-        lastSyncedAt,
-        user,
-        appIcon ->
+        combine(
+          settingsRepository.browserType,
+          settingsRepository.showUnreadPostsCount,
+          settingsRepository.postsDeletionPeriod,
+          settingsRepository.showReaderView,
+          settingsRepository.markAsReadOn,
+          ::SettingsGroup1,
+        ),
+        combine(
+          settingsRepository.appThemeMode,
+          settingsRepository.useAmoled,
+          settingsRepository.dynamicColorEnabled,
+          settingsRepository.showFeedFavIcon,
+          settingsRepository.appIcon,
+          ::SettingsGroup2,
+        ),
+        combine(
+          settingsRepository.homeViewMode,
+          settingsRepository.blockImages,
+          settingsRepository.downloadFullContent,
+          settingsRepository.enableAutoSync,
+          ::SettingsGroup3,
+        ),
+        combine(
+          settingsRepository.enableNotifications,
+          refreshPolicy.lastSyncedAtFlow,
+          userRepository.user(),
+          ::SettingsGroup4,
+        ),
+      ) { group1, group2, group3, group4 ->
         Settings(
-          browserType = browserType,
-          showUnreadPostsCount = showUnreadPostsCount,
-          postsDeletionPeriod = postsDeletionPeriod,
-          showReaderView = showReaderView,
-          appThemeMode = appThemeMode,
-          useAmoled = useAmoled,
-          dynamicColorEnabled = dynamicColorEnabled,
-          enableAutoSync = enableAutoSync,
-          showFeedFavIcon = showFeedFavIcon,
-          markAsReadOn = markAsReadOn,
-          homeViewMode = homeViewMode,
-          blockImages = blockImages,
-          enableNotifications = enableNotifications,
-          downloadFullContent = downloadFullContent,
-          lastSyncedAt = lastSyncedAt,
+          browserType = group1.browserType,
+          showUnreadPostsCount = group1.showUnreadPostsCount,
+          postsDeletionPeriod = group1.postsDeletionPeriod,
+          showReaderView = group1.showReaderView,
+          appThemeMode = group2.appThemeMode,
+          useAmoled = group2.useAmoled,
+          dynamicColorEnabled = group2.dynamicColorEnabled,
+          enableAutoSync = group3.enableAutoSync,
+          showFeedFavIcon = group2.showFeedFavIcon,
+          markAsReadOn = group1.markAsReadOn,
+          homeViewMode = group3.homeViewMode,
+          blockImages = group3.blockImages,
+          enableNotifications = group4.enableNotifications,
+          downloadFullContent = group3.downloadFullContent,
+          lastSyncedAt = group4.lastSyncedAt,
           lastSyncStatus =
-            when (user?.lastSyncStatus) {
+            when (group4.user?.lastSyncStatus) {
               "SUCCESS" -> SettingsState.SyncProgress.Success
               "FAILURE" -> SettingsState.SyncProgress.Failure
               "SYNCING" -> SettingsState.SyncProgress.Syncing
               else -> SettingsState.SyncProgress.Idle
             },
-          hasCloudServiceSignedIn = user != null,
-          appIcon = appIcon,
+          hasCloudServiceSignedIn = group4.user != null,
+          appIcon = group2.appIcon,
         )
       }
       .onEach { settings ->
@@ -425,4 +420,33 @@ private data class Settings(
   val lastSyncStatus: SettingsState.SyncProgress,
   val hasCloudServiceSignedIn: Boolean,
   val appIcon: AppIcon,
+)
+
+private data class SettingsGroup1(
+  val browserType: BrowserType,
+  val showUnreadPostsCount: Boolean,
+  val postsDeletionPeriod: Period,
+  val showReaderView: Boolean,
+  val markAsReadOn: MarkAsReadOn,
+)
+
+private data class SettingsGroup2(
+  val appThemeMode: AppThemeMode,
+  val useAmoled: Boolean,
+  val dynamicColorEnabled: Boolean,
+  val showFeedFavIcon: Boolean,
+  val appIcon: AppIcon,
+)
+
+private data class SettingsGroup3(
+  val homeViewMode: HomeViewMode,
+  val blockImages: Boolean,
+  val downloadFullContent: Boolean,
+  val enableAutoSync: Boolean,
+)
+
+private data class SettingsGroup4(
+  val enableNotifications: Boolean,
+  val lastSyncedAt: Instant?,
+  val user: dev.sasikanth.rss.reader.core.model.local.User?,
 )
