@@ -159,7 +159,7 @@ fun GroupScreen(
           }
         }
       },
-      containerColor = AppTheme.colorScheme.surface,
+      containerColor = AppTheme.colorScheme.bottomSheet,
     ) { innerPadding ->
       LazyColumn(
         modifier = Modifier.fillMaxSize(),
