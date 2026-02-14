@@ -15,12 +15,18 @@
  *
  */
 
-package dev.sasikanth.rss.reader.onboarding
+package dev.sasikanth.rss.reader.accountselection
 
-sealed interface OnboardingEffect {
-  data object NavigateToHome : OnboardingEffect
+import androidx.compose.runtime.Immutable
+import dev.sasikanth.rss.reader.core.model.local.User
 
-  data object NavigateToDiscovery : OnboardingEffect
-
-  data object NavigateToAccountSelection : OnboardingEffect
+@Immutable
+data class AccountSelectionState(
+  val isSubscribed: Boolean,
+  val authUrlToOpen: String?,
+  val user: User?,
+) {
+  companion object {
+    val DEFAULT = AccountSelectionState(isSubscribed = false, authUrlToOpen = null, user = null)
+  }
 }

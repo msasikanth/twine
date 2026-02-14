@@ -55,6 +55,8 @@ import androidx.navigation.toRoute
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import dev.sasikanth.rss.reader.about.ui.AboutScreen
+import dev.sasikanth.rss.reader.accountselection.AccountSelectionViewModel
+import dev.sasikanth.rss.reader.accountselection.ui.AccountSelectionScreen
 import dev.sasikanth.rss.reader.addfeed.AddFeedEvent
 import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.addfeed.ui.AddFeedScreen
@@ -166,6 +168,7 @@ fun App(
   searchViewModel: () -> SearchViewModel,
   bookmarksViewModel: () -> BookmarksViewModel,
   settingsViewModel: () -> SettingsViewModel,
+  accountSelectionViewModel: () -> AccountSelectionViewModel,
   freshRssLoginViewModel: () -> dev.sasikanth.rss.reader.freshrss.FreshRssLoginViewModel,
   minifluxLoginViewModel: () -> MinifluxLoginViewModel,
   groupViewModel: (SavedStateHandle) -> GroupViewModel,
@@ -250,8 +253,8 @@ fun App(
       appViewModel.navigateToReader
         .onEach { args ->
           val route = Screen.Reader(args)
-          if (!navController.popBackStack(Screen.Main, inclusive = false)) {
-            navController.navigate(Screen.Main) {
+          if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
+            navController.navigate(Screen.Main()) {
               popUpTo<Screen.Placeholder> { inclusive = true }
               launchSingleTop = true
             }
@@ -274,8 +277,8 @@ fun App(
           val deepLinkRequest =
             NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
           if (navController.graph.hasDeepLink(deepLinkRequest)) {
-            if (!navController.popBackStack(Screen.Main, inclusive = false)) {
-              navController.navigate(Screen.Main) {
+            if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
+              navController.navigate(Screen.Main()) {
                 popUpTo<Screen.Placeholder> { inclusive = true }
                 launchSingleTop = true
               }
@@ -324,7 +327,7 @@ fun App(
             modifier = roundedCornerScreenModifier,
             viewModel = viewModel,
             navigateHome = {
-              navController.navigate(Screen.Main) {
+              navController.navigate(Screen.Main()) {
                 popUpTo<Screen.Placeholder> { inclusive = true }
               }
             },
@@ -341,7 +344,7 @@ fun App(
           OnboardingScreen(
             viewModel = viewModel,
             onOnboardingDone = {
-              navController.navigate(Screen.Main) {
+              navController.navigate(Screen.Main()) {
                 popUpTo<Screen.Onboarding> { inclusive = true }
               }
             },
@@ -350,10 +353,38 @@ fun App(
                 popUpTo<Screen.Onboarding> { inclusive = true }
               }
             },
+            onNavigateToAccountSelection = {
+              navController.navigate(Screen.AccountSelection) {
+                popUpTo<Screen.Onboarding> { inclusive = true }
+              }
+            },
+          )
+        }
+
+        composable<Screen.AccountSelection> {
+          val viewModel = viewModel { accountSelectionViewModel() }
+
+          AccountSelectionScreen(
+            viewModel = viewModel,
+            onNavigateToHome = {
+              navController.navigate(Screen.Main(triggerSync = true)) {
+                popUpTo<Screen.AccountSelection> { inclusive = true }
+              }
+            },
+            onNavigateToDiscovery = {
+              navController.navigate(Screen.Discovery(isFromOnboarding = true)) {
+                popUpTo<Screen.AccountSelection> { inclusive = true }
+              }
+            },
+            openPaywall = { navController.navigate(Screen.Paywall) },
+            openFreshRssLogin = { navController.navigate(Screen.FreshRssLogin) },
+            openMinifluxLogin = { navController.navigate(Screen.MinifluxLogin) },
           )
         }
 
         composable<Screen.Main> {
+          val triggerSync = it.toRoute<Screen.Main>().triggerSync
+
           LaunchedEffect(useDarkTheme) {
             toggleLightStatusBar(!useDarkTheme)
             toggleLightNavBar(!useDarkTheme)
@@ -406,6 +437,7 @@ fun App(
               HomeScreen(
                 viewModel = viewModel,
                 feedsViewModel = feedsViewModel,
+                triggerSync = triggerSync,
                 openPost = { index, post -> openPost(index, post, FromScreen.Home) },
                 openGroupSelectionSheet = {
                   feedsViewModel.dispatch(FeedsEvent.OnAddToGroupClicked)
@@ -605,7 +637,7 @@ fun App(
             showDoneButton = isFromOnboarding,
             onDone = {
               if (isFromOnboarding) {
-                navController.navigate(Screen.Main) {
+                navController.navigate(Screen.Main()) {
                   popUpTo<Screen.Discovery> { inclusive = true }
                 }
               } else {

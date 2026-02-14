@@ -125,6 +125,7 @@ import twine.shared.generated.resources.swipeUpGetStarted
 internal fun HomeScreen(
   viewModel: HomeViewModel,
   feedsViewModel: FeedsViewModel,
+  triggerSync: Boolean,
   openPost: (Int, ResolvedPost) -> Unit,
   openGroupSelectionSheet: () -> Unit,
   openFeedInfoSheet: (feedId: String) -> Unit,
@@ -193,6 +194,12 @@ internal fun HomeScreen(
     rememberBottomSheetScaffoldState(bottomSheetState = bottomSheetState)
   val showScrollToTop by remember { derivedStateOf { postsListState.firstVisibleItemIndex > 0 } }
   val unreadSinceLastSync = state.unreadSinceLastSync
+
+  LaunchedEffect(triggerSync) {
+    if (triggerSync) {
+      viewModel.dispatch(HomeEvent.OnSwipeToRefresh)
+    }
+  }
 
   LaunchedEffect(state.activeSource) {
     if (state.activeSource != state.prevActiveSource) {

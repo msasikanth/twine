@@ -68,6 +68,7 @@ internal fun OnboardingScreen(
   viewModel: OnboardingViewModel,
   onOnboardingDone: () -> Unit,
   onNavigateToDiscovery: () -> Unit,
+  onNavigateToAccountSelection: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val state by viewModel.state.collectAsStateWithLifecycle()
@@ -78,6 +79,7 @@ internal fun OnboardingScreen(
       when (effect) {
         OnboardingEffect.NavigateToHome -> onOnboardingDone()
         OnboardingEffect.NavigateToDiscovery -> onNavigateToDiscovery()
+        OnboardingEffect.NavigateToAccountSelection -> onNavigateToAccountSelection()
       }
     }
   }

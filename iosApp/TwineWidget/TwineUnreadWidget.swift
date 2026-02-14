@@ -122,7 +122,9 @@ struct TwineUnreadWidgetEntryView : View {
     
     private func createDeepLink(postIndex: Int, postId: String) -> URL {
         let fromScreenType = "dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen.UnreadWidget"
-        let urlString = "twine://reader/{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
+        let json = "{\"postIndex\":\(postIndex),\"postId\":\"\(postId)\",\"fromScreen\":{\"type\":\"\(fromScreenType)\"}}"
+        let encodedJson = json.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        let urlString = "twine://reader/\(encodedJson)"
         return URL(string: urlString) ?? URL(string: "twine://")!
     }
 }

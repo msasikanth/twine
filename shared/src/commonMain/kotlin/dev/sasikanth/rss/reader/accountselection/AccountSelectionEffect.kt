@@ -15,12 +15,15 @@
  *
  */
 
-package dev.sasikanth.rss.reader.onboarding
+package dev.sasikanth.rss.reader.accountselection
 
-sealed interface OnboardingEffect {
-  data object NavigateToHome : OnboardingEffect
+sealed interface AccountSelectionEffect {
 
-  data object NavigateToDiscovery : OnboardingEffect
+  data object NavigateToDiscovery : AccountSelectionEffect
 
-  data object NavigateToAccountSelection : OnboardingEffect
+  data object OpenPaywall : AccountSelectionEffect
+
+  data object OpenFreshRssLogin : AccountSelectionEffect
+
+  data object OpenMinifluxLogin : AccountSelectionEffect
 }
