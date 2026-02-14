@@ -53,6 +53,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
 
   private var progressJob: Job? = null
   private var playingUrl: String? = null
+  private var playingPostId: String? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
   private var selectedSleepTimerOption: SleepTimerOption = SleepTimerOption.None
@@ -98,8 +99,15 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
       )
   }
 
-  override fun play(url: String, title: String, artist: String, coverUrl: String?) {
+  override fun play(
+    url: String,
+    title: String,
+    artist: String,
+    coverUrl: String?,
+    postId: String?,
+  ) {
     playingUrl = url
+    playingPostId = postId
     mediaPlayer?.media()?.play(url)
     updatePlaybackState()
   }
@@ -159,6 +167,7 @@ class JvmAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         currentPosition = mediaPlayer?.status()?.time()?.coerceAtLeast(0) ?: 0L,
         duration = mediaPlayer?.status()?.length()?.coerceAtLeast(0) ?: 0L,
         playingUrl = playingUrl,
+        playingPostId = playingPostId,
         buffering = it.buffering,
         playbackSpeed = mediaPlayer?.status()?.rate() ?: 1f,
         sleepTimerRemaining = sleepTimerRemainingMillis,

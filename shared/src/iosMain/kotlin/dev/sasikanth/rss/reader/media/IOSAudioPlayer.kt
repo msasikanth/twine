@@ -56,6 +56,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
   private val scope = CoroutineScope(SupervisorJob() + dispatchersProvider.main)
   private var progressJob: Job? = null
   private var playingUrl: String? = null
+  private var playingPostId: String? = null
   private var playJob: Job? = null
   private var sleepTimerJob: Job? = null
   private var sleepTimerRemainingMillis: Long? = null
@@ -83,11 +84,18 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
     }
   }
 
-  override fun play(url: String, title: String, artist: String, coverUrl: String?) {
+  override fun play(
+    url: String,
+    title: String,
+    artist: String,
+    coverUrl: String?,
+    postId: String?,
+  ) {
     playJob?.cancel()
     playJob =
       scope.launch {
         playingUrl = url
+        playingPostId = postId
 
         val fileName = "${nameBasedUuidOf(url)}.mp3"
         val localUrl = cacheDirectory.URLByAppendingPathComponent(fileName)!!
@@ -293,6 +301,7 @@ class IOSAudioPlayer(private val dispatchersProvider: DispatchersProvider) : Aud
         currentPosition = currentPosition,
         duration = duration,
         playingUrl = playingUrl,
+        playingPostId = playingPostId,
         buffering = buffering,
         playbackSpeed = currentSpeed,
         sleepTimerRemaining = sleepTimerRemainingMillis,

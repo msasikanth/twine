@@ -102,13 +102,19 @@ class AndroidAudioPlayer(
     }
   }
 
-  override fun play(url: String, title: String, artist: String, coverUrl: String?) {
+  override fun play(
+    url: String,
+    title: String,
+    artist: String,
+    coverUrl: String?,
+    postId: String?,
+  ) {
     playJob?.cancel()
     playJob =
       scope.launch {
         val mediaItem =
           MediaItem.Builder()
-            .setMediaId(url)
+            .setMediaId(postId ?: url)
             .setUri(url)
             .setMediaMetadata(
               MediaMetadata.Builder()
@@ -183,7 +189,8 @@ class AndroidAudioPlayer(
         isPlaying = player.isPlaying,
         currentPosition = player.currentPosition,
         duration = player.duration.coerceAtLeast(0),
-        playingUrl = player.currentMediaItem?.mediaId,
+        playingUrl = player.currentMediaItem?.localConfiguration?.uri?.toString(),
+        playingPostId = player.currentMediaItem?.mediaId,
         buffering = player.playbackState == Player.STATE_BUFFERING,
         playbackSpeed = player.playbackParameters.speed,
         sleepTimerRemaining = sleepTimerRemainingMillis,

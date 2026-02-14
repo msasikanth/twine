@@ -112,6 +112,7 @@ class ReaderPageViewModel(
       title = readerPost.title,
       artist = readerPost.feedName,
       coverUrl = coverUrl,
+      postId = readerPost.id,
     )
   }
 

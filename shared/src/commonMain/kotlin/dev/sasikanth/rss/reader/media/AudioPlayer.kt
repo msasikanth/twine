@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface AudioPlayer {
   val playbackState: StateFlow<PlaybackState>
 
-  fun play(url: String, title: String, artist: String, coverUrl: String?)
+  fun play(url: String, title: String, artist: String, coverUrl: String?, postId: String? = null)
 
   fun pause()
 
@@ -48,6 +48,7 @@ data class PlaybackState(
   val currentPosition: Long,
   val duration: Long,
   val playingUrl: String? = null,
+  val playingPostId: String? = null,
   val buffering: Boolean = false,
   val playbackSpeed: Float = 1f,
   val sleepTimerRemaining: Long? = null,
@@ -59,6 +60,8 @@ data class PlaybackState(
         isPlaying = false,
         currentPosition = 0,
         duration = 0,
+        playingUrl = null,
+        playingPostId = null,
         buffering = false,
         playbackSpeed = 1f,
         sleepTimerRemaining = null,
