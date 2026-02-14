@@ -1162,6 +1162,12 @@ class RssRepository(
     }
   }
 
+  suspend fun resolvedPostById(postId: String): ResolvedPost? {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries.resolvedPostById(id = postId, mapper = ::mapToResolvedPost).executeAsOneOrNull()
+    }
+  }
+
   suspend fun updateFeedRemoteId(
     remoteId: String,
     feedId: String,
