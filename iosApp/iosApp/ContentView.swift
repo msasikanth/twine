@@ -23,6 +23,9 @@ struct ComposeView: UIViewControllerRepresentable {
 struct ContentView: View {
 	
     let homeViewControllerComponent: InjectHomeViewControllerComponent
+    
+    @Environment(\.scenePhase)
+    private var scenePhase
 	
     init(homeViewControllerComponent: InjectHomeViewControllerComponent) {
         self.homeViewControllerComponent = homeViewControllerComponent
@@ -34,6 +37,11 @@ struct ContentView: View {
 			.edgesIgnoringSafeArea(.all)
             .onOpenURL { url in
                 ExternalUriHandler.shared.onNewUri(uri: url.absoluteString)
+            }
+            .onChange(of: scenePhase) { oldPhase, newPhase in
+                if newPhase == .active && oldPhase == .background {
+                    ExternalUriHandler.shared.onNewUri(uri: "twine://reader/currently-playing")
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: UIScene.didEnterBackgroundNotification)) { output in
                 WidgetCenter.shared.reloadTimelines(ofKind: AppDelegate.unreadWidgetKind)

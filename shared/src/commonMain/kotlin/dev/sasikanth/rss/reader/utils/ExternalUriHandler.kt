@@ -20,19 +20,24 @@ package dev.sasikanth.rss.reader.utils
 object ExternalUriHandler {
   private var cached: String? = null
 
-  var listener: ((uri: String) -> Unit)? = null
-    set(value) {
-      field = value
-      if (value != null) {
-        cached?.let { value.invoke(it) }
-        cached = null
-      }
+  private val listeners = mutableSetOf<(String) -> Unit>()
+
+  fun addListener(listener: (String) -> Unit) {
+    listeners.add(listener)
+    cached?.let {
+      listener.invoke(it)
+      cached = null
     }
+  }
+
+  fun removeListener(listener: (String) -> Unit) {
+    listeners.remove(listener)
+  }
 
   fun onNewUri(uri: String) {
     cached = uri
-    listener?.let {
-      it.invoke(uri)
+    if (listeners.isNotEmpty()) {
+      listeners.forEach { it.invoke(uri) }
       cached = null
     }
   }

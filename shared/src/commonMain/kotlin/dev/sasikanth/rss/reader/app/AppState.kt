@@ -17,6 +17,8 @@
 
 package dev.sasikanth.rss.reader.app
 
+import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.Source
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
@@ -30,6 +32,8 @@ data class AppState(
   val activePostIndex: Int,
   val activePostId: String?,
   val blockImages: Boolean,
+  val activeSource: Source?,
+  val postsType: PostsType,
 ) {
 
   companion object {
@@ -44,6 +48,8 @@ data class AppState(
         activePostIndex = 0,
         activePostId = null,
         blockImages = false,
+        activeSource = null,
+        postsType = PostsType.ALL,
       )
   }
 }
