@@ -115,7 +115,7 @@ fun GroupScreen(
               actions = { Spacer(Modifier.requiredSize(48.dp)) },
               colors =
                 TopAppBarDefaults.topAppBarColors(
-                  containerColor = AppTheme.colorScheme.surface,
+                  containerColor = AppTheme.colorScheme.bottomSheet,
                   navigationIconContentColor = AppTheme.colorScheme.onSurface,
                   titleContentColor = AppTheme.colorScheme.onSurface,
                   actionIconContentColor = AppTheme.colorScheme.onSurface,
