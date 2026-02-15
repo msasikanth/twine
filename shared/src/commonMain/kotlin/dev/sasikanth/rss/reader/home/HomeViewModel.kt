@@ -118,19 +118,19 @@ class HomeViewModel(
   private fun onScreenStopped(event: HomeEvent.OnScreenStopped) {
     viewModelScope.launch {
       val featuredPosts = _state.value.featuredPosts.first()
-      val (adjustedIndex, postId) =
-        if (featuredPosts.isEmpty()) {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
-          event.firstVisibleItemIndex to postId
-        } else if (event.firstVisibleItemIndex == 0) {
-          val postId = featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
-          event.settledPage to postId
+      val postId =
+        if (featuredPosts.isNotEmpty() && event.firstVisibleItemIndex == 0) {
+          featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
         } else {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
-          (event.firstVisibleItemIndex + featuredPosts.lastIndex.coerceAtLeast(0)) to postId
+          event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
         }
 
-      observableSelectedPost.updateSelectedPost(adjustedIndex, postId)
+      if (postId != null) {
+        val homeIndex = calculateHomeIndex(postId, event.firstVisibleItemIndex)
+        observableSelectedPost.updateSelectedPost(homeIndex, postId)
+      } else {
+        observableSelectedPost.updateSelectedPost(event.firstVisibleItemIndex, null)
+      }
     }
   }
 
@@ -280,6 +280,7 @@ class HomeViewModel(
           selectedPost?.index ?: 0
         }
       }
+      .distinctUntilChanged()
       .onEach { homeIndex -> _state.update { it.copy(activePostIndex = homeIndex) } }
       .launchIn(viewModelScope)
 
