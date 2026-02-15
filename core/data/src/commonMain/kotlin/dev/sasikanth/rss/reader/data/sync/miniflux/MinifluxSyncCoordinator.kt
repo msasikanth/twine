@@ -123,19 +123,17 @@ class MinifluxSyncCoordinator(
         refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
       val after = lastSyncedAt.epochSeconds
 
-      val hasNewArticles = syncArticles(after = after)
-      syncArticles(starred = true, after = after)
-      updateSyncState(SyncState.InProgress(0.7f))
-
-      // 4. Sync Statuses (Read/Bookmark)
-      syncStatuses()
-      updateSyncState(SyncState.InProgress(0.9f))
+      syncArticles(after = after)
 
       // Always update lastSyncedAt after a successful sync. The 24-hour overlap
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
       refreshPolicy.updateLastSyncedAt()
       updateSyncState(SyncState.Complete)
+
+      // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
+      syncArticles(starred = true, after = after)
+      syncStatuses()
 
       true
     } catch (e: Exception) {

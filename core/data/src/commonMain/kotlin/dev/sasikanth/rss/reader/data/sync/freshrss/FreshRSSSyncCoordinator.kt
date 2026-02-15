@@ -117,19 +117,17 @@ class FreshRSSSyncCoordinator(
         refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
       val newerThan = lastSyncedAt.toEpochMilliseconds()
 
-      val hasNewArticles = syncArticles(newerThan = newerThan)
-      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
-      updateSyncState(SyncState.InProgress(0.7f))
-
-      // 4. Sync Statuses (Read/Bookmark)
-      syncStatuses()
-      updateSyncState(SyncState.InProgress(0.9f))
+      syncArticles(newerThan = newerThan)
 
       // Always update lastSyncedAt after a successful sync. The 24-hour overlap
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
       refreshPolicy.updateLastSyncedAt()
       updateSyncState(SyncState.Complete)
+
+      // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
+      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
+      syncStatuses()
 
       true
     } catch (e: Exception) {
