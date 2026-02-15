@@ -566,9 +566,6 @@ fun App(
             pageViewModelFactory = { post ->
               viewModel(key = post.id) { readerPageViewModel(post) }
             },
-            onPostChanged = { _, _ ->
-              // no-op
-            },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) },
             toggleLightStatusBar = toggleLightStatusBar,

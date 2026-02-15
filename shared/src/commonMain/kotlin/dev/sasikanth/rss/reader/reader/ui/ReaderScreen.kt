@@ -132,7 +132,6 @@ import twine.shared.generated.resources.readerPageCount
 internal fun ReaderScreen(
   viewModel: ReaderViewModel,
   pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
-  onPostChanged: (Int, String) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
   toggleLightStatusBar: (Boolean) -> Unit,
@@ -450,7 +449,6 @@ internal fun ReaderScreen(
                 modifier =
                   Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
                     if (it) {
-                      onPostChanged(page, readerPost.id)
                       viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
                     }
                   },
