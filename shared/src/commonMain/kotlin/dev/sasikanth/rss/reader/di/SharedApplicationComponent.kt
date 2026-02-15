@@ -24,6 +24,7 @@ import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.initializers.Initializer
 import dev.sasikanth.rss.reader.logging.LoggingComponent
 import dev.sasikanth.rss.reader.notifications.di.NotificationsComponent
+import dev.sasikanth.rss.reader.posts.PostsComponent
 import dev.sasikanth.rss.reader.util.DefaultDispatchersProvider
 import dev.sasikanth.rss.reader.util.DispatchersProvider
 import me.tatarka.inject.annotations.Provides
@@ -34,7 +35,8 @@ abstract class SharedApplicationComponent :
   LoggingComponent,
   ImageLoaderComponent,
   BillingComponent,
-  NotificationsComponent {
+  NotificationsComponent,
+  PostsComponent {
 
   abstract val initializers: Set<Initializer>
 
