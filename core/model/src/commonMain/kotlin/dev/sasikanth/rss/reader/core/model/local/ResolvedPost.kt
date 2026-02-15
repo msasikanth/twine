@@ -41,6 +41,7 @@ data class ResolvedPost(
   val showFeedFavIcon: Boolean,
   val feedContentReadingTime: Int? = null,
   val articleContentReadingTime: Int? = null,
+  val seedColor: Int? = null,
   val remoteId: String? = null,
 ) {
   val bookmarked: Boolean

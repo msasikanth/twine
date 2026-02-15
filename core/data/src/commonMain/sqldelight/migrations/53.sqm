@@ -1,0 +1,2 @@
+-- Migration 53
+ALTER TABLE post ADD COLUMN seedColor INTEGER;

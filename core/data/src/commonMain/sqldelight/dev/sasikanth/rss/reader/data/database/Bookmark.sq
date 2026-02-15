@@ -23,7 +23,8 @@ SELECT
   feed.homepageLink AS feedHomepageLink,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN postContent pc ON post.id == pc.id
