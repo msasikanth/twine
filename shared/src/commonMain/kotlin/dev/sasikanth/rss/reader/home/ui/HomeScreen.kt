@@ -54,6 +54,7 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -336,7 +337,7 @@ internal fun HomeScreen(
                 }
               }
 
-              LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) {
+              val saveVisibleItemIndex = {
                 val firstVisibleItemInfoAfterOffset =
                   postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
                     itemInfo.offset >= topOffset || itemInfo.offset == 0
@@ -353,6 +354,10 @@ internal fun HomeScreen(
                   )
                 )
               }
+
+              LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
+
+              DisposableEffect(Unit) { onDispose { saveVisibleItemIndex() } }
 
               val pullToRefreshState = rememberPullToRefreshState()
 
