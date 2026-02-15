@@ -35,5 +35,13 @@ data class PostListKey(val postId: String, val feedId: String) {
     }
 
     fun decode(key: String): PostListKey = json.decodeFromString(key)
+
+    fun decodeSafe(key: String): PostListKey? {
+      return try {
+        decode(key)
+      } catch (e: Exception) {
+        null
+      }
+    }
   }
 }

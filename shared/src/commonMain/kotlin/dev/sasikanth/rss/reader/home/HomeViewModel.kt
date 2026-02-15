@@ -119,13 +119,13 @@ class HomeViewModel(
       val featuredPosts = _state.value.featuredPosts.first()
       val (adjustedIndex, postId) =
         if (featuredPosts.isEmpty()) {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decode(it).postId }
+          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
           event.firstVisibleItemIndex to postId
         } else if (event.firstVisibleItemIndex == 0) {
           val postId = featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
           event.settledPage to postId
         } else {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decode(it).postId }
+          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
           (event.firstVisibleItemIndex + featuredPosts.lastIndex.coerceAtLeast(0)) to postId
         }
 
