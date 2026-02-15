@@ -262,13 +262,13 @@ internal fun ReaderScreen(
       Scaffold(
         modifier =
           modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
-            return@onKeyEvent when {
-              event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
+            return@onKeyEvent when (event.key) {
+              Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
 
                 true
               }
-              event.key == Key.DirectionLeft && event.type == KeyEventType.KeyUp -> {
+              Key.DirectionLeft if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
 
                 true
