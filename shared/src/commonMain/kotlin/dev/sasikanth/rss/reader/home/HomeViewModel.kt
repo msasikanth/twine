@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -117,19 +118,19 @@ class HomeViewModel(
   private fun onScreenStopped(event: HomeEvent.OnScreenStopped) {
     viewModelScope.launch {
       val featuredPosts = _state.value.featuredPosts.first()
-      val (adjustedIndex, postId) =
-        if (featuredPosts.isEmpty()) {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
-          event.firstVisibleItemIndex to postId
-        } else if (event.firstVisibleItemIndex == 0) {
-          val postId = featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
-          event.settledPage to postId
+      val postId =
+        if (featuredPosts.isNotEmpty() && event.firstVisibleItemIndex == 0) {
+          featuredPosts.getOrNull(event.settledPage)?.resolvedPost?.id
         } else {
-          val postId = event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
-          (event.firstVisibleItemIndex + featuredPosts.lastIndex.coerceAtLeast(0)) to postId
+          event.firstVisibleItemKey?.let { PostListKey.decodeSafe(it)?.postId }
         }
 
-      observableSelectedPost.updateSelectedPost(adjustedIndex, postId)
+      if (postId != null) {
+        val homeIndex = calculateHomeIndex(postId, event.firstVisibleItemIndex)
+        observableSelectedPost.updateSelectedPost(homeIndex, postId)
+      } else {
+        observableSelectedPost.updateSelectedPost(event.firstVisibleItemIndex, null)
+      }
     }
   }
 
@@ -192,6 +193,47 @@ class HomeViewModel(
       else -> emptyList()
     }
 
+  private suspend fun calculateHomeIndex(postId: String, index: Int): Int {
+    val featuredPosts = _state.value.featuredPosts.first()
+    val postsAfter = postsThresholdTime(_state.value.postsType)
+    val activeSourceIds = activeSourceIds(_state.value.activeSource)
+    val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
+    val lastRefreshedAt =
+      _state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault()) ?: Clock.System.now()
+
+    if (featuredPosts.isEmpty()) {
+      return rssRepository.postPosition(
+        postId = postId,
+        activeSourceIds = activeSourceIds,
+        unreadOnly = unreadOnly,
+        after = postsAfter,
+        postsUpperBound = lastRefreshedAt,
+      ) ?: index
+    }
+
+    val featuredPostIndex = featuredPosts.indexOfFirst { it.resolvedPost.id == postId }
+    if (featuredPostIndex != -1) {
+      return featuredPostIndex
+    }
+
+    val featuredPostsAfter = lastRefreshedAt.minus(24.hours)
+    val position =
+      rssRepository.nonFeaturedPostPosition(
+        postId = postId,
+        activeSourceIds = activeSourceIds,
+        unreadOnly = unreadOnly,
+        after = postsAfter,
+        featuredPostsAfter = featuredPostsAfter,
+        postsUpperBound = lastRefreshedAt,
+      )
+
+    return if (position != null) {
+      position + featuredPosts.size
+    } else {
+      index
+    }
+  }
+
   private fun showPostsSortFilter(show: Boolean) {
     _state.update { it.copy(showPostsSortFilter = show) }
   }
@@ -230,9 +272,16 @@ class HomeViewModel(
     }
 
     observableSelectedPost.selectedPost
-      .onEach { selectedPost ->
-        _state.update { it.copy(activePostIndex = selectedPost?.index ?: 0) }
+      .mapLatest { selectedPost ->
+        val postId = selectedPost?.id
+        if (postId != null) {
+          calculateHomeIndex(postId, selectedPost.index)
+        } else {
+          selectedPost?.index ?: 0
+        }
       }
+      .distinctUntilChanged()
+      .onEach { homeIndex -> _state.update { it.copy(activePostIndex = homeIndex) } }
       .launchIn(viewModelScope)
 
     syncCoordinator.syncState
@@ -290,40 +339,9 @@ class HomeViewModel(
   private fun updateVisibleItemIndex(index: Int, postId: String?) {
     viewModelScope.launch {
       if (postId != null) {
-        val featuredPosts = _state.value.featuredPosts.first()
-        val featuredPostIndex = featuredPosts.indexOfFirst { it.resolvedPost.id == postId }
-
-        if (featuredPostIndex != -1) {
-          _state.update { it.copy(activePostIndex = featuredPostIndex) }
-        } else {
-          val postsAfter = postsThresholdTime(_state.value.postsType)
-          val featuredPostsAfter =
-            (_state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault())
-                ?: Clock.System.now())
-              .minus(24.hours)
-          val activeSourceIds = activeSourceIds(_state.value.activeSource)
-          val unreadOnly = PostsFilterUtils.shouldGetUnreadPostsOnly(_state.value.postsType)
-          val lastRefreshedAt =
-            _state.value.lastRefreshedAt?.toInstant(TimeZone.currentSystemDefault())
-              ?: Clock.System.now()
-
-          val position =
-            rssRepository.nonFeaturedPostPosition(
-              postId = postId,
-              activeSourceIds = activeSourceIds,
-              unreadOnly = unreadOnly,
-              after = postsAfter,
-              featuredPostsAfter = featuredPostsAfter,
-              postsUpperBound = lastRefreshedAt,
-            )
-
-          if (position != null) {
-            val adjustedIndex = position + featuredPosts.size
-            observableSelectedPost.updateSelectedPost(adjustedIndex, postId)
-          } else {
-            observableSelectedPost.updateSelectedPost(index, postId)
-          }
-        }
+        val homeIndex = calculateHomeIndex(postId, index)
+        _state.update { it.copy(activePostIndex = homeIndex) }
+        observableSelectedPost.updateSelectedPost(homeIndex, postId)
       } else {
         observableSelectedPost.updateSelectedPost(index, null)
       }

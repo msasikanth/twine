@@ -26,7 +26,6 @@ import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
-import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -63,7 +62,6 @@ class AppViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val linkHandler: LinkHandler,
-  private val observableSelectedPost: ObservableSelectedPost,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AppState.DEFAULT)
@@ -111,17 +109,12 @@ class AppViewModel(
       .launchIn(viewModelScope)
   }
 
-  fun onPostOpened(postId: String, index: Int) {
-    updateActivePostIndex(index, postId)
+  fun onPostOpened(postId: String) {
     markPostAsRead(postId)
   }
 
   fun markPostAsRead(id: String) {
     viewModelScope.launch { rssRepository.updatePostReadStatus(read = true, id = id) }
-  }
-
-  fun updateActivePostIndex(index: Int, postId: String? = null) {
-    observableSelectedPost.updateSelectedPost(index, postId)
   }
 
   fun onCurrentlyPlayingDeepLink(playingPostId: String) {

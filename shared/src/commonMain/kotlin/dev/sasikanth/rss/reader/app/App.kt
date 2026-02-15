@@ -223,7 +223,7 @@ fun App(
             openLink = {
               coroutineScope.launch {
                 linkHandler.openLink(post.link)
-                appViewModel.onPostOpened(post.id, index)
+                appViewModel.onPostOpened(post.id)
               }
             },
           )

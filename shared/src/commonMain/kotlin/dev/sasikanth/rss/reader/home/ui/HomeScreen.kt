@@ -62,6 +62,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -337,23 +338,24 @@ internal fun HomeScreen(
                 }
               }
 
-              val saveVisibleItemIndex = {
-                val firstVisibleItemInfoAfterOffset =
-                  postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
-                    itemInfo.offset >= topOffset || itemInfo.offset == 0
-                  }
-                val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
-                val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
-                val settledPage = featuredPostsPagerState.settledPage
+              val saveVisibleItemIndex by
+                rememberUpdatedState({
+                  val firstVisibleItemInfoAfterOffset =
+                    postsListState.layoutInfo.visibleItemsInfo.firstOrNull { itemInfo ->
+                      itemInfo.offset >= topOffset || itemInfo.offset == 0
+                    }
+                  val firstVisibleItemIndexAfterOffset = firstVisibleItemInfoAfterOffset?.index ?: 0
+                  val firstVisibleItemKey = firstVisibleItemInfoAfterOffset?.key as? String
+                  val settledPage = featuredPostsPagerState.settledPage
 
-                viewModel.dispatch(
-                  HomeEvent.OnScreenStopped(
-                    firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
-                    firstVisibleItemKey = firstVisibleItemKey,
-                    settledPage = settledPage,
+                  viewModel.dispatch(
+                    HomeEvent.OnScreenStopped(
+                      firstVisibleItemIndex = firstVisibleItemIndexAfterOffset,
+                      firstVisibleItemKey = firstVisibleItemKey,
+                      settledPage = settledPage,
+                    )
                   )
-                )
-              }
+                })
 
               LifecycleEventEffect(event = Lifecycle.Event.ON_STOP) { saveVisibleItemIndex() }
 
