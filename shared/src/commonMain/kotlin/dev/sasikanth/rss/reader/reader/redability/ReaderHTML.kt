@@ -40,8 +40,13 @@ object ReaderHTML {
           <script>$readabilityJS</script>
           <script>$turndownJS</script>
           <script>$readerJS</script>
+          <script>
+            window.onload = function() {
+              window.webkit.messageHandlers.readabilityMessageHandler.postMessage("READY");
+            };
+          </script>
         </head>
-        <body />
+        <body></body>
         </html>
         """
         .trimIndent()

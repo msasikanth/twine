@@ -101,6 +101,17 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
 
             // We create the handler and ensure it is held strongly during this scope
             val handler = ReaderJSHandler { result ->
+              if (result == "READY") {
+                webView.evaluateJavaScript(executionScript) { _, error ->
+                  if (error != null && isFinished.compareAndSet(0, 1)) {
+                    continuation.resumeWithException(
+                      Exception("JS Execution Error: ${error.localizedDescription}")
+                    )
+                  }
+                }
+                return@ReaderJSHandler
+              }
+
               if (isFinished.compareAndSet(0, 1)) {
                 if (result.startsWith("ERROR:")) {
                   continuation.resumeWithException(Exception(result))
@@ -116,14 +127,6 @@ class IosReadabilityRunner(private val dispatchersProvider: DispatchersProvider)
 
             val userController = webView.configuration.userContentController
             userController.addScriptMessageHandler(handler, "readabilityMessageHandler")
-
-            val userScript =
-              WKUserScript(
-                source = executionScript,
-                injectionTime = WKUserScriptInjectionTime.WKUserScriptInjectionTimeAtDocumentEnd,
-                forMainFrameOnly = true,
-              )
-            userController.addUserScript(userScript)
 
             webView.loadHTMLString(htmlShell, baseURL = link?.let { NSURL.URLWithString(it) })
 
