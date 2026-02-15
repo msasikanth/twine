@@ -32,6 +32,7 @@ import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.MarkAsReadOn
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
+import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -69,6 +70,7 @@ class HomeViewModel(
   private val allPostsPager: AllPostsPager,
   private val syncCoordinator: SyncCoordinator,
   private val inAppRating: InAppRating,
+  private val observableSelectedPost: ObservableSelectedPost,
 ) : ViewModel() {
 
   private val defaultState = HomeState.default()
@@ -79,10 +81,6 @@ class HomeViewModel(
   private val _openPost = MutableSharedFlow<Pair<Int, ResolvedPost>>()
   val openPost: SharedFlow<Pair<Int, ResolvedPost>>
     get() = _openPost
-
-  private val _activePostChanged = MutableSharedFlow<Pair<Int, String?>>()
-  val activePostChanged: SharedFlow<Pair<Int, String?>>
-    get() = _activePostChanged
 
   private var previousVisibleItems = emptyMap<String, Int>()
 
@@ -131,8 +129,7 @@ class HomeViewModel(
           (event.firstVisibleItemIndex + featuredPosts.lastIndex.coerceAtLeast(0)) to postId
         }
 
-      _state.update { it.copy(activePostIndex = adjustedIndex) }
-      _activePostChanged.emit(adjustedIndex to postId)
+      observableSelectedPost.updateSelectedPost(adjustedIndex, postId)
     }
   }
 
@@ -232,6 +229,12 @@ class HomeViewModel(
       )
     }
 
+    observableSelectedPost.selectedPost
+      .onEach { selectedPost ->
+        _state.update { it.copy(activePostIndex = selectedPost?.index ?: 0) }
+      }
+      .launchIn(viewModelScope)
+
     syncCoordinator.syncState
       .onEach { syncState -> _state.update { it.copy(syncState = syncState) } }
       .launchIn(viewModelScope)
@@ -316,13 +319,13 @@ class HomeViewModel(
 
           if (position != null) {
             val adjustedIndex = position + featuredPosts.size
-            _state.update { it.copy(activePostIndex = adjustedIndex) }
+            observableSelectedPost.updateSelectedPost(adjustedIndex, postId)
           } else {
-            _state.update { it.copy(activePostIndex = index) }
+            observableSelectedPost.updateSelectedPost(index, postId)
           }
         }
       } else {
-        _state.update { it.copy(activePostIndex = index) }
+        observableSelectedPost.updateSelectedPost(index, null)
       }
     }
   }
@@ -400,7 +403,10 @@ class HomeViewModel(
   }
 
   private fun onHomeSelected() {
-    viewModelScope.launch { observableActiveSource.clearSelection() }
+    viewModelScope.launch {
+      observableActiveSource.clearSelection()
+      observableSelectedPost.clear()
+    }
   }
 
   private fun refreshContent() {
