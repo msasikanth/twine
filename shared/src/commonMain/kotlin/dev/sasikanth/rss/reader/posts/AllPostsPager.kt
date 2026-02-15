@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -67,7 +67,7 @@ import me.tatarka.inject.annotations.Inject
 class AllPostsPager(
   observableActiveSource: ObservableActiveSource,
   settingsRepository: SettingsRepository,
-  refreshPolicy: RefreshPolicy,
+  private val refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
   private val seedColorExtractor: SeedColorExtractor,
@@ -165,20 +165,36 @@ class AllPostsPager(
   }
 
   private fun observeHasNewerArticles() {
-    syncCoordinator.syncState
-      .flatMapLatest { syncState ->
-        if (syncState is SyncState.InProgress) {
-          emptyFlow()
-        } else {
-          baseParameters.flatMapLatest { params ->
-            rssRepository.unreadSinceLastSync(
-              sources = params.activeSourceIds,
-              postsAfter = params.postsAfter,
+    baseParameters
+      .flatMapLatest { params ->
+        rssRepository
+          .unreadSinceLastSync(
+            sources = params.activeSourceIds,
+            postsAfter = params.postsAfter,
+            postsUpperBound = params.postsUpperBound,
+          )
+          .map { it to params }
+      }
+      .combine(syncCoordinator.syncState) { (unreadSinceLastSync, params), syncState ->
+        Triple(unreadSinceLastSync, params, syncState)
+      }
+      .onEach { (unreadSinceLastSync, params, _) ->
+        if (unreadSinceLastSync.hasNewArticles) {
+          val currentPostsCount =
+            rssRepository.allPostsCount(
+              activeSourceIds = params.activeSourceIds,
+              unreadOnly = params.unreadOnly,
+              after = params.postsAfter,
               postsUpperBound = params.postsUpperBound,
             )
+
+          if (currentPostsCount == 0L || currentPostsCount == null) {
+            refreshPolicy.updateLastRefreshedAt()
           }
         }
       }
+      .filter { (_, _, syncState) -> syncState !is SyncState.InProgress }
+      .map { (unreadSinceLastSync, _, _) -> unreadSinceLastSync }
       .distinctUntilChanged()
       .onEach { _unreadSinceLastSync.value = it }
       .launchIn(coroutineScope)
