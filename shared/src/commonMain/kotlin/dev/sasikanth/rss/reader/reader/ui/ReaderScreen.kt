@@ -132,7 +132,6 @@ import twine.shared.generated.resources.readerPageCount
 internal fun ReaderScreen(
   viewModel: ReaderViewModel,
   pageViewModelFactory: @Composable (ResolvedPost) -> ReaderPageViewModel,
-  onPostChanged: (Int, String) -> Unit,
   onBack: () -> Unit,
   openPaywall: () -> Unit,
   toggleLightStatusBar: (Boolean) -> Unit,
@@ -263,13 +262,13 @@ internal fun ReaderScreen(
       Scaffold(
         modifier =
           modifier.fillMaxSize().then(nestedScrollModifier).onKeyEvent { event ->
-            return@onKeyEvent when {
-              event.key == Key.DirectionRight && event.type == KeyEventType.KeyUp -> {
+            return@onKeyEvent when (event.key) {
+              Key.DirectionRight if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
 
                 true
               }
-              event.key == Key.DirectionLeft && event.type == KeyEventType.KeyUp -> {
+              Key.DirectionLeft if event.type == KeyEventType.KeyUp -> {
                 coroutineScope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) }
 
                 true
@@ -448,9 +447,8 @@ internal fun ReaderScreen(
               }
               ReaderPage(
                 modifier =
-                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
+                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 250L) {
                     if (it) {
-                      onPostChanged(page, readerPost.id)
                       viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
                     }
                   },

@@ -60,7 +60,7 @@ class FreshRSSSyncCoordinator(
   private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
   private companion object {
-    private const val ARTICLE_PAGE_SIZE = 250
+    private const val ARTICLE_PAGE_SIZE = 500
     private const val LOCAL_POSTS_PAGE_SIZE = 1000
     private const val STATUS_BATCH_SIZE = 500
   }
@@ -114,22 +114,20 @@ class FreshRSSSyncCoordinator(
 
       // 3. Sync Articles
       val lastSyncedAt =
-        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(30.days)
+        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
       val newerThan = lastSyncedAt.toEpochMilliseconds()
 
-      val hasNewArticles = syncArticles(newerThan = newerThan)
-      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
-      updateSyncState(SyncState.InProgress(0.7f))
-
-      // 4. Sync Statuses (Read/Bookmark)
-      syncStatuses()
-      updateSyncState(SyncState.InProgress(0.9f))
+      syncArticles(newerThan = newerThan)
 
       // Always update lastSyncedAt after a successful sync. The 24-hour overlap
       // when fetching articles handles cases where articles might be added to
       // the server with older timestamps.
       refreshPolicy.updateLastSyncedAt()
       updateSyncState(SyncState.Complete)
+
+      // After finishing feeds, categories and articles, we continue syncing statuses and bookmarks.
+      syncArticles(streamId = FreshRssSource.USER_STATE_STARRED, newerThan = newerThan)
+      syncStatuses()
 
       true
     } catch (e: Exception) {

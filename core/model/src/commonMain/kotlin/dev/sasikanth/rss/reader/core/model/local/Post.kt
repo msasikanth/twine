@@ -34,6 +34,7 @@ data class Post(
   val flags: Set<PostFlag>,
   val remoteId: String? = null,
   val audioUrl: String?,
+  val seedColor: Long? = null,
 ) {
   val bookmarked: Boolean
     get() = PostFlag.Bookmarked in flags

@@ -17,6 +17,7 @@ CREATE TABLE post(
   flags INTEGER AS Set<PostFlag> NOT NULL DEFAULT 0,
   remoteId TEXT,
   audioUrl TEXT,
+  seedColor INTEGER,
   PRIMARY KEY (id, sourceId),
   FOREIGN KEY(sourceId) REFERENCES feed(id)
 );
@@ -116,7 +117,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -163,7 +165,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -199,7 +202,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -235,7 +239,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -271,7 +276,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -307,7 +313,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -358,7 +365,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -409,7 +417,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -460,7 +469,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -523,6 +533,9 @@ UPDATE post SET flags = CASE WHEN :bookmarked = 1 THEN flags | 1 ELSE flags & ~1
 updateReadStatus:
 UPDATE post SET flags = CASE WHEN :read = 1 THEN flags | 2 ELSE flags & ~2 END, updatedAt = :updatedAt WHERE id = :id;
 
+updateSeedColor:
+UPDATE post SET seedColor = :seedColor WHERE id = :id;
+
 deleteReadPosts:
 DELETE FROM post
 WHERE (post.flags & 2) != 0 AND post.postDate < :before
@@ -563,7 +576,8 @@ SELECT
   feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
   feed.showFeedFavIcon AS showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId = feed.id
 LEFT JOIN postContent pc ON post.id = pc.id
@@ -572,6 +586,35 @@ WHERE post.id = :id;
 post:
 SELECT * FROM post
 WHERE post.id = :id AND post.sourceId = :sourceId;
+
+postsWithImagesAndNoSeedColor:
+SELECT
+  post.id AS id,
+  post.sourceId AS sourceId,
+  post.title AS title,
+  post.description AS description,
+  post.imageUrl AS imageUrl,
+  post.audioUrl AS audioUrl,
+  post.postDate AS postDate,
+  post.createdAt AS createdAt,
+  post.link AS link,
+  post.commentsLink AS commentsLink,
+  post.flags AS flags,
+  post.remoteId AS remoteId,
+  feed.name AS feedName,
+  feed.icon AS feedIcon,
+  feed.homepageLink AS feedHomepageLink,
+  feed.alwaysFetchSourceArticle AS alwaysFetchSourceArticle,
+  feed.showFeedFavIcon AS showFeedFavIcon,
+  pc.feedContentReadingTime AS feedContentReadingTime,
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
+FROM post
+INNER JOIN feed ON post.sourceId = feed.id
+LEFT JOIN postContent pc ON post.id = pc.id
+WHERE post.imageUrl IS NOT NULL AND post.seedColor IS NULL
+ORDER BY post.postDate DESC
+LIMIT :limit;
 
 postByRemoteId:
 SELECT * FROM post
@@ -696,7 +739,8 @@ SELECT
   feed.alwaysFetchSourceArticle,
   feed.showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post
 INNER JOIN feed ON post.sourceId == feed.id
 LEFT JOIN postContent pc ON post.id == pc.id

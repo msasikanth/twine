@@ -26,6 +26,7 @@ import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.data.repository.ObservableActiveSource
+import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
@@ -36,6 +37,7 @@ import dev.sasikanth.rss.reader.platform.LinkHandler
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs
 import dev.sasikanth.rss.reader.reader.ReaderScreenArgs.FromScreen
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -47,7 +49,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import me.tatarka.inject.annotations.Inject
@@ -62,6 +63,7 @@ class AppViewModel(
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
   private val linkHandler: LinkHandler,
+  private val observableSelectedPost: ObservableSelectedPost,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AppState.DEFAULT)
@@ -119,7 +121,7 @@ class AppViewModel(
   }
 
   fun updateActivePostIndex(index: Int, postId: String? = null) {
-    _state.update { it.copy(activePostIndex = index, activePostId = postId) }
+    observableSelectedPost.updateSelectedPost(index, postId)
   }
 
   fun onCurrentlyPlayingDeepLink(playingPostId: String) {

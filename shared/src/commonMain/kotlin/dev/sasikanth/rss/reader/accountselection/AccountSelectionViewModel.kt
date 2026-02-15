@@ -78,6 +78,14 @@ class AccountSelectionViewModel(
       AccountSelectionEvent.LocalAccountClicked -> localAccountClicked()
       is AccountSelectionEvent.CloudServiceClicked -> cloudServiceClicked(event.provider)
       AccountSelectionEvent.ClearAuthUrl -> _state.update { it.copy(authUrlToOpen = null) }
+      AccountSelectionEvent.Refresh -> refresh()
+    }
+  }
+
+  private fun refresh() {
+    viewModelScope.launch {
+      val isSubscribed = billingHandler.isSubscribed()
+      _state.update { it.copy(isSubscribed = isSubscribed) }
     }
   }
 

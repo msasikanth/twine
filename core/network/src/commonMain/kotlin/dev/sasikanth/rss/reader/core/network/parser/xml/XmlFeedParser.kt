@@ -98,6 +98,7 @@ class XmlFeedParser(
     internal const val TAG_COMMENTS = "comments"
     internal const val TAG_FEED_IMAGE = "image"
     internal const val TAG_ICON = "icon"
+    internal const val TAG_LOGO = "logo"
     internal const val TAG_ITUNES_IMAGE = "itunes:image"
     internal const val TAG_MEDIA_GROUP = "media:group"
     internal const val TAG_MEDIA_CONTENT = "media:description"

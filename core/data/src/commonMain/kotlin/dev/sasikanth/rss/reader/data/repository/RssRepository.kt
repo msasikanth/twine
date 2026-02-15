@@ -555,6 +555,12 @@ class RssRepository(
     }
   }
 
+  suspend fun updateSeedColor(seedColor: Int, id: String) {
+    withContext(dispatchersProvider.databaseWrite) {
+      postQueries.updateSeedColor(seedColor = seedColor.toLong(), id = id)
+    }
+  }
+
   suspend fun allReadPostsBlocking(): List<ReadPostSyncEntity> {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries
@@ -979,7 +985,8 @@ class RssRepository(
             alwaysFetchSourceArticle: Boolean,
             showFeedFavIcon: Boolean,
             feedContentReadingTime: Long?,
-            articleContentReadingTime: Long? ->
+            articleContentReadingTime: Long?,
+            seedColor: Long? ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -999,6 +1006,7 @@ class RssRepository(
               showFeedFavIcon = showFeedFavIcon,
               feedContentReadingTime = feedContentReadingTime?.toInt(),
               articleContentReadingTime = articleContentReadingTime?.toInt(),
+              seedColor = seedColor?.toInt(),
             )
           },
         )
@@ -1032,7 +1040,8 @@ class RssRepository(
             feedHomepageLink: String,
             showFeedFavIcon: Boolean,
             feedContentReadingTime: Long?,
-            articleContentReadingTime: Long? ->
+            articleContentReadingTime: Long?,
+            seedColor: Long? ->
             ResolvedPost(
               id = id,
               sourceId = sourceId,
@@ -1052,6 +1061,7 @@ class RssRepository(
               showFeedFavIcon = showFeedFavIcon,
               feedContentReadingTime = feedContentReadingTime?.toInt(),
               articleContentReadingTime = articleContentReadingTime?.toInt(),
+              seedColor = seedColor?.toInt(),
             )
           },
         )
@@ -1289,6 +1299,14 @@ class RssRepository(
   suspend fun postByRemoteId(remoteId: String): Post? {
     return withContext(dispatchersProvider.databaseRead) {
       postQueries.postByRemoteId(remoteId, ::Post).executeAsOneOrNull()
+    }
+  }
+
+  suspend fun postsWithImagesAndNoSeedColor(limit: Long): List<ResolvedPost> {
+    return withContext(dispatchersProvider.databaseRead) {
+      postQueries
+        .postsWithImagesAndNoSeedColor(limit = limit, mapper = ::mapToResolvedPost)
+        .executeAsList()
     }
   }
 
@@ -2164,6 +2182,7 @@ class RssRepository(
     showFeedFavIcon: Boolean,
     feedContentReadingTime: Long?,
     articleContentReadingTime: Long?,
+    seedColor: Long?,
   ): ResolvedPost {
     return ResolvedPost(
       id = id,
@@ -2184,6 +2203,7 @@ class RssRepository(
       showFeedFavIcon = showFeedFavIcon,
       feedContentReadingTime = feedContentReadingTime?.toInt(),
       articleContentReadingTime = articleContentReadingTime?.toInt(),
+      seedColor = seedColor?.toInt(),
       remoteId = remoteId,
     )
   }

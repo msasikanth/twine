@@ -81,7 +81,6 @@ import dev.sasikanth.rss.reader.group.ui.GroupScreen
 import dev.sasikanth.rss.reader.groupselection.GroupSelectionViewModel
 import dev.sasikanth.rss.reader.groupselection.ui.GroupSelectionSheet
 import dev.sasikanth.rss.reader.groupselection.ui.SELECTED_GROUPS_KEY
-import dev.sasikanth.rss.reader.home.HomeEvent
 import dev.sasikanth.rss.reader.home.HomeViewModel
 import dev.sasikanth.rss.reader.home.ui.HomeScreen
 import dev.sasikanth.rss.reader.main.ui.MainScreen
@@ -419,21 +418,6 @@ fun App(
                   .launchIn(this)
               }
 
-              LaunchedEffect(appState.activePostIndex, appState.activePostId) {
-                viewModel.dispatch(
-                  HomeEvent.UpdateVisibleItemIndex(
-                    index = appState.activePostIndex,
-                    postId = appState.activePostId,
-                  )
-                )
-              }
-
-              LaunchedEffect(Unit) {
-                viewModel.activePostChanged
-                  .onEach { (index, postId) -> appViewModel.updateActivePostIndex(index, postId) }
-                  .launchIn(this)
-              }
-
               HomeScreen(
                 viewModel = viewModel,
                 feedsViewModel = feedsViewModel,
@@ -581,11 +565,6 @@ fun App(
             viewModel = viewModel,
             pageViewModelFactory = { post ->
               viewModel(key = post.id) { readerPageViewModel(post) }
-            },
-            onPostChanged = { activePostIndex, postId ->
-              if (fromScreen !is FromScreen.UnreadWidget) {
-                appViewModel.updateActivePostIndex(activePostIndex, postId)
-              }
             },
             onBack = { navController.popBackStack() },
             openPaywall = { navController.navigate(Screen.Paywall) },

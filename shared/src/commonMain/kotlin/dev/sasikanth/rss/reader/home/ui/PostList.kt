@@ -74,12 +74,7 @@ internal fun PostsList(
                 val post = featuredPosts.getOrNull(featuredPostsPagerState.currentPage)
                 post?.resolvedPost?.id?.let { it to item.index }
               } else {
-                try {
-                  val postId = PostListKey.decode(keyString).postId
-                  postId to item.index
-                } catch (e: Exception) {
-                  null
-                }
+                PostListKey.decodeSafe(keyString)?.postId?.let { it to item.index }
               }
             }
             .toMap()

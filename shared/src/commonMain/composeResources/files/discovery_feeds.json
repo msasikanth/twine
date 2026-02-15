@@ -668,7 +668,7 @@
       {
         "name": "DualShockers",
         "link": "https://www.dualshockers.com/feed/",
-        "description": "DualShockers is the definitive destination for video game fans. From gaming news to in-depth guides, we’ve got you covered with our expert coverage.",
+        "description": "DualShockers is the definitive destination for video game fans. From gaming news to in-depth guides, we\u2019ve got you covered with our expert coverage.",
         "homepageLink": "https://www.dualshockers.com",
         "icon": "https://icon.horse/icon/www.dualshockers.com",
         "useFeedIcon": false
@@ -769,7 +769,7 @@
       {
         "name": "The Hacker News",
         "link": "https://feeds.feedburner.com/TheHackersNews",
-        "description": "Most trusted, widely-read independent cybersecurity news source for everyone; supported by hackers and IT professionals — Send TIPs to admin@thehackernews.com",
+        "description": "Most trusted, widely-read independent cybersecurity news source for everyone; supported by hackers and IT professionals \u2014 Send TIPs to admin@thehackernews.com",
         "homepageLink": "https://thehackernews.com",
         "icon": "https://icon.horse/icon/thehackernews.com",
         "useFeedIcon": false
@@ -849,7 +849,7 @@
       {
         "name": "Netflix TechBlog",
         "link": "https://netflixtechblog.com/feed",
-        "description": "Learn about Netflix’s world class engineering efforts, company culture, product developments and more. - Medium",
+        "description": "Learn about Netflix\u2019s world class engineering efforts, company culture, product developments and more. - Medium",
         "homepageLink": "https://netflixtechblog.com?source=rss----2615bd06b42e---4",
         "icon": "https://cdn-images-1.medium.com/proxy/1*TGH72Nnw24QL3iV9IOm4VA.png",
         "useFeedIcon": false
@@ -926,7 +926,7 @@
       {
         "name": "Smashing Magazine",
         "link": "https://www.smashingmagazine.com/feed/",
-        "description": "Recent content in Articles on Smashing Magazine — For Web Designers And Developers",
+        "description": "Recent content in Articles on Smashing Magazine \u2014 For Web Designers And Developers",
         "homepageLink": "https://www.smashingmagazine.com/",
         "icon": "https://www.smashingmagazine.com/images/favicon/app-icon-512x512.png",
         "useFeedIcon": false
@@ -1341,7 +1341,7 @@
       {
         "name": "Camille Styles",
         "link": "https://camillestyles.com/feed/",
-        "description": "Create your most beautiful life—design, food, & gatherings.",
+        "description": "Create your most beautiful life\u2014design, food, & gatherings.",
         "homepageLink": "https://camillestyles.com/",
         "icon": "https://camillestyles.com/wp-content/uploads/2023/11/cropped-camille-styles-favicon-1-32x32.png",
         "useFeedIcon": false
@@ -1477,7 +1477,7 @@
         "useFeedIcon": false
       },
       {
-        "name": "Bon Appétit",
+        "name": "Bon App\u00e9tit",
         "link": "https://www.bonappetit.com/feed/rss",
         "description": "The latest from www.bonappetit.com",
         "homepageLink": "https://www.bonappetit.com",
@@ -1522,7 +1522,7 @@
         "useFeedIcon": false
       },
       {
-        "name": "Condé Nast Traveler",
+        "name": "Cond\u00e9 Nast Traveler",
         "link": "https://www.cntraveler.com/feed/rss",
         "description": "The latest from www.cntraveler.com",
         "homepageLink": "https://www.cntraveler.com",
@@ -1585,7 +1585,7 @@
       {
         "name": "99% Invisible",
         "link": "https://feeds.simplecast.com/BqbsxVfO",
-        "description": "99% Invisible is about all the thought that goes into the things we don’t think about — the unnoticed architecture and design that shape our world.",
+        "description": "99% Invisible is about all the thought that goes into the things we don\u2019t think about \u2014 the unnoticed architecture and design that shape our world.",
         "homepageLink": "https://99percentinvisible.org/",
         "icon": "https://image.simplecastcdn.com/images/8436e3c1-2479-4466-ac48-fa58259960bb/a6d5b177-ab5d-430d-b3f2-b393a09d8101/3000x3000/sxm-cover-99percentinvisible-r2025-3000x3000-final.jpg?aid=rss_feed",
         "useFeedIcon": true
@@ -1601,7 +1601,7 @@
       {
         "name": "Science Vs",
         "link": "https://feeds.megaphone.fm/sciencevs",
-        "description": "There are a lot of strong opinions, but then there’s SCIENCE. Science Vs takes on fads, wizardry, and the internet to find out what’s fact, what’s not, and what’s somewhere in between.",
+        "description": "There are a lot of strong opinions, but then there\u2019s SCIENCE. Science Vs takes on fads, wizardry, and the internet to find out what\u2019s fact, what\u2019s not, and what\u2019s somewhere in between.",
         "homepageLink": "https://gimletmedia.com/shows/science-vs",
         "icon": "https://megaphone.imgix.net/podcasts/f521b120-2c30-11e6-b5f3-63ee984ee1a4/image/e7470287efbfa0aff068175bb6c31805.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress",
         "useFeedIcon": true
@@ -1649,7 +1649,7 @@
       {
         "name": "Decoder with Nilay Patel",
         "link": "https://feeds.megaphone.fm/recodedecode",
-        "description": "A show about big ideas — and other problems. Hosted by Nilay Patel, Decoder features interviews with leaders in tech, business, and policy.",
+        "description": "A show about big ideas \u2014 and other problems. Hosted by Nilay Patel, Decoder features interviews with leaders in tech, business, and policy.",
         "homepageLink": "https://www.theverge.com/decoder-podcast-with-nilay-patel",
         "icon": "https://megaphone.imgix.net/podcasts/5c6a4f4a-e69c-11e8-8066-17a10182e4c8/image/The_Verge_Decoder_Tileart_3000.jpg?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress",
         "useFeedIcon": true
@@ -1777,6 +1777,307 @@
         "description": "An independent, ad-free, non-partisan politics newsletter that summarizes the best arguments from across the political spectrum.",
         "homepageLink": "https://www.tangle.news",
         "icon": "https://www.readtangle.com/favicon.png",
+        "useFeedIcon": true
+      }
+    ]
+  },
+  {
+    "name": "Subreddits",
+    "feeds": [
+      {
+        "name": "r/AskReddit",
+        "link": "https://www.reddit.com/r/AskReddit/.rss",
+        "description": "r/AskReddit is the place to ask and answer thought-provoking questions.",
+        "homepageLink": "https://www.reddit.com/r/AskReddit/",
+        "icon": "https://a.thumbs.redditmedia.com/IrfPJGuWzi_ewrDTBlnULeZsJYGz81hsSQoQJyw6LD8.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/aww",
+        "link": "https://www.reddit.com/r/aww/.rss",
+        "description": "Things that make you go AWW! -- like puppies, bunnies, babies, and so on... Feel free to post original pictures and videos of cute things.",
+        "homepageLink": "https://www.reddit.com/r/aww/",
+        "icon": "https://b.thumbs.redditmedia.com/G-3UFSFhXcv-WCIz2XDKFv9Mt06HMfyfFxpBWhlAMQM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/baseball",
+        "link": "https://www.reddit.com/r/baseball/.rss",
+        "description": "The BIGGEST and BEST subreddit for baseball. The focus is mainly on MLB, but posts about other leagues and levels are welcome! Official r/baseball Discord: https://discord.gg/rbaseball Shohei Ohtani **For the best user experience, we recommend disabling the Reddit redesign.**",
+        "homepageLink": "https://www.reddit.com/r/baseball/",
+        "icon": "https://a.thumbs.redditmedia.com/NNFZ9MiT7lPt2W9gdzOrH-ZV1LvrVBGpNBI-lbWa1p8.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/boxing",
+        "link": "https://www.reddit.com/r/boxing/.rss",
+        "description": "Welcome to /r/boxing, reddit's home for pro boxing enthusiasts! Please check out our rules and FAQs before posting: https://www.reddit.com/r/Boxing/wiki/index. Our basic rules are... * Be civil - no insults or direct attacks * No spoilers in post titles 24 hours after a fight * DO NOT post or request streams * Mods will remove reposts/low-effort posts * Fight threads are made by mods unless specified For further updates and communication join our Discord here: https://discord.gg/Mg6ReMDW7u",
+        "homepageLink": "https://www.reddit.com/r/boxing/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/CFB",
+        "link": "https://www.reddit.com/r/CFB/.rss",
+        "description": "The home of college football on reddit.",
+        "homepageLink": "https://www.reddit.com/r/CFB/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/ChatGPT",
+        "link": "https://www.reddit.com/r/ChatGPT/.rss",
+        "description": "Subreddit to discuss ChatGPT and AI. Not affiliated with OpenAI. Thanks, Nat!",
+        "homepageLink": "https://www.reddit.com/r/ChatGPT/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/CollegeBasketball",
+        "link": "https://www.reddit.com/r/CollegeBasketball/.rss",
+        "description": "Your home for College Basketball on the internet. Forever. Discord: https://discord.gg/redditcbb Twitter: https://twitter.com/redditCBB",
+        "homepageLink": "https://www.reddit.com/r/CollegeBasketball/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/cricket",
+        "link": "https://www.reddit.com/r/cricket/.rss",
+        "description": "News, banter and occasional serious discussion on the great game.",
+        "homepageLink": "https://www.reddit.com/r/cricket/",
+        "icon": "https://b.thumbs.redditmedia.com/oBhyNiZBWdEAkW-Sq_QUoO1JcPRhhHY6VlxSO_vPWzU.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/dataisbeautiful",
+        "link": "https://www.reddit.com/r/dataisbeautiful/.rss",
+        "description": "DataIsBeautiful is for visualizations that effectively convey information. Aesthetics are an important part of information visualization, but pretty pictures are not the sole aim of this subreddit.",
+        "homepageLink": "https://www.reddit.com/r/dataisbeautiful/",
+        "icon": "https://b.thumbs.redditmedia.com/JQgfgZVmHIlgdo2CxcGI8hSgFlFTJxXPYiXS2kUT7PY.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/explainlikeimfive",
+        "link": "https://www.reddit.com/r/explainlikeimfive/.rss",
+        "description": "Explain Like I'm Five is the best forum and archive on the internet for layperson-friendly explanations. Don't Panic!",
+        "homepageLink": "https://www.reddit.com/r/explainlikeimfive/",
+        "icon": "https://b.thumbs.redditmedia.com/ygk_8tHzu9sEDZMh7iXRLAmMx1DLWi-LqSCBIQAx_CM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/formula1",
+        "link": "https://www.reddit.com/r/formula1/.rss",
+        "description": "Welcome to r/Formula1, the best independent online Formula 1 community!",
+        "homepageLink": "https://www.reddit.com/r/formula1/",
+        "icon": "https://b.thumbs.redditmedia.com/bfj6051x5t6R3awBCSySha1L-V4lkbdw2XM4BOXdA-I.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/funny",
+        "link": "https://www.reddit.com/r/funny/.rss",
+        "description": "Reddit's largest humor depository",
+        "homepageLink": "https://www.reddit.com/r/funny/",
+        "icon": "https://b.thumbs.redditmedia.com/JXMBG9CsCO8qDCm5AxBKzKlpziPyxQWGbrI1STjs7uM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/Futurology",
+        "link": "https://www.reddit.com/r/Futurology/.rss",
+        "description": "A subreddit devoted to the field of Future(s) Studies and evidence-based speculation about the development of humanity, technology, and civilization. -------- You can also find us in the fediverse at - https://futurology.today",
+        "homepageLink": "https://www.reddit.com/r/Futurology/",
+        "icon": "https://b.thumbs.redditmedia.com/an4N1OIwI9YVFOgyQdQgBiP5nhmO7qTgiCJGNIY6Ccc.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/gaming",
+        "link": "https://www.reddit.com/r/gaming/.rss",
+        "description": "The Number One Gaming forum on the Internet.",
+        "homepageLink": "https://www.reddit.com/r/gaming/",
+        "icon": "https://b.thumbs.redditmedia.com/j8hkctmLsAxRKhZ4iM-XZdrlGxWYmpm7shNsosXn31o.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/golf",
+        "link": "https://www.reddit.com/r/golf/.rss",
+        "description": "",
+        "homepageLink": "https://www.reddit.com/r/golf/",
+        "icon": "https://b.thumbs.redditmedia.com/WdxFe67zzbE7y5veSa4w2fCnRjUQ-71LaeEy68A88pA.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/hockey",
+        "link": "https://www.reddit.com/r/hockey/.rss",
+        "description": "Discuss the NHL, PWHL, IIHF, and all other hockey you can think of! We are the premier subreddit to talk everything hockey!",
+        "homepageLink": "https://www.reddit.com/r/hockey/",
+        "icon": "https://b.thumbs.redditmedia.com/eooFxdmfjeaGgP8Jf8OxnBVkh7Hc0mbd_XWfN-ERZXY.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/interestingasfuck",
+        "link": "https://www.reddit.com/r/interestingasfuck/.rss",
+        "description": "For anything truly interesting as fuck",
+        "homepageLink": "https://www.reddit.com/r/interestingasfuck/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/LifeProTips",
+        "link": "https://www.reddit.com/r/LifeProTips/.rss",
+        "description": "Tips that improve your life in one way or another.",
+        "homepageLink": "https://www.reddit.com/r/LifeProTips/",
+        "icon": "https://b.thumbs.redditmedia.com/Of8ijyvKv7_mihvIo_nD8jPnPbWqTqSqCF1layRZvvE.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/MLS",
+        "link": "https://www.reddit.com/r/MLS/.rss",
+        "description": "The community for any and all levels of soccer in the United States &amp; Canada, with an emphasis on Major League Soccer.",
+        "homepageLink": "https://www.reddit.com/r/MLS/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/MMA",
+        "link": "https://www.reddit.com/r/MMA/.rss",
+        "description": "A subreddit for all things Mixed Martial Arts.",
+        "homepageLink": "https://www.reddit.com/r/MMA/",
+        "icon": "https://b.thumbs.redditmedia.com/JQgfgZVmHIlgdo2CxcGI8hSgFlFTJxXPYiXS2kUT7PY.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/movies",
+        "link": "https://www.reddit.com/r/movies/.rss",
+        "description": "/r/movies is the world's largest online film community, with over 37,000,000 members. Come on in and talk about movies with us!",
+        "homepageLink": "https://www.reddit.com/r/movies/",
+        "icon": "https://b.thumbs.redditmedia.com/86fsvFSWKE7feM8yhBOjLAtwj20x5c4ofwcXQWwy1iM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/Music",
+        "link": "https://www.reddit.com/r/Music/.rss",
+        "description": "Reddit\u2019s #1 Music Community",
+        "homepageLink": "https://www.reddit.com/r/Music/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/nba",
+        "link": "https://www.reddit.com/r/nba/.rss",
+        "description": "A community for NBA discussion.",
+        "homepageLink": "https://www.reddit.com/r/nba/",
+        "icon": "https://b.thumbs.redditmedia.com/aWMVdI7D3vEOzJ9AEQ9FpUxQjdSyXKilv8K2-pp7_Fk.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/nfl",
+        "link": "https://www.reddit.com/r/nfl/.rss",
+        "description": "The place to discuss all NFL related things",
+        "homepageLink": "https://www.reddit.com/r/nfl/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/olympics",
+        "link": "https://www.reddit.com/r/olympics/.rss",
+        "description": "The Games of the XXXIII Olympiad, the Milano Cortina Winter Games, and everything before and beyond",
+        "homepageLink": "https://www.reddit.com/r/olympics/",
+        "icon": "https://b.thumbs.redditmedia.com/f_vqPwifxdwOmoPMM5HulZ4Rpk9YBuUoGTUqb0dqg2A.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/personalfinance",
+        "link": "https://www.reddit.com/r/personalfinance/.rss",
+        "description": "Learn about budgeting, saving, getting out of debt, credit, investing, and retirement planning. Join our community, read the PF Wiki, and get on top of your finances!",
+        "homepageLink": "https://www.reddit.com/r/personalfinance/",
+        "icon": "https://b.thumbs.redditmedia.com/hOn2BgW06eQdpNY-RvF3UGBtbG_CFbr4XkotMYLWhEc.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/pics",
+        "link": "https://www.reddit.com/r/pics/.rss",
+        "description": "A place for photographs, pictures, and other images.",
+        "homepageLink": "https://www.reddit.com/r/pics/",
+        "icon": "https://b.thumbs.redditmedia.com/1zT3FeN8pCAFIooNVuyuZ0ObU0x1ro4wPfArGHl3KjM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/PremierLeague",
+        "link": "https://www.reddit.com/r/PremierLeague/.rss",
+        "description": "A community for the English Premier League",
+        "homepageLink": "https://www.reddit.com/r/PremierLeague/",
+        "icon": "https://b.thumbs.redditmedia.com/tKPzz__vfsval9hoXLbuaZ8mXu1oO73of2vnCrXOrsc.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/science",
+        "link": "https://www.reddit.com/r/science/.rss",
+        "description": "This community is a place to share and discuss new scientific research. Read about the latest advances in astronomy, biology, medicine, physics, social science, and more. Find and submit new publications and popular science coverage of current research.",
+        "homepageLink": "https://www.reddit.com/r/science/",
+        "icon": "https://b.thumbs.redditmedia.com/qzIP8EKeRG_kef7dVYI5ojcPj_V9kk5xyByof-Fe0eE.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/soccer",
+        "link": "https://www.reddit.com/r/soccer/.rss",
+        "description": "The football subreddit. News, results, and discussion about the beautiful game.",
+        "homepageLink": "https://www.reddit.com/r/soccer/",
+        "icon": "https://a.thumbs.redditmedia.com/wfkuHEkaf1r43cSkfBPMFc-HFCdDHhV_B-qbHxO0Q58.jpg",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/sports",
+        "link": "https://www.reddit.com/r/sports/.rss",
+        "description": "Sports News and Highlights from the NFL, NBA, NHL, MLB, MLS, NCAA, F1, and other leagues around the world.",
+        "homepageLink": "https://www.reddit.com/r/sports/",
+        "icon": "https://a.thumbs.redditmedia.com/OG0cMFwrTOQE6Gj5xW2pwTMpjkegILNnJEzHZukZTW4.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/technology",
+        "link": "https://www.reddit.com/r/technology/.rss",
+        "description": "Subreddit dedicated to the news and discussions about the creation and use of technology and its surrounding issues.",
+        "homepageLink": "https://www.reddit.com/r/technology/",
+        "icon": "https://a.thumbs.redditmedia.com/VwBugImhQhFTJhC0HjM9IWyEEEF898HHtI2AunD5SW4.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/television",
+        "link": "https://www.reddit.com/r/television/.rss",
+        "description": "Subreddit for content primarily about and related to scripted television programming",
+        "homepageLink": "https://www.reddit.com/r/television/",
+        "icon": "https://b.thumbs.redditmedia.com/bh6N6n089qHcmwGnMDIymG04fAalGyWdz1OqaC5WtGM.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/tennis",
+        "link": "https://www.reddit.com/r/tennis/.rss",
+        "description": "Professional tennis discussion. Feel free to visit our sister sub for more information on technique, r/10s.",
+        "homepageLink": "https://www.reddit.com/r/tennis/",
+        "icon": "https://www.redditstatic.com/icon.png/",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/todayilearned",
+        "link": "https://www.reddit.com/r/todayilearned/.rss",
+        "description": "You learn something new every day; what did you learn today? Submit interesting and specific facts about something that you just found out here.",
+        "homepageLink": "https://www.reddit.com/r/todayilearned/",
+        "icon": "https://b.thumbs.redditmedia.com/pskDeiR7LPmkU3Vq1HSBs6Y0geRbSTAQiz23AwVppbs.jpg",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/travel",
+        "link": "https://www.reddit.com/r/travel/.rss",
+        "description": "r/travel is a community about exploring the world. Your pictures, questions, stories, or any good content is welcome. Please read the rules, pinned announcements and the wiki/FAQ before posting. Failure to do so may result in a removal or ban. If you've never contributed positively to this sub or Reddit overall before being banned, your chance of a successful appeal to any ban is nearly zero. Happy travels!",
+        "homepageLink": "https://www.reddit.com/r/travel/",
+        "icon": "https://b.thumbs.redditmedia.com/qlvJZXMWY8FHGVbWVoVrTQ-oy1yYKnFXwRJ5XbMhiOs.png",
+        "useFeedIcon": true
+      },
+      {
+        "name": "r/worldnews",
+        "link": "https://www.reddit.com/r/worldnews/.rss",
+        "description": "A place for major news from around the world, excluding US-internal news.",
+        "homepageLink": "https://www.reddit.com/r/worldnews/",
+        "icon": "https://www.redditstatic.com/icon.png/",
         "useFeedIcon": true
       }
     ]

@@ -54,7 +54,8 @@ SELECT
   feed.alwaysFetchSourceArticle,
   feed.showFeedFavIcon,
   pc.feedContentReadingTime AS feedContentReadingTime,
-  pc.articleContentReadingTime AS articleContentReadingTime
+  pc.articleContentReadingTime AS articleContentReadingTime,
+  post.seedColor AS seedColor
 FROM post_search
 INNER JOIN post ON post.id == post_search.id
 INNER JOIN feed ON post.sourceId == feed.id

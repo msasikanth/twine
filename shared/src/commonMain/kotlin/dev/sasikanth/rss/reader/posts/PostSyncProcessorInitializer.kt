@@ -15,16 +15,17 @@
  *
  */
 
-package dev.sasikanth.rss.reader.accountselection
+package dev.sasikanth.rss.reader.posts
 
-import dev.sasikanth.rss.reader.data.sync.CloudServiceProvider
+import dev.sasikanth.rss.reader.di.scopes.AppScope
+import dev.sasikanth.rss.reader.initializers.Initializer
+import me.tatarka.inject.annotations.Inject
 
-sealed interface AccountSelectionEvent {
-  data object LocalAccountClicked : AccountSelectionEvent
+@Inject
+@AppScope
+class PostSyncProcessorInitializer(private val postSyncProcessor: PostSyncProcessor) : Initializer {
 
-  data class CloudServiceClicked(val provider: CloudServiceProvider) : AccountSelectionEvent
-
-  data object ClearAuthUrl : AccountSelectionEvent
-
-  data object Refresh : AccountSelectionEvent
+  override fun initialize() {
+    postSyncProcessor.observeSyncState()
+  }
 }

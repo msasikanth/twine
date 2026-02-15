@@ -35,7 +35,6 @@ import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
 import dev.sasikanth.rss.reader.data.sync.SyncCoordinator
 import dev.sasikanth.rss.reader.data.sync.SyncState
-import dev.sasikanth.rss.reader.data.utils.Constants
 import dev.sasikanth.rss.reader.data.utils.PostsFilterUtils
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import dev.sasikanth.rss.reader.ui.SeedColorExtractor
@@ -52,12 +51,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -68,7 +67,7 @@ import me.tatarka.inject.annotations.Inject
 class AllPostsPager(
   observableActiveSource: ObservableActiveSource,
   settingsRepository: SettingsRepository,
-  refreshPolicy: RefreshPolicy,
+  private val refreshPolicy: RefreshPolicy,
   private val rssRepository: RssRepository,
   private val syncCoordinator: SyncCoordinator,
   private val seedColorExtractor: SeedColorExtractor,
@@ -135,41 +134,22 @@ class AllPostsPager(
           featuredPostsAfter = params.featuredPostsAfter,
           postsUpperBound = params.postsUpperBound,
         )
-        .transformLatest { featuredPosts ->
-          val featuredPostsCount = Constants.NUMBER_OF_FEATURED_POSTS.toInt()
-          val actualFeaturedPostsCount = minOf(featuredPosts.size, featuredPostsCount)
-          val mutablePostsList =
-            MutableList(actualFeaturedPostsCount) { index ->
-              val post = featuredPosts[index]
-              if (post.imageUrl.isNullOrBlank().not()) {
-                val existingSeedColor = seedColorExtractor.cachedSeedColor(post.imageUrl!!)
-
-                FeaturedPostItem(resolvedPost = post, seedColor = existingSeedColor?.toArgb())
-              } else {
-                null
-              }
-            }
-
-          emit(mutablePostsList.filterNotNull().toImmutableList())
-
-          val updatedPosts =
-            mutablePostsList
-              .mapNotNull { item ->
-                if (item == null) return@mapNotNull null
-
-                if (item.seedColor != null) return@mapNotNull item
-
-                return@mapNotNull if (!item.resolvedPost.imageUrl.isNullOrBlank()) {
-                  val seedColor =
-                    seedColorExtractor.calculateSeedColor(url = item.resolvedPost.imageUrl!!)
-                  item.copy(seedColor = seedColor?.toArgb())
-                } else {
-                  null
+        .onEach { posts ->
+          posts.forEach { post ->
+            if (post.seedColor == null && !post.imageUrl.isNullOrBlank()) {
+              coroutineScope.launch {
+                val seedColor = seedColorExtractor.calculateSeedColor(post.imageUrl)
+                if (seedColor != null) {
+                  rssRepository.updateSeedColor(seedColor.toArgb(), post.id)
                 }
               }
-              .toImmutableList()
-
-          emit(updatedPosts)
+            }
+          }
+        }
+        .map { featuredPosts ->
+          featuredPosts
+            .map { post -> FeaturedPostItem(resolvedPost = post, seedColor = post.seedColor) }
+            .toImmutableList()
         }
     }
 
@@ -185,20 +165,36 @@ class AllPostsPager(
   }
 
   private fun observeHasNewerArticles() {
-    syncCoordinator.syncState
-      .flatMapLatest { syncState ->
-        if (syncState is SyncState.InProgress) {
-          emptyFlow()
-        } else {
-          baseParameters.flatMapLatest { params ->
-            rssRepository.unreadSinceLastSync(
-              sources = params.activeSourceIds,
-              postsAfter = params.postsAfter,
+    baseParameters
+      .flatMapLatest { params ->
+        rssRepository
+          .unreadSinceLastSync(
+            sources = params.activeSourceIds,
+            postsAfter = params.postsAfter,
+            postsUpperBound = params.postsUpperBound,
+          )
+          .map { it to params }
+      }
+      .combine(syncCoordinator.syncState) { (unreadSinceLastSync, params), syncState ->
+        Triple(unreadSinceLastSync, params, syncState)
+      }
+      .onEach { (unreadSinceLastSync, params, _) ->
+        if (unreadSinceLastSync.hasNewArticles) {
+          val currentPostsCount =
+            rssRepository.allPostsCount(
+              activeSourceIds = params.activeSourceIds,
+              unreadOnly = params.unreadOnly,
+              after = params.postsAfter,
               postsUpperBound = params.postsUpperBound,
             )
+
+          if (currentPostsCount == 0L || currentPostsCount == null) {
+            refreshPolicy.updateLastRefreshedAt()
           }
         }
       }
+      .filter { (_, _, syncState) -> syncState !is SyncState.InProgress }
+      .map { (unreadSinceLastSync, _, _) -> unreadSinceLastSync }
       .distinctUntilChanged()
       .onEach { _unreadSinceLastSync.value = it }
       .launchIn(coroutineScope)
