@@ -60,7 +60,7 @@ class FreshRSSSyncCoordinator(
   private val fullArticleFetcher: FullArticleFetcher,
 ) : SyncCoordinator {
   private companion object {
-    private const val ARTICLE_PAGE_SIZE = 250
+    private const val ARTICLE_PAGE_SIZE = 500
     private const val LOCAL_POSTS_PAGE_SIZE = 1000
     private const val STATUS_BATCH_SIZE = 500
   }
@@ -114,7 +114,7 @@ class FreshRSSSyncCoordinator(
 
       // 3. Sync Articles
       val lastSyncedAt =
-        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(30.days)
+        refreshPolicy.fetchLastSyncedAt()?.minus(24.hours) ?: syncStartTime.minus(14.days)
       val newerThan = lastSyncedAt.toEpochMilliseconds()
 
       val hasNewArticles = syncArticles(newerThan = newerThan)
