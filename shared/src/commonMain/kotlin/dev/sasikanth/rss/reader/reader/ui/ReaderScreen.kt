@@ -447,7 +447,7 @@ internal fun ReaderScreen(
               }
               ReaderPage(
                 modifier =
-                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 200L) {
+                  Modifier.fillMaxSize().onVisibilityChanged(minDurationMs = 500L) {
                     if (it) {
                       viewModel.dispatch(ReaderEvent.PostPageChanged(page, readerPost))
                     }
