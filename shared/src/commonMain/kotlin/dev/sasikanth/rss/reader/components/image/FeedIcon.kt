@@ -68,7 +68,28 @@ internal fun FeedIcon(
       modifier = Modifier.matchParentSize(),
       contentScale = contentScale,
       imageLoader = imageLoader,
-      error = { PlaceHolderIcon() },
+      error = {
+        if (!useFavIcon) {
+          val faviconImageRequest =
+            ImageRequest.Builder(context)
+              .data(homepageLink)
+              .diskCacheKey(homepageLink)
+              .size(size)
+              .build()
+
+          SubcomposeAsyncImage(
+            model = faviconImageRequest,
+            contentDescription = contentDescription,
+            modifier = Modifier.matchParentSize(),
+            contentScale = contentScale,
+            imageLoader = FavIconImageLoader.get(context),
+            error = { PlaceHolderIcon() },
+            loading = { PlaceHolderIcon() },
+          )
+        } else {
+          PlaceHolderIcon()
+        }
+      },
       loading = { PlaceHolderIcon() },
     )
   }
