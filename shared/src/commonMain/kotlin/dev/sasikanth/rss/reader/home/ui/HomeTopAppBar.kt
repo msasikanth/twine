@@ -17,11 +17,17 @@
 
 package dev.sasikanth.rss.reader.home.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +41,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.FloatingToolbarDefaults.animationSpec
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -170,11 +177,26 @@ private fun SourceInfo(source: Source?, postsType: PostsType, modifier: Modifier
         maxLines = 1,
       )
 
-      Text(
-        text = getPostTypeLabel(postsType),
-        style = MaterialTheme.typography.labelMedium,
-        color = AppTheme.colorScheme.secondary,
-      )
+      AnimatedContent(
+        targetState = postsType,
+        transitionSpec = {
+          (fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+              slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) { -it })
+            .togetherWith(
+              fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMedium)) +
+                slideOutVertically(animationSpec = spring(stiffness = Spring.StiffnessMedium)) {
+                  it
+                }
+            )
+        },
+        contentAlignment = Alignment.Center,
+      ) {
+        Text(
+          text = getPostTypeLabel(postsType),
+          style = MaterialTheme.typography.labelMedium,
+          color = AppTheme.colorScheme.secondary,
+        )
+      }
     }
   }
 }
