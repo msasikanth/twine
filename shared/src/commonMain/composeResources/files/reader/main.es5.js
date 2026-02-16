@@ -256,6 +256,53 @@ function removeFirstImageTagByUrl(doc, imageUrl) {
   }
 }
 
+/**
+ * Removes duplicate images that are essentially the same (e.g., responsive variants).
+ * It uses normalizeUrl to strip query parameters and hashes for comparison.
+ */
+function deduplicateImages(doc) {
+  var imgs = Array.prototype.slice.call(doc.querySelectorAll("img"));
+  var seenUrls = [];
+
+  for (var i = 0; i < imgs.length; i++) {
+    var img = imgs[i];
+    var src = img.getAttribute("src") ||
+              img.getAttribute("data-src") ||
+              img.getAttribute("data-lazy-src") ||
+              img.getAttribute("srcset");
+
+    if (!src) continue;
+
+    // If it's a srcset, take the first URL for comparison
+    if (img.getAttribute("srcset")) {
+      src = src.split(",")[0].trim().split(" ")[0];
+    }
+
+    var normalizedUrl = normalizeUrl(src, doc.baseURI);
+    if (seenUrls.indexOf(normalizedUrl) !== -1) {
+      var nodeToRemove = img;
+      var figure = img.closest("figure");
+      var picture = img.closest("picture");
+      var parentA = img.closest("a");
+
+      if (figure) {
+        nodeToRemove = figure;
+      } else if (picture) {
+        nodeToRemove = picture;
+      } else if (parentA && parentA.querySelectorAll("img").length === 1) {
+        // Only remove the anchor if it contains no other images
+        nodeToRemove = parentA;
+      }
+
+      if (nodeToRemove && nodeToRemove.parentNode) {
+        nodeToRemove.remove();
+      }
+    } else {
+      seenUrls.push(normalizedUrl);
+    }
+  }
+}
+
 function getImageCaption(markdown) {
   var captionPattern = /!\[.*\]\(.*\]\(.*\s+"(.*)"\)/;
   var match = markdown.match(captionPattern);
@@ -309,6 +356,8 @@ function parseReaderContent(link, bannerImage, html) {
         for(var i=0; i<junkElements.length; i++) {
             junkElements[i].remove();
         }
+
+        deduplicateImages(doc);
 
         var reader = new Readability(doc, {
             charThreshold: 0,
