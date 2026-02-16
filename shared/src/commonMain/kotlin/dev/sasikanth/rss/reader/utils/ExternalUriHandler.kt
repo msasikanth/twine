@@ -25,29 +25,8 @@ object ExternalUriHandler {
   val uri: StateFlow<String?>
     field = MutableStateFlow<String?>(null)
 
-  private var cached: String? = null
-
-  private val listeners = mutableSetOf<(String) -> Unit>()
-
-  fun addListener(listener: (String) -> Unit) {
-    listeners.add(listener)
-    cached?.let {
-      listener.invoke(it)
-      cached = null
-    }
-  }
-
-  fun removeListener(listener: (String) -> Unit) {
-    listeners.remove(listener)
-  }
-
   fun onNewUri(uri: String) {
     this.uri.value = uri
-    cached = uri
-    if (listeners.isNotEmpty()) {
-      listeners.forEach { it.invoke(uri) }
-      cached = null
-    }
   }
 
   fun consume() {
