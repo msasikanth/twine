@@ -1,0 +1,12 @@
+.gradle/
+build/
+.idea/
+*.iml
+.DS_Store
+local.properties
+iosApp/Pods/
+iosApp/DerivedData/
+iosApp/xcuserdata/
+.kotlin/
+gradle/wrapper/
+core/network/http_requests/http-client.private.env.json
