@@ -31,7 +31,6 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -263,33 +262,33 @@ fun App(
         .launchIn(this)
     }
 
-    DisposableEffect(Unit) {
-      val listener: (String) -> Unit = { uri ->
-        if (uri.startsWith("twine://oauth")) {
-          appViewModel.onOAuthRedirect(uri)
-        } else if (uri == "twine://reader/currently-playing") {
-          val playingPostId = audioPlayer.playbackState.value.playingPostId
-          if (playingPostId != null) {
-            appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
-          }
-        } else {
-          val deepLinkRequest =
-            NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
-          if (navController.graph.hasDeepLink(deepLinkRequest)) {
-            if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
-              navController.navigate(Screen.Main()) {
-                popUpTo<Screen.Placeholder> { inclusive = true }
-                launchSingleTop = true
-              }
+    LaunchedEffect(Unit) {
+      ExternalUriHandler.uri.collect { uri ->
+        if (uri != null) {
+          if (uri.startsWith("twine://oauth")) {
+            appViewModel.onOAuthRedirect(uri)
+          } else if (uri == "twine://reader/currently-playing") {
+            val playingPostId = audioPlayer.playbackState.value.playingPostId
+            if (playingPostId != null) {
+              appViewModel.onCurrentlyPlayingDeepLink(playingPostId)
             }
+          } else {
+            val deepLinkRequest =
+              NavDeepLinkRequest(uri = NavUri(uri), action = null, mimeType = null)
+            if (navController.graph.hasDeepLink(deepLinkRequest)) {
+              if (!navController.popBackStack(Screen.Main(), inclusive = false)) {
+                navController.navigate(Screen.Main()) {
+                  popUpTo<Screen.Placeholder> { inclusive = true }
+                  launchSingleTop = true
+                }
+              }
 
-            navController.navigate(NavUri(uri))
+              navController.navigate(NavUri(uri))
+            }
           }
+          ExternalUriHandler.consume()
         }
       }
-      ExternalUriHandler.addListener(listener)
-
-      onDispose { ExternalUriHandler.removeListener(listener) }
     }
 
     AppTheme(useDarkTheme = useDarkTheme) {
