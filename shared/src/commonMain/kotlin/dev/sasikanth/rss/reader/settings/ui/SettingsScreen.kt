@@ -31,16 +31,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.SnackbarResult
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -246,10 +245,14 @@ internal fun SettingsScreen(
         Snackbar(
           modifier = Modifier.padding(12.dp),
           content = {
-            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+            Text(
+              text = snackbarData.visuals.message,
+              maxLines = 4,
+              overflow = TextOverflow.Ellipsis,
+            )
           },
           action = {
-            snackbarData.actionLabel?.let { actionLabel ->
+            snackbarData.visuals.actionLabel?.let { actionLabel ->
               TextButton(
                 onClick = { snackbarHostState.currentSnackbarData?.performAction() },
                 colors =
@@ -260,11 +263,8 @@ internal fun SettingsScreen(
               }
             }
           },
-          actionOnNewLine = false,
-          shape = SnackbarDefaults.shape,
-          backgroundColor = AppTheme.colorScheme.inverseSurface,
+          containerColor = AppTheme.colorScheme.inverseSurface,
           contentColor = AppTheme.colorScheme.inverseOnSurface,
-          elevation = 0.dp,
         )
       }
     },
