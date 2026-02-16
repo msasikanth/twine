@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.diffplug.gradle.spotless.SpotlessExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
   // this is necessary to avoid the plugins to be loaded multiple times
@@ -27,6 +28,12 @@ plugins {
   alias(libs.plugins.kotlin.serialization).apply(false)
   alias(libs.plugins.kotlin.compose).apply(false)
   alias(libs.plugins.bugsnag).apply(false)
+}
+
+subprojects {
+  tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    compilerOptions { freeCompilerArgs.add("-Xskip-prerelease-check") }
+  }
 }
 
 allprojects {
