@@ -42,17 +42,16 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -197,14 +196,14 @@ fun AddFeedScreen(
         Snackbar(
           modifier = Modifier.padding(12.dp),
           content = {
-            Text(text = snackbarData.message, maxLines = 4, overflow = TextOverflow.Ellipsis)
+            Text(
+              text = snackbarData.visuals.message,
+              maxLines = 4,
+              overflow = TextOverflow.Ellipsis,
+            )
           },
-          action = null,
-          actionOnNewLine = false,
-          shape = SnackbarDefaults.shape,
-          backgroundColor = AppTheme.colorScheme.inverseSurface,
+          containerColor = AppTheme.colorScheme.inverseSurface,
           contentColor = AppTheme.colorScheme.inverseOnSurface,
-          elevation = 0.dp,
         )
       }
     },

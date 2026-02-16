@@ -17,28 +17,19 @@
 
 package dev.sasikanth.rss.reader.utils
 
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
 object ExternalUriHandler {
-  private var cached: String? = null
 
-  private val listeners = mutableSetOf<(String) -> Unit>()
-
-  fun addListener(listener: (String) -> Unit) {
-    listeners.add(listener)
-    cached?.let {
-      listener.invoke(it)
-      cached = null
-    }
-  }
-
-  fun removeListener(listener: (String) -> Unit) {
-    listeners.remove(listener)
-  }
+  val uri: StateFlow<String?>
+    field = MutableStateFlow<String?>(null)
 
   fun onNewUri(uri: String) {
-    cached = uri
-    if (listeners.isNotEmpty()) {
-      listeners.forEach { it.invoke(uri) }
-      cached = null
-    }
+    this.uri.value = uri
+  }
+
+  fun consume() {
+    this.uri.value = null
   }
 }
