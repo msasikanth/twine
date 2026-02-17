@@ -18,6 +18,7 @@ package dev.sasikanth.rss.reader.feeds.ui.sheet
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.shadow.Shadow
@@ -75,7 +77,6 @@ internal fun FeedsBottomSheet(
   modifier: Modifier = Modifier,
 ) {
   val focusManager = LocalFocusManager.current
-  val shadowContext = LocalGraphicsContext.current.shadowContext
   val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
   BackHandler(enabled = state.isInMultiSelectMode) {
@@ -100,125 +101,147 @@ internal fun FeedsBottomSheet(
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
 
   AppTheme(useDarkTheme = true) {
-    Column(
-      modifier =
-        modifier.fillMaxSize().drawBehind {
-          val bottomSheetProgress = bottomSheetProgress()
+    Box(modifier = modifier.fillMaxSize()) {
+      BottomSheetBackground(
+        bottomSheetProgress = bottomSheetProgress,
+        shadowColor1 = shadowColor1,
+        shadowColor2 = shadowColor2,
+        collapsedSheetBackgroundColor = collapsedSheetBackgroundColor,
+        collapsedSheetBorderColor = collapsedSheetBorderColor,
+      )
 
-          val collapsedSheetHeight = BOTTOM_SHEET_PEEK_HEIGHT.toPx()
-          val targetSheetHeight = size.height
-          val sheetHeight =
-            lerp(
-              start = collapsedSheetHeight,
-              stop = targetSheetHeight,
-              fraction = (bottomSheetProgress * 2f).coerceAtMost(1f),
+      Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          if (isExpanding) {
+            val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+            val paddingTop =
+              lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = bottomSheetProgress())
+
+            BottomSheetExpandedContent(
+              modifier =
+                Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
+                  val progress = bottomSheetProgress()
+                  alpha =
+                    if (progress <= 0.25f) {
+                      0f
+                    } else {
+                      bottomSheetProgress()
+                    }
+                },
+              viewModel = feedsViewModel,
+              openFeedInfoSheet = openFeedInfoSheet,
+              openGroupScreen = openGroupScreen,
+              openGroupSelectionSheet = openGroupSelectionSheet,
+              openAddFeedScreen = openAddFeedScreen,
+              openPaywall = openPaywall,
+              closeFeeds = closeFeeds,
             )
-          val sheetHorizontalPadding =
-            lerp(
-              start = BOTTOM_SHEET_HORIZONTAL_PADDING,
-              stop = 0.dp,
-              fraction = (bottomSheetProgress * 4f).coerceAtMost(1f),
+          }
+
+          if (isCollapsing) {
+            BottomSheetCollapsedContent(
+              modifier =
+                Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
+                  .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
+                  .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
+              pinnedSources = state.pinnedSources,
+              activeSource = state.activeSource,
+              isParentThemeDark = isParentThemeDark,
+              canShowUnreadPostsCount = state.canShowUnreadPostsCount,
+              onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
+              onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
+              openFeeds = openFeeds,
             )
-          val offset =
-            Offset(x = sheetHorizontalPadding.toPx(), 1.dp.toPx() * bottomSheetProgress.inverse())
-          val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
-
-          val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * bottomSheetProgress.inverse()
-          val cornerRadius = CornerRadius(x = cornerRadiusDp.toPx(), y = cornerRadiusDp.toPx())
-          val backgroundColor =
-            lerp(collapsedSheetBackgroundColor, Color.Black, bottomSheetProgress)
-          val borderColor =
-            lerp(
-              start = collapsedSheetBorderColor,
-              stop = backgroundColor,
-              fraction = bottomSheetProgress,
-            )
-
-          val shadow1Painter =
-            shadowContext.createDropShadowPainter(
-              shape = RoundedCornerShape(cornerRadiusDp),
-              shadow =
-                Shadow(
-                  offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 16.dp),
-                  radius = 32.dp,
-                  color = shadowColor1,
-                ),
-            )
-
-          val shadow2Painter =
-            shadowContext.createDropShadowPainter(
-              shape = RoundedCornerShape(cornerRadiusDp),
-              shadow =
-                Shadow(
-                  offset = DpOffset(x = offset.x.toDp(), y = offset.y.toDp() + 4.dp),
-                  radius = 8.dp,
-                  color = shadowColor2,
-                ),
-            )
-
-          with(shadow1Painter) { draw(sheetSize) }
-
-          with(shadow2Painter) { draw(sheetSize) }
-
-          drawRoundRect(
-            color = backgroundColor,
-            cornerRadius = cornerRadius,
-            size = sheetSize,
-            topLeft = offset,
-          )
-
-          drawRoundRect(
-            color = borderColor,
-            style = Stroke(width = 1.dp.toPx()),
-            cornerRadius = cornerRadius,
-            size = sheetSize,
-            topLeft = offset,
-          )
-        }
-    ) {
-      Box(modifier = Modifier.fillMaxSize()) {
-        if (isExpanding) {
-          val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-          val paddingTop =
-            lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = bottomSheetProgress())
-
-          BottomSheetExpandedContent(
-            modifier =
-              Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
-                val progress = bottomSheetProgress()
-                alpha =
-                  if (progress <= 0.25f) {
-                    0f
-                  } else {
-                    bottomSheetProgress()
-                  }
-              },
-            viewModel = feedsViewModel,
-            openFeedInfoSheet = openFeedInfoSheet,
-            openGroupScreen = openGroupScreen,
-            openGroupSelectionSheet = openGroupSelectionSheet,
-            openAddFeedScreen = openAddFeedScreen,
-            openPaywall = openPaywall,
-            closeFeeds = closeFeeds,
-          )
-        }
-
-        if (isCollapsing) {
-          BottomSheetCollapsedContent(
-            modifier =
-              Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
-                .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
-                .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
-            pinnedSources = state.pinnedSources,
-            activeSource = state.activeSource,
-            isParentThemeDark = isParentThemeDark,
-            canShowUnreadPostsCount = state.canShowUnreadPostsCount,
-            onSourceClick = { feed -> feedsViewModel.dispatch(FeedsEvent.OnSourceClick(feed)) },
-            onHomeSelected = { feedsViewModel.dispatch(FeedsEvent.OnHomeSelected) },
-            openFeeds = openFeeds,
-          )
+          }
         }
       }
     }
   }
+}
+
+@Composable
+private fun BottomSheetBackground(
+  bottomSheetProgress: () -> Float,
+  shadowColor1: Color,
+  shadowColor2: Color,
+  collapsedSheetBackgroundColor: Color,
+  collapsedSheetBorderColor: Color,
+  modifier: Modifier = Modifier,
+) {
+  val shadowContext = LocalGraphicsContext.current.shadowContext
+
+  val quantizedProgress by
+    remember(bottomSheetProgress) {
+      derivedStateOf { (bottomSheetProgress() * 100).toInt() / 100f }
+    }
+
+  val shadow1Painter =
+    remember(quantizedProgress, shadowColor1) {
+      val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * quantizedProgress.inverse()
+      shadowContext.createDropShadowPainter(
+        shape = RoundedCornerShape(cornerRadiusDp),
+        shadow =
+          Shadow(offset = DpOffset(x = 0.dp, y = 16.dp), radius = 32.dp, color = shadowColor1),
+      )
+    }
+
+  val shadow2Painter =
+    remember(quantizedProgress, shadowColor2) {
+      val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * quantizedProgress.inverse()
+      shadowContext.createDropShadowPainter(
+        shape = RoundedCornerShape(cornerRadiusDp),
+        shadow = Shadow(offset = DpOffset(x = 0.dp, y = 4.dp), radius = 8.dp, color = shadowColor2),
+      )
+    }
+
+  Spacer(
+    modifier =
+      modifier.fillMaxSize().drawBehind {
+        val progress = bottomSheetProgress()
+        val collapsedSheetHeight = BOTTOM_SHEET_PEEK_HEIGHT.toPx()
+        val targetSheetHeight = size.height
+        val sheetHeight =
+          lerp(
+            start = collapsedSheetHeight,
+            stop = targetSheetHeight,
+            fraction = (progress * 2f).coerceAtMost(1f),
+          )
+
+        val sheetHorizontalPadding =
+          lerp(
+            start = BOTTOM_SHEET_HORIZONTAL_PADDING,
+            stop = 0.dp,
+            fraction = (progress * 4f).coerceAtMost(1f),
+          )
+
+        val offset = Offset(x = sheetHorizontalPadding.toPx(), 1.dp.toPx() * progress.inverse())
+        val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
+
+        val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * progress.inverse()
+        val cornerRadius = CornerRadius(x = cornerRadiusDp.toPx(), y = cornerRadiusDp.toPx())
+        val backgroundColor = lerp(collapsedSheetBackgroundColor, Color.Black, progress)
+        val borderColor =
+          lerp(start = collapsedSheetBorderColor, stop = backgroundColor, fraction = progress)
+
+        translate(left = offset.x, top = offset.y) {
+          with(shadow1Painter) { draw(sheetSize) }
+          with(shadow2Painter) { draw(sheetSize) }
+        }
+
+        drawRoundRect(
+          color = backgroundColor,
+          cornerRadius = cornerRadius,
+          size = sheetSize,
+          topLeft = offset,
+        )
+
+        drawRoundRect(
+          color = borderColor,
+          style = Stroke(width = 1.dp.toPx()),
+          cornerRadius = cornerRadius,
+          size = sheetSize,
+          topLeft = offset,
+        )
+      }
+  )
 }

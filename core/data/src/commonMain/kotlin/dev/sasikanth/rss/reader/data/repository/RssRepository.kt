@@ -203,49 +203,7 @@ class RssRepository(
   }
 
   fun feed(feedId: String): Feed? {
-    return feedQueries
-      .feed(
-        feedId,
-        mapper = {
-          id: String,
-          name: String,
-          icon: String,
-          description: String,
-          link: String,
-          homepageLink: String,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          alwaysFetchSourceArticle: Boolean,
-          pinnedPosition: Double,
-          showFeedFavIcon: Boolean,
-          lastUpdatedAt: Instant?,
-          refreshInterval: String,
-          isDeleted: Boolean,
-          hideFromAllFeeds: Boolean,
-          remoteId: String? ->
-          Feed(
-            id = id,
-            name = name,
-            icon = icon,
-            description = description,
-            homepageLink = homepageLink,
-            createdAt = createdAt,
-            link = link,
-            pinnedAt = pinnedAt,
-            lastCleanUpAt = lastCleanUpAt,
-            lastUpdatedAt = lastUpdatedAt,
-            refreshInterval = Duration.parse(refreshInterval),
-            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-            pinnedPosition = pinnedPosition,
-            showFeedFavIcon = showFeedFavIcon,
-            hideFromAllFeeds = hideFromAllFeeds,
-            isDeleted = isDeleted,
-            remoteId = remoteId,
-          )
-        },
-      )
-      .executeAsOneOrNull()
+    return feedQueries.feed(feedId, mapper = ::mapToFeed).executeAsOneOrNull()
   }
 
   suspend fun postsCountForFeed(feedId: String): Long {
@@ -584,131 +542,20 @@ class RssRepository(
 
   fun allFeeds(): Flow<List<Feed>> {
     return feedQueries
-      .allFeedsBlocking(
-        mapper = {
-          id: String,
-          name: String,
-          icon: String,
-          description: String,
-          link: String,
-          homepageLink: String,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          alwaysFetchSourceArticle: Boolean,
-          pinnedPosition: Double,
-          showFeedFavIcon: Boolean,
-          lastUpdatedAt: Instant?,
-          refreshInterval: String,
-          isDeleted: Boolean,
-          hideFromAllFeeds: Boolean,
-          remoteId: String? ->
-          Feed(
-            id = id,
-            name = name,
-            icon = icon,
-            description = description,
-            homepageLink = homepageLink,
-            createdAt = createdAt,
-            link = link,
-            pinnedAt = pinnedAt,
-            lastCleanUpAt = lastCleanUpAt,
-            lastUpdatedAt = lastUpdatedAt,
-            refreshInterval = Duration.parse(refreshInterval),
-            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-            pinnedPosition = pinnedPosition,
-            showFeedFavIcon = showFeedFavIcon,
-            hideFromAllFeeds = hideFromAllFeeds,
-            isDeleted = isDeleted,
-            remoteId = remoteId,
-          )
-        }
-      )
+      .allFeedsBlocking(mapper = ::mapToFeed)
       .asFlow()
       .mapToList(dispatchersProvider.databaseRead)
   }
 
   suspend fun allFeedsBlocking(): List<Feed> {
     return withContext(dispatchersProvider.databaseRead) {
-      feedQueries
-        .allFeedsBlocking(
-          mapper = {
-            id: String,
-            name: String,
-            icon: String,
-            description: String,
-            link: String,
-            homepageLink: String,
-            createdAt: Instant,
-            pinnedAt: Instant?,
-            lastCleanUpAt: Instant?,
-            alwaysFetchSourceArticle: Boolean,
-            pinnedPosition: Double,
-            showFeedFavIcon: Boolean,
-            lastUpdatedAt: Instant?,
-            refreshInterval: String,
-            isDeleted: Boolean,
-            hideFromAllFeeds: Boolean,
-            remoteId: String? ->
-            Feed(
-              id = id,
-              name = name,
-              icon = icon,
-              description = description,
-              homepageLink = homepageLink,
-              createdAt = createdAt,
-              link = link,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              lastUpdatedAt = lastUpdatedAt,
-              refreshInterval = Duration.parse(refreshInterval),
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition,
-              showFeedFavIcon = showFeedFavIcon,
-              hideFromAllFeeds = hideFromAllFeeds,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          }
-        )
-        .executeAsList()
+      feedQueries.allFeedsBlocking(mapper = ::mapToFeed).executeAsList()
     }
   }
 
   suspend fun allFeedGroupsBlocking(): List<FeedGroup> {
     return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries
-        .allGroupsBlocking(
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIconLinks: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks = feedIconLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt,
-              pinnedPosition = pinnedPosition,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          }
-        )
-        .executeAsList()
+      feedGroupQueries.allGroupsBlocking(mapper = ::mapToFeedGroup).executeAsList()
     }
   }
 
@@ -733,46 +580,7 @@ class RssRepository(
           postsAfter = postsAfter,
           limit = limit,
           offset = offset,
-          mapper = {
-            id,
-            name,
-            icon,
-            description,
-            link,
-            homepageLink,
-            createdAt,
-            pinnedAt,
-            lastCleanUpAt,
-            alwaysFetchSourceArticle,
-            pinnedPosition,
-            lastUpdatedAt,
-            refreshInterval,
-            isDeleted,
-            remoteId,
-            numberOfUnreadPosts,
-            showFeedFavIcon,
-            hideFromAllFeeds ->
-            Feed(
-              id = id,
-              name = name,
-              icon = icon,
-              description = description,
-              link = link,
-              homepageLink = homepageLink,
-              createdAt = createdAt,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition,
-              lastUpdatedAt = lastUpdatedAt,
-              refreshInterval = Duration.parse(refreshInterval),
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              showFeedFavIcon = showFeedFavIcon,
-              hideFromAllFeeds = hideFromAllFeeds,
-            )
-          },
+          mapper = ::mapToFeedWithUnreadCountAndRefreshInterval,
         )
       },
     )
@@ -788,42 +596,7 @@ class RssRepository(
         id = feedId,
         postsAfter = postsAfter,
         postsUpperBound = postsUpperBound,
-        mapper = {
-          id: String,
-          name: String,
-          icon: String,
-          description: String,
-          link: String,
-          homepageLink: String,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          alwaysFetchSourceArticle: Boolean,
-          pinnedPosition: Double,
-          numberOfUnreadPosts: Long,
-          showFeedFavIcon: Boolean,
-          hideFromAllFeeds: Boolean,
-          isDeleted: Boolean,
-          remoteId: String? ->
-          Feed(
-            id = id,
-            name = name,
-            icon = icon,
-            description = description,
-            homepageLink = homepageLink,
-            createdAt = createdAt,
-            link = link,
-            pinnedAt = pinnedAt,
-            lastCleanUpAt = lastCleanUpAt,
-            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-            pinnedPosition = pinnedPosition,
-            numberOfUnreadPosts = numberOfUnreadPosts,
-            showFeedFavIcon = showFeedFavIcon,
-            hideFromAllFeeds = hideFromAllFeeds,
-            isDeleted = isDeleted,
-            remoteId = remoteId,
-          )
-        },
+        mapper = ::mapToFeedWithUnreadCount,
       )
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
@@ -840,42 +613,7 @@ class RssRepository(
           id = feedId,
           postsAfter = postsAfter,
           postsUpperBound = postsUpperBound,
-          mapper = {
-            id: String,
-            name: String,
-            icon: String,
-            description: String,
-            link: String,
-            homepageLink: String,
-            createdAt: Instant,
-            pinnedAt: Instant?,
-            lastCleanUpAt: Instant?,
-            alwaysFetchSourceArticle: Boolean,
-            pinnedPosition: Double,
-            numberOfUnreadPosts: Long,
-            showFeedFavIcon: Boolean,
-            hideFromAllFeeds: Boolean,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            Feed(
-              id = id,
-              name = name,
-              icon = icon,
-              description = description,
-              homepageLink = homepageLink,
-              createdAt = createdAt,
-              link = link,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              showFeedFavIcon = showFeedFavIcon,
-              hideFromAllFeeds = hideFromAllFeeds,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          },
+          mapper = ::mapToFeedWithUnreadCount,
         )
         .executeAsOne()
     }
@@ -901,6 +639,62 @@ class RssRepository(
         }
       }
       .orEmpty()
+  }
+
+  private fun mapToSource(
+    type: String,
+    id: String,
+    name: String,
+    icon: String?,
+    description: String?,
+    link: String?,
+    homepageLink: String?,
+    createdAt: Instant,
+    pinnedAt: Instant?,
+    lastCleanUpAt: Instant?,
+    numberOfUnreadPosts: Long,
+    feedIds: String?,
+    feedHomepageLinks: String?,
+    feedIcons: String?,
+    feedShowFavIconSettings: String?,
+    updatedAt: Instant?,
+    pinnedPosition: Double,
+    showFeedFavIcon: Boolean?,
+    remoteId: String?,
+  ): Source {
+    return if (type == "group") {
+      FeedGroup(
+        id = id,
+        name = name,
+        feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+        feedHomepageLinks =
+          feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+        feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+        feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+        createdAt = createdAt,
+        updatedAt = updatedAt!!,
+        pinnedAt = pinnedAt,
+        numberOfUnreadPosts = numberOfUnreadPosts,
+        pinnedPosition = pinnedPosition,
+        remoteId = remoteId,
+      )
+    } else {
+      Feed(
+        id = id,
+        name = name,
+        icon = icon!!,
+        description = description!!,
+        link = link!!,
+        homepageLink = homepageLink!!,
+        createdAt = createdAt,
+        pinnedAt = pinnedAt,
+        lastCleanUpAt = lastCleanUpAt,
+        numberOfUnreadPosts = numberOfUnreadPosts,
+        pinnedPosition = pinnedPosition,
+        showFeedFavIcon = showFeedFavIcon ?: true,
+        remoteId = remoteId,
+      )
+    }
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
@@ -1311,49 +1105,7 @@ class RssRepository(
   }
 
   fun feedByRemoteId(remoteId: String): Feed? {
-    return feedQueries
-      .feedByRemoteId(
-        remoteId,
-        mapper = {
-          id: String,
-          name: String,
-          icon: String,
-          description: String,
-          link: String,
-          homepageLink: String,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          alwaysFetchSourceArticle: Boolean,
-          pinnedPosition: Double,
-          showFeedFavIcon: Boolean,
-          lastUpdatedAt: Instant?,
-          refreshInterval: String,
-          isDeleted: Boolean,
-          hideFromAllFeeds: Boolean,
-          remoteId: String? ->
-          Feed(
-            id = id,
-            name = name,
-            icon = icon,
-            description = description,
-            homepageLink = homepageLink,
-            createdAt = createdAt,
-            link = link,
-            pinnedAt = pinnedAt,
-            lastCleanUpAt = lastCleanUpAt,
-            lastUpdatedAt = lastUpdatedAt,
-            refreshInterval = Duration.parse(refreshInterval),
-            alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-            pinnedPosition = pinnedPosition,
-            showFeedFavIcon = showFeedFavIcon,
-            hideFromAllFeeds = hideFromAllFeeds,
-            isDeleted = isDeleted,
-            remoteId = remoteId,
-          )
-        },
-      )
-      .executeAsOneOrNull()
+    return feedQueries.feedByRemoteId(remoteId, mapper = ::mapToFeed).executeAsOneOrNull()
   }
 
   suspend fun upsertPosts(posts: List<Post>) {
@@ -1431,39 +1183,7 @@ class RssRepository(
 
   suspend fun feedGroupBlocking(id: String): FeedGroup? {
     return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries
-        .group(
-          id,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIconLinks: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks = feedIconLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt,
-              pinnedPosition = pinnedPosition,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          },
-        )
-        .executeAsOneOrNull()
+      feedGroupQueries.group(id, mapper = ::mapToFeedGroup).executeAsOneOrNull()
     }
   }
 
@@ -1641,59 +1361,7 @@ class RssRepository(
       .pinnedSources(
         postsAfter = postsAfter,
         postsUpperBound = postsUpperBound,
-        mapper = {
-          type: String,
-          id: String,
-          name: String,
-          icon: String?,
-          description: String?,
-          link: String?,
-          homepageLink: String?,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          numberOfUnreadPosts: Long,
-          feedIds: String?,
-          feedHomepageLinks: String?,
-          feedIcons: String?,
-          feedShowFavIconSettings: String?,
-          updatedAt: Instant?,
-          pinnedPosition: Double,
-          showFeedFavIcon: Boolean?,
-          remoteId: String? ->
-          if (type == "group") {
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks =
-                feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt!!,
-              pinnedAt = pinnedAt,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              pinnedPosition = pinnedPosition,
-            )
-          } else {
-            Feed(
-              id = id,
-              name = name,
-              icon = icon!!,
-              description = description!!,
-              link = link!!,
-              homepageLink = homepageLink!!,
-              createdAt = createdAt,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              pinnedPosition = pinnedPosition,
-              showFeedFavIcon = showFeedFavIcon ?: true,
-              remoteId = remoteId,
-            )
-          }
-        },
+        mapper = ::mapToSource,
       )
       .asFlow()
       .mapToList(dispatchersProvider.databaseRead)
@@ -1715,59 +1383,7 @@ class RssRepository(
           orderBy = orderBy.value,
           limit = limit,
           offset = offset,
-          mapper = {
-            type: String,
-            id: String,
-            name: String,
-            icon: String?,
-            description: String?,
-            link: String?,
-            homepageLink: String?,
-            createdAt: Instant,
-            pinnedAt: Instant?,
-            lastCleanUpAt: Instant?,
-            numberOfUnreadPosts: Long,
-            feedIds: String?,
-            feedHomepageLinks: String?,
-            feedIcons: String?,
-            feedShowFavIconSettings: String?,
-            updatedAt: Instant?,
-            pinnedPosition: Double,
-            showFeedFavIcon: Boolean?,
-            remoteId: String? ->
-            if (type == "group") {
-              FeedGroup(
-                id = id,
-                name = name,
-                feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-                feedHomepageLinks =
-                  feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-                feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-                feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-                createdAt = createdAt,
-                updatedAt = updatedAt!!,
-                pinnedAt = pinnedAt,
-                numberOfUnreadPosts = numberOfUnreadPosts,
-                pinnedPosition = pinnedPosition,
-              )
-            } else {
-              Feed(
-                id = id,
-                name = name,
-                icon = icon!!,
-                description = description!!,
-                link = link!!,
-                homepageLink = homepageLink!!,
-                createdAt = createdAt,
-                pinnedAt = pinnedAt,
-                lastCleanUpAt = lastCleanUpAt,
-                numberOfUnreadPosts = numberOfUnreadPosts,
-                pinnedPosition = pinnedPosition,
-                showFeedFavIcon = showFeedFavIcon ?: true,
-                remoteId = remoteId,
-              )
-            }
-          },
+          mapper = ::mapToSource,
         )
       },
     )
@@ -1783,59 +1399,7 @@ class RssRepository(
         postsAfter = postsAfter,
         postsUpperBound = postsUpperBound,
         id = id,
-        mapper = {
-          type: String,
-          id: String,
-          name: String,
-          icon: String?,
-          description: String?,
-          link: String?,
-          homepageLink: String?,
-          createdAt: Instant,
-          pinnedAt: Instant?,
-          lastCleanUpAt: Instant?,
-          numberOfUnreadPosts: Long,
-          feedIds: String?,
-          feedHomepageLinks: String?,
-          feedIcons: String?,
-          feedShowFavIconSettings: String?,
-          updatedAt: Instant?,
-          pinnedPosition: Double,
-          showFeedFavIcon: Boolean?,
-          remoteId: String? ->
-          if (type == "group") {
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks =
-                feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt!!,
-              pinnedAt = pinnedAt,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              pinnedPosition = pinnedPosition,
-            )
-          } else {
-            Feed(
-              id = id,
-              name = name,
-              icon = icon!!,
-              description = description!!,
-              link = link!!,
-              homepageLink = homepageLink!!,
-              createdAt = createdAt,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              pinnedPosition = pinnedPosition,
-              showFeedFavIcon = showFeedFavIcon ?: true,
-              remoteId = remoteId,
-            )
-          }
-        },
+        mapper = ::mapToSource,
       )
       .asFlow()
       .mapToOneOrNull(dispatchersProvider.databaseRead)
@@ -1847,36 +1411,7 @@ class RssRepository(
       transacter = feedGroupQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        feedGroupQueries.groups(
-          limit = limit,
-          offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIcons: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            remoteId: String? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt,
-              pinnedPosition = pinnedPosition,
-              remoteId = remoteId,
-            )
-          },
-        )
+        feedGroupQueries.groups(limit = limit, offset = offset, mapper = ::mapToFeedGroupFromGroups)
       },
     )
   }
@@ -1888,66 +1423,14 @@ class RssRepository(
   suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
     return withContext(dispatchersProvider.databaseRead) {
       feedGroupQueries
-        .groupsByIds(
-          ids = ids,
-          mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIcons: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            remoteId: String? ->
-            FeedGroup(
-              id = id,
-              name = name,
-              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-              createdAt = createdAt,
-              updatedAt = updatedAt,
-              pinnedAt = pinnedAt,
-              remoteId = remoteId,
-            )
-          },
-        )
+        .groupsByIds(ids = ids, mapper = ::mapToFeedGroupFromGroupsByIds)
         .executeAsList()
     }
   }
 
   fun groupById(groupId: String): Flow<FeedGroup> {
     return feedGroupQueries
-      .groupsByIds(
-        ids = setOf(groupId),
-        mapper = {
-          id: String,
-          name: String,
-          feedIds: String?,
-          feedHomepageLinks: String,
-          feedIcons: String,
-          feedShowFavIconSettings: String,
-          createdAt: Instant,
-          updatedAt: Instant,
-          pinnedAt: Instant?,
-          remoteId: String? ->
-          FeedGroup(
-            id = id,
-            name = name,
-            feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-            createdAt = createdAt,
-            updatedAt = updatedAt,
-            pinnedAt = pinnedAt,
-            remoteId = remoteId,
-          )
-        },
-      )
+      .groupsByIds(ids = setOf(groupId), mapper = ::mapToFeedGroupFromGroupsByIds)
       .asFlow()
       .mapToOne(dispatchersProvider.databaseRead)
   }
@@ -1966,42 +1449,7 @@ class RssRepository(
           orderBy = orderBy.value,
           limit = limit,
           offset = offset,
-          mapper = {
-            id: String,
-            name: String,
-            icon: String,
-            description: String,
-            link: String,
-            homepageLink: String,
-            createdAt: Instant,
-            pinnedAt: Instant?,
-            lastCleanUpAt: Instant?,
-            alwaysFetchSourceArticle: Boolean,
-            pinnedPosition: Double,
-            numberOfUnreadPosts: Long,
-            showFeedFavIcon: Boolean,
-            hideFromAllFeeds: Boolean,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            Feed(
-              id = id,
-              name = name,
-              icon = icon,
-              description = description,
-              link = link,
-              homepageLink = homepageLink,
-              createdAt = createdAt,
-              pinnedAt = pinnedAt,
-              lastCleanUpAt = lastCleanUpAt,
-              alwaysFetchSourceArticle = alwaysFetchSourceArticle,
-              pinnedPosition = pinnedPosition,
-              numberOfUnreadPosts = numberOfUnreadPosts,
-              showFeedFavIcon = showFeedFavIcon,
-              hideFromAllFeeds = hideFromAllFeeds,
-              isDeleted = isDeleted,
-              remoteId = remoteId,
-            )
-          },
+          mapper = ::mapToFeedWithUnreadCount,
         )
       },
     )
@@ -2098,6 +1546,210 @@ class RssRepository(
     }
   }
 
+  private fun mapToFeed(
+    id: String,
+    name: String,
+    icon: String,
+    description: String,
+    link: String,
+    homepageLink: String,
+    createdAt: Instant,
+    pinnedAt: Instant?,
+    lastCleanUpAt: Instant?,
+    alwaysFetchSourceArticle: Boolean,
+    pinnedPosition: Double,
+    showFeedFavIcon: Boolean,
+    lastUpdatedAt: Instant?,
+    refreshInterval: String,
+    isDeleted: Boolean,
+    hideFromAllFeeds: Boolean,
+    remoteId: String?,
+  ): Feed {
+    return Feed(
+      id = id,
+      name = name,
+      icon = icon,
+      description = description,
+      homepageLink = homepageLink,
+      createdAt = createdAt,
+      link = link,
+      pinnedAt = pinnedAt,
+      lastCleanUpAt = lastCleanUpAt,
+      lastUpdatedAt = lastUpdatedAt,
+      refreshInterval = Duration.parse(refreshInterval),
+      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+      pinnedPosition = pinnedPosition,
+      showFeedFavIcon = showFeedFavIcon,
+      hideFromAllFeeds = hideFromAllFeeds,
+      isDeleted = isDeleted,
+      remoteId = remoteId,
+    )
+  }
+
+  private fun mapToFeedWithUnreadCount(
+    id: String,
+    name: String,
+    icon: String,
+    description: String,
+    link: String,
+    homepageLink: String,
+    createdAt: Instant,
+    pinnedAt: Instant?,
+    lastCleanUpAt: Instant?,
+    alwaysFetchSourceArticle: Boolean,
+    pinnedPosition: Double,
+    numberOfUnreadPosts: Long,
+    showFeedFavIcon: Boolean,
+    hideFromAllFeeds: Boolean,
+    isDeleted: Boolean,
+    remoteId: String?,
+  ): Feed {
+    return Feed(
+      id = id,
+      name = name,
+      icon = icon,
+      description = description,
+      homepageLink = homepageLink,
+      createdAt = createdAt,
+      link = link,
+      pinnedAt = pinnedAt,
+      lastCleanUpAt = lastCleanUpAt,
+      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+      pinnedPosition = pinnedPosition,
+      numberOfUnreadPosts = numberOfUnreadPosts,
+      showFeedFavIcon = showFeedFavIcon,
+      hideFromAllFeeds = hideFromAllFeeds,
+      isDeleted = isDeleted,
+      remoteId = remoteId,
+    )
+  }
+
+  private fun mapToFeedWithUnreadCountAndRefreshInterval(
+    id: String,
+    name: String,
+    icon: String,
+    description: String,
+    link: String,
+    homepageLink: String,
+    createdAt: Instant,
+    pinnedAt: Instant?,
+    lastCleanUpAt: Instant?,
+    alwaysFetchSourceArticle: Boolean,
+    pinnedPosition: Double,
+    lastUpdatedAt: Instant?,
+    refreshInterval: String,
+    isDeleted: Boolean,
+    remoteId: String?,
+    numberOfUnreadPosts: Long,
+    showFeedFavIcon: Boolean,
+    hideFromAllFeeds: Boolean,
+  ): Feed {
+    return Feed(
+      id = id,
+      name = name,
+      icon = icon,
+      description = description,
+      link = link,
+      homepageLink = homepageLink,
+      createdAt = createdAt,
+      pinnedAt = pinnedAt,
+      lastCleanUpAt = lastCleanUpAt,
+      alwaysFetchSourceArticle = alwaysFetchSourceArticle,
+      pinnedPosition = pinnedPosition,
+      lastUpdatedAt = lastUpdatedAt,
+      refreshInterval = Duration.parse(refreshInterval),
+      isDeleted = isDeleted,
+      remoteId = remoteId,
+      numberOfUnreadPosts = numberOfUnreadPosts,
+      showFeedFavIcon = showFeedFavIcon,
+      hideFromAllFeeds = hideFromAllFeeds,
+    )
+  }
+
+  private fun mapToFeedGroup(
+    id: String,
+    name: String,
+    feedIds: String?,
+    feedHomepageLinks: String,
+    feedIconLinks: String,
+    feedShowFavIconSettings: String,
+    createdAt: Instant,
+    updatedAt: Instant,
+    pinnedAt: Instant?,
+    pinnedPosition: Double,
+    isDeleted: Boolean,
+    remoteId: String?,
+  ): FeedGroup {
+    return FeedGroup(
+      id = id,
+      name = name,
+      feedIds = feedIds?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedIconLinks = feedIconLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+      createdAt = createdAt,
+      updatedAt = updatedAt,
+      pinnedAt = pinnedAt,
+      pinnedPosition = pinnedPosition,
+      isDeleted = isDeleted,
+      remoteId = remoteId,
+    )
+  }
+
+  private fun mapToFeedGroupFromGroups(
+    id: String,
+    name: String,
+    feedIds: String?,
+    feedHomepageLinks: String,
+    feedIcons: String,
+    feedShowFavIconSettings: String,
+    createdAt: Instant,
+    updatedAt: Instant,
+    pinnedAt: Instant?,
+    pinnedPosition: Double,
+    remoteId: String?,
+  ): FeedGroup {
+    return FeedGroup(
+      id = id,
+      name = name,
+      feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+      createdAt = createdAt,
+      updatedAt = updatedAt,
+      pinnedAt = pinnedAt,
+      pinnedPosition = pinnedPosition,
+      remoteId = remoteId,
+    )
+  }
+
+  private fun mapToFeedGroupFromGroupsByIds(
+    id: String,
+    name: String,
+    feedIds: String?,
+    feedHomepageLinks: String,
+    feedIcons: String,
+    feedShowFavIconSettings: String,
+    createdAt: Instant,
+    updatedAt: Instant,
+    pinnedAt: Instant?,
+    remoteId: String?,
+  ): FeedGroup {
+    return FeedGroup(
+      id = id,
+      name = name,
+      feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+      createdAt = createdAt,
+      updatedAt = updatedAt,
+      pinnedAt = pinnedAt,
+      remoteId = remoteId,
+    )
+  }
+
   private fun mapToResolvedPost(
     id: String,
     sourceId: String,
@@ -2145,6 +1797,6 @@ class RssRepository(
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
-    return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
+    return searchQuery.replace("\"", "\"\"").run { "\"$this\"" }
   }
 }

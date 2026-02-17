@@ -46,3 +46,7 @@ The project follows a modular Kotlin Multiplatform structure:
 - Content filtering: Blocked words based on keywords.
 - Background sync and Cloud sync (FreshRSS, Miniflux, Dropbox).
 - OPML import and export.
+
+## PR instructions
+- Title format: <Title>. Title should not include any emojis
+- Always run `./gradlew spotlessApply` before committing.
