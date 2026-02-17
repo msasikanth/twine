@@ -48,7 +48,7 @@ class DurationExtTest {
 
   @Test
   fun formatting_duration_with_single_digit_values_should_work_correctly() {
-     // given
+    // given
     val duration = 3661000L // 1 hour 1 minute 1 second
 
     // when
