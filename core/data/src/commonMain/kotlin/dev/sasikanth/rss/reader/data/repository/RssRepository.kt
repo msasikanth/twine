@@ -641,67 +641,6 @@ class RssRepository(
       .orEmpty()
   }
 
-  private fun mapToSource(
-    type: String,
-    id: String,
-    name: String,
-    icon: String?,
-    description: String?,
-    link: String?,
-    homepageLink: String?,
-    createdAt: Instant,
-    pinnedAt: Instant?,
-    lastCleanUpAt: Instant?,
-    numberOfUnreadPosts: Long,
-    feedIds: String?,
-    feedHomepageLinks: String?,
-    feedIcons: String?,
-    feedShowFavIconSettings: String?,
-    updatedAt: Instant?,
-    pinnedPosition: Double,
-    showFeedFavIcon: Boolean?,
-    remoteId: String?,
-  ): Source {
-    return if (type == "group") {
-      FeedGroup(
-        id = id,
-        name = name,
-        feedIds =
-          feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-        feedHomepageLinks =
-          feedHomepageLinks
-            ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-            ?.filterNot { it.isBlank() }
-            .orEmpty(),
-        feedIconLinks =
-          feedIcons?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filterNot { it.isBlank() }.orEmpty(),
-        feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
-        createdAt = createdAt,
-        updatedAt = updatedAt!!,
-        pinnedAt = pinnedAt,
-        numberOfUnreadPosts = numberOfUnreadPosts,
-        pinnedPosition = pinnedPosition,
-        remoteId = remoteId,
-      )
-    } else {
-      Feed(
-        id = id,
-        name = name,
-        icon = icon!!,
-        description = description!!,
-        link = link!!,
-        homepageLink = homepageLink!!,
-        createdAt = createdAt,
-        pinnedAt = pinnedAt,
-        lastCleanUpAt = lastCleanUpAt,
-        numberOfUnreadPosts = numberOfUnreadPosts,
-        pinnedPosition = pinnedPosition,
-        showFeedFavIcon = showFeedFavIcon ?: true,
-        remoteId = remoteId,
-      )
-    }
-  }
-
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
     withContext(dispatchersProvider.databaseWrite) {
       feedQueries.updateFeedName(
