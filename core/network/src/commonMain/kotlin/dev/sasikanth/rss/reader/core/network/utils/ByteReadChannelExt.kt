@@ -21,67 +21,40 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.readRemaining
 import korlibs.io.lang.Charset
 import korlibs.io.lang.Charsets
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlinx.coroutines.runBlocking
 import kotlinx.io.readByteArray
 
-private val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
+private val ENCODING_REGEX = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
 
-internal fun ByteReadChannel.toCharIterator(
+internal suspend fun ByteReadChannel.toCharIterator(
   charset: Charset,
   platformPageSize: Long,
-  context: CoroutineContext = EmptyCoroutineContext,
 ): CharIterator {
-  return object : CharIterator() {
+  val bytes = readRemaining().readByteArray()
 
-    private var encodingCharset: Charset? = null
-    private var currentIndex = 0
-    private var currentBuffer = ""
-    private var isFirstRead = true
+  val firstChunkSize = minOf(bytes.size, platformPageSize.toInt())
+  val encodingContent = buildString { Charsets.UTF8.decode(this, bytes, 0, firstChunkSize) }
+  val encodingCharset = findEncodingCharset(encodingContent, charset)
 
-    override fun hasNext(): Boolean {
-      if (currentIndex < currentBuffer.length) return true
-      if (this@toCharIterator.isClosedForRead) return false
+  val text =
+    buildString { encodingCharset.decode(this, bytes) }
+      .replace("&acirc;&#128;&#148;", "&ndash;")
+      .replace("&acirc;&#128;&#153;", "&apos;")
 
-      val packet = runBlocking(context) { this@toCharIterator.readRemaining(platformPageSize) }
-      val bytes = packet.readByteArray()
-      if (encodingCharset == null) {
-        val encodingContent = buildString { Charsets.UTF8.decode(this, bytes) }
-        encodingCharset = findEncodingCharset(encodingRegex, encodingContent, charset)
-      }
-
-      currentBuffer =
-        buildString { (encodingCharset ?: charset).decode(this, bytes) }
-          .replace("&acirc;&#128;&#148;", "&ndash;")
-          .replace("&acirc;&#128;&#153;", "&apos;")
-
-      if (isFirstRead && currentBuffer.startsWith("\uFEFF")) {
-        currentBuffer = currentBuffer.substring(1)
-      }
-      isFirstRead = false
-
-      packet.close()
-      currentIndex = 0
-      return currentBuffer.isNotEmpty()
+  val finalXml =
+    if (text.startsWith("\uFEFF")) {
+      text.substring(1)
+    } else {
+      text
     }
 
-    private fun findEncodingCharset(
-      encodingRegex: Regex,
-      encodingContent: String,
-      fallbackCharset: Charset,
-    ) =
-      (encodingRegex.find(encodingContent)?.groupValues?.get(1)?.let { encoding ->
-        try {
-          Charset.forName(encoding)
-        } catch (e: Exception) {
-          null
-        }
-      } ?: fallbackCharset)
-
-    override fun nextChar(): Char {
-      if (!hasNext()) throw NoSuchElementException()
-      return currentBuffer[currentIndex++]
-    }
-  }
+  return finalXml.iterator()
 }
+
+private fun findEncodingCharset(encodingContent: String, fallbackCharset: Charset) =
+  (ENCODING_REGEX.find(encodingContent)?.groupValues?.get(1)?.let { encoding ->
+    try {
+      Charset.forName(encoding)
+    } catch (e: Exception) {
+      null
+    }
+  } ?: fallbackCharset)
