@@ -1355,11 +1355,7 @@ class RssRepository(
       transacter = feedGroupQueries,
       context = dispatchersProvider.databaseRead,
       queryProvider = { limit, offset ->
-        feedGroupQueries.groups(
-          limit = limit,
-          offset = offset,
-          mapper = ::mapToFeedGroupFromGroups,
-        )
+        feedGroupQueries.groups(limit = limit, offset = offset, mapper = ::mapToFeedGroupFromGroups)
       },
     )
   }
@@ -1370,7 +1366,9 @@ class RssRepository(
 
   suspend fun groupByIds(ids: Set<String>): List<FeedGroup> {
     return withContext(dispatchersProvider.databaseRead) {
-      feedGroupQueries.groupsByIds(ids = ids, mapper = ::mapToFeedGroupFromGroupsByIds).executeAsList()
+      feedGroupQueries
+        .groupsByIds(ids = ids, mapper = ::mapToFeedGroupFromGroupsByIds)
+        .executeAsList()
     }
   }
 
@@ -1645,7 +1643,9 @@ class RssRepository(
         feedIds =
           feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
         feedHomepageLinks =
-          feedHomepageLinks?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filterNot { it.isBlank() }
+          feedHomepageLinks
+            ?.split(Constants.GROUP_CONCAT_SEPARATOR)
+            ?.filterNot { it.isBlank() }
             .orEmpty(),
         feedIconLinks =
           feedIcons?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filterNot { it.isBlank() }.orEmpty(),
