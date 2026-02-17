@@ -18,7 +18,23 @@
 package dev.sasikanth.rss.reader.reader.ui
 
 import androidx.compose.ui.graphics.Color
+import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.ui.AppColorScheme
+
+internal fun ReaderColorScheme.getOverriddenColorScheme(
+  isDark: Boolean,
+  sourceColorScheme: AppColorScheme,
+): AppColorScheme? {
+  return when (this) {
+    ReaderColorScheme.Dynamic -> null
+    ReaderColorScheme.Sepia -> sepiaColorScheme(sourceColorScheme)
+    ReaderColorScheme.Solarized -> solarizedColorScheme(isDark, sourceColorScheme)
+    ReaderColorScheme.Parchment -> parchmentColorScheme(sourceColorScheme)
+    ReaderColorScheme.Midnight -> midnightColorScheme(sourceColorScheme)
+    ReaderColorScheme.Forest -> forestColorScheme(sourceColorScheme)
+    ReaderColorScheme.Slate -> slateColorScheme(sourceColorScheme)
+  }
+}
 
 internal data class ReaderThemeTokens(
   val primary: Color,
