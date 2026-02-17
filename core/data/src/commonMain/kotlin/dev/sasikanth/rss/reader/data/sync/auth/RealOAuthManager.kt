@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.data.sync.auth
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.utils.generateSecureRandomBytes
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
@@ -28,7 +29,6 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okio.ByteString.Companion.encodeUtf8
@@ -122,7 +122,7 @@ class RealOAuthManager(
 
   @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeVerifier(): String {
-    val bytes = Random.nextBytes(32)
+    val bytes = generateSecureRandomBytes(32)
     return Base64.UrlSafe.encode(bytes).trimEnd('=')
   }
 
