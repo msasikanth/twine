@@ -13,17 +13,21 @@ class OkioAdapterTest {
   @Test
   fun reading_from_raw_source_should_work() {
     val data = "Hello, World!".encodeToByteArray()
-    val okioSource = object : OkioSource {
-      private var read = false
-      override fun read(sink: OkioBuffer, byteCount: Long): Long {
-        if (read) return -1L
-        sink.write(data)
-        read = true
-        return data.size.toLong()
+    val okioSource =
+      object : OkioSource {
+        private var read = false
+
+        override fun read(sink: OkioBuffer, byteCount: Long): Long {
+          if (read) return -1L
+          sink.write(data)
+          read = true
+          return data.size.toLong()
+        }
+
+        override fun timeout(): Timeout = Timeout.NONE
+
+        override fun close() {}
       }
-      override fun timeout(): Timeout = Timeout.NONE
-      override fun close() {}
-    }
 
     val rawSource = okioSource.asKotlinxIoRawSource()
     val sink = Buffer()
