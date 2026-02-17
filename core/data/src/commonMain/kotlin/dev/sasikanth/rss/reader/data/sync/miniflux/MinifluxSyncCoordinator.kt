@@ -174,7 +174,7 @@ class MinifluxSyncCoordinator(
   }
 
   private suspend fun pushChangesForFeed(feedId: String) {
-    pushStatusChangesForFeed(feedId)
+    pushStatusChanges(feedId)
   }
 
   private suspend fun purgeDeletedSources() {
@@ -616,52 +616,26 @@ class MinifluxSyncCoordinator(
     } while (localPosts.size >= LOCAL_POSTS_PAGE_SIZE)
   }
 
-  private suspend fun pushStatusChanges() {
+  private suspend fun pushStatusChanges(feedId: String? = null) {
     // Fetch remote bookmark state to avoid accidentally toggling bookmarks
     // for posts that are dirty due to read status changes only
     val remoteBookmarkIds = fetchStarredEntryIds()
 
     while (true) {
       val dirtyPosts =
-        rssRepository.postsWithLocalChangesPaged(limit = LOCAL_POSTS_PAGE_SIZE.toLong(), offset = 0)
-      if (dirtyPosts.isEmpty()) return
+        if (feedId != null) {
+          rssRepository.postsWithLocalChangesForFeedPaged(
+            feedId = feedId,
+            limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
+            offset = 0,
+          )
+        } else {
+          rssRepository.postsWithLocalChangesPaged(
+            limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
+            offset = 0,
+          )
+        }
 
-      val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
-      val toMarkUnread = dirtyPosts.filter { !it.read }.mapNotNull { it.remoteId?.toLong() }
-
-      // Only push bookmark changes for posts where local state differs from remote state
-      val toBookmark =
-        dirtyPosts
-          .filter { it.bookmarked && it.remoteId !in remoteBookmarkIds }
-          .mapNotNull { it.remoteId?.toLong() }
-      val toUnbookmark =
-        dirtyPosts
-          .filter { !it.bookmarked && it.remoteId in remoteBookmarkIds }
-          .mapNotNull { it.remoteId?.toLong() }
-
-      toMarkRead.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.markEntriesAsRead(ids) }
-      toMarkUnread.chunked(STATUS_BATCH_SIZE).forEach { ids ->
-        minifluxSource.markEntriesAsUnread(ids)
-      }
-      toBookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.addBookmarks(ids) }
-      toUnbookmark.chunked(STATUS_BATCH_SIZE).forEach { ids -> minifluxSource.removeBookmarks(ids) }
-
-      dirtyPosts.forEach { post -> rssRepository.updatePostSyncedAt(post.id, post.updatedAt) }
-    }
-  }
-
-  private suspend fun pushStatusChangesForFeed(feedId: String) {
-    // Fetch remote bookmark state to avoid accidentally toggling bookmarks
-    // for posts that are dirty due to read status changes only
-    val remoteBookmarkIds = fetchStarredEntryIds()
-
-    while (true) {
-      val dirtyPosts =
-        rssRepository.postsWithLocalChangesForFeedPaged(
-          feedId = feedId,
-          limit = LOCAL_POSTS_PAGE_SIZE.toLong(),
-          offset = 0,
-        )
       if (dirtyPosts.isEmpty()) return
 
       val toMarkRead = dirtyPosts.filter { it.read }.mapNotNull { it.remoteId?.toLong() }
