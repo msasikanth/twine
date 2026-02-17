@@ -46,14 +46,11 @@ import coil3.util.MimeTypeMap
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.parseSource
-import kotlin.math.min
 import kotlinx.io.Buffer
 import kotlinx.io.RawSource
 import kotlinx.io.okio.asKotlinxIoRawSource
-import okio.Buffer as OkioBuffer
 import okio.FileSystem
 import okio.IOException as OkioIOException
-import okio.Source as OkioSource
 
 private const val CACHE_CONTROL = "Cache-Control"
 private const val CONTENT_TYPE = "Content-Type"
@@ -290,4 +287,3 @@ class FavIconFetcher(
     }
   }
 }
-
