@@ -18,7 +18,6 @@
 package dev.sasikanth.rss.reader.app
 
 import androidx.compose.material3.SheetValue
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -101,9 +100,7 @@ fun NavGraphBuilder.placeholderScreen(
       modifier = modifier,
       viewModel = viewModel,
       navigateHome = {
-        navController.navigate(Screen.Main()) {
-          popUpTo<Screen.Placeholder> { inclusive = true }
-        }
+        navController.navigate(Screen.Main()) { popUpTo<Screen.Placeholder> { inclusive = true } }
       },
       navigateOnboarding = {
         navController.navigate(Screen.Onboarding) {
@@ -123,9 +120,7 @@ fun NavGraphBuilder.onboardingScreen(
     OnboardingScreen(
       viewModel = viewModel,
       onOnboardingDone = {
-        navController.navigate(Screen.Main()) {
-          popUpTo<Screen.Onboarding> { inclusive = true }
-        }
+        navController.navigate(Screen.Main()) { popUpTo<Screen.Onboarding> { inclusive = true } }
       },
       onNavigateToDiscovery = {
         navController.navigate(Screen.Discovery(isFromOnboarding = true)) {
@@ -468,7 +463,11 @@ fun NavGraphBuilder.statisticsScreen(
 ) {
   composable<Screen.Statistics> {
     val viewModel = viewModel { statisticsViewModel() }
-    StatisticsScreen(modifier = modifier, viewModel = viewModel, goBack = { navController.popBackStack() })
+    StatisticsScreen(
+      modifier = modifier,
+      viewModel = viewModel,
+      goBack = { navController.popBackStack() },
+    )
   }
 }
 
@@ -554,10 +553,9 @@ fun NavGraphBuilder.groupSelectionDialog(
       viewModel = viewModel,
       dismiss = { navController.popBackStack() },
       onGroupsSelected = { selectedGroupIds ->
-        navController.previousBackStackEntry?.savedStateHandle?.set(
-          SELECTED_GROUPS_KEY,
-          selectedGroupIds,
-        )
+        navController.previousBackStackEntry
+          ?.savedStateHandle
+          ?.set(SELECTED_GROUPS_KEY, selectedGroupIds)
 
         navController.popBackStack()
       },
