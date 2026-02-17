@@ -162,6 +162,7 @@ import dev.sasikanth.rss.reader.resources.icons.VisibilityOff
 import dev.sasikanth.rss.reader.share.LocalShareHandler
 import dev.sasikanth.rss.reader.ui.AppTheme
 import dev.sasikanth.rss.reader.ui.GolosFontFamily
+import dev.sasikanth.rss.reader.util.formatDuration
 import dev.sasikanth.rss.reader.util.readerDateTimestamp
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
 import dev.sasikanth.rss.reader.utils.ParallaxAlignment
@@ -1004,17 +1005,6 @@ private fun MediaControls(
   }
 }
 
-private fun formatDuration(duration: Long): String {
-  val seconds = (duration / 1000) % 60
-  val minutes = (duration / (1000 * 60)) % 60
-  val hours = (duration / (1000 * 60 * 60))
-
-  return if (hours > 0) {
-    "${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-  } else {
-    "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-  }
-}
 
 @Composable
 private fun SleepTimerBottomSheet(
