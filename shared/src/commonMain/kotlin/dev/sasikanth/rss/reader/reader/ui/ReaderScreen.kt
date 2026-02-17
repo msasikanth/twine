@@ -236,15 +236,13 @@ internal fun ReaderScreen(
     val sourceColorScheme = AppTheme.colorScheme
     val overriddenColorScheme =
       remember(state.selectedReaderColorScheme, isDarkTheme, sourceColorScheme) {
-        when (state.selectedReaderColorScheme) {
-          ReaderColorScheme.Dynamic -> null
-          ReaderColorScheme.Sepia -> sepiaColorScheme(sourceColorScheme)
-          ReaderColorScheme.Solarized -> solarizedColorScheme(isDarkTheme, sourceColorScheme)
-          ReaderColorScheme.Parchment -> parchmentColorScheme(sourceColorScheme)
-          ReaderColorScheme.Midnight -> midnightColorScheme(sourceColorScheme)
-          ReaderColorScheme.Forest -> forestColorScheme(sourceColorScheme)
-          ReaderColorScheme.Slate -> slateColorScheme(sourceColorScheme)
-        }
+        state.selectedReaderColorScheme.getOverriddenColorScheme(isDarkTheme, sourceColorScheme)
+      }
+
+    val darkAppColorScheme = appDynamicColorState.darkAppColorScheme
+    val overriddenDarkColorScheme =
+      remember(state.selectedReaderColorScheme, darkAppColorScheme) {
+        state.selectedReaderColorScheme.getOverriddenColorScheme(true, darkAppColorScheme)
       }
 
     AppTheme(
@@ -364,7 +362,7 @@ internal fun ReaderScreen(
               fontScaleFactor = state.readerFontScaleFactor,
               fontLineHeightFactor = state.readerLineHeightScaleFactor,
               isSubscribed = state.isSubscribed,
-              overriddenColorScheme = overriddenColorScheme,
+              overriddenColorScheme = overriddenDarkColorScheme,
               openInBrowserClick = {
                 coroutineScope.launch { linkHandler.openLink(readerPost.link) }
               },
@@ -577,7 +575,7 @@ private fun ReaderActionsPanel(
             )
             .graphicsLayer { clip = true }
       ) {
-        AppTheme(useDarkTheme = true) {
+        AppTheme(useDarkTheme = true, overriddenColorScheme = overriddenColorScheme) {
           AnimatedContent(
             modifier = Modifier.requiredHeightIn(min = 64.dp),
             contentAlignment = Alignment.BottomCenter,
