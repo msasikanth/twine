@@ -1258,15 +1258,8 @@ class RssRepository(
       feedGroupQueries
         .feedGroupByRemoteId(
           remoteId = remoteId,
-          mapper = {
-            id,
-            name,
-            createdAt,
-            updatedAt,
-            pinnedAt,
-            pinnedPosition,
-            isDeleted,
-            remoteId ->
+          mapper = { id, name, createdAt, updatedAt, pinnedAt, pinnedPosition, isDeleted, remoteId
+            ->
             mapToFeedGroup(
               id = id,
               name = name,
