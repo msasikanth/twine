@@ -16,6 +16,9 @@
  */
 package dev.sasikanth.rss.reader.feeds.ui.sheet
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -95,37 +98,60 @@ internal fun FeedsBottomSheet(
       }
     }
 
-  val isExpanding by remember { derivedStateOf { bottomSheetProgress() > 0f } }
-  val isCollapsing by remember { derivedStateOf { bottomSheetProgress() < 1f } }
+  val animatedProgress by
+    animateFloatAsState(
+      targetValue = bottomSheetProgress(),
+      animationSpec =
+        spring(
+          dampingRatio = Spring.DampingRatioMediumBouncy,
+          stiffness = Spring.StiffnessMediumLow,
+        ),
+      label = "Bouncy Progress",
+    )
+
+  val isExpanding by remember {
+    derivedStateOf { bottomSheetProgress() > 0f || animatedProgress > 0f }
+  }
+  val isCollapsing by remember {
+    derivedStateOf { bottomSheetProgress() < 1f || animatedProgress < 1f }
+  }
 
   LaunchedEffect(isCollapsing) { focusManager.clearFocus() }
+
+  val bouncyProgressLambda = remember(animatedProgress) { { animatedProgress } }
 
   AppTheme(useDarkTheme = true) {
     Box(modifier = modifier.fillMaxSize()) {
       BottomSheetBackground(
-        bottomSheetProgress = bottomSheetProgress,
+        bottomSheetProgress = bouncyProgressLambda,
         shadowColor1 = shadowColor1,
         shadowColor2 = shadowColor2,
         collapsedSheetBackgroundColor = collapsedSheetBackgroundColor,
         collapsedSheetBorderColor = collapsedSheetBorderColor,
       )
 
-      Column(modifier = Modifier.fillMaxSize()) {
+      Column(
+        modifier =
+          Modifier.fillMaxSize().graphicsLayer {
+            if (animatedProgress < 0f) {
+              translationY = -animatedProgress * 40.dp.toPx()
+            }
+          }
+      ) {
         Box(modifier = Modifier.fillMaxSize()) {
           if (isExpanding) {
             val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
             val paddingTop =
-              lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = bottomSheetProgress())
+              lerp(start = 16.dp, stop = statusBarPadding + 16.dp, fraction = animatedProgress)
 
             BottomSheetExpandedContent(
               modifier =
                 Modifier.fillMaxSize().padding(top = paddingTop).graphicsLayer {
-                  val progress = bottomSheetProgress()
                   alpha =
-                    if (progress <= 0.25f) {
+                    if (animatedProgress <= 0.25f) {
                       0f
                     } else {
-                      bottomSheetProgress()
+                      animatedProgress.coerceIn(0f, 1f)
                     }
                 },
               viewModel = feedsViewModel,
@@ -143,7 +169,7 @@ internal fun FeedsBottomSheet(
               modifier =
                 Modifier.padding(horizontal = BOTTOM_SHEET_HORIZONTAL_PADDING)
                   .clip(RoundedCornerShape(BOTTOM_SHEET_CORNER_SIZE))
-                  .graphicsLayer { alpha = (bottomSheetProgress() * 5f).inverse() },
+                  .graphicsLayer { alpha = (animatedProgress * 5f).coerceIn(0f, 1f).inverse() },
               pinnedSources = state.pinnedSources,
               activeSource = state.activeSource,
               isParentThemeDark = isParentThemeDark,
@@ -172,7 +198,7 @@ private fun BottomSheetBackground(
 
   val quantizedProgress by
     remember(bottomSheetProgress) {
-      derivedStateOf { (bottomSheetProgress() * 100).toInt() / 100f }
+      derivedStateOf { (bottomSheetProgress().coerceIn(0f, 1f) * 100).toInt() / 100f }
     }
 
   val shadow1Painter =
@@ -198,30 +224,45 @@ private fun BottomSheetBackground(
     modifier =
       modifier.fillMaxSize().drawBehind {
         val progress = bottomSheetProgress()
+        val coercedProgress = progress.coerceIn(0f, 1f)
         val collapsedSheetHeight = BOTTOM_SHEET_PEEK_HEIGHT.toPx()
         val targetSheetHeight = size.height
         val sheetHeight =
-          lerp(
-            start = collapsedSheetHeight,
-            stop = targetSheetHeight,
-            fraction = (progress * 2f).coerceAtMost(1f),
-          )
+          if (progress > 0f) {
+            lerp(
+              start = collapsedSheetHeight,
+              stop = targetSheetHeight,
+              fraction = (progress * 2f).coerceAtMost(1f),
+            )
+          } else {
+            collapsedSheetHeight
+          }
 
         val sheetHorizontalPadding =
           lerp(
             start = BOTTOM_SHEET_HORIZONTAL_PADDING,
             stop = 0.dp,
-            fraction = (progress * 4f).coerceAtMost(1f),
+            fraction = (coercedProgress * 4f).coerceAtMost(1f),
           )
 
-        val offset = Offset(x = sheetHorizontalPadding.toPx(), 1.dp.toPx() * progress.inverse())
+        val offset =
+          Offset(
+            x = sheetHorizontalPadding.toPx(),
+            y =
+              (1.dp.toPx() * coercedProgress.inverse()) +
+                (if (progress < 0f) -progress * 40.dp.toPx() else 0f),
+          )
         val sheetSize = Size(size.width - (offset.x * 2), sheetHeight)
 
-        val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * progress.inverse()
+        val cornerRadiusDp = BOTTOM_SHEET_CORNER_SIZE * coercedProgress.inverse()
         val cornerRadius = CornerRadius(x = cornerRadiusDp.toPx(), y = cornerRadiusDp.toPx())
-        val backgroundColor = lerp(collapsedSheetBackgroundColor, Color.Black, progress)
+        val backgroundColor = lerp(collapsedSheetBackgroundColor, Color.Black, coercedProgress)
         val borderColor =
-          lerp(start = collapsedSheetBorderColor, stop = backgroundColor, fraction = progress)
+          lerp(
+            start = collapsedSheetBorderColor,
+            stop = backgroundColor,
+            fraction = coercedProgress,
+          )
 
         translate(left = offset.x, top = offset.y) {
           with(shadow1Painter) { draw(sheetSize) }
