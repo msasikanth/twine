@@ -26,9 +26,9 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import dev.sasikanth.rss.reader.data.utils.generateSecureRandomBytes
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -121,7 +121,7 @@ class RealOAuthManager(
 
   @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeVerifier(): String {
-    val bytes = Random.nextBytes(32)
+    val bytes = generateSecureRandomBytes(32)
     return Base64.UrlSafe.encode(bytes).trimEnd('=')
   }
 
