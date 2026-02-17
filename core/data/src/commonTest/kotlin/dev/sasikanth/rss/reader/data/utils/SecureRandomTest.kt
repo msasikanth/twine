@@ -18,7 +18,6 @@ package dev.sasikanth.rss.reader.data.utils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
 
 class SecureRandomTest {
 
