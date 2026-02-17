@@ -26,6 +26,7 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import dev.sasikanth.rss.reader.util.sha256
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
@@ -58,7 +59,7 @@ class RealOAuthManager(
             parameters.append("scope", "files.content.read files.content.write")
             parameters.append("token_access_type", "offline")
             parameters.append("code_challenge", codeChallenge)
-            parameters.append("code_challenge_method", "plain")
+            parameters.append("code_challenge_method", "S256")
           }
           .buildString()
       }
@@ -125,8 +126,10 @@ class RealOAuthManager(
     return Base64.UrlSafe.encode(bytes).trimEnd('=')
   }
 
+  @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeChallenge(verifier: String): String {
-    return verifier
+    val hash = sha256(verifier.encodeToByteArray())
+    return Base64.UrlSafe.encode(hash).trimEnd('=')
   }
 }
 
