@@ -1449,7 +1449,8 @@ class RssRepository(
           UnreadSinceLastSync(
             newArticleCount = count,
             hasNewArticles = count > 0,
-            feedHomepageLinks = feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+            feedHomepageLinks =
+              feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
             feedIcons = feedIcons.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
             feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
           )
@@ -1635,7 +1636,8 @@ class RssRepository(
         id = id,
         name = name,
         feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-        feedHomepageLinks = feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+        feedHomepageLinks =
+          feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
         feedIconLinks = feedIcons.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
         feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
         createdAt = createdAt,
