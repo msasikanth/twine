@@ -679,31 +679,25 @@ class RssRepository(
       feedGroupQueries
         .allGroupsBlocking(
           mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIconLinks: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
+            id,
+            name,
+            feedIds,
+            feedHomepageLinks,
+            feedIconLinks,
+            feedShowFavIconSettings,
+            createdAt,
+            updatedAt,
+            pinnedAt,
+            pinnedPosition,
+            isDeleted,
+            remoteId ->
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
-                  ?: emptyList(),
-              feedHomepageLinks =
-                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter {
-                  it.isNotBlank()
-                },
-              feedIconLinks =
-                feedIconLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter { it.isNotBlank() },
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIconLinks,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -907,6 +901,43 @@ class RssRepository(
         }
       }
       .orEmpty()
+  }
+
+  private fun mapToFeedGroup(
+    id: String,
+    name: String,
+    feedIds: String?,
+    feedHomepageLinks: String?,
+    feedIconLinks: String?,
+    feedShowFavIconSettings: String?,
+    createdAt: Instant,
+    updatedAt: Instant,
+    pinnedAt: Instant?,
+    pinnedPosition: Double = 0.0,
+    isDeleted: Boolean = false,
+    remoteId: String? = null,
+    numberOfUnreadPosts: Long = 0L,
+  ): FeedGroup {
+    return FeedGroup(
+      id = id,
+      name = name,
+      feedIds =
+        feedIds?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() } ?: emptyList(),
+      feedHomepageLinks =
+        feedHomepageLinks?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
+          ?: emptyList(),
+      feedIconLinks =
+        feedIconLinks?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
+          ?: emptyList(),
+      feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+      createdAt = createdAt,
+      updatedAt = updatedAt,
+      pinnedAt = pinnedAt,
+      pinnedPosition = pinnedPosition,
+      isDeleted = isDeleted,
+      remoteId = remoteId,
+      numberOfUnreadPosts = numberOfUnreadPosts,
+    )
   }
 
   suspend fun updateFeedName(newFeedName: String, feedId: String) {
@@ -1228,21 +1259,21 @@ class RssRepository(
         .feedGroupByRemoteId(
           remoteId = remoteId,
           mapper = {
-            id: String,
-            name: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
+            id,
+            name,
+            createdAt,
+            updatedAt,
+            pinnedAt,
+            pinnedPosition,
+            isDeleted,
+            remoteId ->
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds = emptyList(),
-              feedHomepageLinks = emptyList(),
-              feedIconLinks = emptyList(),
-              feedShowFavIconSettings = emptyList(),
+              feedIds = null,
+              feedHomepageLinks = null,
+              feedIconLinks = null,
+              feedShowFavIconSettings = null,
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1441,31 +1472,25 @@ class RssRepository(
         .group(
           id,
           mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIconLinks: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            isDeleted: Boolean,
-            remoteId: String? ->
-            FeedGroup(
+            id,
+            name,
+            feedIds,
+            feedHomepageLinks,
+            feedIconLinks,
+            feedShowFavIconSettings,
+            createdAt,
+            updatedAt,
+            pinnedAt,
+            pinnedPosition,
+            isDeleted,
+            remoteId ->
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds?.split(Constants.GROUP_CONCAT_SEPARATOR)?.filter { it.isNotBlank() }
-                  ?: emptyList(),
-              feedHomepageLinks =
-                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter {
-                  it.isNotBlank()
-                },
-              feedIconLinks =
-                feedIconLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filter { it.isNotBlank() },
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIconLinks,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1674,24 +1699,13 @@ class RssRepository(
           showFeedFavIcon: Boolean?,
           remoteId: String? ->
           if (type == "group") {
-            FeedGroup(
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedHomepageLinks =
-                feedHomepageLinks
-                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                  ?.filterNot { it.isBlank() }
-                  .orEmpty(),
-              feedIconLinks =
-                feedIcons
-                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                  ?.filterNot { it.isBlank() }
-                  .orEmpty(),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIcons,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
@@ -1758,24 +1772,13 @@ class RssRepository(
             showFeedFavIcon: Boolean?,
             remoteId: String? ->
             if (type == "group") {
-              FeedGroup(
+              mapToFeedGroup(
                 id = id,
                 name = name,
-                feedIds =
-                  feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                    it.isBlank()
-                  },
-                feedHomepageLinks =
-                  feedHomepageLinks
-                    ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                    ?.filterNot { it.isBlank() }
-                    .orEmpty(),
-                feedIconLinks =
-                  feedIcons
-                    ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                    ?.filterNot { it.isBlank() }
-                    .orEmpty(),
-                feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+                feedIds = feedIds,
+                feedHomepageLinks = feedHomepageLinks,
+                feedIconLinks = feedIcons,
+                feedShowFavIconSettings = feedShowFavIconSettings,
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
                 pinnedAt = pinnedAt,
@@ -1836,24 +1839,13 @@ class RssRepository(
           showFeedFavIcon: Boolean?,
           remoteId: String? ->
           if (type == "group") {
-            FeedGroup(
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedHomepageLinks =
-                feedHomepageLinks
-                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                  ?.filterNot { it.isBlank() }
-                  .orEmpty(),
-              feedIconLinks =
-                feedIcons
-                  ?.split(Constants.GROUP_CONCAT_SEPARATOR)
-                  ?.filterNot { it.isBlank() }
-                  .orEmpty(),
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIcons,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt!!,
               pinnedAt = pinnedAt,
@@ -1893,31 +1885,24 @@ class RssRepository(
           limit = limit,
           offset = offset,
           mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIcons: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            pinnedPosition: Double,
-            remoteId: String? ->
-            FeedGroup(
+            id,
+            name,
+            feedIds,
+            feedHomepageLinks,
+            feedIcons,
+            feedShowFavIconSettings,
+            createdAt,
+            updatedAt,
+            pinnedAt,
+            pinnedPosition,
+            remoteId ->
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedHomepageLinks =
-                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedIconLinks =
-                feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIcons,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1940,30 +1925,23 @@ class RssRepository(
         .groupsByIds(
           ids = ids,
           mapper = {
-            id: String,
-            name: String,
-            feedIds: String?,
-            feedHomepageLinks: String,
-            feedIcons: String,
-            feedShowFavIconSettings: String,
-            createdAt: Instant,
-            updatedAt: Instant,
-            pinnedAt: Instant?,
-            remoteId: String? ->
-            FeedGroup(
+            id,
+            name,
+            feedIds,
+            feedHomepageLinks,
+            feedIcons,
+            feedShowFavIconSettings,
+            createdAt,
+            updatedAt,
+            pinnedAt,
+            remoteId ->
+            mapToFeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedHomepageLinks =
-                feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot {
-                  it.isBlank()
-                },
-              feedIconLinks =
-                feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-              feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+              feedIds = feedIds,
+              feedHomepageLinks = feedHomepageLinks,
+              feedIconLinks = feedIcons,
+              feedShowFavIconSettings = feedShowFavIconSettings,
               createdAt = createdAt,
               updatedAt = updatedAt,
               pinnedAt = pinnedAt,
@@ -1980,26 +1958,23 @@ class RssRepository(
       .groupsByIds(
         ids = setOf(groupId),
         mapper = {
-          id: String,
-          name: String,
-          feedIds: String?,
-          feedHomepageLinks: String,
-          feedIcons: String,
-          feedShowFavIconSettings: String,
-          createdAt: Instant,
-          updatedAt: Instant,
-          pinnedAt: Instant?,
-          remoteId: String? ->
-          FeedGroup(
+          id,
+          name,
+          feedIds,
+          feedHomepageLinks,
+          feedIcons,
+          feedShowFavIconSettings,
+          createdAt,
+          updatedAt,
+          pinnedAt,
+          remoteId ->
+          mapToFeedGroup(
             id = id,
             name = name,
-            feedIds =
-              feedIds.orEmpty().split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-            feedHomepageLinks =
-              feedHomepageLinks.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-            feedIconLinks =
-              feedIcons.split(Constants.GROUP_CONCAT_SEPARATOR).filterNot { it.isBlank() },
-            feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
+            feedIds = feedIds,
+            feedHomepageLinks = feedHomepageLinks,
+            feedIconLinks = feedIcons,
+            feedShowFavIconSettings = feedShowFavIconSettings,
             createdAt = createdAt,
             updatedAt = updatedAt,
             pinnedAt = pinnedAt,
