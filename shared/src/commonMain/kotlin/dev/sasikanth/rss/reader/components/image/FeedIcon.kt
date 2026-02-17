@@ -59,7 +59,7 @@ internal fun FeedIcon(
 
   Box(
     modifier = Modifier.clip(shape).then(modifier).background(Color.White, shape),
-    contentAlignment = Alignment.Center
+    contentAlignment = Alignment.Center,
   ) {
     if (shouldBlockImage) {
       PlaceHolderIcon()
@@ -101,7 +101,7 @@ internal fun FeedIcon(
           if (!loadFavIcon) {
             useFallback = true
           }
-        }
+        },
       )
     }
   }
