@@ -59,6 +59,8 @@ class FreshRssSource(
     const val USER_STATE_READ = "user/-/state/com.google/read"
     const val USER_STATE_UNREAD = "user/-/state/com.google/reading-list"
     const val USER_STATE_STARRED = "user/-/state/com.google/starred"
+
+    private val authRegex = Regex("Auth=([^&]+)")
   }
 
   private val httpClientMutex = Mutex()
@@ -97,7 +99,6 @@ class FreshRssSource(
         .run {
           if (status != HttpStatusCode.OK) return@withContext null
 
-          val authRegex = Regex("Auth=([^&]+)")
           val matchResult = authRegex.find(bodyAsText())
 
           if (matchResult == null) {

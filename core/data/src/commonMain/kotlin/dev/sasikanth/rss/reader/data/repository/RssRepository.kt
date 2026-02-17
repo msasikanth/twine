@@ -2209,6 +2209,6 @@ class RssRepository(
   }
 
   private fun sanitizeSearchQuery(searchQuery: String): String {
-    return searchQuery.replace(Regex.fromLiteral("\""), "\"\"").run { "\"$this\"" }
+    return searchQuery.replace("\"", "\"\"").run { "\"$this\"" }
   }
 }

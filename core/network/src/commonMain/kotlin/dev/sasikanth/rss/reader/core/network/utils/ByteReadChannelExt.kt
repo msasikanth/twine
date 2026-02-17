@@ -26,6 +26,8 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.readByteArray
 
+private val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
+
 internal fun ByteReadChannel.toCharIterator(
   charset: Charset,
   platformPageSize: Long,
@@ -44,7 +46,6 @@ internal fun ByteReadChannel.toCharIterator(
 
       val packet = runBlocking(context) { this@toCharIterator.readRemaining(platformPageSize) }
       val bytes = packet.readByteArray()
-      val encodingRegex = """<?xml.*encoding=["']([^"']+)["'].*?>""".toRegex()
       if (encodingCharset == null) {
         val encodingContent = buildString { Charsets.UTF8.decode(this, bytes) }
         encodingCharset = findEncodingCharset(encodingRegex, encodingContent, charset)

@@ -36,6 +36,8 @@ class ArticleHtmlParser {
     private const val ATTR_TYPE = "type"
 
     private const val MAX_CONTENT_SIZE = 10 * 1024 * 1024 // 10MB
+
+    private val gifRegex = Regex("/\\.gif(\\?.*)?\\$/i")
   }
 
   private val allowedContentTags by lazy {
@@ -45,7 +47,6 @@ class ArticleHtmlParser {
       .addAttributes(TAG_AUDIO, ATTR_SRC)
       .addAttributes(TAG_SOURCE, ATTR_SRC, ATTR_TYPE)
   }
-  private val gifRegex by lazy { Regex("/\\.gif(\\?.*)?\\$/i") }
 
   fun parse(htmlContent: String): Result? {
     if (htmlContent.isBlank() || htmlContent.length > MAX_CONTENT_SIZE) return null
