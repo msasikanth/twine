@@ -54,6 +54,7 @@ import kotlinx.io.RawSource
 import kotlinx.io.UnsafeIoApi
 import kotlinx.io.unsafe.UnsafeBufferOperations
 import okio.Buffer as OkioBuffer
+import okio.BufferedSource as OkioBufferedSource
 import okio.EOFException as OkioEOFException
 import okio.FileSystem
 import okio.IOException as OkioIOException
@@ -303,11 +304,26 @@ class FavIconFetcher(
  */
 public fun OkioSource.asKotlinxIoRawSource(): RawSource =
   object : RawSource {
-    private val buffer =
-      OkioBuffer() // TODO: optimization - reuse BufferedSource's buffer if possible
+    private val bufferedSource = this@asKotlinxIoRawSource as? OkioBufferedSource
+    private val tempBuffer = if (bufferedSource == null) OkioBuffer() else null
 
     override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = withOkio2KxIOExceptionMapping {
-      val readBytes = this@asKotlinxIoRawSource.read(buffer, byteCount)
+      if (byteCount == 0L) return 0L
+
+      val okioBuffer: OkioBuffer
+      val readBytes: Long
+
+      if (bufferedSource != null) {
+        if (bufferedSource.buffer.exhausted()) {
+          if (!bufferedSource.request(1)) return -1L
+        }
+        okioBuffer = bufferedSource.buffer
+        readBytes = min(okioBuffer.size, byteCount)
+      } else {
+        okioBuffer = tempBuffer!!
+        readBytes = this@asKotlinxIoRawSource.read(okioBuffer, byteCount)
+      }
+
       if (readBytes == -1L) return -1L
 
       var remaining = readBytes
@@ -315,7 +331,7 @@ public fun OkioSource.asKotlinxIoRawSource(): RawSource =
         @OptIn(UnsafeIoApi::class)
         UnsafeBufferOperations.writeToTail(sink, 1) { data, from, to ->
           val toRead = min((to - from).toLong(), remaining).toInt()
-          val read = buffer.read(data, from, toRead)
+          val read = okioBuffer.read(data, from, toRead)
           check(read != -1) { "Buffer was exhausted before reading $toRead bytes from it." }
           remaining -= read
           read
