@@ -46,18 +46,11 @@ import coil3.util.MimeTypeMap
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.parseSource
-import kotlin.math.min
 import kotlinx.io.Buffer
-import kotlinx.io.EOFException as KxEOFException
-import kotlinx.io.IOException as KxIOException
 import kotlinx.io.RawSource
-import kotlinx.io.UnsafeIoApi
-import kotlinx.io.unsafe.UnsafeBufferOperations
-import okio.Buffer as OkioBuffer
-import okio.EOFException as OkioEOFException
+import kotlinx.io.okio.asKotlinxIoRawSource
 import okio.FileSystem
 import okio.IOException as OkioIOException
-import okio.Source as OkioSource
 
 private const val CACHE_CONTROL = "Cache-Control"
 private const val CONTENT_TYPE = "Content-Type"
@@ -292,53 +285,5 @@ class FavIconFetcher(
     private fun isApplicable(data: Uri): Boolean {
       return data.scheme == "http" || data.scheme == "https"
     }
-  }
-}
-
-// TODO: Remove after Okio adapters are available in kotlinx-io library
-/**
- * Returns a [kotlinx.io.RawSource] backed by this [okio.Source].
- *
- * Closing one of these sources will also close another one.
- */
-public fun OkioSource.asKotlinxIoRawSource(): RawSource =
-  object : RawSource {
-    private val buffer =
-      OkioBuffer() // TODO: optimization - reuse BufferedSource's buffer if possible
-
-    override fun readAtMostTo(sink: Buffer, byteCount: Long): Long = withOkio2KxIOExceptionMapping {
-      val readBytes = this@asKotlinxIoRawSource.read(buffer, byteCount)
-      if (readBytes == -1L) return -1L
-
-      var remaining = readBytes
-      while (remaining > 0) {
-        @OptIn(UnsafeIoApi::class)
-        UnsafeBufferOperations.writeToTail(sink, 1) { data, from, to ->
-          val toRead = min((to - from).toLong(), remaining).toInt()
-          val read = buffer.read(data, from, toRead)
-          check(read != -1) { "Buffer was exhausted before reading $toRead bytes from it." }
-          remaining -= read
-          read
-        }
-      }
-
-      return readBytes
-    }
-
-    override fun close() = withOkio2KxIOExceptionMapping { this@asKotlinxIoRawSource.close() }
-  }
-
-internal inline fun <T> withOkio2KxIOExceptionMapping(block: () -> T): T {
-  try {
-    return block()
-  } catch (
-    bypassIOE: KxIOException) { // on JVM, kotlinx.io.IOException and okio.IOException are the same
-    throw bypassIOE
-  } catch (bypassEOF: KxEOFException) { // see above
-    throw bypassEOF
-  } catch (eofe: OkioEOFException) {
-    throw KxIOException(eofe.message, eofe)
-  } catch (ioe: OkioIOException) {
-    throw KxIOException(ioe.message, ioe)
   }
 }

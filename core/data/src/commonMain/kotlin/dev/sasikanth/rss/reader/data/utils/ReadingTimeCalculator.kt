@@ -33,6 +33,9 @@ class ReadingTimeCalculator(private val dispatchersProvider: DispatchersProvider
     private const val FAST_PATH_THRESHOLD = 1000
 
     private const val MAX_HTML_SIZE = 1_000_000 // 1MB
+
+    private val HTML_TAG_REGEX = Regex("<[^>]*>")
+    private val WHITESPACE_REGEX = Regex("\\s+")
   }
 
   /**
@@ -49,7 +52,7 @@ class ReadingTimeCalculator(private val dispatchersProvider: DispatchersProvider
       }
 
       if (htmlContent.length > MAX_HTML_SIZE) {
-        val fallbackText = htmlContent.take(MAX_HTML_SIZE).replace(Regex("<[^>]*>"), " ")
+        val fallbackText = htmlContent.take(MAX_HTML_SIZE).replace(HTML_TAG_REGEX, " ")
         return@withContext calculateFromPlainText(fallbackText)
       }
 
@@ -59,13 +62,13 @@ class ReadingTimeCalculator(private val dispatchersProvider: DispatchersProvider
 
         return@withContext calculateFromPlainText(plainText)
       } catch (e: Exception) {
-        val fallbackText = htmlContent.replace(Regex("<[^>]*>"), " ")
+        val fallbackText = htmlContent.replace(HTML_TAG_REGEX, " ")
         return@withContext calculateFromPlainText(fallbackText)
       }
     }
 
   private fun calculateFromPlainText(text: String): Int {
-    val wordCount = text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+    val wordCount = text.trim().split(WHITESPACE_REGEX).count { it.isNotEmpty() }
 
     return if (wordCount > 0) {
       ceil(wordCount.toDouble() / WORDS_PER_MINUTE).toInt()

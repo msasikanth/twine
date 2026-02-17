@@ -31,14 +31,16 @@ object UrlUtils {
       "https://external-preview.redd.it/",
     )
 
-  fun isYouTubeLink(url: String): Boolean {
-    val youtubeRegex =
-      Regex(
-        "(?:https?:)?(?://)?" +
-          "(?:(?:www|m)\\.)?(?:youtube\\.com|youtu\\.be)" +
-          "(?:/(?:[\\w\\-]+\\?v=|embed/|v/)?([\\w\\-]+)(?:\\S+)?)?"
-      )
+  private val youtubeRegex =
+    Regex(
+      "(?:https?:)?(?://)?" +
+        "(?:(?:www|m)\\.)?(?:youtube\\.com|youtu\\.be)" +
+        "(?:/(?:[\\w\\-]+\\?v=|embed/|v/)?([\\w\\-]+)(?:\\S+)?)?"
+    )
 
+  private val absoluteUrlPattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
+
+  fun isYouTubeLink(url: String): Boolean {
     return youtubeRegex.matches(url)
   }
 
@@ -80,7 +82,6 @@ object UrlUtils {
   }
 
   private fun isAbsoluteUrl(url: String): Boolean {
-    val pattern = """^[a-zA-Z][a-zA-Z0-9\+\-\.]*:""".toRegex()
-    return pattern.containsMatchIn(url)
+    return absoluteUrlPattern.containsMatchIn(url)
   }
 }

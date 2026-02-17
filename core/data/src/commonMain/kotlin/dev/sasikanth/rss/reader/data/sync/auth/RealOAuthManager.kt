@@ -20,6 +20,7 @@ package dev.sasikanth.rss.reader.data.sync.auth
 import co.touchlab.kermit.Logger
 import dev.sasikanth.rss.reader.core.model.local.ServiceType
 import dev.sasikanth.rss.reader.data.repository.UserRepository
+import dev.sasikanth.rss.reader.data.utils.generateSecureRandomBytes
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
@@ -28,9 +29,9 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import okio.ByteString.Companion.encodeUtf8
 
 internal const val DROPBOX_CLIENT_ID = "qtxdwxyzi69tuxp"
 
@@ -58,7 +59,7 @@ class RealOAuthManager(
             parameters.append("scope", "files.content.read files.content.write")
             parameters.append("token_access_type", "offline")
             parameters.append("code_challenge", codeChallenge)
-            parameters.append("code_challenge_method", "plain")
+            parameters.append("code_challenge_method", "S256")
           }
           .buildString()
       }
@@ -121,12 +122,14 @@ class RealOAuthManager(
 
   @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeVerifier(): String {
-    val bytes = Random.nextBytes(32)
+    val bytes = generateSecureRandomBytes(32)
     return Base64.UrlSafe.encode(bytes).trimEnd('=')
   }
 
+  @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeChallenge(verifier: String): String {
-    return verifier
+    val hash = verifier.encodeUtf8().sha256().toByteArray()
+    return Base64.UrlSafe.encode(hash).trimEnd('=')
   }
 }
 
