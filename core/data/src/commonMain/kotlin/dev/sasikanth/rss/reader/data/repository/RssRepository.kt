@@ -1665,16 +1665,10 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
               feedHomepageLinks =
-                feedHomepageLinks
-                  ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                  .orEmpty(),
-              feedIconLinks =
-                feedIcons
-                  ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                  .orEmpty(),
+                feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+              feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt!!,
@@ -1745,16 +1739,10 @@ class RssRepository(
               FeedGroup(
                 id = id,
                 name = name,
-                feedIds =
-                  feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+                feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
                 feedHomepageLinks =
-                  feedHomepageLinks
-                    ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                    .orEmpty(),
-                feedIconLinks =
-                  feedIcons
-                    ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                    .orEmpty(),
+                  feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+                feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
                 feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
                 createdAt = createdAt,
                 updatedAt = updatedAt!!,
@@ -1819,16 +1807,10 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
               feedHomepageLinks =
-                feedHomepageLinks
-                  ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                  .orEmpty(),
-              feedIconLinks =
-                feedIcons
-                  ?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR)
-                  .orEmpty(),
+                feedHomepageLinks?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
+              feedIconLinks = feedIcons?.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR).orEmpty(),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt!!,
@@ -1883,12 +1865,9 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks =
-                feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks =
-                feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
@@ -1925,12 +1904,9 @@ class RssRepository(
             FeedGroup(
               id = id,
               name = name,
-              feedIds =
-                feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedHomepageLinks =
-                feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-              feedIconLinks =
-                feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+              feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
               feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
               createdAt = createdAt,
               updatedAt = updatedAt,
@@ -1961,12 +1937,9 @@ class RssRepository(
           FeedGroup(
             id = id,
             name = name,
-            feedIds =
-              feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedHomepageLinks =
-              feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedIconLinks =
-              feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+            feedIds = feedIds.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+            feedHomepageLinks = feedHomepageLinks.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+            feedIconLinks = feedIcons.splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
             feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
             createdAt = createdAt,
             updatedAt = updatedAt,
@@ -2086,8 +2059,7 @@ class RssRepository(
             hasNewArticles = count > 0,
             feedHomepageLinks =
               feedHomepageLinks.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
-            feedIcons =
-              feedIcons.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
+            feedIcons = feedIcons.orEmpty().splitAndTrim(Constants.GROUP_CONCAT_SEPARATOR),
             feedShowFavIconSettings = mapToFeedShowFavIconSettings(feedShowFavIconSettings),
           )
         },
