@@ -26,12 +26,12 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
-import dev.sasikanth.rss.reader.util.sha256
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import okio.ByteString.Companion.encodeUtf8
 
 internal const val DROPBOX_CLIENT_ID = "qtxdwxyzi69tuxp"
 
@@ -128,7 +128,7 @@ class RealOAuthManager(
 
   @OptIn(ExperimentalEncodingApi::class)
   private fun generateCodeChallenge(verifier: String): String {
-    val hash = sha256(verifier.encodeToByteArray())
+    val hash = verifier.encodeUtf8().sha256().toByteArray()
     return Base64.UrlSafe.encode(hash).trimEnd('=')
   }
 }
