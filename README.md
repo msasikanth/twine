@@ -21,12 +21,16 @@ to browse through your feeds, with [dynamic theming](https://m3.material.io/styl
 - Bottom bar in home screen to access pinned feeds and groups
 - Smart fetching: Twine looks for feeds when given any website homepage
 - Article shortcut to fetch full article in the reader view
+- Audio player for podcasts and HTML audio tags
+- Reader view customizations (fonts, colors)
 - Bookmark posts to read later
 - Search posts
 - Blocked words: Filter out content based on keywords
 - Background sync
 - Cloud sync support with FreshRSS(GReader), Miniflux, Dropbox (Alpha ⚠)
+- Home screen widgets
 - Import and exports your feeds with OPML
+- App icon customization
 - Light, dark and amoled theme support
 
 ## Project Structure 🏗️
