@@ -51,15 +51,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationEventHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.window.core.layout.WindowSizeClass
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
 import dev.sasikanth.rss.reader.resources.icons.BookmarkFilled
@@ -97,8 +98,10 @@ internal fun MainScreen(
   var selectedDestination by rememberSaveable { mutableStateOf(MainDestination.Home) }
   var isSideNavigationVisible by remember { mutableStateOf(true) }
 
-  @OptIn(ExperimentalComposeUiApi::class)
-  BackHandler(enabled = selectedDestination != MainDestination.Home) {
+  NavigationEventHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled = selectedDestination != MainDestination.Home,
+  ) {
     selectedDestination = MainDestination.Home
   }
 
