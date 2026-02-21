@@ -38,10 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.resources.icons.StarShine
@@ -124,7 +120,7 @@ fun ThemeVariantIconButton(
         Text(
           text = label,
           style = MaterialTheme.typography.titleSmall,
-          color = onSurfaceColor,
+          color = primaryColor,
           maxLines = 1,
           modifier = Modifier.weight(1f),
         )
@@ -134,32 +130,20 @@ fun ThemeVariantIconButton(
             modifier = Modifier.requiredSize(16.dp),
             imageVector = TwineIcons.StarShine,
             contentDescription = null,
-            tint = onSurfaceColor.copy(alpha = 0.6f),
+            tint = primaryColor,
           )
         }
       }
 
       Spacer(Modifier.height(8.dp))
 
-      val previewText = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = onSurfaceColor.copy(alpha = 0.6f))) {
-          append("Lorem ipsum ")
-        }
-        withStyle(style = SpanStyle(color = onSurfaceColor, fontWeight = FontWeight.Bold)) {
-          append("dolor sit amet")
-        }
-        withStyle(style = SpanStyle(color = onSurfaceColor.copy(alpha = 0.6f))) {
-          append(", consectetur adipiscing elit. Mauris iaculis ")
-        }
-        withStyle(style = SpanStyle(color = primaryColor, fontWeight = FontWeight.Bold)) {
-          append("semper")
-        }
-        withStyle(style = SpanStyle(color = onSurfaceColor.copy(alpha = 0.6f))) {
-          append(" pharetra.")
-        }
-      }
-
-      Text(text = previewText, style = MaterialTheme.typography.bodySmall, maxLines = 5)
+      val previewText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+      Text(
+        text = previewText,
+        color = AppTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.bodySmall,
+        maxLines = 5,
+      )
     }
   }
 }
