@@ -19,13 +19,14 @@ package dev.sasikanth.rss.reader.app
 
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 
 data class AppState(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
-  val dynamicColorEnabled: Boolean,
+  val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,
   val showReaderView: Boolean,
@@ -39,7 +40,7 @@ data class AppState(
       AppState(
         appThemeMode = AppThemeMode.Auto,
         useAmoled = false,
-        dynamicColorEnabled = true,
+        themeVariant = ThemeVariant.Dynamic,
         showFeedFavIcon = true,
         homeViewMode = HomeViewMode.Default,
         showReaderView = false,
