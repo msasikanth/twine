@@ -112,10 +112,6 @@ internal fun OPMLSettingItem(
                 is OpmlResult.InProgress.Exporting -> {
                   stringResource(Res.string.settingsOpmlExporting, opmlResult.progress)
                 }
-
-                else -> {
-                  ""
-                }
               }
 
             Text(text = string, maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
