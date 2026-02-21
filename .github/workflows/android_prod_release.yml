@@ -52,19 +52,19 @@ jobs:
           ./gradlew --no-daemon androidApp:assembleFossRelease -Ptwine.isFoss=true
 
       - name: Upload Full Release Bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: full-release.aab
           path: androidApp/build/outputs/bundle/fullRelease/androidApp-full-release.aab
 
       - name: Upload Full Release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: full-release.apk
           path: androidApp/build/outputs/apk/full/release/androidApp-full-release.apk
 
       - name: Upload FOSS Release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: foss-release.apk
           path: androidApp/build/outputs/apk/foss/release/androidApp-foss-release.apk

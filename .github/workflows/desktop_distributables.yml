@@ -26,7 +26,7 @@ jobs:
       - name: Build DMG
         run: ./gradlew :desktopApp:packageReleaseDmg --no-daemon
       - name: Upload DMG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Twine-macOS
           path: desktopApp/build/compose/binaries/main-release/dmg/*.dmg
@@ -45,7 +45,7 @@ jobs:
       - name: Build MSI
         run: ./gradlew :desktopApp:packageReleaseMsi --no-daemon
       - name: Upload MSI
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Twine-Windows
           path: desktopApp/build/compose/binaries/main-release/msi/*.msi
@@ -64,7 +64,7 @@ jobs:
       - name: Build DEB
         run: ./gradlew :desktopApp:packageReleaseDeb --no-daemon
       - name: Upload DEB
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: Twine-Linux
           path: desktopApp/build/compose/binaries/main-release/deb/*.deb
