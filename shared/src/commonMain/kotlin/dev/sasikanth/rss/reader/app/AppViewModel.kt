@@ -62,7 +62,6 @@ class AppViewModel(
   private val observableActiveSource: ObservableActiveSource,
   private val syncCoordinator: SyncCoordinator,
   private val oAuthManager: OAuthManager,
-  private val linkHandler: LinkHandler,
 ) : ViewModel() {
 
   private val _state = MutableStateFlow(AppState.DEFAULT)
@@ -208,7 +207,7 @@ class AppViewModel(
     }
   }
 
-  fun onOAuthRedirect(uri: String) {
+  fun onOAuthRedirect(uri: String, linkHandler: LinkHandler) {
     viewModelScope.launch {
       val signInSucceeded = oAuthManager.handleRedirect(uri)
       if (signInSucceeded) {
