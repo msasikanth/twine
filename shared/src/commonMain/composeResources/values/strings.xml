@@ -91,8 +91,6 @@
   <string name="settingsThemeDark">Dark</string>
   <string name="settingsAmoledTitle">Amoled mode</string>
   <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
-  <string name="settingsDynamicColorTitle">Dynamic color</string>
-  <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
   <string name="settingsBlockImagesTitle">Block images</string>
   <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
   <string name="feeds">Feeds</string>
@@ -194,17 +192,17 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
-  <string name="readerCustomisationsColorScheme">Color scheme</string>
-  <string name="readerColorSchemeDynamic">Dynamic</string>
-  <string name="readerColorSchemeSepia" translatable="false">Sepia</string>
-  <string name="readerColorSchemeSolarized" translatable="false">Solarized</string>
-  <string name="readerColorSchemeParchment" translatable="false">Parchment</string>
-  <string name="readerColorSchemeMidnight" translatable="false">Midnight</string>
-  <string name="readerColorSchemeSlate" translatable="false">Slate</string>
-  <string name="readerColorSchemeForest" translatable="false">Forest</string>
-  <string name="readerColorSchemeAmber" translatable="false">Amber</string>
-  <string name="readerColorSchemeRaspberry" translatable="false">Raspberry</string>
-  <string name="readerColorSchemeSkyline" translatable="false">Skyline</string>
+  <string name="themeVariantColorScheme">Color scheme</string>
+  <string name="themeVariantDynamic">Dynamic</string>
+  <string name="themeVariantSepia" translatable="false">Sepia</string>
+  <string name="themeVariantSolarized" translatable="false">Solarized</string>
+  <string name="themeVariantParchment" translatable="false">Parchment</string>
+  <string name="themeVariantMidnight" translatable="false">Midnight</string>
+  <string name="themeVariantSlate" translatable="false">Slate</string>
+  <string name="themeVariantForest" translatable="false">Forest</string>
+  <string name="themeVariantAmber" translatable="false">Amber</string>
+  <string name="themeVariantRaspberry" translatable="false">Raspberry</string>
+  <string name="themeVariantSkyline" translatable="false">Skyline</string>
   <string name="postsFilter">Posts filter</string>
   <string name="postsSortBy">Sort by</string>
   <string name="postsSortByPostDate">Post date</string>

@@ -89,8 +89,6 @@
   <string name="settingsThemeDark">深色</string>
   <string name="settingsAmoledTitle">Amoled mode</string>
   <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
-  <string name="settingsDynamicColorTitle">Dynamic color</string>
-  <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
   <string name="settingsBlockImagesTitle">Block images</string>
   <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
   <string name="feeds">来源</string>
@@ -189,8 +187,8 @@
   <string name="twinePremiumDesc">订阅高级版：解锁全部功能并助力后续开发。</string>
   <string name="twinePremiumSubscribedDesc">你已订阅 Twine 高级版。感谢支持 ❤️</string>
   <string name="readerCustomisationsTypeface">排版</string>
-  <string name="readerCustomisationsColorScheme">Color scheme</string>
-  <string name="readerColorSchemeDynamic">Dynamic</string>
+  <string name="themeVariantColorScheme">Color scheme</string>
+  <string name="themeVariantDynamic">Dynamic</string>
   <string name="postsFilter">文章过滤</string>
   <string name="postsSortBy">排序方式</string>
   <string name="postsSortByPostDate">发布日期</string>
