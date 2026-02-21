@@ -43,7 +43,7 @@ internal object TwineDynamicColors {
 
   private val bottomSheetInverse: DynamicColor =
     DynamicColor.fromPalette(
-      name = "bottomSheet",
+      name = "bottomSheetInverse",
       palette = { s: DynamicScheme -> s.primaryPalette },
       tone = { s: DynamicScheme -> if (s.isDark) 5.0 else 0.0 },
       isBackground = true,
