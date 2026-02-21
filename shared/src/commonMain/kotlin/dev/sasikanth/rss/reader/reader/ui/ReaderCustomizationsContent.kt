@@ -81,12 +81,11 @@ import dev.sasikanth.rss.reader.ui.RobotoSerifFontFamily
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 import twine.shared.generated.resources.Res
+import twine.shared.generated.resources.readerColorSchemeAmber
 import twine.shared.generated.resources.readerColorSchemeDynamic
 import twine.shared.generated.resources.readerColorSchemeForest
-import twine.shared.generated.resources.readerColorSchemeMidnight
-import twine.shared.generated.resources.readerColorSchemeParchment
-import twine.shared.generated.resources.readerColorSchemeSepia
-import twine.shared.generated.resources.readerColorSchemeSlate
+import twine.shared.generated.resources.readerColorSchemeRaspberry
+import twine.shared.generated.resources.readerColorSchemeSkyline
 import twine.shared.generated.resources.readerColorSchemeSolarized
 import twine.shared.generated.resources.readerCustomisationsColorScheme
 import twine.shared.generated.resources.readerCustomisationsTypeface
@@ -124,7 +123,6 @@ internal fun ReaderCustomizationsContent(
       items(ReaderColorScheme.entries) { colorScheme ->
         val appDynamicColorState = LocalDynamicColorState.current
         val isDark = colorScheme.isDark(isParentThemeDark)
-        val sourceColorScheme = AppTheme.colorScheme
         val (backgroundColor, contentColor) =
           when (colorScheme) {
             ReaderColorScheme.Dynamic -> {
@@ -134,42 +132,36 @@ internal fun ReaderCustomizationsContent(
 
               colorSchemeForDynamic.primaryContainer to colorSchemeForDynamic.onPrimaryContainer
             }
-
-            ReaderColorScheme.Sepia -> {
-              val sepiaColorScheme = sepiaColorScheme(sourceColorScheme)
-              sepiaColorScheme.surface to sepiaColorScheme.onSurface
-            }
             ReaderColorScheme.Solarized -> {
-              val solarizedColorScheme = solarizedColorScheme(isDark, sourceColorScheme)
+              val solarizedColorScheme = solarizedColorScheme(isDark)
               solarizedColorScheme.surface to solarizedColorScheme.onSurface
             }
-            ReaderColorScheme.Parchment -> {
-              val parchmentColorScheme = parchmentColorScheme(sourceColorScheme)
-              parchmentColorScheme.surface to parchmentColorScheme.onSurface
-            }
-            ReaderColorScheme.Midnight -> {
-              val midnightColorScheme = midnightColorScheme(sourceColorScheme)
-              midnightColorScheme.surface to midnightColorScheme.onSurface
-            }
             ReaderColorScheme.Forest -> {
-              val forestColorScheme = forestColorScheme(sourceColorScheme)
+              val forestColorScheme = forestColorScheme(isDark)
               forestColorScheme.surface to forestColorScheme.onSurface
             }
-            ReaderColorScheme.Slate -> {
-              val slateColorScheme = slateColorScheme(sourceColorScheme)
-              slateColorScheme.surface to slateColorScheme.onSurface
+            ReaderColorScheme.Amber -> {
+              val amberColorScheme = amberColorScheme(isDark)
+              amberColorScheme.surface to amberColorScheme.onSurface
+            }
+            ReaderColorScheme.Raspberry -> {
+              val raspberryColorScheme = raspberryColorScheme(isDark)
+              raspberryColorScheme.surface to raspberryColorScheme.onSurface
+            }
+            ReaderColorScheme.Skyline -> {
+              val skylineColorScheme = skylineColorScheme(isDark)
+              skylineColorScheme.surface to skylineColorScheme.onSurface
             }
           }
 
         val label =
           when (colorScheme) {
             ReaderColorScheme.Dynamic -> stringResource(Res.string.readerColorSchemeDynamic)
-            ReaderColorScheme.Sepia -> stringResource(Res.string.readerColorSchemeSepia)
             ReaderColorScheme.Solarized -> stringResource(Res.string.readerColorSchemeSolarized)
-            ReaderColorScheme.Parchment -> stringResource(Res.string.readerColorSchemeParchment)
-            ReaderColorScheme.Midnight -> stringResource(Res.string.readerColorSchemeMidnight)
             ReaderColorScheme.Forest -> stringResource(Res.string.readerColorSchemeForest)
-            ReaderColorScheme.Slate -> stringResource(Res.string.readerColorSchemeSlate)
+            ReaderColorScheme.Amber -> stringResource(Res.string.readerColorSchemeAmber)
+            ReaderColorScheme.Raspberry -> stringResource(Res.string.readerColorSchemeRaspberry)
+            ReaderColorScheme.Skyline -> stringResource(Res.string.readerColorSchemeSkyline)
           }
 
         ColorSchemeChip(

@@ -426,12 +426,11 @@ enum class ReaderColorScheme(
   val isLightModeOnly: Boolean = false,
 ) {
   Dynamic(isPremium = false),
-  Sepia(isPremium = false, isLightModeOnly = true),
   Solarized(isPremium = false),
-  Parchment(isPremium = true, isLightModeOnly = true),
-  Midnight(isPremium = true, isDarkModeOnly = true),
-  Forest(isPremium = true, isDarkModeOnly = true),
-  Slate(isPremium = true, isDarkModeOnly = true);
+  Forest(isPremium = true),
+  Amber(isPremium = true),
+  Raspberry(isPremium = true),
+  Skyline(isPremium = true);
 
   fun isDark(isSystemDark: Boolean): Boolean {
     if (isDarkModeOnly) return true

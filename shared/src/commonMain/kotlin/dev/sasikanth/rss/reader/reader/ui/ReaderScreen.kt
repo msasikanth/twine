@@ -236,13 +236,13 @@ internal fun ReaderScreen(
     val sourceColorScheme = AppTheme.colorScheme
     val overriddenColorScheme =
       remember(state.selectedReaderColorScheme, isDarkTheme, sourceColorScheme) {
-        state.selectedReaderColorScheme.getOverriddenColorScheme(isDarkTheme, sourceColorScheme)
+        state.selectedReaderColorScheme.getOverriddenColorScheme(isDarkTheme)
       }
 
     val darkAppColorScheme = appDynamicColorState.darkAppColorScheme
     val overriddenDarkColorScheme =
       remember(state.selectedReaderColorScheme, darkAppColorScheme) {
-        state.selectedReaderColorScheme.getOverriddenColorScheme(true, darkAppColorScheme)
+        state.selectedReaderColorScheme.getOverriddenColorScheme(true)
       }
 
     AppTheme(
