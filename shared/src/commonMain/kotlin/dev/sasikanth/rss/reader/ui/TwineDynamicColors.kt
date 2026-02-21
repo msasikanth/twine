@@ -25,7 +25,9 @@ import com.materialkolor.hct.Hct
 import com.materialkolor.ktx.getColor
 import com.materialkolor.scheme.DynamicScheme
 import com.materialkolor.scheme.SchemeContent
+import com.materialkolor.scheme.SchemeExpressive
 import com.materialkolor.scheme.SchemeTonalSpot
+import com.materialkolor.scheme.SchemeVibrant
 
 internal object TwineDynamicColors {
 
@@ -65,15 +67,27 @@ internal object TwineDynamicColors {
   fun calculateColorScheme(
     seedColor: Color,
     useDarkTheme: Boolean,
-    useTonalSpotScheme: Boolean,
-    defaultColorScheme: AppColorValues,
+    scheme: Scheme,
   ): AppColorValues {
     val sourceColorHct = Hct.fromInt(seedColor.toArgb())
     val scheme =
-      if (useTonalSpotScheme) {
-        SchemeTonalSpot(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
-      } else {
-        SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+      when (scheme) {
+        Scheme.Content ->
+          SchemeContent(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
+        Scheme.TonalSpot ->
+          SchemeTonalSpot(
+            sourceColorHct = sourceColorHct,
+            isDark = useDarkTheme,
+            contrastLevel = 0.0,
+          )
+        Scheme.Expressive ->
+          SchemeExpressive(
+            sourceColorHct = sourceColorHct,
+            isDark = useDarkTheme,
+            contrastLevel = 0.0,
+          )
+        Scheme.Vibrant ->
+          SchemeVibrant(sourceColorHct = sourceColorHct, isDark = useDarkTheme, contrastLevel = 0.0)
       }
 
     return AppColorValues(
@@ -101,5 +115,12 @@ internal object TwineDynamicColors {
       bottomSheetInverse = bottomSheetInverse.getColor(scheme),
       bottomSheetBorder = bottomSheetBorder.getColor(scheme),
     )
+  }
+
+  enum class Scheme {
+    Content,
+    TonalSpot,
+    Expressive,
+    Vibrant,
   }
 }

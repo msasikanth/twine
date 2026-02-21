@@ -86,7 +86,6 @@ import dev.sasikanth.rss.reader.settings.ui.items.CloudSyncSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.DeleteAppDataConfirmationDialog
 import dev.sasikanth.rss.reader.settings.ui.items.DeleteAppDataSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.DownloadFullContentSettingItem
-import dev.sasikanth.rss.reader.settings.ui.items.DynamicColorSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.HomeLayoutSelector
 import dev.sasikanth.rss.reader.settings.ui.items.MarkAsReadOnSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.NotificationsSettingItem
@@ -97,6 +96,7 @@ import dev.sasikanth.rss.reader.settings.ui.items.ReportIssueSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowFeedFavIconSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.ShowReaderViewSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.StatisticsItem
+import dev.sasikanth.rss.reader.settings.ui.items.ThemeVariantSettingItem
 import dev.sasikanth.rss.reader.settings.ui.items.TwinePremiumBanner
 import dev.sasikanth.rss.reader.settings.ui.items.UnreadPostsCountSettingItem
 import dev.sasikanth.rss.reader.ui.AppTheme
@@ -339,36 +339,67 @@ internal fun SettingsScreen(
         item { SubHeader(text = stringResource(Res.string.settingsHeaderTheme)) }
 
         item {
-          val appThemeMode = state.appThemeMode
-          ToggleableButtonGroup(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 24.dp),
-            items =
-              listOf(
-                ToggleableButtonItem(
-                  label = stringResource(Res.string.settingsThemeAuto),
-                  isSelected = appThemeMode == AppThemeMode.Auto,
-                  identifier = AppThemeMode.Auto,
-                ),
-                ToggleableButtonItem(
-                  label = stringResource(Res.string.settingsThemeLight),
-                  isSelected = appThemeMode == AppThemeMode.Light,
-                  identifier = AppThemeMode.Light,
-                ),
-                ToggleableButtonItem(
-                  label = stringResource(Res.string.settingsThemeDark),
-                  isSelected = appThemeMode == AppThemeMode.Dark,
-                  identifier = AppThemeMode.Dark,
-                ),
-              ),
-            onItemSelected = {
-              viewModel.dispatch(SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode))
+          ThemeVariantSettingItem(
+            selectedThemeVariant = state.themeVariant,
+            isSubscribed = state.isSubscribed,
+            useDarkTheme = AppTheme.isDark,
+            onThemeVariantChanged = {
+              if (it.isPremium && !state.isSubscribed) {
+                openPaywall()
+              } else {
+                viewModel.dispatch(SettingsEvent.OnThemeVariantChanged(it))
+              }
             },
           )
         }
 
+        item { Divider(24.dp) }
+
         item {
           AnimatedVisibility(
-            visible = AppTheme.isDark,
+            visible = !state.themeVariant.isDarkModeOnly && !state.themeVariant.isLightModeOnly,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically(),
+          ) {
+            val appThemeMode = state.appThemeMode
+            ToggleableButtonGroup(
+              modifier =
+                Modifier.fillMaxWidth()
+                  .padding(horizontal = 24.dp)
+                  .padding(top = 24.dp, bottom = 24.dp),
+              items =
+                listOf(
+                  ToggleableButtonItem(
+                    label = stringResource(Res.string.settingsThemeAuto),
+                    isSelected = appThemeMode == AppThemeMode.Auto,
+                    identifier = AppThemeMode.Auto,
+                  ),
+                  ToggleableButtonItem(
+                    label = stringResource(Res.string.settingsThemeLight),
+                    isSelected = appThemeMode == AppThemeMode.Light,
+                    identifier = AppThemeMode.Light,
+                  ),
+                  ToggleableButtonItem(
+                    label = stringResource(Res.string.settingsThemeDark),
+                    isSelected = appThemeMode == AppThemeMode.Dark,
+                    identifier = AppThemeMode.Dark,
+                  ),
+                ),
+              onItemSelected = {
+                viewModel.dispatch(
+                  SettingsEvent.OnAppThemeModeChanged(it.identifier as AppThemeMode)
+                )
+              },
+            )
+          }
+        }
+
+        item {
+          AnimatedVisibility(
+            visible =
+              AppTheme.isDark &&
+                !state.themeVariant.isDarkModeOnly &&
+                !state.themeVariant.isLightModeOnly,
             enter = fadeIn() + expandVertically(),
             exit = fadeOut() + shrinkVertically(),
           ) {
@@ -379,15 +410,6 @@ internal fun SettingsScreen(
               },
             )
           }
-        }
-
-        item {
-          DynamicColorSettingItem(
-            dynamicColorEnabled = state.dynamicColorEnabled,
-            onValueChanged = { newValue ->
-              viewModel.dispatch(SettingsEvent.ToggleDynamicColor(newValue))
-            },
-          )
         }
 
         if (state.canSubscribe) {

@@ -20,6 +20,7 @@ import androidx.compose.runtime.Immutable
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.SubscriptionResult
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlResult
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
@@ -39,8 +40,8 @@ data class SettingsState(
   val postsDeletionPeriod: Period?,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
+  val themeVariant: ThemeVariant,
   val useAmoled: Boolean,
-  val dynamicColorEnabled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
@@ -83,8 +84,8 @@ data class SettingsState(
         postsDeletionPeriod = null,
         showReaderView = false,
         appThemeMode = AppThemeMode.Auto,
+        themeVariant = ThemeVariant.Dynamic,
         useAmoled = false,
-        dynamicColorEnabled = true,
         enableAutoSync = true,
         showFeedFavIcon = true,
         markAsReadOn = MarkAsReadOn.Open,

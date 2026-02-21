@@ -89,8 +89,6 @@
   <string name="settingsThemeDark">Dunkel</string>
   <string name="settingsAmoledTitle">Amoled mode</string>
   <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
-  <string name="settingsDynamicColorTitle">Dynamic color</string>
-  <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
   <string name="settingsBlockImagesTitle">Block images</string>
   <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
   <string name="feeds">Feeds</string>
@@ -189,8 +187,8 @@
   <string name="twinePremiumDesc">Abonnieren Sie Premium: Alles freischalten und die zukünftige Entwicklung vorantreiben.</string>
   <string name="twinePremiumSubscribedDesc">Sie haben Twine Premium abonniert. Danke für die Unterstützung ❤️</string>
   <string name="readerCustomisationsTypeface">Schriftart</string>
-  <string name="readerCustomisationsColorScheme">Color scheme</string>
-  <string name="readerColorSchemeDynamic">Dynamic</string>
+  <string name="themeVariantColorScheme">Color scheme</string>
+  <string name="themeVariantDynamic">Dynamic</string>
   <string name="postsFilter">Beitragsfilter</string>
   <string name="postsSortBy">Sortieren nach</string>
   <string name="postsSortByPostDate">Beitragsdatum</string>

@@ -53,6 +53,7 @@ import dev.sasikanth.rss.reader.addfeed.AddFeedViewModel
 import dev.sasikanth.rss.reader.blockedwords.BlockedWordsViewModel
 import dev.sasikanth.rss.reader.bookmarks.BookmarksViewModel
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
 import dev.sasikanth.rss.reader.discovery.DiscoveryViewModel
@@ -84,12 +85,12 @@ import dev.sasikanth.rss.reader.ui.LocalDynamicColorState
 import dev.sasikanth.rss.reader.ui.LocalSeedColorExtractor
 import dev.sasikanth.rss.reader.ui.SeedColorExtractor
 import dev.sasikanth.rss.reader.ui.darkAppColorScheme
+import dev.sasikanth.rss.reader.ui.getOverriddenColorScheme
 import dev.sasikanth.rss.reader.ui.lightAppColorScheme
 import dev.sasikanth.rss.reader.ui.rememberDynamicColorState
 import dev.sasikanth.rss.reader.utils.ExternalUriHandler
 import dev.sasikanth.rss.reader.utils.LocalAmoledSetting
 import dev.sasikanth.rss.reader.utils.LocalBlockImage
-import dev.sasikanth.rss.reader.utils.LocalDynamicColorEnabled
 import dev.sasikanth.rss.reader.utils.LocalShowFeedFavIconSetting
 import dev.sasikanth.rss.reader.utils.LocalWindowSizeClass
 import kotlinx.coroutines.flow.launchIn
@@ -157,7 +158,6 @@ fun App(
     LocalShareHandler provides shareHandler,
     LocalLinkHandler provides linkHandler,
     LocalDynamicColorState provides dynamicColorState,
-    LocalDynamicColorEnabled provides appState.dynamicColorEnabled,
     LocalShowFeedFavIconSetting provides appState.showFeedFavIcon,
     LocalSeedColorExtractor provides seedColorExtractor,
     LocalBlockImage provides appState.blockImages,
@@ -165,12 +165,18 @@ fun App(
   ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme =
-      remember(isSystemInDarkTheme, appState.appThemeMode) {
-        when (appState.appThemeMode) {
-          AppThemeMode.Light -> false
-          AppThemeMode.Dark -> true
-          AppThemeMode.Auto -> isSystemInDarkTheme
-        }
+      remember(isSystemInDarkTheme, appState.appThemeMode, appState.themeVariant) {
+        appState.themeVariant.isDark(
+          when (appState.appThemeMode) {
+            AppThemeMode.Light -> false
+            AppThemeMode.Dark -> true
+            AppThemeMode.Auto -> isSystemInDarkTheme
+          }
+        )
+      }
+    val overriddenColorScheme =
+      remember(appState.themeVariant, useDarkTheme) {
+        appState.themeVariant.getOverriddenColorScheme(useDarkTheme)
       }
     val navController = rememberNavController()
     val openPost: (Int, ResolvedPost, FromScreen) -> Unit =
@@ -201,8 +207,11 @@ fun App(
 
     LaunchedEffect(useDarkTheme) { onThemeChange(useDarkTheme) }
 
-    LaunchedEffect(appState.homeViewMode, appState.dynamicColorEnabled) {
-      if (appState.homeViewMode == HomeViewMode.Default && appState.dynamicColorEnabled) {
+    LaunchedEffect(appState.homeViewMode, appState.themeVariant) {
+      if (
+        appState.homeViewMode == HomeViewMode.Default &&
+          appState.themeVariant == ThemeVariant.Dynamic
+      ) {
         dynamicColorState.refresh()
       } else {
         dynamicColorState.reset()
@@ -253,7 +262,7 @@ fun App(
       }
     }
 
-    AppTheme(useDarkTheme = useDarkTheme) {
+    AppTheme(useDarkTheme = useDarkTheme, overriddenColorScheme = overriddenColorScheme) {
       NavHost(
         navController = navController,
         startDestination = Screen.Placeholder,

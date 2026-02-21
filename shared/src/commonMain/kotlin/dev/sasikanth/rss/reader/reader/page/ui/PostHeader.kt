@@ -60,8 +60,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.sasikanth.rss.reader.components.image.FeedIcon
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.network.utils.UrlUtils
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.home.ui.FeaturedImage
 import dev.sasikanth.rss.reader.home.ui.PostMetadataConfig
 import dev.sasikanth.rss.reader.resources.icons.Bookmark
@@ -92,7 +92,7 @@ internal fun PostHeader(
   pagerState: PagerState,
   excerpt: String,
   darkTheme: Boolean,
-  readerColorScheme: ReaderColorScheme,
+  themeVariant: ThemeVariant,
   onCommentsClick: () -> Unit,
   onShareClick: () -> Unit,
   onBookmarkClick: () -> Unit,
@@ -162,9 +162,9 @@ internal fun PostHeader(
       Text(
         modifier =
           Modifier.padding(top = 12.dp).graphicsLayer {
-            if (readerColorScheme == ReaderColorScheme.Dynamic) {
+            if (themeVariant == ThemeVariant.Dynamic) {
               blendMode =
-                if (readerColorScheme.isDark(darkTheme)) {
+                if (themeVariant.isDark(darkTheme)) {
                   BlendMode.Screen
                 } else {
                   BlendMode.Multiply

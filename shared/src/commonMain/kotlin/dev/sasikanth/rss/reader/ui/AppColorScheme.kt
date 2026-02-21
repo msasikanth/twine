@@ -209,59 +209,11 @@ class AppColorScheme(values: AppColorValues) {
 }
 
 fun lightAppColorScheme(): AppColorValues {
-  return AppColorValues(
-    primary = Color(0xFF006B54),
-    onPrimary = Color.White,
-    secondary = Color(0xFF4C635D),
-    outline = Color(0xFF707976),
-    outlineVariant = Color(0xFFBFC9C5),
-    primaryContainer = Color(0xFF9CF2D6),
-    onPrimaryContainer = Color(0xFF002118),
-    surface = Color(0xFFF4FBF9),
-    onSurface = Color(0xFF161D1B),
-    onSurfaceVariant = Color(0xFF3F4946),
-    surfaceContainer = Color(0xFFE8EFED),
-    surfaceContainerLow = Color(0xFFEEF5F3),
-    surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerHigh = Color(0xFFE2E9E7),
-    surfaceContainerHighest = Color(0xFFDCE5E1),
-    inversePrimary = Color(0xFF51DEB8),
-    inverseSurface = Color(0xFF2B322F),
-    inverseOnSurface = Color(0xFFEFF2F0),
-    backdrop = Color(0xFFE5EEEB),
-    bottomSheet = Color(0xFF002118),
-    bottomSheetInverse = Color.Black,
-    bottomSheetBorder = Color(0xFF303E39),
-    error = Color(0xFFBA1A1A),
-  )
+  return forestColorScheme(isDark = false).toValues()
 }
 
 fun darkAppColorScheme(): AppColorValues {
-  return AppColorValues(
-    primary = Color(0xFF51DEB8),
-    onPrimary = Color(0xFF00382B),
-    secondary = Color(0xFFB3CCC3),
-    outline = Color(0xFF89938F),
-    outlineVariant = Color(0xFF3F4946),
-    primaryContainer = Color(0xFF00513F),
-    onPrimaryContainer = Color(0xFF9CF2D6),
-    surface = Color(0xFF0E1512),
-    onSurface = Color(0xFFDEE4E1),
-    onSurfaceVariant = Color(0xFFBFC9C5),
-    surfaceContainer = Color(0xFF1A211E),
-    surfaceContainerLow = Color(0xFF161D1A),
-    surfaceContainerLowest = Color(0xFF080F0D),
-    surfaceContainerHigh = Color(0xFF242B28),
-    surfaceContainerHighest = Color(0xFF2F3633),
-    inversePrimary = Color(0xFF006B54),
-    inverseSurface = Color(0xFFF4FBF9),
-    inverseOnSurface = Color(0xFF161D1B),
-    backdrop = Color(0xFF090F0D),
-    bottomSheet = Color.Black,
-    bottomSheetInverse = Color(0xFF002118),
-    bottomSheetBorder = Color(0xFF303E39),
-    error = Color(0xFFFFB4AB),
-  )
+  return forestColorScheme(isDark = true).toValues()
 }
 
 internal val LocalAppColorScheme = compositionLocalOf { AppColorScheme(darkAppColorScheme()) }

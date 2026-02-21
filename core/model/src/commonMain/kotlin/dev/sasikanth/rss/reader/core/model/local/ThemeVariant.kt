@@ -15,8 +15,23 @@
  *
  */
 
-package dev.sasikanth.rss.reader.utils
+package dev.sasikanth.rss.reader.core.model.local
 
-import androidx.compose.runtime.staticCompositionLocalOf
+enum class ThemeVariant(
+  val isPremium: Boolean,
+  val isDarkModeOnly: Boolean = false,
+  val isLightModeOnly: Boolean = false,
+) {
+  Dynamic(isPremium = false),
+  Solarized(isPremium = false),
+  Forest(isPremium = true),
+  Amber(isPremium = true),
+  Raspberry(isPremium = true),
+  Skyline(isPremium = true);
 
-val LocalDynamicColorEnabled = staticCompositionLocalOf { true }
+  fun isDark(isSystemDark: Boolean): Boolean {
+    if (isDarkModeOnly) return true
+    if (isLightModeOnly) return false
+    return isSystemDark
+  }
+}

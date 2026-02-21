@@ -65,7 +65,7 @@ import com.mikepenz.markdown.model.markdownAnnotator
 import com.mikepenz.markdown.model.markdownDimens
 import com.mikepenz.markdown.model.markdownPadding
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.markdown.CoilMarkdownTransformer
 import dev.sasikanth.rss.reader.media.PlaybackState
 import dev.sasikanth.rss.reader.platform.LocalLinkHandler
@@ -86,7 +86,7 @@ internal fun ReaderPage(
   pagerState: PagerState,
   markdownComponents: MarkdownComponents,
   isDarkTheme: Boolean,
-  readerColorScheme: ReaderColorScheme,
+  themeVariant: ThemeVariant,
   onBookmarkClick: () -> Unit,
   onMarkAsUnread: () -> Unit,
   modifier: Modifier = Modifier,
@@ -170,7 +170,7 @@ internal fun ReaderPage(
                 pagerState = pagerState,
                 excerpt = excerptState,
                 darkTheme = isDarkTheme,
-                readerColorScheme = readerColorScheme,
+                themeVariant = themeVariant,
                 onCommentsClick = {
                   coroutineScope.launch { linkHandler.openLink(readerPost.commentsLink) }
                 },

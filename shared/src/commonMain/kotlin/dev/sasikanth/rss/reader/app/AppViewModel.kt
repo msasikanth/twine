@@ -22,6 +22,7 @@ import dev.sasikanth.rss.reader.core.model.local.Feed
 import dev.sasikanth.rss.reader.core.model.local.FeedGroup
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -77,13 +78,22 @@ class AppViewModel(
 
     combine(
         combine(
-          settingsRepository.appThemeMode,
-          settingsRepository.useAmoled,
-          settingsRepository.dynamicColorEnabled,
-          settingsRepository.showFeedFavIcon,
-          settingsRepository.homeViewMode,
-          ::AppAppearanceSettings,
-        ),
+          combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
+          combine(
+            settingsRepository.themeVariant,
+            settingsRepository.showFeedFavIcon,
+            settingsRepository.homeViewMode,
+            ::Triple,
+          ),
+        ) { (appThemeMode, useAmoled), (themeVariant, showFeedFavIcon, homeViewMode) ->
+          AppAppearanceSettings(
+            appThemeMode = appThemeMode,
+            useAmoled = useAmoled,
+            themeVariant = themeVariant,
+            showFeedFavIcon = showFeedFavIcon,
+            homeViewMode = homeViewMode,
+          )
+        },
         combine(
           settingsRepository.showReaderView,
           settingsRepository.blockImages,
@@ -96,7 +106,7 @@ class AppViewModel(
           it.copy(
             appThemeMode = appearanceSettings.appThemeMode,
             useAmoled = appearanceSettings.useAmoled,
-            dynamicColorEnabled = appearanceSettings.dynamicColorEnabled,
+            themeVariant = appearanceSettings.themeVariant,
             showFeedFavIcon = appearanceSettings.showFeedFavIcon,
             homeViewMode = appearanceSettings.homeViewMode,
             showReaderView = contentSettings.showReaderView,
@@ -233,7 +243,7 @@ class AppViewModel(
 private data class AppAppearanceSettings(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
-  val dynamicColorEnabled: Boolean,
+  val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val homeViewMode: HomeViewMode,
 )

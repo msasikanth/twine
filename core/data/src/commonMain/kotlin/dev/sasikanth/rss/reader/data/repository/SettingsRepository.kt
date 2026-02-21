@@ -27,6 +27,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.di.scopes.AppScope
 import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +55,7 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val readerFontScaleFactorKey = floatPreferencesKey("reader_font_scale")
   private val readerLineHeightScaleFactorKey = floatPreferencesKey("reader_line_height_scale")
   private val readerFontStyleKey = stringPreferencesKey("reader_font_style")
-  private val readerColorSchemeKey = stringPreferencesKey("reader_color_scheme")
+  private val themeVariantKey = stringPreferencesKey("pref_theme_variant")
   private val blockImagesKey = booleanPreferencesKey("block_images")
   private val enableNotificationsKey = booleanPreferencesKey("enable_notifications")
   private val downloadFullContentKey = booleanPreferencesKey("download_full_content")
@@ -63,7 +64,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   private val userSessionCountKey = intPreferencesKey("user_session_count")
   private val appIconKey = stringPreferencesKey("app_icon")
   private val isOnboardingDoneKey = booleanPreferencesKey("is_onboarding_done")
-  private val dynamicColorEnabledKey = booleanPreferencesKey("dynamic_color_enabled")
   private val discoveryFeedsLastFetchTimeKey = longPreferencesKey("discovery_feeds_last_fetch_time")
   private val discoveryFeedsCacheKey = stringPreferencesKey("discovery_feeds_cache")
 
@@ -107,9 +107,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val isOnboardingDone: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[isOnboardingDoneKey] ?: false }
 
-  val dynamicColorEnabled: Flow<Boolean> =
-    dataStore.data.map { preferences -> preferences[dynamicColorEnabledKey] ?: true }
-
   val enableAutoSync: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[enableAutoSyncKey] ?: true }
 
@@ -131,8 +128,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
   val readerFontStyle: Flow<ReaderFont> =
     dataStore.data.map { preferences -> mapToReaderFont(preferences[readerFontStyleKey]) }
 
-  val readerColorScheme: Flow<ReaderColorScheme> =
-    dataStore.data.map { preferences -> mapToReaderColorScheme(preferences[readerColorSchemeKey]) }
+  val themeVariant: Flow<ThemeVariant> =
+    dataStore.data.map { preferences -> mapToThemeVariant(preferences[themeVariantKey]) }
 
   val blockImages: Flow<Boolean> =
     dataStore.data.map { preferences -> preferences[blockImagesKey] ?: false }
@@ -215,10 +212,6 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[useAmoledKey] = value }
   }
 
-  suspend fun toggleDynamicColor(value: Boolean) {
-    dataStore.edit { preferences -> preferences[dynamicColorEnabledKey] = value }
-  }
-
   suspend fun completeOnboarding() {
     dataStore.edit { preferences -> preferences[isOnboardingDoneKey] = true }
   }
@@ -251,8 +244,8 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     dataStore.edit { preferences -> preferences[readerFontStyleKey] = value.name }
   }
 
-  suspend fun updateReaderColorScheme(value: ReaderColorScheme) {
-    dataStore.edit { preferences -> preferences[readerColorSchemeKey] = value.name }
+  suspend fun updateThemeVariant(value: ThemeVariant) {
+    dataStore.edit { preferences -> preferences[themeVariantKey] = value.name }
   }
 
   suspend fun toggleBlockImages(value: Boolean) {
@@ -352,12 +345,12 @@ class SettingsRepository(private val dataStore: DataStore<Preferences>) {
     }
   }
 
-  private fun mapToReaderColorScheme(pref: String?): ReaderColorScheme {
-    if (pref.isNullOrBlank()) return ReaderColorScheme.Dynamic
+  private fun mapToThemeVariant(pref: String?): ThemeVariant {
+    if (pref.isNullOrBlank()) return ThemeVariant.Dynamic
     return try {
-      ReaderColorScheme.valueOf(pref)
+      ThemeVariant.valueOf(pref)
     } catch (e: Exception) {
-      ReaderColorScheme.Dynamic
+      ThemeVariant.Dynamic
     }
   }
 
@@ -419,23 +412,3 @@ val ReaderFont.isPremium: Boolean
       ReaderFont.GoogleSans -> true
       else -> false
     }
-
-enum class ReaderColorScheme(
-  val isPremium: Boolean,
-  val isDarkModeOnly: Boolean = false,
-  val isLightModeOnly: Boolean = false,
-) {
-  Dynamic(isPremium = false),
-  Sepia(isPremium = false, isLightModeOnly = true),
-  Solarized(isPremium = false),
-  Parchment(isPremium = true, isLightModeOnly = true),
-  Midnight(isPremium = true, isDarkModeOnly = true),
-  Forest(isPremium = true, isDarkModeOnly = true),
-  Slate(isPremium = true, isDarkModeOnly = true);
-
-  fun isDark(isSystemDark: Boolean): Boolean {
-    if (isDarkModeOnly) return true
-    if (isLightModeOnly) return false
-    return isSystemDark
-  }
-}

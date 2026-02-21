@@ -23,6 +23,7 @@ import dev.sasikanth.rss.reader.app.AppIcon
 import dev.sasikanth.rss.reader.app.AppIconManager
 import dev.sasikanth.rss.reader.app.AppInfo
 import dev.sasikanth.rss.reader.billing.BillingHandler
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.opml.OpmlFeedGroup
 import dev.sasikanth.rss.reader.data.opml.OpmlManager
@@ -83,13 +84,22 @@ class SettingsViewModel(
           ::SettingsGroup1,
         ),
         combine(
-          settingsRepository.appThemeMode,
-          settingsRepository.useAmoled,
-          settingsRepository.dynamicColorEnabled,
-          settingsRepository.showFeedFavIcon,
-          settingsRepository.appIcon,
-          ::SettingsGroup2,
-        ),
+          combine(settingsRepository.appThemeMode, settingsRepository.useAmoled, ::Pair),
+          combine(
+            settingsRepository.themeVariant,
+            settingsRepository.showFeedFavIcon,
+            settingsRepository.appIcon,
+            ::Triple,
+          ),
+        ) { (appThemeMode, useAmoled), (themeVariant, showFeedFavIcon, appIcon) ->
+          SettingsGroup2(
+            appThemeMode = appThemeMode,
+            useAmoled = useAmoled,
+            themeVariant = themeVariant,
+            showFeedFavIcon = showFeedFavIcon,
+            appIcon = appIcon,
+          )
+        },
         combine(
           settingsRepository.homeViewMode,
           settingsRepository.blockImages,
@@ -110,8 +120,8 @@ class SettingsViewModel(
           postsDeletionPeriod = group1.postsDeletionPeriod,
           showReaderView = group1.showReaderView,
           appThemeMode = group2.appThemeMode,
+          themeVariant = group2.themeVariant,
           useAmoled = group2.useAmoled,
-          dynamicColorEnabled = group2.dynamicColorEnabled,
           enableAutoSync = group3.enableAutoSync,
           showFeedFavIcon = group2.showFeedFavIcon,
           markAsReadOn = group1.markAsReadOn,
@@ -139,8 +149,8 @@ class SettingsViewModel(
             postsDeletionPeriod = settings.postsDeletionPeriod,
             showReaderView = settings.showReaderView,
             appThemeMode = settings.appThemeMode,
+            themeVariant = settings.themeVariant,
             useAmoled = settings.useAmoled,
-            dynamicColorEnabled = settings.dynamicColorEnabled,
             enableAutoSync = settings.enableAutoSync,
             showFeedFavIcon = settings.showFeedFavIcon,
             markAsReadOn = settings.markAsReadOn,
@@ -184,8 +194,8 @@ class SettingsViewModel(
       SettingsEvent.CancelOpmlImportOrExport -> cancelOpmlImportOrExport()
       is SettingsEvent.PostsDeletionPeriodChanged -> postsDeletionPeriodChanged(event.newPeriod)
       is SettingsEvent.OnAppThemeModeChanged -> onAppThemeModeChanged(event.appThemeMode)
+      is SettingsEvent.OnThemeVariantChanged -> onThemeVariantChanged(event.themeVariant)
       is SettingsEvent.ToggleAmoled -> toggleAmoled(event.value)
-      is SettingsEvent.ToggleDynamicColor -> toggleDynamicColor(event.value)
       is SettingsEvent.MarkAsReadOnChanged -> markAsReadOnChanged(event.newMarkAsReadOn)
       is SettingsEvent.LoadSubscriptionStatus -> loadSubscriptionStatus()
       is SettingsEvent.MarkOpenPaywallAsDone -> {
@@ -320,12 +330,12 @@ class SettingsViewModel(
     viewModelScope.launch { settingsRepository.updateAppTheme(appThemeMode) }
   }
 
-  private fun toggleAmoled(value: Boolean) {
-    viewModelScope.launch { settingsRepository.toggleAmoled(value) }
+  private fun onThemeVariantChanged(themeVariant: ThemeVariant) {
+    viewModelScope.launch { settingsRepository.updateThemeVariant(themeVariant) }
   }
 
-  private fun toggleDynamicColor(value: Boolean) {
-    viewModelScope.launch { settingsRepository.toggleDynamicColor(value) }
+  private fun toggleAmoled(value: Boolean) {
+    viewModelScope.launch { settingsRepository.toggleAmoled(value) }
   }
 
   private fun toggleShowReaderView(value: Boolean) {
@@ -407,8 +417,8 @@ private data class Settings(
   val postsDeletionPeriod: Period,
   val showReaderView: Boolean,
   val appThemeMode: AppThemeMode,
+  val themeVariant: ThemeVariant,
   val useAmoled: Boolean,
-  val dynamicColorEnabled: Boolean,
   val enableAutoSync: Boolean,
   val showFeedFavIcon: Boolean,
   val markAsReadOn: MarkAsReadOn,
@@ -433,7 +443,7 @@ private data class SettingsGroup1(
 private data class SettingsGroup2(
   val appThemeMode: AppThemeMode,
   val useAmoled: Boolean,
-  val dynamicColorEnabled: Boolean,
+  val themeVariant: ThemeVariant,
   val showFeedFavIcon: Boolean,
   val appIcon: AppIcon,
 )

@@ -89,8 +89,6 @@
   <string name="settingsThemeDark">Dark</string>
   <string name="settingsAmoledTitle">Amoled mode</string>
   <string name="settingsAmoledSubtitle">Use pure black backgrounds</string>
-  <string name="settingsDynamicColorTitle">Dynamic color</string>
-  <string name="settingsDynamicColorSubtitle">App colors will be derived from the current article/feed</string>
   <string name="settingsBlockImagesTitle">Block images</string>
   <string name="settingsBlockImagesSubtitle">When turned-on, images will not be downloaded or shown. This may improve performance and save data.</string>
   <string name="feeds">Feeds</string>
@@ -189,8 +187,8 @@
   <string name="twinePremiumDesc">Go Premium: Unlock everything and fuel future development.</string>
   <string name="twinePremiumSubscribedDesc">You are subscribed to Twine premium. Thanks for supporting ❤️</string>
   <string name="readerCustomisationsTypeface">Typeface</string>
-  <string name="readerCustomisationsColorScheme">Color scheme</string>
-  <string name="readerColorSchemeDynamic">Dynamic</string>
+  <string name="themeVariantColorScheme">Color scheme</string>
+  <string name="themeVariantDynamic">Dynamic</string>
   <string name="postsFilter">पोस्ट फ़िल्टर</string>
   <string name="postsSortBy">क्रमबद्ध करें</string>
   <string name="postsSortByPostDate">पोस्ट की तारीख</string>

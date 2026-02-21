@@ -26,8 +26,8 @@ import app.cash.paging.createPagingConfig
 import dev.sasikanth.rss.reader.app.Screen
 import dev.sasikanth.rss.reader.billing.BillingHandler
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.repository.ObservableSelectedPost
-import dev.sasikanth.rss.reader.data.repository.ReaderColorScheme
 import dev.sasikanth.rss.reader.data.repository.ReaderFont
 import dev.sasikanth.rss.reader.data.repository.RssRepository
 import dev.sasikanth.rss.reader.data.repository.SettingsRepository
@@ -101,7 +101,7 @@ class ReaderViewModel(
       is ReaderEvent.ShowReaderCustomisations -> toggleReaderCustomisations(show = true)
       is ReaderEvent.HideReaderCustomisations -> toggleReaderCustomisations(show = false)
       is ReaderEvent.UpdateReaderFont -> updateReaderFont(event.font)
-      is ReaderEvent.UpdateReaderColorScheme -> updateReaderColorScheme(event.colorScheme)
+      is ReaderEvent.UpdateThemeVariant -> updateThemeVariant(event.themeVariant)
       is ReaderEvent.UpdateFontScaleFactor -> updateFontScaleFactor(event.fontScaleFactor)
       is ReaderEvent.UpdateFontLineHeightFactor ->
         updateFontLineHeightFactor(event.fontLineHeightFactor)
@@ -140,12 +140,12 @@ class ReaderViewModel(
     }
   }
 
-  private fun updateReaderColorScheme(colorScheme: ReaderColorScheme) {
+  private fun updateThemeVariant(themeVariant: ThemeVariant) {
     coroutineScope.launch {
-      if (colorScheme.isPremium && !billingHandler.isSubscribed()) {
+      if (themeVariant.isPremium && !billingHandler.isSubscribed()) {
         _state.update { it.copy(openPaywall = true) }
       } else {
-        settingsRepository.updateReaderColorScheme(colorScheme)
+        settingsRepository.updateThemeVariant(themeVariant)
       }
     }
   }
@@ -198,14 +198,14 @@ class ReaderViewModel(
 
       combine(
           settingsRepository.readerFontStyle,
-          settingsRepository.readerColorScheme,
+          settingsRepository.themeVariant,
           settingsRepository.readerFontScaleFactor,
           settingsRepository.readerLineHeightScaleFactor,
-          { fontStyle, colorScheme, fontScaleFactor, lineHeightScaleFactor ->
+          { fontStyle, themeVariant, fontScaleFactor, lineHeightScaleFactor ->
             val result =
               object {
                 val fontStyle = fontStyle
-                val colorScheme = colorScheme
+                val themeVariant = themeVariant
                 val fontScaleFactor = fontScaleFactor
                 val lineHeightScaleFactor = lineHeightScaleFactor
               }
@@ -216,7 +216,7 @@ class ReaderViewModel(
           _state.update {
             it.copy(
               selectedReaderFont = result.fontStyle,
-              selectedReaderColorScheme = result.colorScheme,
+              selectedThemeVariant = result.themeVariant,
               readerFontScaleFactor = result.fontScaleFactor,
               readerLineHeightScaleFactor = result.lineHeightScaleFactor,
             )

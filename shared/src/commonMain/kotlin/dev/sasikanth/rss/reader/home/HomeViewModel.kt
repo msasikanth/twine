@@ -27,6 +27,7 @@ import dev.sasikanth.rss.reader.core.model.local.PostsSortOrder
 import dev.sasikanth.rss.reader.core.model.local.PostsType
 import dev.sasikanth.rss.reader.core.model.local.ResolvedPost
 import dev.sasikanth.rss.reader.core.model.local.Source
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.core.model.local.UnreadSinceLastSync
 import dev.sasikanth.rss.reader.data.refreshpolicy.RefreshPolicy
 import dev.sasikanth.rss.reader.data.repository.HomeViewMode
@@ -300,6 +301,7 @@ class HomeViewModel(
           postsTypeFlow,
           settingsRepository.postsSortOrder,
           settingsRepository.homeViewMode,
+          settingsRepository.themeVariant,
           ::HomeSelectionFilters,
         ),
         combine(
@@ -315,6 +317,7 @@ class HomeViewModel(
             postsType = selectionFilters.postsType,
             postsSortOrder = selectionFilters.postsSortOrder,
             homeViewMode = selectionFilters.homeViewMode,
+            themeVariant = selectionFilters.themeVariant,
             hasUnreadPosts = unreadStatus.hasUnreadPosts,
             unreadSinceLastSync = unreadStatus.unreadSinceLastSync,
             lastRefreshedAt = unreadStatus.lastRefreshedAt,
@@ -443,6 +446,7 @@ private data class HomeSelectionFilters(
   val postsType: PostsType,
   val postsSortOrder: PostsSortOrder,
   val homeViewMode: HomeViewMode,
+  val themeVariant: ThemeVariant,
 )
 
 private data class HomeUnreadStatus(
