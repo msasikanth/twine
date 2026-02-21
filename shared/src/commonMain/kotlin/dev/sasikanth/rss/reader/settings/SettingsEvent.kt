@@ -17,6 +17,7 @@
 package dev.sasikanth.rss.reader.settings
 
 import dev.sasikanth.rss.reader.app.AppIcon
+import dev.sasikanth.rss.reader.core.model.local.ThemeVariant
 import dev.sasikanth.rss.reader.data.opml.OpmlFeed
 import dev.sasikanth.rss.reader.data.repository.AppThemeMode
 import dev.sasikanth.rss.reader.data.repository.BrowserType
@@ -47,9 +48,9 @@ sealed interface SettingsEvent {
 
   data class OnAppThemeModeChanged(val appThemeMode: AppThemeMode) : SettingsEvent
 
-  data class ToggleAmoled(val value: Boolean) : SettingsEvent
+  data class OnThemeVariantChanged(val themeVariant: ThemeVariant) : SettingsEvent
 
-  data class ToggleDynamicColor(val value: Boolean) : SettingsEvent
+  data class ToggleAmoled(val value: Boolean) : SettingsEvent
 
   data class MarkAsReadOnChanged(val newMarkAsReadOn: MarkAsReadOn) : SettingsEvent
 
