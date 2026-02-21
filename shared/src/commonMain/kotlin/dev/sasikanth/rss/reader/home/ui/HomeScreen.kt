@@ -68,7 +68,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -88,6 +87,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationEventHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.collectAsLazyPagingItems
 import dev.sasikanth.rss.reader.components.NewArticlesScrollToTopButton
@@ -238,10 +240,13 @@ internal fun HomeScreen(
     }
   }
 
-  BackHandler(
-    enabled = state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
-    onBack = { coroutineScope.launch { bottomSheetState.partialExpand() } },
-  )
+  NavigationEventHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled =
+      state.feedsSheetState == SheetValue.Expanded && !(feedsState.isInMultiSelectMode),
+  ) {
+    coroutineScope.launch { bottomSheetState.partialExpand() }
+  }
 
   Scaffold(
     modifier =

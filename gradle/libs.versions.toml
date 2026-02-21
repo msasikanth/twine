@@ -53,6 +53,7 @@ markdown = "0.39.2"
 revenuecat = "2.5.1+17.33.1"
 viewmodel = "2.9.6"
 navigation = "2.9.2"
+navigation-event = "1.0.1"
 glance = "1.2.0-rc01"
 material-kolor = "4.1.1"
 htmlunit = "4.21.0"
@@ -146,6 +147,7 @@ purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.r
 viewmodel = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "viewmodel" }
 lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "viewmodel" }
 navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
+navigation-event = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigation-event" }
 glance = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "material-kolor" }

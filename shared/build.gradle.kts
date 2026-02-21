@@ -123,6 +123,7 @@ kotlin {
       implementation(libs.viewmodel)
       implementation(libs.lifecycle.runtime.compose)
       implementation(libs.navigation)
+      implementation(libs.navigation.event)
       implementation(libs.material.kolor)
     }
     commonTest.dependencies {

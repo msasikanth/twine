@@ -59,7 +59,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.dropShadow
@@ -82,6 +81,9 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.window.core.layout.WindowSizeClass
 import app.cash.paging.compose.collectAsLazyPagingItems
 import com.mikepenz.markdown.compose.components.markdownComponents
@@ -195,7 +197,10 @@ internal fun ReaderScreen(
     }
   }
 
-  BackHandler(enabled = state.showReaderCustomisations) {
+  NavigationBackHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled = state.showReaderCustomisations,
+  ) {
     viewModel.dispatch(ReaderEvent.HideReaderCustomisations)
   }
 

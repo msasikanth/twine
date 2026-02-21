@@ -32,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -51,6 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationEventHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import dev.sasikanth.rss.reader.feeds.FeedsEvent
 import dev.sasikanth.rss.reader.feeds.FeedsViewModel
 import dev.sasikanth.rss.reader.feeds.ui.sheet.collapsed.BottomSheetCollapsedContent
@@ -79,7 +81,10 @@ internal fun FeedsBottomSheet(
   val focusManager = LocalFocusManager.current
   val state by feedsViewModel.state.collectAsStateWithLifecycle()
 
-  BackHandler(enabled = state.isInMultiSelectMode) {
+  NavigationEventHandler(
+    state = rememberNavigationEventState(NavigationEventInfo.None),
+    isBackEnabled = state.isInMultiSelectMode,
+  ) {
     feedsViewModel.dispatch(FeedsEvent.CancelSourcesSelection)
   }
 
